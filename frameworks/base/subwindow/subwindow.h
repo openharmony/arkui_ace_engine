@@ -48,6 +48,9 @@ public:
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
+    virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
+    virtual void UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect) = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) = 0;
@@ -112,6 +115,16 @@ public:
         return isAboveApps_;
     }
 
+    void SetIsSystemTopMost(bool isSystemTopMost)
+    {
+        isSystemTopMost_ = isSystemTopMost;
+    }
+
+    bool IsSystemTopMost() const
+    {
+        return isSystemTopMost_;
+    }
+
     virtual void ClearToast() = 0;
     virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) = 0;
@@ -136,6 +149,7 @@ private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
+    bool isSystemTopMost_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -124,7 +124,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(
         descriptionId,
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
-        static_cast<int32_t>(ButtonType::CAPSULE));
+        static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1288,7 +1288,8 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     RefPtr<FrameNode> menuWrapper;
     std::vector<OptionParam> params = GetOptionsParams(info);
     menuWrapper = MenuView::Create(
-        std::move(params), -1, "SelectOverlayMenuByRightClick", MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
+        std::move(params), -1, "SelectOverlayMenuByRightClick", MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU,
+        { .isShowInSubWindow = false });
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu

@@ -274,6 +274,16 @@ public:
         renderType_ = renderType;
     }
 
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId()
+    {
+        return transformHintChangedCallbackId_.has_value();
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -286,6 +296,7 @@ public:
     void ClearIdealSurfaceOffset(bool isXAxis);
     void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
+    void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
@@ -332,7 +343,6 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
-    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -343,7 +353,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
-    void SetRotation();
+    void SetRotation(uint32_t rotation);
 #ifdef OHOS_PLATFORM
     float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
     int GetFlingDuration(float velocity);
@@ -418,7 +428,7 @@ private:
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    uint32_t rotation_ = 0;
+    std::optional<int32_t> transformHintChangedCallbackId_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;

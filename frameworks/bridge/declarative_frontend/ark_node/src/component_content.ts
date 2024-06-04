@@ -17,6 +17,7 @@ class ComponentContent extends Content {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private builderNode_: BuilderNode;
   private attachNodeRef_: NativeStrongRef;
+  private parentWeak_: WeakRef<FrameNode> | undefined;
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object) {
     super();
     let builderNode = new BuilderNode(uiContext, {});
@@ -31,7 +32,13 @@ class ComponentContent extends Content {
   public getFrameNode(): FrameNode | null | undefined {
     return this.builderNode_.getFrameNodeWithoutCheck();
   }
+  public setAttachedParent(parent: WeakRef<FrameNode> | undefined) {
+    this.parentWeak_ = parent;
+  }
   public getNodePtr(): NodePtr {
+    if (this.attachNodeRef_ !== undefined) {
+      return this.attachNodeRef_.getNativeHandle();
+    }
     return this.builderNode_.getNodePtr();
   }
   public reuse(param: Object): void {
@@ -40,6 +47,22 @@ class ComponentContent extends Content {
   public recycle(): void {
     this.builderNode_.recycle();
   }
+  public dispose(): void {
+    this.detachFromParent();
+    this.attachNodeRef_?.dispose();
+    this.builderNode_?.dispose();
+  }
+
+  public detachFromParent() {
+    if (this.parentWeak_ === undefined) {
+      return;
+    }
+    let parent = this.parentWeak_.deref();
+    if (parent !== undefined) {
+      parent.removeComponentContent(this);
+    }
+  }
+
   public getNodeWithoutProxy(): NodePtr {
     const node = this.getNodePtr();
     const nodeType = getUINativeModule().frameNode.getNodeType(node);

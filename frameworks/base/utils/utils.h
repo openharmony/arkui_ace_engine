@@ -278,6 +278,16 @@ inline float CalculateFriction(float gamma)
     return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
 }
 
+inline bool IsDarkColor(uint32_t color)
+{
+    constexpr int lightThresholds = 128;
+    int r = (color >> 16) & 0xFF;
+    int g = (color >> 8) & 0xFF;
+    int b = color & 0xFF;
+    int gray = (r * 299 + g * 587 + b * 114) / 1000;
+    return gray < lightThresholds;
+}
+
 bool RealPath(const std::string& fileName, char* realPath);
 
 } // namespace OHOS::Ace

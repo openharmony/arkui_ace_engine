@@ -46,6 +46,8 @@
 
 namespace OHOS::Rosen {
 class DrawCmdList;
+class VisualEffect;
+class Filter;
 enum class Gravity;
 }
 
@@ -187,6 +189,8 @@ public:
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
+
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
@@ -296,6 +300,13 @@ public:
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
+    virtual void RemoveClipWithRRect() {}
+
+    // visual
+    virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
+    virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
+    virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
+    virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -488,7 +499,7 @@ public:
 
     virtual void SetActualForegroundColor(const Color& value) {}
 
-    virtual void ResetSurface() {}
+    virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -667,6 +678,10 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    void SetHandleChildBounds(bool value) {
+        handleChildBounds_ = value;
+    }
+
     virtual Matrix4 GetRevertMatrix()
     {
         return Matrix4();
@@ -681,6 +696,7 @@ protected:
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
+    bool handleChildBounds_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

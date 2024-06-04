@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -33,6 +34,7 @@
 
 namespace OHOS::Ace {
 
+std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
 
@@ -73,6 +75,21 @@ bool FontManager::IsDefaultFontChanged()
         isDefaultFontChanged_ = true;
     }
     return isDefaultFontChanged_;
+}
+
+bool FontManager::IsUseAppCustomFont()
+{
+    return !appCustomFont_.empty();
+}
+
+void FontManager::SetAppCustomFont(const std::string& familyName)
+{
+    appCustomFont_ = familyName;
+}
+
+const std::string& FontManager::GetAppCustomFont() const
+{
+    return appCustomFont_;
 }
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
@@ -164,7 +181,7 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
         fontInfo.family = systemFontDesc->fontFamily;
         fontInfo.subfamily = systemFontDesc->fontSubfamily;
         fontInfo.weight = static_cast<uint32_t>(systemFontDesc->weight);
-        fontInfo.width = systemFontDesc->width;
+        fontInfo.width = static_cast<uint32_t>(systemFontDesc->width);
         fontInfo.italic = systemFontDesc->italic;
         fontInfo.monoSpace = systemFontDesc->monoSpace;
         fontInfo.symbolic = systemFontDesc->symbolic;
@@ -248,7 +265,7 @@ void FontManager::RebuildFontNodeNG()
         CHECK_NULL_VOID(fontNode);
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
-            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
             ++iter;
         } else {
             iter = fontNodesNG_.erase(iter);

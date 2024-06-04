@@ -207,6 +207,7 @@ void RefreshPattern::InitProgressNode()
     if (layoutProperty->HasProgressColor()) {
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
+    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, -1);
     if (HasLoadingText()) {
         InitProgressColumn();
@@ -522,6 +523,9 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
 
 void RefreshPattern::FireOnOffsetChange(float value)
 {
+    if (NearZero(value)) {
+        value = 0.0f;
+    }
     if (!NearEqual(lastScrollOffset_, value)) {
         auto refreshEventHub = GetEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
@@ -651,6 +655,7 @@ void RefreshPattern::InitOffsetProperty()
             CHECK_NULL_VOID(pattern);
             pattern->scrollOffset_ = scrollOffset;
             pattern->UpdateFirstChildPlacement();
+            pattern->FireOnOffsetChange(scrollOffset);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();
@@ -770,13 +775,14 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     if (!NearEqual(scrollOffset_, targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_);
     }
+    bool recycle = true;
     if (!isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
+        recycle = false;
         SwitchToFinish();
     }
-    FireOnOffsetChange(targetOffset);
     ResetAnimation();
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
@@ -788,10 +794,14 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(targetOffset);
         },
-        [weak = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(this), recycle]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SpeedAnimationFinish();
+            if (recycle) {
+                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
+            } else {
+                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, pattern->GetFollowRatio());
+            }
         });
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
@@ -827,7 +837,6 @@ void RefreshPattern::SpeedAnimationFinish()
 
 void RefreshPattern::QuickFirstChildAppear()
 {
-    FireOnOffsetChange(static_cast<float>(refreshOffset_.ConvertToPx()));
     isSourceFromAnimation_ = false;
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
     ResetAnimation();
@@ -840,7 +849,6 @@ void RefreshPattern::QuickFirstChildAppear()
 
 void RefreshPattern::QuickFirstChildDisappear()
 {
-    FireOnOffsetChange(0.0f);
     ResetAnimation();
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);

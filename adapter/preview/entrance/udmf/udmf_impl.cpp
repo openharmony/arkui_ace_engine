@@ -136,4 +136,14 @@ void UnifiedDataImpl::SetUnifiedData(std::shared_ptr<UnifiedData> unifiedData)
     return;
 }
 
+void UdmfClientImpl::AddSpanStringRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
+{
+    return;
+}
+std::vector<uint8_t> UdmfClientImpl::GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData)
+{
+    return {};
+}
+
 } // namespace OHOS::Ace

@@ -49,7 +49,7 @@ struct SelectParam {
     RefPtr<SymbolModifier> symbolModifier = nullptr;
 };
 
-class SelectModel {
+class ACE_FORCE_EXPORT SelectModel {
 public:
     static SelectModel* GetInstance();
     virtual ~SelectModel() = default;
@@ -97,6 +97,7 @@ public:
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
+    virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();
 private:
     static std::unique_ptr<SelectModel> instance_;

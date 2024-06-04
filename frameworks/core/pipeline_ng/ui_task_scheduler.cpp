@@ -56,6 +56,38 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     dirtyLayoutNodes_.emplace_back(dirty);
 }
 
+void UITaskScheduler::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(layoutNode);
+    layoutNodes_.emplace_back(layoutNode);
+}
+
+void UITaskScheduler::SetLayoutNodeRect()
+{
+    if (layoutNodes_.empty()) {
+        return;
+    }
+    auto layoutNodes = std::move(layoutNodes_);
+    LayoutNodesSet layoutNodesSet(layoutNodes.begin(), layoutNodes.end());
+
+    for (auto& layoutNode : layoutNodesSet) {
+        if (layoutNode->GetIsFind()) {
+            layoutNode->SetIsFind(false);
+            continue;
+        }
+        std::list<RefPtr<FrameNode>> children;
+        OffsetF offset;
+        layoutNode->GetOneDepthVisibleFrameWithOffset(children, offset);
+        for (auto& child : children) {
+            auto paintRect = child->GetRenderContext()->GetPaintRectWithoutTransform();
+            paintRect.SetOffset(paintRect.GetOffset() + offset);
+            child->GetRenderContext()->UpdatePaintRect(paintRect);
+        }
+    }
+}
+
+
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
@@ -79,6 +111,7 @@ void UITaskScheduler::FlushSyncGeometryNodeTasks()
 {
     ACE_LAYOUT_SCOPED_TRACE("FlushSyncGeometryNodeTasks");
     ExpandSafeArea();
+    SetLayoutNodeRect();
     auto tasks = std::move(syncGeometryNodeTasks_);
     for (auto& task : tasks) {
         if (task) {
@@ -185,7 +218,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
             }
             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
             if (geometryTransition != nullptr) {
-                ret |= geometryTransition->OnAdditionalLayout(node);
+                ret = ret || geometryTransition->OnAdditionalLayout(node);
             }
         }
     }

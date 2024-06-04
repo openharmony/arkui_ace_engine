@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_INPUT_TEXT_INPUT_PATTERN_H
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
+
 namespace OHOS::Ace::NG {
+class TextFieldPattern;
 class TextInputLayoutAlgorithm : public TextFieldLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextInputLayoutAlgorithm, TextFieldLayoutAlgorithm);
 
@@ -37,6 +40,27 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     LayoutConstraintF BuildLayoutConstraintWithoutResponseArea(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+
+private:
+    struct UpdateContentPositionParams {
+        bool isRTL;
+        OffsetF offsetBase;
+        SizeT<float> size;
+        SizeT<float> contentSize;
+        Alignment align;
+        RefPtr<TextInputResponseArea> responseArea;
+    };
+    struct UpdateTextRectParams {
+        RefPtr<TextFieldLayoutProperty> layoutProperty;
+        RefPtr<TextFieldPattern> pattern;
+        SizeT<float> contentSize;
+        bool isRTL;
+        RefPtr<TextInputResponseArea> responseArea;
+        OffsetF offsetBase;
+    };
+    void UpdateContentPosition(const UpdateContentPositionParams& params,
+        const std::unique_ptr<GeometryProperty>& content);
+    void UpdateTextRect(const UpdateTextRectParams& params);
 };
 } // namespace OHOS::Ace::NG
 

@@ -15,19 +15,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
-if (is_ohos_standard_system) {
-  config("ohos_web_config") {
-    include_dirs = [
-      "$ability_runtime_path/interfaces/kits/native/appkit/app",
-      "//commonlibrary/c_utils/base/include",
-      "//foundation/window/window_manager/interfaces/innerkits/wm",
-      "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-      "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-      "//foundation/multimedia/image_framework/interfaces/innerkits/include",
-    ]
-  }
-}
-
 build_component("web") {
   sources = [
     "render_web.cpp",
@@ -41,14 +28,15 @@ build_component("web") {
   ]
 
   if (is_ohos_standard_system) {
-    sources += [ "resource/web_javascript_result_callback.cpp" ]
+    sources += [
+      "resource/web_javascript_execute_callback.cpp",
+      "resource/web_javascript_result_callback.cpp",
+    ]
   }
 
   rosen_sources = [ "rosen_render_web.cpp" ]
 
   if (is_ohos_standard_system) {
-    configs = [ ":ohos_web_config" ]
-    deps = [ "//third_party/openGLES:libGLES" ]
     external_deps = [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
@@ -57,6 +45,7 @@ build_component("web") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "napi:ace_napi",
+      "opengles:libGLES",
       "webview:libnweb",
       "window_manager:libwm",
     ]

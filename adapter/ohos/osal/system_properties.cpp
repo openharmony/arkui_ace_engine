@@ -59,6 +59,8 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
+constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
+constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 std::shared_mutex mutex_;
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
@@ -70,7 +72,7 @@ using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
-    return (system::GetParameter(IS_OPINC_ENABLE, "0") == "2");
+    return (system::GetParameter(IS_OPINC_ENABLE, "2") == "2");
 }
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
@@ -113,6 +115,11 @@ bool IsLayoutTraceEnabled()
 bool IsTextTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
+}
+
+bool IsAccessTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.access.enabled", "false") == "true");
 }
 
 bool IsTraceInputEventEnabled()
@@ -223,6 +230,11 @@ bool IsGpuUploadEnabled()
             system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
 
+bool IsImageFrameworkEnabled()
+{
+    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
+}
+
 void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 {
     CHECK_NULL_VOID(key);
@@ -306,6 +318,17 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+float ReadDragStartDampingRatio()
+{
+    return system::GetIntParameter("debug.ace.drag.damping.ratio", DEFAULT_DRAG_START_DAMPING_RATIO) / 100.0f;
+}
+
+float ReadDragStartPanDistanceThreshold()
+{
+    return system::GetIntParameter("debug.ace.drag.pan.threshold",
+        DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
+}
+
 bool IsFaultInjectEnabled()
 {
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
@@ -315,7 +338,7 @@ std::pair<float, float> GetPercent()
 {
     std::vector<double> result;
     StringUtils::StringSplitter(
-        system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
+        system::GetParameter("const.ace.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
     std::pair<float, float> percent(result.front(), result.back());
     return percent;
 }
@@ -323,11 +346,13 @@ std::pair<float, float> GetPercent()
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
+bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -377,7 +402,8 @@ bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnabl
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
-
+float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
+float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -612,14 +638,14 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
 }
 
-bool SystemProperties::GetImageFrameworkEnabled()
-{
-    return system::GetBoolParameter("persist.ace.image.framework.enabled", true);
-}
-
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
+bool SystemProperties::GetPixelRoundEnable()
+{
+    return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
@@ -743,5 +769,15 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

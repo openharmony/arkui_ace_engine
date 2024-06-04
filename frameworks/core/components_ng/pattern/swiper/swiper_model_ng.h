@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
-    RefPtr<SwiperController> Create() override;
+    RefPtr<SwiperController> Create(bool isCreateArc = false) override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
     void SetIndicatorInteractive(bool interactive) override;
@@ -113,6 +113,7 @@ public:
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
+    static void SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup);
 
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
@@ -131,8 +132,8 @@ public:
 
     static int32_t RealTotalCount(FrameNode* frameNode);
     static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
-    static float GetPreviousMargin(FrameNode* frameNode, int32_t unit);
-    static float GetNextMargin(FrameNode* frameNode, int32_t unit);
+    static void GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
+    static void GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
     static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);

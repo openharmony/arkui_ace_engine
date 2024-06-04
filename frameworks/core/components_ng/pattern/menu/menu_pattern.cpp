@@ -70,6 +70,7 @@ const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
+constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
 
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -304,7 +305,9 @@ void MenuPattern::FireBuilder()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChild(builderNode_.Upgrade());
-    CHECK_NULL_VOID(makeFunc_.has_value());
+    if (!makeFunc_.has_value()) {
+        return;
+    }
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto scroll = CreateMenuScroll(column);
@@ -312,8 +315,10 @@ void MenuPattern::FireBuilder()
     builderNode_ = scroll;
     for (size_t i = 0; i < selectProperties_.size(); i++) {
         auto contentModifierNode = BuildContentModifierNode(i);
-        contentModifierNode->MarkModifyDone();
-        contentModifierNode->MountToParent(column);
+        if (contentModifierNode) {
+            contentModifierNode->MarkModifyDone();
+            contentModifierNode->MountToParent(column);
+        }
     }
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
@@ -326,7 +331,9 @@ void MenuPattern::FireBuilder()
 
 RefPtr<FrameNode> MenuPattern::BuildContentModifierNode(int index)
 {
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
     auto property = selectProperties_[index];
     MenuItemConfiguration menuItemConfiguration(property.value, property.icon, property.symbolModifier,
         index, property.selected, property.selectEnable);
@@ -604,9 +611,9 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
     CHECK_NULL_RETURN(wrapper, false);
     auto outterMenu = wrapper->GetFirstChild();
     CHECK_NULL_RETURN(outterMenu, false);
-    auto scroll = outterMenu->GetFirstChild();
-    CHECK_NULL_RETURN(scroll, false);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto menuWrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    auto innerMenu = menuWrapperPattern->GetMenuChild(outterMenu);
     CHECK_NULL_RETURN(innerMenu, false);
     auto innerMenuPattern = AceType::DynamicCast<MenuPattern>(innerMenu->GetPattern());
     CHECK_NULL_RETURN(innerMenuPattern, false);
@@ -617,7 +624,7 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto hostZone = host->GetPaintRectOffset();
-        scroll = host->GetFirstChild();
+        auto scroll = host->GetFirstChild();
         CHECK_NULL_RETURN(scroll, false);
         auto column = scroll->GetFirstChild();
         CHECK_NULL_RETURN(column, false);
@@ -628,6 +635,19 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         clickAreaZone.SetTop(hostZone.GetY());
         if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             HideStackMenu();
+            return true;
+        }
+    } else if (expandingMode == SubMenuExpandingMode::STACK) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto hostZone = host->GetPaintRectOffset();
+        auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
+        clickAreaZone.SetLeft(hostZone.GetX());
+        clickAreaZone.SetTop(hostZone.GetY());
+        if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            auto wrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_RETURN(wrapperPattern, false);
+            wrapperPattern->HideSubMenu();
             return true;
         }
     }
@@ -901,7 +921,11 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
+    } else {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
 }
 
@@ -1377,8 +1401,14 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     auto radiusBottomRight = borderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
     auto maxRadiusW = std::max(radiusTopLeft + radiusTopRight, radiusBottomLeft + radiusBottomRight);
     auto maxRadiusH = std::max(radiusTopLeft + radiusBottomLeft, radiusTopRight + radiusBottomRight);
-    if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
-        radius = borderRadius;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
+            radius = borderRadius;
+        }
+    } else {
+        if (LessNotEqual(maxRadiusW, menuSize.Width())) {
+            radius = borderRadius;
+        }
     }
 
     return radius;

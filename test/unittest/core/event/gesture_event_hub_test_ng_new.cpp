@@ -227,6 +227,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
     TouchRestrict touchRestrict;
     std::list<RefPtr<NGGestureRecognizer>> innerTargets;
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
 
     /**
      * @tc.steps: step3. call externalExclusiveRecognizer_
@@ -244,7 +245,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
      * @tc.expected: finalResult is empty
      */
     gestureEventHub->ProcessTouchTestHierarchy(
-        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr);
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
 }
 
@@ -355,6 +356,8 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo001, TestSize.Level1)
     GestureEvent info;
     DragDropInfo dragPreviewInfo;
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
     EXPECT_FALSE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
@@ -442,6 +445,8 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo002, TestSize.Level1)
     GestureEvent info;
     DragDropInfo dragPreviewInfo;
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
     EXPECT_TRUE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");
@@ -691,7 +696,7 @@ HWTEST_F(GestureEventHubTestNg, TestSetDragGatherPixelMap001, TestSize.Level1)
      * @tc.steps: step5. Test SetDragGatherPixelMap result.
      */
     DragDataCore dragData;
-    dragDropManager->PushGatherPixelMap(dragData, 1.0f);
+    dragDropManager->GetGatherPixelMap(dragData, 1.0f);
     auto size = dragData.shadowInfos.size();
     EXPECT_EQ(size, 0);
 }

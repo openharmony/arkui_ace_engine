@@ -424,6 +424,15 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback
     actionEventHandle_ = callback;
 }
 
+void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EnableFormCallback is null");
+        return;
+    }
+    enableFormCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
@@ -558,6 +567,14 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(top, left);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto&& enableFormEventHandler = [weak = WeakClaim(this)](const OHOS::AppExecFwk::FormJsInfo& formInfo,
+        const bool enable) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnEnableForm(formInfo, enable);
+    };
+    renderDelegate_->SetEnableFormEventHandler(std::move(enableFormEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -753,6 +770,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     }
 }
 
+void FormManagerDelegate::OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate::OnEnableForm,formInfo.formId = %{public}" PRId64 "",
+        formInfo.formId);
+    HandleEnableFormCallback(enable);
+}
+
 void FormManagerDelegate::HandleUnTrustFormCallback()
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "HandleUnTrustFormCallback.");
@@ -767,6 +791,14 @@ void FormManagerDelegate::HandleSnapshotCallback(const uint32_t& delayTime)
     if (snapshotCallback_) {
         snapshotCallback_(delayTime);
     }
+}
+
+void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
+{
+    if (!enableFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "enableFormCallback_. is null");
+    }
+    enableFormCallback_(enable);
 }
 
 void FormManagerDelegate::ReAddForm()
@@ -810,6 +842,13 @@ void FormManagerDelegate::OnAccessibilityDumpChildInfo(
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->OnAccessibilityDumpChildInfo(params, info);
+}
+
+void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

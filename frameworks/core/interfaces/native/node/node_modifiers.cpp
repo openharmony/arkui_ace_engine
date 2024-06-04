@@ -101,6 +101,7 @@
 #include "core/interfaces/native/node/text_timer_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_container_span_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"
@@ -244,6 +245,8 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+
+    NodeModifier::GetContainerSpanModifier,
 };
 } // namespace
 

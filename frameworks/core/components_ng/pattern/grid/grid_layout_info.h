@@ -354,6 +354,7 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
+    std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;

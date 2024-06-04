@@ -17,6 +17,7 @@ adapter/ohos/osal/js_accessibility_manager.h  @jayleehw
 adapter/ohos/osal/js_accessibility_manager.cpp  @jayleehw
 adapter/ohos/osal/layout_inspector.cpp  @jayleehw
 adapter/ohos/osal/log_wrapper.cpp  @lushi1202
+adapter/ohos/entrance/dynamic_component/  @bad-eleven @lmleon @dutie123
 
 [Preview adapter]
 adapter/preview/ @laigerendaqiu
@@ -53,6 +54,10 @@ frameworks/bridge/declarative_frontend/jsview/js_view.h       @yan-shuifeng @gui
 frameworks/bridge/declarative_frontend/jsview/js_view.cpp     @yan-shuifeng @guido_grassel
 frameworks/bridge/declarative_frontend/jsview/js_view_functions.h     @yan-shuifeng @guido_grassel
 frameworks/bridge/declarative_frontend/jsview/js_view_functions.cpp   @yan-shuifeng @guido_grassel
+frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h  @bad-eleven @lmleon @dutie123
+frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp  @bad-eleven @lmleon @dutie123
+frameworks/bridge/declarative_frontend/jsview/js_isolated_component.h  @bad-eleven @lmleon @dutie123
+frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp  @bad-eleven @lmleon @dutie123
 frameworks/bridge/declarative_frontend/view_stack_processor.cpp  @yan-shuifeng @guido_grassel
 frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @guido_grassel
 
@@ -164,7 +169,6 @@ frameworks/core/components_ng/pattern/texttimer/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/time_picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/toast/  @futurescape
 frameworks/core/components_ng/pattern/toggle/  @fredtt
-frameworks/core/components_ng/pattern/ui_extension/  @lushi1202 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/video/  @sunbees
 frameworks/core/components_ng/pattern/view_context/  @hehongyang9
 frameworks/core/components_ng/pattern/waterflow/  @zcdqs
@@ -172,6 +176,7 @@ frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/  @zhoutia
 frameworks/core/components_ng/pattern/web/  @LongLie
 frameworks/core/components_ng/pattern/window_scene/  @liuchao92
 frameworks/core/components_ng/pattern/xcomponent/  @sunbees
+frameworks/core/components_ng/pattern/ui_extension/  @bad-eleven @lmleon @dutie123
 frameworks/core/components/ability_component/  @lushi1202
 frameworks/core/components/align/  @yangfan229
 frameworks/core/components/arc/  @aryawang
@@ -332,6 +337,7 @@ advanced_ui_component/splitlayout/ @hanyujia1
 advanced_ui_component/atomicservicenavigation @giteewzp
 advanced_ui_component/atomicservicetabs @giteewzp
 advanced_ui_component/interstitialdialogaction @giteewzp
+advanced_ui_component/fullscreenlaunchcomponent/ @bad-eleven @lmleon @dutie123
 
 [Build configs]
 build/ @sunfei2021
@@ -378,6 +384,7 @@ test/unittest/  @chenjiafeng-openharmony
 test/unittest/core/pattern/grid/ @zhoutianer
 test/unittest/core/pattern/swiper/ @zhoutianer
 test/unittest/core/pattern/waterflow/ @zhoutianer
+test/unittest/core/pattern/ui_extension/ @bad-eleven @lmleon @dutie123
 
 [Native Node Module]
 frameworks/core/interfaces/arkoala/ @nikolay-igotti

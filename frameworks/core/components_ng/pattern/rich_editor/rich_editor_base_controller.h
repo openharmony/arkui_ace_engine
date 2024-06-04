@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 
 namespace OHOS::Ace::NG {
 class RichEditorPattern;
@@ -35,7 +36,7 @@ public:
     void StopEditing() override;
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
-
+    WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
 protected:
     WeakPtr<RichEditorPattern> pattern_;
 };

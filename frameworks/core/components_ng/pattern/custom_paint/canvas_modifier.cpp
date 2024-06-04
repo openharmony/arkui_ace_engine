@@ -43,7 +43,9 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
 
     if (needResetSurface_) {
         CHECK_NULL_VOID(renderContext_.Upgrade());
-        renderContext_.Upgrade()->ResetSurface();
+        int surfaceWidth = static_cast<int>(drawCmdList->GetWidth());
+        int surfaceHeight = static_cast<int>(drawCmdList->GetHeight());
+        renderContext_.Upgrade()->ResetSurface(surfaceWidth, surfaceHeight);
         needResetSurface_ = false;
     }
 

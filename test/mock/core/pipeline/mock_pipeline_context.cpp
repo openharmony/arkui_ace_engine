@@ -136,7 +136,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -190,13 +190,15 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
+void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
@@ -314,7 +316,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     }
     return focusManager_;
 }
@@ -377,6 +379,8 @@ UITaskScheduler::UITaskScheduler() {}
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -485,6 +489,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+float PipelineContext::GetPageAvoidOffset()
+{
+    return 0.0f;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -757,6 +766,11 @@ bool PipelineBase::HasFloatTitle() const
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetFontScale(float fontScale)
+{
+    fontScale_ = fontScale;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT DataPanelModel {
+class ACE_FORCE_EXPORT DataPanelModel {
 public:
     static DataPanelModel* GetInstance();
     virtual ~DataPanelModel() = default;

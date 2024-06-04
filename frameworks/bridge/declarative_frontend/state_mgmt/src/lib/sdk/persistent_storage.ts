@@ -21,10 +21,10 @@
  */
 type MapItem<K, V> = { key: K, value: V };
 class MapInfo<K, V> {
-  static readonly replacer: Symbol = Symbol('_____map_replacer__');
+  static readonly replacer: string = '_____map_replacer__';
 
   constructor(
-    public mapReplacer: Symbol,
+    public mapReplacer: string,
     public keyToValue: MapItem<K, V>[]
   ) { }
 
@@ -59,10 +59,10 @@ class MapInfo<K, V> {
  *
  */
 class SetInfo<V> {
-  static readonly replacer: Symbol = Symbol('_____set_replacer__');
+  static readonly replacer: string = '_____set_replacer__';
 
   constructor(
-    public setReplacer: Symbol,
+    public setReplacer: string,
     public values: V[]
   ) { }
 
@@ -94,10 +94,10 @@ class SetInfo<V> {
  *
  */
 class DateInfo {
-  static readonly replacer: Symbol = Symbol('_____date_replacer__');
+  static readonly replacer: string = '_____date_replacer__';
 
   constructor(
-    public dateReplacer: Symbol,
+    public dateReplacer: string,
     public date: string
   ) { }
 

@@ -543,6 +543,18 @@ inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBr
     return index < 0 ? "line-break-strategy" : lineBreakStrategyTable[index].value;
 }
 
+inline std::string ConvertWrapTextSelectableToString(TextSelectableMode textSelectable)
+{
+    static const LinearEnumMapNode<TextSelectableMode, std::string> textSelectableTable[] = {
+        { TextSelectableMode::SELECTABLE_UNFOCUSABLE, "selectable-unfocusable" },
+        { TextSelectableMode::SELECTABLE_FOCUSABLE, "selectable-focusable" },
+        { TextSelectableMode::UNSELECTABLE, "unselectable" }
+    };
+
+    auto index = BinarySearchFindIndex(textSelectableTable, ArraySize(textSelectableTable), textSelectable);
+    return index < 0 ? "text-selectable" : textSelectableTable[index].value;
+}
+
 inline std::string ConvertColorToString(Color color)
 {
     return color.ColorToString();

@@ -86,7 +86,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         if (!predictBuildList_.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { predictBuildList_, cachedChildConstraint_ });
+            PostIdleTask(layoutWrapper->GetHostNode(),
+                { predictBuildList_, cachedChildConstraint_, itemsCrossSize_, crossGap_ });
             predictBuildList_.clear();
         }
     }
@@ -441,16 +442,14 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     if (!rowsTemplate.empty()) {
         cross = ParseTemplateArgs(GridUtils::ParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     } else {
         cross = ParseTemplateArgs(GridUtils::ParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     }
     crossLens = cross.first;
-    if (cross.second) {
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = cross.second;
 
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
@@ -493,9 +492,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 
     CheckReset(mainSize, crossSize, layoutWrapper);
 
-    if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER || gridLayoutInfo_.scrollAlign_ == ScrollAlign::END) {
-        UpdateCurrentOffsetForJumpTo(mainSize);
-    }
+    UpdateCurrentOffsetForJumpTo(mainSize);
     gridLayoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
     gridLayoutInfo_.scrollAlign_ = ScrollAlign::AUTO;
 
@@ -603,9 +600,9 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         return fillNewLine;
     }
     auto blankAtStart = gridLayoutInfo_.currentOffset_;
-    while (GreatNotEqual(blankAtStart, 0.0)) {
+    while (GreatNotEqual(blankAtStart, 0.0) || gridLayoutInfo_.startIndex_ > gridLayoutInfo_.childrenCount_ - 1) {
         float lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
-        if (GreatNotEqual(lineHeight, 0.0)) {
+        if (GreatOrEqual(lineHeight, 0.0)) {
             gridLayoutInfo_.lineHeightMap_[gridLayoutInfo_.startMainLineIndex_] = lineHeight;
             blankAtStart -= (lineHeight + mainGap_);
             fillNewLine = true;
@@ -1037,21 +1034,28 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
 
 void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
 {
-    int32_t startLine = 0;
-    /* targetIndex is in the matrix */
-    if (IsIndexInMatrix(gridLayoutInfo_.jumpIndex_, startLine)) {
-        // scroll to end of the screen
-        gridLayoutInfo_.currentOffset_ =
-            mainSize - gridLayoutInfo_.lineHeightMap_[startLine] - gridLayoutInfo_.contentEndPadding_;
-        // scroll to center of the screen
-        if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
-            gridLayoutInfo_.currentOffset_ /= 2;
+    if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER || gridLayoutInfo_.scrollAlign_ == ScrollAlign::END) {
+        int32_t startLine = 0;
+        /* targetIndex is in the matrix */
+        if (IsIndexInMatrix(gridLayoutInfo_.jumpIndex_, startLine)) {
+            // scroll to end of the screen
+            gridLayoutInfo_.currentOffset_ =
+                mainSize - gridLayoutInfo_.lineHeightMap_[startLine] - gridLayoutInfo_.contentEndPadding_;
+            // scroll to center of the screen
+            if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
+                gridLayoutInfo_.currentOffset_ /= 2;
+            }
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        } else {
+            /* targetIndex is out of the matrix */
+            TAG_LOGW(
+                AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
         }
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        return;
     }
-    /* targetIndex is out of the matrix */
-    TAG_LOGW(AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
+    if (gridLayoutInfo_.extraOffset_.has_value()) {
+        gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
+        gridLayoutInfo_.extraOffset_.reset();
+    }
 }
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)

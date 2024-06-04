@@ -145,7 +145,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-        if (layoutDirection == TextDirection::RTL) {
+        if (layoutDirection == TextDirection::RTL && axis_ == Axis::HORIZONTAL) {
             LayoutHeaderFooterRTL(layoutWrapper, paddingOffset, crossSize);
         } else {
             LayoutHeaderFooterLTR(layoutWrapper, paddingOffset, crossSize);
@@ -1022,7 +1022,13 @@ void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrap
     float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     if (axis_ == Axis::VERTICAL) {
-        offset = offset + OffsetF(laneCrossOffset, startPos);
+        auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        if (layoutDirection == TextDirection::RTL) {
+            auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
+            offset = offset + OffsetF(crossSize - laneCrossOffset - size.Width(), startPos);
+        } else {
+            offset = offset + OffsetF(laneCrossOffset, startPos);
+        }
     } else {
         offset = offset + OffsetF(startPos, laneCrossOffset);
     }

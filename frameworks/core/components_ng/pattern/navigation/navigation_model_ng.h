@@ -29,6 +29,7 @@ public:
     void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
@@ -90,6 +91,7 @@ private:
     bool CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode);
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -182,6 +183,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
     auto controller = paramObject->GetProperty("controller");
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
     JSRef<JSObject> controllerObj;
     if (controller->IsObject()) {
@@ -217,6 +219,18 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsString()) {
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
+    }
+
+    if (aiOptions->IsObject()) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
     }
 }
 

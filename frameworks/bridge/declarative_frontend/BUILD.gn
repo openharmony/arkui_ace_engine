@@ -185,6 +185,7 @@ template("declarative_js_engine") {
       "engine/functions/js_on_size_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
+      "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
@@ -249,6 +250,7 @@ template("declarative_js_engine") {
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
+      "jsview/js_layout_manager.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -639,10 +641,6 @@ template("declarative_js_engine") {
         if (defined(config.dynamic_component_support) &&
             config.dynamic_component_support && !build_ohos_sdk) {
           external_deps += [ "ets_utils:worker" ]
-
-          include_dirs +=
-              [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
-
           sources += [
             "jsview/js_dynamic_component.cpp",
             "jsview/js_isolated_component.cpp",
@@ -706,6 +704,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_on_size_change_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
+      "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
@@ -779,6 +778,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_indexer.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
+      "jsview/js_layout_manager.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -913,9 +913,6 @@ template("declarative_js_engine_ng") {
       if (defined(config.dynamic_component_support) &&
           config.dynamic_component_support && !build_ohos_sdk) {
         external_deps += [ "ets_utils:worker" ]
-
-        include_dirs =
-            [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
 
         sources += [
           "jsview/js_dynamic_component.cpp",

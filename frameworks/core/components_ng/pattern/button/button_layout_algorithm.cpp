@@ -192,6 +192,9 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    if (NeedAgingMeasure(layoutWrapper)) {
+        return;
+    }
     if (buttonLayoutProperty->HasLabel()) {
         auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -308,5 +311,50 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
         auto context = PipelineContext::GetCurrentContext();
         context->MarkNeedFlushMouseEvent();
     }
+}
+
+bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
+{
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(buttonLayoutProperty, false);
+    if (buttonLayoutProperty->HasFontSize() && buttonLayoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
+        return false;
+    }
+    auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutContraint, false);
+    if (layoutContraint->selfIdealSize.Width().has_value() || layoutContraint->selfIdealSize.Height().has_value()) {
+        return false;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
+        return false;
+    }
+
+    float agingPadding = buttonTheme->GetAgingNormalPadding().ConvertToPx() * 2.0f;
+    if (buttonLayoutProperty->HasControlSize() && buttonLayoutProperty->GetControlSize() == ControlSize::SMALL) {
+        agingPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameSize = geometryNode->GetFrameSize();
+    if (buttonLayoutProperty->HasLabel()) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        CHECK_NULL_RETURN(childWrapper, false);
+        auto childGeometryNode = childWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(childGeometryNode, false);
+        auto childFrameSize = childGeometryNode->GetContentSize();
+        frameSize.SetHeight(childFrameSize.Height() + agingPadding);
+    } else {
+        frameSize.SetHeight(frameSize.Height() + agingPadding);
+    }
+    geometryNode->SetFrameSize(frameSize);
+    HandleBorderRadius(layoutWrapper);
+    return true;
 }
 } // namespace OHOS::Ace::NG

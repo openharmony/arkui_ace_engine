@@ -168,6 +168,7 @@ void RichEditorPattern::ProcessStyledString()
     textForDisplay_.clear();
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
+    RemoveEmptySpanItems();
     for (const auto& span : spans_) {
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
@@ -244,25 +245,24 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     int32_t changeStart = caretPosition_;
     int32_t changeLength = 0;
     if (textSelector_.IsValid()) {
-        auto start = textSelector_.GetTextStart();
-        auto end = textSelector_.GetTextEnd();
-        SetCaretPosition(start);
-        changeStart = caretPosition_;
-        changeLength = end - start;
-        DeleteForwardInStyledString(changeLength, false);
-        CloseSelectOverlay();
-        ResetSelection();
+        changeStart = textSelector_.GetTextStart();
+        changeLength = textSelector_.GetTextEnd() - changeStart;
     }
     bool isPreventChange = false;
+    RefPtr<SpanString> insertStyledString = nullptr;
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        auto insertStyledString =
-            CreateStyledStringByTextStyle(insertValue, typingStyle_.value(), typingTextStyle_.value());
+        insertStyledString = CreateStyledStringByTextStyle(insertValue, typingStyle_.value(), typingTextStyle_.value());
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertStyledString);
-        CHECK_NULL_VOID(!isPreventChange);
-        styledString_->InsertSpanString(changeStart, insertStyledString);
     } else {
         isPreventChange = !BeforeStyledStringChange(changeStart, changeLength, insertValue);
-        CHECK_NULL_VOID(!isPreventChange);
+    }
+    CHECK_NULL_VOID(!isPreventChange);
+    if (changeLength > 0) {
+        DeleteForwardInStyledString(changeLength, false);
+    }
+    if (insertStyledString) {
+        styledString_->InsertSpanString(changeStart, insertStyledString);
+    } else {
         styledString_->InsertString(changeStart, insertValue);
     }
     if (!caretVisible_) {
@@ -270,7 +270,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     }
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ = StringUtils::ToWstring(insertValue).length();
+    moveLength_ += StringUtils::ToWstring(insertValue).length();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -342,25 +342,24 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 {
     CHECK_NULL_VOID(styledString_);
-    if (textSelector_.IsValid()) {
-        if (!textSelector_.StartEqualToDest()) {
-            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        }
-        SetCaretPosition(textSelector_.GetTextEnd());
-        CloseSelectOverlay();
-        ResetSelection();
+    if (!textSelector_.SelectNothing()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
     CHECK_NULL_VOID(caretPosition_ != 0);
     int32_t changeStart = caretPosition_ - length;
     bool isPreventChange = !BeforeStyledStringChange(changeStart, length, "");
     CHECK_NULL_VOID(!isPreventChange);
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextEnd());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
     }
     isTextChange_ = true;
-    moveDirection_ = MoveDirection::BACKWARD;
-    moveLength_ = length;
+    SetCaretPosition(caretPosition_ - length);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -371,18 +370,18 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
 {
     CHECK_NULL_VOID(styledString_);
-    if (textSelector_.IsValid()) {
-        if (!textSelector_.StartEqualToDest()) {
-            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        }
-        SetCaretPosition(textSelector_.GetTextStart());
-        CloseSelectOverlay();
-        ResetSelection();
+    if (!textSelector_.SelectNothing()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
     CHECK_NULL_VOID(GetTextContentLength() != 0);
     int32_t changeStart = caretPosition_;
     bool isPreventChange = isIME && !BeforeStyledStringChange(changeStart, length, "");
     CHECK_NULL_VOID(!isPreventChange);
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
@@ -876,7 +875,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
-    if (updateCaretPosition) {
+    if (updateCaretPosition && !previewTextRecord_.isPreviewTextInputting) {
         if (options.offset.has_value()) {
             SetCaretPosition(options.offset.value() + StringUtils::ToWstring(options.value).length());
         } else {
@@ -1419,26 +1418,24 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
-    if (pos == correctPos) {
-        FireOnSelectionChange(correctPos);
-        if (caretPosition_ != correctPos) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
-            if (caretChangeListener_) {
-                caretChangeListener_(correctPos);
-            }
-        }
+    CHECK_NULL_RETURN((pos == correctPos), false);
+    if (caretPosition_ != correctPos) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
         caretPosition_ = correctPos;
-        if (needNotifyImf) {
-            UpdateCaretInfoToController();
+        FireOnSelectionChange(caretPosition_);
+        if (caretChangeListener_) {
+            caretChangeListener_(caretPosition_);
         }
-        return true;
     }
-    return false;
+    if (needNotifyImf) {
+        UpdateCaretInfoToController();
+    }
+    return true;
 }
 
 void RichEditorPattern::FireOnSelectionChange(const int32_t caretPosition)
 {
-    if (!textSelector_.SelectNothing() || caretPosition == caretPosition_ || !caretTwinkling_) {
+    if (!textSelector_.SelectNothing() || !caretTwinkling_) {
         return;
     }
     FireOnSelectionChange(caretPosition, caretPosition);
@@ -2382,15 +2379,51 @@ std::pair<OffsetF, float> RichEditorPattern::CalcAndRecordLastClickCaretInfo(con
 void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!clickEventInitialized_);
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "click callback, sourceType=%{public}d", info.GetSourceDevice());
+    GestureMode mode = GestureMode::Exclusive;
+    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(mode);
+    auto tapTripleGesture = AceType::MakeRefPtr<NG::TapGesture>(3, 1);
+    CHECK_NULL_VOID(tapTripleGesture);
+    auto tripleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "triple click callback, sourceType=%{public}d", info.GetSourceDevice());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
-        pattern->HandleClickEvent(info);
+        pattern->HandleTripleClickEvent(info);
     };
-    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickListener);
+    tapTripleGesture->SetOnActionId(tripleClickCallback);
+    gestureGroup->AddGesture(tapTripleGesture);
+
+    auto doubleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click callback, sourceType=%{public}d", info.GetSourceDevice());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
+        if (pattern->BeforeGestureAndClickOperate(info, true)) {
+            pattern->HandleDoubleClickEvent(info);
+        }
+    };
+    auto tapDoubleGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
+    CHECK_NULL_VOID(tapDoubleGesture);
+    tapDoubleGesture->SetOnActionId(doubleClickCallback);
+    gestureGroup->AddGesture(tapDoubleGesture);
+
+    auto clickSingleCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "single click callback, sourceType=%{public}d", info.GetSourceDevice());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
+        if (pattern->BeforeGestureAndClickOperate(info, false)) {
+            pattern->HandleSingleClickEvent(info);
+        }
+    };
+    auto tapSingleGesture = AceType::MakeRefPtr<NG::TapGesture>(1, 1);
+    CHECK_NULL_VOID(tapSingleGesture);
+    tapSingleGesture->SetOnActionId(clickSingleCallback);
+    gestureGroup->AddGesture(tapSingleGesture);
+    gestureGroup->SetPriority(GesturePriority::Parallel);
+    
+    gestureHub->AddGesture(gestureGroup);
+    gestureHub->OnModifyDone();
     clickEventInitialized_ = true;
 }
 
@@ -2484,8 +2517,8 @@ void RichEditorPattern::HandleFocusEvent()
     if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Handle Focus Event, Request keyboard.");
         RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
     }
-    HandleOnEditChanged(true);
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
@@ -2657,6 +2690,10 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DoubleClickOrLongPress in previewTextInputting");
         return;
     }
+    if (IsDragging()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "do not handle DoubleClickOrLongPress during drag");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textResponseType_ = TextResponseType::LONG_PRESS;
@@ -2706,9 +2743,14 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
+    if ((caretUpdateType_ == CaretUpdateType::LONG_PRESSED) && IsEditing()) {
+        ShowCaretNoTwinkling(textOffset);
+        return;
+    }
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    initSelectStart_ = selectStart;
     if (IsSelected()) {
         showSelect_ = true;
     }
@@ -2722,13 +2764,16 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     selectionMenuOffset_ = info.GetGlobalLocation();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     focusHub->RequestFocusImmediately();
-    if (overlayMod_) {
+    if (overlayMod_ && (IsEditing() == IsSelected())) {
         RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
     }
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
         int32_t requestCode = (selectOverlay_->SelectOverlayIsOn() && caretUpdateType_ == CaretUpdateType::LONG_PRESSED)
             ? REQUEST_RECREATE : 0;
-        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = requestCode});
+        // preview + longpress shall hide menu; edit + longpress shall show menu.
+        selectOverlay_->ProcessOverlay({.menuIsShow = IsEditing(), .animation = IsEditing(),
+                .requestCode = requestCode});
         FireOnSelectionChange(selectStart, selectEnd);
         if (selectOverlay_->IsSingleHandle()) {
             StartTwinkling();
@@ -2738,7 +2783,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     } else {
         StopTwinkling();
     }
-    HandleOnEditChanged(true);
 }
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
@@ -2870,6 +2914,12 @@ std::list<RefPtr<SpanItem>>::iterator RichEditorPattern::GetSpanIter(int32_t ind
     });
 }
 
+PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+}
+
 void RichEditorPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -2994,6 +3044,8 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
         touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
     auto position = isShowPlaceholder_? 0 : paragraphs_.GetIndex(textOffset);
+    ResetSelection();
+    CloseSelectOverlay();
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
@@ -3226,7 +3278,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .height = caretHeight };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = true };
+        .isTextPreviewSupported = isTextPreviewSupported_ };
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
@@ -3439,7 +3491,7 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
         return false;
     }
     previewTextRecord_.isPreviewTextInputting = true;
-    if (textSelector_.IsValid()) {
+    if (!textSelector_.SelectNothing()) {
         DeleteBackward(1);
     }
     TextSpanOptions options;
@@ -3717,6 +3769,8 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.value = insertValue;
     options.offset = caretPosition_;
     options.style = typingTextStyle_;
+    options.hasResourceFontColor = typingStyle_->hasResourceFontColor;
+    options.hasResourceDecorationColor = typingStyle_->hasResourceDecorationColor;
     auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
@@ -3865,6 +3919,8 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode->UpdateContent(insertValue);
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        spanItem->hasResourceFontColor = typingStyle_->hasResourceFontColor;
+        spanItem->hasResourceDecorationColor = typingStyle_->hasResourceDecorationColor;
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
         spanItem->SetTextStyle(typingTextStyle_);
@@ -4289,7 +4345,7 @@ bool RichEditorPattern::CursorMoveDown()
         OffsetF caretOffsetUp = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightUp);
         OffsetF caretOffsetDown = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightDown, true, false);
         OffsetF nextCaretOffset = CalcCursorOffsetByPosition(GetCaretPosition() + 1, nextCaretHeight, false, false);
-        auto minDet = paragraphs_.minParagraphFontSize.value();
+        auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
         auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         auto caretOffsetOverlay = overlayMod->GetCaretOffset();
         float textOffsetX = GetTextRect().GetX();
@@ -5120,10 +5176,16 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
 
 void RichEditorPattern::HandleTouchUp()
 {
-    if (isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) {
+    if ((isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) || IsSelected()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show menu, IsSelected()=%{public}d", IsSelected());
         selectOverlay_->ShowMenu();
     }
+    if (isLongPress_ && IsEditing() && !IsSelectAll()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after move caret anywhere, restore caret to twinkling");
+        StartTwinkling();
+    }
     isTouchCaret_ = false;
+    isMoveCaretAnywhere_ = false;
     if (magnifierController_->GetShowMagnifier()) {
         magnifierController_->UpdateShowMagnifier();
     }
@@ -5136,6 +5198,14 @@ void RichEditorPattern::HandleTouchUp()
 
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
 {
+    if (isLongPress_) {
+        if (!IsEditing()) {
+            UpdateSelectionByTouchMove(offset);
+        } else {
+            MoveCaretAnywhere(offset);
+        }
+        return;
+    }
     CHECK_NULL_VOID(isTouchCaret_);
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
@@ -5256,6 +5326,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isMousePressed_ = false;
     isFirstMouseSelect_ = true;
     isOnlyImageDrag_ = false;
+    mouseClickRelease_ = oldMouseStatus == MouseStatus::MOVE;
     if (dataDetectorAdapter_->pressedByLeftMouse_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
         dataDetectorAdapter_->ResponseBestMatchItem(dataDetectorAdapter_->clickedAISpan_);
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
@@ -5694,7 +5765,7 @@ void RichEditorPattern::OnAreaChangedInner()
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        CHECK_NULL_VOID(SelectOverlayIsOn());
+        CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
         textSelector_.selectionBaseOffset.SetX(
             CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
         textSelector_.selectionDestinationOffset.SetX(
@@ -5775,10 +5846,10 @@ bool RichEditorPattern::IsHandlesShow()
 
 void RichEditorPattern::ResetSelection()
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
     bool selectNothing = textSelector_.SelectNothing();
     textSelector_.Update(-1, -1);
     if (!selectNothing) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetSelection");
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<RichEditorEventHub>();
@@ -5872,11 +5943,11 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
     CHECK_NULL_VOID(richEditorTheme);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
-    textFieldManager->SetClickPosition(
-        { offset.GetX() + GetCaretRect().GetX(), offset.GetY() + GetCaretRect().GetY() });
-    textFieldManager->SetHeight(NearZero(GetCaretRect().Height())
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    textFieldManager->SetClickPosition({ offset.GetX() + caretOffset.GetX(), offset.GetY() + caretOffset.GetY() });
+    textFieldManager->SetHeight(NearZero(caretHeight)
                                     ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
-                                    : GetCaretRect().Height());
+                                    : caretHeight);
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 
     if (!isTextChange_) {
@@ -5900,16 +5971,42 @@ bool RichEditorPattern::IsDisabled() const
     return !eventHub->IsEnabled();
 }
 
+void RichEditorPattern::MouseDoubleClickParagraphEnd(int32_t& index)
+{
+    bool isMouseDoubleClick = caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK && sourceType_ == SourceType::MOUSE;
+    CHECK_NULL_VOID(isMouseDoubleClick);
+    auto paragraphEndPos = GetParagraphEndPosition(index);
+    auto paragraphBeginPos = GetParagraphBeginPosition(index);
+    bool isBeginEqualEnd = paragraphBeginPos == paragraphEndPos;
+    CHECK_NULL_VOID(!isBeginEqualEnd);
+    if (index == paragraphEndPos) {
+        index -= 1;
+    }
+}
+
+void RichEditorPattern::DoubleClickExcludeSymbol(int32_t& start, int32_t& end)
+{
+    bool isDoubleClick = caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK;
+    CHECK_NULL_VOID(isDoubleClick);
+    AdjustSelectorForSymbol(start, HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE);
+    AdjustSelectorForSymbol(end, HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE);
+}
+
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
-    if (IsTouchBeforeCaret(currentPosition, pos)) {
+    bool currentPosEqualParagraphBegin = currentPosition == GetParagraphBeginPosition(currentPosition);
+    if (IsTouchBeforeCaret(currentPosition, pos) && !currentPosEqualParagraphBegin) {
         currentPosition = std::max(0, currentPosition - 1);
     }
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
+    MouseDoubleClickParagraphEnd(currentPosition);
+    DoubleClickExcludeSymbol(currentPosition, nextPosition);
+    if (!IsCustomSpanInCaretPos(currentPosition, true)) {
+        AdjustWordSelection(currentPosition, nextPosition);
+    }
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     bool isSelectEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
@@ -6094,6 +6191,26 @@ float RichEditorPattern::GetLineHeight() const
     auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
+}
+
+size_t RichEditorPattern::GetLineCount() const
+{
+    return paragraphs_.GetLineCount();
+}
+
+TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
+{
+    if (lineNumber < 0 || lineNumber > GetLineCount() - 1) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
+                "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
+        return TextLineMetrics();
+    }
+    auto lineMetrics = paragraphs_.GetLineMetrics(lineNumber);
+    const auto& textRect = GetTextRect();
+    lineMetrics.x += textRect.GetX();
+    lineMetrics.y += textRect.GetY();
+    lineMetrics.baseline += textRect.GetY();
+    return lineMetrics;
 }
 
 float RichEditorPattern::GetLetterSpacing() const
@@ -6940,6 +7057,10 @@ bool RichEditorPattern::NeedShowAIDetect()
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
@@ -7431,7 +7552,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto it = textTemp.find(lineSeparator);
-    bool containNextLine = it != std::wstring::npos && it != static_cast<int32_t>(textTemp.length()) - 1;
+    bool containNextLine = it != std::wstring::npos && it != textTemp.length() - 1;
     auto content = StringUtils::ToString(textTemp);
 
     if (textStyle || containNextLine) { // SpanNode Fission
@@ -7469,7 +7590,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
         if (offsetInSpan != static_cast<int32_t>(textBefore.length())) {
             CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, textBefore.length(),
                 StringUtils::ToString(textBefore), textStyle, paraStyle);
-            innerPosition += textBefore.length() - offsetInSpan;
+            innerPosition += static_cast<int32_t>(textBefore.length()) - offsetInSpan;
         }
         wContent = textAfter;
         index = wContent.find(lineSeparator);
@@ -7921,7 +8042,7 @@ int32_t RichEditorPattern::CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretO
 
     OffsetF caretOffsetCalcUp = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightUp, false, false);
     OffsetF caretOffsetCalcDown = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightDown, true, false);
-    auto minDet = paragraphs_.minParagraphFontSize.value();
+    auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
     caretOffsetUp = caretOffsetCalcUp;
     caretOffsetDown = caretOffsetCalcDown;
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
@@ -7938,11 +8059,21 @@ int32_t RichEditorPattern::CalcLineBeginPosition()
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    auto minDet = paragraphs_.minParagraphFontSize.value();
+    auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
     auto textOffsetY = caretOffset.GetY() - textPaintOffset.GetY() + minDet / 2.0;
     Offset textOffset = { 0, textOffsetY };
     auto newPos = paragraphs_.GetIndex(textOffset);
     return newPos;
+}
+
+float RichEditorPattern::GetTextThemeFontSize()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto textStyle = theme->GetTextStyle();
+    return textStyle.GetFontSize().ConvertToPx();
 }
 
 int32_t RichEditorPattern::CalcLineEndPosition()
@@ -7951,7 +8082,7 @@ int32_t RichEditorPattern::CalcLineEndPosition()
 
     OffsetF CaretOffsetDown = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightDown, true, false);
     auto textPaintOffset = GetTextContentRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    auto minDet = paragraphs_.minParagraphFontSize.value();
+    auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
     Offset textOffset;
     float textWidth = GetTextRect().Width();
     float textPaintOffsetY = textPaintOffset.GetY() - minDet / 2.0;
@@ -7995,7 +8126,7 @@ bool RichEditorPattern::CursorMoveLineBegin()
     }
     OffsetF caretOffsetDown = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeightDown, true, false);
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    auto minDet = paragraphs_.minParagraphFontSize.value();
+    auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
     float textPaintOffsetY = textPaintOffset.GetY() - minDet / 2.0;
     if (lastClickOffset_.NonNegative()) {
         textOffset = { 0, lastClickOffset_.GetY() - textPaintOffsetY };
@@ -8031,7 +8162,7 @@ bool RichEditorPattern::CursorMoveLineEnd()
 
 void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
 {
-    if (textSelector_.SelectNothing()) {
+    if (textSelector_.SelectNothing() || isSpanStringMode_) {
         return;
     }
     auto host = GetHost();
@@ -8090,7 +8221,7 @@ int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
     float careOffsetY = 0.0f;
     int32_t newPos;
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
-    auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
+    auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize()) / 2.0;
     if (isForward) {
         careOffsetY = caretOffset.GetY() - GetTextRect().GetY() - minDet;
     } else {
@@ -8238,5 +8369,146 @@ const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
         }
     }
     return childNodes_;
+}
+
+bool RichEditorPattern::BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick)
+{
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusable() || mouseClickRelease_) {
+        mouseClickRelease_ = false;
+        return false;
+    }
+    selectionMenuOffsetClick_ = OffsetF(
+        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
+    dataDetectorAdapter_->hasClickedAISpan_ = false;
+    lastClickTimeStamp_ = info.GetTimeStamp();
+    if (isDoubleClick) {
+        HandleSingleClickEvent(info);
+    }
+    return true;
+}
+
+void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
+{
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_EQUAL_VOID(focusHub->IsFocusable(), false);
+
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    int32_t pos = paragraphs_.GetIndex(textOffset);
+
+    int start = 0;
+    int end = 0;
+    auto& paragraphInfoList = paragraphs_.GetParagraphs();
+    if (pos == paragraphInfoList.back().end) {
+        start = paragraphInfoList.back().start;
+        end = paragraphInfoList.back().end;
+    } else {
+        for (const auto& paragraph : paragraphInfoList) {
+            if (pos >= paragraph.start && pos < paragraph.end) {
+                start = paragraph.start;
+                end = paragraph.end;
+                break;
+            }
+        }
+    }
+    if (paragraphInfoList.back().end != end) {
+        --end;
+    }
+    CHECK_NULL_VOID(end > start);
+
+    UpdateSelector(start, end);
+    AdjustCursorPosition(pos);
+    SetCaretPosition(pos);
+    if (textSelector_.SelectNothing()) {
+        if (!caretTwinkling_) {
+            StartTwinkling();
+        }
+    } else {
+        StopTwinkling();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (textSelector_.IsValid() && info.GetSourceTool() == SourceTool::FINGER && IsSelected()) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
+}
+
+void RichEditorPattern::ShowCaretNoTwinkling(const Offset& textOffset)
+{
+    auto position = paragraphs_.GetIndex(textOffset);
+    SetCaretPosition(position);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show caret no twinkling at position=%{public}d", position);
+    StopTwinkling();
+    caretVisible_ = true;
+    isMoveCaretAnywhere_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    CHECK_NULL_VOID(overlayMod_);
+    auto [lastClickOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
+    auto localOffset = OffsetF(textOffset.GetX(), lastClickOffset.GetY());
+    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
+
+    // select + long press, so cancel selection.
+    if (textSelector_.IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select + long press, so cancel selection");
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+}
+
+void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
+{
+    // While previewing + long press and move, then shall select content.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
+    InitSelection(textOffset);
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+
+    int32_t start = initSelectStart_;
+    int32_t end = selectEnd;
+
+    if (selectStart < initSelectStart_) {
+        start = selectStart;
+        end = initSelectStart_;
+    }
+    isShowMenu_ = false;
+    HandleSelectionChange(start, end);
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .menuIsShow = false, .hideHandle = false, .animation = false });
+    selectOverlay_->HideMenu(); // preview + longpress and move, shall also hide menu
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
+{
+    // While editing + long press and move, then shall move caret:caret show anywhere on the fonts.
+    CHECK_NULL_VOID(isMoveCaretAnywhere_);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
+    auto position = paragraphs_.GetIndex(textOffset);
+    AdjustCursorPosition(position);
+    SetCaretPosition(position);
+    auto [caretOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
+    CHECK_NULL_VOID(overlayMod_);
+    auto localOffset = OffsetF(offset.GetX(), caretOffset.GetY());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    // make sure the caret is display in the range of frame.
+    localOffset.SetX(std::clamp(localOffset.GetX(), 0.0f, frameSize.Width()));
+    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
 }
 } // namespace OHOS::Ace::NG

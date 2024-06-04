@@ -27,6 +27,7 @@ public:
     void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
     void SetFontFamily(const std::vector<std::string> &families) override;
+    void ResetFontFamily() override;
     void SetWidth(const Dimension& width) override;
     void SetBorderRadius(const Dimension& radius) override;
     void ResetBorderRadius() override;
@@ -49,6 +50,10 @@ public:
     void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
 
+private:
+    static Dimension CalculateBoundedWidth(const Dimension& inputWidth);
+    static Dimension CalculateBoundedWidthForPC(const Dimension& inputWidth);
+    static Dimension CalculateBoundedWidthForMobile(const Dimension& inputWidth);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

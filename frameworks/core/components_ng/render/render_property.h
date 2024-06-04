@@ -129,12 +129,12 @@ struct BorderImageProperty {
         };
         auto jsonBorderImage = JsonUtil::Create(true);
         jsonBorderImage->Put("source", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetSrc().c_str());
-        jsonBorderImage->Put("slice", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
-            ->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageSlice().ToString().c_str());
-        jsonBorderImage->Put("width", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
-            ->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageWidth().ToString().c_str());
-        jsonBorderImage->Put("outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
-            ->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageOutset().ToString().c_str());
+        jsonBorderImage->Put(
+            "slice", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->SliceToString().c_str());
+        jsonBorderImage->Put(
+            "width", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->WidthToString().c_str());
+        jsonBorderImage->Put(
+            "outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->OutsetToString().c_str());
         jsonBorderImage->Put("repeat", REPEAT_MODE[static_cast<int>(
             propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
         jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())

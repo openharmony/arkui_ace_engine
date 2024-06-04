@@ -31,6 +31,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
@@ -47,6 +48,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -98,7 +100,7 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
         std::optional<std::string> addText;
         std::optional<std::string> deleteText;
         int32_t beforeCaretPosition;
@@ -174,6 +176,11 @@ public:
     void UpdatePreviewTextOnInsert(const std::string& insertValue);
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
+
+    void SetSupportPreviewText(bool isTextPreviewSupported)
+    {
+        isTextPreviewSupported_ = isTextPreviewSupported;
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
@@ -339,6 +346,7 @@ public:
     bool CursorMoveEnd();
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
+    float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
     bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
@@ -540,11 +548,15 @@ public:
         selectionMenuMap_.clear();
     }
     void DumpInfo() override;
+    void MouseDoubleClickParagraphEnd(int32_t& index);
+    void DoubleClickExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     void OnColorConfigurationUpdate() override;
     bool IsDisabled() const;
     float GetLineHeight() const override;
+    size_t GetLineCount() const override;
+    TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     float GetLetterSpacing() const;
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
@@ -722,9 +734,20 @@ public:
         contentChange_ = onChange;
     }
 
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
+    }
+
+    bool IsMoveCaretAnywhere() const
+    {
+        return isMoveCaretAnywhere_;
+    }
+
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
 protected:
@@ -943,6 +966,11 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction();
+    bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
+    void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
+    void UpdateSelectionByTouchMove(const Offset& offset);
+    void MoveCaretAnywhere(const Offset& touchOffset);
+    void ShowCaretNoTwinkling(const Offset& textOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1037,9 +1065,13 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    bool isTextPreviewSupported_ = true;
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
+    bool mouseClickRelease_ = false;
+    int32_t initSelectStart_ = 0;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

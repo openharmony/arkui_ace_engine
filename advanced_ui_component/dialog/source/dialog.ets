@@ -22,6 +22,7 @@ import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import bundleManager from '@ohos.bundle.bundleManager';
 import { LengthMetrics } from '@ohos.arkui.node';
+import common from '@ohos.app.ability.common';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -45,6 +46,7 @@ const LOADING_PROGRESS_WIDTH: number = 40;
 const LOADING_PROGRESS_HEIGHT: number = 40;
 const ITEM_TEXT_SIZE: number = 14;
 const LOADING_MAX_LINES: number = 10;
+const LOADING_MAX_LINES_BIG_FONT: number = 4;
 const LOADING_TEXT_LAYOUT_WEIGHT: number = 1;
 const LOADING_TEXT_MARGIN_LEFT: number = 12;
 const LOADING_MIN_HEIGHT: number = 48;
@@ -52,11 +54,30 @@ const LIST_MIN_HEIGHT: number = 48;
 const CHECKBOX_CONTAINER_LENGTH: number = 20;
 const TEXT_MIN_HEIGHT: number = 48;
 const DEFAULT_IMAGE_SIZE: number = 64;
+const MIN_CONTENT_HEIGHT: number = 100;
+const MAX_CONTENT_HEIGHT: number = 30000;
 const KEYCODE_UP: number = 2012;
 const KEYCODE_DOWN: number = 2013;
 const IGNORE_KEY_EVENT_TYPE: number = 1;
 const FIRST_ITEM_INDEX: number = 0;
-const VERSION_TWELVE: number = 50000012
+const VERSION_TWELVE: number = 50000012;
+const MAX_DIALOG_WIDTH: number = getNumberByResource('alert_container_max_width') ?? 400;
+const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResource('alert_right_padding_horizontal') ?? 16;
+const BUTTON_HORIZONTAL_PADDING: number = getNumberByResource('padding_level8') ?? 16;
+const BUTTON_HORIZONTAL_SPACE: number = getNumberByResource('alert_button_horizontal_space') ?? 8;
+const BUTTON_HORIZONTAL_BOTTOM_MARGIN: number = getNumberByResource('alert_button_bottom_padding_horizontal') ?? 16;
+const BUTTON_VERTICAL_BOTTOM_MARGIN: number = getNumberByResource('alert_button_bottom_padding_vertical') ?? 8;
+const BUTTON_VERTICAL_PADDING: number = getNumberByResource('alert_button_top_padding') ?? 8;
+const BUTTON_VERTICAL_SPACE: number = getNumberByResource('alert_button_vertical_space') ?? 4;
+const MAX_BIG_BUTTON_SIZE: number = 3;
+const MAX_WINDOW_HORIZONTAL_HEIGHT: number = 540;
+const MAX_FONT_SCALE: number = 2;
+const BODY_L = getNumberByResource('Body_L') ?? 16;
+const BODY_M = getNumberByResource('Body_M') ?? 14;
+const BODY_S = getNumberByResource('Body_S') ?? 12;
+const TITLE_S = getNumberByResource('Title_S') ?? 20;
+const SUBTITLE_S = getNumberByResource('Subtitle_S') ?? 14;
+const BUTTON_MIN_FONT_SIZE = 9;
 
 @CustomDialog
 export struct TipsDialog {
@@ -76,21 +97,29 @@ export struct TipsDialog {
   @State textAlignment: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
   @State checkBoxHeight: number = 0;
-  buttonHeight: number = 0;
+  @State buttonHeight: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State fontSizeScale: number = 1;
+  @State windowSize: Size = { width: 0, height: 0 };
+  updateButtonHeight: (height: number) => void = (height: number) => {
+    this.buttonHeight = height;
+  }
 
   build() {
-    CustomDialogComponent({
+    CustomDialogContentComponent({
       controller: this.controller,
       contentBuilder: () => {
         this.contentBuilder();
       },
       buttons: this.buttons,
       theme: this.theme,
-    })
+      fontSizeScale: this.fontSizeScale,
+      windowSize: this.windowSize,
+      updateButtonHeight: this.updateButtonHeight
+    }).constraintSize({ maxHeight: '100%' });
   }
 
   @Builder
@@ -129,7 +158,7 @@ export struct TipsDialog {
         })
         .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
-        .fontSize($r('sys.float.Body_M'))
+        .fontSize(this.getCheckBoxFontSize())
         .fontWeight(FontWeight.Regular)
         .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
@@ -181,14 +210,12 @@ export struct TipsDialog {
         if (this.title != null) {
           Row() {
             Text(this.title)
-              .fontSize($r('sys.float.Title_S'))
+              .fontSize(this.getTitleFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
               .maxLines(CONTENT_MAX_LINES)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .minFontSize($r('sys.float.Body_L'))
-              .maxFontSize($r('sys.float.Title_S'))
               .width('100%')
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
@@ -198,7 +225,7 @@ export struct TipsDialog {
             Text(this.content)
               .focusable(true)
               .defaultFocus(!(this.primaryButton || this.secondaryButton))
-              .fontSize($r('sys.float.Body_L'))
+              .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(this.textAlignment)
@@ -227,18 +254,40 @@ export struct TipsDialog {
   }
 
   private getTextAlign(maxWidth: number): void {
+    let contentFontSize: Length = this.getContentFontSize()
     let contentSize: SizeOptions = measure.measureTextSize({
       textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
+      fontSize: contentFontSize,
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
       textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
+      fontSize: contentFontSize,
     });
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
       this.textAlignment = TextAlign.Center;
     }
+  }
+
+  getTitleFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return TITLE_S * MAX_FONT_SCALE + 'vp';
+    }
+    return TITLE_S + 'fp';
+  }
+
+  getContentFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_L * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_L + 'fp';
+  }
+
+  getCheckBoxFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_M * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_M + 'fp';
   }
 
   private getTextHeight(textSize: SizeOptions): number {
@@ -259,16 +308,6 @@ export struct TipsDialog {
     if (this.secondaryButton) {
       this.buttons.push(this.secondaryButton);
     }
-    this.buttonHeight = this.getButtonsHeight();
-  }
-
-  private getButtonsHeight(): number {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
-    }
-    let buttonsHeight: number = getNumberByResource('alert_button_top_padding');
-    buttonsHeight += BUTTON_DEFAULT_HEIGHT + getNumberByResource('alert_button_bottom_padding_horizontal');
-    return buttonsHeight;
   }
 
   private initMargin(): void {
@@ -278,6 +317,7 @@ export struct TipsDialog {
 
 @CustomDialog
 export struct SelectDialog {
+  controller: CustomDialogController;
   title: ResourceStr = '';
   content?: ResourceStr = '';
   selectedIndex?: number = -1;
@@ -285,21 +325,18 @@ export struct SelectDialog {
   radioContent: Array<SheetInfo> = [];
   buttons?: ButtonOptions[] = [];
   contentPadding ?: Padding;
+  isFocus: boolean = false;
+  currentFocusIndex?: number = -1;
+  radioHeight: number = 0;
+  itemHeight: number = 0;
   @BuilderParam contentBuilder: () => void = this.buildContent;
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  controller: CustomDialogController = new CustomDialogController({
-    builder: CustomContentDialog({
-      primaryTitle: this.title,
-      contentBuilder: () => {
-        this.contentBuilder();
-      },
-      buttons: this.buttons,
-    })
-  });
   // the controller of content list
   contentScroller: Scroller = new Scroller();
+  @State fontSizeScale: number = 1;
+  @State windowSize: Size = { width: 0, height: 0 };
 
   @Styles
   paddingContentStyle() {
@@ -325,7 +362,7 @@ export struct SelectDialog {
         if (this.content) {
           Row() {
             Text(this.content)
-              .fontSize($r('sys.float.Body_M'))
+              .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -338,7 +375,7 @@ export struct SelectDialog {
                 Button() {
                   Row() {
                     Text(item.title)
-                      .fontSize($r('sys.float.Body_L'))
+                      .fontSize(this.getListFontSize())
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
@@ -348,11 +385,16 @@ export struct SelectDialog {
                       .hitTestBehavior(HitTestMode.None)
                       .id(String(index))
                       .onFocus(() => {
+                        this.isFocus = true;
+                        this.currentFocusIndex = index;
                         if (index == FIRST_ITEM_INDEX) {
                           this.contentScroller.scrollEdge(Edge.Top);
                         } else if (index == this.radioContent.length - 1) {
                           this.contentScroller.scrollEdge(Edge.Bottom);
                         }
+                      })
+                      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                        this.radioHeight = Number(newValue.height)
                       })
                   }.constraintSize({ minHeight: LIST_MIN_HEIGHT }).clip(false)
                   .padding({ top: $r('sys.float.padding_level4'), bottom: $r('sys.float.padding_level4') })
@@ -371,6 +413,9 @@ export struct SelectDialog {
                 }
               }.paddingStyle()
             }
+            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+              this.itemHeight = Number(newValue.height)
+            })
           })
         }.width('100%').clip(false)
         .onFocus(() => {
@@ -382,10 +427,29 @@ export struct SelectDialog {
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
+    .onDidScroll((xOffset: number, yOffset: number) => {
+      let scrollHeight: number = (this.itemHeight - this.radioHeight) / 2
+      if (this.isFocus) {
+        if (this.currentFocusIndex === this.radioContent.length - 1) {
+          this.contentScroller.scrollEdge(Edge.Bottom);
+          this.currentFocusIndex = -1;
+        } else if (this.currentFocusIndex === FIRST_ITEM_INDEX) {
+          this.contentScroller.scrollEdge(Edge.Top);
+          this.currentFocusIndex = -1;
+        } else {
+          if (yOffset > 0) {
+            this.contentScroller.scrollBy(0, scrollHeight)
+          } else if (yOffset < 0) {
+            this.contentScroller.scrollBy(0, 0 - scrollHeight)
+          }
+        }
+        this.isFocus = false;
+      }
+    })
   }
 
   build() {
-    CustomDialogComponent({
+    CustomDialogContentComponent({
       controller: this.controller,
       primaryTitle: this.title,
       contentBuilder: () => {
@@ -394,7 +458,9 @@ export struct SelectDialog {
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
       theme: this.theme,
-    })
+      fontSizeScale: this.fontSizeScale,
+      windowSize: this.windowSize
+    }).constraintSize({ maxHeight: '100%' });
   }
 
   aboutToAppear(): void {
@@ -437,6 +503,20 @@ export struct SelectDialog {
       this.buttons.push(this.confirm);
     }
   }
+
+  getContentFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_M * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_M + 'fp';
+  }
+
+  getListFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_L * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_L + 'fp';
+  }
 }
 
 @CustomDialog
@@ -458,6 +538,8 @@ export struct ConfirmDialog {
   @State titleHeight: number = 0;
   @State buttonHeight: number = 0;
   @State checkBoxHeight: number = CHECKBOX_CONTAINER_HEIGHT;
+  @State fontSizeScale: number = 1;
+  @State windowSize: Size = { width: 0, height: 0 };
   @State maxContentHeight: string =
     `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
   updateTitleHeight: (height: number) => void = (height: number) => {
@@ -478,7 +560,7 @@ export struct ConfirmDialog {
             Text(this.content)
               .focusable(true)
               .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
-              .fontSize($r('sys.float.Body_L'))
+              .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Start)
@@ -514,7 +596,7 @@ export struct ConfirmDialog {
         }
 
         Text(this.checkTips)
-          .fontSize($r('sys.float.Body_M'))
+          .fontSize(this.getCheckBoxFontSize())
           .fontWeight(FontWeight.Medium)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -527,6 +609,7 @@ export struct ConfirmDialog {
       }
       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.checkBoxHeight = Number(newValue.height);
+        this.maxContentHeight = `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
       })
       .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
       .width('100%')
@@ -534,8 +617,23 @@ export struct ConfirmDialog {
     }
   }
 
+  getContentFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_L * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_L + 'fp';
+
+  }
+
+  getCheckBoxFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_M * MAX_FONT_SCALE + 'vp';
+    }
+    return BODY_M + 'fp';
+  }
+
   build() {
-    CustomDialogComponent({
+    CustomDialogContentComponent({
       primaryTitle: this.title,
       controller: this.controller,
       contentBuilder: () => {
@@ -545,7 +643,9 @@ export struct ConfirmDialog {
       updateButtonHeight: this.updateButtonHeight,
       buttons: this.buttons,
       theme: this.theme,
-    })
+      fontSizeScale: this.fontSizeScale,
+      windowSize: this.windowSize
+    }).constraintSize({ maxHeight: '100%' });
   }
 
   aboutToAppear(): void {
@@ -589,9 +689,11 @@ export struct AlertDialog {
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State windowSize: Size = { width: MAX_DIALOG_WIDTH, height: 0 };
+  @State fontSizeScale: number = 1;
 
   build() {
-    CustomDialogComponent({
+    CustomDialogContentComponent({
       primaryTitle: this.primaryTitle,
       secondaryTitle: this.secondaryTitle,
       controller: this.controller,
@@ -600,7 +702,9 @@ export struct AlertDialog {
       },
       buttons: this.buttons,
       theme: this.theme,
-    })
+      fontSizeScale: this.fontSizeScale,
+      windowSize: this.windowSize,
+    }).constraintSize({ maxHeight: '100%' });
   }
 
   @Builder
@@ -610,7 +714,7 @@ export struct AlertDialog {
         Text(this.content)
           .focusable(true)
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(this.getContentFontSize())
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ right: $r('sys.float.padding_level8'), })
@@ -636,17 +740,25 @@ export struct AlertDialog {
     this.initButtons();
   }
 
+  private getContentFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_L * MAX_FONT_SCALE + 'vp';
+    } else {
+      return BODY_L + 'fp';
+    }
+  }
+
   private getTextAlign(maxWidth: number): void {
+    let fontSize: Length = this.getContentFontSize();
     let contentSize: SizeOptions = measure.measureTextSize({
       textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
+      fontSize: fontSize,
       constraintWidth: maxWidth,
     });
     let oneLineSize: SizeOptions = measure.measureTextSize({
       textContent: this.content,
-      fontSize: $r('sys.float.Body_L'),
+      fontSize: fontSize,
     });
-
     if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
       this.textAlign = TextAlign.Center;
     }
@@ -693,6 +805,8 @@ export struct CustomContentDialog {
   contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State fontSizeScale: number = 1;
+  @State windowSize: Size = { width: 0, height: 0 };
 
   build() {
     CustomDialogContentComponent({
@@ -705,7 +819,9 @@ export struct CustomContentDialog {
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
       theme: this.theme,
-    });
+      fontSizeScale: this.fontSizeScale,
+      windowSize: this.windowSize
+    }).constraintSize({ maxHeight: '100%' });
   }
 }
 
@@ -718,250 +834,158 @@ struct CustomDialogContentComponent {
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
   keyIndex: number = 0;
-  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
-  @State buttonFontColorWithTheme: ResourceColor = '';
-  @State errorButtonFontColorWithTheme: ResourceColor = '';
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
 
   @Builder
   defaultContentBuilder(): void {
   }
 
-  titleHeight: number = 0;
-  buttonHeight: number = 0;
-  @State contentMaxHeight: string = '';
+  @State titleHeight: number = 0;
+  @State buttonHeight: number = 0;
+  @State contentMaxHeight: string = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
   updateTitleHeight?: (height: number) => void;
   updateButtonHeight?: (height: number) => void;
+  targetSdk: number = VERSION_TWELVE;
+  @Link fontSizeScale: number;
+  @Link windowSize: Size;
+  @State customStyle: boolean = false;
+  @State needResponseScale: boolean = true;
+  screenSize: Size = { width: 0, height: 0 };
+  initCustomStyle: boolean = false;
 
   build() {
     WithTheme({ theme: this.theme }) {
-      Column() {
-        // title area
-        this.buildTitles();
-
-        // content area
+      Scroll() {
         Column() {
-          this.contentBuilder();
-        }
-        .padding(this.getContentPadding())
-        .constraintSize({ maxHeight: this.contentMaxHeight })
+          // title area
+          TitleComponent({
+            primaryTitle: this.primaryTitle,
+            secondaryTitle: this.secondaryTitle,
+            windowSize: this.windowSize,
+            fontSizeScale: this.fontSizeScale,
+            titleHeight: this.titleHeight,
+            needResponseScale: this.needResponseScale,
+            theme: this.theme
+          })
+          // content area
+          Column() {
+            this.contentBuilder();
+          }
+          .padding(this.getContentPadding())
+          .constraintSize({ maxHeight: this.contentMaxHeight })
 
-        // operation area
-        this.buildButtons();
+          ButtonComponent({
+            buttons: this.buttons,
+            windowSize: this.windowSize,
+            fontSizeScale: this.fontSizeScale,
+            needResponseScale: this.needResponseScale,
+            buttonHeight: this.buttonHeight,
+            controller: this.controller,
+            theme: this.theme
+          })
+        }
+        .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
+        .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
+        .margin(this.customStyle ? {
+          left: $r('sys.float.ohos_id_dialog_margin_start'),
+          right: $r('sys.float.ohos_id_dialog_margin_end'),
+          bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
+        } : { left: 0, right: 0, bottom: 0 })
+        .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
-      .width('100%')
     }
   }
 
-  @Builder
-  buildTitles(): void {
-    Column() {
-      Row() {
-        Text(this.primaryTitle)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(this.primaryTitleFontColorWithTheme)
-          .textAlign(this.getTitleTextAlign())
-          .maxFontSize($r('sys.float.Title_S'))
-          .minFontSize($r('sys.float.Body_L'))
-          .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-      }
-      .width('100%')
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+                constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let maxWidth: number = Number(constraint.maxWidth);
+    let maxHeight: number = Number(constraint.maxHeight);
+    this.windowSize = { width: maxWidth, height: maxHeight };
+    this.updateFontScale();
+    this.updateNeedResponseScale();
+    this.updateCustomStyle(Number(constraint.maxWidth), Number(constraint.maxHeight));
 
-      if (this.primaryTitle && this.secondaryTitle) {
-        Row() {
-          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
-        }
-      }
-
-      Row() {
-        Text(this.secondaryTitle)
-          .fontWeight(FontWeight.Regular)
-          .fontColor(this.secondaryTitleFontColorWithTheme)
-          .textAlign(this.getTitleTextAlign())
-          .maxFontSize($r('sys.float.Subtitle_S'))
-          .minFontSize($r('sys.float.Body_S'))
-          .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-      }
-      .width('100%')
-    }
-    .constraintSize({
-      minHeight: this.getTitleAreaMinHeight(),
-    })
-    .justifyContent(FlexAlign.Center)
-    .width('100%')
-    .padding(this.getTitleAreaPadding())
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.titleHeight = Number(newValue.height);
-      if (this.updateTitleHeight) {
-        this.updateTitleHeight(this.titleHeight);
-      }
-      this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    });
-  }
-
-  @Builder
-  buildButtons(): void {
-    Column() {
-      this.buildHorizontalAlignButtons();
-      this.buildVerticalAlignButtons();
-    }
-    .width('100%')
-    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-      this.buttonHeight = Number(newValue.height);
+    children.forEach((child) => {
+      let measureResult: MeasureResult = child.measure(constraint);
       if (this.updateButtonHeight) {
         this.updateButtonHeight(this.buttonHeight);
       }
-    })
-    .padding(this.getOperationAreaPadding());
+      if (this.updateTitleHeight) {
+        this.updateTitleHeight(this.titleHeight);
+      }
+      if (maxHeight - this.buttonHeight - this.titleHeight < MIN_CONTENT_HEIGHT) {
+        this.contentMaxHeight = `${MAX_CONTENT_HEIGHT}vp`;
+      } else {
+        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+      }
+      measureResult = child.measure(constraint);
+      sizeResult.height = measureResult.height;
+    });
+    sizeResult.width = Number(constraint.maxWidth);
+    return sizeResult;
   }
 
-  @Builder
-  buildSingleButton(buttonOptions: ButtonOptions): void {
-    if (this.isNewPropertiesHighPriority(buttonOptions)) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .role(buttonOptions.role ?? ButtonRole.NORMAL)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .backgroundColor(buttonOptions.background)
-        .fontColor(buttonOptions.fontColor)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .backgroundColor(buttonOptions.background)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .backgroundColor(buttonOptions.background)
-        .fontColor(buttonOptions.role === ButtonRole.ERROR ?
-        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
+  updateCustomStyle(dialogWidth: number, dialogHeight: number) {
+    if (this.initCustomStyle) {
+      return;
+    }
+    if (this.targetSdk >= VERSION_TWELVE) {
+      return;
+    }
+    let marginStart: number = getNumberByResource('ohos_id_dialog_margin_start');
+    let marginEnd: number = getNumberByResource('ohos_id_dialog_margin_end');
+    if (Math.abs(dialogWidth - this.screenSize.width) < marginStart + marginEnd ||
+      Math.abs(dialogHeight - this.screenSize.height) < 1) {
+      this.customStyle = true;
+    }
+    this.initCustomStyle = true;
+  }
+
+  updateNeedResponseScale() {
+    if (this.buttons && this.buttons.length >= MAX_BIG_BUTTON_SIZE &&
+      this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      this.needResponseScale = false;
     } else {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .fontColor(buttonOptions.fontColor)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
-    }
-  }
-
-  @Builder
-  buildHorizontalAlignButtons(): void {
-    if (this.buttons && this.buttons.length > 0 && this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      Row() {
-        this.buildSingleButton(this.buttons[0]);
-        if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
-          Divider()
-            .width($r('sys.float.alert_divider_width'))
-            .height($r('sys.float.alert_divider_height'))
-            .color(this.getDividerColor())
-            .vertical(true)
-            .margin({
-              left: $r('sys.float.alert_button_horizontal_space'),
-              right: $r('sys.float.alert_button_horizontal_space'),
-            });
-          this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
-        }
-      }
-    }
-  }
-
-  @Builder
-  buildVerticalAlignButtons(): void {
-    if (this.buttons && this.isVerticalAlignButton()) {
-      Column() {
-        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
-          this.buildButtonWithDivider(index);
-        }, (item: ButtonOptions) => item.value.toString());
-      }
-    }
-  }
-
-  @Builder
-  buildButtonWithDivider(index: number): void {
-    if (this.buttons && this.buttons[index]) {
-      Row() {
-        this.buildSingleButton(this.buttons[index]);
-      }
-
-      if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
-        Row() {
-        }
-        .height($r('sys.float.alert_button_vertical_space'))
-      }
+      this.needResponseScale = true;
     }
   }
 
   aboutToAppear(): void {
-    if (this.primaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_primary_height');
-    }
-    if (this.secondaryTitle) {
-      this.titleHeight = getNumberByResource('alert_title_secondary_height');
-    }
-    this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
-    if (this.updateButtonHeight) {
-      this.updateButtonHeight(this.buttonHeight);
-    }
-    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
-    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
-    this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-    this.theme.colors.fontEmphasize : '';
-    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
-    this.theme.colors.warning : '';
+    this.initEnvInfo();
   }
 
-  /**
-   * get divider color
-   *
-   * @returns divider color
-   */
-  private getDividerColor(): ResourceColor {
-    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
-      return Color.Transparent;
+  private initEnvInfo(): void {
+    try {
+      let screenSize: display.Display = display.getDefaultDisplaySync();
+      this.windowSize = { width: px2vp(screenSize.width), height: px2vp(screenSize.height) };
+      this.screenSize = { width: this.windowSize.width, height: this.windowSize.height };
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init windowsize,cause, code: ${code}, message: ${message}`);
     }
-
-    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
-      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
-        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
-        return $r('sys.color.alert_divider_color');
-      }
+    this.updateFontScale();
+    try {
+      let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+      bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+      this.targetSdk = bundleManager.getBundleInfoForSelfSync(bundleFlags).targetVersion;
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init bundle info,cause, code: ${code}, message: ${message}`);
     }
-    return Color.Transparent;
   }
 
-  /**
-   * get dialog buttons total height
-   *
-   * @returns buttons total height
-   */
-  private getButtonsHeight(): number {
-    if (!this.buttons || this.buttons.length === 0) {
-      return 0;
+  updateFontScale(): void {
+    try {
+      let context: common.ExtensionContext = this.getUIContext().getHostContext() as common.ExtensionContext;
+      this.fontSizeScale = context.config?.fontSizeScale ?? this.fontSizeScale;
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
     }
-    let buttonsHeight: number = getNumberByResource('alert_button_top_padding');
-    if (this.buttons.length <= HORIZON_BUTTON_MAX_COUNT) {
-      buttonsHeight += BUTTON_DEFAULT_HEIGHT +
-      getNumberByResource('alert_button_bottom_padding_horizontal');
-    } else {
-      buttonsHeight += BUTTON_DEFAULT_HEIGHT * this.buttons.length +
-        (this.buttons.length - 1) * getNumberByResource('alert_button_vertical_space') +
-      getNumberByResource('alert_button_bottom_padding_vertical');
-    }
-    this.buttonHeight = buttonsHeight;
-    return buttonsHeight;
   }
 
   /**
@@ -1004,19 +1028,109 @@ struct CustomDialogContentComponent {
       };
     }
   }
+}
 
-  /**
-   * get title area min height
-   *
-   * @returns min height
-   */
-  private getTitleAreaMinHeight(): ResourceStr | number {
-    if (this.secondaryTitle) {
-      return $r('sys.float.alert_title_secondary_height');
-    } else if (this.primaryTitle) {
-      return $r('sys.float.alert_title_primary_height');
+@Component
+struct TitleComponent {
+  primaryTitle?: ResourceStr;
+  secondaryTitle?: ResourceStr;
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
+  @State titleTextAlign: TextAlign = TextAlign.Center;
+  @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
+  @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
+  @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
+  @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
+  @Link needResponseScale: boolean;
+  @Link fontSizeScale: number;
+  @Link windowSize: Size;
+  @Link titleHeight: Length;
+
+  build() {
+    Column() {
+      Row() {
+        Text(this.primaryTitle)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(this.primaryTitleFontColorWithTheme)
+          .textAlign(this.titleTextAlign)
+          .maxFontSize(this.primaryTitleMaxFontSize)
+          .minFontSize(this.primaryTitleMinFontSize)
+          .maxLines(TITLE_MAX_LINES)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
+      }
+      .width('100%')
+
+      if (this.primaryTitle && this.secondaryTitle) {
+        Row() {
+          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
+        }
+      }
+
+      Row() {
+        Text(this.secondaryTitle)
+          .fontWeight(FontWeight.Regular)
+          .fontColor(this.secondaryTitleFontColorWithTheme)
+          .textAlign(this.titleTextAlign)
+          .maxFontSize(this.secondaryTitleMaxFontSize)
+          .minFontSize(this.secondaryTitleMinFontSize)
+          .maxLines(TITLE_MAX_LINES)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .width('100%')
+      }
+      .width('100%')
+    }
+    .constraintSize({
+      minHeight: this.getTitleAreaMinHeight(),
+    })
+    .justifyContent(FlexAlign.Center)
+    .width('100%')
+    .padding(this.getTitleAreaPadding())
+  }
+
+  aboutToAppear(): void {
+    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+    this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
+    this.initTitleTextAlign();
+    this.updateFontSize();
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+                constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    this.updateFontSize();
+    children.forEach((child) => {
+      let measureResult: MeasureResult = child.measure(constraint);
+      sizeResult.height = measureResult.height;
+    });
+    sizeResult.width = Number(constraint.maxWidth);
+    this.titleHeight = sizeResult.height;
+    return sizeResult;
+  }
+
+  updateFontSize(): void {
+    if (this.needResponseScale) {
+      if (this.fontSizeScale > MAX_FONT_SCALE) {
+        this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
+        this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+        this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
+        this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
+      } else {
+        this.primaryTitleMaxFontSize = TITLE_S + 'fp';
+        this.primaryTitleMinFontSize = BODY_L + 'fp';
+        this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
+        this.secondaryTitleMinFontSize = BODY_S + 'fp';
+      }
     } else {
-      return 0;
+      this.primaryTitleMaxFontSize = TITLE_S + 'vp';
+      this.primaryTitleMinFontSize = BODY_L + 'vp';
+      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'vp';
+      this.secondaryTitleMinFontSize = BODY_S + 'vp';
     }
   }
 
@@ -1044,15 +1158,94 @@ struct CustomDialogContentComponent {
   }
 
   /**
-   * check button vertical align or not
-   *
-   * @returns check result
+   * get tile TextAlign
+   * @returns TextAlign
    */
-  private isVerticalAlignButton(): boolean {
-    if (this.buttons) {
-      return this.buttons.length > HORIZON_BUTTON_MAX_COUNT;
+  private initTitleTextAlign(): void {
+    let textAlign: number = getEnumNumberByResource('alert_title_alignment');
+    if (textAlign === TextAlign.Start) {
+      this.titleTextAlign = TextAlign.Start;
+    } else if (textAlign === TextAlign.Center) {
+      this.titleTextAlign = TextAlign.Center;
+    } else if (textAlign === TextAlign.End) {
+      this.titleTextAlign = TextAlign.End;
+    } else if (textAlign === TextAlign.JUSTIFY) {
+      this.titleTextAlign = TextAlign.JUSTIFY;
+    } else {
+      this.titleTextAlign = TextAlign.Center;
     }
-    return false;
+  }
+
+  /**
+   * get title area min height
+   *
+   * @returns min height
+   */
+  private getTitleAreaMinHeight(): ResourceStr | number {
+    if (this.secondaryTitle) {
+      return $r('sys.float.alert_title_secondary_height');
+    } else if (this.primaryTitle) {
+      return $r('sys.float.alert_title_primary_height');
+    } else {
+      return 0;
+    }
+  }
+}
+
+@Component
+struct ButtonComponent {
+  controller?: CustomDialogController;
+  buttons?: ButtonOptions[];
+  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
+  @State buttonMinFontSize: Length = 9;
+  keyIndex: number = 0;
+  @State buttonFontColorWithTheme: ResourceColor = '';
+  @State errorButtonFontColorWithTheme: ResourceColor = '';
+  theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
+  @State isButtonVertical: boolean = false;
+  @Link fontSizeScale: number;
+  @Link windowSize: Size;
+  @Link buttonHeight: Length;
+  @Link needResponseScale: boolean;
+
+  build() {
+    Column() {
+      if (this.buttons && this.buttons.length > 0) {
+        if (this.isButtonVertical) {
+          this.buildVerticalAlignButtons();
+        } else {
+          this.buildHorizontalAlignButtons();
+        }
+      }
+    }
+    .width('100%')
+    .padding(this.getOperationAreaPadding());
+  }
+
+  aboutToAppear(): void {
+    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
+    this.theme.colors.fontEmphasize : '';
+    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
+    this.theme.colors.warning : '';
+    this.updateFontSize();
+    this.isButtonVertical = this.isVerticalAlignButton(Math.min(this.windowSize.width - BUTTON_HORIZONTAL_MARGIN * 2,
+      MAX_DIALOG_WIDTH));
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+                constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    this.updateFontSize();
+    this.isButtonVertical = this.isVerticalAlignButton(Number(constraint.maxWidth));
+
+    children.forEach((child) => {
+      let measureResult: MeasureResult = child.measure(constraint);
+      sizeResult.height = measureResult.height;
+    });
+    sizeResult.width = Number(constraint.maxWidth);
+    this.buttonHeight = Number(sizeResult.height);
+    return sizeResult;
   }
 
   /**
@@ -1061,7 +1254,7 @@ struct CustomDialogContentComponent {
    * @returns padding
    */
   private getOperationAreaPadding(): Padding {
-    if (this.isVerticalAlignButton()) {
+    if (this.isButtonVertical) {
       return {
         top: $r('sys.float.alert_button_top_padding'),
         right: $r('sys.float.alert_right_padding_vertical'),
@@ -1076,6 +1269,110 @@ struct CustomDialogContentComponent {
       left: $r('sys.float.alert_left_padding_horizontal'),
       bottom: $r('sys.float.alert_button_bottom_padding_horizontal'),
     };
+  }
+
+  @Builder
+  buildSingleButton(buttonOptions: ButtonOptions): void {
+    if (this.isNewPropertiesHighPriority(buttonOptions)) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .role(buttonOptions.role ?? ButtonRole.NORMAL)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
+        .fontColor(buttonOptions.fontColor)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+    } else if (buttonOptions.background !== undefined) {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .backgroundColor(buttonOptions.background)
+        .fontColor(buttonOptions.role === ButtonRole.ERROR ?
+        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+    } else {
+      Button(buttonOptions.value)
+        .setButtonProperties(buttonOptions, this.controller)
+        .fontColor(buttonOptions.fontColor)
+        .key(`advanced_dialog_button_${this.keyIndex++}`)
+        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+    }
+  }
+
+  @Builder
+  buildHorizontalAlignButtons(): void {
+    if (this.buttons && this.buttons.length > 0) {
+      Row() {
+        this.buildSingleButton(this.buttons[0]);
+        if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
+          Divider()
+            .width($r('sys.float.alert_divider_width'))
+            .height($r('sys.float.alert_divider_height'))
+            .color(this.getDividerColor())
+            .vertical(true)
+            .margin({
+              left: $r('sys.float.alert_button_horizontal_space'),
+              right: $r('sys.float.alert_button_horizontal_space'),
+            });
+          this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
+        }
+      }
+    }
+  }
+
+  @Builder
+  buildVerticalAlignButtons(): void {
+    if (this.buttons) {
+      Column() {
+        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
+          this.buildButtonWithDivider(index);
+        }, (item: ButtonOptions) => item.value.toString());
+      }
+    }
+  }
+
+  /**
+   * get divider color
+   *
+   * @returns divider color
+   */
+  private getDividerColor(): ResourceColor {
+    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
+      return Color.Transparent;
+    }
+
+    if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
+      if (this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === ButtonStyleMode.TEXTUAL ||
+        this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle === undefined) {
+        return $r('sys.color.alert_divider_color');
+      }
+    }
+    return Color.Transparent;
+  }
+
+  private updateFontSize(): void {
+    if (this.needResponseScale) {
+      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+      } else {
+        this.buttonMaxFontSize = BODY_L + 'fp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
+      }
+    } else {
+      this.buttonMaxFontSize = BODY_L + 'vp';
+      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
+    }
   }
 
   /**
@@ -1098,121 +1395,44 @@ struct CustomDialogContentComponent {
     return false;
   }
 
-  /**
-   * get tile TextAlign
-   * @returns TextAlign
-   */
-  private getTitleTextAlign(): TextAlign {
-    let textAlign: number = getEnumNumberByResource('alert_title_alignment');
-    if (textAlign === TextAlign.Start) {
-      return TextAlign.Start;
-    } else if (textAlign === TextAlign.Center) {
-      return TextAlign.Center;
-    } else if (textAlign === TextAlign.End) {
-      return TextAlign.End;
-    } else if (textAlign === TextAlign.JUSTIFY) {
-      return TextAlign.JUSTIFY;
-    } else {
-      return TextAlign.Center;
-    }
-  }
-}
-
-@Component
-export struct CustomDialogComponent {
-  controller?: CustomDialogController;
-  primaryTitle?: ResourceStr;
-  secondaryTitle?: ResourceStr;
-  @BuilderParam contentBuilder: () => void;
-  buttons?: ButtonOptions[];
-  contentAreaPadding?: Padding;
-  screenWidth: number = 0;
-  @State columnModifier: ColumnModifier = new ColumnModifier();
-  isFirstInit: boolean = true;
-  theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  targetSdk: number = VERSION_TWELVE;
-  dialogWidth: Length = 0;
-  updateTitleHeight?: (height: number) => void;
-  updateButtonHeight?: (height: number) => void;
-
-  build() {
-    Column() {
-      Column() {
-        CustomDialogContentComponent({
-          controller: this.controller,
-          primaryTitle: this.primaryTitle,
-          secondaryTitle: this.secondaryTitle,
-          contentBuilder: () => {
-            this.contentBuilder();
-          },
-          updateTitleHeight: this.updateTitleHeight,
-          updateButtonHeight: this.updateButtonHeight,
-          buttons: this.buttons,
-          contentAreaPadding: this.contentAreaPadding,
-          theme: this.theme,
-        })
+  @Builder
+  buildButtonWithDivider(index: number): void {
+    if (this.buttons && this.buttons[index]) {
+      Row() {
+        this.buildSingleButton(this.buttons[index]);
       }
-      .attributeModifier(this.columnModifier)
-    }
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      if (!this.isFirstInit) {
-        return;
-      }
-      this.dialogWidth = newValue.width;
-      this.updateCustomStyle();
-      if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-        this.columnModifier.customStyle = newValue.width > getNumberByResource('alert_container_max_width');
-      } else {
-        this.columnModifier.customStyle = newValue.width >= this.screenWidth;
-      }
-      this.isFirstInit = false;
-    })
-  }
 
-  updateCustomStyle() {
-    if (this.targetSdk >= VERSION_TWELVE) {
-      return;
-    }
-    if (this.screenWidth > getNumberByResource('alert_container_max_width')) {
-      this.columnModifier.customStyle = this.dialogWidth > getNumberByResource('alert_container_max_width');
-    } else {
-      this.columnModifier.customStyle = this.dialogWidth >= this.screenWidth;
+      if (index < Math.min(this.buttons.length, VERTICAL_BUTTON_MAX_COUNT) - 1) {
+        Row() {
+        }
+        .height($r('sys.float.alert_button_vertical_space'))
+      }
     }
   }
 
-  aboutToAppear(): void {
-    try {
-      this.screenWidth = px2vp(display.getDefaultDisplaySync().width);
-      let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
-      bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
-      bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
-        this.targetSdk = data.targetVersion;
-        this.updateCustomStyle();
-      }).catch((err: BusinessError) => {
-        hilog.error(0x3900, 'Ace', 'getBundleInfoForSelf failed Cause: %{public}s', err.message);
+  private isVerticalAlignButton(width: number): boolean {
+    if (this.buttons) {
+      if (this.buttons.length === 1) {
+        return false;
+      }
+      if (this.buttons.length !== HORIZON_BUTTON_MAX_COUNT) {
+        return true;
+      }
+      let isVertical: boolean = false;
+      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
+        BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
+      this.buttons.forEach((button) => {
+        let contentSize: SizeOptions = measure.measureTextSize({
+          textContent: button.value,
+          fontSize: this.buttonMaxFontSize
+        });
+        if (Number(contentSize.width) > maxButtonTextSize) {
+          isVertical = true;
+        }
       });
-    } catch (error) {
-      hilog.error(0x3900, 'Ace', `CustomDialogComponent getDefaultDisplaySync error: ${JSON.stringify(error)}`);
+      return isVertical;
     }
-    ;
-  }
-}
-
-class ColumnModifier implements AttributeModifier<ColumnAttribute> {
-  public customStyle: boolean = false;
-
-  applyNormalAttribute(instance: ColumnAttribute): void {
-    if (!this.customStyle) {
-      return;
-    }
-    instance.backgroundBlurStyle(BlurStyle.Thick);
-    instance.borderRadius($r('sys.float.ohos_id_corner_radius_dialog'));
-    instance.margin({
-      left: $r('sys.float.ohos_id_dialog_margin_start'),
-      right: $r('sys.float.ohos_id_dialog_margin_end'),
-      bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
-    });
-    instance.backgroundColor($r('sys.color.ohos_id_color_dialog_bg'));
+    return false;
   }
 }
 
@@ -1295,16 +1515,20 @@ export struct LoadingDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  @State fontSizeScale: number = 1;
+  @State windowSize: Size = { width: 0, height: 0 };
 
   build() {
     Column() {
-      CustomDialogComponent({
+      CustomDialogContentComponent({
         controller: this.controller,
         contentBuilder: () => {
           this.contentBuilder();
         },
         theme: this.theme,
-      })
+        fontSizeScale: this.fontSizeScale,
+        windowSize: this.windowSize
+      }).constraintSize({ maxHeight: '100%' });
     }
   }
 
@@ -1313,11 +1537,11 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(this.getFontSize())
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
-          .maxLines(LOADING_MAX_LINES)
+          .maxLines(this.fontSizeScale > MAX_FONT_SCALE ? LOADING_MAX_LINES_BIG_FONT : LOADING_MAX_LINES)
           .focusable(true)
           .defaultFocus(true)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1328,6 +1552,14 @@ export struct LoadingDialog {
           .margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) })
       }
       .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
+    }
+  }
+
+  getFontSize(): Length {
+    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+      return BODY_L * MAX_FONT_SCALE + 'vp';
+    } else {
+      return BODY_L;
     }
   }
 
@@ -1382,6 +1614,4 @@ export struct PopupDialog {
   }
 }
 
-export declare interface PopupDialogOptions extends CustomPopupOptions {
-}
-
+export declare interface PopupDialogOptions extends CustomPopupOptions {}

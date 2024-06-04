@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/badge/badge_data.h"
 
 namespace OHOS::Ace {
-class BadgeModel {
+class ACE_FORCE_EXPORT BadgeModel {
 public:
     static BadgeModel* GetInstance();
     virtual ~BadgeModel() = default;

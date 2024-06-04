@@ -254,6 +254,14 @@ int32_t ImageAnimatorModelNG::GetIteration(FrameNode* frameNode)
     return pattern->GetIteration();
 }
 
+int32_t ImageAnimatorModelNG::GetImagesSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetImagesSize();
+}
+
 void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart)
 {
     CHECK_NULL_VOID(frameNode);

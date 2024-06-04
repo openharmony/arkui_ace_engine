@@ -674,6 +674,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->SetTextFadeoutCapacity(true);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
@@ -692,7 +693,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         CHECK_NULL_VOID(pattern);
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
-        frameNode->MarkModifyDone();
     }
 }
 

@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Ace {
-constexpr int32_t PROCESS_WAIT_TIME = 10;
+constexpr int32_t PROCESS_WAIT_TIME = 20;
 constexpr float DOUBLE = 2.0;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
@@ -203,6 +203,25 @@ void FormRendererDispatcherImpl::OnAccessibilityDumpChildInfo(
         }
         HILOG_INFO("OnAccessibilityDumpChildInfo");
         uiContent->AccessibilityDumpChildInfo(params, info);
+    });
+}
+
+void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, pointX, pointY, sourceType, eventType, timeMs]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityTransferHoverEvent");
+        uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     });
 }
 } // namespace Ace

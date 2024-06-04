@@ -102,10 +102,9 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "$cjson_root:cjson",
     "//base/startup/init/interfaces/innerkits:libbegetutil",
     "//third_party/googletest:gmock_main",
   ]
-
+  external_deps = [ "cJSON:cjson" ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

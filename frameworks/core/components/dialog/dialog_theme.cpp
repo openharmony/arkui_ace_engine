@@ -44,6 +44,7 @@ void DialogTheme::Builder::ParsePattern(
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
     }
     theme->text_align_content_ = dialogPattern->GetAttr<int>("text_align_content", 0);
+    theme->button_type_ = dialogPattern->GetAttr<int>("button_type", 0);
     theme->text_align_title_ = dialogPattern->GetAttr<int>("text_align_title", 0);
     theme->device_columns_dialog_ = dialogPattern->GetAttr<int>("device_columns_dialog", 0);
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
@@ -181,9 +182,9 @@ void DialogTheme::Builder::ParseNewPattern(
     }
     theme->containerMaxWidth_ = dialogPattern->GetAttr<Dimension>("dialog_container_max_width", 400.0_vp);
     theme->defaultShadowOn_ = static_cast<uint32_t>(
-        dialogPattern->GetAttr<double>("dialog_background_shadow_on", static_cast<double>(ShadowStyle::None)));
+        dialogPattern->GetAttr<int>("dialog_background_shadow_on", static_cast<int>(ShadowStyle::None)));
     theme->defaultShadowOff_ = static_cast<uint32_t>(
-        dialogPattern->GetAttr<double>("dialog_background_shadow_off", static_cast<double>(ShadowStyle::None)));
+        dialogPattern->GetAttr<int>("dialog_background_shadow_off", static_cast<int>(ShadowStyle::None)));
     theme->shadowDialog_ = static_cast<uint32_t>(dialogPattern->GetAttr<double>("shadow_dialog", SHADOW_NONE));
     theme->alignDialog_ = static_cast<int32_t>(dialogPattern->GetAttr<double>("align_dialog", DEFAULT_ALIGN_DIALOG));
     theme->colorBgWithBlur_ = dialogPattern->GetAttr<Color>("color_bg_with_blur", Color::TRANSPARENT);

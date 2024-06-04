@@ -51,6 +51,7 @@ constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
 constexpr char ETS_PATH[] = "/src/main/ets/";
 constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/";
+constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
 constexpr char ETS_SUFFIX[] = ".ets";
 
@@ -85,7 +86,11 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    if (pagePath.empty()) {
+        pagePath = url;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -135,7 +140,6 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
 
 void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
@@ -151,12 +155,17 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
         [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
-        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrl");
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent");
 #endif
 }
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(name);
+    if (pagePath.empty()) {
+        pagePath = name;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -760,6 +769,10 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
         }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
+            auto child = jsonPages->GetChild();
+            if (!child->GetValue("entry-package-info")->IsNull()) {
+                judgePath = NEW_PATH + pagePath.substr(0, pagePath.size() - JS_FILE_EXTENSION_LENGTH) + TS_SUFFIX;
+            }
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();
             auto stagePageMap = MakeRefPtr<Framework::RevSourceMap>();
             stagePageMap->Init(jsonPage);
@@ -919,7 +932,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterPushErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
@@ -1017,7 +1030,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
                                               int32_t errorCode, const std::string& errorMsg) {
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
-                TaskExecutor::TaskType::JS, "ArkUIPageRouterErrorCallback");
+                TaskExecutor::TaskType::JS, "ArkUIPageRouterReplaceErrorCallback");
         };
 
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
@@ -1149,7 +1162,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
 {
-    ACE_SCOPED_TRACE("PageRouterManager::LoadPage");
+    ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     LOGI("Page router manager is loading page[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, target.params);

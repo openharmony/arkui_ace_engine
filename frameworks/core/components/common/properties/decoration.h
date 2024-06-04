@@ -137,6 +137,10 @@ struct BlurStyleOption {
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
             "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
             "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
@@ -178,8 +182,12 @@ struct BrightnessOption {
                NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
                NearEqual(fraction, other.fraction);
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonBrightnessOption = JsonUtil::Create(true);
         jsonBrightnessOption->Put("rate", rate);
         jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
@@ -200,7 +208,7 @@ struct BrightnessOption {
         }
         jsonBrightnessOption->Put("negRGB", negRGBstr);
         jsonBrightnessOption->Put("fraction", fraction);
-        json->Put("brightnessEffect", jsonBrightnessOption);
+        json->PutExtAttr("brightnessEffect", jsonBrightnessOption, filter);
     }
 };
 
@@ -391,7 +399,7 @@ struct ACE_EXPORT ConicGradient {
     std::optional<AnimatableDimension> startAngle;
 };
 
-class ACE_EXPORT Gradient final {
+class ACE_FORCE_EXPORT Gradient final {
 public:
     void AddColor(const GradientColor& color);
 
@@ -655,7 +663,7 @@ struct ClickEffectInfo {
     }
 };
 
-class ACE_EXPORT BackgroundImageSize final {
+class ACE_FORCE_EXPORT BackgroundImageSize final {
 public:
     BackgroundImageSize() = default;
     BackgroundImageSize(BackgroundImageSizeType type, double value) : typeX_(type), valueX_(value) {}
@@ -1566,7 +1574,7 @@ struct PathArgs {
     double para8 = 0.0;
 };
 
-class ACE_EXPORT CanvasPath2D : virtual public AceType {
+class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
     DECLARE_ACE_TYPE(CanvasPath2D, AceType)
 public:
     CanvasPath2D() = default;

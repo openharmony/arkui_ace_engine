@@ -30,6 +30,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,6 +72,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
@@ -144,7 +150,7 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex)
 {
-    for (auto && group : spans_) {
+    for (auto&& group : spans_) {
         for (const auto& child : group) {
             if (!child) {
                 continue;
@@ -432,7 +438,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             }
             spanParagraphStyle.maxLines = std::max(maxLines, 0);
         }
-        auto && paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;

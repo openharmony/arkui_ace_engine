@@ -430,7 +430,7 @@ struct TouchEvent final : public UIInputEvent {
 };
 
 namespace Platform {
-Offset GetTouchEventOriginOffset(const TouchEvent& event);
+ACE_FORCE_EXPORT Offset GetTouchEventOriginOffset(const TouchEvent& event);
 } // namespace Platform
 
 struct TouchRestrict final {

@@ -174,7 +174,9 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
 
     /**
@@ -184,7 +186,8 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
      */
 
     clickEventActuator.jsFrameNodeCallback_ = nullptr;
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_TRUE(finalResult.empty());
 
     /**
@@ -196,7 +199,8 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
     GestureEventFunc callback = [](GestureEvent& info) {};
     clickEventActuator.jsFrameNodeCallback_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_FALSE(finalResult.empty());
 
     /**
@@ -206,7 +210,8 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
     clickEventActuator.AddClickEvent(clickEvent);
     clickEventActuator.AddClickEvent(nullptr);
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_2);
 
     /**
@@ -226,7 +231,8 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     clickEventActuator.userCallback_ = clickEvent;
     const OnAccessibilityEventFunc onAccessibility = [](AccessibilityEventType type) {};
     clickEventActuator.SetOnAccessibility(onAccessibility);
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_3);
 
     /**
@@ -260,11 +266,13 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest004, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
 
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
     std::string result;
     GestureEventFunc callback = [&result](GestureEvent& info) { result = RESULT_SUCCESS; };
 
     clickEventActuator.SetUserCallback(std::move(callback));
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(clickEventActuator.userCallback_->callback_, nullptr);
 
     GestureEvent info = GestureEvent();
@@ -273,7 +281,8 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest004, TestSize.Level1)
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_1);
 
     clickEventActuator.ClearUserCallback();
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(clickEventActuator.userCallback_, nullptr);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_1);
 }
@@ -307,7 +316,9 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     clickEventActuator.AddClickEvent(clickEvent);
 
     TouchTestResult finalResult;
-    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE_1);
 
     /**
@@ -317,7 +328,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     TouchTestResult finalResultAfterClear;
     clickEventActuator.ClearUserCallback();
     clickEventActuator.OnCollectTouchTarget(
-        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClear);
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClear, responseLinkResult);
     EXPECT_EQ(finalResultAfterClear.size(), CLICK_TEST_RESULT_SIZE_1);
 
     /**
@@ -327,7 +338,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
     clickEventActuator.RemoveClickEvent(clickEvent);
     TouchTestResult finalResultAfterClearEvent;
     clickEventActuator.OnCollectTouchTarget(
-        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClearEvent);
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClearEvent, responseLinkResult);
     EXPECT_EQ(finalResultAfterClearEvent.size(), CLICK_TEST_RESULT_SIZE_0);
 }
 /**

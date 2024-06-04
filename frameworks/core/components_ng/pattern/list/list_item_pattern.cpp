@@ -404,7 +404,7 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ratio = NEW_SWIPE_RATIO;
         return exp(-ratio * gamma);
     }
@@ -1096,6 +1096,27 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
     return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
 }
 
+bool ListItemPattern::ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset)
+{
+    if (yOffset < 0 || yOffset > size.Height()) {
+        return true;
+    }
+    if (!IsRTLAndVertical()) {
+        if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
+            return false;
+        } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
+            return false;
+        }
+    } else {
+        if (endNodeSize_ && xOffset > 0 && xOffset < endNodeSize_) {
+            return false;
+        } else if (startNodeSize_ && xOffset > size.Width() - startNodeSize_ && xOffset < size.Width()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool ListItemPattern::ClickJudge(const PointF& localPoint)
 {
     auto host = GetHost();
@@ -1115,13 +1136,7 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {
-        if (yOffset > 0 && yOffset < size.Height()) {
-            if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
-                return false;
-            } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
-                return false;
-            }
-        }
+        return ClickJudgeVertical(size, xOffset, yOffset);
     } else {
         if (xOffset > 0 && xOffset < size.Width()) {
             if (startNodeSize_ && yOffset > 0 && yOffset < startNodeSize_) {

@@ -224,7 +224,6 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     if (!videoComponent->GetPlayer().Invalid() && !videoComponent->GetTexture().Invalid()) {
         player_ = videoComponent->GetPlayer().Upgrade();
         texture_ = videoComponent->GetTexture().Upgrade();
-
         if (player_ && texture_) {
             isExternalResource_ = true;
             videoComponent->SetPlayer(nullptr);
@@ -1336,7 +1335,7 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
                 LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
                 video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, startTime, true);
             }
-        }, "ArkUIVideoPrepared");
+        }, "ArkUIVideoPlaybackPrepared");
     } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }

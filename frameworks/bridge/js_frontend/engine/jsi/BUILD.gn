@@ -73,10 +73,7 @@ template("js_engine_ark") {
       "jsi_stepper_bridge.cpp",
     ]
 
-    include_dirs = [
-      "$flutter_root/engine",
-      "$c_utils_root/base/include",
-    ]
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     cflags_cc = [ "-Wno-thread-safety-attributes" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
@@ -107,23 +104,18 @@ template("js_engine_ark") {
         "//third_party/jsframework:ark_build",
       ]
     } else if (defined(config.build_for_ios) && config.build_for_ios) {
-      deps += [
-        ":gen_obj_src_abc_strip_native_min",
-        "//foundation/arkui/napi:ace_napi_static",
-      ]
-      deps += [
-        "//third_party/css-what:css_what_sources",
-        "//third_party/jsframework:ark_build",
-      ]
-      external_deps += [ "napi:ace_napi" ]
-    } else {
-      deps += [
-        "//third_party/css-what:css_what_sources",
-        "//third_party/jsframework:ark_build",
-      ]
+      deps += [ ":gen_obj_src_abc_strip_native_min" ]
       external_deps += [
+        "css-what:css_what_sources",
+        "jsframework:ark_build",
+        "napi:ace_napi",
+      ]
+    } else {
+      external_deps += [
+        "css-what:css_what_sources",
         "image_framework:image",
         "image_framework:image_native",
+        "jsframework:ark_build",
         "napi:ace_napi",
       ]
     }

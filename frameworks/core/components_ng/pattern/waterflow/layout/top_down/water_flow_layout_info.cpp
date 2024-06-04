@@ -175,6 +175,9 @@ OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
     }
     if (itemEnd_) {
         auto endPos = currentOffset_ + maxHeight_;
+        if (GreatNotEqual(lastMainSize_, currentOffset_ + maxHeight_)) {
+            endPos = currentOffset_ + lastMainSize_;
+        }
         auto newEndPos = endPos + delta;
         if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
             offset.end = delta;
@@ -338,6 +341,9 @@ bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
 
 bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 {
+    if (!offsetEnd_) {
+        return false;
+    }
     float minOffset = lastMainSize_ - maxHeight_;
     auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
     auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
@@ -547,6 +553,10 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
 void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
 {
     currentOffset_ = JumpToTargetAlign(item);
+    if (extraOffset_.has_value()) {
+        currentOffset_ += extraOffset_.value();
+        extraOffset_.reset();
+    }
     align_ = ScrollAlign::START;
     jumpIndex_ = EMPTY_JUMP_INDEX;
 }

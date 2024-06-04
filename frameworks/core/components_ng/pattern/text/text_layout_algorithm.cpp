@@ -397,8 +397,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
 
 OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    SetContentOffset(layoutWrapper);
-    return OffsetF(0.0f, 0.0f);
+    return SetContentOffset(layoutWrapper);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
@@ -444,7 +443,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         if (!DidExceedMaxLines(maxSize)) {
             break;
         }
+        bool isEqual = maxFontSize == minFontSize;
         maxFontSize -= stepSize;
+        if (LessNotEqual(maxFontSize, minFontSize) && !isEqual) {
+            maxFontSize = minFontSize;
+        }
     }
     return true;
 }

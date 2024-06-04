@@ -641,7 +641,8 @@ void ScrollBar::ProcessFrictionMotionStop()
 }
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& responseLinkResult)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -650,7 +651,9 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->AttachFrameNode(frameNode);
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
+        panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_front(panRecognizer_);
+        responseLinkResult.emplace_back(panRecognizer_);
     }
 }
 
@@ -668,12 +671,13 @@ void ScrollBar::ScheduleDisappearDelayTask()
             scrollBar->PlayScrollBarDisappearAnimation();
         });
         taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
-            "ArkUIScrollBarDisappearAnimation");
+            "ArkUIScrollBarInnerDisappearAnimation");
     }
 }
 
 void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+    TouchTestResult& responseLinkResult)
 {
     if (longPressRecognizer_ && isScrollable_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -682,7 +686,9 @@ void ScrollBar::OnCollectLongPressTarget(const OffsetF& coordinateOffset, const 
         longPressRecognizer_->AttachFrameNode(frameNode);
         longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
+        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         result.emplace_front(longPressRecognizer_);
+        responseLinkResult.emplace_back(longPressRecognizer_);
     }
 }
 
@@ -736,7 +742,7 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarInnerHandleLongPress");
 }
 
 void ScrollBar::AddScrollBarLayoutInfo()

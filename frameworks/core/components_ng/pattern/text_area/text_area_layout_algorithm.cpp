@@ -54,7 +54,7 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         }
     }
 
-    direction_ = textFieldLayoutProperty->GetLayoutDirection();
+    direction_ = textFieldLayoutProperty->GetNonAutoLayoutDirection();
 
     // Create paragraph.
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);

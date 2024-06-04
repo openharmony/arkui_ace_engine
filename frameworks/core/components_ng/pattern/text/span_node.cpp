@@ -81,6 +81,11 @@ std::string SpanItem::GetFont() const
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", content.c_str(), filter, FIXED_ATTR_CONTENT);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
+        return;
+    }
     if (fontStyle) {
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
@@ -246,6 +251,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (frameNode) {
         FontRegisterCallback(frameNode, textStyle);
     }
@@ -956,6 +965,8 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
     sameSpan->SetImageSpanOptions(options);
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
 
@@ -1011,6 +1022,8 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
+    sameSpan->onClick = onClick;
+    sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
 

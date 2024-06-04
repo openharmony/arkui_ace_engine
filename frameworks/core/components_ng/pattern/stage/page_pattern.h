@@ -45,7 +45,7 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
+class ACE_FORCE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
     DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
@@ -153,7 +153,7 @@ public:
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
-    void ProcessAutoSave();
+    bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr);
 
     void StopPageTransition();
 
@@ -197,6 +197,16 @@ public:
         return isOnShow_;
     }
 
+    bool GetIsModalCovered() const
+    {
+        return isModalCovered_;
+    }
+
+    void SetIsModalCovered(bool isModalCovered)
+    {
+        isModalCovered_ = isModalCovered;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -217,6 +227,8 @@ private:
         return true;
     }
 
+    void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 
@@ -234,6 +246,7 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
+    bool isModalCovered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

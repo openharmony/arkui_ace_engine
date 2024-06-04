@@ -73,7 +73,7 @@ public:
         nativeEngine_ = nativeEngine;
     }
 
-    ArkNativeEngine const* GetArkNativeEngine() const
+    ArkNativeEngine const *GetArkNativeEngine() const
     {
         return static_cast<ArkNativeEngine*>(nativeEngine_);
     }

@@ -1210,6 +1210,10 @@ void GridPattern::ScrollBy(float offset)
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("multiSelectable", multiSelectable_ ? "true" : "false", filter);
     json->PutExtAttr("supportAnimation", supportAnimation_ ? "true" : "false", filter);
 }
@@ -1822,7 +1826,7 @@ Rect GridPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
@@ -1831,11 +1835,15 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     int32_t totalChildCount = host->TotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (smooth) {
+            SetExtraOffset(extraOffset);
             targetIndex_ = index;
             scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
+            if (extraOffset.has_value()) {
+                gridLayoutInfo_.extraOffset_ = -extraOffset.value();
+            }
         }
     }
     FireAndCleanScrollingListener();
@@ -1887,6 +1895,11 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     }
 
     isSmoothScrolling_ = true;
+    auto extraOffset = GetExtraOffset();
+    if (extraOffset.has_value()) {
+        targetPos += extraOffset.value();
+        ResetExtraOffset();
+    }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
 }

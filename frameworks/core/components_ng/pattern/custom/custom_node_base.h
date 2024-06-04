@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CustomNodeBase : public virtual AceType {
+class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
 public:

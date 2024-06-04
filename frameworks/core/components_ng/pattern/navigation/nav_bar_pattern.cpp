@@ -40,6 +40,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
+constexpr float DEFAULT_NAV_BAR_MASK_OPACITY = 0.6f;
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -579,6 +580,17 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void NavBarPattern::WindowFocus(bool isFocus)
 {
+    isWindowFocus_ = isFocus;
+    SetNavBarMask(isFocus);
+}
+
+void NavBarPattern::OnColorConfigurationUpdate()
+{
+    SetNavBarMask(isWindowFocus_);
+}
+
+void NavBarPattern::SetNavBarMask(bool isWindowFocus)
+{
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto navBarNode = GetHost();
@@ -593,9 +605,9 @@ void NavBarPattern::WindowFocus(bool isFocus)
     if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
         auto renderContext = navBarNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        Color maskColor = theme->GetNavBarUnfocusColor();
+        Color maskColor = theme->GetNavBarUnfocusColor().BlendOpacity(DEFAULT_NAV_BAR_MASK_OPACITY);
         auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-        maskProperty->SetColor(isFocus ? Color::TRANSPARENT : maskColor);
+        maskProperty->SetColor(isWindowFocus ? Color::TRANSPARENT : maskColor);
         renderContext->UpdateProgressMask(maskProperty);
     }
 }

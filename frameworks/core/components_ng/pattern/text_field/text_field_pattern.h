@@ -317,6 +317,7 @@ public:
     bool IsReachedBoundary(float offset);
 
     virtual TextInputAction GetDefaultTextInputAction() const;
+    bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
@@ -617,7 +618,7 @@ public:
     }
 
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
-    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
@@ -676,6 +677,10 @@ public:
         OnScrollCallback(offset, source);
         return true;
     }
+
+    void PlayScrollBarAppearAnimation();
+
+    void ScheduleDisappearDelayTask();
 
     bool IsAtTop() const override
     {
@@ -952,6 +957,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1050,7 +1056,8 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
@@ -1078,7 +1085,7 @@ public:
     }
 
     virtual RefPtr<FocusHub> GetFocusHub() const;
-    void UpdateCaretInfoToController() const;
+    void UpdateCaretInfoToController();
     void OnObscuredChanged(bool isObscured);
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
@@ -1222,7 +1229,7 @@ public:
 
     bool GetIsPreviewText() const
     {
-        return hasPreviewText;
+        return hasPreviewText_;
     }
 
     const Color& GetPreviewDecorationColor() const
@@ -1253,10 +1260,29 @@ public:
         return keyboardAvoidance_;
     }
 
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
+    }
+
     void SetShowKeyBoardOnFocus(bool value);
     bool GetShowKeyBoardOnFocus()
     {
         return showKeyBoardOnFocus_;
+    }
+
+    void SetSupportPreviewText(bool isSupported)
+    {
+        hasSupportedPreviewText_ = isSupported;
+    }
+
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
 protected:
@@ -1282,6 +1308,7 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
     void HandleTouchMove(const TouchEventInfo& info);
+    void HandleTouchMoveAfterLongPress(const TouchEventInfo& info);
     void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
@@ -1373,6 +1400,7 @@ private:
 
     void CalculateDefaultCursor();
     void RequestKeyboardOnFocus();
+    bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction();
     void SetAccessibilityActionGetAndSetCaretPosition();
@@ -1418,6 +1446,7 @@ private:
 
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
+    void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void SetIsSingleHandle(bool isSingleHandle)
     {
@@ -1465,17 +1494,21 @@ private:
 
     int32_t GetPreviewTextStart() const
     {
-        return hasPreviewText ? previewTextStart_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
     }
 
     int32_t GetPreviewTextEnd() const
     {
-        return hasPreviewText ? previewTextEnd_ : selectController_->GetCaretIndex();
+        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
     bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
+    void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
+    void ShowCaretAndStopTwinkling();
+    void OnCaretMoveDone(const TouchEventInfo& info);
+    void ChangeEditState();
 
     void TwinklingByFocus();
 
@@ -1650,14 +1683,18 @@ private:
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
 
+    bool haveTextFadeoutCapacity_ = false;
+
     bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText = true;
-    bool hasPreviewText = false;
-    std::queue<PreviewTextInfo> previewTextOperation;
+    bool hasSupportedPreviewText_ = true;
+    bool hasPreviewText_ = false;
+    std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     int32_t clickTimes_ = -1;
 };

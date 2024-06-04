@@ -71,6 +71,10 @@ void MenuLayoutProperty::DividerToJsonValue(std::unique_ptr<JsonValue>& json) co
 void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("title", GetTitle().value_or("").c_str(), filter);
     json->PutExtAttr("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str(), filter);
     auto context = PipelineBase::GetCurrentContext();

@@ -64,6 +64,9 @@ bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
+bool SystemProperties::imageFrameworkEnable_ = true;
+float SystemProperties::dragStartDampingRatio_ = 0.2f;
+float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
@@ -117,11 +120,6 @@ bool SystemProperties::Is24HourClock()
     return false;
 }
 
-bool SystemProperties::GetImageFrameworkEnabled()
-{
-    return true;
-}
-
 bool SystemProperties::GetTitleStyleEnabled()
 {
     return false;
@@ -170,5 +168,15 @@ float SystemProperties::GetDefaultResolution()
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return {};
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

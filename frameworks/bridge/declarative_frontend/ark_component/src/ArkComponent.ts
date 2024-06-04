@@ -302,6 +302,24 @@ class HeightModifier extends ModifierWithKey<Length> {
   }
 }
 
+class ChainModeifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('chainMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    } else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   constructor(value: Length | BorderRadiuses) {
     super(value);
@@ -2405,8 +2423,8 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   }
 }
 
-class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
-  constructor(value: DragPreviewOptions) {
+class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> {
+  constructor(value: ArkDragPreviewOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('dragPreviewOptions');
@@ -2414,12 +2432,16 @@ class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
     if (reset) {
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
-      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode);
+    return !(this.value.mode === this.stageValue.mode
+      && this.value.numberBadge === this.stageValue.numberBadge
+      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 
@@ -2806,8 +2828,63 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
   }
   static identity: Symbol = Symbol('systemBarEffect');
   applyPeer(node: KNode, reset: boolean): void {
-    if (!reset) {
-      getUINativeModule().common.setSystemBarEffect(node, true);
+    getUINativeModule().common.setSystemBarEffect(node, true);
+  }
+}
+class PixelRoundModifier extends ModifierWithKey<PixelRoundPolicy> {
+  constructor(value: PixelRoundPolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pixelRound');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    } else {
+      let start: PixelRoundCalcPolicy;
+      let top: PixelRoundCalcPolicy;
+      let end: PixelRoundCalcPolicy;
+      let bottom: PixelRoundCalcPolicy;
+      if (isObject(this.value)) {
+        start = (this.value as PixelRoundCalcPolicy)?.start;
+        top = (this.value as PixelRoundCalcPolicy)?.top;
+        end = (this.value as PixelRoundCalcPolicy)?.end;
+        bottom = (this.value as PixelRoundCalcPolicy)?.bottom;
+      }
+      getUINativeModule().common.setPixelRound(node, start, top, end, bottom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
+
+class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
+  constructor(value: ArkFocusScopeId) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopeId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    } else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+
+class FocusScopePriorityModifier extends ModifierWithKey<ArkFocusScopePriority> {
+  constructor(value: ArkFocusScopePriority) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopePriority');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    } else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
     }
   }
 }
@@ -3023,9 +3100,23 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  dragPreviewOptions(value: DragPreviewOptions): this {
+  dragPreviewOptions(value: DragPreviewOptions, options?: DragInteractionOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+        DragPreviewOptionsModifier, undefined);
+      return this;
+    }
+    let arkDragPreviewOptions = new ArkDragPreviewOptions();
+    if (typeof value === 'object') {
+      arkDragPreviewOptions.mode = value.mode;
+      arkDragPreviewOptions.numberBadge = value.numberBadge;
+    }
+    if (typeof options === 'object') {
+      arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
+      arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+    }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
-      DragPreviewOptionsModifier, value);
+      DragPreviewOptionsModifier, arkDragPreviewOptions);
     return this;
   }
 
@@ -3793,6 +3884,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  onPreDrag(event: (preDragStatus: PreDragStatus) => void): this {
+    throw new Error('Method not implemented.');
+  }
+
   allowDrop(value: Array<UniformDataType>): this {
     modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
@@ -3806,6 +3901,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
     }
     return this;
+  }
+
+  dragPreview(value: CustomBuilder | DragItemInfo | string): this {
+    throw new Error('Method not implemented.');
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
@@ -3869,6 +3968,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  chainMode(direction: Axis, style: ChainStyle): this {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+  
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4031,8 +4138,38 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  systemBarEffect(value:null):this {
+  systemBarEffect(): this {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
+    return this;
+  }
+
+  focusScopeId(id: string, isGroup?: boolean): this {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+
+  focusScopePriority(scopeId: string, priority?: number): this {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
+  }
+  pixelRound(value:PixelRoundPolicy):this {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
   }
 }
 

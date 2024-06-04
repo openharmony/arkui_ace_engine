@@ -426,7 +426,10 @@ private:
     void SetAccessibilityAction();
 
     void ResetOptionPropertyHeight();
+    bool IsTextFadeOut();
+    void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
+    bool isTossing_ = false;
     bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;

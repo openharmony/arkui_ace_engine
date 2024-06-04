@@ -41,6 +41,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t SHEET_DETENTS_TWO = 2;
+constexpr int32_t SHEET_DETENTS_THREE = 3;
+} // namespace
 RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<FrameNode> builder,
     RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
 {
@@ -51,6 +55,10 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    auto eventConfirmHub = sheetNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventConfirmHub, nullptr);
+    eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
+        [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
@@ -92,15 +100,33 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
                 CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
         }
     }
+    CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    return operationColumn;
+}
 
+void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const RefPtr<FrameNode>& operationColumn,
+    NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode)
+{
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(dragBarLayoutProperty, nullptr);
+    CHECK_NULL_VOID(dragBarLayoutProperty);
     dragBarLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(SHEET_DRAG_BAR_HEIGHT)));
     dragBarLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
+    auto isSingleDetents = true;
+    if (sheetStyle.detents.size() == SHEET_DETENTS_TWO) {
+        isSingleDetents = sheetStyle.detents[0] == sheetStyle.detents[1];
+    } else if (sheetStyle.detents.size() == SHEET_DETENTS_THREE) {
+        isSingleDetents = sheetStyle.detents[0] == sheetStyle.detents[1] &&
+                          sheetStyle.detents[1] == sheetStyle.detents[SHEET_DETENTS_TWO];
+    }
+    if (!isSingleDetents && showDragIndicator) {
+        dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    }
 
     dragBarNode->MountToParent(operationColumn);
     dragBarNode->MarkModifyDone();
@@ -117,7 +143,6 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
             titleColumn->GetRenderContext()->UpdateClipEdge(true);
         }
     }
-    return operationColumn;
 }
 
 void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)

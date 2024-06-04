@@ -78,13 +78,13 @@ bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(canvasEventHub, false);
 
     if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = !pixelGridRoundSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if ((isCanvasInit_ == true) && (config.frameOffsetChange || config.contentOffsetChange)) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = true;
         } else {
             isCanvasInit_ = false;
@@ -846,6 +846,7 @@ void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 #else
     paintMethod_->PushTask<SetLineDashOp>(segments);
 #endif
+    paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()
@@ -1089,6 +1090,15 @@ void CanvasPattern::EnableAnalyzer(bool enable)
     });
 }
 
+void CanvasPattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::CANVAS);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
+}
+
 void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
@@ -1162,7 +1172,7 @@ void CanvasPattern::ReleaseImageAnalyzer()
 
 void CanvasPattern::DumpAdvanceInfo()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         DumpLog::GetInstance().AddDesc(
             std::string("PixelGridRoundSize: ")
                 .append(dirtyPixelGridRoundSize_.ToString())
@@ -1192,7 +1202,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
-    currentSetTextDirection_ = TextDirection::INHERIT;
+    SetTextDirection(TextDirection::INHERIT);
 }
 
 void CanvasPattern::OnLanguageConfigurationUpdate()

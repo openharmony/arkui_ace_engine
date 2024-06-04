@@ -48,6 +48,7 @@ public:
     virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut);
     virtual bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
     virtual bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
+    virtual bool RemoveDownloadTask(const std::string& url);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

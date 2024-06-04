@@ -30,7 +30,7 @@ ClickEventActuator::ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEv
 {}
 
 void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
 {
     if (clickEvents_.empty() && !userCallback_ && !jsFrameNodeCallback_) {
         return;
@@ -44,6 +44,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
     clickRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, true));
+    clickRecognizer_->SetRecognizerType(GestureTypeName::CLICK);
     clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
@@ -52,6 +53,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
         clickRecognizer_->SetSysGestureJudge(sysJudgeFunc.value());
     }
     result.emplace_back(clickRecognizer_);
+    responseLinkResult.emplace_back(clickRecognizer_);
 }
 
 std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const

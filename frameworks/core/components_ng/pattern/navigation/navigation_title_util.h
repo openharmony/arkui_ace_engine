@@ -67,6 +67,8 @@ public:
 private:
     static void InitTitleBarButtonLongPressEvent(const RefPtr<FrameNode>& buttonNode,
         bool isMoreButton, const BarItem& menuItem);
+    static RefPtr<FrameNode> CreatePopupDialogNode(
+        const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton);
 };
 
 } // namespace OHOS::Ace::NG

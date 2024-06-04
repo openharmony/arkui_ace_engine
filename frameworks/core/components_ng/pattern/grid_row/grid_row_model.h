@@ -24,7 +24,7 @@
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace {
-class GridRowModel {
+class ACE_FORCE_EXPORT GridRowModel {
 public:
     static GridRowModel* GetInstance();
     virtual ~GridRowModel() = default;

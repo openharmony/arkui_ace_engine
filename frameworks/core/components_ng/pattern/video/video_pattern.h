@@ -238,6 +238,7 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     bool GetAnalyzerState();
     void UpdateAnalyzerState(bool isCreated)
     {

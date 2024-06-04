@@ -64,14 +64,17 @@ struct ParsedConfig {
     std::string direction;
     std::string densitydpi;
     std::string themeTag;
+    std::string fontFamily;
     std::string fontScale;
     std::string fontWeightScale;
     std::string colorModeIsSetByApp;
+    std::string mcc;
+    std::string mnc;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
-                 colorModeIsSetByApp.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
+                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
     }
 };
 
@@ -348,7 +351,7 @@ public:
         return isSubContainer_;
     }
 
-    bool IsFormRender() const
+    bool IsFormRender() const override
     {
         return isFormRender_;
     }
@@ -422,6 +425,7 @@ public:
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
+    static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
@@ -470,7 +474,7 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender)
+    void SetIsFormRender(bool isFormRender) override
     {
         isFormRender_ = isFormRender;
     }
@@ -546,7 +550,7 @@ public:
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
         AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
-    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
@@ -629,6 +633,7 @@ private:
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
     void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);

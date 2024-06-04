@@ -38,15 +38,15 @@ namespace {
 constexpr float LUMR = 0.2126f;
 constexpr float LUMG = 0.7152f;
 constexpr float LUMB = 0.0722f;
-
+constexpr double HALF = 0.5;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
 constexpr double MAX_GRAYSCALE = 255.0;
 constexpr int32_t DEFAULT_SAVE_COUNT = 1;
-#ifndef ACE_UNITTEST
 constexpr double HANGING_PERCENT = 0.8;
+#ifndef ACE_UNITTEST
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 #endif
 
@@ -1315,7 +1315,58 @@ void CustomPaintPaintMethod::Translate(double x, double y)
     rsCanvas_->Translate(x, y);
 }
 
-double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph)
+void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        paragraph_->Layout(FLT_MAX);
+    } else {
+        paragraph_->Layout(width);
+    }
+    if (width > paragraph_->GetMaxIntrinsicWidth()) {
+        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
+    }
+    auto align = isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign();
+    double dx = 0.0;
+    if (maxWidth.has_value() && (maxWidth.value() < paragraph_->GetMaxIntrinsicWidth())) {
+        dx = x + GetAlignOffset(align, maxWidth.value());
+    } else {
+        dx = x + GetAlignOffset(align, paragraph_->GetMaxIntrinsicWidth());
+    }
+    auto baseline = isStroke ? state_.strokeState.GetTextStyle().GetTextBaseline()
+                             : state_.fillState.GetTextStyle().GetTextBaseline();
+    double dy = y + GetBaselineOffset(baseline, paragraph_);
+
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
+    if (hasShadow) {
+        rsCanvas_->Save();
+        auto shadowOffsetX = state_.shadow.GetOffset().GetX();
+        auto shadowOffsetY = state_.shadow.GetOffset().GetY();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            rsCanvas_->Scale(scale.value(), 1.0);
+        }
+        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
+        rsCanvas_->Restore();
+        return;
+    }
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            dx /= scale.value();
+        }
+        rsCanvas_->Save();
+        rsCanvas_->Scale(scale.value(), 1.0);
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
+        rsCanvas_->Restore();
+    } else {
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
+    }
+}
+
+double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, double width)
 {
     double x = 0.0;
     TextDirection textDirection = state_.fillState.GetOffTextDirection();
@@ -1324,22 +1375,51 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<R
             x = 0.0;
             break;
         case TextAlign::START:
-            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
+            x = (textDirection == TextDirection::LTR) ? 0.0 : -width;
             break;
         case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
+            x = -width;
             break;
         case TextAlign::END:
-            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
+            x = (textDirection == TextDirection::LTR) ? -width : 0.0;
             break;
         case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2.0;
+            x = -width * HALF;
             break;
         default:
             x = 0.0;
             break;
     }
     return x;
+}
+
+double CustomPaintPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph)
+{
+    double y = 0.0;
+    switch (baseline) {
+        case TextBaseline::ALPHABETIC:
+            y = -paragraph->GetAlphabeticBaseline();
+            break;
+        case TextBaseline::IDEOGRAPHIC:
+            y = -paragraph->GetIdeographicBaseline();
+            break;
+        case TextBaseline::BOTTOM:
+            y = -paragraph->GetHeight();
+            break;
+        case TextBaseline::TOP:
+            y = 0.0;
+            break;
+        case TextBaseline::MIDDLE:
+            y = -paragraph->GetHeight() * HALF;
+            break;
+        case TextBaseline::HANGING:
+            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
+            break;
+        default:
+            y = -paragraph->GetAlphabeticBaseline();
+            break;
+    }
+    return y;
 }
 
 #ifndef ACE_UNITTEST

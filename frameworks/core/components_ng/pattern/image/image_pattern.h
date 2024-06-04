@@ -96,6 +96,11 @@ public:
         return image_;
     }
 
+    const RefPtr<CanvasImage>& GetAltCanvasImage()
+    {
+        return altImage_;
+    }
+
     RefPtr<FrameNode> GetClientHost() const override
     {
         return GetHost();
@@ -191,6 +196,7 @@ public:
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -310,6 +316,16 @@ public:
         isImageAnimator_ = isImageAnimator;
     }
 
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
     SizeF GetRawImageSize()
@@ -320,10 +336,11 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
 
@@ -401,7 +418,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -459,6 +476,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;

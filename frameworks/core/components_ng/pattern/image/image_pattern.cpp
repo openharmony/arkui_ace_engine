@@ -432,11 +432,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
+        isHdrDecoderNeed = true;
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
     }
 
     if (loadingCtx_) {
+        loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
@@ -557,7 +560,7 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
-void ImagePattern::LoadImage(const ImageSourceInfo& src)
+void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
 {
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -566,14 +569,11 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
+    loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
         loadingCtx_->FinishMearuse();
     }
     loadingCtx_->LoadImageData();
@@ -603,7 +603,7 @@ void ImagePattern::LoadImageDataIfNeed()
                                                               loadPixelMap->GetRawPixelMapPtr();
     }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
-        LoadImage(src);
+        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -787,6 +787,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
@@ -851,7 +852,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetHost()->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -1162,6 +1163,10 @@ void ImagePattern::HandleCopy()
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
     json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
@@ -1376,7 +1381,7 @@ void ImagePattern::OnConfigurationUpdate()
     UpdateInternalResource(src);
     src.SetIsConfigurationChange(true);
 
-    LoadImage(src);
+    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
@@ -1466,6 +1471,15 @@ void ImagePattern::SetImageAnalyzerConfig(void* config)
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
+}
+
+void ImagePattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
 bool ImagePattern::IsSupportImageAnalyzerFeature()
@@ -1723,7 +1737,7 @@ std::list<ImagePattern::CacheImageStruct>::iterator ImagePattern::FindCacheImage
 void ImagePattern::GenerateCachedImages()
 {
     CHECK_NULL_VOID(images_.size());
-    auto averageShowTime = animator_->GetDuration() / images_.size();
+    auto averageShowTime = static_cast<uint32_t>(animator_->GetDuration()) / images_.size();
     size_t cacheImageNum = averageShowTime >= CRITICAL_TIME ? 1 : 2;
     cacheImageNum = std::min(images_.size() - 1, cacheImageNum);
     if (cacheImages_.size() > cacheImageNum) {

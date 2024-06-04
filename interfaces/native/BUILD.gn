@@ -69,9 +69,8 @@ ohos_shared_library("ace_ndk") {
     "node/style_modifier.cpp",
     "node/waterflow_section_option.cpp",
   ]
-
-  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  deps = []
   cflags_cc = [ "-Wno-missing-braces" ]
 
   if (target_os == "ohos") {
@@ -84,7 +83,7 @@ ohos_shared_library("ace_ndk") {
       ":libace_ndk_rom",
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
     ]
-    external_deps = [
+    external_deps += [
       "graphic_2d:native_drawing_ndk",
       "hilog:libhilog",
       "image_framework:pixelmap",
@@ -116,7 +115,7 @@ if (is_arkui_x) {
       "native_interface_xcomponent.cpp",
     ]
 
-    deps = [ "$checking_function_root:libsec_static" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
     cflags_cc = [ "-Wno-missing-braces" ]
 

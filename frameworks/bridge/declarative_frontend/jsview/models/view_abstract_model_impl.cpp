@@ -1180,11 +1180,7 @@ void ViewAbstractModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
     box->SetOnDragStartId(ToDragFunc(std::move(onDragStart)));
 }
 
-void ViewAbstractModelImpl::SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag)
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnPreDragId(onPreDrag);
-}
+void ViewAbstractModelImpl::SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) {}
 
 void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {

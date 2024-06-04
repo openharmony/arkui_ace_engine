@@ -23,7 +23,7 @@ interface ChipGroupTheme {
 
 const noop = (selectedIndexes: Array<number>) => {
 }
-const colorStops: Array<[string, number]> = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
+const colorStops: ( string | number )[] = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
 const defaultTheme: ChipGroupTheme = {
   itemStyle: {
     size: ChipSize.NORMAL,
@@ -402,6 +402,20 @@ export struct ChipGroup {
       return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
+    }
+  }
+
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number + ChipGroupHeight.AMEND
+    } else {
+      return ChipGroupHeight.DEFAULT
     }
   }
 

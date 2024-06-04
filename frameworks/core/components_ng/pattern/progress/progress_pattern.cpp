@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,12 @@ void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
 
 void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonValueForRingStyleOptions(json, filter);
+        ToJsonValueForLinearStyleOptions(json, filter);
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
@@ -271,6 +277,22 @@ void ProgressPattern::DumpInfo()
             .append(paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false"));
 }
 
+void ProgressPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRightToLeft_ == isRtl) {
+        return;
+    }
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->SetIsRightToLeft(isRtl);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    isRightToLeft_ = isRtl;
+}
+
 void ProgressPattern::OnVisibleChange(bool isVisible)
 {
     auto host = GetHost();
@@ -282,6 +304,10 @@ void ProgressPattern::OnVisibleChange(bool isVisible)
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json,
     const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -299,6 +325,10 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
 void ProgressPattern::ToJsonValueForLinearStyleOptions(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();

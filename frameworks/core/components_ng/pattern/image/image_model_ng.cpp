@@ -68,13 +68,13 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
         frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     }
     stack->Push(frameNode);
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
         pattern->SetSrcUndefined(true);
@@ -83,7 +83,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
 
     // set draggable for framenode
     if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto draggable = pipeline->GetDraggable<ImageTheme>();
         if (draggable && !frameNode->IsDraggable()) {
@@ -148,7 +148,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     }
     stack->Push(frameNode);
 
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->GetIsAnimation()) {
         auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
@@ -499,6 +499,19 @@ void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
 }
 
+void ImageModelNG::ResetAutoResize(FrameNode *frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto autoResize = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !container->IsScenceBoardWindow()) {
+        autoResize = false;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
+}
+
 void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice);
@@ -568,6 +581,19 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolatio
     pattern->SetImageInterpolation(interpolation);
 }
 
+void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto interpolationDefault = ImageInterpolation::NONE;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !container->IsScenceBoardWindow()) {
+        interpolationDefault = ImageInterpolation::LOW;
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolationDefault, frameNode);
+}
+
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix, frameNode);
@@ -607,6 +633,13 @@ void ImageModelNG::SetImageAnalyzerConfig(void* config)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::SetImageAIOptions(void* options)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAIOptions(options);
 }
 
 bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)

@@ -1659,9 +1659,6 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone(frameNode_);
-    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(1)
-        .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
@@ -1682,7 +1679,6 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone(frameNode_);
-    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea).Times(0);
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);

@@ -304,13 +304,15 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 
 void JSSwiper::SetIndex(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
+    auto length = info.Length();
+    if (length < 1 || length > 2) {
         return;
     }
 
     int32_t index = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        index = info[0]->ToNumber<int32_t>();
+    auto jsIndex = info[0];
+    if (length > 0 && jsIndex->IsNumber()) {
+        index = jsIndex->ToNumber<int32_t>();
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -322,7 +324,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetIndex(index);
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
+    if (length > 1 && info[1]->IsFunction()) {
         ParseSwiperIndexObject(info, info[1]);
     }
 }
@@ -459,8 +461,12 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
-    swiperParameters.dimStart =  ParseIndicatorDimension(startValue);
-    swiperParameters.dimEnd =  ParseIndicatorDimension(endValue);
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    std::optional<Dimension> indicatorDimension;
+    swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     CalcDimension dimPosition;
     bool parseItemWOk =
         ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
@@ -489,12 +495,40 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     return swiperParameters;
 }
 
+bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
+    return false;
+}
+
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
     JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
     JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
@@ -508,6 +542,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
     digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+    std::optional<Dimension> indicatorDimension;
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
     digitalParameters.fontColor =
@@ -807,8 +847,7 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
     RefPtr<Curve> curve = DEFAULT_CURVE;
     if (info[0]->IsString()) {
-        auto userSetCurve = CreateCurve(info[0]->ToString(), false);
-        curve = userSetCurve ? userSetCurve : curve;
+        curve = CreateCurve(info[0]->ToString());
     } else if (info[0]->IsObject()) {
         auto object = JSRef<JSObject>::Cast(info[0]);
         std::function<float(float)> customCallBack = nullptr;
@@ -1137,12 +1176,13 @@ void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
     }
 
     RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
-    auto onPreloadFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Swiper.preloadItems");
-        TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
-        func->Execute(errorCode);
-    };
+    auto onPreloadFinish =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode, std::string message) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.preloadItems");
+            TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+            func->Execute(errorCode);
+        };
 
     controller_->SetPreloadFinishCallback(onPreloadFinish);
     controller_->PreloadItems(indexSet);

@@ -185,6 +185,10 @@ struct MouseEvent final {
         if (sourceType == SourceType::MOUSE) {
             pointId = GetPointerId(pointId);
         }
+        auto pointOriginalId = originalId;
+        if (sourceType == SourceType::MOUSE) {
+            pointOriginalId = GetId();
+        }
         TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
@@ -192,7 +196,8 @@ struct MouseEvent final {
             .screenY = screenY,
             .downTime = time,
             .size = 0.0,
-            .isPressed = (type == TouchType::DOWN) };
+            .isPressed = (type == TouchType::DOWN),
+            .originalId = pointOriginalId };
         TouchEvent event;
         event.SetId(pointId)
             .SetX(x)
@@ -208,7 +213,7 @@ struct MouseEvent final {
             .SetSourceTool(sourceTool)
             .SetPointerEvent(pointerEvent)
             .SetTouchEventId(touchEventId)
-            .SetOriginalId(GetId())
+            .SetOriginalId(pointOriginalId)
             .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;

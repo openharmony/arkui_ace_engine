@@ -669,4 +669,34 @@ ArkUINativeModuleValue TabsBridge::ResetHeightAuto(ArkUIRuntimeCallInfo* runtime
     GetArkUINodeModifiers()->getTabsModifier()->resetTabHeightAuto(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TabsBridge::SetAnimateMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> animateModeArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (!animateModeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t animateModeValue = animateModeArg->Uint32Value(vm);
+    if (animateModeValue >= static_cast<uint32_t>(TabAnimateMode::MAX_VALUE)) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setAnimateMode(nativeNode, animateModeValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetAnimateMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetAnimateMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

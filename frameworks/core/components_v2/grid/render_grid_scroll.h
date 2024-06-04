@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +113,7 @@ public:
 
     double GetEstimatedHeight();
     // Used in GridPositionController
-    void ScrollToIndex(int32_t index, int32_t source);
+    void ScrollToIndex(int32_t index);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
     void BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx);
     void BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx);

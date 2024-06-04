@@ -21,6 +21,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/form/accessibility_session_adapter_form.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -94,10 +95,14 @@ public:
         return isJsCard_;
     }
 
+    RefPtr<UINode> FindUINodeByTag(const std::string &tag);
+
     void SetObscured(bool isObscured)
     {
         isFormObscured_ = isObscured;
     }
+
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
 
@@ -105,6 +110,11 @@ public:
 
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
+    void OnLanguageConfigurationUpdate() override;
+
+    void GetTimeLimitResource(std::string &content);
+
+    void UpdateTimeLimitResource(std::string &content);
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -147,15 +157,19 @@ private:
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(bool isRecover);
+    void HandleEnableForm(const bool enable);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
 
     void LoadFormSkeleton();
+    void LoadDisableFormStyle();
+    void RemoveDisableFormStyle();
     int32_t GetFormDimensionHeight(int32_t dimension);
     void RemoveFormSkeleton();
     RefPtr<FrameNode> CreateColumnNode();
+    RefPtr<FrameNode> CreateTimeLimitNode();
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
@@ -166,6 +180,7 @@ private:
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
+    RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;

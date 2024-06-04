@@ -140,6 +140,12 @@ public:
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
 
+    // visual
+    static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
+
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
     static void SetOuterBorderRadius(const Dimension& value);
@@ -224,6 +230,9 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -389,6 +398,13 @@ public:
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
+    static void SetLightPosition(FrameNode* frameNode,
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(FrameNode* frameNode, float value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
+    static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
@@ -592,7 +608,7 @@ public:
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
     static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
         const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
-        uint32_t expectedUpdateInterval = 1000);
+        int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -640,8 +656,6 @@ public:
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
     static float GetLayoutWeight(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
-    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
@@ -649,6 +663,11 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+        const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
@@ -660,6 +679,7 @@ public:
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
+    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
 
 private:
     static void AddDragFrameNodeToManager();

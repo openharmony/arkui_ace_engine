@@ -285,6 +285,12 @@ private:
     bool isFocusActiveWhenFocused_ = false;
 };
 
+enum class ScopeFocusDirection {
+    VERTICAL = 0,
+    HORIZONTAL,
+    UNIVERSAL,
+};
+
 struct ScopeFocusAlgorithm final {
     ScopeFocusAlgorithm() = default;
     ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType)
@@ -294,8 +300,18 @@ struct ScopeFocusAlgorithm final {
         : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
           getNextFocusNode(std::move(function))
     {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType)
+    {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType,
+        GetNextFocusNodeFunc&& function)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
+          getNextFocusNode(std::move(function))
+    {}
     ~ScopeFocusAlgorithm() = default;
 
+    // isVertical will be deleted
+    ScopeFocusDirection direction { ScopeFocusDirection::VERTICAL };
     bool isVertical { true };
     bool isLeftToRight { true };
     ScopeType scopeType { ScopeType::OTHERS };
@@ -358,14 +374,6 @@ public:
     {
         return focusStyleType_;
     }
-
-    static void CloseKeyboard();
-
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
-
-    static void PushPageCloseKeyboard();
-
-    static void NavCloseKeyboard();
 
     BlurReason GetBlurReason() const
     {
@@ -771,6 +779,9 @@ public:
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    std::list<RefPtr<FocusHub>>::iterator FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>> GetChildren()
     {

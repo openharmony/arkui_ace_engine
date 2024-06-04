@@ -239,6 +239,13 @@ public:
         return false;
     }
 
+    virtual bool IsFormRender() const
+    {
+        return false;
+    }
+    
+    virtual void SetIsFormRender(bool isFormRender) {};
+
     const std::string& GetCardHapPath() const
     {
         return cardHapPath_;
@@ -470,7 +477,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr)
     {
         return false;
     }

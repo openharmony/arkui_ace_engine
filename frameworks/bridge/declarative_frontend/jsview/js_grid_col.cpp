@@ -79,6 +79,9 @@ void InheritGridContainerSize(const RefPtr<V2::GridContainerSize>& gridContainer
 void ParseGridContainerSizeArray(const JSRef<JSVal>& jsValue,
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT], bool isOrder)
 {
+    if (!jsValue->IsObject()) {
+        return;
+    }
     auto gridParam = JSRef<JSObject>::Cast(jsValue);
     auto xs = gridParam->GetProperty("xs");
     if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {

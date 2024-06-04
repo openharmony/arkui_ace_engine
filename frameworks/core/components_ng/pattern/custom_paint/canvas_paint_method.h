@@ -108,9 +108,6 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth, bool isStroke,
-        bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,

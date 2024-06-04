@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -235,7 +236,14 @@ void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, f
 
 OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 float PasswordResponseArea::GetIconSize()
@@ -374,7 +382,14 @@ void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float
 
 OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 bool UnitResponseArea::IsShowUnit()

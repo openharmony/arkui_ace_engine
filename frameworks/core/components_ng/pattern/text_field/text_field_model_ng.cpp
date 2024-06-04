@@ -70,6 +70,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -1842,7 +1843,7 @@ void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
 
 int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
 {
-    uint32_t value = -1;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
     return value;
 }

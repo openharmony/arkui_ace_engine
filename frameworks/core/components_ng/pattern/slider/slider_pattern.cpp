@@ -73,7 +73,9 @@ void SliderPattern::OnModifyDone()
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
     InitWindowSizeChanged(host);
-    UpdateToValidValue();
+    if (!panMoveFlag_) {
+        UpdateToValidValue();
+    }
     UpdateBlock();
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
@@ -200,9 +202,6 @@ void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     if (clickListener_) {
         return;
     }
@@ -214,6 +213,10 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (UseContentModifier()) {
+        if (touchEvent_) {
+            gestureHub->RemoveTouchEvent(touchEvent_);
+            touchEvent_ = nullptr;
+        }
         return;
     }
     if (touchEvent_) {
@@ -694,6 +697,13 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    if (UseContentModifier()) {
+        focusHub->SetInnerFocusPaintRectCallback(nullptr);
+        focusHub->SetOnKeyEventInternal(nullptr);
+        focusHub->SetOnFocusInternal(nullptr);
+        focusHub->SetOnBlurInternal(nullptr);
+        return;
+    }
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -927,6 +937,14 @@ bool SliderPattern::MoveStep(int32_t stepCount)
 void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 {
     if (UseContentModifier()) {
+        if (hoverEvent_) {
+            inputEventHub->RemoveOnHoverEvent(hoverEvent_);
+            hoverEvent_ = nullptr;
+        }
+        if (mouseEvent_) {
+            inputEventHub->RemoveOnMouseEvent(mouseEvent_);
+            mouseEvent_ = nullptr;
+        }
         return;
     }
     auto hoverEvent = [weak = WeakClaim(this)](bool isHover) {

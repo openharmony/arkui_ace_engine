@@ -70,7 +70,7 @@ private:
 };
 
 // Pattern is the base class for different measure, layout and paint behavior.
-class Pattern : public virtual AceType {
+class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
@@ -217,6 +217,12 @@ public:
                 childrenList.emplace_back(childFrameNode);
             }
         }
+        UpdateChildRenderContext(renderContext, childrenList);
+    }
+
+    void UpdateChildRenderContext(
+        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+    {
         bool isForegroundColor = renderContext->HasForegroundColor();
         for (auto child : childrenList) {
             auto childRenderContext = child->GetRenderContext();
@@ -270,6 +276,8 @@ public:
     {
         return true;
     }
+
+    virtual void NotifyForNextTouchEvent() {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -352,7 +360,8 @@ public:
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
-    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
     virtual bool CheckAutoSave()
     {
@@ -473,6 +482,7 @@ public:
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
+    virtual void OnFontConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

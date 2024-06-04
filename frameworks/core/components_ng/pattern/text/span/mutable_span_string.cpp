@@ -116,6 +116,27 @@ void MutableSpanString::ApplyReplaceStringToSpans(
     }
 }
 
+std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperationStart(
+    std::list<RefPtr<NG::SpanItem>>::iterator it, int32_t spanItemStart, int32_t length,
+    const std::wstring& wContent, const std::string& other)
+{
+    auto wOther = StringUtils::ToWstring(other);
+    if ((*it)->spanItemType == NG::SpanItemType::IMAGE || (*it)->spanItemType == NG::SpanItemType::CustomSpan) {
+        auto newSpan = MakeRefPtr<NG::SpanItem>();
+        newSpan->content = other;
+        newSpan->interval.first = spanItemStart;
+        newSpan->interval.second = StringUtils::ToWstring(newSpan->content).length() + spanItemStart;
+        it = spans_.erase(it);
+        it = spans_.insert(it, newSpan);
+    } else {
+        (*it)->content = StringUtils::ToString(wOther + GetWideStringSubstr(wContent, length));
+        (*it)->interval.second =
+            static_cast<int32_t>(StringUtils::ToWstring((*it)->content).length()) + spanItemStart;
+    }
+    ++it;
+    return it;
+}
+
 std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation(
     std::list<RefPtr<NG::SpanItem>>::iterator it, int32_t start, int32_t length,
     const std::string& other, SpanStringOperation op, const std::pair<int32_t, int32_t>& intersection)
@@ -127,19 +148,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation
     auto wOther = StringUtils::ToWstring(other);
 
     if (spanItemStart == start && op == SpanStringOperation::REPLACE) {
-        if ((*it)->spanItemType == NG::SpanItemType::IMAGE || (*it)->spanItemType == NG::SpanItemType::CustomSpan) {
-            auto newSpan = MakeRefPtr<NG::SpanItem>();
-            newSpan->content = other;
-            newSpan->interval.first = spanItemStart;
-            newSpan->interval.second = StringUtils::ToWstring(newSpan->content).length() + spanItemStart;
-            it = spans_.erase(it);
-            it = spans_.insert(it, newSpan);
-        } else {
-            (*it)->content = StringUtils::ToString(wOther + GetWideStringSubstr(wContent, length));
-            (*it)->interval.second = StringUtils::ToWstring((*it)->content).length() + spanItemStart;
-        }
-        ++it;
-        return it;
+        return HandleSpanOperationStart(it, spanItemStart, length, wContent, other);
     }
 
     if (spanItemStart == intersection.first && spanItemEnd == intersection.second) {
@@ -170,8 +179,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation
         (*it)->content = StringUtils::ToString(GetWideStringSubstr(wContent, end - spanItemStart));
         (*it)->interval.first = end;
     }
-    ++it;
-    return it;
+    return ++it;
 }
 
 void MutableSpanString::ApplyReplaceStringToSpanBase(
@@ -552,7 +560,7 @@ void MutableSpanString::InsertStringAroundSpecialNode(
     } else if (aroundMode == AroundSpecialNode::AFTER && iter != spans_.end()) {
         spanItem = (*iter)->GetSameStyleSpanItem();
     }
-    int32_t length = StringUtils::ToWstring(str).length();
+    int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     spanItem->content = str;
     spanItem->interval.first = start;
     spanItem->interval.second = start + length;

@@ -50,6 +50,10 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             gridLayoutInfo_.currentOffset_ = postJumpOffset_;
             MeasureOnOffset(mainSize);
         }
+        if (gridLayoutInfo_.extraOffset_.has_value()) {
+            gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
+            gridLayoutInfo_.extraOffset_.reset();
+        }
     } else {
         MeasureOnOffset(mainSize);
     }
@@ -111,10 +115,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
         crossLens_.push_back(crossSize);
     }
 
-    if (res.second) {
-        // compress, no more gaps
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = res.second;
 
     info.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset();

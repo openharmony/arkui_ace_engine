@@ -52,6 +52,11 @@ FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(
     }
     int32_t segment = info->GetSegment(index);
     auto itemIndex = info->GetCrossIndexForNextItem(segment);
+    if (static_cast<int32_t>(info->segmentStartPos_.size()) <= segment) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "The size of segmentStartPos %{public}zu is less than expected %{public}d.",
+            info->segmentStartPos_.size(), segment);
+        return { itemIndex.crossIndex, 0.0f };
+    }
     if (itemIndex.lastItemIndex < 0) {
         return { itemIndex.crossIndex, info->segmentStartPos_[segment] };
     }
@@ -71,7 +76,7 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
     itemConstraint.maxSize.SetMainSize(Infinity<float>(), params.axis);
     itemConstraint.percentReference = itemIdealSize;
 
-    CHECK_NULL_RETURN(props->HasItemLayoutConstraint(), itemConstraint);
+    CHECK_NULL_RETURN(props->HasItemLayoutConstraint() && !params.haveUserDefSize, itemConstraint);
 
     OptionalSizeF childMinSize;
     OptionalSizeF childMaxSize;
@@ -136,6 +141,7 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
 float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
 {
     auto footer = wrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(footer, 0.0f);
     auto layoutProperty = wrapper->GetLayoutProperty();
     auto footerConstraint = layoutProperty->CreateChildConstraint();
     footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);

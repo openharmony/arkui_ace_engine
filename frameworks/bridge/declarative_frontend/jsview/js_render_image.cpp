@@ -106,7 +106,9 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     auto wrapper = new (std::nothrow) JSRenderImage();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (argc <= 0) {
-        DELETE_RETURN_NULL(wrapper);
+        napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
+        napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
+        return thisVar;
     }
     napi_value argv[2] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -132,7 +134,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         wrapper->LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             auto pixelMap = GetPixelMap(env, argv[0]);
             if (!pixelMap) {
                 DELETE_RETURN_NULL(wrapper);
@@ -245,7 +247,6 @@ napi_value JSRenderImage::OnGetWidth(napi_env env)
     double width = 0.0;
     double density = GetDensity();
     width = width_;
-    density = (density == 0.0 ? 1.0 : density);
     width /= density;
     napi_value jsWidth = nullptr;
     napi_create_double(env, width, &jsWidth);
@@ -257,7 +258,6 @@ napi_value JSRenderImage::OnGetHeight(napi_env env)
     double height = 0.0;
     double density = GetDensity();
     height = height_;
-    density = (density == 0.0 ? 1.0 : density);
     height /= density;
     napi_value jsHeight = nullptr;
     napi_create_double(env, height, &jsHeight);

@@ -61,6 +61,10 @@ public:
             { Axis::NONE, "ScrollDirection.None" } };
         Axis axis = GetAxisValue(Axis::VERTICAL);
         json->PutFixedAttr("scrollable", scrollableMap[axis].c_str(), filter, FIXED_ATTR_SCROLLABLE);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
         std::unordered_map<ScrollSnapAlign, std::string> scrollSnapAlignMap {
             { ScrollSnapAlign::NONE, "ScrollSnapAlign.NONE" }, { ScrollSnapAlign::START, "ScrollSnapAlign.START" },

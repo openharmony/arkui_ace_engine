@@ -192,6 +192,16 @@ void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
 }
 
+void TextModelNG::SetTextSelectableMode(Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
@@ -528,6 +538,14 @@ void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrat
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
 }
 
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
+}
+
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value, frameNode);
@@ -713,7 +731,9 @@ uint32_t TextModelNG::GetMaxLines(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultMaxLines);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultMaxLines);
-    return layoutProperty->GetTextLineStyle()->GetMaxLines().value_or(defaultMaxLines);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultMaxLines);
+    return textLineStyle->GetMaxLines().value_or(defaultMaxLines);
 }
 
 TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
@@ -721,7 +741,9 @@ TextAlign TextModelNG::GetTextAlign(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, OHOS::Ace::TextAlign::START);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, OHOS::Ace::TextAlign::START);
-    return layoutProperty->GetTextLineStyle()->GetTextAlign().value_or(TextAlign::START);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, OHOS::Ace::TextAlign::START);
+    return textLineStyle->GetTextAlign().value_or(TextAlign::START);
 }
 
 TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
@@ -729,7 +751,9 @@ TextOverflow TextModelNG::GetTextOverflow(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, TextOverflow::CLIP);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextOverflow::CLIP);
-    return layoutProperty->GetTextLineStyle()->GetTextOverflow().value_or(TextOverflow::CLIP);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, TextOverflow::CLIP);
+    return textLineStyle->GetTextOverflow().value_or(TextOverflow::CLIP);
 }
 
 Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
@@ -738,7 +762,9 @@ Dimension TextModelNG::GetTextIndent(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultTextIndent);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultTextIndent);
-    return layoutProperty->GetTextLineStyle()->GetTextIndent().value_or(defaultTextIndent);
+    auto& textLineStyle = layoutProperty->GetTextLineStyle();
+    CHECK_NULL_RETURN(textLineStyle, defaultTextIndent);
+    return textLineStyle->GetTextIndent().value_or(defaultTextIndent);
 }
 
 std::vector<std::string> TextModelNG::GetFontFamily(FrameNode* frameNode)
@@ -933,6 +959,13 @@ LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
 {
     LineBreakStrategy value = LineBreakStrategy::GREEDY;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
+    return value;
+}
+
+TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
+{
+    TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextSelectableMode, value, frameNode, value);
     return value;
 }
 

@@ -99,7 +99,6 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         ScopeRAII scope(env);
         double density = context->GetDensity();
-        density = (density == 0.0 ? 1.0 : density);
         height /= density;
         width /= density;
         context->size_.SetHeight(height);

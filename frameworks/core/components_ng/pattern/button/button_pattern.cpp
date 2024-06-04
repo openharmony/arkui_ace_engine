@@ -62,6 +62,31 @@ void ButtonPattern::OnAttachToFrameNode()
     renderContext->SetAlphaOffscreen(true);
 }
 
+bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
+        return false;
+    }
+    auto layoutContraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutContraint, false);
+    if (layoutContraint->selfIdealSize.Width().has_value() || layoutContraint->selfIdealSize.Height().has_value()) {
+        return false;
+    }
+    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
+        return false;
+    }
+    return true;
+}
+
 void ButtonPattern::UpdateTextLayoutProperty(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
@@ -85,6 +110,17 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFamily().has_value()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
+
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetAgingTextMaxLines());
+    } else {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
+    }
+
     if (layoutProperty->GetTextOverflow().has_value()) {
         textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
     }
@@ -203,12 +239,12 @@ void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProp
     if (scaleModify_) {
         buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
-    if (buttonStyle != ButtonStyleMode::EMPHASIZE && controlSize == ControlSize::NORMAL) {
-        bool isTextButton = buttonStyle == ButtonStyleMode::TEXT;
-        bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        if (bgColorModify_) {
-            buttonRenderContext->UpdateBackgroundColor(
-                isTextButton ? buttonTheme->GetTextBackgroundFocus() : buttonTheme->GetNormalBackgroundFocus());
+    bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    if (bgColorModify_) {
+        if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::NORMAL) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
         }
     }
 

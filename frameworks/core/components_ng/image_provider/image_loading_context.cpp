@@ -85,6 +85,9 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
 ImageLoadingContext::~ImageLoadingContext()
 {
     // cancel background task
+    if (Downloadable()) {
+        RemoveDownloadTask(src_.GetSrc());
+    }
     if (!syncLoad_) {
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
@@ -169,6 +172,7 @@ void ImageLoadingContext::OnDataLoading()
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
             TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s Hit the Cache, not need Create imageObject.",
                 src_.GetSrc().c_str());
+            ImageProvider::PrepareImageData(obj);
             DataReadyCallback(obj);
             return;
         }
@@ -269,6 +273,11 @@ void ImageLoadingContext::PerformDownload()
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
+bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
+{
+    return DownloadManager::GetInstance()->RemoveDownloadTask(src);
+}
+
 void ImageLoadingContext::CacheDownloadedImage()
 {
     CHECK_NULL_VOID(Downloadable());
@@ -344,7 +353,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_, GetLoadInVipChannel());
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()
@@ -450,7 +459,7 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
 bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
     const std::optional<SizeF>& sourceSize, bool hasValidSlice)
 {
-    bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize();
+    bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize() || firstLoadImage_;
 
     /* When function is called with a changed dstSize, assume the image will be resized frequently. To minimize
      * MakeCanvasImage operations, map dstSize to size levels in log_2. Only Remake when the size level changes.
@@ -486,9 +495,10 @@ void ImageLoadingContext::MakeCanvasImage(
     updateParamsCallback_ = [wp = WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
         auto ctx = wp.Upgrade();
         CHECK_NULL_VOID(ctx);
-        if (ctx->SizeChanging(dstSize)) {
+        if (ctx->SizeChanging(dstSize) || ctx->firstLoadImage_) {
             ctx->sizeLevel_ = ctx->RoundUp(dstSize.Width());
         }
+        ctx->firstLoadImage_ = false;
         ctx->dstSize_ = dstSize;
         ctx->imageFit_ = imageFit;
         ctx->autoResize_ = autoResize;

@@ -23,10 +23,10 @@
 namespace OHOS::Ace::NG {
 class ImageUtils {
 public:
-    static void PostToUI(
-        std::function<void()>&& task, const std::string& name, const int32_t containerId = Container::CurrentId());
-    static void PostToBg(
-        std::function<void()>&& task, const std::string& name, const int32_t containerId = Container::CurrentId());
+    static void PostToUI(std::function<void()>&& task, const std::string& name,
+        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::LOW);
+    static void PostToBg(std::function<void()>&& task, const std::string& name,
+        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::LOW);
 
     inline static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
     {
@@ -35,7 +35,8 @@ public:
 
 private:
     // helper function to post task to [TaskType] thread
-    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName);
+    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName,
+        PriorityType priorityType = PriorityType::LOW);
 };
 } // namespace OHOS::Ace::NG
 

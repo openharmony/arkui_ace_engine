@@ -398,6 +398,10 @@ void CalendarPattern::UpdateTitleNode()
 
 void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto swiperNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());

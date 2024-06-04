@@ -20,7 +20,7 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace {
-class MenuModel {
+class ACE_FORCE_EXPORT MenuModel {
 public:
     static MenuModel* GetInstance();
     virtual ~MenuModel() = default;
@@ -31,6 +31,7 @@ public:
     virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
     virtual void SetFontFamily(const std::vector<std::string> &families);
+    virtual void ResetFontFamily() {};
     virtual void SetWidth(const Dimension& width);
     virtual void SetBorderRadius(const Dimension& radius);
     virtual void ResetBorderRadius() {};

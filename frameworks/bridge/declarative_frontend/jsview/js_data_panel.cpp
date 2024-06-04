@@ -20,9 +20,11 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_data_panel_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
 namespace OHOS::Ace {
@@ -51,8 +53,59 @@ DataPanelModel* DataPanelModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr int32_t TYPE_CYCLE = 0;
+
+bool CheckJSCallbackInfo(
+    const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
+{
+    bool typeVerified = false;
+    std::string unrecognizedType;
+    auto tmpInfo = info[0];
+    for (const auto& infoType : infoTypes) {
+        switch (infoType) {
+            case JSCallbackInfoType::STRING:
+                if (tmpInfo->IsString()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "string|";
+                }
+                break;
+            case JSCallbackInfoType::NUMBER:
+                if (tmpInfo->IsNumber()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "number|";
+                }
+                break;
+            case JSCallbackInfoType::OBJECT:
+                if (tmpInfo->IsObject()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "object|";
+                }
+                break;
+            case JSCallbackInfoType::FUNCTION:
+                if (tmpInfo->IsFunction()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "Function|";
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
+    }
+    return typeVerified || infoTypes.size() == 0;
+}
+}
 
 constexpr size_t MAX_COUNT = 9;
+int32_t JSDataPanel::dataPanelType_ = 0;
 
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
@@ -64,6 +117,7 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
     JSClass<JSDataPanel>::StaticMethod("trackBackgroundColor", &JSDataPanel::TrackBackground);
     JSClass<JSDataPanel>::StaticMethod("strokeWidth", &JSDataPanel::StrokeWidth);
     JSClass<JSDataPanel>::StaticMethod("trackShadow", &JSDataPanel::ShadowOption);
+    JSClass<JSDataPanel>::StaticMethod("borderRadius", &JSDataPanel::BorderRadius);
 
     JSClass<JSDataPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDataPanel>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -122,6 +176,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }
+    dataPanelType_ =  dataPanelType;
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
     JSDataPanelTheme::ApplyTheme();
 }
@@ -315,6 +370,27 @@ void JSDataPanel::ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors
         gradientColorEnd.SetDimension(Dimension(1.0));
         gradient.AddColor(gradientColorEnd);
         colors.emplace_back(gradient);
+    }
+}
+
+void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsBorderRadius(info);
+    } else {
+        std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+            JSCallbackInfoType::OBJECT };
+        if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
+            if (dataPanelType_ != TYPE_CYCLE) {
+                RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+                CHECK_NULL_VOID(theme);
+                ViewAbstractModel::GetInstance()->SetBorderRadius(theme->GetDefaultBorderRadius());
+            } else {
+                ViewAbstractModel::GetInstance()->SetBorderRadius({});
+            }
+            return;
+        }
+        JSViewAbstract::ParseBorderRadius(info[0]);
     }
 }
 } // namespace OHOS::Ace::Framework

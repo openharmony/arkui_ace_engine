@@ -81,20 +81,33 @@ public:
     static RefPtr<FrameNode> GetOrCreateFrameNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
+    static RefPtr<FrameNode> GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    static RefPtr<FrameNode> CreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
+        bool isRoot = false, bool isLayoutNode = false);
 
     ~FrameNode() override;
 
     int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
+    int32_t CurrentFrameCount() const override
     {
         return 1;
     }
@@ -166,6 +179,16 @@ public:
     }
 
     void OnMountToParentDone();
+
+    bool GetIsLayoutNode();
+
+    bool GetIsFind();
+
+    void SetIsFind(bool isFind);
+
+    void GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children);
+
+    void GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset);
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
@@ -313,7 +336,8 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -402,7 +426,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -646,6 +670,11 @@ public:
         return UINode::TotalChildCount();
     }
 
+    int32_t GetTotalChildCountWithoutExpanded() const
+    {
+        return UINode::CurrentFrameCount();
+    }
+
     const RefPtr<GeometryNode>& GetGeometryNode() const override
     {
         return geometryNode_;
@@ -666,8 +695,7 @@ public:
         uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
-    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false);
-
+    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -719,6 +747,7 @@ public:
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
     RefPtr<UINode> GetFrameChildByIndex(
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
+    RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -787,7 +816,8 @@ public:
         }
     }
 
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
 
     int32_t GetUiExtensionId();
@@ -856,6 +886,11 @@ public:
         isLocalRevertMatrixAvailable_ = false;
     }
 
+    void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
+    {
+        predictLayoutNode_.emplace_back(node);
+    }
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -908,6 +943,8 @@ private:
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
@@ -921,6 +958,7 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
+    void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
@@ -937,8 +975,9 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false);
-    void ProcessThrottledVisibleCallback(double currentRatio = -1.0f);
-    void ThrottledVisibleTask(double currentRatio);
+    void ProcessThrottledVisibleCallback();
+    bool IsFrameDisappear();
+    void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -967,6 +1006,9 @@ private:
     void SetCachedTransformRelativeOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
+
+    void TriggerShouldParallelInnerWith(
+        const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
@@ -1051,10 +1093,13 @@ private:
     Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
     // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
     bool isLocalRevertMatrixAvailable_ = false;
+    bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
+
+    bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
@@ -1073,6 +1118,7 @@ private:
         RectF currFrameRect;
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
+    std::list<WeakPtr<FrameNode>> predictLayoutNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

@@ -1009,7 +1009,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
      * @tc.expected: Only onScroll call back function should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->JumpTo(5, false, ScrollAlign::CENTER, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1066,7 +1066,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->JumpTo(19, false, ScrollAlign::END, 3);
+    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1247,7 +1247,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
      * @tc.expected: Only onScroll call back function should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->JumpTo(5, false, ScrollAlign::CENTER, 3);
+    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1303,7 +1303,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->JumpTo(19, false, ScrollAlign::END, 3);
+    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);

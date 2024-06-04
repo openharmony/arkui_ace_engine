@@ -16,13 +16,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_shared_library("plugincomponent") {
   include_dirs = [
-    "$ability_runtime_services_path/common/include",
     "$ace_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ui_service_manager/include",
     "$root_out_dir/arkui/framework",
-    "//foundation/arkui",
-    "//foundation/arkui/ace_engine/frameworks",
-    "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager/include",
   ]
 
   sources = [
@@ -45,6 +42,7 @@ ohos_shared_library("plugincomponent") {
     "ability_base:base",
     "ability_base:want",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:extensionkit_native",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

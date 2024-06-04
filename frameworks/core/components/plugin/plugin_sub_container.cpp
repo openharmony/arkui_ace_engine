@@ -205,7 +205,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
             }
             context->SetupRootElement();
         },
-        TaskExecutor::TaskType::UI, "ArkUIPluginSetupRootElement");
+        TaskExecutor::TaskType::UI, "ArkUIPluginDecompressedSetupRootElement");
 
     if (frontend_) {
         frontend_->AttachPipelineContext(pipelineContext_);

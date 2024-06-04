@@ -601,6 +601,9 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, nullptr);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     return buttonNode;
 }
 

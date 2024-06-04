@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -67,6 +69,22 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             }
         }
     }
+
+    if (info.Length() > 1) {
+        auto options = info[1];
+        if (!options->IsObject()) {
+            return;
+        }
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        CanvasModel::GetInstance()->SetImageAIOptions(optionsValue);
+    }
 }
 
 void JSCanvas::JSBind(BindingTarget globalObj)
@@ -90,7 +108,7 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
+    TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas onReady begins");
     if (info.Length() < 1 || !info[0]->IsFunction()) {
         return;
     }

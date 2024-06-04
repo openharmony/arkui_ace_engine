@@ -51,10 +51,21 @@ public:
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent, GestureEventFunc callback);
+    static RefPtr<FrameNode> CreateAgingButtonNode(RefPtr<FrameNode>& textPickerNode,
+        const std::vector<ButtonInfo>& buttonInfos,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>dialogCancelEvent,
+        std::map<std::string, NG::DialogGestureEvent>dialogMoveForwardEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent,
+        GestureEventFunc closeCallback, GestureEventFunc nextCallBack, GestureEventFunc previousCallBack);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
         const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+        const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos);
+    static RefPtr<FrameNode> CreateForwardNode(NG::DialogGestureEvent& moveForwardEvent,
+        const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos);
+    static RefPtr<FrameNode> CreateBackwardNode(NG::DialogGestureEvent& moveBackwardEvent,
         const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos);
 
 private:
@@ -80,13 +91,25 @@ private:
         RefPtr<PickerTheme> pickerTheme);
     static void UpdateButtonCancelLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<PipelineContext>& pipeline);
+    static void UpdateButtonForwardLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
+        const RefPtr<PipelineContext>& pipeline);
+    static void UpdateButtonBackwardLayoutProperty(const RefPtr<FrameNode>& buttonCancelNode,
+        const RefPtr<PipelineContext>& pipeline);
     static void UpdateConfirmButtonTextLayoutProperty(
         const RefPtr<FrameNode>& textConfirmNode, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateForwardButtonTextLayoutProperty(
+        const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateBackwardButtonTextLayoutProperty(
+        const RefPtr<FrameNode>& textCancelNode, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateForwardButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateBackwardButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
@@ -95,7 +118,22 @@ private:
         const RefPtr<ButtonTheme>& buttonTheme);
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
         const RefPtr<FrameNode>& buttonNode, bool isConfirm);
+    static bool GetIsOverRange(const float& scale);
+    static void SetDialogNodePageActive(RefPtr<FrameNode>& contentRow, RefPtr<FrameNode>& textPickerNode,
+        const uint32_t& dialogNodePage, const uint32_t& showCount);
+    static RefPtr<FrameNode> SeparatedOptionsShow(RefPtr<FrameNode>& contentColumn, RefPtr<FrameNode>& textPickerNode,
+        const std::vector<ButtonInfo>& buttonInfos,
+        const TextPickerSettingData& settingData,
+        std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+        const float& scale, GestureEventFunc closeCallBack, RefPtr<FrameNode>& dialogNode);
+    static void SetDialogButtonActive(RefPtr<FrameNode>& contentColumn,
+        const uint32_t& dialogNodePage, const uint32_t& columnCount);
+    static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
     static WeakPtr<FrameNode> dialogNode_;
+    static uint32_t dialogNodePage_;
 };
 } // namespace OHOS::Ace::NG
 

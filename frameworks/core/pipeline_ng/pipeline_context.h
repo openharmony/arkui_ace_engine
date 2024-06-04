@@ -51,6 +51,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -69,6 +70,7 @@ public:
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
+    using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -93,35 +95,20 @@ public:
 
     static float GetCurrentRootHeight();
 
-    // handle close keyboard
-    RefPtr<FrameNode> HandleFocusNode();
-    void IsCloseSCBKeyboard();
-    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
-    void SetNeedSoftKeyboard(std::optional<bool> flag)
-    {
-        needSoftKeyboard_ = flag;
-    }
-
     void SetupRootElement() override;
 
     void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
-    void SetFocusNode(RefPtr<FrameNode> node)
-    {
-        focusNode_ = node;
-    }
-
-    RefPtr<FrameNode> GetFocusNode()
-    {
-        return focusNode_;
-    }
-
     void SetOnWindowFocused(const std::function<void()>& callback) override
     {
         focusOnNodeCallback_ = callback;
+    }
+
+    const std::function<void()>& GetWindowFocusCallback() const
+    {
+        return focusOnNodeCallback_;
     }
 
     const RefPtr<FrameNode>& GetRootElement() const
@@ -152,6 +139,9 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
+
+    // ReDispatch KeyEvent from Web process.
+    void ReDispatch(KeyEvent& keyEvent);
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -257,6 +247,8 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
+
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
     void AddPredictTask(PredictTask&& task);
@@ -286,6 +278,8 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
+
+    float GetPageAvoidOffset() override;
 
     void CheckAndUpdateKeyboardInset() override;
 
@@ -500,6 +494,20 @@ public:
         surfacePositionChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+    {
+        if (callback) {
+            transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterTransformHintChangedCallback(int32_t callbackId)
+    {
+        transformHintChangedCallbackMap_.erase(callbackId);
+    }
+
     void SetMouseStyleHoldNode(int32_t id)
     {
         if (mouseStyleNodeId_ == -1) {
@@ -617,6 +625,8 @@ public:
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
 
+    void OnTransformHintChanged(uint32_t transform) override;
+
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -702,7 +712,7 @@ public:
 
     bool CheckNeedDisableUpdateBackgroundImage();
 
-    void ChangeDarkModeBrightness(bool isFocus) override;
+    void ChangeDarkModeBrightness() override;
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -750,6 +760,18 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
+
+    void SetPredictNode(const RefPtr<FrameNode>& node)
+    {
+        predictNode_ = node;
+    }
+
+    void ResetPredictNode()
+    {
+        predictNode_.Reset();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -761,6 +783,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
+    void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
@@ -804,6 +827,10 @@ private:
 
     bool TriggerKeyEventDispatch(const KeyEvent& event);
 
+    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
+
+    bool IsSkipShortcutAndFocusMove();
+
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;
@@ -825,6 +852,8 @@ private:
     void UpdateFormLinkInfos();
 
     void FlushFrameRate();
+
+    void RegisterFocusCallback();
 
     template<typename T>
     struct NodeCompare {
@@ -888,6 +917,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
+    TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
 
     bool isOnAreaChangeNodesCacheVaild_ = false;
     std::vector<FrameNode*> onAreaChangeNodesCache_;
@@ -964,6 +994,8 @@ private:
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
+    RefPtr<FrameNode> predictNode_;
+
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
@@ -972,6 +1004,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;

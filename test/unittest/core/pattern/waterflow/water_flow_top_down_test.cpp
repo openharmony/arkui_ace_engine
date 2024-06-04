@@ -432,8 +432,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
     }
     EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
 
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
-    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 0 }));
 }
 
 /**

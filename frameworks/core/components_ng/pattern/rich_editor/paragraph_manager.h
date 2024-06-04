@@ -20,6 +20,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
 namespace OHOS::Ace::NG {
 class ParagraphManager : public virtual AceType {
@@ -38,6 +39,7 @@ public:
     std::optional<double> minParagraphFontSize = std::nullopt;
 
     int32_t GetIndex(Offset offset, bool clamp = false) const;
+    PositionWithAffinity GetGlyphPositionAtCoordinate(Offset offset);
     float GetHeight() const;
 
     const std::list<ParagraphInfo>& GetParagraphs() const
@@ -73,8 +75,9 @@ public:
     float GetMaxWidth() const;
     float GetTextWidth() const;
     float GetTextWidthIncludeIndent() const;
-    size_t GetLineCount() const;
+    size_t GetLineCount(bool isSkipEmptyParagraphs = false) const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
+    TextLineMetrics GetLineMetrics(size_t lineNumber);
 
 private:
     std::list<ParagraphInfo> paragraphs_;

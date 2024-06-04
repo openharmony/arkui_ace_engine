@@ -63,7 +63,7 @@ struct NodeInfoPU {
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;
 
-class ACE_EXPORT ViewPartialUpdateModel {
+class ACE_FORCE_EXPORT ViewPartialUpdateModel {
 public:
     static ViewPartialUpdateModel* GetInstance();
     virtual ~ViewPartialUpdateModel() = default;

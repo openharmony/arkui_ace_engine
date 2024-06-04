@@ -80,15 +80,12 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     if (rowsLen.empty()) {
         rowsLen.push_back(idealSize.Height());
     }
-    if (rows.second) {
-        rowsGap_ = 0;
-    }
+    rowsGap_ = rows.second;
+
     if (colsLen.empty()) {
         colsLen.push_back(idealSize.Width());
     }
-    if (cols.second) {
-        columnsGap_ = 0;
-    }
+    columnsGap_ = cols.second;
 
     if (static_cast<uint32_t>(mainCount_) != rowsLen.size()) {
         mainCount_ = rowsLen.size();

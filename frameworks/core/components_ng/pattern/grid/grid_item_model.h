@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 
 namespace OHOS::Ace {
-class GridItemModel {
+class ACE_FORCE_EXPORT GridItemModel {
 public:
     static GridItemModel* GetInstance();
     virtual ~GridItemModel() = default;

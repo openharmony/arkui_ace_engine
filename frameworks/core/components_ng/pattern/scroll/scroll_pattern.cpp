@@ -79,6 +79,7 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    SetEdgeRtl();
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -1182,6 +1183,10 @@ void ScrollPattern::DumpAdvanceInfo()
 void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     ScrollablePattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto initialOffset = JsonUtil::Create(true);
     initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
     initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
@@ -1191,5 +1196,18 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
+}
+
+void ScrollPattern::SetEdgeRtl()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto scrollEdgeEffect = GetScrollEdgeEffect();
+    CHECK_NULL_VOID(scrollEdgeEffect);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    scrollEdgeEffect->SetScrollRtl(layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL);
 }
 } // namespace OHOS::Ace::NG

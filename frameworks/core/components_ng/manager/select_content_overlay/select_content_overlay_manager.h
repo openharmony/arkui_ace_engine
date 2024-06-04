@@ -104,7 +104,6 @@ private:
     WeakPtr<FrameNode> selectOverlayNode_;
     std::shared_ptr<SelectOverlayInfo> shareOverlayInfo_;
     WeakPtr<FrameNode> rootNodeWeak_;
-    WeakPtr<FrameNode> realRootNodeWeak_;
     int32_t selectionHoldId_ = -1;
     std::optional<HoldSelectionInfo> holdSelectionInfo_;
     LegacyManagerCallbacks legacyManagerCallbacks_;

@@ -108,6 +108,12 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
     view->NotifyDensityChanged(config.Density());
 }
 
+void AceViewOhos::TransformHintChanged(AceViewOhos* view, uint32_t transform)
+{
+    CHECK_NULL_VOID(view);
+    view->NotifyTransformHintChanged(transform);
+}
+
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {
@@ -321,29 +327,21 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            event.x = event.windowX;
-            event.y = event.windowY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
             action = DragEventAction::DRAG_EVENT_END;
-            event.x = event.windowX;
-            event.y = event.windowY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {
             action = DragEventAction::DRAG_EVENT_START;
-            event.x = event.displayX;
-            event.y = event.displayY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
             action = DragEventAction::DRAG_EVENT_OUT;
-            event.x = event.displayX;
-            event.y = event.displayY;
             dragEventCallback_(event, action);
             break;
         }

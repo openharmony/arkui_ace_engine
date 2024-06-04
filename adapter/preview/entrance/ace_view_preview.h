@@ -100,6 +100,8 @@ public:
         densityChangeCallback_ = std::move(callback);
     }
 
+    void RegisterTransformHintChangeCallback(TransformHintChangeCallback&& callback) override {}
+
     void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) override
     {
         ACE_DCHECK(callback);

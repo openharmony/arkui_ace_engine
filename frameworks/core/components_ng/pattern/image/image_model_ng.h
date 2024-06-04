@@ -64,6 +64,7 @@ public:
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
     void SetImageAnalyzerConfig(void* config) override;
+    void SetImageAIOptions(void* options) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
@@ -74,6 +75,7 @@ public:
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
+    static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
@@ -85,6 +87,7 @@ public:
     static void SetImageFill(FrameNode *frameNode, const Color &color);
     static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void ResetImageInterpolation(FrameNode *frameNode);
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);

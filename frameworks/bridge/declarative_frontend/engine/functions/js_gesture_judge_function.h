@@ -42,11 +42,15 @@ public:
     GestureJudgeResult Execute(
         const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info);
 
+    GestureJudgeResult Execute(const std::shared_ptr<BaseGestureEvent>& info,
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::list<RefPtr<NG::NGGestureRecognizer>>& others);
+
 private:
     JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo);
     JSRef<JSObject> CreateEventTargetObject(const std::shared_ptr<BaseGestureEvent>& info);
     void SetUniqueAttributes(
         JSRef<JSObject>& obj, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
+    JSRef<JSObject> CreateGestureEventObject(const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName);
 };
 } // namespace OHOS::Ace::Framework
 

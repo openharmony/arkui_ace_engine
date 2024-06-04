@@ -156,9 +156,9 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step2. Test JumpTo func.
      */
-    controller->JumpTo(2, false, ScrollAlign::START, 0);
+    controller->ScrollToIndex(2, false, ScrollAlign::START, std::nullopt);
     EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 2);
-    controller->JumpTo(0, false, ScrollAlign::START, 0);
+    controller->ScrollToIndex(0, false, ScrollAlign::START, std::nullopt);
     EXPECT_EQ(pattern_->layoutInfo_->jumpIndex_, 0);
 }
 
@@ -538,5 +538,54 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+}
+
+/**
+ * @tc.name: Focus001
+ * @tc.desc: Test WaterFlow scroll during focus change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Focus001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateFocusableItem(30);
+    });
+
+    auto next = pattern_->GetNextFocusNode(FocusStep::DOWN, GetChildFocusHub(frameNode_, 5)).Upgrade();
+    auto cmp = GetChildFocusHub(frameNode_, 6);
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+
+    cmp = GetChildFocusHub(frameNode_, 4);
+    next = pattern_->GetNextFocusNode(FocusStep::UP, GetChildFocusHub(frameNode_, 5)).Upgrade();
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+    auto info = pattern_->layoutInfo_;
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+
+    next = pattern_->GetNextFocusNode(FocusStep::LEFT, GetChildFocusHub(frameNode_, 0)).Upgrade();
+    EXPECT_FALSE(next);
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    next = pattern_->GetNextFocusNode(FocusStep::RIGHT, GetChildFocusHub(frameNode_, 10)).Upgrade();
+    EXPECT_EQ(GetChildRect(frameNode_, 11).Bottom(), WATERFLOW_HEIGHT);
+    cmp = GetChildFocusHub(frameNode_, 11);
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    next = pattern_->GetNextFocusNode(FocusStep::LEFT, GetChildFocusHub(frameNode_, 29)).Upgrade();
+    cmp = GetChildFocusHub(frameNode_, 28);
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+    next = pattern_->GetNextFocusNode(FocusStep::DOWN_END, GetChildFocusHub(frameNode_, 29)).Upgrade();
+    EXPECT_FALSE(next);
+
+    EXPECT_EQ(info->startIndex_, 19);
+    next = pattern_->GetNextFocusNode(FocusStep::UP_END, GetChildFocusHub(frameNode_, info->startIndex_)).Upgrade();
+    cmp = GetChildFocusHub(frameNode_, 18);
+    EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+    EXPECT_EQ(GetChildY(frameNode_, 18), 0.0f);
 }
 } // namespace OHOS::Ace::NG

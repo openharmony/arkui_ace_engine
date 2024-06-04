@@ -33,6 +33,7 @@ public:
     void SetTextColor(const Color& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
+    void SetTextSelectableMode(TextSelectableMode value) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;

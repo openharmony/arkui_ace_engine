@@ -31,8 +31,8 @@ public:
     {}
     ~PixelMapImageObject() override = default;
 
-    void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+    void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
+        bool syncLoad, bool loadInVipChannel = false) override;
 
     static RefPtr<PixelMapImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 

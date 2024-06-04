@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -41,6 +42,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -1258,7 +1260,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -1750,6 +1752,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
+    JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
     JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
@@ -2050,7 +2053,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2169,7 +2172,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
             updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
-            updateSpanStyle.hasResourceDecorationColor = color->IsObject();
+            updateSpanStyle.hasResourceDecorationColor = false;
         }
     }
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
@@ -2298,6 +2301,20 @@ void JSRichEditorBaseController::SetSelection(const JSCallbackInfo& args)
     std::optional<SelectionOptions> options = std::nullopt;
     ParseJsSelectionOptions(args, options);
     controller->SetSelection(selectionStart, selectionEnd, options);
+}
+
+void JSRichEditorBaseController::GetLayoutManager(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
+    auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
+    CHECK_NULL_VOID(jsLayoutManager);
+    jsLayoutManager->IncRefCount();
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto layoutInfoInterface = controller->GetLayoutInfoInterface();
+    jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
+    args.SetReturnValue(obj);
 }
 
 void JSRichEditorBaseController::ParseJsSelectionOptions(
@@ -2468,6 +2485,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "getStyledString", &JSRichEditorStyledStringController::GetStyledString);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "onContentChanged", &JSRichEditorStyledStringController::OnContentChanged);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getLayoutManager", &JSRichEditorStyledStringController::GetLayoutManager);
     JSClass<JSRichEditorStyledStringController>::Method(
         "stopEditing", &JSRichEditorStyledStringController::StopEditing);
     JSClass<JSRichEditorStyledStringController>::Method(

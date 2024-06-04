@@ -72,6 +72,9 @@ public:
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
+    void UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -128,10 +131,21 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void HideSystemTopMostWindow();
+    RefPtr<Subwindow> GetSystemToastWindow()
+    {
+        return systemToastWindow_;
+    }
+    void SetSystemToastWindow(RefPtr<Subwindow> systemToastWindow)
+    {
+        systemToastWindow_ = systemToastWindow;
+    }
+    void ClearToastInSystemSubwindow();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
-
+    RefPtr<Subwindow> GetOrCreateSystemSubWindow();
+    RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -155,6 +169,7 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
+    RefPtr<Subwindow> systemToastWindow_;
 };
 
 } // namespace OHOS::Ace

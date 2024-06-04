@@ -992,6 +992,32 @@ ArkUINativeModuleValue TextBridge::ResetSelection(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TextBridge::SetTextSelectableMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> textSelectableModeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (textSelectableModeArg->IsNull() || textSelectableModeArg->IsUndefined() || !textSelectableModeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextSelectableMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t textSelectableMode = textSelectableModeArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextModifier()->setTextSelectableMode(nativeNode, textSelectableMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextBridge::ResetTextSelectableMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextModifier()->resetTextSelectableMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

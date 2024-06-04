@@ -13,6 +13,7 @@
 
 group("advanced_ui_component") {
   deps = [
+    "arcslider/interfaces:arcslider",
     "atomicservicenavigation/interfaces:atomicservicenavigation",
     "chip/interfaces:chip",
     "chipgroup/interfaces:chipgroup",
@@ -20,6 +21,7 @@ group("advanced_ui_component") {
     "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
+    "downloadfilebutton/interfaces:downloadfilebutton",
     "editabletitlebar/interfaces:editabletitlebar",
     "exceptionprompt/interfaces:exceptionprompt",
     "filter/interfaces:filter",

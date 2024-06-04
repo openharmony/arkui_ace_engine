@@ -136,9 +136,9 @@ class FrameNode {
     if (node === null) {
       return;
     }
-    let child = node.getFirstChild();
+    let child = node.getFirstChildWithoutExpand();
     FrameNode.disposeTreeRecursively(child);
-    let sibling = node.getNextSibling();
+    let sibling = node.getNextSiblingWithoutExpand();
     FrameNode.disposeTreeRecursively(sibling);
     node.dispose();
   }
@@ -210,7 +210,19 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    } else {
+      content.setAttachedParent(new WeakRef<FrameNode>(this));
     }
+  }
+
+  removeComponentContent(content: ComponentContent): void {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
+    content.setAttachedParent(undefined);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
@@ -276,8 +288,34 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
+  getFirstChildWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
   getNextSibling(): FrameNode | null {
     const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getNextSiblingWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;

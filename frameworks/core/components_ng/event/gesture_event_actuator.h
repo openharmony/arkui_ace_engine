@@ -33,7 +33,7 @@ public:
     ~GestureEventActuator() override = default;
 
     virtual void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, TouchTestResult& responseLinkResult)
     {}
 
     void SetOnAccessibility(OnAccessibilityEventFunc onAccessibilityEvent)

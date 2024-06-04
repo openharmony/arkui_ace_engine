@@ -38,8 +38,8 @@ namespace {
 #ifndef ACE_UNITTEST
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
-#endif
 constexpr double HANGING_PERCENT = 0.8;
+#endif
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
 const std::string URL_SYMBOL = ";base64,";
@@ -261,7 +261,7 @@ void OffscreenCanvasPaintMethod::FillText(
     if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, maxWidth, false, HasShadow());
+    PaintText(static_cast<float>(width_), x, y, maxWidth, false, HasShadow());
 }
 
 void OffscreenCanvasPaintMethod::StrokeText(
@@ -271,13 +271,13 @@ void OffscreenCanvasPaintMethod::StrokeText(
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, maxWidth, true, true);
+        PaintText(static_cast<float>(width_), x, y, maxWidth, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {
         return;
     }
-    PaintText(text, x, y, maxWidth, true);
+    PaintText(static_cast<float>(width_), x, y, maxWidth, true);
 }
 
 double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
@@ -377,81 +377,6 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 #endif
 }
 
-void OffscreenCanvasPaintMethod::PaintText(
-    const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
-{
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        paragraph_->Layout(FLT_MAX);
-    } else {
-        paragraph_->Layout(width_);
-    }
-    if (width_ > paragraph_->GetMaxIntrinsicWidth()) {
-        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
-    }
-    auto align = isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign();
-    double dx = x + GetAlignOffset(align, paragraph_);
-    auto baseline = isStroke ? state_.strokeState.GetTextStyle().GetTextBaseline()
-                             : state_.fillState.GetTextStyle().GetTextBaseline();
-    double dy = y + GetBaselineOffset(baseline, paragraph_);
-
-    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
-    if (hasShadow) {
-        rsCanvas_->Save();
-        auto shadowOffsetX = state_.shadow.GetOffset().GetX();
-        auto shadowOffsetY = state_.shadow.GetOffset().GetY();
-        if (scale.has_value()) {
-            if (!NearZero(scale.value())) {
-                dx /= scale.value();
-                shadowOffsetX /= scale.value();
-            }
-            rsCanvas_->Scale(scale.value(), 1.0);
-        }
-        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
-        rsCanvas_->Restore();
-        return;
-    }
-    if (scale.has_value()) {
-        if (!NearZero(scale.value())) {
-            dx /= scale.value();
-        }
-        rsCanvas_->Save();
-        rsCanvas_->Scale(scale.value(), 1.0);
-        paragraph_->Paint(rsCanvas_.get(), dx, dy);
-        rsCanvas_->Restore();
-    } else {
-        paragraph_->Paint(rsCanvas_.get(), dx, dy);
-    }
-}
-
-double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph)
-{
-    double y = 0.0;
-    switch (baseline) {
-        case TextBaseline::ALPHABETIC:
-            y = -paragraph->GetAlphabeticBaseline();
-            break;
-        case TextBaseline::IDEOGRAPHIC:
-            y = -paragraph->GetIdeographicBaseline();
-            break;
-        case TextBaseline::BOTTOM:
-            y = -paragraph->GetHeight();
-            break;
-        case TextBaseline::TOP:
-            y = 0.0;
-            break;
-        case TextBaseline::MIDDLE:
-            y = -paragraph->GetHeight() / 2;
-            break;
-        case TextBaseline::HANGING:
-            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
-            break;
-        default:
-            y = -paragraph->GetAlphabeticBaseline();
-            break;
-    }
-    return y;
-}
-
 bool OffscreenCanvasPaintMethod::UpdateOffParagraph(
     const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
 {
@@ -545,7 +470,7 @@ void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& s
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         rsCanvas_->SaveLayer(*slo);
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
@@ -560,7 +485,7 @@ void OffscreenCanvasPaintMethod::PaintImageShadow(const RSPath& path, const Shad
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(rsCanvas_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
         RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
         rsCanvas_->Restore();
         rsCanvas_->SaveLayer(*slo);
@@ -651,5 +576,10 @@ TransformParam OffscreenCanvasPaintMethod::GetTransform() const
         param.translateY = matrix.Get(RSMatrix::TRANS_Y);
     }
     return param;
+}
+
+LineDashParam OffscreenCanvasPaintMethod::GetLineDash() const
+{
+    return state_.strokeState.GetLineDash();
 }
 } // namespace OHOS::Ace::NG

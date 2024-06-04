@@ -54,6 +54,7 @@ public:
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
+    static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
@@ -116,6 +117,7 @@ public:
     void CloseSelectionMenu();
 
     void SetStyledString(const JSCallbackInfo& info);
+    void GetLayoutManager(const JSCallbackInfo& args);
 private:
     WeakPtr<TextControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextController);

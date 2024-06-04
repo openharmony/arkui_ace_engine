@@ -23,7 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
