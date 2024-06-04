@@ -6741,10 +6741,10 @@ bool TextFieldPattern::HasInputOperation()
 bool TextFieldPattern::UpdateFocusForward()
 {
     if (focusIndex_ == FocuseIndex::TEXT && HasFocus()) {
-        if (!CancelNodeIsShow() && responseArea_ == nullptr) {
-            return false;
-        }
         if (!CancelNodeIsShow()) {
+            if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
+                return false;
+            }
             focusIndex_ = FocuseIndex::UNIT;
             PaintResponseAreaRect();
             return true;
