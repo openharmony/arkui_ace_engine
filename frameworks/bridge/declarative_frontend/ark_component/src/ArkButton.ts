@@ -115,7 +115,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<ButtonConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ButtonContentModifier.identity, ButtonContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
@@ -592,6 +592,16 @@ class ButtonCreateTypeModifier extends ModifierWithKey<boolean> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class ButtonContentModifier extends ModifierWithKey<ContentModifier<ButtonConfiguration>> {
+  constructor(value: ContentModifier<ButtonConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let buttonComponent = component as ArkButtonComponent;
+    buttonComponent.setContentModifier(this.value);
   }
 }
 
