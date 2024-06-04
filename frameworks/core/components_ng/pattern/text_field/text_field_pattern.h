@@ -1330,6 +1330,7 @@ private:
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
+    bool SelectOverlayVisibile();
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -1696,6 +1697,7 @@ private:
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
+    bool isTextSelectionMenuShow_ = true;
     int32_t clickTimes_ = -1;
 };
 } // namespace OHOS::Ace::NG

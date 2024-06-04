@@ -715,12 +715,36 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
            LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width());
 }
 
+bool TextFieldPattern::SelectOverlayVisibile()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, {});
+    auto pipeline = tmpHost->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, {});
+    auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
+    CHECK_NULL_RETURN(keyboardInset, {});
+    auto selectArea = selectOverlay_->GetSelectArea();
+    CHECK_NULL_RETURN(selectArea, {});
+    auto globalOffsetY = GetPaintRectGlobalOffset();
+    CHECK_NULL_RETURN(globalOffsetY, {});
+    if (selectArea.Bottom() < 0) {
+        return false;
+    } else if (selectArea.Bottom() <= contentRect_.Top() + globalOffsetY.GetY() ||
+               selectArea.Top() > keyboardInset.start ||
+               selectArea.Right() <= contentRect_.Left()  + globalOffsetY.GetX() ||
+               selectArea.Left() >= contentRect_.Right()  + globalOffsetY.GetX()) {
+        return false;
+    }
+    return true;
+}
+
 void TextFieldPattern::OnScrollEndCallback()
 {
     ScheduleDisappearDelayTask();
     auto selectArea = selectOverlay_->GetSelectArea();
-    if (!IsUsingMouse() && SelectOverlayIsOn() &&
-        !(Negative(selectArea.Width()) || Negative(selectArea.Height()))) {
+    if (!IsUsingMouse() && SelectOverlayIsOn() && isTextSelectionMenuShow_ && SelectOverlayVisibile()) {
         selectOverlay_->ShowMenu();
     }
 }
@@ -5435,6 +5459,12 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         PlayScrollBarAppearAnimation();
+        auto selectArea = selectOverlay_->GetSelectArea();
+        if (selectOverlay_->IsCurrentMenuVisibile()) {
+            isTextSelectionMenuShow_ = true;
+        } else if (SelectOverlayVisibile()) {
+            isTextSelectionMenuShow_ = false;
+        }
         selectOverlay_->HideMenu();
         return true;
     }
