@@ -337,10 +337,13 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
         option,
-        [previewRenderContext, scaleAfter, offset]() {
+        [previewRenderContext, dragPreviewContext, scaleAfter, offset]() {
             CHECK_NULL_VOID(previewRenderContext);
             previewRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
             previewRenderContext->UpdateTransformTranslate({ offset.GetX(), offset.GetY(), 0.0f });
+
+            CHECK_NULL_VOID(dragPreviewContext);
+            dragPreviewContext->UpdateTransformTranslate({ offset.GetX(), offset.GetY(), 0.0f });
         });
 }
 
@@ -367,24 +370,36 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     auto dragPreviewContext = dragPreviewNode->GetRenderContext();
     CHECK_NULL_VOID(dragPreviewContext);
 
+    // update custom preview scale and position
+    ContextMenuSwitchDragPreviewScaleAnimationProc(dragPreviewContext, previewRenderContext, previewChild, offset,
+        duration);
+
     // custom preview and drag preview update Opacity
+    CHECK_NULL_VOID(!menuWrapperPattern->GetIsShowHoverImagePreviewStartDrag());
+    menuWrapperPattern->SetIsShowHoverImagePreviewStartDrag(true);
     previewRenderContext->UpdateOpacity(1.0);
     dragPreviewContext->UpdateOpacity(0.0);
     AnimationOption option;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
+    option.SetOnFinishEvent(
+        [id = Container::CurrentId(), menuWrapperPattern] {
+            ContainerScope scope(id);
+            menuWrapperPattern->SetIsShowHoverImagePreviewStartDrag(false);
+        });
     AnimationUtils::Animate(
-        option, [previewRenderContext, dragPreviewContext]() {
+        option, [previewRenderContext, dragPreviewContext]() mutable {
             CHECK_NULL_VOID(previewRenderContext);
             previewRenderContext->UpdateOpacity(0.0);
+
+            BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(0.0_vp);
+            previewRenderContext->UpdateBorderRadius(borderRadius);
 
             CHECK_NULL_VOID(dragPreviewContext);
             dragPreviewContext->UpdateOpacity(1.0);
         },
         option.GetOnFinishEvent());
-    
-    ContextMenuSwitchDragPreviewScaleAnimationProc(dragPreviewContext, previewRenderContext, previewChild, offset,
-        duration);
 }
 
 void ShowContextMenuDisappearAnimation(

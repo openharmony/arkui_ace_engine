@@ -3381,7 +3381,8 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM) {
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM || menuParam.hasPreviewTransitionEffect ||
+            menuParam.hasTransitionEffect) {
             return;
         }
         auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");

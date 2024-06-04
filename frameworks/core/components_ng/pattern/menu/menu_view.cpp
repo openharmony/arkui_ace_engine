@@ -271,7 +271,8 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
     return menuHostNode->GetPattern<MenuPattern>();
 }
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext)
+void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
+    bool isShowHoverImage)
 {
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
@@ -283,12 +284,14 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
     AnimationUtils::Animate(
         option,
-        [imageContext, previewBorderRadius, shadow]() mutable {
+        [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
             if (imageContext) {
                 auto color = shadow->GetColor();
                 auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
                 shadow->SetColor(newColor);
                 imageContext->UpdateBackShadow(shadow.value());
+
+                CHECK_NULL_VOID(!isShowHoverImage);
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(previewBorderRadius);
                 imageContext->UpdateBorderRadius(borderRadius);
@@ -392,7 +395,7 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
         ShowPixelMapScaleAnimationProc(menuTheme, imageContext, menuPattern, menuParam);
     }
 
-    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, menuParam.isShowHoverImage);
 }
 
 void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
