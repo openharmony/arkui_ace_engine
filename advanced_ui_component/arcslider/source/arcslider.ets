@@ -810,6 +810,7 @@ export struct ArcSlider {
           .onTouch((event?: TouchEvent) => {
             if (event) {
               if (event.type === TouchType.Down && this.isEnlarged === false) {
+                this.touchY = event.touches[0].y;
                 clearTimeout(this.meter);
                 if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
                   this.options.onTouch?.(event);
