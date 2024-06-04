@@ -35,6 +35,7 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
     { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
 };
 const uint32_t CLEAN_BLANK_DELAY_TIME = 1000;
+const int32_t ANIMATION_CONFIG_CURVE = 200;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -300,16 +301,11 @@ void WindowScene::BufferAvailableCallbackForBlank()
         CHECK_NULL_VOID(context);
         auto blankRsNode = context->GetRSNode();
         CHECK_NULL_VOID(blankRsNode);
-        blankRsNode->MarkNodeGroup(true);
         blankRsNode->SetAlpha(1);
         auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
         Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(200);
-        auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
-        auto iter = curveMap.find("linear");
-        if (iter != curveMap.end()) {
-            curve = iter->second;
-        }
+        protocol.SetDuration(ANIMATION_CONFIG_CURVE);
+        auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
         Rosen::RSNode::Animate(protocol, curve, [blankRsNode, effect] {
             AceAsyncTraceBegin(0, "BlankNodeExitAnimation");
             blankRsNode->NotifyTransition(effect, false);
