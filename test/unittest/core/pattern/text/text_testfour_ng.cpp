@@ -379,4 +379,156 @@ HWTEST_F(TextTestFourNg, TextRace001, TestSize.Level1)
     textPaintMethod.DoStartTextRace();
     textContentModifier->StopTextRace();
 }
+
+/**
+ * @tc.name: GetTextRacePercent001
+ * @tc.desc: test GetTextRacePercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, GetTextRacePercent001, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+
+    textContentModifier->GetTextRacePercent();
+    textContentModifier->racePercentFloat_->Set(1.0f);
+    auto ret = textContentModifier->GetTextRacePercent();
+    EXPECT_EQ(ret, 1.0f);
+}
+
+/**
+ * @tc.name: DetermineTextRace001
+ * @tc.desc: test DetermineTextRace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, DetermineTextRace001, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeSet_ = false;
+    textContentModifier->marqueeOption_.start = false;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::DEFAULT;
+    textContentModifier->DetermineTextRace();
+    EXPECT_FALSE(textContentModifier->marqueeSet_);
+}
+
+/**
+ * @tc.name: DetermineTextRace002
+ * @tc.desc: test GetTextRacePercent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, DetermineTextRace002, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->textRacing_ = true;
+    textContentModifier->marqueeFocused_ = true;
+    textContentModifier->marqueeHovered_ = true;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    textContentModifier->DetermineTextRace();
+    EXPECT_TRUE(textContentModifier->marqueeSet_);
+
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->textRacing_ = false;
+    textContentModifier->marqueeFocused_ = true;
+    textContentModifier->marqueeHovered_ = false;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = true;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeFocused_ = true;
+    textContentModifier->marqueeHovered_ = true;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    textContentModifier->DetermineTextRace();
+    EXPECT_TRUE(textContentModifier->marqueeSet_);
+}
+
+/**
+ * @tc.name: AllowTextRace001
+ * @tc.desc: test AllowTextRace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, AllowTextRace001, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    textContentModifier->AllowTextRace();
+
+    textContentModifier->marqueeSet_ = false;
+    textContentModifier->marqueeOption_.start = false;
+    bool ret = textContentModifier->AllowTextRace();
+    EXPECT_FALSE(ret);
+
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.loop = 1;
+    textContentModifier->marqueeCount_ = 2;
+    ret = textContentModifier->AllowTextRace();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AllowTextRace002
+ * @tc.desc: test AllowTextRace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, AllowTextRace002, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+    textContentModifier->AllowTextRace();
+
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.loop = 0;
+    textContentModifier->marqueeCount_ = -1;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    bool ret = textContentModifier->AllowTextRace();
+    EXPECT_FALSE(ret);
+
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::DEFAULT;
+    textContentModifier->marqueeFocused_ = true;
+    textContentModifier->marqueeHovered_ = true;
+    ret = textContentModifier->AllowTextRace();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: PauseTextRace001
+ * @tc.desc: test PauseTextRace.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, PauseTextRace001, TestSize.Level1)
+{
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    ASSERT_NE(textContentModifier, nullptr);
+
+    textContentModifier->textRacing_ = false;
+    textContentModifier->PauseTextRace();
+
+    textContentModifier->textRacing_ = true;
+    textContentModifier->PauseTextRace();
+    EXPECT_FALSE(textContentModifier->textRacing_);
+}
+
 } // namespace OHOS::Ace::NG
