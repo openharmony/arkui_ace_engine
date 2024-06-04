@@ -1481,6 +1481,18 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     return true;
 }
 
+float SheetPresentationPattern::GetFirstChildHeight() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto firstChildNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(firstChildNode, 0.0f);
+    auto firstChildGeometryNode = firstChildNode->GetGeometryNode();
+    CHECK_NULL_RETURN(firstChildGeometryNode, 0.0f);
+    auto titleHeight = firstChildGeometryNode->GetFrameSize().Height();
+    return titleHeight;
+}
+
 void SheetPresentationPattern::SetColumnMinSize(bool reset)
 {
     auto host = GetHost();
