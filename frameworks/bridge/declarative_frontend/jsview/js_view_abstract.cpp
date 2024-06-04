@@ -7447,6 +7447,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
+    auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
@@ -7495,6 +7496,15 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
                 sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
             }
+        }
+    }
+    if (scrollSizeMode->IsNull() || scrollSizeMode->IsUndefined()) {
+        sheetStyle.scrollSizeMode.reset();
+    } else if (scrollSizeMode->IsNumber()) {
+        auto sheetScrollSizeMode = scrollSizeMode->ToNumber<int32_t>();
+        if (sheetScrollSizeMode >= static_cast<int>(NG::ScrollSizeMode::FOLLOW_DETENT) &&
+            sheetScrollSizeMode <= static_cast<int>(NG::ScrollSizeMode::CONTINUOUS)) {
+            sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(sheetScrollSizeMode);
         }
     }
     Color color;

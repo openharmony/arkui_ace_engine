@@ -107,6 +107,7 @@ void SheetPresentationPattern::InitPageHeight()
     auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
+    scrollSizeMode_ = GetScrollSizeMode();
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -311,6 +312,7 @@ void SheetPresentationPattern::HandleDragStart()
         isAnimationBreak_ = true;
     }
     currentOffset_ = 0.0f;
+    isDirectionUp_ = true;
 }
 
 void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
@@ -344,6 +346,10 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     if (LessOrEqual(offset, (pageHeight - sheetMaxHeight_))) {
         offset = pageHeight - sheetMaxHeight_;
         currentOffset_ = height - sheetMaxHeight_;
+    }
+    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && currentOffset_ < 0;
+    if (isNeedChangeScrollHeight) {
+        ChangeScrollHeight(height - currentOffset_);
     }
     ProcessColumnRect(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
@@ -407,6 +413,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
+                isDirectionUp_ = false;
                 detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -421,6 +428,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     } else {
         // when drag velocity is over the threshold
         if (GreatOrEqual(dragVelocity, 0.0f)) {
+            isDirectionUp_ = false;
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
@@ -632,12 +640,15 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
     property_->Set(start_);
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), renderContext, offset]() {
+        [weak = AceType::WeakClaim(this), renderContext, offset, scrollSizeMode = scrollSizeMode_]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {
                 renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
+                if (scrollSizeMode == ScrollSizeMode::CONTINUOUS) {
+                    ref->ChangeScrollHeight(ref->height_);
+                }
             }
         },
         finishCallback);
@@ -645,7 +656,9 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    if (HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_) {
+    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDirectionUp_;
+    if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
+        || isNeedChangeScrollHeight) {
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
@@ -1093,6 +1106,18 @@ SheetType SheetPresentationPattern::GetSheetType()
         GetSheetTypeWithPopup(sheetType);
     }
     return sheetType;
+}
+
+ScrollSizeMode SheetPresentationPattern::GetScrollSizeMode()
+{
+    ScrollSizeMode scrollSizeMode = ScrollSizeMode::FOLLOW_DETENT;
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, scrollSizeMode);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.scrollSizeMode.has_value() && sheetStyle.scrollSizeMode.value() == ScrollSizeMode::CONTINUOUS) {
+        return ScrollSizeMode::CONTINUOUS;
+    }
+    return scrollSizeMode;
 }
 
 void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
@@ -1812,6 +1837,7 @@ void SheetPresentationPattern::OnScrollStartRecursive(float position, float velo
     }
     currentOffset_ = 0.0f;
     isSheetNeedScroll_ = false;
+    isDirectionUp_ = true;
 }
 
 ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
@@ -1863,6 +1889,10 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     if (LessOrEqual(sheetOffsetInPage, pageHeight - sheetMaxHeight_)) {
         sheetOffsetInPage = pageHeight - sheetMaxHeight_;
         currentOffset_ = currentHeightPos - sheetMaxHeight_;
+    }
+    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && scrollOffset < 0;
+    if (isNeedChangeScrollHeight) {
+        ChangeScrollHeight(currentHeightPos - currentOffset_);
     }
     ProcessColumnRect(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
