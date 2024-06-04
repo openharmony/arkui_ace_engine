@@ -190,6 +190,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(buttonFrameNode);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateVisibility(searchButton.has_value() ? VisibleType::VISIBLE : VisibleType::GONE);
     buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
