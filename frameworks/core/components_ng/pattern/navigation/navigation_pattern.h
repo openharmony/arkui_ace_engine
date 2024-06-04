@@ -71,6 +71,7 @@ public:
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -397,6 +398,12 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
+    float GetPaintRectHeight(const RefPtr<FrameNode>& node)
+    {
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, 0.0f);
+        return renderContext->GetPaintRectWithoutTransform().Height();
+    }
     void AddDividerHotZoneRect();
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
