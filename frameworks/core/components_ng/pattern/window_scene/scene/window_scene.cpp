@@ -34,7 +34,7 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
     { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
     { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
 };
-const uint32_t CLEAN_BLANK_DELAY_TIME  = 1000;
+const uint32_t CLEAN_BLANK_DELAY_TIME = 1000;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -389,7 +389,7 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    AddChild(host, contentNode_, contentNodeName_);
+    AddChild(host, contentNode_, contentNodeName_, 0);
     surfaceNode->SetBufferAvailableCallback(callback_);
     if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_) &&
         NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_)) {
