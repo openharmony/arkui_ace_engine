@@ -200,6 +200,11 @@ public:
         return navigationPathInfo_;
     }
 
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
