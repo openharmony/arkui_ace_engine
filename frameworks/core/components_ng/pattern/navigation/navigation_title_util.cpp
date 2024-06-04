@@ -241,6 +241,15 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemTextNode(const std::string& 
     return textNode;
 }
 
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barItem, const bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
@@ -263,13 +272,14 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(symbolProperty, nullptr);
-        symbolProperty->UpdateFontSize(iconWidth);
         if (isButtonEnabled) {
             symbolProperty->UpdateSymbolColorList({ iconColor });
         } else {
             symbolProperty->UpdateSymbolColorList({ iconColor.BlendOpacity(iconOpacity) });
         }
         barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+        UpdateSymbolEffect(symbolProperty, false);
+        symbolProperty->UpdateFontSize(iconWidth);
         iconNode->MarkModifyDone();
         return iconNode;
     }
