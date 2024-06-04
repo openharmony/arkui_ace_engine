@@ -41,6 +41,7 @@ constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
+constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -464,6 +465,20 @@ void ResetSwiperDisplayCount(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
+}
+
+void SetSwiperSwipeByGroup(ArkUINodeHandle node, ArkUI_Bool swipeByGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, swipeByGroup);
+}
+
+void ResetSwiperSwipeByGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, DEFAULT_SWIPE_BY_GROUP);
 }
 
 void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
@@ -999,19 +1014,19 @@ namespace NodeModifier {
 const ArkUISwiperModifier* GetSwiperModifier()
 {
     static const ArkUISwiperModifier modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
-        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperDisplayArrow,
-        ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve, SetSwiperDisableSwipe, ResetSwiperDisableSwipe,
-        SetSwiperEffectMode, ResetSwiperEffectMode, SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode,
-        ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
-        SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
-        SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
-        GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
-        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
-        GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll,
-        SetSwiperToIndex, GetSwiperPrevMargin, GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator,
-        GetSwiperController };
+        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperSwipeByGroup,
+        ResetSwiperSwipeByGroup, SetSwiperDisplayArrow, ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve,
+        SetSwiperDisableSwipe, ResetSwiperDisableSwipe, SetSwiperEffectMode, ResetSwiperEffectMode,
+        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode, ResetSwiperDisplayMode, SetSwiperItemSpace,
+        ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical, SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval,
+        ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay, SetSwiperIndex, ResetSwiperIndex,
+        SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration, ResetSwiperDuration, SetSwiperEnabled,
+        ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex, GetSwiperVertical, GetSwiperDuration,
+        GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace,
+        GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
+        ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
+        SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController };
     return &modifier;
 }
 

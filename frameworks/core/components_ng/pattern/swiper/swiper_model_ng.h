@@ -111,6 +111,7 @@ public:
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
+    static void SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup);
 
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);

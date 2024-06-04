@@ -78,8 +78,16 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
-  displayCount(value: string | number | SwiperAutoFill): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
+  displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this {
+    let arkDisplayCount = new ArkDisplayCount();
+    arkDisplayCount.value = value;
+    arkDisplayCount.swipeByGroup = swipeByGroup;
+    modifierWithKey(
+      this._modifiersWithKeys,
+      SwiperDisplayCountModifier.identity,
+      SwiperDisplayCountModifier,
+      arkDisplayCount
+    );
     return this;
   }
   effectMode(value: EdgeEffect): this {
@@ -123,7 +131,8 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value: SwiperNestedScrollMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
+    return this;
   }
   indicatorInteractive(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
@@ -167,29 +176,46 @@ class SwiperPrevMarginModifier extends ModifierWithKey<Length> {
   }
 }
 
-class SwiperDisplayCountModifier extends ModifierWithKey<string | number | SwiperAutoFill> {
+class SwiperDisplayCountModifier extends ModifierWithKey<ArkDisplayCount> {
   static identity: Symbol = Symbol('swiperDisplayCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
       getUINativeModule().swiper.resetSwiperDisplayCount(node);
     } else {
-      if (isNull(this.value) || isUndefined(this.value)) {
-        getUINativeModule().swiper.resetSwiperDisplayCount(node);
-      } else if (typeof this.value === 'object') {
-        let minSize = (this.value as SwiperAutoFill).minSize.toString();
-        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
+      if (!isNull(this.value) && !isUndefined(this.value)) {
+        let swipeByGroup;
+        if (typeof this.value.swipeByGroup === 'boolean') {
+          swipeByGroup = this.value.swipeByGroup;
+        }
+
+        getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
+
+        if (typeof this.value.value === 'object') {
+          let minSize = (this.value.value as SwiperAutoFill).minSize.toString();
+          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+        } else {
+          getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value);
+        }
       } else {
-        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
+        getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
+        getUINativeModule().swiper.resetSwiperDisplayCount(node);
       }
     }
   }
   checkObjectDiff(): boolean {
-    if (typeof this.stageValue !== typeof this.value) {
+    if (
+      this.stageValue.swipeByGroup !== this.value.swipeByGroup ||
+      typeof this.stageValue.value !== typeof this.value.value
+    ) {
       return true;
-    } else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return (this.stageValue as SwiperAutoFill).minSize !== (this.value as SwiperAutoFill).minSize;
+    } else if (
+      typeof this.stageValue.value === 'object' &&
+      typeof this.value.value === 'object'
+    ) {
+      return (this.stageValue.value as SwiperAutoFill).minSize !== (this.value.value as SwiperAutoFill).minSize;
     } else {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
+      return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);
     }
   }
 }
@@ -644,6 +670,24 @@ class SwiperEnabledModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+
+class SwiperNestedScrollModifier extends ModifierWithKey<SwiperNestedScrollMode> {
+  constructor(value: SwiperNestedScrollMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('nestedScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetNestedScroll(node);
+    } else {
+      getUINativeModule().swiper.setNestedScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);

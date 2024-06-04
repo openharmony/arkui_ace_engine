@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 99
+#define ARKUI_FULL_API_VERSION 100
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 99
+#define ARKUI_NODE_API_VERSION 100
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1837,6 +1837,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperPrevMargin)(ArkUINodeHandle node);
     void (*setSwiperDisplayCount)(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType);
     void (*resetSwiperDisplayCount)(ArkUINodeHandle node);
+    void (*setSwiperSwipeByGroup)(ArkUINodeHandle node, ArkUI_Bool swipeByGroup);
+    void (*resetSwiperSwipeByGroup)(ArkUINodeHandle node);
     void (*setSwiperDisplayArrow)(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr);
     void (*resetSwiperDisplayArrow)(ArkUINodeHandle node);
     void (*setSwiperCurve)(ArkUINodeHandle node, ArkUI_CharPtr curveChar);
