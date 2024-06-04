@@ -291,8 +291,15 @@ namespace OHOS::Ace::NG {
         totalCountForDataset_ = GetTotalCount();
         int32_t initialIndex = totalCountForDataset_;
         std::map<int32_t, LazyForEachChild> expiringTempItem_;
+        std::list<std::string> expiringKeys;
         for (auto& [key, cacheChild] : expiringItem_) {
-            expiringTempItem_.try_emplace(cacheChild.first, LazyForEachChild(key, cacheChild.second));
+            if (cacheChild.first > -1) {
+                expiringTempItem_.try_emplace(cacheChild.first, LazyForEachChild(key, cacheChild.second));
+                expiringKeys.emplace_back(key);
+            }
+        }
+        for (auto& key : expiringKeys) {
+            expiringItem_.erase(key);
         }
         decltype(expiringTempItem_) expiringTemp(std::move(expiringTempItem_));
         std::list<RefPtr<UINode>> nodeList;
@@ -323,13 +330,21 @@ namespace OHOS::Ace::NG {
     {
         int32_t changedIndex = 0;
         for (auto& [index, child] : cachedTemp) {
+            auto iter = indexChangedMap.find(index);
+            if (iter == indexChangedMap.end()) {
+                iter--;
+                if (iter->first < index) {
+                    changedIndex = iter->second;
+                }
+            } else {
+                changedIndex = iter->second;
+            }
             if (operationList_.find(index) == operationList_.end()) {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
                 continue;
             }
-
+            changedIndex = iter->second;
             auto info = operationList_.find(index)->second;
-            changedIndex = indexChangedMap.find(index)->second;
             if (info.isDeleting) {
                 nodeList_.emplace_back(child.first, child.second);
             } else if (info.isChanged) {
@@ -354,13 +369,13 @@ namespace OHOS::Ace::NG {
     {
         int32_t changedIndex = 0;
         for (auto& [index, operationInfo] : operationList_) {
-            operationInfo.changeCount += changedIndex;
-            changedIndex = operationInfo.changeCount;
             if (indexChangedMap.size() >= static_cast<size_t>(1)) {
                 for (int32_t i = indexChangedMap.rbegin()->first + 1; i < index; i++) {
                     indexChangedMap.try_emplace(i, changedIndex);
                 }
             }
+            operationInfo.changeCount += changedIndex;
+            changedIndex = operationInfo.changeCount;
             indexChangedMap.try_emplace(index, changedIndex);
         }
     }
