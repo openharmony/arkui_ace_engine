@@ -87,7 +87,7 @@ private:
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
         const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
     static void SwitchTimePickerPage(const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
-        const RefPtr<FrameNode>& buttonConfirmNode,const RefPtr<FrameNode>& cancelNextDividerNode,
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
         const RefPtr<FrameNode>& nextConfirmDividerNode);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static bool switchFlag_;

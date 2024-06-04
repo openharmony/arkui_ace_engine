@@ -45,7 +45,8 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
-    if ((NeedadaptForAging() && (!settingData.isUseMilitaryTime) && (!GetIsUserSetTextProperties(settingData.properties)))) {
+    if ((NeedadaptForAging() && (!settingData.isUseMilitaryTime)
+        && (!GetIsUserSetTextProperties(settingData.properties)))) {
         return ShowForAging(
             dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
     }
@@ -440,7 +441,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
         CHECK_NULL_VOID(timePickerEventHub);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
-        textLayoutProperty->UpdateContent((textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("stepper.next"))
+        textLayoutProperty->UpdateContent(
+            (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("stepper.next"))
                             ? Localization::GetInstance()->GetEntryLetters("datepicker.prev")
                             : Localization::GetInstance()->GetEntryLetters("stepper.next"));
         timeNode->MarkModifyDone();
@@ -612,13 +614,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     auto buttonConfirmNode = CreateConfirmNode(frameNode, timePickerNode, buttonInfos, acceptEvent);
     CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
 
-    auto cancelNextDividerNode = CreateDividerNode(timePickerNode,true);
+    auto cancelNextDividerNode = CreateDividerNode(timePickerNode, true);
     CHECK_NULL_RETURN(cancelNextDividerNode, nullptr);
-    auto nextConfirmDividerNode = CreateDividerNode(timePickerNode,true);
+    auto nextConfirmDividerNode = CreateDividerNode(timePickerNode, true);
     CHECK_NULL_RETURN(nextConfirmDividerNode, nullptr);
 
     auto timePickerSwitchEvent = CreateAndSetTimePickerSwitchEvent(timePickerNode, buttonCancelNode, buttonConfirmNode,
-                                                                cancelNextDividerNode, nextConfirmDividerNode);
+        cancelNextDividerNode, nextConfirmDividerNode);
     auto buttonNextPreNode = CreateNextPrevButtonNode(timePickerSwitchEvent, timePickerNode, buttonInfos);
     CHECK_NULL_RETURN(buttonNextPreNode, nullptr);
     buttonCancelNode->MountToParent(contentRow);
@@ -650,8 +652,10 @@ std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(co
 {
     auto timePickerSwitchEvent = [weakTimePickerNode = AceType::WeakClaim(AceType::RawPtr(timePickerNode)),
                                      weakbuttonCancelNode = AceType::WeakClaim(AceType::RawPtr(buttonCancelNode)),
-                                     weakcancelNextDividerNode = AceType::WeakClaim(AceType::RawPtr(cancelNextDividerNode)),
-                                     weaknextConfirmDividerNode = AceType::WeakClaim(AceType::RawPtr(nextConfirmDividerNode)),
+                                     weakcancelNextDividerNode =
+                                         AceType::WeakClaim(AceType::RawPtr(cancelNextDividerNode)),
+                                     weaknextConfirmDividerNode =
+                                         AceType::WeakClaim(AceType::RawPtr(nextConfirmDividerNode)),
                                      weakbuttonConfirmNode = AceType::WeakClaim(AceType::RawPtr(buttonConfirmNode))]() {
         auto timePickerNode = weakTimePickerNode.Upgrade();
         CHECK_NULL_VOID(timePickerNode);
@@ -664,7 +668,7 @@ std::function<void()> TimePickerDialogView::CreateAndSetTimePickerSwitchEvent(co
         auto nextConfirmDividerNode = weaknextConfirmDividerNode.Upgrade();
         CHECK_NULL_VOID(nextConfirmDividerNode);
         SwitchTimePickerPage(timePickerNode, buttonCancelNode, buttonConfirmNode,
-                            cancelNextDividerNode, nextConfirmDividerNode);
+            cancelNextDividerNode, nextConfirmDividerNode);
     };
 
     return timePickerSwitchEvent;
