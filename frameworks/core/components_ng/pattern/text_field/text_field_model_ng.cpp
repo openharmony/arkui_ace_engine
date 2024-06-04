@@ -647,7 +647,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         backgroundColor = theme->GetBgColor();
     }
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
-    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
