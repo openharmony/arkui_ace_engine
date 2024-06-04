@@ -14304,6 +14304,15 @@ class ArkDisplayArrow {
     return this.value === another.value && this.isHoverShow === another.isHoverShow;
   }
 }
+class ArkDisplayCount {
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+  isEqual(another) {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
 class ArkGridEdgeEffect {
   constructor() {
     this.value = undefined;
@@ -24058,8 +24067,11 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
-  displayCount(value) {
-    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
+  displayCount(value, swipeByGroup) {
+    let arkDisplayCount = new ArkDisplayCount();
+    arkDisplayCount.value = value;
+    arkDisplayCount.swipeByGroup = swipeByGroup;
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, arkDisplayCount);
     return this;
   }
   effectMode(value) {
@@ -24102,7 +24114,8 @@ class ArkSwiperComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
+    return this;
   }
   indicatorInteractive(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
@@ -24151,30 +24164,41 @@ SwiperPrevMarginModifier.identity = Symbol('swiperPrevMargin');
 class SwiperDisplayCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
+      getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
       getUINativeModule().swiper.resetSwiperDisplayCount(node);
     }
     else {
-      if (isNull(this.value) || isUndefined(this.value)) {
+      if (!isNull(this.value) && !isUndefined(this.value)) {
+        let swipeByGroup;
+        if (typeof this.value.swipeByGroup === 'boolean') {
+          swipeByGroup = this.value.swipeByGroup;
+        }
+
+        getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
+
+        if (typeof this.value.value === 'object') {
+          let minSize = this.value.value.minSize.toString();
+          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+        } else {
+          getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value, swipeByGroup);
+        }
+      } else {
+        getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
         getUINativeModule().swiper.resetSwiperDisplayCount(node);
-      }
-      else if (typeof this.value === 'object') {
-        let minSize = this.value.minSize.toString();
-        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
-      }
-      else {
-        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
   checkObjectDiff() {
-    if (typeof this.stageValue !== typeof this.value) {
+    if (this.stageValue.swipeByGroup !== this.value.swipeByGroup ||
+      typeof this.stageValue.value !== typeof this.value.value) {
       return true;
     }
-    else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return this.stageValue.minSize !== this.value.minSize;
+    else if (typeof this.stageValue.value === 'object' &&
+      typeof this.value.value === 'object') {
+      return this.stageValue.value.minSize !== this.value.value.minSize;
     }
     else {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
+      return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);
     }
   }
 }
@@ -24546,6 +24570,22 @@ class SwiperEnabledModifier extends ModifierWithKey {
   }
 }
 SwiperEnabledModifier.identity = Symbol('swiperenabled');
+class SwiperNestedScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetNestedScroll(node);
+    } else {
+      getUINativeModule().swiper.setNestedScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperNestedScrollModifier.identity = Symbol('nestedScroll');
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

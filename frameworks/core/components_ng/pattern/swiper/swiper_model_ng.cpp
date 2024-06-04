@@ -242,6 +242,11 @@ void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOp
     pattern->SetNestedScroll(option);
 }
 
+void SwiperModelNG::SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, SwipeByGroup, swipeByGroup, frameNode);
+}
+
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
 
 void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)

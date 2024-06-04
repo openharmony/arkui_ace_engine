@@ -1106,6 +1106,20 @@ class ArkDisplayArrow {
   }
 }
 
+class ArkDisplayCount {
+  value: string | number | SwiperAutoFill;
+  swipeByGroup: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+
+  isEqual(another: ArkDisplayCount): boolean {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
+
 class ArkGridEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
