@@ -244,8 +244,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   }
 
   // KEEP
-  public debugInfoElmtId(elmtId: number): string {
-    return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
+  public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
+
+    return isProfiler ? {
+      elementId: elmtId,
+      elementTag: this.updateFuncByElmtId.get(elmtId).getComponentName(),
+      isCustomNode: this.childrenWeakrefMap_.has(elmtId)
+    } : this.updateFuncByElmtId.debugInfoElmtId(elmtId);
   }
 
   public dumpStateVars(): void {

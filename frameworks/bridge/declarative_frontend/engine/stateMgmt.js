@@ -2960,11 +2960,10 @@ class stateMgmtDFX {
 }
 // enable profile
 stateMgmtDFX.enableProfiler_ = false;
-stateMgmtDFX.changeId_ = -1;
+stateMgmtDFX.inRenderingElementId_ = new Array();
 function setProfilerStatus(profilerStatus) {
     stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
     stateMgmtDFX.enableProfiler_ = profilerStatus;
-    stateMgmtDFX.changeId_ = -1;
 }
 class DumpInfo {
     constructor() {
@@ -4021,8 +4020,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         return result;
     }
     // KEEP
-    debugInfoElmtId(elmtId) {
-        return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
+    debugInfoElmtId(elmtId, isProfiler = false) {
+        return isProfiler ? {
+            elementId: elmtId,
+            elementTag: this.updateFuncByElmtId.get(elmtId).getComponentName(),
+            isCustomNode: this.childrenWeakrefMap_.has(elmtId)
+        } : this.updateFuncByElmtId.debugInfoElmtId(elmtId);
     }
     dumpStateVars() {
         
@@ -4329,12 +4332,12 @@ class TrackedObject {
      * if optimisation can not be applied calls notifyPropertyChanged and returns false
      */
     static notifyObjectValueAssignment(obj1, obj2, notifyPropertyChanged, // notify as assignment (none-optimised)
-    notifyTrackedPropertyChange, obSelf, isFromSource) {
+    notifyTrackedPropertyChange, obSelf) {
         if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
             (obj1.constructor !== obj2.constructor) ||
             TrackedObject.isCompatibilityMode(obj1)) {
             
-            notifyPropertyChanged.call(obSelf, isFromSource);
+            notifyPropertyChanged.call(obSelf);
             return false;
         }
         
@@ -4347,7 +4350,7 @@ class TrackedObject {
             if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`) &&
                 (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
                 
-                notifyTrackedPropertyChange.call(obSelf, propName, isFromSource);
+                notifyTrackedPropertyChange.call(obSelf, propName);
                 shouldFakePropPropertyBeNotified = true;
             }
             else {
@@ -4464,8 +4467,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     debugInfoDependentElmtIds(dumpDependantElements = false) {
         return this.dependentElmtIdsByProperty_.dumpInfoDependencies(this.owningView_, dumpDependantElements);
     }
-    dumpDependentElmtIdsObj(isTrackedMode) {
-        return this.dependentElmtIdsByProperty_.dumpInfoDependenciesObj(this.owningView_, isTrackedMode);
+    dumpDependentElmtIdsObj(isTrackedMode, isProfiler) {
+        return this.dependentElmtIdsByProperty_.dumpInfoDependenciesObj(this.owningView_, isTrackedMode, isProfiler);
     }
     debugInfoElmtId(elmtId) {
         if (this.owningView_) {
@@ -4541,8 +4544,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 let syncPeer = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
                     changedTrackPropertyName: changedTrackPropertyName,
-                    value: this.getRawObjectValue(),
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false),
+                    value: observedProp.getRawObjectValue(),
+                    inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
+                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, true),
                     owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
                 };
                 res.push(syncPeer);
@@ -4556,9 +4560,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         let observedPropertyInfo = {
             decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
             value: this.getRawObjectValue(),
-            dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
+            dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
             owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
-            changeId: stateMgmtDFX.changeId_, syncPeers: this.dumpSyncPeers()
+            syncPeers: this.dumpSyncPeers()
         };
         res.viewInfo = { componentName: (_c = this.owningView_) === null || _c === void 0 ? void 0 : _c.constructor.name, id: (_d = this.owningView_) === null || _d === void 0 ? void 0 : _d.id__() };
         res.observedPropertiesInfo.push(observedPropertyInfo);
@@ -4635,7 +4640,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     // notify owning ViewPU and peers of a variable assignment
     // also property/item changes to  ObservedObjects of class object type, which use compat mode
     // Date and Array are notified as if there had been an assignment.
-    notifyPropertyHasChangedPU(isFromSource = false) {
+    notifyPropertyHasChangedPU() {
         
         
         if (this.owningView_) {
@@ -4645,10 +4650,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 // send changed observed property to profiler
                 // only will be true when enable profiler
                 if (stateMgmtDFX.enableProfiler_) {
-                    stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
-                    if (isFromSource && !this.changeNotificationIsOngoing_) {
-                        stateMgmtDFX.changeId_++;
-                    }
+                    
                     this.onDumpProfiler();
                 }
             }
@@ -4670,7 +4672,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         
     }
     // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
-    notifyTrackedObjectPropertyHasChanged(changedPropertyName, isFromSource = false) {
+    notifyTrackedObjectPropertyHasChanged(changedPropertyName) {
         
         
         if (this.owningView_) {
@@ -4681,9 +4683,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 // only will be true when enable profiler
                 if (stateMgmtDFX.enableProfiler_) {
                     
-                    if (isFromSource) {
-                        stateMgmtDFX.changeId_++;
-                    }
                     this.onDumpProfiler(changedPropertyName);
                 }
             }
@@ -4868,7 +4867,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     */
     onTrackedObjectPropertyHasChangedPU(sourceObject, changedPropertyName) {
         
-        this.notifyTrackedObjectPropertyHasChanged(changedPropertyName, true);
+        this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
     }
     /**
     * event emitted by wrapped ObservedObject, when one of its property values changes
@@ -4879,7 +4878,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     */
     onTrackedObjectPropertyCompatModeHasChangedPU(sourceObject, changedPropertyName) {
         
-        this.notifyPropertyHasChangedPU(true);
+        this.notifyPropertyHasChangedPU();
     }
     hasChanged(_) {
         // unused for PU
@@ -4957,14 +4956,14 @@ class PropertyDependencies {
         });
         return result;
     }
-    dumpInfoDependenciesObj(owningView = undefined, isTrackedMode) {
-        const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
+    dumpInfoDependenciesObj(owningView = undefined, isTrackedMode, isProfiler) {
+        const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId, isProfiler)) : (elmtId => elmtId);
         let trackedObjectPropertyDependenciesDumpInfo = new Map();
         this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
             trackedObjectPropertyDependenciesDumpInfo.set(propertyName, Array.from(propertyElmtId).map(formatElmtId));
         });
         let PropertyDependenciesInfo = {
-            mode: isTrackedMode ? 'Track Mode' : 'Compatible mode',
+            mode: isTrackedMode ? 'Track Mode' : 'Compatible Mode',
             trackPropertiesDependencies: MapInfo.toObject(trackedObjectPropertyDependenciesDumpInfo).keyToValue,
             propertyDependencies: Array.from(this.propertyDependencies_).map(formatElmtId),
         };
@@ -5111,7 +5110,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.wrappedValue_;
         if (this.setValueInternal(newValue)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this, true);
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -5324,7 +5323,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         
         const oldValue = this.localCopyObservedObject_;
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this, true);
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -5688,7 +5687,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         this.changeNotificationIsOngoing_ = true;
         let oldValue = this.getUnmonitored();
         this.setObject(newValue);
-        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this, true);
+        TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         this.changeNotificationIsOngoing_ = false;
         
     }
@@ -5794,7 +5793,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         if (this.setValueInternal(newValue)) {
             this.createSourceDependency(newValue);
             // notify value change to subscribing View
-            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this, false);
+            TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_, this.notifyPropertyHasChangedPU, this.notifyTrackedObjectPropertyHasChanged, this);
         }
     }
     onOptimisedObjectPropertyRead(readObservedObject, readPropertyName, isTracked) {
@@ -6335,12 +6334,10 @@ class ViewPU extends PUV2ViewBase {
         
         
     }
-
     delayCompleteRerender(deep = false) {
         this.delayRecycleNodeRerender = true;
         this.delayRecycleNodeRerenderDeep = deep;
     }
-
     flushDelayCompleteRerender() {
         this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
         this.delayRecycleNodeRerender = false;
@@ -6608,6 +6605,7 @@ class ViewPU extends PUV2ViewBase {
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
                 this.currentlyRenderedElmtIdStack_.push(elmtId);
+                stateMgmtDFX.inRenderingElementId_.push(elmtId);
             }
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
@@ -6630,6 +6628,7 @@ class ViewPU extends PUV2ViewBase {
             }
             if (!this.isViewV3) {
                 this.currentlyRenderedElmtIdStack_.pop();
+                stateMgmtDFX.inRenderingElementId_.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
             (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
@@ -6732,7 +6731,8 @@ class ViewPU extends PUV2ViewBase {
         }
         if (!this.delayRecycleNodeRerender) {
             this.updateDirtyElements();
-        } else {
+        }
+        else {
             this.flushDelayCompleteRerender();
         }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -7002,7 +7002,7 @@ class ViewPU extends PUV2ViewBase {
                 let observedPropertyInfo = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
                     value: observedProp.getRawObjectValue(),
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false),
+                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
                     owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
                 };
                 res.observedPropertiesInfo.push(observedPropertyInfo);
