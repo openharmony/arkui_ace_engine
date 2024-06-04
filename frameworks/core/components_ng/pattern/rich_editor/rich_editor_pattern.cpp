@@ -1847,7 +1847,7 @@ void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCod
             SetSelectSpanStyle(startPosition, endPosition, spanNode, code, false);
             continue;
         }
-        startPosition = spanItem->position - spanItem->content.size();
+        startPosition = spanItem->rangeStart;
         endPosition = spanItem->position;
         SetSelectSpanStyle(startPosition, endPosition, spanNode, code, false);
     }
@@ -8100,7 +8100,7 @@ int32_t RichEditorPattern::CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretO
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
     auto caretOffsetOverlay = overlayMod->GetCaretOffset();
     float textOffsetY = GetTextRect().GetY() + minDet / 2.0; // 2.0 Cursor one half at the center position
-    auto lineHeightDis = CalcLineHeightByPosition(GetCaretPosition()) - caretHeightUp;
+    auto lineHeightDis = CalcLineHeightByPosition(GetCaretPosition()) - overlayMod->GetCaretHeight();
     float textOffsetDownY = caretOffsetOverlay.GetY() - lineHeightDis - textOffsetY;
     textOffset = Offset(caretOffsetOverlay.GetX() - GetTextRect().GetX(), textOffsetDownY);
     caretPosition = paragraphs_.GetIndex(textOffset);
