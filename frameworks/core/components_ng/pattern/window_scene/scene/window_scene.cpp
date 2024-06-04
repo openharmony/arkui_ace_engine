@@ -294,31 +294,29 @@ void WindowScene::BufferAvailableCallbackForBlank()
         CHECK_NULL_VOID(contentContext && contentContext->GetRSNode());
         auto rsNode = contentContext->GetRSNode();
         rsNode->SetAlpha(1);
-        const auto& config =
-            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-        if (config.enabled_) {
-            CHECK_NULL_VOID(self->blankNode_);
-            auto context = AceType::DynamicCast<RosenRenderContext>(self->blankNode_->GetRenderContext());
-            CHECK_NULL_VOID(context);
-            auto rsNode = context->GetRSNode();
-            CHECK_NULL_VOID(rsNode);
-            rsNode->MarkNodeGroup(true);
-            rsNode->SetAlpha(config.opacityStart_);
-            auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
-            Rosen::RSAnimationTimingProtocol protocol;
-            protocol.SetDuration(config.duration_);
-            auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
-            auto iter = curveMap.find(config.curve_);
-            if (iter != curveMap.end()) {
-                curve = iter->second;
-            }
-            Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
-                AceAsyncTraceBegin(0, "BlankNodeExitAnimation");
-                rsNode->NotifyTransition(effect, false);
-            }, []() {
-                AceAsyncTraceEnd(0, "BlankNodeExitAnimation");
-            });
+
+        CHECK_NULL_VOID(self->blankNode_);
+        auto context = AceType::DynamicCast<RosenRenderContext>(self->blankNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto blankNodeRsNode = context->GetRSNode();
+        CHECK_NULL_VOID(blankNodeRsNode);
+        blankNodeRsNode->MarkNodeGroup(true);
+        blankNodeRsNode->SetAlpha(1);
+        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(200);
+        auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
+        auto iter = curveMap.find("linear");
+        if (iter != curveMap.end()) {
+            curve = iter->second;
         }
+        Rosen::RSNode::Animate(protocol, curve, [blankNodeRsNode, effect] {
+            AceAsyncTraceBegin(0, "BlankNodeExitAnimation");
+            blankNodeRsNode->NotifyTransition(effect, false);
+        }, []() {
+            AceAsyncTraceEnd(0, "BlankNodeExitAnimation");
+        });
+
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
@@ -492,13 +490,6 @@ void WindowScene::OnDisconnect()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
-}
-
-void WindowScene::OnBackground()
-{
-    lastWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionLastRect(lastWindowRect_);
-    WindowPattern::OnBackground();
 }
 
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
