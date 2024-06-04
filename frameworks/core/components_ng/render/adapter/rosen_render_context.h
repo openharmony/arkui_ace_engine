@@ -89,6 +89,10 @@ public:
 
     void SetBorderWidth(const BorderWidthProperty& value) override;
 
+    void SetDashGap(const BorderWidthProperty& value) override;
+
+    void SetDashWidth(const BorderWidthProperty& value) override;
+
     void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
 
     void SetOuterBorderStyle(const BorderStyleProperty& value) override;
@@ -412,6 +416,8 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnDashGapUpdate(const BorderWidthProperty& value) override;
+    void OnDashWidthUpdate(const BorderWidthProperty& value) override;
 
     void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;

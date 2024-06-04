@@ -137,6 +137,10 @@ public:
 
     virtual void SetBorderWidth(const BorderWidthProperty& value) {};
 
+    virtual void SetDashGap(const BorderWidthProperty& value) {};
+
+    virtual void SetDashWidth(const BorderWidthProperty& value) {};
+
     virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
 
     virtual void SetOuterBorderStyle(const BorderStyleProperty& value) {};
@@ -575,6 +579,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -724,6 +730,8 @@ protected:
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+    virtual void OnDashGapUpdate(const BorderWidthProperty& value) {}
+    virtual void OnDashWidthUpdate(const BorderWidthProperty& value) {}
 
     virtual void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) {}

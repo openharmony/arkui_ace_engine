@@ -1376,26 +1376,26 @@ void ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonCol
     ParseEdgeColors(object, commonColor);
 }
 
-void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     CalcDimension left;
     if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
-        CheckDimensionUnit(left, true, true);
+        CheckDimensionUnit(left, true, notNegative);
         commonCalcDimension.left = left;
     }
     CalcDimension right;
     if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
-        CheckDimensionUnit(right, true, true);
+        CheckDimensionUnit(right, true, notNegative);
         commonCalcDimension.right = right;
     }
     CalcDimension top;
     if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
-        CheckDimensionUnit(top, true, true);
+        CheckDimensionUnit(top, true, notNegative);
         commonCalcDimension.top = top;
     }
     CalcDimension bottom;
     if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
-        CheckDimensionUnit(bottom, true, true);
+        CheckDimensionUnit(bottom, true, notNegative);
         commonCalcDimension.bottom = bottom;
     }
 }
@@ -1432,14 +1432,15 @@ void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& co
     }
 }
 
-void ParseLocalizedEdgeWidths(const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension)
+void ParseLocalizedEdgeWidths(const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension,
+                              bool notNegative)
 {
     auto jsStart = object->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
     if (jsStart->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(jsStart);
         CalcDimension calcDimension;
         if (ParseJsLengthMetrics(startObj, calcDimension)) {
-            CheckDimensionUnit(calcDimension, true, true);
+            CheckDimensionUnit(calcDimension, true, notNegative);
             localizedCalcDimension.start = calcDimension;
         }
     }
@@ -1448,7 +1449,7 @@ void ParseLocalizedEdgeWidths(const JSRef<JSObject>& object, LocalizedCalcDimens
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(jsEnd);
         CalcDimension calcDimension;
         if (ParseJsLengthMetrics(endObj, calcDimension)) {
-            CheckDimensionUnit(calcDimension, true, true);
+            CheckDimensionUnit(calcDimension, true, notNegative);
             localizedCalcDimension.end = calcDimension;
         }
     }
@@ -1457,7 +1458,7 @@ void ParseLocalizedEdgeWidths(const JSRef<JSObject>& object, LocalizedCalcDimens
         JSRef<JSObject> topObj = JSRef<JSObject>::Cast(jsTop);
         CalcDimension calcDimension;
         if (ParseJsLengthMetrics(topObj, calcDimension)) {
-            CheckDimensionUnit(calcDimension, true, true);
+            CheckDimensionUnit(calcDimension, true, notNegative);
             localizedCalcDimension.top = calcDimension;
         }
     }
@@ -1466,7 +1467,7 @@ void ParseLocalizedEdgeWidths(const JSRef<JSObject>& object, LocalizedCalcDimens
         JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(jsBottom);
         CalcDimension calcDimension;
         if (ParseJsLengthMetrics(bottomObj, calcDimension)) {
-            CheckDimensionUnit(calcDimension, true, true);
+            CheckDimensionUnit(calcDimension, true, notNegative);
             localizedCalcDimension.bottom = calcDimension;
         }
     }
@@ -1508,11 +1509,11 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
     }
 }
 
-void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
-        ParseLocalizedEdgeWidths(object, localizedCalcDimension);
+        ParseLocalizedEdgeWidths(object, localizedCalcDimension, notNegative);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         commonCalcDimension.top = localizedCalcDimension.top;
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
@@ -1520,7 +1521,7 @@ void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
         return;
     }
-    ParseEdgeWidths(object, commonCalcDimension);
+    ParseEdgeWidths(object, commonCalcDimension, notNegative);
 }
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
@@ -3760,6 +3761,8 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
+        ViewAbstractModel::GetInstance()->SetDashGap(Dimension(-1));
+        ViewAbstractModel::GetInstance()->SetDashWidth(Dimension(-1));
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -3778,6 +3781,15 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     }
     // use default value when undefined.
     ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
+
+    auto dashGap = object->GetProperty("dashGap");
+    if (!dashGap->IsUndefined()) {
+        ParseDashGap(dashGap);
+    }
+    auto dashWidth = object->GetProperty("dashWidth");
+    if (!dashWidth->IsUndefined()) {
+        ParseDashWidth(dashWidth);
+    }
 
     info.ReturnSelf();
 }
@@ -3835,8 +3847,46 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension);
+        ParseCommonEdgeWidths(obj, commonCalcDimension, true);
         ViewAbstractModel::GetInstance()->SetBorderWidth(
+            commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+    } else {
+        return;
+    }
+}
+
+void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
+{
+    CalcDimension dashGap;
+    if (ParseJsDimensionVp(args, dashGap)) {
+        if (dashGap.Unit() == DimensionUnit::PERCENT) {
+            dashGap.Reset();
+        }
+        ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
+    } else if (args->IsObject()) {
+        CommonCalcDimension commonCalcDimension;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ViewAbstractModel::GetInstance()->SetDashGap(
+            commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+    } else {
+        return;
+    }
+}
+
+void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
+{
+    CalcDimension dashWidth;
+    if (ParseJsDimensionVp(args, dashWidth)) {
+        if (dashWidth.Unit() == DimensionUnit::PERCENT) {
+            dashWidth.Reset();
+        }
+        ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
+    } else if (args->IsObject()) {
+        CommonCalcDimension commonCalcDimension;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
+        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ViewAbstractModel::GetInstance()->SetDashWidth(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
         return;

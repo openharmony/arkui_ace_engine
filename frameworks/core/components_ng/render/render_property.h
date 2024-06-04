@@ -148,6 +148,8 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DashGap, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DashWidth, BorderWidthProperty);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
