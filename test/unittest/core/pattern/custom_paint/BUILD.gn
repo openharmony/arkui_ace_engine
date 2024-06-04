@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("custom_paint_test_ng") {

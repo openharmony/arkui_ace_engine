@@ -77,7 +77,7 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
-		"libxml2",
+		        "libxml2",
                 "ffrt",
                 "icu",
                 "miscdevice",
@@ -87,12 +87,11 @@
                 "jsframework",
                 "opencl-headers",
                 "opengles",
-                "zlib"
-            ],
-            "third_party": [
+                "zlib",
                 "skia",
                 "libuv"
-            ]
+            ],
+            "third_party": []
         },
         "build": {
             "group_type": {
@@ -145,7 +144,7 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor",
                         "header_files": [
                             "drawable_descriptor.h"
                         ]
@@ -173,14 +172,14 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/native",
                         "header_files": [
-                            "interfaces/native/node/native_drawable_descriptor.h",
-                            "interfaces/native/native_interface_xcomponent.h",
-                            "interfaces/native/native_node.h",
-                            "interfaces/native/native_interface.h",
-                            "interfaces/native/native_type.h",
-                            "interfaces/native/native_node_napi.h"
+                            "node/native_drawable_descriptor.h",
+                            "native_interface_xcomponent.h",
+                            "native_node.h",
+                            "native_interface.h",
+                            "native_type.h",
+                            "native_node_napi.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"
