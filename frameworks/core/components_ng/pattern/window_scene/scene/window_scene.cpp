@@ -298,10 +298,10 @@ void WindowScene::BufferAvailableCallbackForBlank()
         CHECK_NULL_VOID(self->blankNode_);
         auto context = AceType::DynamicCast<RosenRenderContext>(self->blankNode_->GetRenderContext());
         CHECK_NULL_VOID(context);
-        auto blankNodeRsNode = context->GetRSNode();
-        CHECK_NULL_VOID(blankNodeRsNode);
-        blankNodeRsNode->MarkNodeGroup(true);
-        blankNodeRsNode->SetAlpha(1);
+        auto blankRsNode = context->GetRSNode();
+        CHECK_NULL_VOID(blankRsNode);
+        blankRsNode->MarkNodeGroup(true);
+        blankRsNode->SetAlpha(1);
         auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(200);
@@ -310,9 +310,9 @@ void WindowScene::BufferAvailableCallbackForBlank()
         if (iter != curveMap.end()) {
             curve = iter->second;
         }
-        Rosen::RSNode::Animate(protocol, curve, [blankNodeRsNode, effect] {
+        Rosen::RSNode::Animate(protocol, curve, [blankRsNode, effect] {
             AceAsyncTraceBegin(0, "BlankNodeExitAnimation");
-            blankNodeRsNode->NotifyTransition(effect, false);
+            blankRsNode->NotifyTransition(effect, false);
         }, []() {
             AceAsyncTraceEnd(0, "BlankNodeExitAnimation");
         });
