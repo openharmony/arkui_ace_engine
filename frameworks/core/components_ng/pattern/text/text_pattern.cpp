@@ -524,7 +524,7 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        if (isSpanStringMode_) {
+        if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else {
             clipboard_->SetData(value, copyOption_);
