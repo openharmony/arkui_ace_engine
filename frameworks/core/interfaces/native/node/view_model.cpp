@@ -704,7 +704,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
         }
         //minHeight == maxHeight
         if (data[1] == data[3]) {
-            constraint->selfIdealSize.SetHeight(data[0]);
+            constraint->selfIdealSize.SetHeight(data[1]);
         }
         //percentReferenceWidth
         constraint->percentReference.SetWidth(data[4]);
