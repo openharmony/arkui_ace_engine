@@ -102,12 +102,12 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
-        const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
+        int32_t key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
     static void GetJsAngleWithDefault(
-        const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
+        int32_t key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
     static inline void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
-    static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
+    static void GetJsPerspective(int32_t key, const JSRef<JSObject>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void GetFractionStops(
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);

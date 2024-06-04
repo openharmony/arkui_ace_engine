@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
@@ -374,9 +375,11 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
-    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    static std::array<int32_t, 4> keys = {
+        static_cast<int32_t>(ArkUIIndex::LEFT), static_cast<int32_t>(ArkUIIndex::RIGHT),
+        static_cast<int32_t>(ArkUIIndex::TOP), static_cast<int32_t>(ArkUIIndex::BOTTOM)};
     for (uint32_t i = 0; i < keys.size(); i++) {
-        auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());
+        auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
         if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
             continue;
