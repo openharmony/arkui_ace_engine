@@ -1678,6 +1678,7 @@ private:
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     bool autoFillOtherAccount_ = false;
+    std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
 
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;

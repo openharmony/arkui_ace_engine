@@ -135,7 +135,6 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-constexpr int32_t AUTO_FILL_FAILED = 1;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
 #endif
@@ -147,7 +146,6 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
-const std::string AUTO_FILL_TEST = "persist.sys.arkui.auto.fill.input.method.enabled";
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
 const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
 constexpr int32_t DEFAULT_MODE = -1;
@@ -3445,6 +3443,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
     UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
+    if (!fillContentMap_.empty()) {
+        inputMethod->SendPrivateCommand(fillContentMap_);
+        fillContentMap_.clear();
+    }
 #else
     ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
 #endif
@@ -6272,11 +6274,9 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
 bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
 {
-    bool ret = false;
-
     if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
-        return ret;
+        return false;
     }
     auto child = jsonObject->GetChild();
 
@@ -6303,46 +6303,18 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
     SetFillRequestFinish(true);
-    if (errCode == AUTO_FILL_FAILED) {
-        return;
-    }
-
-    if (RequestKeyboard(false, true, true)) {
-        NotifyOnEditChanged(true);
-    }
 
 #if defined(ENABLE_STANDARD_INPUT)
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
-    std::unordered_map<std::string, MiscServices::PrivateDataValue> userNamesOrPassWordMap;
-    while (errCode == AUTO_FILL_CANCEL && IsAutoFillPasswordType(GetAutoFillType())) {
+    if (errCode == AUTO_FILL_CANCEL && !fillContent.empty() && IsAutoFillPasswordType(GetAutoFillType())) {
         auto jsonObject = JsonUtil::ParseJsonString(fillContent);
         if (jsonObject == nullptr) {
-            break;
+            return;
         }
-        if (!ParseFillContentJsonValue(jsonObject, userNamesOrPassWordMap)) {
-            break;
-        }
-        MiscServices::InputMethodController::GetInstance()->SendPrivateCommand(userNamesOrPassWordMap);
-        if (system::GetBoolParameter(AUTO_FILL_TEST, false)) {
-            if (textChangeListener_ == nullptr) {
-                textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-            }
-            auto task = [textChangeListener = textChangeListener_, userNamesOrPassWordMap] {
-                CHECK_NULL_VOID(textChangeListener);
-                textChangeListener->ReceivePrivateCommand(userNamesOrPassWordMap);
-            };
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, 3000, "ArkUITextFieldTestAutoFillInput");
-        }
-        break;
+        fillContentMap_.clear();
+        ParseFillContentJsonValue(jsonObject, fillContentMap_);
     }
 #endif
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CheckAutoSave()
