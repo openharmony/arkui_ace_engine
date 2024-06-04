@@ -1602,41 +1602,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
-
-    if (renderContextForSurface_) {
-        auto localposition = geometryNode->GetContentOffset();
-        renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
-    }
-
     return false;
-}
-
-void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
-{
-    if (!CheckSafeAreaIsExpand()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "Not set safeArea, return.");
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto size = Size(rect.Width(), rect.Height());
-    if (renderContextForSurface_) {
-        auto localposition = geometryNode->GetContentOffset();
-        renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
-        TAG_LOGD(AceLogTag::ACE_WEB,
-            "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
-            "height:%{public}f",
-            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
-    }
 }
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
@@ -1653,7 +1619,15 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         return;
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        auto bottomArea = safeAreaManager->GetSystemSafeArea().bottom_.Length();
+        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        double newHeight = height - keyboard - bottomArea - topArea;
         if (GreatOrEqual(newHeight, oldWebHeight)) {
             newHeight = oldWebHeight;
         }
@@ -1687,12 +1661,6 @@ void WebPattern::OnAreaChangedInner()
         areaChangeSize_ = size;
         drawSize_ = size;
         drawSizeCache_ = drawSize_;
-
-        if (renderContextForSurface_) {
-            auto localposition = geometryNode->GetContentOffset();
-            renderContextForSurface_->SetBounds(
-                localposition.GetX(), localposition.GetY(), drawSize_.Width(), drawSize_.Height());
-        }
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -2194,6 +2162,7 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetHandleChildBounds(true);
     bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
@@ -4647,7 +4616,7 @@ bool WebPattern::CheckSafeAreaKeyBoard()
     CHECK_NULL_RETURN(layoutProperty, false);
     auto &&opts = layoutProperty->GetSafeAreaExpandOpts();
     CHECK_NULL_RETURN(opts, false);
-    if ((opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if ((opts->type & SAFE_AREA_TYPE_KEYBOARD) && (opts->edges & SAFE_AREA_EDGE_BOTTOM)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "SafeArea type is KEYBOARD.");
         return true;
     }

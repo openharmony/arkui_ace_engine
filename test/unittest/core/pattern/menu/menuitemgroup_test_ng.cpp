@@ -496,7 +496,6 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern001, TestSize.Level1)
     menuItemGroupPattern->headerIndex_ = 0;
     menuItemGroupPattern->footerIndex_ = 0;
     menuItemGroupPattern->AddHeader(headerNode);
-    menuItemGroupPattern->AddFooter(footerNode);
     EXPECT_FALSE(menuItemGroupPattern->GetMenu() == nullptr);
 }
 } // namespace OHOS::Ace::NG

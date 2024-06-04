@@ -189,9 +189,14 @@ public:
         state_.strokeState.SetMiterLimit(limit);
     }
 
-    LineDashParam GetLineDash() const
+    virtual LineDashParam GetLineDash() const
     {
-        return state_.strokeState.GetLineDash();
+        return lineDash_;
+    }
+
+    void SetLineDashParam(const std::vector<double>& segments)
+    {
+        lineDash_.lineDash = segments;
     }
 
     void SetLineDash(const std::vector<double>& segments)
@@ -380,6 +385,7 @@ protected:
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
     std::vector<PaintHolder> saveStates_;
+    LineDashParam lineDash_;
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
 

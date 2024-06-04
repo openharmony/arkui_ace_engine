@@ -15,18 +15,24 @@
 
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "form_constants.h"
 #include "form_info_base.h"
+#include "locale_config.h"
+#include "locale_info.h"
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
 
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/form_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
@@ -35,21 +41,13 @@
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#include "core/common/resource/resource_manager.h"
-#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
-#include "base/i18n/localization.h"
-
-#include "form_constants.h"
-#include "locale_info.h"
-#include "locale_config.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -369,6 +367,11 @@ void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& p
         return;
     }
     formManagerBridge_->OnAccessibilityDumpChildInfo(params, info);
+}
+
+RefPtr<AccessibilitySessionAdapter> FormPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
 }
 
 void FormPattern::UpdateStaticCard()
@@ -785,7 +788,7 @@ void FormPattern::LoadDisableFormStyle()
     }
     renderContext->UpdateBackgroundColor(Color(CONTENT_BG_COLOR_DARK));
     renderContext->UpdateOpacity(TIME_LIMIT_TRANSPARENT_VAL);
-    
+
     auto textNode = CreateTimeLimitNode();
     CHECK_NULL_VOID(textNode);
     textNode->MarkModifyDone();
@@ -970,7 +973,7 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-        
+
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
@@ -1037,6 +1040,7 @@ void FormPattern::InitFormManagerDelegate()
         formManagerBridge_->SetFormUtils(formUtils);
     }
     int32_t instanceID = context->GetInstanceId();
+    accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
@@ -1683,6 +1687,7 @@ void FormPattern::UpdateTimeLimitResource(std::string &content)
     auto findTextNode = FindUINodeByTag(V2::TEXT_ETS_TAG);
     if (findTextNode == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "Not find TimeLimitTextNode");
+        return;
     }
     auto textNode = AceType::DynamicCast<FrameNode>(findTextNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

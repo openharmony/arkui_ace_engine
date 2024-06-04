@@ -322,6 +322,12 @@ public:
                  LessOrEqual(other.Bottom(), Top()) || GreatOrEqual(other.Top(), Bottom()));
     }
 
+    bool IsInnerIntersectWithRound(const RectT& other) const
+    {
+        return !(LessOrEqual(other.Right(), Left() + 1.0) || GreatOrEqual(other.Left() + 1.0, Right()) ||
+                 LessOrEqual(other.Bottom(), Top() + 1.0) || GreatOrEqual(other.Top() + 1.0, Bottom()));
+    }
+
     RectT IntersectRectT(const RectT& other) const
     {
         T left = std::max(Left(), other.Left());

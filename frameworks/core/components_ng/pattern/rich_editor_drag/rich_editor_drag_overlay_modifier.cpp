@@ -100,7 +100,12 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
         auto pattern = child->GetPattern();
         auto imagePattern = DynamicCast<ImagePattern>(pattern);
         if (imagePattern) {
-            PaintImageNode(context, child, imagePattern, offset);
+            auto canvasImage = imagePattern->GetCanvasImage();
+            if (canvasImage && !canvasImage->GetPaintConfig().isSvg_) {
+                PaintImageNode(context, child, imagePattern, offset);
+            } else {
+                PaintFrameNode(context, child, pattern, offset);
+            }
         } else {
             PaintFrameNode(context, child, pattern, offset);
         }
@@ -116,7 +121,9 @@ void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefP
     auto canvasImage = pattern->GetCanvasImage();
     auto layoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(geometryNode && canvasImage && layoutProperty);
-    auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+    auto pixelMap = canvasImage->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto pixelMapImage = DynamicCast<PixelMapImage>(CanvasImage::Create(pixelMap));
     CHECK_NULL_VOID(pixelMapImage);
     float marginTop = 0.0f;
     float marginLeft = 0.0f;

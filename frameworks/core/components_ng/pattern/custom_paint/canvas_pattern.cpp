@@ -846,6 +846,7 @@ void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 #else
     paintMethod_->PushTask<SetLineDashOp>(segments);
 #endif
+    paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()
@@ -1087,6 +1088,15 @@ void CanvasPattern::EnableAnalyzer(bool enable)
         CHECK_NULL_VOID(pattern);
         pattern->DestroyAnalyzerOverlay();
     });
+}
+
+void CanvasPattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::CANVAS);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
 void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)

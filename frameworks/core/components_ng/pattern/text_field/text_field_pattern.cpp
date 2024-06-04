@@ -581,12 +581,22 @@ bool TextFieldPattern::HasFocus() const
     return focusHub->IsCurrentFocus();
 }
 
-void TextFieldPattern::UpdateCaretInfoToController() const
+void TextFieldPattern::UpdateCaretInfoToController()
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
+    PreviewRange miscTextConfigRange {
+        miscTextConfig.value().range.start,
+        miscTextConfig.value().range.end
+    };
+    if (lastCursorRange_ == miscTextConfigRange) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateCaretInfoToController, same to update caretInfo");
+        return;
+    }
+    lastCursorRange_.Set(miscTextConfig.value().range.start, miscTextConfig.value().range.end);
+
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
@@ -808,7 +818,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(host->GetId());
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
@@ -2174,7 +2184,6 @@ void TextFieldPattern::DoProcessAutoFill()
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
         needToRequestKeyboardInner_ = false;
-        CloseKeyboard(true, false);
     } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
@@ -3399,71 +3408,79 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (!showKeyBoardOnFocus_ || !HasFocus()) {
         return false;
     }
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, false);
+    CHECK_NULL_RETURN(needShowSoftKeyboard, true);
+    if (customKeyboard_ || customKeyboardBuilder_) {
+        return RequestCustomKeyboard();
+    }
+    bool ok = true;
+    KeyboardContentTypeToInputType();
+#if defined(ENABLE_STANDARD_INPUT)
+    if (textChangeListener_ == nullptr) {
+        textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+    }
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (!inputMethod) {
+        return false;
+    }
+    auto optionalTextConfig = GetMiscTextConfig();
+    CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
+    MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    TAG_LOGI(
+        AceLogTag::ACE_TEXT_FIELD, "node %{public}d RequestKeyboard set calling window id:%{public}u"
+        " inputType: %{public}d enterKeyType: %{public}d", tmpHost->GetId(), textConfig.windowId,
+        textConfig.inputAttribute.inputPattern, textConfig.inputAttribute.enterKeyType);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto systemWindowId = GetSCBSystemWindowId();
+    if (systemWindowId) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+            systemWindowId);
+        textConfig.windowId = systemWindowId;
+    }
+#endif
+    if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
+        CloseCustomKeyboard();
+    }
+    inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+    UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
+#else
+    ok = RequestKeyboardCrossPlatForm(isFocusViewChanged);
+#endif
+    return ok;
+}
 
+bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
+{
+#if !defined(ENABLE_STANDARD_INPUT)
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     auto context = tmpHost->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
+    if (!HasConnection()) {
+        TextInputConfiguration config;
+        config.type = keyboard_;
+        config.action = GetTextInputActionValue(GetDefaultTextInputAction());
+        config.inputFilter = GetInputFilter();
+        config.maxLength = GetMaxLength();
+        if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
+            config.obscureText = textObscured_;
+        }
+        connection_ = TextInputProxy::GetInstance().Attach(
+            WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
 
-    if (needShowSoftKeyboard) {
-        if (customKeyboard_ || customKeyboardBuilder_) {
-            return RequestCustomKeyboard();
-        }
-    KeyboardContentTypeToInputType();
-#if defined(ENABLE_STANDARD_INPUT)
-        if (textChangeListener_ == nullptr) {
-            textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
-        }
-        auto inputMethod = MiscServices::InputMethodController::GetInstance();
-        if (!inputMethod) {
+        if (!HasConnection()) {
             return false;
         }
-        auto optionalTextConfig = GetMiscTextConfig();
-        CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
-        MiscServices::TextConfig textConfig = optionalTextConfig.value();
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d",
-            textConfig.windowId, textConfig.inputAttribute.inputPattern);
-#ifdef WINDOW_SCENE_SUPPORTED
-        auto systemWindowId = GetSCBSystemWindowId();
-        if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
-                systemWindowId);
-            textConfig.windowId = systemWindowId;
-        }
-#endif
-        if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard, Close CustomKeyboard.");
-            CloseCustomKeyboard();
-        }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
-#else
-        if (!HasConnection()) {
-            TextInputConfiguration config;
-            config.type = keyboard_;
-            config.action = GetTextInputActionValue(GetDefaultTextInputAction());
-            config.inputFilter = GetInputFilter();
-            config.maxLength = GetMaxLength();
-            if (keyboard_ == TextInputType::VISIBLE_PASSWORD || keyboard_ == TextInputType::NEW_PASSWORD) {
-                config.obscureText = textObscured_;
-            }
-            connection_ = TextInputProxy::GetInstance().Attach(
-                WeakClaim(this), config, context->GetTaskExecutor(), GetInstanceId());
-
-            if (!HasConnection()) {
-                return false;
-            }
-            TextEditingValue value;
-            value.text = contentController_->GetTextValue();
-            value.hint = GetPlaceHolder();
-            value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-            connection_->SetEditingState(value, GetInstanceId());
-        }
-        connection_->Show(isFocusViewChanged, GetInstanceId());
-#endif
+        TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+        connection_->SetEditingState(value, GetInstanceId());
     }
+    connection_->Show(isFocusViewChanged, GetInstanceId());
+#endif
     return true;
 }
 
@@ -3490,11 +3507,11 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         positionY -= keyboardOffset;
     }
 
-    if (IsNormalInlineState()) {
-        auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
-        positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary;
-        height = offset;
-    }
+    GetInlinePositionYAndHeight(positionY, height);
+
+    TAG_LOGI(
+        AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d MiscTextConfig positionY: %{public}f, height: %{public}f",
+        tmpHost->GetId(), positionY, height);
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
@@ -3516,6 +3533,31 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     }
     return textConfig;
 }
+
+void TextFieldPattern::GetInlinePositionYAndHeight(double& positionY, double& height) const
+{
+    if (IsNormalInlineState()) {
+        auto theme = GetTheme();
+        CHECK_NULL_VOID(theme);
+        auto offset = AVOID_OFFSET.ConvertToPx();
+        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        PaddingProperty userPadding;
+        MarginProperty userMargin;
+        if (paintProperty->HasPaddingByUser()) {
+            userPadding = paintProperty->GetPaddingByUserValue();
+        } else {
+            userPadding.top = CalcLength(theme->GetPadding().Top());
+        }
+        if (paintProperty->HasMarginByUser()) {
+            userMargin = paintProperty->GetMarginByUserValue();
+        }
+        auto topMargin = userPadding.top->GetDimension().ConvertToPx() + userMargin.top->GetDimension().ConvertToPx();
+        auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
+        positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary + topMargin;
+        height = offset;
+    }
+}
+
 #endif
 
 AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
@@ -4483,7 +4525,7 @@ void TextFieldPattern::HandleParentGlobalOffsetChange()
 
 void TextFieldPattern::RequestKeyboardOnFocus()
 {
-    if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_) {
+    if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_ || IsModalCovered()) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -4497,6 +4539,17 @@ void TextFieldPattern::RequestKeyboardOnFocus()
         textField->NotifyOnEditChanged(true);
         textField->needToRequestKeyboardInner_ = false;
     });
+}
+
+bool TextFieldPattern::IsModalCovered()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pageNode = host->GetPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    return pagePattern->GetIsModalCovered();
 }
 
 void TextFieldPattern::OnVisibleChange(bool isVisible)
@@ -4532,7 +4585,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     UpdateCaretInfoToController();
 }
 
-void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY) const
+void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Textfield handleSurface position change, posX %{public}d, posY %{public}d",
         posX, posY);

@@ -351,18 +351,21 @@ void ImagePattern::OnImageLoadSuccess()
     altDstRect_.reset();
     altSrcRect_.reset();
 
-    if (isPixelMapChanged_) {
-        UpdateAnalyzerOverlay();
+    if (IsSupportImageAnalyzerFeature()) {
+        if (isPixelMapChanged_) {
+            UpdateAnalyzerOverlay();
+        }
+        UpdateAnalyzerUIConfig(geometryNode);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetHostInstanceId());
+            pattern->CreateAnalyzerOverlay();
+        }, "ArkUIImageCreateAnalyzerOverlay");
     }
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        ContainerScope scope(pattern->GetHostInstanceId());
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUIImageCreateAnalyzerOverlay");
     ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
     host->MarkNeedRenderOnly();
 }
@@ -432,14 +435,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
     bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
+    bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
-        loadingCtx_->SetIsHdrDecoderNeed(true);
+        isHdrDecoderNeed = true;
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
-    } else {
-        loadingCtx_->SetIsHdrDecoderNeed(false);
     }
 
     if (loadingCtx_) {
+        loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
@@ -560,7 +563,7 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
-void ImagePattern::LoadImage(const ImageSourceInfo& src)
+void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
 {
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
@@ -573,11 +576,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
         loadingCtx_->FinishMearuse();
     }
     loadingCtx_->LoadImageData();
@@ -607,8 +606,8 @@ void ImagePattern::LoadImageDataIfNeed()
                                                               loadPixelMap->GetRawPixelMapPtr();
     }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
-        LoadImage(src);
-    } else {
+        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
+    } else if (IsSupportImageAnalyzerFeature()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -618,11 +617,9 @@ void ImagePattern::LoadImageDataIfNeed()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             ContainerScope scope(pattern->GetHostInstanceId());
-            if (pattern->IsSupportImageAnalyzerFeature()) {
-                pattern->CreateAnalyzerOverlay();
-                auto host = pattern->GetHost();
-                pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
-            }
+            pattern->CreateAnalyzerOverlay();
+            auto host = pattern->GetHost();
+            pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
         }, "ArkUIImageUpdateAnalyzerUIConfig");
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -856,7 +853,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetHost()->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -1385,7 +1382,7 @@ void ImagePattern::OnConfigurationUpdate()
     UpdateInternalResource(src);
     src.SetIsConfigurationChange(true);
 
-    LoadImage(src);
+    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
@@ -1477,6 +1474,15 @@ void ImagePattern::SetImageAnalyzerConfig(void* config)
     }
 }
 
+void ImagePattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
+}
+
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
@@ -1487,7 +1493,7 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
 void ImagePattern::CreateAnalyzerOverlay()
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
-    if (!IsSupportImageAnalyzerFeature() || imageAnalyzerManager_->IsOverlayCreated()) {
+    if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
 
@@ -1530,10 +1536,8 @@ void ImagePattern::ReleaseImageAnalyzer()
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
-    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
 }
 
 void ImagePattern::InitDefaultValue()

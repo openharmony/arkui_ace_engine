@@ -241,6 +241,25 @@ class HeightModifier extends ModifierWithKey {
   }
 }
 HeightModifier.identity = Symbol('height');
+
+class ChainModeifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    }
+    else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ChainModeifier.identity = Symbol('chainMode');
+
 class BorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2709,7 +2728,30 @@ class FocusScopePriorityModifier extends ModifierWithKey {
   }
 }
 FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
-
+class PixelRoundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    }
+    else {
+      if (!isObject(this.value)) {
+        getUINativeModule().common.resetPixelRound(node);
+      } else {
+        getUINativeModule().common.setPixelRound(node, this.value.start, this.value.top, this.value.end, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
+PixelRoundModifier.identity = Symbol('pixelRound');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -3333,6 +3375,15 @@ class ArkComponent {
   parallelGesture(gesture, mask) {
     throw new Error('Method not implemented.');
   }
+
+  chainMode(direction, style) {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+
   blur(value, options) {
     let blur = new ArkBlurOptions();
     blur.value = value;
@@ -3922,6 +3973,10 @@ class ArkComponent {
     }
     modifierWithKey(
       this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
+  }
+  pixelRound(value) {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
     return this;
   }
 }
@@ -9831,7 +9886,7 @@ class TextLineSpacingModifier extends ModifierWithKey {
       getUINativeModule().text.resetLineSpacing(node);
     }
     else {
-      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+      getUINativeModule().text.setLineSpacing(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10080,6 +10135,22 @@ class TextSelectionModifier extends ModifierWithKey {
   }
 }
 TextSelectionModifier.identity = Symbol('textSelection');
+class TextSelectableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextSelectableMode(node);
+    } else {
+      getUINativeModule().text.setTextSelectableMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextSelectableModifier.identity = Symbol('textTextSelectable');
 class TextDataDetectorConfigModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10265,6 +10336,10 @@ class ArkTextComponent extends ArkComponent {
     arkSelection.selectionStart = selectionStart;
     arkSelection.selectionEnd = selectionEnd;
     modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
+    return this;
+  }
+  textSelectable(value) {
+    modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
   ellipsisMode(value) {
@@ -14229,6 +14304,15 @@ class ArkDisplayArrow {
     return this.value === another.value && this.isHoverShow === another.isHoverShow;
   }
 }
+class ArkDisplayCount {
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+  isEqual(another) {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
 class ArkGridEdgeEffect {
   constructor() {
     this.value = undefined;
@@ -14248,6 +14332,15 @@ class ArkWaterFlowEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+class ArkChainMode {
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another) {
+    return (this.direction === another.direction) && (this.style === another.style);
   }
 }
 class ArkMesh {
@@ -23896,12 +23989,102 @@ if (globalThis.ListItemGroup !== undefined) {
   };
 }
 
+class ArkRelativeContainerGuideLine {
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another) {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
+
+class RelativeContainerGuideLineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().relativeContainer.resetGuideLine(node);
+    } else {
+      getUINativeModule().relativeContainer.setGuideLine(node,
+        this.value.ids, this.value.directions, this.value.positions);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+      !isBaseOrResourceEqual(this.stageValue.positions, this.value.positions);
+  }
+}
+RelativeContainerGuideLineModifier.identity = Symbol('relativeContainerGuideLine');
+class RelativeContainerBarrierModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().relativeContainer.resetBarrier(node);
+    } else {
+      getUINativeModule().relativeContainer.setBarrier(node,
+        this.value.ids, this.value.directions, this.value.referencedIds);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.ids, this.value.ids) ||
+      !isBaseOrResourceEqual(this.stageValue.directions, this.value.directions) ||
+      !isBaseOrResourceEqual(this.stageValue.referencedIds, this.value.referencedIds);
+  }
+}
+RelativeContainerBarrierModifier.identity = Symbol('relativeContainerBarrier');
 /// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   initialize(value) {
+    return this;
+  }
+  guideLine(value) {
+    let guideLineInfo = new ArkRelativeContainerGuideLine();
+    guideLineInfo.ids = value.map(item => { return item.id; });
+    guideLineInfo.directions = value.map(item => { return item.direction; });
+    guideLineInfo.positions = new Array();
+    for (let i = 0; i < value.length; i++) {
+      guideLineInfo.positions.push(value[i].position.start);
+      guideLineInfo.positions.push(value[i].position.end);
+    }
+    modifierWithKey(this._modifiersWithKeys, RelativeContainerGuideLineModifier.identity, RelativeContainerGuideLineModifier, guideLineInfo);
+    return this;
+  }
+  barrier(value) {
+    let barrierInfo = new ArkRelativeContainerBarrier();
+    barrierInfo.ids = value.map(item => { return item.id; });
+    barrierInfo.directions = value.map(item => { return item.direction; });
+    barrierInfo.referencedIds = value.map(item => { return item.referencedId; });
+    modifierWithKey(this._modifiersWithKeys, RelativeContainerBarrierModifier.identity, RelativeContainerBarrierModifier, barrierInfo);
     return this;
   }
 }
@@ -23974,8 +24157,11 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
-  displayCount(value) {
-    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
+  displayCount(value, swipeByGroup) {
+    let arkDisplayCount = new ArkDisplayCount();
+    arkDisplayCount.value = value;
+    arkDisplayCount.swipeByGroup = swipeByGroup;
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, arkDisplayCount);
     return this;
   }
   effectMode(value) {
@@ -24018,7 +24204,8 @@ class ArkSwiperComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
+    return this;
   }
   indicatorInteractive(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
@@ -24067,30 +24254,41 @@ SwiperPrevMarginModifier.identity = Symbol('swiperPrevMargin');
 class SwiperDisplayCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
+      getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
       getUINativeModule().swiper.resetSwiperDisplayCount(node);
     }
     else {
-      if (isNull(this.value) || isUndefined(this.value)) {
+      if (!isNull(this.value) && !isUndefined(this.value)) {
+        let swipeByGroup;
+        if (typeof this.value.swipeByGroup === 'boolean') {
+          swipeByGroup = this.value.swipeByGroup;
+        }
+
+        getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
+
+        if (typeof this.value.value === 'object') {
+          let minSize = this.value.value.minSize.toString();
+          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+        } else {
+          getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value, swipeByGroup);
+        }
+      } else {
+        getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
         getUINativeModule().swiper.resetSwiperDisplayCount(node);
-      }
-      else if (typeof this.value === 'object') {
-        let minSize = this.value.minSize.toString();
-        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
-      }
-      else {
-        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
   checkObjectDiff() {
-    if (typeof this.stageValue !== typeof this.value) {
+    if (this.stageValue.swipeByGroup !== this.value.swipeByGroup ||
+      typeof this.stageValue.value !== typeof this.value.value) {
       return true;
     }
-    else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return this.stageValue.minSize !== this.value.minSize;
+    else if (typeof this.stageValue.value === 'object' &&
+      typeof this.value.value === 'object') {
+      return this.stageValue.value.minSize !== this.value.value.minSize;
     }
     else {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
+      return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);
     }
   }
 }
@@ -24462,6 +24660,22 @@ class SwiperEnabledModifier extends ModifierWithKey {
   }
 }
 SwiperEnabledModifier.identity = Symbol('swiperenabled');
+class SwiperNestedScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetNestedScroll(node);
+    } else {
+      getUINativeModule().swiper.setNestedScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperNestedScrollModifier.identity = Symbol('nestedScroll');
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

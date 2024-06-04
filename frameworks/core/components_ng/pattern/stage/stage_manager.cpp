@@ -226,7 +226,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // close keyboard
     PageChangeCloseKeyboard();
 
-    FireAutoSave(outPageNode);
+    FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -287,7 +287,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
-    FireAutoSave(outPageNode);
+    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
         inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -339,7 +339,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
 
-    FireAutoSave(outPageNode);
+    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
@@ -407,7 +407,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
 
     stageNode_->RebuildRenderContextTree();
     auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
-    FireAutoSave(outPageNode);
+    FireAutoSave(outPageNode, node);
     if (needTransition) {
         StartTransition(outPageNode, node, RouteType::PUSH);
     }
@@ -461,12 +461,24 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 #endif
 }
 
-void StageManager::FireAutoSave(const RefPtr<FrameNode>& pageNode)
+void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode)
 {
-    CHECK_NULL_VOID(pageNode);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(pagePattern);
-    pagePattern->ProcessAutoSave();
+    CHECK_NULL_VOID(outPageNode);
+    CHECK_NULL_VOID(inPageNode);
+    auto outPagePattern = outPageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(outPagePattern);
+    auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {
+        auto page = weak.Upgrade();
+        CHECK_NULL_VOID(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsModalCovered(false);
+    };
+    if (outPagePattern->ProcessAutoSave(onUIExtNodeDestroy)) {
+        auto inPagePattern = inPageNode->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(inPagePattern);
+        inPagePattern->SetIsModalCovered(true);
+    }
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()

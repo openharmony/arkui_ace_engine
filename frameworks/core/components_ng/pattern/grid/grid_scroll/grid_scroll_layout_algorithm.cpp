@@ -442,16 +442,14 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     if (!rowsTemplate.empty()) {
         cross = ParseTemplateArgs(GridUtils::ParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     } else {
         cross = ParseTemplateArgs(GridUtils::ParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     }
     crossLens = cross.first;
-    if (cross.second) {
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = cross.second;
 
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
@@ -602,9 +600,9 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
         return fillNewLine;
     }
     auto blankAtStart = gridLayoutInfo_.currentOffset_;
-    while (GreatNotEqual(blankAtStart, 0.0)) {
+    while (GreatNotEqual(blankAtStart, 0.0) || gridLayoutInfo_.startIndex_ > gridLayoutInfo_.childrenCount_ - 1) {
         float lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
-        if (GreatNotEqual(lineHeight, 0.0)) {
+        if (GreatOrEqual(lineHeight, 0.0)) {
             gridLayoutInfo_.lineHeightMap_[gridLayoutInfo_.startMainLineIndex_] = lineHeight;
             blankAtStart -= (lineHeight + mainGap_);
             fillNewLine = true;

@@ -70,7 +70,7 @@ private:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
-    void FireAutoSave(const RefPtr<FrameNode>& pageNode);
+    void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
 
     RefPtr<FrameNode> stageNode_;

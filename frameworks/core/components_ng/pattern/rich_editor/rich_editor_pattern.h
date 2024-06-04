@@ -177,6 +177,11 @@ public:
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
 
+    void SetSupportPreviewText(bool isTextPreviewSupported)
+    {
+        isTextPreviewSupported_ = isTextPreviewSupported;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
 
@@ -329,6 +334,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
+    bool BeforeStatusCursorMove(bool isLeft);
     bool CursorMoveLeft();
     bool CursorMoveRight();
     bool CursorMoveUp();
@@ -339,6 +345,7 @@ public:
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
     bool CursorMoveEnd();
+    float CalcLineHeightByPosition(int32_t position);
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
@@ -1060,6 +1067,7 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    bool isTextPreviewSupported_ = true;
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;

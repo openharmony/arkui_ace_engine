@@ -115,7 +115,7 @@ public:
     void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;
 #else
     void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData) override;
+        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) override;
 #endif
 
 private:

@@ -57,6 +57,11 @@ struct PreviewRange {
     {
         return start == range.start && end == range.end;
     }
+    void Set(int32_t startValue, int32_t endValue)
+    {
+        start = startValue;
+        end = endValue;
+    }
 };
 
 struct KeyComb final {

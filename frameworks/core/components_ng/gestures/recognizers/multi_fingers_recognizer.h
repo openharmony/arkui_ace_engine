@@ -67,6 +67,11 @@ public:
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
     }
 
+    int32_t GetTouchPointsSize() const
+    {
+        return static_cast<int32_t>(touchPoints_.size());
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {

@@ -206,6 +206,9 @@ public:
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     // ArkTsCard end
     static bool IsPlugin();
+    static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);
+    static panda::Local<panda::StringRef> GetCachedString(const EcmaVM *vm, int32_t propertyIndex);
+    static void SetCachedString(const EcmaVM* vm);
 
 private:
     void InitGlobalObjectTemplate();

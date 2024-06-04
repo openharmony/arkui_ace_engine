@@ -336,6 +336,7 @@ public:
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
+    virtual void SetMarkNodeGroup(bool isNodeGroup) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -499,7 +500,7 @@ public:
 
     virtual void SetActualForegroundColor(const Color& value) {}
 
-    virtual void ResetSurface() {}
+    virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -678,6 +679,10 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    void SetHandleChildBounds(bool value) {
+        handleChildBounds_ = value;
+    }
+
     virtual Matrix4 GetRevertMatrix()
     {
         return Matrix4();
@@ -692,6 +697,7 @@ protected:
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
+    bool handleChildBounds_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

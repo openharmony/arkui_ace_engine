@@ -192,6 +192,16 @@ void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
 }
 
+void TextModelNG::SetTextSelectableMode(Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
@@ -526,6 +536,14 @@ void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
+}
+
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
@@ -941,6 +959,13 @@ LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
 {
     LineBreakStrategy value = LineBreakStrategy::GREEDY;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
+    return value;
+}
+
+TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
+{
+    TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextSelectableMode, value, frameNode, value);
     return value;
 }
 

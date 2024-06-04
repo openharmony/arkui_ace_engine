@@ -1260,7 +1260,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2053,7 +2053,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2172,7 +2172,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
             updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
-            updateSpanStyle.hasResourceDecorationColor = color->IsObject();
+            updateSpanStyle.hasResourceDecorationColor = false;
         }
     }
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {

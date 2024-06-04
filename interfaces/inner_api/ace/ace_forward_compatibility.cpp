@@ -15,6 +15,12 @@
 
 #include "ace_forward_compatibility.h"
 
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unistd.h>
 #include <unordered_set>
 
 #include "arkui_log.h"
@@ -39,6 +45,11 @@ constexpr char ARKUI_LIB_NAME[] = "libace.so";
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
 constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
 #endif
+#ifdef OHOS_PLATFORM
+const std::string KERNEL_TYPE_HM = "hongmeng";
+const std::string RECLAIM_FILEPAGE_STRING_FOR_HM = "1";
+#endif
+const std::string RECLAIM_FILEPAGE_STRING_FOR_LINUX = "file";
 } // namespace
 
 void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated)
@@ -95,6 +106,31 @@ const char* AceForwardCompatibility::GetAceLibName()
 bool AceForwardCompatibility::PipelineChanged()
 {
     return (isNewPipeline_ && !isForceOldPipeline_) != isNewAppspawn_;
+}
+
+void AceForwardCompatibility::ReclaimFileCache(int32_t pid)
+{
+    LOGI("ReclaimFileCache start pid:%{public}d", pid);
+    if (pid <= 0) {
+        LOGE("get invalid pid:%{public}d", pid);
+        return;
+    }
+    std::string path = "/proc" + std::to_string(pid) +"/reclaim";
+    std::string content = RECLAIM_FILEPAGE_STRING_FOR_LINUX;
+#ifdef OHOS_PLATFORM
+
+    if (system::GetParameter("ohos.boot.kernel", "") == KERNEL_TYPE_HM) {
+        content = RECLAIM_FILEPAGE_STRING_FOR_HM;
+    }
+#endif
+    std::ofstream outfile(path);
+    if (outfile.is_open()) {
+        outfile << content;
+        outfile.close();
+    } else {
+        LOGE("ace reclaim exception");
+    }
+    LOGI("ReclaimFileCache end");
 }
 } // namespace Ace
 } // namespace OHOS

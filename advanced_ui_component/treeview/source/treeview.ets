@@ -924,7 +924,7 @@ export struct TreeView {
     this.treeViewTheme.borderFocusedColor = theme.colors.interactiveFocus;
     this.treeViewTheme.leftIconColor = theme.colors.iconSecondary;
     this.treeViewTheme.leftIconActiveColor = theme.colors.interactiveActive;
-    this.treeViewTheme.arrowIconColor = theme.colors.iconTertiary;
+    this.treeViewTheme.arrowIconColor = theme.colors.iconPrimary;
     this.treeController.treeViewTheme = this.treeViewTheme;
   }
 
@@ -2893,7 +2893,7 @@ class ListNodeDataSource extends BasicDataSource {
         if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.Expand) {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
-        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === 
+        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
           NodeStatus.Expand &&
           this.listNode[i].getCanShowFlagLine() === false) {
           parentNodeId = rearCurrentNodeId;

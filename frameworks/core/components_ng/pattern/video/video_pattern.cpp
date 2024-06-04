@@ -1728,6 +1728,15 @@ void VideoPattern::SetImageAnalyzerConfig(void* config)
     }
 }
 
+void VideoPattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
+}
+
 bool VideoPattern::IsSupportImageAnalyzer()
 {
     auto host = GetHost();

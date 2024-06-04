@@ -42,6 +42,7 @@ public:
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void SetTransform(const TransformParam& param) override;
     TransformParam GetTransform() const override;
+    LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);
     void Reset();
     int32_t GetWidth()

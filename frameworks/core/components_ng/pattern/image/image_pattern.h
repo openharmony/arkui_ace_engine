@@ -196,6 +196,7 @@ public:
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -335,10 +336,11 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
 
@@ -416,7 +418,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();

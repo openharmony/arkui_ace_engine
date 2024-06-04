@@ -110,6 +110,19 @@ ArkUI_Float32 GetPullDownRatio(ArkUINodeHandle node)
     return RefreshModelNG::GetPullDownRatio(frameNode);
 }
 
+ArkUI_Float32 GetRefreshOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetRefreshOffset(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Bool GetPullToRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullToRefresh(frameNode));
+}
 } // namespace
 namespace NodeModifier {
 
@@ -117,7 +130,7 @@ const ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
         SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio };
+        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
     return &modifier;
 }
 

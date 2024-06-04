@@ -57,6 +57,12 @@ public:
         return true;
     }
 
+    virtual bool ExecuteJsBinForAOT([[maybe_unused]] const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    {
+        return true;
+    }
+
     // Get the global object.
     virtual shared_ptr<JsValue> GetGlobal() = 0;
     virtual void RunGC() = 0;

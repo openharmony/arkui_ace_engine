@@ -1003,6 +1003,7 @@ export struct ChipComponent {
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
     }
+    .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)
     .type(ButtonType.Normal)
     .clip(false)

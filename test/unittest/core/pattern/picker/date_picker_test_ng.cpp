@@ -3660,7 +3660,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0013, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -3768,7 +3768,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0015, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -3822,7 +3822,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0016, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(SMALL_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(SMALL_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -3876,7 +3876,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0017, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -3984,7 +3984,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0019, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4038,7 +4038,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0020, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4092,7 +4092,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0021, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4200,7 +4200,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0023, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4254,7 +4254,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0024, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4308,7 +4308,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0025, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4416,7 +4416,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0027, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4470,7 +4470,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0028, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(SMALL_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(SMALL_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4524,7 +4524,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0029, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4632,7 +4632,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0031, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4686,7 +4686,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0032, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(ENORMOUS_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(ENORMOUS_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4740,7 +4740,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0033, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4848,7 +4848,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0035, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4902,7 +4902,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0036, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(MEDIUM_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(MEDIUM_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -4956,7 +4956,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0037, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5064,7 +5064,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0039, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5118,7 +5118,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0040, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5172,7 +5172,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0041, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5280,7 +5280,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0043, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5334,7 +5334,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0044, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(MEDIUM_SHOWCOUNT) + COLON + std::to_string(HUGE_SHOWCOUNT));
+        AM + ZERO + std::to_string(MEDIUM_SHOWCOUNT) + COLON + ZERO + std::to_string(HUGE_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5388,7 +5388,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0045, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5496,7 +5496,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0047, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -5550,7 +5550,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0048, TestSize.Level1)
     auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
-        AM + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
+        AM + ZERO + std::to_string(BIG_SHOWCOUNT) + COLON + ZERO + std::to_string(BIG_SHOWCOUNT));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

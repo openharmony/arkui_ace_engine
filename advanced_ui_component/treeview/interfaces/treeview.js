@@ -888,7 +888,7 @@ export class TreeView extends ViewPU {
         this.treeViewTheme.borderFocusedColor = n24.colors.interactiveFocus;
         this.treeViewTheme.leftIconColor = n24.colors.iconSecondary;
         this.treeViewTheme.leftIconActiveColor = n24.colors.interactiveActive;
-        this.treeViewTheme.arrowIconColor = n24.colors.iconTertiary;
+        this.treeViewTheme.arrowIconColor = n24.colors.iconPrimary;
         this.treeController.treeViewTheme = this.treeViewTheme;
     }
 

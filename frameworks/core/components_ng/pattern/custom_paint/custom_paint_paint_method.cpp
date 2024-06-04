@@ -623,8 +623,21 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 
     ContainerScope scope(canvasImage.instanceId);
     auto context = PipelineBase::GetCurrentContext();
-    auto image = Ace::ImageProvider::GetDrawingImage(
-        canvasImage.src, context, Size(std::max(width, 0.0), std::max(height, 0.0)));
+    auto image = std::make_shared<RSImage>();
+    if (canvasImage.imageData != nullptr) {
+        auto imageData = *(canvasImage.imageData);
+        if (imageData.data.empty()) {
+            return;
+        }
+        RSBitmap bitmap;
+        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+        bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
+        bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
+        image->BuildFromBitmap(bitmap);
+    } else {
+        image = Ace::ImageProvider::GetDrawingImage(
+            canvasImage.src, context, Size(std::max(width, 0.0), std::max(height, 0.0)));
+    }
     CHECK_NULL_VOID(image);
     DrawImageInternal(canvasImage, image);
 #endif
@@ -635,22 +648,15 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
     if (imageData.data.empty()) {
         return;
     }
-    uint32_t* data = new (std::nothrow) uint32_t[imageData.data.size()];
-    CHECK_NULL_VOID(data);
-
-    for (uint32_t i = 0; i < imageData.data.size(); ++i) {
-        data[i] = imageData.data[i].GetValue();
-    }
     RSBitmap bitmap;
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
-    bitmap.SetPixels(data);
+    bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;
     brush.SetBlendMode(RSBlendMode::SRC);
     rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawBitmap(bitmap, imageData.x, imageData.y);
     rsCanvas_->DetachBrush();
-    delete[] data;
 }
 
 void CustomPaintPaintMethod::FillRect(const Rect& rect)
@@ -1318,7 +1324,7 @@ void CustomPaintPaintMethod::Translate(double x, double y)
 void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
     std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
         paragraph_->Layout(width);

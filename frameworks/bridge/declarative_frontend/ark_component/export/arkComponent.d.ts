@@ -732,6 +732,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
+    textSelectable(value: TextSelectableMode): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
@@ -1815,7 +1816,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
     cachedCount(value: number): this;
-    displayCount(value: string | number | SwiperAutoFill): this;
+    displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;

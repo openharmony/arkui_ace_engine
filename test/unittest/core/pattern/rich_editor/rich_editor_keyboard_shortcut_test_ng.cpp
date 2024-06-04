@@ -31,7 +31,6 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
-    void AddParagraph(TestParagraphItem testParagraphItem);
 };
 
 void RichEditorKeyboardShortcutTestNg::SetUp()
@@ -66,35 +65,6 @@ void RichEditorKeyboardShortcutTestNg::TearDown()
 void RichEditorKeyboardShortcutTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
-}
-
-void RichEditorKeyboardShortcutTestNg::AddParagraph(TestParagraphItem testParagraphItem)
-{
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->paragraphs_.AddParagraph(
-        { .paragraph = paragraph, .start = testParagraphItem.start, .end = testParagraphItem.end });
-    for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
-        EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offset, _)).WillRepeatedly(Return(index));
-    }
-    for (auto& cursorItem : testParagraphItem.testCursorItems) {
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(cursorItem.index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(cursorItem.caretMetricsFDown), Return(true)));
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(cursorItem.index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(cursorItem.caretMetricsFUp), Return(true)));
-        float cursorHeight = 0.0f;
-        EXPECT_EQ(richEditorPattern->paragraphs_.ComputeCursorOffset(cursorItem.index, cursorHeight, true),
-            cursorItem.caretMetricsFDown.offset);
-        EXPECT_EQ(richEditorPattern->paragraphs_.ComputeCursorOffset(cursorItem.index, cursorHeight, false),
-            cursorItem.caretMetricsFUp.offset);
-    }
-    for (auto& paragraphRect : testParagraphItem.testParagraphRects) {
-        EXPECT_CALL(*paragraph, GetRectsForRange(paragraphRect.start, paragraphRect.end, _))
-            .WillRepeatedly(SetArgReferee<THIRD_PARAM>(paragraphRect.rects));
-    }
 }
 
 /**

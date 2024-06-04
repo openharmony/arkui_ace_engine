@@ -32,7 +32,22 @@ public:
     static void TearDown();
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
-    MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
+
+    SafeAreaInsets GetSafeArea() const override
+    {
+        return safeAreaManager_->GetSafeArea();
+    }
+
+    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override
+    {
+        safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+    }
+
+    void SetIsLayoutFullScreen(bool value) override
+    {
+        safeAreaManager_->SetIsFullScreen(value);
+    };
+
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
     MOCK_METHOD(float, GetFontScale, ());
@@ -49,6 +64,7 @@ protected:
     bool isDeclarative_ = false;
     double dipScale_ = 1.0;
     RefPtr<TaskExecutor> taskExecutor_;
+    RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H

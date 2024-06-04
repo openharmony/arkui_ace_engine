@@ -97,6 +97,7 @@ void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
     auto taskScheduler = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
 
+    LOGI("Stylus received commandType:%{public}d", static_cast<int32_t>(command));
     taskScheduler->PostTask(
         [command, callback, nodeId, args]() {
             ResultData res;
@@ -159,16 +160,19 @@ bool StylusDetectorMgr::Notify(const NotifyInfo& notifyInfo)
 
 bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent)
 {
-    if (!IsEnable()) {
+    if (!IsStylusTouchEvent(touchEvent)) {
         return false;
     }
-    if (!IsStylusTouchEvent(touchEvent)) {
+
+    if (!IsEnable()) {
         return false;
     }
 
     auto frameNode = FindTextInputFrameNodeByPosition(touchEvent.x, touchEvent.y);
     CHECK_NULL_RETURN(frameNode, false);
 
+    LOGI("Stylus hit position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s", touchEvent.x,
+        touchEvent.y, frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str());
     NotifyInfo info;
     info.componentId = frameNode->GetId();
     nodeId_ = info.componentId;
