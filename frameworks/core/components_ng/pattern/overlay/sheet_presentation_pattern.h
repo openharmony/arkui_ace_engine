@@ -504,11 +504,14 @@ public:
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
+        auto titleHeight = GetFirstChildHeight();
         if (sheetType_ == SheetType::SHEET_CENTER) {
-            return centerHeight_;
+            return centerHeight_ - titleHeight;
         }
-        return height_;
+        return height_ - titleHeight;
     }
+    
+    float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
     RefPtr<FrameNode> GetOverlayRoot();
