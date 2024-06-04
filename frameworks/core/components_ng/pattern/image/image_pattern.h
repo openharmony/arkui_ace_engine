@@ -194,6 +194,11 @@ public:
         return syncLoad_;
     }
 
+    void SetNeedBorderRadius(bool needBorderRadius)
+    {
+        needBorderRadius_ = needBorderRadius;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void SetImageAIOptions(void* options);
@@ -476,6 +481,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
