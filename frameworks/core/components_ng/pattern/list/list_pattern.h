@@ -183,7 +183,7 @@ public:
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
-    void CalculateCurrentOffset(float delta);
+    void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
