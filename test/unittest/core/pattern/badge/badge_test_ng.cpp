@@ -22,6 +22,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -53,6 +55,7 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
+constexpr float AGE_FONT_SIZE_SCALE = 1.75f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 
@@ -71,26 +74,55 @@ const Color Colors[] {
 };
 } // namespace
 
-class BadgeTestNg : public testing::Test {
+class BadgeTestNg : public TestNG {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void GetInstance();
 
 protected:
     std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateChild(const LayoutConstraintF& childLayoutConstraint);
+    void CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<BadgePattern> pattern_;
+    RefPtr<BadgeLayoutProperty> layoutProperty_;
+    RefPtr<BadgeAccessibilityProperty> accessibilityProperty_;
 };
 
-void BadgeTestNg::SetUp()
+void BadgeTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     // set badgeTheme to themeManager before using themeManager to get badgeTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<BadgeTheme>()));
 }
+
+void BadgeTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
+}
+
+void BadgeTestNg::SetUp() {}
+
 void BadgeTestNg::TearDown()
 {
-    MockPipelineContext::TearDown();
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    layoutProperty_ = nullptr;
+    accessibilityProperty_ = nullptr;
+}
+
+void BadgeTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    pattern_ = frameNode_->GetPattern<BadgePattern>();
+    layoutProperty_ = frameNode_->GetLayoutProperty<BadgeLayoutProperty>();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<BadgeAccessibilityProperty>();
 }
 
 std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BadgeTestNg::CreateChild(
@@ -115,14 +147,13 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BadgeTestNg::CreateChild
     return { textNode, textLayoutWrapper };
 }
 
-std::pair<RefPtr<FrameNode>, BadgeModelNG> CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize)
+void BadgeTestNg::CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize)
 {
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badgeParameters.badgeCircleSize = badgeCircleSize;
     badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return { frameNode, badge };
+    GetInstance();
 }
 
 /**
@@ -137,10 +168,17 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator001, TestSize.Level1)
     BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgeLayoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    EXPECT_NE(badgeLayoutProperty, nullptr);
+    GetInstance();
+    EXPECT_EQ(accessibilityProperty_->GetText(), "");
+
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+
+    filter.AddFilterAttr("id");
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
 }
 
 /**
@@ -161,20 +199,22 @@ HWTEST_F(BadgeTestNg, BadgeFrameNodeCreator002, TestSize.Level1)
     badgeParameters.badgeTextColor = Color::GREEN;
     badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
     badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
+    badgeParameters.isPositionXy = true;
+    badgeParameters.badgePositionX = Dimension(10);
+    badgeParameters.badgePositionY = Dimension(10);
     badge.Create(badgeParameters);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgeLayoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeValue(), "test");
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeCount(), 1);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeMaxCount(), 99);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeColor(), Color::BLACK);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeTextColor(), Color::GREEN);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeFontSize(), BADGE_FONT_SIZE);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeCircleSize(), BADGE_CIRCLE_SIZE);
+    GetInstance();
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(layoutProperty_->GetBadgeValue(), "test");
+    EXPECT_EQ(layoutProperty_->GetBadgeCount(), 1);
+    EXPECT_EQ(layoutProperty_->GetBadgeMaxCount(), 99);
+    EXPECT_EQ(layoutProperty_->GetBadgeColor(), Color::BLACK);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::GREEN);
+    EXPECT_EQ(layoutProperty_->GetBadgeFontSize(), BADGE_FONT_SIZE);
+    EXPECT_EQ(layoutProperty_->GetBadgeCircleSize(), BADGE_CIRCLE_SIZE);
 }
+
 /**
  * @tc.name: BadgePatternTest001
  * @tc.desc: test badge pattern OnModifyDone.
@@ -185,51 +225,47 @@ HWTEST_F(BadgeTestNg, BadgePatternTest001, TestSize.Level1)
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
     badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    GetInstance();
 
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto layoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
     // test frameNode has not
-    badgePattern->OnModifyDone();
+    pattern_->OnModifyDone();
 
     // add frameNode child
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     ASSERT_NE(rowNode, nullptr);
-    rowNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
     // add textNode child
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(textNode, nullptr);
-    textNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
     // update badge layoutProperty and go to different branch
-    layoutProperty->UpdateBadgeValue("");
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeValue("");
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeValue("test");
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeValue("test");
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeCount(1);
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeCount(1);
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeCount(100);
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeCount(100);
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeCount(-1);
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeCount(-1);
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeCount(-0);
-    badgePattern->OnModifyDone();
+    layoutProperty_->UpdateBadgeCount(-0);
+    pattern_->OnModifyDone();
 }
 
 /**
@@ -245,20 +281,16 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    GetInstance();
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+
+    auto badgeLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
     /**
@@ -272,28 +304,26 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     auto firstChild = CreateChild(childLayoutConstraint);
     auto firstChildFrameNode = firstChild.first;
     auto firstChildLayoutWrapper = firstChild.second;
-    firstChildFrameNode->MountToParent(frameNode);
+    firstChildFrameNode->MountToParent(frameNode_);
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
 
     /**
      * @tc.steps: step4. update layoutWrapper and go to different branch.
      */
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-
     LayoutConstraintF LayoutConstraintVaildWidth;
     LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
 
-    layoutProperty->UpdateBadgeValue("");
+    layoutProperty_->UpdateBadgeValue("");
     LayoutConstraintF LayoutConstraintVaildHeight;
     LayoutConstraintVaildHeight.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, 1000000));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildHeight);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
 
-    layoutProperty->UpdateBadgeValue("test");
+    layoutProperty_->UpdateBadgeValue("test");
     LayoutConstraintF LayoutConstraintVaildSize;
     LayoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(1000000, 1000000));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildSize);
@@ -314,14 +344,14 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
-    badgeLayoutProperty->UpdateBadgeMaxCount(5);
+    layoutProperty_->UpdateBadgeMaxCount(5);
     textLayoutProperty->UpdateContent("hello");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     for (int32_t i = 0; i < 3; ++i) {
         auto badgePosition = static_cast<BadgePosition>(i);
-        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
+        layoutProperty_->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
@@ -329,7 +359,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     textLayoutProperty->UpdateContent(" ");
     for (int32_t i = 0; i < 3; ++i) {
         auto badgePosition = static_cast<BadgePosition>(i);
-        badgeLayoutProperty->UpdateBadgePosition(badgePosition);
+        layoutProperty_->UpdateBadgePosition(badgePosition);
         badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
@@ -337,7 +367,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     auto secondChild = CreateChild(childLayoutConstraint);
     auto secondChildFrameNode = secondChild.first;
     auto secondChildLayoutWrapper = secondChild.second;
-    secondChildFrameNode->MountToParent(frameNode);
+    secondChildFrameNode->MountToParent(frameNode_);
     layoutWrapper->AppendChild(secondChildLayoutWrapper);
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
@@ -354,35 +384,30 @@ HWTEST_F(BadgeTestNg, BadgePatternTest003, TestSize.Level1)
     BadgeParameters badgeParameters;
     badgeParameters.badgeFontWeight = FontWeight::W100;
     BadgeModelNG.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    GetInstance();
 
-    auto badgePattern = frameNode->GetPattern<BadgePattern>();
-    ASSERT_NE(badgePattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     // test frameNode has not
-    badgePattern->OnModifyDone();
+    pattern_->OnModifyDone();
 
     // add frameNode child
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     ASSERT_NE(rowNode, nullptr);
-    rowNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
     // add textNode child
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(textNode, nullptr);
-    textNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
     for (auto fontWeight : FontWeights) {
-        layoutProperty->UpdateBadgeFontWeight(fontWeight);
-        badgePattern->OnModifyDone();
-        EXPECT_EQ(layoutProperty->GetBadgeFontWeight().value(), fontWeight);
+        layoutProperty_->UpdateBadgeFontWeight(fontWeight);
+        pattern_->OnModifyDone();
+        EXPECT_EQ(layoutProperty_->GetBadgeFontWeight().value(), fontWeight);
     }
 }
 
@@ -398,35 +423,30 @@ HWTEST_F(BadgeTestNg, BadgePatternTest004, TestSize.Level1)
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderWidth = BADGE_BORDER_WIDTH;
     BadgeModelNG.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    GetInstance();
 
-    auto badgePattern = frameNode->GetPattern<BadgePattern>();
-    ASSERT_NE(badgePattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     // test frameNode has not
-    badgePattern->OnModifyDone();
+    pattern_->OnModifyDone();
 
     // add frameNode child
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     ASSERT_NE(rowNode, nullptr);
-    rowNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
     // add textNode child
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(textNode, nullptr);
-    textNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
-    layoutProperty->UpdateBadgeBorderWidth(BADGE_BORDER_WIDTH);
-    badgePattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth().value(), BADGE_BORDER_WIDTH);
+    layoutProperty_->UpdateBadgeBorderWidth(BADGE_BORDER_WIDTH);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(layoutProperty_->GetBadgeBorderWidth().value(), BADGE_BORDER_WIDTH);
 }
 
 /**
@@ -441,35 +461,30 @@ HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level1)
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeBorderColor = Color::BLACK;
     badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    GetInstance();
 
-    auto badgePattern = frameNode->GetPattern<BadgePattern>();
-    ASSERT_NE(badgePattern, nullptr);
-    badgePattern->OnModifyDone();
+    pattern_->OnModifyDone();
 
     // add frameNode child
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     ASSERT_NE(rowNode, nullptr);
-    rowNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
     // add textNode child
     auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(textNode, nullptr);
-    textNode->MountToParent(frameNode);
-    badgePattern->OnModifyDone();
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
 
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     for (auto color : Colors) {
-        layoutProperty->UpdateBadgeBorderColor(color);
-        badgePattern->OnModifyDone();
-        EXPECT_EQ(layoutProperty->GetBadgeBorderColor().value(), color);
+        layoutProperty_->UpdateBadgeBorderColor(color);
+        pattern_->OnModifyDone();
+        EXPECT_EQ(layoutProperty_->GetBadgeBorderColor().value(), color);
     }
 }
 
@@ -483,9 +498,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    RefPtr<FrameNode> frameNode = obj.first;
-    BadgeModelNG badge = obj.second;
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -493,21 +506,18 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    auto badgeLayoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto badgeLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
-    badgeLayoutProperty->UpdateBadgeFontSize(BADGE_FONT_SIZE);
+    layoutProperty_->UpdateBadgeFontSize(BADGE_FONT_SIZE);
 
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     auto firstChild = CreateChild(childLayoutConstraint);
     auto firstChildFrameNode = firstChild.first;
     auto firstChildLayoutWrapper = firstChild.second;
-    firstChildFrameNode->MountToParent(frameNode);
+    firstChildFrameNode->MountToParent(frameNode_);
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -541,8 +551,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
      * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
      */
     layoutAlgorithm->hasFontSize_ = true;
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
-    layoutProperty->UpdateBadgePosition(BadgePosition(6));
+    layoutProperty_->UpdateBadgePosition(BadgePosition(6));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
 }
@@ -557,9 +566,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    RefPtr<FrameNode> frameNode = obj.first;
-    BadgeModelNG badge = obj.second;
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -567,12 +574,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto badgeLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
 
@@ -581,7 +584,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
     auto firstChild = CreateChild(childLayoutConstraint);
     auto firstChildFrameNode = firstChild.first;
     auto firstChildLayoutWrapper = firstChild.second;
-    firstChildFrameNode->MountToParent(frameNode);
+    firstChildFrameNode->MountToParent(frameNode_);
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -590,7 +593,6 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step3. update layoutWrapper and go to different branch.
      */
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     LayoutConstraintF LayoutConstraintVaildWidth;
     LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
@@ -610,8 +612,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
      * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
      */
     layoutAlgorithm->hasFontSize_ = true;
-    layoutProperty->UpdateBadgePosition(BadgePosition(6));
-    layoutProperty->UpdateIsPositionXy(true);
+    layoutProperty_->UpdateBadgePosition(BadgePosition(6));
+    layoutProperty_->UpdateIsPositionXy(true);
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TEN);
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
@@ -627,9 +629,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    RefPtr<FrameNode> frameNode = obj.first;
-    BadgeModelNG badge = obj.second;
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -637,12 +637,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto badgeLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
 
@@ -651,7 +647,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     auto firstChild = CreateChild(childLayoutConstraint);
     auto firstChildFrameNode = firstChild.first;
     auto firstChildLayoutWrapper = firstChild.second;
-    firstChildFrameNode->MountToParent(frameNode);
+    firstChildFrameNode->MountToParent(frameNode_);
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -660,7 +656,6 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step3. update layoutWrapper and go to different branch.
      */
-    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     LayoutConstraintF LayoutConstraintVaildWidth;
     LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
@@ -672,8 +667,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutAlgorithm->hasFontSize_ = true;
-    layoutProperty->UpdateBadgePosition(BadgePosition(6));
-    layoutProperty->UpdateIsPositionXy(true);
+    layoutProperty_->UpdateBadgePosition(BadgePosition(6));
+    layoutProperty_->UpdateIsPositionXy(true);
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_FIVE);
 
     /**
@@ -694,9 +689,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    RefPtr<FrameNode> frameNode = obj.first;
-    BadgeModelNG badge = obj.second;
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -704,12 +697,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(badgeLayoutProperty, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    auto badgeLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
     layoutWrapper->GetLayoutProperty()->layoutConstraint_->selfIdealSize =
@@ -739,23 +728,44 @@ HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
-    RefPtr<FrameNode> frameNode = obj.first;
-    BadgeModelNG badge = obj.second;
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
-     * @tc.steps: step2. get layoutproperty
-     * @tc.expected: step2. related function is called.
+     * @tc.steps: step2. call SetIsDefault with badgeLayoutProperty.
      */
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(badgeLayoutProperty, nullptr);
+    layoutProperty_->SetIsDefault(true, true);
+    EXPECT_EQ(layoutProperty_->GetFontSizeIsDefault(), true);
+    EXPECT_EQ(layoutProperty_->GetBadgeSizeIsDefault(), true);
+}
 
-    /**
-     * @tc.steps: step3. call SetIsDefault with badgeLayoutProperty.
-     */
-    badgeLayoutProperty->SetIsDefault(true, true);
-    EXPECT_EQ(badgeLayoutProperty->GetFontSizeIsDefault(), true);
-    EXPECT_EQ(badgeLayoutProperty->GetBadgeSizeIsDefault(), true);
+/**
+ * @tc.name: BadgePatternTest011
+ * @tc.desc: Test badge measure and layout.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level1)
+{
+    int32_t minPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->lastBadgeVisible_);
+
+    layoutProperty_->UpdateBadgeCircleSize(Dimension(10));
+    pattern_->OnModifyDone();
+    EXPECT_FALSE(pattern_->lastBadgeVisible_);
+    pattern_->OnModifyDone();
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(minPlatformVersion);
 }
 
 /**
@@ -770,11 +780,8 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg001, TestSize.Level1)
     BadgeParameters badgeParameters;
     badgeParameters.badgeValue = VALUE;
     badge.Create(badgeParameters);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
-    EXPECT_EQ(badgeAccessibilityProperty->GetText(), VALUE);
+    GetInstance();
+    EXPECT_EQ(accessibilityProperty_->GetText(), VALUE);
 }
 
 /**
@@ -790,29 +797,8 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level1)
     badgeParameters.badgeValue = VALUE;
     badgeParameters.badgeCount = COUNT;
     badge.Create(badgeParameters);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
-    EXPECT_EQ(badgeAccessibilityProperty->GetText(), std::to_string(COUNT));
-}
-
-/**
- * @tc.name: BadgeAccessibilityPropertyTestNg003
- * @tc.desc: Test Text property of Badge if BadgeValue is empty.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg003, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
-    EXPECT_EQ(badgeAccessibilityProperty->GetText(), "");
+    GetInstance();
+    EXPECT_EQ(accessibilityProperty_->GetText(), std::to_string(COUNT));
 }
 
 /**
@@ -826,30 +812,25 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Level1)
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
-    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
-    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-
-    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
-    layoutProperty->UpdateBadgePosition(BadgePosition::RIGHT_TOP);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty->UpdateIsPositionXy(false);
-    layoutAlgorithm->hasFontSize_ = true;
-    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+    layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT_TOP);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty_->UpdateIsPositionXy(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT_TOP);
+    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
 
 /**
@@ -863,30 +844,25 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Level1)
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
-    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
-    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-
-    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
-    layoutProperty->UpdateBadgePosition(BadgePosition::RIGHT);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty->UpdateIsPositionXy(false);
-    layoutAlgorithm->hasFontSize_ = true;
-    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+    layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty_->UpdateIsPositionXy(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT);
+    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
 }
 
 /**
@@ -900,29 +876,69 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
     BadgeModelNG badge;
     BadgeParameters badgeParameters;
     badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
-    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
-    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
      */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutProperty_->UpdateBadgePosition(BadgePosition::LEFT);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    layoutProperty_->UpdateIsPositionXy(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
+    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
+}
 
-    RefPtr<BadgeLayoutProperty> layoutProperty = AceType::MakeRefPtr<BadgeLayoutProperty>();
-    layoutProperty->UpdateBadgePosition(BadgePosition::LEFT);
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty->UpdateIsPositionXy(false);
-    layoutAlgorithm->hasFontSize_ = true;
-    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+/**
+ * @tc.name: BadgeLayoutAlgorithmTestNg004
+ * @tc.desc: Test the layout on the left side of the badge.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
+    badge.SetIsDefault(false, false);
+    badge.Create(badgeParameters);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_FALSE(layoutProperty_->GetFontSizeIsDefault());
+    EXPECT_FALSE(layoutProperty_->GetBadgeSizeIsDefault());
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
+
+    float fontScale = MockPipelineContext::GetCurrentContext()->GetFontScale();
+    MockPipelineContext::GetCurrentContext()->SetFontScale(AGE_FONT_SIZE_SCALE);
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
+
+    layoutProperty_->SetIsDefault(true, true);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 0);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
+    MockPipelineContext::GetCurrentContext()->SetFontScale(fontScale);
 }
 } // namespace OHOS::Ace::NG
