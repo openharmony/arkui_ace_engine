@@ -46,6 +46,8 @@ constexpr int32_t PAGE_NODES = 1000;
 constexpr int32_t PAGE_DEPTH = 300;
 namespace {
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
+const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 
 void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
     const RefPtr<NavDestinationContext>& context, bool isFrom, std::optional<NavDestinationInfo>& info)
@@ -205,7 +207,19 @@ void NavigationPattern::OnModifyDone()
         dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         dividerNode->MarkModifyDone();
     }
-    isInitialDone_ = true;
+
+    if (GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
+        AnimationOption option;
+        option.SetCurve(MODE_SWITCH_CURVE);
+        option.SetFillMode(FillMode::FORWARDS);
+        option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+        AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
+            auto hostNode = weakHost.Upgrade();
+            CHECK_NULL_VOID(hostNode);
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            hostNode->GetContext()->FlushUITasks();
+        });
+    }
 }
 
 void NavigationPattern::OnLanguageConfigurationUpdate()
