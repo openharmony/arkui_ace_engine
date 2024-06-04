@@ -107,6 +107,7 @@ private:
     void CollapseArrayValue();
     void ApplySevenPlusOneMode(int32_t fullArraySize);
     void ApplyFivePlusOneMode(int32_t fullArraySize);
+    int32_t GetAutoCollapseIndex(int32_t propSelect);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
