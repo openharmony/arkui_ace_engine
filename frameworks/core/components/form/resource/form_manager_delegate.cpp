@@ -230,12 +230,12 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 void FormManagerDelegate::HandleCachedClickEvents()
 {
     if (!isDynamic_) {
-        LOGE("failed to handle cached click, not dynamic card");
+        TAG_LOGE(AceLogTag::ACE_FORM, "failed to handle cached click, not dynamic card");
         return;
     }
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
-        LOGI("process click event after recover form, pointerEventCache_.size: %{public}s",
+        TAG_LOGI(AceLogTag::ACE_FORM, "process click event after recover form, pointerEventCache_.size: %{public}s",
             std::to_string(pointerEventCache_.size()).c_str());
         recycleStatus_ = RecycleStatus::RECOVERED;
         for (const auto& pointerEvent : pointerEventCache_) {
@@ -666,9 +666,10 @@ void FormManagerDelegate::DispatchPointerEvent(const
             if (pipelineContext && pipelineContext->GetEventManager()) {
                 // avoid context dispatch mocked cancel event
                 pipelineContext->GetEventManager()->SetInnerFlag(true);
-                LOGI("set event manager inner flag");
+                TAG_LOGI(AceLogTag::ACE_FORM, "set event manager inner flag");
             }
-            LOGI("form is recycled, recover it first, action=%{public}d, formId=%{public}" PRId64 "",
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "form is recycled, recover it first, action=%{public}d, formId=%{public}" PRId64 "",
                 pointerEvent->GetPointerAction(), runningCardId_);
             recycleStatus_ = RecycleStatus::RECOVERING;
             pointerEventCache_.emplace_back(pointerEvent);
@@ -678,15 +679,16 @@ void FormManagerDelegate::DispatchPointerEvent(const
             want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, true);
             OHOS::AppExecFwk::FormMgr::GetInstance().RecoverForms(formIds, want);
         } else if (recycleStatus_ == RecycleStatus::RECOVERING) {
-            LOGI("form is recovering, cache pointer event, action=%{public}d", pointerEvent->GetPointerAction());
+            TAG_LOGI(AceLogTag::ACE_FORM, "form is recovering, cache pointer event, action=%{public}d", 
+                pointerEvent->GetPointerAction());
             pointerEventCache_.emplace_back(pointerEvent);
         } else {
-            LOGE("formRendererDispatcher_ is null");
+            TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is null");
         }
         return;
     }
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        LOGI("dispatch down event to renderer");
+        TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
     formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
@@ -694,7 +696,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 {
     if (formRendererDispatcher_ == nullptr) {
-        LOGE("formRendererDispatcher_ is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is null");
         return;
     }
 
@@ -704,7 +706,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
     if (formRendererDispatcher_ == nullptr) {
-        LOGE("formRendererDispatcher_ is nullptr");
+        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
         return;
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
@@ -768,7 +770,8 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
     int32_t externalErrorCode = 0;
     std::string errorMsg;
     OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
-    LOGI("OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
@@ -980,7 +983,8 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
 
 void FormManagerDelegate::ProcessRecycleForm()
 {
-    LOGI("ProcessRecycleForm, formId is %{public}s", std::to_string(runningCardId_).c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessRecycleForm, formId is %{public}s",
+        std::to_string(runningCardId_).c_str());
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         recycleStatus_ = RecycleStatus::RECYCLED;
