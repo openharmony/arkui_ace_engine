@@ -238,6 +238,7 @@
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
+      OHOS::Ace::AceScoringLog::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
