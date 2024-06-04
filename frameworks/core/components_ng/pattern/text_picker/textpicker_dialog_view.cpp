@@ -142,6 +142,7 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
+            layoutProperty->UpdateLayoutWeight(1);
             columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(textPickerNode);
         }
@@ -583,10 +584,12 @@ void TextPickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     } else {
         margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -599,10 +602,12 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -612,13 +617,15 @@ void TextPickerDialogView::UpdateForwardButtonMargin(
 {
     MarginProperty margin;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     } else {
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     }
     buttonForwardNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -631,10 +638,12 @@ void TextPickerDialogView::UpdateBackwardButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     }
     buttonBackwardNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -1227,7 +1236,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
     auto nextClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(nextCallBack));
     auto previousClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(previousCallBack));
 
-    for (int i = 0; i < (contentRow->GetChildren().size() - 1); i++) {
+    for (int i = 0; i < contentRow->GetChildren().size(); i++) {
         auto child = contentRow->GetChildAtIndex(i);
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(childNode, nullptr);
@@ -1256,6 +1265,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
     std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
     const float& scale, GestureEventFunc closeCallBack, RefPtr<FrameNode>& dialogNode)
 {
+    dialogNodePage = 0;
     auto moveForwardFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogMoveForwardEvent;
     dialogMoveForwardEvent["moveForwardId"] = moveForwardFunc;
