@@ -21,6 +21,9 @@
 #define protected public
 
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
@@ -37,13 +40,11 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -126,6 +127,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier001, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -180,6 +182,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier002, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -191,7 +194,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier002, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -239,6 +241,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier003, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -249,7 +252,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier003, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -308,6 +310,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier004, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -318,7 +321,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier004, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -370,6 +372,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier005, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -380,7 +383,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier005, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -441,6 +443,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier001, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -451,7 +454,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier001, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -501,6 +503,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier002, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -511,7 +514,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier002, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -562,6 +564,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier003, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -619,6 +622,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier004, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -629,7 +633,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier004, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -684,6 +687,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier005, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -694,7 +698,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier005, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -744,6 +747,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier006, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -754,7 +758,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier006, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -807,6 +810,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier007, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -817,7 +821,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier007, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -870,6 +873,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier008, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -880,7 +884,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier008, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -933,6 +936,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier009, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -943,7 +947,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier009, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     paintMethod = pattern->CreateNodePaintMethod();
@@ -997,6 +1000,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier010, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1007,7 +1011,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier010, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1067,6 +1070,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier011, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1077,7 +1081,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier011, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1126,6 +1129,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier012, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1136,7 +1140,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier012, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1187,6 +1190,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier013, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1197,7 +1201,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier013, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1243,6 +1246,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier014, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1253,7 +1257,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier014, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1300,6 +1303,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier015, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1310,7 +1314,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier015, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1357,6 +1360,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier016, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1367,7 +1371,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier016, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1414,6 +1417,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier017, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1424,7 +1428,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier017, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
@@ -1473,6 +1476,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier018, TestSize.Leve
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1483,7 +1487,6 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier018, TestSize.Leve
     auto paintProperty = pattern->CreatePaintProperty();
     ASSERT_NE(paintProperty, nullptr);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
