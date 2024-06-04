@@ -590,7 +590,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 }
 #else
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData)
+    RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData)
 {
     auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
