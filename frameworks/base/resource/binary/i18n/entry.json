@@ -37,7 +37,8 @@
             "rightSide":"窗口显示在屏幕右侧"
         },
         "datepicker":{
-            "lunarSwitch":"显示农历"
+            "lunarSwitch":"显示农历",
+            "prev":"上一步"
         },
         "textclock":{
             "week":"周",
@@ -84,7 +85,8 @@
             "rightSide":"Show On Right"
         },
         "datepicker":{
-            "lunarSwitch":"Display Lunar"
+            "lunarSwitch":"Display Lunar",
+            "prev":"PREV"
         }
     },
     "ml":{
