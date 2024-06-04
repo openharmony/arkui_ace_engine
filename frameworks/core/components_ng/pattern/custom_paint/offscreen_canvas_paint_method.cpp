@@ -251,7 +251,7 @@ void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageDa
     auto* rawData = pixelMap->GetWritablePixels();
     CHECK_NULL_VOID(rawData);
     RSImageInfo imageInfo = RSImageInfo(dirtyWidth * viewScale, dirtyHeight * viewScale,
-        RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE);
+        RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
     subBitmap.ReadPixels(imageInfo, rawData, dirtyWidth * imageInfo.GetBytesPerPixel(), dx, dy);
 }
 
