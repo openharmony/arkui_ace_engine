@@ -1578,6 +1578,15 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
+    auto focusHub = GetFocusHub();
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
+    if (!HasFocus()) {
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+            return;
+        }
+    }
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
     }
