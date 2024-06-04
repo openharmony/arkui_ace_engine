@@ -454,7 +454,7 @@ class ObserveV2 {
     aceTrace.end();
   }
 
-  private updateDirtyComputedProps(computed: Array<number>): void {
+  public updateDirtyComputedProps(computed: Array<number>): void {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
     aceTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
@@ -474,7 +474,7 @@ class ObserveV2 {
   }
 
 
-  private updateDirtyMonitors(monitors: Set<number>): void {
+  public updateDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
     aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
@@ -484,9 +484,8 @@ class ObserveV2 {
       weakMonitor = this.id2cmp_[watchId];
       if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
         if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
-          // FIXME @Component freeze enable
           // monitor notifyChange delayed if target is a View that is not active
-          // monitorTarget addDelayedMonitorIds watchId
+          monitorTarget.addDelayedMonitorIds(watchId);
         } else {
           monitor.notifyChange();
         }
@@ -513,9 +512,9 @@ class ObserveV2 {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
-        } else {
-          // FIXME @Component freeze
-          //....
+        } else if (view instanceof ViewV2) {
+          // schedule delayed update once the view gets active
+          view.scheduleDelayedUpdate(elmtId);
         }
       } // if ViewV2 or ViewPU
     });
@@ -537,8 +536,9 @@ class ObserveV2 {
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV3(elmtId);
-        } else {
-          // FIXME delayed update
+        } else if (view instanceof ViewV2) {
+          // schedule delayed update once the view gets active
+          view.scheduleDelayedUpdate(elmtId);
         }
       }
     });
