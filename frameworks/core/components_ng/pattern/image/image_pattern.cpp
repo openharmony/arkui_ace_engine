@@ -351,18 +351,21 @@ void ImagePattern::OnImageLoadSuccess()
     altDstRect_.reset();
     altSrcRect_.reset();
 
-    if (isPixelMapChanged_) {
-        UpdateAnalyzerOverlay();
+    if (IsSupportImageAnalyzerFeature()) {
+        if (isPixelMapChanged_) {
+            UpdateAnalyzerOverlay();
+        }
+        UpdateAnalyzerUIConfig(geometryNode);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetHostInstanceId());
+            pattern->CreateAnalyzerOverlay();
+        }, "ArkUIImageCreateAnalyzerOverlay");
     }
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        ContainerScope scope(pattern->GetHostInstanceId());
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUIImageCreateAnalyzerOverlay");
     ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
     host->MarkNeedRenderOnly();
 }
@@ -604,7 +607,7 @@ void ImagePattern::LoadImageDataIfNeed()
     }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
-    } else {
+    } else if (IsSupportImageAnalyzerFeature()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -614,11 +617,9 @@ void ImagePattern::LoadImageDataIfNeed()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             ContainerScope scope(pattern->GetHostInstanceId());
-            if (pattern->IsSupportImageAnalyzerFeature()) {
-                pattern->CreateAnalyzerOverlay();
-                auto host = pattern->GetHost();
-                pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
-            }
+            pattern->CreateAnalyzerOverlay();
+            auto host = pattern->GetHost();
+            pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
         }, "ArkUIImageUpdateAnalyzerUIConfig");
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -1492,7 +1493,7 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
 void ImagePattern::CreateAnalyzerOverlay()
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
-    if (!IsSupportImageAnalyzerFeature() || imageAnalyzerManager_->IsOverlayCreated()) {
+    if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
 
@@ -1535,10 +1536,8 @@ void ImagePattern::ReleaseImageAnalyzer()
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
-    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
 }
 
 void ImagePattern::InitDefaultValue()
