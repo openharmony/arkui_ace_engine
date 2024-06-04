@@ -8065,6 +8065,25 @@ OffsetF RichEditorPattern::GetPaintRectGlobalOffset() const
     return textPaintOffset - rootOffset;
 }
 
+float RichEditorPattern::CalcLineHeightByPosition(int32_t position)
+{
+    int32_t lineStartIndex;
+    int32_t lineEndIndex;
+    Offset textStartOffset;
+    Offset textEndOffset;
+
+    CHECK_NULL_RETURN(overlayMod_, 0.0f);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    auto currentCaretOffsetOverlay = overlayMod->GetCaretOffset();
+    textStartOffset = Offset(0, currentCaretOffsetOverlay.GetY() - GetTextRect().GetY());
+    textEndOffset = Offset(GetTextRect().Width(), currentCaretOffsetOverlay.GetY() - GetTextRect().GetY());
+    lineStartIndex = paragraphs_.GetIndex(textStartOffset);
+    lineEndIndex = paragraphs_.GetIndex(textEndOffset);
+    auto selectedRects = paragraphs_.GetRects(lineStartIndex, lineEndIndex);
+    CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
+    return selectedRects.front().Height();
+}
+
 int32_t RichEditorPattern::CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown)
 {
     int32_t caretPosition;
@@ -8081,7 +8100,8 @@ int32_t RichEditorPattern::CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretO
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
     auto caretOffsetOverlay = overlayMod->GetCaretOffset();
     float textOffsetY = GetTextRect().GetY() + minDet / 2.0; // 2.0 Cursor one half at the center position
-    float textOffsetDownY = caretOffsetOverlay.GetY() - textOffsetY;
+    auto lineHeightDis = CalcLineHeightByPosition(GetCaretPosition()) - caretHeightUp;
+    float textOffsetDownY = caretOffsetOverlay.GetY() - lineHeightDis - textOffsetY;
     textOffset = Offset(caretOffsetOverlay.GetX() - GetTextRect().GetX(), textOffsetDownY);
     caretPosition = paragraphs_.GetIndex(textOffset);
     return caretPosition;
