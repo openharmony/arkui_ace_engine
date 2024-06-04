@@ -382,6 +382,7 @@ public:
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
+    void SetMarkNodeGroup(bool isNodeGroup) override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
