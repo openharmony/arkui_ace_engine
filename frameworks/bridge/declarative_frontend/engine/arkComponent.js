@@ -9886,7 +9886,7 @@ class TextLineSpacingModifier extends ModifierWithKey {
       getUINativeModule().text.resetLineSpacing(node);
     }
     else {
-      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+      getUINativeModule().text.setLineSpacing(node, this.value);
     }
   }
   checkObjectDiff() {
