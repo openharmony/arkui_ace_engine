@@ -1495,6 +1495,7 @@ void TextFieldPattern::HandleOnCameraInput()
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
         inputMethod->ShowTextInput();
     }
+    CloseSelectOverlay(true);
 #endif
 #endif
 }
