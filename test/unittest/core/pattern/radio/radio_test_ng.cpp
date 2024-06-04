@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -409,8 +410,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
     ASSERT_EQ(pageNode, nullptr);
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
-    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
+    EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
 }
 
 /**
@@ -462,7 +465,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     ASSERT_NE(radioPaintProperty0, nullptr);
     EXPECT_NE(radioPaintProperty0->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
     auto radioPaintProperty1 = frameNode1->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty1, nullptr);
     EXPECT_EQ(radioPaintProperty1->GetRadioCheckValue(), CHECKED);

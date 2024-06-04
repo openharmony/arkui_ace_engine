@@ -170,6 +170,7 @@ public:
     }
 
     void SetRadioChecked(bool check);
+    RefPtr<GroupManager> GetGroupManager();
 
 private:
     void OnAttachToFrameNode() override;
@@ -187,7 +188,8 @@ private:
     void SetBuilderState();
     void UpdateIndicatorType();
     void UpdateState();
-    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check);
+    void UpdateGroupCheckStatus(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check);
     void OnTouchDown();
     void OnTouchUp();
     void CheckPageNode();
@@ -214,11 +216,13 @@ private:
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    void SetPrePageIdToLastPageId();
     RefPtr<FrameNode> BuildContentModifierNode();
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<FrameNode> customNode_;
+    WeakPtr<GroupManager> groupManager_;
 
     std::function<void()> builder_;
     bool isFirstCreated_ = true;
