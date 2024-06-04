@@ -395,14 +395,26 @@ public:
         return damping_;
     }
 
+    float GetMinimumAmplitudeRatio() const
+    {
+        return minimumAmplitudeRatio_;
+    }
+
+    void UpdateMinimumAmplitudeRatio(float minimumAmplitudeRatio)
+    {
+        minimumAmplitudeRatio_ = minimumAmplitudeRatio;
+    }
+
     static constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
     static constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 0.0f;
+    static constexpr float DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
 private:
     float velocity_ = 0.0f;
     float mass_ = 0.0f;
     float stiffness_ = 0.0f;
     float damping_ = 0.0f;
+    float minimumAmplitudeRatio_ = DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO;
 };
 
 } // namespace OHOS::Ace
