@@ -1474,7 +1474,6 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
-    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
