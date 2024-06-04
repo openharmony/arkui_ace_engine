@@ -315,10 +315,13 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void PreLayout() override;
+    
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
+    
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);

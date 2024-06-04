@@ -415,6 +415,8 @@ public:
         return {};
     }
 
+    virtual void PreLayout() {};
+    
     virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 

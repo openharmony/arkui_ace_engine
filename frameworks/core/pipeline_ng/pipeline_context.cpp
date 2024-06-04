@@ -3710,6 +3710,11 @@ bool PipelineContext::IsContainerModalVisible()
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
 }
 
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    FlushVsync(nanoTimestamp, frameCount);
+}
+
 void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
 {
     eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
