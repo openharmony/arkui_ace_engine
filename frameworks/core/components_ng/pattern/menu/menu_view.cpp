@@ -689,22 +689,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         if (!optionNode) {
             continue;
         }
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_RETURN(menuTheme, nullptr);
-        auto fontScale = pipeline->GetFontScale();
-        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-            auto optionPattern = optionNode->GetPattern<OptionPattern>();
-            CHECK_NULL_RETURN(optionPattern, nullptr);
-            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
-            CHECK_NULL_RETURN(textNode, nullptr);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-            textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
-        }
+        NeedAgingUpdateNode(optionNode);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         auto eventHub = optionNode->GetEventHub<EventHub>();
@@ -961,6 +946,27 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
+}
+
+void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
+{
+    CHECK_NULL_VOID(optionNode);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto fontScale = pipeline->GetFontScale();
+    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
     }
 }
 } // namespace OHOS::Ace::NG
