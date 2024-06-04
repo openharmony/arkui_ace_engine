@@ -104,6 +104,8 @@ void FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}
 
+void FormManagerDelegate::HandleCachedClickEvents() {}
+
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& cardName, AppExecFwk::FormInfo& formInfo)
