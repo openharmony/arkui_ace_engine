@@ -389,8 +389,8 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, contentNode_, contentNodeName_, 0);
     surfaceNode->SetBufferAvailableCallback(callback_);
-    if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_) &&
-        NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_)) {
+    if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
+        NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
         return;
     }
     RemoveChild(host, snapshotNode_, snapshotNodeName_);
@@ -502,8 +502,8 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         CHECK_NULL_RETURN(host, false);
         CHECK_NULL_RETURN(dirty, false);
         auto size = dirty->GetGeometryNode()->GetFrameSize();
-        if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_) &&
-            NearEqual(size.Height(), session_->GetSessionLastRect().height_)) && snapshotNode_) {
+        if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
+            NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotNode_) {
             RemoveChild(host, snapshotNode_, snapshotNodeName_);
             snapshotNode_.Reset();
             lastWindowRect_ = {
