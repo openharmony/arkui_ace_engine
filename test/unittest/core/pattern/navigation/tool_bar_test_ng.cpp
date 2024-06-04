@@ -20,6 +20,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -240,7 +241,11 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
 
-    navToolbarPattern->InitLongPressEvent(gestureHub, imageNode, textNode, false);
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 1000);
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->SetTextNode(textNode);
+
+    navToolbarPattern->InitLongPressEvent(gestureHub, barItemNode);
     auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_NE(longPressRecognizer->onActionEnd_, nullptr);
