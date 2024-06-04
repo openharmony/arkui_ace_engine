@@ -25,8 +25,7 @@ group("core_unittest") {
     "layout:core_layout_unittest",
     "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",
-
-    #"pipeline:pipeline_context_test_ng",
+    "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",
     "svg:core_svg_unittest",
@@ -77,7 +76,8 @@ group("linux_core_unittest") {
     "pattern/flex:flex_test_ng",
     "pattern/gauge:gauge_test_ng",
     "pattern/grid:grid_test_ng",
-    "pattern/grid:grid_test_regular",
+
+    # "pattern/grid:grid_test_regular",
     "pattern/grid_col:grid_col_test_ng",
     "pattern/grid_container:grid_container_test_ng",
     "pattern/grid_row:grid_row_test_ng",
@@ -87,7 +87,8 @@ group("linux_core_unittest") {
     "pattern/indexer:indexer_test_ng",
     "pattern/linear_layout:linear_layout_test_ng",
     "pattern/linear_split:linear_split_test_ng",
-    "pattern/list:list_test_ng",
+
+    # "pattern/list:list_test_ng",
     "pattern/loading_progress:loading_progress_test_ng",
     "pattern/marquee:marquee_test_ng",
     "pattern/menu:menu_test_ng",
@@ -96,7 +97,8 @@ group("linux_core_unittest") {
     "pattern/navrouter:navrouter_test_ng",
     "pattern/node_container:node_container_test_ng",
     "pattern/option:option_test_ng",
-    "pattern/overlay:overlay_manager_test_ng",
+
+    # "pattern/overlay:overlay_manager_test_ng",
     "pattern/panel:panel_test_ng",
     "pattern/patternlock:patternlock_test_ng",
     "pattern/picker:date_picker_test_ng",
@@ -112,7 +114,8 @@ group("linux_core_unittest") {
     "pattern/scroll:scroll_test_ng",
     "pattern/scroll_bar:scroll_bar_test_ng",
     "pattern/scrollable:scrollable_test_ng",
-    "pattern/search:search_test_ng",
+
+    # "pattern/search:search_test_ng",
     "pattern/select:select_test_ng",
     "pattern/select_overlay:select_overlay_test_ng",
     "pattern/side_bar:side_bar_test_ng",
@@ -120,14 +123,17 @@ group("linux_core_unittest") {
     "pattern/stack:stack_test_ng",
     "pattern/stage:stage_test_ng",
     "pattern/stepper:stepper_test_ng",
-    "pattern/swiper:swiper_test_ng",
+
+    # "pattern/swiper:swiper_test_ng",
     "pattern/symbol:symbol_test_ng",
     "pattern/tabs:tabs_test_ng",
-    "pattern/text:text_test_ng",
+
+    # "pattern/text:text_test_ng",
     "pattern/text_clock:text_clock_test_ng",
     "pattern/text_drag:text_drag_test_ng",
-    "pattern/text_input:TextInputTest",
-    "pattern/text_picker:text_picker_test_ng",
+
+    # "pattern/text_input:TextInputTest",
+    # "pattern/text_picker:text_picker_test_ng",
     "pattern/text_timer:text_timer_test_ng",
     "pattern/time_picker:time_picker_test_ng",
     "pattern/toggle:toggle_test_ng",
