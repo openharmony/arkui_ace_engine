@@ -589,13 +589,10 @@ template("declarative_js_engine") {
         if (is_arkui_x) {
           deps += [ "$ace_napi:ace_container_scope_static" ]
         } else {
-          deps += [ "$ace_napi:ace_container_scope" ]
+          external_deps += [ "napi:ace_container_scope" ]
         }
       }
     }
-
-    include_dirs +=
-        [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -995,7 +992,7 @@ template("declarative_js_engine_ng") {
       }
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
     }
 
