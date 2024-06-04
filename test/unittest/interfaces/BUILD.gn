@@ -309,6 +309,45 @@ ohos_unittest("navigation_controller_test") {
   ]
 }
 
+ohos_unittest("native_node_napi_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "native_node_napi_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
+  ]
+
+  deps = [ "//third_party/googletest:gmock_main" ]
+
+  public_deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
@@ -317,6 +356,7 @@ group("interfaces_unittest") {
     ":extension_custom_node_test_ng",
     ":form_render_group_test",
     ":form_render_test",
+    ":native_node_napi_test",
     ":navigation_controller_test",
     ":ui_content_test",
     ":ui_event_test",
