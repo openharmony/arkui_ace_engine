@@ -531,36 +531,6 @@ std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<Fra
     return maskRect;
 }
 
-void DialogLayoutAlgorithm::UpdateDialogAlignment()
-{
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (alignment_ == DialogAlignment::TOP_START) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::TOP_END;
-        }
-    } else if (alignment_ == DialogAlignment::TOP_END) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::TOP_START;
-        }
-    } else if (alignment_ == DialogAlignment::CENTER_START) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::CENTER_END;
-        }
-    } else if (alignment_ == DialogAlignment::CENTER_END) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::CENTER_START;
-        }
-    } else if (alignment_ == DialogAlignment::BOTTOM_START) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::BOTTOM_END;
-        }
-    } else if (alignment_ == DialogAlignment::BOTTOM_END) {
-        if (isRtl) {
-            alignment_ = DialogAlignment::BOTTOM_START;
-        }
-    }
-}
-
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     subWindowId_ = SubwindowManager::GetInstance()->GetDialogSubWindowId();
@@ -598,7 +568,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
-    UpdateDialogAlignment();
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
     auto isNonUIExtensionSubwindow = isShowInSubWindow_ && !isUIExtensionSubWindow_;
     if ((!isModal_ || isNonUIExtensionSubwindow) && !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
@@ -712,10 +681,6 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        dialogOffset.SetX(dialogOffset.GetX() * (-1));
-    }
     auto isHostWindowAlign = isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
     if (!customSize_ && !IsAlignmentByWholeScreen()) {

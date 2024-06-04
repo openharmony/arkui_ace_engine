@@ -92,7 +92,6 @@ private:
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
-    void UpdateDialogAlignment();
     
     RectF touchRegion_;
     OffsetF topLeftPoint_;

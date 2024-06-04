@@ -1178,10 +1178,22 @@ void DialogPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
+void DialogPattern::UpdateAlignmentAndOffset()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto dialogProp = GetDialogProperties();
+    props->UpdateDialogAlignment(dialogProp.alignment);
+    props->UpdateDialogOffset(dialogProp.offset);
+}
+
 void DialogPattern::OnLanguageConfigurationUpdate()
 {
     CHECK_NULL_VOID(dialogProperties_.onLanguageChange);
     dialogProperties_.onLanguageChange(dialogProperties_);
+    UpdateAlignmentAndOffset();
     if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
         UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], dialogProperties_.title);
         title_ = dialogProperties_.title;
