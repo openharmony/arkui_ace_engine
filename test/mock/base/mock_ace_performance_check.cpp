@@ -31,6 +31,10 @@ int32_t AceChecker::flexLayouts_ = 0;
 void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout)
 {}
 
+void AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const std::string& navPath)
+{}
+
 AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& /* name */) {}
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
