@@ -8524,17 +8524,10 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     CHECK_NULL_VOID(host);
 
     Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
-    InitSelection(textOffset);
-    auto selectStart = textSelector_.GetTextStart();
-    auto selectEnd = textSelector_.GetTextEnd();
-
-    int32_t start = initSelectStart_;
-    int32_t end = selectEnd;
-
-    if (selectStart < initSelectStart_) {
-        start = selectStart;
-        end = initSelectStart_;
-    }
+    int32_t currentPosition = paragraphs_.GetIndex(textOffset);
+    currentPosition = std::clamp(currentPosition, 0, GetTextContentLength());
+    int32_t start = std::min(initSelectStart_, currentPosition);
+    int32_t end = std::max(initSelectStart_, currentPosition);
     isShowMenu_ = false;
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();
