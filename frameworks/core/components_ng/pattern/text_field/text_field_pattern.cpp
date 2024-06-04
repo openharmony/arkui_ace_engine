@@ -818,7 +818,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(host->GetId());
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
