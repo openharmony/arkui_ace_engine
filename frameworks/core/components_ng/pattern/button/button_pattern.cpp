@@ -431,11 +431,13 @@ void ButtonPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
+            buttonPattern->UpdateTexOverflow(!(buttonPattern->isPress_));
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->OnTouchUp();
+            buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -556,18 +558,21 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
+    UpdateTexOverflow(isHover || isFocus_);
+}
+
+void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
+{
     if (isTextFadeOut_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        if (isHover) {
-            textLayoutProperty->UpdateTextMarqueeStart(isHover);
-        } else {
-            textLayoutProperty->UpdateTextMarqueeStart(isFocus_);
-        }
+        textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
         textNode->MarkDirtyNode();
     }
 }
