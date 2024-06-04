@@ -191,7 +191,6 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         return;
     }
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(frameNode);
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(jsOnClickVal));
     auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](GestureEvent& info) {
@@ -209,6 +208,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+    CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
