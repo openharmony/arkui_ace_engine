@@ -2743,7 +2743,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
-    if ((caretUpdateType_ == CaretUpdateType::LONG_PRESSED) && IsEditing()) {
+    if ((caretUpdateType_ == CaretUpdateType::LONG_PRESSED) && isEditing_) {
         ShowCaretNoTwinkling(textOffset);
         return;
     }
@@ -3645,6 +3645,10 @@ void RichEditorPattern::UpdatePreviewTextOnInsert(const std::string& insertValue
 
 void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
 {
+    if (!IsEditing()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
+        return;
+    }
     if (isSpanStringMode_) {
         InsertValueInStyledString(insertValue);
         return;
