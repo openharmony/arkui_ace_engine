@@ -433,6 +433,9 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
             paintOffsetY += paragraph->GetHeight();
         }
+        if (marqueeSet_) {
+            PaintImage(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
+        }
     } else {
         // Racing
         float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT
