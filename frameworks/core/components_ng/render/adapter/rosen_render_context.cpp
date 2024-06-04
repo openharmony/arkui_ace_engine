@@ -143,6 +143,10 @@ constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
 constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
 constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
+constexpr int32_t RIGHT_ANGLE = 90;
+constexpr int32_t STRAIGHT_ANGLE = 180;
+constexpr int32_t REFLEX_ANGLE = 270;
+constexpr int32_t FULL_ROTATION = 360;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr int32_t DELAY_TIME = 300;
@@ -1834,22 +1838,22 @@ RectF gRect;
 double Degree2Radian(int32_t degree)
 {
     const float pi = 3.14159265;
-    degree = degree % 360;
+    degree = degree % FULL_ROTATION;
     if (degree < 0) {
-        degree += 360;
+        degree += FULL_ROTATION;
     }
-    return degree * pi / 180;
+    return degree * pi / STRAIGHT_ANGLE;
 }
 
 void SetCorner(double& x, double& y, double width, double height, int32_t degree)
 {
-    if (degree == 90) {
+    if (degree == RIGHT_ANGLE) {
         x = 0;
         y = height;
-    } else if (degree == 180) {
+    } else if (degree == STRAIGHT_ANGLE) {
         x = width;
         y = height;
-    } else if (degree == 270) {
+    } else if (degree == REFLEX_ANGLE) {
         x = width;
         y = 0;
     }
@@ -1943,13 +1947,13 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     // calculate skew
     SkewRect(skew[0], skew[1], rect);
     // calculate rotate
-    degree = static_cast<int32_t>(degree) % 360;
+    degree = static_cast<int32_t>(degree) % FULL_ROTATION;
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         auto newRect = GetPaintRectWithoutTransform();
         double leftX = 0.0;
         double leftY = 0.0;
-        degree = degree < 0 ? degree + 360 : degree;
+        degree = degree < 0 ? degree + FULL_ROTATION : degree;
         SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
         double centerX = oldSize.Width() * center[0];
         double centerY = oldSize.Height() * center[1];
@@ -1960,7 +1964,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         leftY += newRect.GetOffset().GetY() + centerY;
         auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
         rect.SetOffset(offset);
-        if (degree == 180) {
+        if (degree == STRAIGHT_ANGLE) {
             newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
         } else {
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
@@ -2169,7 +2173,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
         degree = 0;
     }
-    degree = degree % 360;
+    degree = degree % FULL_ROTATION;
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         point = point + gRect.GetOffset();
