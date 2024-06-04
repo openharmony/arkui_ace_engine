@@ -1330,7 +1330,7 @@ private:
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
-    bool SelectOverlayVisibile();
+    bool CheckSelectAreaVisible();
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);

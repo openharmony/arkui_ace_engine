@@ -715,7 +715,7 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
            LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width());
 }
 
-bool TextFieldPattern::SelectOverlayVisibile()
+bool TextFieldPattern::CheckSelectAreaVisible()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, {});
@@ -724,17 +724,17 @@ bool TextFieldPattern::SelectOverlayVisibile()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(manager, {});
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
-    CHECK_NULL_RETURN(keyboardInset, {});
     auto selectArea = selectOverlay_->GetSelectArea();
-    CHECK_NULL_RETURN(selectArea, {});
-    auto globalOffsetY = GetPaintRectGlobalOffset();
-    CHECK_NULL_RETURN(globalOffsetY, {});
+    auto globalOffset = GetPaintRectGlobalOffset();
+    auto globalContentRect = contentRect_;
+    globalContentRect.SetOffset(globalContentRect.GetOffset() + globalOffset);
     if (selectArea.Bottom() < 0) {
         return false;
-    } else if (selectArea.Bottom() <= contentRect_.Top() + globalOffsetY.GetY() ||
-               selectArea.Top() > keyboardInset.start ||
-               selectArea.Right() <= contentRect_.Left()  + globalOffsetY.GetX() ||
-               selectArea.Left() >= contentRect_.Right()  + globalOffsetY.GetX()) {
+    } else if (selectArea.Bottom() <= globalContentRect.Top() ||
+               selectArea.Top() >= globalContentRect.Bottom() ||
+               selectArea.Top() >= keyboardInset.start ||
+               selectArea.Right() <= globalContentRect.Left() ||
+               selectArea.Left() >= globalContentRect.Right()) {
         return false;
     }
     return true;
@@ -743,8 +743,7 @@ bool TextFieldPattern::SelectOverlayVisibile()
 void TextFieldPattern::OnScrollEndCallback()
 {
     ScheduleDisappearDelayTask();
-    auto selectArea = selectOverlay_->GetSelectArea();
-    if (!IsUsingMouse() && SelectOverlayIsOn() && isTextSelectionMenuShow_ && SelectOverlayVisibile()) {
+    if (!IsUsingMouse() && SelectOverlayIsOn() && isTextSelectionMenuShow_ && CheckSelectAreaVisible()) {
         selectOverlay_->ShowMenu();
     }
 }
@@ -5459,10 +5458,9 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         PlayScrollBarAppearAnimation();
-        auto selectArea = selectOverlay_->GetSelectArea();
         if (selectOverlay_->IsCurrentMenuVisibile()) {
             isTextSelectionMenuShow_ = true;
-        } else if (SelectOverlayVisibile()) {
+        } else if (CheckSelectAreaVisible()) {
             isTextSelectionMenuShow_ = false;
         }
         selectOverlay_->HideMenu();
