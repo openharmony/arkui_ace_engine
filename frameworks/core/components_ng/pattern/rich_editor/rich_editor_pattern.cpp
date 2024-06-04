@@ -8505,4 +8505,23 @@ void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
     localOffset.SetX(std::clamp(localOffset.GetX(), 0.0f, frameSize.Width()));
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
 }
+
+void RichEditorPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    menuOptionItems_ = std::move(menuOptionsItems);
+    for (auto& menuOption : menuOptionItems_) {
+        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
+        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
+                                const std::string& selectInfo) {
+            auto richEditorPattern = weak.Upgrade();
+            CHECK_NULL_VOID(richEditorPattern);
+            if (actionRange) {
+                auto start = richEditorPattern->textSelector_.GetTextStart();
+                auto end = richEditorPattern->textSelector_.GetTextEnd();
+                actionRange(start, end);
+            }
+            richEditorPattern->CloseSelectOverlay();
+        };
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -730,6 +730,7 @@ public:
     }
 
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
@@ -745,6 +746,15 @@ public:
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
 protected:
     bool CanStartAITask() override;
 
@@ -1005,7 +1015,7 @@ private:
 
     // still in progress
     ParagraphManager paragraphs_;
-
+    std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
 
