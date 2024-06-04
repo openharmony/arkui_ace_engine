@@ -157,11 +157,8 @@ public:
 
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        navDestinationPathInfo_.clear();
-        navDestinationPathInfo_.append(NAVIGATION_MODULE_NAME);
-        navDestinationPathInfo_ += ": " + moduleName + ", ";
-        navDestinationPathInfo_.append(NAVIGATION_PAGE_PATH);
-        navDestinationPathInfo_ += ": " + pagePath;
+        navDestinationPathInfo_ = pagePath;
+        navDestinationModuleName_ = moduleName;
     }
 
     const std::string& GetNavDestinationPathInfo() const
@@ -181,6 +178,7 @@ private:
     bool isAnimated_ = false;
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
+    std::string navDestinationModuleName_;
 };
 
 } // namespace OHOS::Ace::NG

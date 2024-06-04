@@ -361,6 +361,8 @@ public:
 
     static std::string GetPagePath(const std::string& url);
 
+    static std::string GetFullPathInfo(const std::string& url);
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
@@ -508,6 +510,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, std::string> routerPathInfoMap_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
     static thread_local panda::Global<panda::ObjectRef> obj_;
