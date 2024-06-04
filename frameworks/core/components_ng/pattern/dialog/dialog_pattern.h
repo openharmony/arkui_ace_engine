@@ -352,6 +352,7 @@ private:
     bool isLandspace_ = false;
     bool isThreeButtonsDialog_ = false;
     bool neeedUpdateOrientation_ = false;
+    bool isNeedToVp_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
