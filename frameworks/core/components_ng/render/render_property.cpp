@@ -113,8 +113,10 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("dynamicDimming", propDynamicDimDegree.has_value() ?
         static_cast<float_t>(propDynamicDimDegree.value()) : 1.0f, filter);
     auto jsonBgBrightness = JsonUtil::Create(true);
-    jsonBgBrightness->Put("dynamicLightUpRate", std::to_string(propDynamicLightUpRate.value()).c_str());
-    jsonBgBrightness->Put("dynamicLightUpDegree", std::to_string(propDynamicLightUpDegree.value()).c_str());
+    jsonBgBrightness->Put(
+        "dynamicLightUpRate", propDynamicLightUpRate.has_value() ? propDynamicLightUpRate.value() : 0.0);
+    jsonBgBrightness->Put(
+        "dynamicLightUpDegree", propDynamicLightUpDegree.has_value() ? propDynamicLightUpDegree.value() : 0.0);
     json->PutExtAttr("BackgroundBrightness", jsonBgBrightness, filter);
     auto jsonShadow = JsonUtil::Create(true);
     auto shadow = propBackShadow.value_or(Shadow());
