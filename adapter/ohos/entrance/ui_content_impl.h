@@ -91,6 +91,7 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -314,11 +315,16 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void PreLayout() override;
+    
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
+    
     void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -346,8 +352,6 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;

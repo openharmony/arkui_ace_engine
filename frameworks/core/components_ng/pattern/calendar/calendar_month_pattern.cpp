@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CALENDAR_WEEK_DAYS = 7;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 } // namespace
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
@@ -48,7 +49,8 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
@@ -88,12 +90,6 @@ void CalendarMonthPattern::SetColRowSpace()
     }
 
     auto rowCount = dataSize / CALENDAR_WEEK_DAYS;
-
-    auto pipeline = GetHost()->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFontScale() >= theme->GetCalendarPickerLargerScale()) {
-        calendarDaySize = theme->GetCalendarPickerDayLargerHeight();
-    }
     space = (height - calendarDaySize.ConvertToPx() * (rowCount + 1)) / rowCount;
     if (!Positive(space)) {
         return;

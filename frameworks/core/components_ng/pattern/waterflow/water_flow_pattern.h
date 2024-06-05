@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -72,7 +72,7 @@ public:
     }
 
     void TriggerModifyDone();
-    
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);
@@ -149,11 +149,18 @@ public:
      * @param start the index of the first modified section.
      */
     void OnSectionChanged(int32_t start);
-
     void OnSectionChangedNow(int32_t start);
 
     void DumpAdvanceInfo() override;
 
+    // ------------------------ Focus adapter --------------------------------
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
+    // ------------------------ Focus ^^^ --------------------------------
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -172,6 +179,14 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+
+    /**
+     * @param step FocusStep
+     * @param currentFocusNode the currently focused FlowItem.
+     * @return WeakPtr<FocusHub> of the next FlowItem to focus on.
+     */
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+
     std::optional<int32_t> targetIndex_;
     RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::TOP_DOWN);
     RefPtr<WaterFlowSections> sections_;

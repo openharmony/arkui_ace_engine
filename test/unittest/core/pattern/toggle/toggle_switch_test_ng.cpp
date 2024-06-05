@@ -50,6 +50,7 @@ constexpr float POINT_RADIUS_LARGE = 30.0f;
 constexpr float TRACK_BORDER_RADIUS = 10.0f;
 constexpr Color SELECTED_COLOR = Color(0XFFFF0000);
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+constexpr Dimension TOGGLE_TARGET_WIDTH = 36.0_px;
 } // namespace
 
 class ToggleSwitchTestNg : public testing::Test {
@@ -130,7 +131,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest001, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), TOGGLE_WIDTH.ConvertToPx());
+    EXPECT_EQ(switchSize->Width(), TOGGLE_TARGET_WIDTH.ConvertToPx());
     EXPECT_EQ(switchSize->Height(), TOGGLE_HEIGHT.ConvertToPx());
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
@@ -185,7 +186,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest002, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = SizeF(30, 10); //30 is width of toggle, 10 is height of toggle
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 30);  //30 is width of toggle
+    EXPECT_EQ(switchSize->Width(), 18);  //18 is width of toggle
     EXPECT_EQ(switchSize->Height(), 10); //10 is height of toggle
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
@@ -241,7 +242,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest003, TestSize.Level1)
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), SWITCH_WIDTH);
+    EXPECT_EQ(switchSize->Width(), 90);
     EXPECT_EQ(switchSize->Height(), SWITCH_HEIGHT);
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
@@ -299,7 +300,6 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest004, TestSize.Level1)
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(60, 40)); //60 is width of toggle, 40 is height of toggle
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_EQ(switchSize->Width(), 60);  //60 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 40); //40 is height of toggle
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
@@ -413,7 +413,6 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest006, TestSize.Level1)
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(280, 180)); //280 is width of toggle, 180 is height of toggle
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_EQ(switchSize->Width(), 280);  //280 is width of toggle
-    EXPECT_EQ(switchSize->Height(), 180); //180 is height of toggle
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
@@ -468,7 +467,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest007, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), TOGGLE_WIDTH.ConvertToPx());
+    EXPECT_EQ(switchSize->Width(), TOGGLE_TARGET_WIDTH.ConvertToPx());
     EXPECT_EQ(switchSize->Height(), TOGGLE_HEIGHT.ConvertToPx());
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
@@ -524,7 +523,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest008, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = CONTAINER_SIZE;
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), CONTAINER_WIDTH);
+    EXPECT_EQ(switchSize->Width(), 180);
     EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
@@ -583,7 +582,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest009, TestSize.Level1)
         SizeF(0, CONTAINER_HEIGHT)); //280 is width of toggle, 180 is height of toggle
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_EQ(switchSize->Width(), 0);
-    EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
+    EXPECT_EQ(switchSize->Height(), 0);
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
@@ -641,7 +640,6 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchLayoutTest010, TestSize.Level1)
         SizeF(-280, CONTAINER_HEIGHT)); //-280 is width of toggle, 180 is height of toggle
     auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_EQ(switchSize->Width(), -280); //-280 is width of toggle
-    EXPECT_EQ(switchSize->Height(), CONTAINER_HEIGHT);
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }

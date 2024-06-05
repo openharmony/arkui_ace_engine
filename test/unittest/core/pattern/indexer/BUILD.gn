@@ -17,6 +17,7 @@ ace_unittest("indexer_test_ng") {
   type = "new"
   sources = [
     "indexer_model_test_ng.cpp",
+    "indexer_pattern_test_ng.cpp",
     "indexer_test_ng.cpp",
   ]
 }

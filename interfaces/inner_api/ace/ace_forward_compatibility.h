@@ -32,6 +32,7 @@ public:
     static bool IsUseNG(); // true for using newpipeline in ace engine
     static bool PipelineChanged();
     static const char* GetAceLibName();
+    static void ReclaimFileCache(int32_t pid);
 private:
     AceForwardCompatibility() = default;
     static inline bool isForceOldPipeline_ = true;

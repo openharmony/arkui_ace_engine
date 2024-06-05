@@ -274,7 +274,12 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
             return false;
         }
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-            return false;
+            if (totalItemCount_ > 0 &&
+                (!layoutedItemInfo_ || layoutedItemInfo_.value().endIndex < totalItemCount_ - 1)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     } else {
         if (childrenSize_ && needAdjustRefPos_) {
@@ -874,15 +879,15 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         if (!wrapper) {
             continue;
         }
-
+        const auto& geometryNode = wrapper->GetGeometryNode();
         auto offset = paddingOffset;
         int32_t laneIndex = pos.first % lanes_;
-        float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        float childCrossSize = GetCrossAxisSize(geometryNode->GetMarginFrameSize(), axis_);
         float laneCrossOffset = CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_, childCrossSize);
         auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
         if (layoutDirection == TextDirection::RTL) {
             if (axis_ == Axis::VERTICAL) {
-                auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
+                auto size = geometryNode->GetMarginFrameSize();
                 auto tmpX = crossSize - laneCrossOffset -
                     ((crossSize + laneGutter_) / lanes_) * laneIndex - size.Width();
                 offset = offset + OffsetF(tmpX, pos.second.startPos);
@@ -902,12 +907,17 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
             }
         }
         SetListItemIndex(layoutWrapper, wrapper, pos.first);
-        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        geometryNode->SetMarginFrameOffset(offset);
         if (wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);
         }
+        geometryNode->OnePixelRounding(true, wrapper->GetLayoutProperty()->GetPixelRound());
+        auto rect = geometryNode->GetPixelGridRoundMarginFrameRect();
+        auto padding = axis_ == Axis::VERTICAL ? paddingOffset.GetY() : paddingOffset.GetX();
+        pos.second.startPos = rect.GetOffset().GetMainOffset(axis_) - padding;
+        pos.second.endPos = pos.second.startPos + rect.GetSize().MainSize(axis_);
     }
 }
 

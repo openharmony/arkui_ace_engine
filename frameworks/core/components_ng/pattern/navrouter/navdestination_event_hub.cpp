@@ -23,9 +23,10 @@ void NavDestinationEventHub::FireOnDisappear()
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
     if (navDestination->GetIsAnimated()) {
-        FireDisappearCallback();
         auto pattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
+        FireDisappearCallback();
         pattern->SetCustomNode(nullptr);
         return;
     }
@@ -34,9 +35,10 @@ void NavDestinationEventHub::FireOnDisappear()
     pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
         auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireDisappearCallback();
         auto pattern = destination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
+        eventHub->FireDisappearCallback();
         pattern->SetCustomNode(nullptr);
     });
 }

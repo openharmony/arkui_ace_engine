@@ -136,6 +136,7 @@ public:
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
@@ -414,6 +415,8 @@ public:
         return {};
     }
 
+    virtual void PreLayout() {};
+    
     virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 

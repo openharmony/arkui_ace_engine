@@ -1071,6 +1071,36 @@ void JSPromptThrowInterError(napi_env env, std::shared_ptr<PromptAsyncContext>& 
     }
 }
 
+void UpdatePromptAlignment(DialogAlignment& alignment)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_END;
+        }
+    } else if (alignment == DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_START;
+        }
+    } else if (alignment == DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show dialog enter");
@@ -1153,13 +1183,26 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    auto onLanguageChange = [shadowProps](DialogProperties& dialogProps) {
+    auto onLanguageChange = [shadowProps, alignment, offset,
+        updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) mutable {
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (shadowProps.has_value()) {
             std::optional<Shadow> shadow = shadowProps.value();
-            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
             double offsetX = isRtl ? shadow->GetOffset().GetX() * (-1) : shadow->GetOffset().GetX();
             shadow->SetOffsetX(offsetX);
             dialogProps.shadow = shadow.value();
+        }
+        if (alignment.has_value()) {
+            std::optional<DialogAlignment> pmAlign = alignment.value();
+            updateAlignment(pmAlign.value());
+            dialogProps.alignment = pmAlign.value();
+        }
+        if (offset.has_value()) {
+            std::optional<DimensionOffset> pmOffset = offset.value();
+            double xValue = isRtl ? pmOffset->GetX().Value() * (-1) : pmOffset->GetX().Value();
+            Dimension offsetX = Dimension(xValue);
+            pmOffset->SetX(offsetX);
+            dialogProps.offset = pmOffset.value();
         }
     };
     napi_value result = nullptr;

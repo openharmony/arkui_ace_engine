@@ -1602,41 +1602,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
-
-    if (renderContextForSurface_) {
-        auto localposition = geometryNode->GetContentOffset();
-        renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), drawSize.Width(), drawSize.Height());
-    }
-
     return false;
-}
-
-void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
-{
-    if (!CheckSafeAreaIsExpand()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "Not set safeArea, return.");
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto size = Size(rect.Width(), rect.Height());
-    if (renderContextForSurface_) {
-        auto localposition = geometryNode->GetContentOffset();
-        renderContextForSurface_->SetBounds(
-            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
-        TAG_LOGD(AceLogTag::ACE_WEB,
-            "Before sync geometry properties set bounds, X:%{public}f, Y:%{public}f, width:%{public}f, "
-            "height:%{public}f",
-            localposition.GetX(), localposition.GetY(), size.Width(), size.Height());
-    }
 }
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
@@ -1695,12 +1661,6 @@ void WebPattern::OnAreaChangedInner()
         areaChangeSize_ = size;
         drawSize_ = size;
         drawSizeCache_ = drawSize_;
-
-        if (renderContextForSurface_) {
-            auto localposition = geometryNode->GetContentOffset();
-            renderContextForSurface_->SetBounds(
-                localposition.GetX(), localposition.GetY(), drawSize_.Width(), drawSize_.Height());
-        }
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -2202,6 +2162,7 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetHandleChildBounds(true);
     bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,

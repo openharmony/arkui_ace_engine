@@ -924,7 +924,7 @@ export struct TreeView {
     this.treeViewTheme.borderFocusedColor = theme.colors.interactiveFocus;
     this.treeViewTheme.leftIconColor = theme.colors.iconSecondary;
     this.treeViewTheme.leftIconActiveColor = theme.colors.interactiveActive;
-    this.treeViewTheme.arrowIconColor = theme.colors.iconTertiary;
+    this.treeViewTheme.arrowIconColor = theme.colors.iconPrimary;
     this.treeController.treeViewTheme = this.treeViewTheme;
   }
 
@@ -966,6 +966,8 @@ export struct TreeView {
             .height(item.getNodeItem().imageNode?.itemHeight)
             .width(item.getNodeItem().imageNode?.itemWidth)
             .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+            .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || item.getNodeItem()
+              .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
         }
         .backgroundColor(COLOR_IMAGE_ROW)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
@@ -2893,7 +2895,7 @@ class ListNodeDataSource extends BasicDataSource {
         if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.Expand) {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
-        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === 
+        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
           NodeStatus.Expand &&
           this.listNode[i].getCanShowFlagLine() === false) {
           parentNodeId = rearCurrentNodeId;
@@ -3193,6 +3195,9 @@ export struct TreeViewInner {
                     .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
                     .fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                     this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
+                    .matchTextDirection((this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
                 .backgroundColor(COLOR_IMAGE_ROW)
@@ -3322,6 +3327,9 @@ export struct TreeViewInner {
                       event.stopPropagation();
                     })
                     .focusable(true)
+                    .matchTextDirection((this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
                 .height(this.item.getNodeItem().imageCollapse?.itemHeight)

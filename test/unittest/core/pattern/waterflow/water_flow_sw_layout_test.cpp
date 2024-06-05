@@ -348,6 +348,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     Create([](WaterFlowModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetRowsGap(Dimension(5.0f));
         CreateRandomItem(50);
     });
     pattern_->SetAnimateCanOverScroll(true);
@@ -361,6 +362,13 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 0);
     EXPECT_EQ(info_->TopFinalPos(), -1000.0f);
+    for (auto& lane : info_->lanes_) {
+        if (lane.items_.empty()) {
+            EXPECT_EQ(lane.startPos, lane.endPos);
+        } else {
+            EXPECT_EQ(lane.endPos - lane.startPos, GetChildHeight(frameNode_, 0));
+        }
+    }
 }
 
 /**
@@ -373,6 +381,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     Create([](WaterFlowModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetRowsGap(Dimension(5.0f));
         CreateRandomItem(50);
     });
     pattern_->SetAnimateCanOverScroll(true);
@@ -388,6 +397,41 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 49);
     EXPECT_EQ(info_->endIndex_, 49);
     EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
+    for (auto& lane : info_->lanes_) {
+        if (lane.items_.empty()) {
+            EXPECT_EQ(lane.startPos, lane.endPos);
+        } else {
+            EXPECT_EQ(lane.endPos - lane.startPos, GetChildHeight(frameNode_, 49));
+        }
+    }
+}
+
+/**
+ * @tc.name: OverScroll004
+ * @tc.desc: Test overScroll with content < WATERFLOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, OverScroll005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(3);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    info_->UpdateOffset(200.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 200.0f);
+    EXPECT_EQ(info_->TopFinalPos(), -200.0f);
+
+    info_->UpdateOffset(-300.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -100.0f);
+    EXPECT_EQ(info_->maxHeight_, 250.0f);
+    EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 100.0f);
 }
 
 /**

@@ -26,6 +26,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+    constexpr Dimension TITLE_TEXT_FONT_SIZE = 18.0_fp;
+    constexpr Color MENU_TEXT_COLOR = Color(0xe5000000);
+}
+namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -84,8 +88,14 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
-    layoutProps->UpdateFontSize(theme->GetMenuFontSize());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        layoutProps->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
+        layoutProps->UpdateFontWeight(FontWeight::BOLD);
+        layoutProps->UpdateTextColor(MENU_TEXT_COLOR);
+    } else {
+        layoutProps->UpdateFontSize(theme->GetMenuFontSize());
+        layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
+    }
     layoutProps->UpdateMaxLines(1);
     layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     pattern->AddHeaderContent(content);

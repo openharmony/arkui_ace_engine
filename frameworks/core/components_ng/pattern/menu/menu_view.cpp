@@ -184,8 +184,10 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    float contentPadding = 0.0f;
+    if (theme) {
+        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
@@ -195,7 +197,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto renderContext = scroll->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (theme) {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
@@ -457,7 +461,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto panEvent =
         AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance));
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance, DimensionUnit::VP));
 
     // add TouchEvent for Menu dragStart Move
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
@@ -616,6 +620,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
             manager->ShowFilterAnimation(columnNode);
         }
+    }
+}
+
+void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode != MenuPreviewMode::NONE || targetNode->IsDraggable()) {
+        SetFilter(targetNode, wrapperNode);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+        menuParam.isShowHoverImage) {
+        SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::NONE) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
     }
 }
 
@@ -800,16 +823,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
-            menuParam.isShowHoverImage) {
-            SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
-        }
-        if (menuParam.previewMode == MenuPreviewMode::NONE) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, wrapperNode);
-            renderContext->UpdateZIndex(1);
-        }
+        SetPreviewInfoToMenu(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
             previewNode->MountToParent(wrapperNode);
             previewNode->MarkModifyDone();

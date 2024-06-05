@@ -247,7 +247,6 @@ napi_value JSRenderImage::OnGetWidth(napi_env env)
     double width = 0.0;
     double density = GetDensity();
     width = width_;
-    density = (density == 0.0 ? 1.0 : density);
     width /= density;
     napi_value jsWidth = nullptr;
     napi_create_double(env, width, &jsWidth);
@@ -259,7 +258,6 @@ napi_value JSRenderImage::OnGetHeight(napi_env env)
     double height = 0.0;
     double density = GetDensity();
     height = height_;
-    density = (density == 0.0 ? 1.0 : density);
     height /= density;
     napi_value jsHeight = nullptr;
     napi_create_double(env, height, &jsHeight);

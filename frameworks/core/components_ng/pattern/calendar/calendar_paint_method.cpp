@@ -37,7 +37,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const char ELLIPSIS[] = "...";
-constexpr int32_t WEEK_START_DAY_OFFSET = 6;
 constexpr int32_t ROW_COUNT_FOUR = 4;
 constexpr int32_t ROW_COUNT_FIVE = 5;
 constexpr int32_t ROW_COUNT_SIX = 6;
@@ -508,7 +507,6 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
     auto textDirection = textDirection_;
     bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isRtl) {
-        startDayOfWeek = startOfWeek_ + WEEK_START_DAY_OFFSET;
         textDirection = textDirection_ == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
     }
     for (uint32_t column = 0; column < totalWeek; column++) {
@@ -523,11 +521,7 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
             newText = StringUtils::ToString(wText);
         }
         DrawCalendarText(&canvas, newText, weekTextStyle, boxRect);
-        if (isRtl) {
-            --startDayOfWeek;
-        } else {
-            ++startDayOfWeek;
-        }
+        ++startDayOfWeek;
     }
 }
 

@@ -850,6 +850,9 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
+    if (textStyle.HasHeightOverride()) {
+        return AdaptFontSizeForLineHeight(textStyle, layoutProperty, contentConstraint, layoutWrapper);
+    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -882,6 +885,35 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
             break;
     }
     return result;
+}
+
+bool TextFieldLayoutAlgorithm::IsNeedAdaptFontSize(const TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint)
+{
+    if (!textStyle.GetAdaptTextSize()) {
+        return false;
+    }
+    auto adaptivePolicy = layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    if ((adaptivePolicy != TextHeightAdaptivePolicy::MAX_LINES_FIRST) &&
+        (adaptivePolicy != TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST) &&
+        (adaptivePolicy != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
+        return false;
+    }
+    return TextAdaptFontSizer::IsNeedAdaptFontSize(textStyle, contentConstraint);
+}
+
+bool TextFieldLayoutAlgorithm::AdaptFontSizeForLineHeight(TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper)
+{
+    auto keepLineHeight = textStyle.GetLineHeight();
+    textStyle.SetLineHeight(Dimension(), false);
+    bool result = AddAdaptFontSizeAndAnimations(textStyle, layoutProperty, contentConstraint, layoutWrapper);
+    textStyle.SetLineHeight(keepLineHeight);
+    if (!result) {
+        return result;
+    }
+    return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
 }
 
 bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content,

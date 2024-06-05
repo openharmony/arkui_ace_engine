@@ -660,6 +660,12 @@ public:
     bool IsAtStart() const;
     bool IsAtEnd() const;
 
+    void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
+    {
+        frameRateRange_[type] = rateRange;
+    }
+    void UpdateNodeRate();
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -762,6 +768,7 @@ private:
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
@@ -1067,7 +1074,6 @@ private:
     float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
-    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
@@ -1103,6 +1109,7 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
+    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
     // capture
     std::optional<int32_t> leftCaptureIndex_;
     std::optional<int32_t> rightCaptureIndex_;

@@ -1703,7 +1703,8 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     std::vector<std::pair<float, float>> props(cnt, { 0.0, 0.0 });
     if (cnt > 0) {
         props[cnt - FIRST_GATHER_PIXEL_MAP] = { FIRST_PIXELMAP_ANGLE, FIRST_PIXELMAP_OPACITY };
-    } else if (cnt > 1) {
+    }
+    if (cnt > 1) {
         props[cnt - SECOND_GATHER_PIXEL_MAP] = { SECOND_PIXELMAP_ANGLE, SECOND_PIXELMAP_OPACITY };
     }
     for (uint32_t i = 0; i < cnt; ++i) {

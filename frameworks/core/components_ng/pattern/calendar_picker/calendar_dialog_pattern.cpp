@@ -59,10 +59,10 @@ void CalendarDialogPattern::OnModifyDone()
     InitTitleArrowsEvent();
     InitEntryChangeEvent();
 
+    UpdateTitleArrowsImage();
     UpdateDialogBackgroundColor();
     UpdateTitleArrowsColor();
     UpdateOptionsButtonColor();
-    UpdateTitleArrowsImage();
 }
 
 void CalendarDialogPattern::UpdateDialogBackgroundColor()
@@ -135,6 +135,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
         UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+    } else {
+        UpdateImage(lastYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG);
+        UpdateImage(lastMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+        UpdateImage(nextMonthNode, InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+        UpdateImage(nextYearNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     }
 }
 
@@ -146,9 +151,10 @@ void CalendarDialogPattern::UpdateImage(
     auto imageNode = AceType::DynamicCast<FrameNode>(image);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
-    imageInfo->SetResourceId(resourceId);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(resourceId);
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
 }
 

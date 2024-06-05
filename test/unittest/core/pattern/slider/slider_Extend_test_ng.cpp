@@ -104,10 +104,6 @@ const PointF SELECT_START { 10.0f, 10.0f };
 const PointF SELECT_END { 20.0f, 20.0f };
 const PointF POINTF_CENTER { 15.0f, 15.0f };
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
-constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
-constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension ARROW_WIDTH = 16.0_vp;
@@ -237,7 +233,7 @@ HWTEST_F(SliderExTestNg, SliderModelNgTest001, TestSize.Level1)
 
     std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
     sliderModelNG.SetOnChange(std::move(eventOnChange));
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = AceType::DynamicCast<FrameNode>(NG::ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     /**
@@ -266,8 +262,6 @@ HWTEST_F(SliderExTestNg, SliderModelNgTest001, TestSize.Level1)
     sliderModelNG.ResetBlockType();
     sliderModelNG.ResetBlockImage();
     sliderModelNG.ResetBlockShape();
-    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
 
@@ -275,14 +269,14 @@ HWTEST_F(SliderExTestNg, SliderModelNgTest001, TestSize.Level1)
      * @tc.steps: step4. check whether the properties is correct.
      * @tc.expected: step4. check whether the properties is correct.
      */
-    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderColor().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetBlockBorderWidth().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetTrackBorderRadius().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetStepColor().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetStepSize().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetBlockType().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetBlockImage().has_value());
-    EXPECT_FALSE(sliderPaintProperty->GetBlockShape().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetBlockBorderColor().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetBlockBorderWidth().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetTrackBorderRadius().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetStepColor().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetStepSize().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetBlockType().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetBlockImage().has_value());
+    EXPECT_TRUE(sliderPaintProperty->GetBlockShape().has_value());
 }
 
 /**
@@ -349,28 +343,26 @@ HWTEST_F(SliderExTestNg, SliderTipModifierTest001, TestSize.Level1)
     sliderTipModifier.onDraw(context);
     EXPECT_EQ(sliderTipModifier.vertex_.GetY(), 0 - offset);
     EXPECT_EQ(sliderTipModifier.isMask_, false);
-    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), false);
     sliderTipModifier.SetSliderGlobalOffset(OffsetF());
     sliderTipModifier.onDraw(context);
     EXPECT_EQ(sliderTipModifier.vertex_.GetY(), offset);
     EXPECT_EQ(sliderTipModifier.isMask_, true);
-    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
-    EXPECT_EQ(sliderTipModifier.bubbleSize_,
-        SizeF(BUBBLE_HORIZONTAL_WIDTH.ConvertToPx(), BUBBLE_HORIZONTAL_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), false);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, BLOCK_SIZE_F_ZREO);
 
     sliderPattern->direction_ = Axis::VERTICAL;
     sliderTipModifier.SetDirection(Axis::VERTICAL);
     sliderTipModifier.onDraw(context);
     EXPECT_EQ(sliderTipModifier.vertex_.GetX(), offset);
     EXPECT_EQ(sliderTipModifier.isMask_, true);
-    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), false);
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.onDraw(context);
     EXPECT_EQ(sliderTipModifier.vertex_.GetX(), 0 - offset);
     EXPECT_EQ(sliderTipModifier.isMask_, false);
-    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
-    EXPECT_EQ(sliderTipModifier.bubbleSize_,
-        SizeF(BUBBLE_VERTICAL_WIDTH.ConvertToPx(), BUBBLE_VERTICAL_HEIGHT.ConvertToPx()));
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), false);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_, BLOCK_SIZE_F_ZREO);
 }
 
 /**

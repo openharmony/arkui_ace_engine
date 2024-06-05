@@ -213,7 +213,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
-    auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
+    auto actionStart = [weak = WeakClaim(this), this, hasContextMenu](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -249,6 +249,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else if (!isNotInPreviewState_) {
                 HideEventColumn();
+                if (hasContextMenu) {
+                    SubwindowManager::GetInstance()->HidePreviewNG();
+                }
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
@@ -280,6 +283,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
+                if (hasContextMenu) {
+                    SubwindowManager::GetInstance()->HidePreviewNG();
+                }
                 SubwindowManager::GetInstance()->HideMenuNG(false, true);
             } else {
                 // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
@@ -730,7 +736,7 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto delta = Point(point.GetX(), point.GetY()) - startPoint;
     //get the number with VP unit
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    if (delta.GetDistance() > Dimension(distance).ConvertToPx()) {
+    if (delta.GetDistance() > Dimension(distance, DimensionUnit::VP).ConvertToPx()) {
         return;
     }
     auto dragStartDampingRatio = SystemProperties::GetDragStartDampingRatio();

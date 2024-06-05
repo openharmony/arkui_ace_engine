@@ -462,13 +462,15 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         }
         if (paddingObj->GetProperty("top")->IsObject()) {
             JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
-            ParseJsLengthMetrics(topObj, top);
-            padding.top = NG::CalcLength(top);
+            if (ParseJsLengthMetrics(topObj, top)) {
+                padding.top = NG::CalcLength(top);
+            }
         }
         if (paddingObj->GetProperty("bottom")->IsObject()) {
             JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
-            ParseJsLengthMetrics(bottomObj, bottom);
-            padding.bottom = NG::CalcLength(bottom);
+            if (ParseJsLengthMetrics(bottomObj, bottom)) {
+                padding.bottom = NG::CalcLength(bottom);
+            }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);

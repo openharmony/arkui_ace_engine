@@ -295,7 +295,7 @@ void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
     JSRef<JSArray> lineDashObj = JSRef<JSArray>::New();
     double density = GetDensity();
     for (auto i = 0U; i < lineDash.size(); i++) {
-        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] * density)));
+        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] / density)));
     }
     info.SetReturnValue(lineDashObj);
 }
@@ -473,8 +473,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 #else
     CHECK_NULL_VOID(jsImage);
     isImage = true;
-    std::string imageValue = jsImage->GetSrc();
-    image.src = imageValue;
+    image.src = jsImage->GetSrc();
+    image.imageData = jsImage->GetImageData();
     imageInfo.imgWidth = jsImage->GetWidth();
     imageInfo.imgHeight = jsImage->GetHeight();
     imageInfo.isImage = true;
@@ -539,11 +539,12 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
 // createPattern(image: ImageBitmap, repetition: string | null): CanvasPattern | null
 void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
-    std::string repeat;
     auto arg0 = info[0];
-    if (arg0->IsObject() && info.GetStringArg(1, repeat)) {
+    if (arg0->IsObject()) {
         JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         CHECK_NULL_VOID(jsImage);
+        std::string repeat;
+        info.GetStringArg(1, repeat);
         auto pattern = std::make_shared<Pattern>();
         pattern->SetImgSrc(jsImage->GetSrc());
         pattern->SetImageWidth(jsImage->GetWidth());

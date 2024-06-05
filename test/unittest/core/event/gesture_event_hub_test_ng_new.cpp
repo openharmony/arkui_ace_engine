@@ -356,6 +356,8 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo001, TestSize.Level1)
     GestureEvent info;
     DragDropInfo dragPreviewInfo;
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
     EXPECT_FALSE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
@@ -443,6 +445,8 @@ HWTEST_F(GestureEventHubTestNg, GetDragDropInfo002, TestSize.Level1)
     GestureEvent info;
     DragDropInfo dragPreviewInfo;
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    gestureEventHub->InitDragDropEvent();
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     auto dragDropInfo = gestureEventHub->GetDragDropInfo(info, frameNode, dragPreviewInfo, dragEvent);
     EXPECT_TRUE(dragDropInfo.customNode);
     EXPECT_EQ(dragDropInfo.extraInfo, "user set extraInfo");

@@ -3970,7 +3970,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   chainMode(direction: Axis, style: ChainStyle): this {
     let arkChainMode = new ArkChainMode();
-    arkChainMode.direction = direction ;
+    arkChainMode.direction = direction;
     arkChainMode.style = style;
     modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
     return this;

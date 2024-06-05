@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class ArcSwiperPattern : public SwiperPattern {
+    DECLARE_ACE_TYPE(ArcSwiperPattern, SwiperPattern);
 public:
     void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) override;
     void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) override;

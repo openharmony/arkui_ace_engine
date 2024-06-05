@@ -821,10 +821,22 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3]?.i32: animation delay duration, in milliseconds. \n
+     * .value[4]?.i32: number of times that the animation is played. \n
+     * .value[5]?.i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6]?.f32: animation playback speed. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3].i32: animation delay duration, in milliseconds. \n
+     * .value[4].i32: number of times that the animation is played. \n
+     * .value[5].i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6].f32: animation playback speed. \n
      *
      */
     NODE_MOVE_TRANSITION,
@@ -4175,6 +4187,16 @@ typedef enum {
      * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
      */
     NODE_LIST_CHILDREN_MAIN_SIZE = 1003007,
+    /**
+     * @brief 设置当前List初次加载时视口起始位置显示的item的索引值，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值，默认值：0。 \n
+     */
+    NODE_LIST_INITIAL_INDEX = 1003008,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4676,7 +4698,6 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_LAYOUT_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
-
     /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used
      * by default. This attribute can be set, reset, and obtained as required through APIs.

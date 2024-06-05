@@ -101,6 +101,8 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode);
+
 private:
     class UIExtensionIdUtility {
     public:

@@ -31,6 +31,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
+} // namespace
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -381,7 +384,8 @@ void CalendarPattern::UpdateTitleNode()
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
     } else {
         textLayoutProperty->UpdateMaxLines(2);

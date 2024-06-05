@@ -21,6 +21,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/form/accessibility_session_adapter_form.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -101,6 +102,8 @@ public:
         isFormObscured_ = isObscured;
     }
 
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
+
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
 
     void OnAccessibilityChildTreeDeregister();
@@ -128,7 +131,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover);
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();
@@ -149,11 +152,12 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DeleteImageNode();
-    void DelayDeleteImageNode();
-    void DeleteImageNodeAfterRecover();
+    void DelayDeleteImageNode(bool needHandleCachedClick);
+    void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
-    void ProcDeleteImageNode(bool isRecover);
+    void ProcDeleteImageNode(const AAFwk::Want& want);
+    void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void HandleEnableForm(const bool enable);
 
     void InitClickEvent();
@@ -171,12 +175,13 @@ private:
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
-    
+
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
+    RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;

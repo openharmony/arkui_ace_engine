@@ -47,7 +47,7 @@ const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase)
 const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
 const std::string REPEAT_WITH_AUTOFILL_OR_AUTOFIT =
     R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},(\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\s{0,}\)))";
-const std::string AUTO_STRETCH_REGEX = R"(^repeat\(auto-stretch,\s*(\d+(\.\d+)?(vp|px)?)\)$)";
+const std::string AUTO_STRETCH_REGEX = R"(^\s*repeat\(auto-stretch,\s*(\d+(\.\d+)?(vp|px)?)\)$)";
 
 enum class RepeatType {
     NONE = 0,

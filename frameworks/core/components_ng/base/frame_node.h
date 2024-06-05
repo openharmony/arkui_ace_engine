@@ -426,7 +426,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -475,7 +475,8 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    bool MarkRemoving() override;
+    void ApplyGeometryTransition() override;
+    bool MarkRemoving(bool applyGeometryTransition = true) override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;

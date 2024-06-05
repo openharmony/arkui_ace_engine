@@ -126,6 +126,10 @@ protected:
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IsNeedAdaptFontSize(const TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint);
+    bool AdaptFontSizeForLineHeight(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
