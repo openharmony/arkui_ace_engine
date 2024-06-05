@@ -1471,8 +1471,8 @@ void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end)
     if (range == lastSelectionRange_) {
         return;
     }
-    eventHub->FireOnSelectionChange(&range);
     lastSelectionRange_ = std::move(range);
+    eventHub->FireOnSelectionChange(&range);
 }
 
 bool RichEditorPattern::GetCaretVisible() const
