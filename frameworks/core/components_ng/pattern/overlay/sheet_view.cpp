@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -304,6 +305,20 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
+void SheetView::GetTitlePaddingPos(PaddingProperty& padding)
+{
+    // The title bar area is reserved for the close button area size by default.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            padding.left = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+        } else {
+            padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+        }
+    } else {
+        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    }
+}
+
 RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
     auto titleColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -322,11 +337,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
     layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
-    } else {
-        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
-    }
+    GetTitlePaddingPos(padding);
     layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);
