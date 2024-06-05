@@ -398,7 +398,7 @@ void FormPattern::DeleteImageNode()
     }
 }
 
-void FormPattern::DeleteImageNodeAfterRecover()
+void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 {
     // delete image rs node
     auto host = GetHost();
@@ -425,6 +425,11 @@ void FormPattern::DeleteImageNodeAfterRecover()
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
+
+    // handle cached pointer event
+    if (needHandleCachedClick && formManagerBridge_) {
+        formManagerBridge_->HandleCachedClickEvents();
+    }
 }
 
 RefPtr<FrameNode> FormPattern::CreateImageNode()
@@ -618,6 +623,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
 
 void FormPattern::AddFormComponent(const RequestFormInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // When cardInfo has changed, it will call AddForm in Fwk
@@ -714,6 +720,9 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "form manager delagate is nullptr, card id is %{public}" PRId64 ".",
+            cardInfo_.id);
     }
     if (isSnapshot_) {
         auto imageNode = GetImageNode();
@@ -1121,7 +1130,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](
-            const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
+            const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
             ContainerScope scope(instanceID);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
@@ -1129,11 +1138,11 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(executor);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic, isRecover] {
+            uiTaskExecutor.PostTask([weak, instanceID, node, want] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->FireFormSurfaceNodeCallback(node, isDynamic, isRecover);
+                form->FireFormSurfaceNodeCallback(node, want);
                 }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
@@ -1228,25 +1237,20 @@ void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
         host->GetAccessibilityId(), top, left);
 }
 
-void FormPattern::ProcDeleteImageNode(bool isRecover)
+void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
 {
-    if (isRecover) {
-        DelayDeleteImageNode();
+    if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false)) {
+        DelayDeleteImageNode(want.GetBoolParam(
+            OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else {
         DeleteImageNode();
     }
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
+void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
 {
-    CHECK_NULL_VOID(node);
-    node->CreateNodeInRenderThread();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RemoveFormSkeleton();
-
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetRSNode(node);
@@ -1261,6 +1265,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
     }
     externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
+    bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+    bool isDynamic = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
     if (isRecover) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
@@ -1272,7 +1278,20 @@ void FormPattern::FireFormSurfaceNodeCallback(
         renderContext->ClearChildren();
     }
     renderContext->AddChild(externalRenderContext, 0);
+}
 
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(node);
+    node->CreateNodeInRenderThread();
+
+    RemoveFormSkeleton();
+    AttachRSNode(node, want);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -1283,15 +1302,17 @@ void FormPattern::FireFormSurfaceNodeCallback(
     isLoaded_ = true;
     isUnTrust_ = false;
     isFrsNodeDetached_ = false;
-    isDynamic_ = isDynamic;
+    isDynamic_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
 
-    ProcDeleteImageNode(isRecover);
+    ProcDeleteImageNode(want);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
     OnLoadEvent();
 
@@ -1300,7 +1321,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     formNode->NotifyAccessibilityChildTreeRegister();
 }
 
-void FormPattern::DelayDeleteImageNode()
+void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1309,10 +1330,10 @@ void FormPattern::DelayDeleteImageNode()
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->DeleteImageNodeAfterRecover();
+            pattern->DeleteImageNodeAfterRecover(needHandleCachedClick);
         },
         DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
 }

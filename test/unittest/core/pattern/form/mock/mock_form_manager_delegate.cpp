@@ -106,6 +106,8 @@ void FormManagerDelegate::OnAccessibilityDumpChildInfo(
 void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs) {}
 
+void FormManagerDelegate::HandleCachedClickEvents() {}
+
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& cardName, AppExecFwk::FormInfo& formInfo)

@@ -131,7 +131,7 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
-    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover);
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();
@@ -152,11 +152,12 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DeleteImageNode();
-    void DelayDeleteImageNode();
-    void DeleteImageNodeAfterRecover();
+    void DelayDeleteImageNode(bool needHandleCachedClick);
+    void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
-    void ProcDeleteImageNode(bool isRecover);
+    void ProcDeleteImageNode(const AAFwk::Want& want);
+    void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void HandleEnableForm(const bool enable);
 
     void InitClickEvent();
