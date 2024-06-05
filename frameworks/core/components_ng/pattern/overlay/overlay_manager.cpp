@@ -5650,4 +5650,16 @@ std::string OverlayManager::GetMapNodeLog(const RefPtr<FrameNode>& node, bool ha
     entryLog += "NodeId: " + std::to_string(node->GetId()) + ", NodeTag: " + node->GetTag();
     return entryLog;
 }
+
+void OverlayManager::OnUIExtensionWindowSizeChange()
+{
+    for (auto iter = dialogMap_.begin(); iter != dialogMap_.end(); iter++) {
+        auto dialogNode = (*iter).second;
+        CHECK_NULL_VOID(dialogNode);
+        auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(dialogPattern);
+        dialogPattern->InitHostWindowRect();
+        dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
 } // namespace OHOS::Ace::NG

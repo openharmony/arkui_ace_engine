@@ -941,4 +941,20 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         subwindow->ClearToast();
     }
 }
+void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    if (!container->IsUIExtensionWindow() || uiExtensionWindowRect_ == windowRect) {
+        return;
+    }
+    auto subContainer = Container::GetContainer(GetSubContainerId(instanceId));
+    CHECK_NULL_VOID(subContainer);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->OnUIExtensionWindowSizeChange();
+    uiExtensionWindowRect_ = windowRect;
+}
 } // namespace OHOS::Ace

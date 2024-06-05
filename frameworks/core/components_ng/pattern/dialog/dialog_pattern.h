@@ -261,6 +261,7 @@ public:
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
+    void InitHostWindowRect();
 
 private:
     bool AvoidKeyboard() const override
@@ -272,7 +273,6 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void InitHostWindowRect();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);

@@ -543,6 +543,7 @@ public:
     {
         calendarDialogDirection_ = textDirection;
     }
+    void OnUIExtensionWindowSizeChange();
 
 private:
     void PopToast(int32_t targetId);

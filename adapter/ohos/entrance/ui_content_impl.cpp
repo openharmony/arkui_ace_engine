@@ -2095,6 +2095,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->CheckAndUpdateKeyboardInset();
             pipelineContext->ChangeDarkModeBrightness();
         }
+        SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
+            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
+            static_cast<WindowSizeChangeReason>(reason));
     };
 
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
