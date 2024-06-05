@@ -6530,8 +6530,6 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
 
 void WebDelegate::OnDetachContext()
 {
-    instanceId_ = INSTANCE_ID_UNDEFINED;
-    context_ = nullptr;
     UnRegisterScreenLockFunction();
 }
 
