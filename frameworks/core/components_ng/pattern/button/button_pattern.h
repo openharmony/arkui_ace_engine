@@ -353,6 +353,7 @@ protected:
     void OnTouchDown();
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
+    void UpdateTexOverflow(bool isMarqueeStart);
     void HandleButtonStyle();
     void HandleEnabled();
     void InitButtonLabel();
