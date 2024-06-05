@@ -872,7 +872,7 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
         const auto& children = current->GetChildren();
         for (const auto& child : children) {
             frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
-            if (frameNode != nullptr) {
+            if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
                 if (frameNode->GetAccessibilityId() == id) {
                     return AceType::DynamicCast<NG::FrameNode>(child);
                 }
@@ -883,7 +883,16 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
                 }
 #endif
             }
-            nodes.push(Referenced::RawPtr(child));
+
+            if (frameNode != nullptr && frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>() != nullptr) {
+                auto property = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                if (property->GetAccessibilityLevel() != NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS &&
+                !property->IsAccessibilityGroup()) {
+                    nodes.push(Referenced::RawPtr(child));
+                }
+            } else {
+                nodes.push(Referenced::RawPtr(child));
+            }
         }
     }
     return nullptr;
@@ -1004,7 +1013,8 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
     auto parent = uiNode->GetParent();
     while (parent) {
         if (AceType::InstanceOf<NG::FrameNode>(parent)) {
-            if ((parent->GetTag() == V2::PAGE_ETS_TAG) || (parent->GetTag() == V2::STAGE_ETS_TAG)) {
+            if ((parent->GetTag() == V2::PAGE_ETS_TAG) || (parent->GetTag() == V2::STAGE_ETS_TAG) ||
+                AceType::DynamicCast<NG::FrameNode>(parent)->CheckAccessibilityLevelNo()) {
                 parent = parent->GetParent();
                 continue;
             }

@@ -892,6 +892,18 @@ public:
         predictLayoutNode_.emplace_back(node);
     }
 
+    bool CheckAccessibilityLevelNo() const {
+        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (property) {
+            auto level = property->GetAccessibilityLevel();
+            if (level == NG::AccessibilityProperty::Level::NO ||
+                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
