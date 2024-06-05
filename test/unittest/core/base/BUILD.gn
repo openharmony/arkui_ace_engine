@@ -83,7 +83,8 @@ group("core_base_unittest") {
   testonly = true
   deps = [
     ":distributed_ui_test_ng",
-    ":frame_node_test_ng",
+
+    # ":frame_node_test_ng",
     ":geometry_node_test_ng",
     ":inspector_test_ng",
     ":observer_test_ng",

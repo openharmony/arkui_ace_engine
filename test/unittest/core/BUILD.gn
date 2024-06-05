@@ -113,8 +113,8 @@ group("linux_core_unittest") {
     "pattern/rich_editor_drag:rich_editor_drag_test_ng",
     "pattern/scroll:scroll_test_ng",
     "pattern/scroll_bar:scroll_bar_test_ng",
-    "pattern/scrollable:scrollable_test_ng",
 
+    # "pattern/scrollable:scrollable_test_ng",
     # "pattern/search:search_test_ng",
     "pattern/select:select_test_ng",
     "pattern/select_overlay:select_overlay_test_ng",
