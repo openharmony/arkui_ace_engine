@@ -31,6 +31,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
 constexpr InputStyle DEFAULT_TEXT_AREA_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr uint32_t DEFAULT_MAX_VIEW_LINE = 3;
@@ -1157,6 +1162,18 @@ void ResetTextAreaMargin(ArkUINodeHandle node)
     paddings.right = NG::CalcLength(0.0);
     TextFieldModelNG::SetMargin(frameNode, paddings);
 }
+
+void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = TextFieldModelNG::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    length = NUM_4;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1194,7 +1211,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
         SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
         SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy,
-        SetTextAreaMargin, ResetTextAreaMargin };
+        SetTextAreaMargin, ResetTextAreaMargin, GetTextAreaMargin };
     return &modifier;
 }
 

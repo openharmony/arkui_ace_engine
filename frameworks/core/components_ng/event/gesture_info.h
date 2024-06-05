@@ -88,12 +88,23 @@ public:
         return userData_;
     }
 
+    void SetDisposeTag(bool tag)
+    {
+        disposeTag_ = tag;
+    }
+
+    bool GetDisposeTag()
+    {
+        return disposeTag_;
+    }
+
 private:
     std::optional<std::string> tag_;
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
-    void* userData_;
+    void* userData_ = nullptr;
+    bool disposeTag_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -854,7 +854,7 @@ void ResetPosition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
+    ViewAbstract::ResetPosition(frameNode);
 }
 
 bool ParseEdges(OHOS::Ace::EdgesParam& edges, const ArkUIStringAndFloat* options)
@@ -1891,7 +1891,7 @@ void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkU
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
+ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     ArkUIImageSizeType imageSizeType = { 0, 0, 0, 0 };
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1900,9 +1900,10 @@ ArkUIImageSizeType GetBackgroundImageSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(renderContext, imageSizeType);
     CHECK_NULL_RETURN(renderContext->GetBackground(), imageSizeType);
     auto imageSize = renderContext->GetBackground()->GetBackgroundImageSize();
+    double density = unit == static_cast<ArkUI_Int32>(DimensionUnit::PX) ? 1 : PipelineBase::GetCurrentDensity();
     CHECK_NULL_RETURN(imageSize, imageSizeType);
-    imageSizeType.xValue = imageSize->GetSizeValueX();
-    imageSizeType.yValue = imageSize->GetSizeValueY();
+    imageSizeType.xValue = imageSize->GetSizeValueX() / density;
+    imageSizeType.yValue = imageSize->GetSizeValueY() / density;
     imageSizeType.xType = static_cast<int32_t>(imageSize->GetSizeTypeX());
     imageSizeType.yType = static_cast<int32_t>(imageSize->GetSizeTypeY());
     return imageSizeType;
@@ -5737,20 +5738,18 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.kind = MOUSE_INPUT_EVENT;
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
         event.mouseEvent.subKind = ON_MOUSE;
-        event.mouseEvent.actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetX());
-        event.mouseEvent.actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(info.GetLocalLocation().GetY());
+        event.mouseEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
         event.mouseEvent.button = static_cast<int32_t>(info.GetButton());
         event.mouseEvent.action = static_cast<int32_t>(info.GetAction());
         event.mouseEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-        event.mouseEvent.actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetGlobalLocation().GetX());
-        event.mouseEvent.actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetGlobalLocation().GetY());
-        event.mouseEvent.actionTouchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetScreenLocation().GetX());
-        event.mouseEvent.actionTouchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(
-            info.GetScreenLocation().GetY());
+        event.mouseEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
