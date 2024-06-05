@@ -2667,7 +2667,24 @@ void FrameNode::OnReuse()
     }
 }
 
-bool FrameNode::MarkRemoving()
+void FrameNode::ApplyGeometryTransition()
+{
+    if (!layoutProperty_ || !geometryNode_) {
+        return;
+    }
+
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        geometryTransition->Build(WeakClaim(this), false);
+    }
+
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        child->ApplyGeometryTransition();
+    }
+}
+
+bool FrameNode::MarkRemoving(bool applyGeometryTransition)
 {
     bool pendingRemove = false;
     if (!layoutProperty_ || !geometryNode_) {
@@ -2678,13 +2695,15 @@ bool FrameNode::MarkRemoving()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
+        if (applyGeometryTransition) {
+            geometryTransition->Build(WeakClaim(this), false);
+        }
         pendingRemove = true;
     }
 
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving() || pendingRemove;
+        pendingRemove = child->MarkRemoving(applyGeometryTransition) || pendingRemove;
     }
     return pendingRemove;
 }
