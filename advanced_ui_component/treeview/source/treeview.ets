@@ -35,8 +35,6 @@ const X_OFF_SET: string = '0vp'
 const Y_OFF_SET: string = '2.75vp'
 const Y_BOTTOM_OFF_SET: string = '-1.25vp'
 const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
-const COLOR_SELECT: string = '#1A0A59F7'
-const COLOR_IMAGE_ROW: string = '#00000000'
 const COLOR_IMAGE_EDIT: string = '#FFFFFF'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
@@ -48,17 +46,7 @@ const MIN_WIDTH: string = '112vp'
 const MAX_WIDTH: string = '192vp'
 const TRANS_COLOR: string = '#00FFFFFF'
 
-const ARROW_DOWN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA+' +
-  'gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzA' +
-  'AAOxAAADsQBlSsOGwAAAq9JREFUeNrt2j9rFEEYx/FJziIECwsLCwsJIVhYiISgaIhiioiIlpaCjZ1/qhNUIkHE0negpZggEnwHFgoWFiJic' +
-  'VyRQsQXIHKIvyGzIJKbmTW7M7P6/cCvyR3c7fPsPLO7F2MAAAAAAAAAAAAAAAAAAAAAAAAAAF01keAz9ihrymVln/JEua18L7w2V5TrykHlt' +
-  'XJTGTb9Ib0EB/JYueWKP6Ucd3mh/Ci0+Hfc9z6gTCuHlUvK06ZPnMkEB3Nth78tK89dQ0os/toOfz+kHG36w1I0YNwZs6JsFtaEccVvTYoGr' +
-  'HteW3ajaKoDxbfz/10X94BXyoIyO+b1Wbcn2JE0ylT8VeW+5/UtZUn52sUG/FQ23PycG/OeGWXevW+U4cwPFf+MMmjjw3uJDnLkRo2vCTlWQ' +
-  'l954Hn9i3Je+djWF+glPNNimlCthJcJLlH7buZPemb+ovKpzS/RS7zcqybMB/aEhZZXwmqg+NXMH7ZdkNQNqJrwLLAxz7Q4jkIzf5iq+LkaU' +
-  'GdjbroJoUvNb674g1SFyNWAOntCU48tYq7zzyqfUxYhZwPqNOHYLi9RQ8XfylH8EhpQZ2P+23EUU/zFlGOntAbU2Zjr3qyF7nCrsTPIdeClN' +
-  'CB2Y66zEvoRG26WsVNqA+rerPlWwg3lYeAmayl38UtsQBOPLezMfxRxkzUo4WBLbEDsxmxXwinlrRsn+5W7yr1SbrJiTJiy2d+T7Y82K4H32' +
-  'QbsNf7fFeyDtRMlFb/kFVBnY7amXbN8l5oXTYtPNf/VBsTuCSZQfPs8/0OJB9eFBuymCXbsnCxlw+1yA2I35j+Lf860/Dz/f2rA73fMdhUc8' +
-  'bzvjXKhxJnftasgH3sJelU5bbb/Z8ee8e/N9j9PrZt8P/ADAAAAAAAAAAAAAAAAAAAAAAAgpV9KuZwVm6MIDQAAAABJRU5ErkJggg=='
+const ARROW_DOWN: Resource | string = $r('sys.media.ohos_ic_public_arrow_down');
 
 const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
   'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
@@ -66,16 +54,7 @@ const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAY
   '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
   'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg=='
 
-const ARROW_RIGHT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA' +
-  '+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlz' +
-  'AAAOxAAADsQBlSsOGwAAAjVJREFUeNrtnCtvG1EQRq+9BlVUEBAYYFBgYGBYaBBoFUVVfkCtyqDAIL8jtI8EBruVIgU4UvMD0iKDPmirtlJg' +
-  'lJZUyqzsSFXlxwZsPPPtOdJHbDKac+/cXXvtlAAAAAAAAAAAAAAAAAAAAAAUyZzW1bMMLbuWv5YvqgJqTps/sjT+eW1geckOuB+OLdtzpHy3' +
-  'fFQTUHdY06MFr7+xPGMHlE93iYQnajvBo4APlj3LRhUkeBRwaRnProDkJXi9DP1ZFQmZ49oqISFzXl9RCb8sFwhYn4Sw9wlZkDplx1EWqFZJ' +
-  'CVmwHSsnIZoAuYM5ogCpgzmqAJlxFFmAxDiKLiD8OFIQEHocqQgIK0FJwF0kfLZMELA+CTuWI8s1AtYj4YHlt+UcAeVK+JqmX2/OY9Pyat1F' +
-  '1pM2J2n6Fec8mh4KVBdwO27m8RAB5dNb0uhPCCiXTpo+zLWItwgoj/bsKmhrwft/PBzAOQ3RlT9a0vycF5ZvHoqtCTZ/vKL5fcuhl4KVRlA7' +
-  'WvOVBOQP875f0fyBt+arnAH52DmNtvJVzoBwM19pBBVp/r7n5kceQa0CYyfE78pqoiu/733lRxUg1fxoZ0BbrfmRzoAiHy+Ea36UEdRRXPlR' +
-  'RlCR5g+iNt/7CGoqr3zvAuRXvucR1CrQ/GES+fMOjzvgQH3seN8B3ao036uASVWan+Pxybgflqf/LY78wH2dBPF6I/bY8txyZXlnOUsAAAAA' +
-  'AAAAAAAAAAAAAAAAEIgb8WKMjSFbuAQAAAAASUVORK5CYII='
+const ARROW_RIGHT: Resource | string = $r('sys.media.ohos_ic_public_arrow_right');
 
 const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
   'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
@@ -967,7 +946,7 @@ export struct TreeView {
             .width(item.getNodeItem().imageNode?.itemWidth)
             .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
         }
-        .backgroundColor(COLOR_IMAGE_ROW)
+        .backgroundColor(this.treeViewTheme.arrowIconColor)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
         .height(item.getNodeItem().imageNode?.itemHeight)
         .width(item.getNodeItem().imageNode?.itemWidth)
@@ -1148,7 +1127,7 @@ export struct TreeView {
       /* flag the position of the focus on the node. */
       let flag: Flag = Math.floor(
         event.getY() /
-        (nodeHeight / FLAG_NUMBER)) %
+          (nodeHeight / FLAG_NUMBER)) %
         FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
 
       /* Record the node position to which the dragged node moves. */
@@ -1344,14 +1323,14 @@ export struct TreeView {
           this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
             .imageNode?.setImageSource(InteractionStatus.Normal);
           this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
-          this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-            .imageNode?.source;
+            this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
+              .imageNode?.source;
         }
       }
 
       if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
         this.listNodeDataSource.listNode[this.viewLastIndex]
-        .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+          .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
       }
 
       this.listNodeDataSource.lastIndex = currentFocusIndex;
@@ -2894,7 +2873,7 @@ class ListNodeDataSource extends BasicDataSource {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
         } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
-          NodeStatus.Expand &&
+        NodeStatus.Expand &&
           this.listNode[i].getCanShowFlagLine() === false) {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
@@ -3195,7 +3174,7 @@ export struct TreeViewInner {
                     this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
                 }
                 .focusable(true)
-                .backgroundColor(COLOR_IMAGE_ROW)
+                .backgroundColor(this.treeViewTheme.arrowIconColor)
                 .margin({
                   end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                 })
@@ -3273,7 +3252,7 @@ export struct TreeViewInner {
                           InputError.NONE,
                           false,
                           thisIndex
-                          );
+                        );
                         this.listNodeDataSource.setItemVisibilityOnEdit(thisIndex, MenuOperation.COMMIT_NODE);
                       })
                   }.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
@@ -3307,7 +3286,7 @@ export struct TreeViewInner {
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
                   Image(this.item.getNodeItem().imageCollapse?.collapseSource)
-                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? COLOR_IMAGE_ROW : COLOR_IMAGE_EDIT)
+                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT)
                     .align(Alignment.End)
                     .objectFit(ImageFit.Contain)
                     .height(this.item.getNodeItem().imageCollapse?.itemHeight)
@@ -3367,7 +3346,7 @@ export struct TreeViewInner {
           }
 
           else if (event.type === TouchType.Up) {
-            this.item.setNodeColor(COLOR_SELECT);
+            this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
             if (this.item.getNodeItem().imageNode !== null) {
               this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
               this.item.imageSource = this.item.getNodeItem().imageNode?.source;
