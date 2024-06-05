@@ -1204,6 +1204,16 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
             borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
             renderContext_->UpdateBorderStyle(borderStyleProperty);
         }
+        if (!renderContext_->HasDashGap()) {
+            BorderWidthProperty dashGapProperty;
+            dashGapProperty.SetBorderWidth(Dimension(-1));
+            renderContext_->UpdateDashGap(dashGapProperty);
+        }
+        if (!renderContext_->HasDashWidth()) {
+            BorderWidthProperty dashWidthProperty;
+            dashWidthProperty.SetBorderWidth(Dimension(-1));
+            renderContext_->UpdateDashWidth(dashWidthProperty);
+        }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(),
@@ -3589,6 +3599,16 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
             BorderStyleProperty borderStyleProperty;
             borderStyleProperty.SetBorderStyle(BorderStyle::SOLID);
             renderContext_->UpdateBorderStyle(borderStyleProperty);
+        }
+        if (!renderContext_->HasDashGap()) {
+            BorderWidthProperty dashGapProperty;
+            dashGapProperty.SetBorderWidth(Dimension(-1));
+            renderContext_->UpdateDashGap(dashGapProperty);
+        }
+        if (!renderContext_->HasDashWidth()) {
+            BorderWidthProperty dashWidthProperty;
+            dashWidthProperty.SetBorderWidth(Dimension(-1));
+            renderContext_->UpdateDashWidth(dashWidthProperty);
         }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),

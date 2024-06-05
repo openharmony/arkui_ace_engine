@@ -211,6 +211,8 @@ public:
     static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
+    static void ParseDashGap(const JSRef<JSVal>& args);
+    static void ParseDashWidth(const JSRef<JSVal>& args);
     static void JsBorderImage(const JSCallbackInfo& info);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
