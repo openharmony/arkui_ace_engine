@@ -2633,7 +2633,6 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
     CHECK_NULL_VOID(overlayManager_);
     overlayManager_->HideAllMenus();
-    overlayManager_->HideCustomPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)
