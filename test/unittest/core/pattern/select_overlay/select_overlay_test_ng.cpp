@@ -3222,4 +3222,59 @@ HWTEST_F(SelectOverlayTestNg, SetSelectMenuHeight001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->SetSelectMenuHeight();
 }
+
+/**
+ * @tc.name: SelectOverlayModifier001
+ * @tc.desc: Test selectOverlay modifier function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    EXPECT_NE(pattern, nullptr);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+    auto contentModifier = pattern->selectOverlayContentModifier_;
+    EXPECT_NE(contentModifier, nullptr);
+    auto selectOverlayModifier = pattern->selectOverlayModifier_;
+    ASSERT_NE(selectOverlayModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Test selectOverlay modifier SelectOverlayModifier function.
+     */
+    selectOverlayModifier->SetDefaultCircleAndLineEndOffset();
+    Dimension radius = 2.0_vp;
+    selectOverlayModifier->pointRadius_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(Dimension(1.75_vp).ConvertToPx());
+    selectOverlayModifier->SetOtherPointRadius(radius);
+    EXPECT_EQ(radius, 2.0_vp);
+}
 } // namespace OHOS::Ace::NG

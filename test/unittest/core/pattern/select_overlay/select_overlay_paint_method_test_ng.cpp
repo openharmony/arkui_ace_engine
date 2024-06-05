@@ -1502,4 +1502,60 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateContentModifier018, TestSize.Leve
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_EQ(contentModifier->isHandleLineShow_->Get(), true);
 }
+
+/**
+ * @tc.name: SelectOverlayPaintMethod001
+ * @tc.desc: Test select_ovelay_paint_method CheckCirclesAndBackArrowIsShown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPaintMethodTestNg, SelectOverlayPaintMethod001, TestSize.Level1)
+{
+/**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto overlayModifier = pattern->selectOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+    selectOverlayPaintMethod->isCreated_ = true;
+    selectOverlayPaintMethod->circlesAndBackArrowIsShown_ = false;
+    selectOverlayPaintMethod->hasExtensionMenu_ = true;
+    selectOverlayPaintMethod->hasShowAnimation_ = true;
+    selectOverlayPaintMethod->CheckCirclesAndBackArrowIsShown();
+    EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
+
+    selectOverlayPaintMethod->hasShowAnimation_ = false;
+    selectOverlayPaintMethod->CheckCirclesAndBackArrowIsShown();
+    EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
 }
+} // namespace OHOS::Ace::NG
