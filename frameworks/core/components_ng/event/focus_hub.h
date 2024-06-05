@@ -515,11 +515,11 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
-    void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
     static void LostFocusToViewRoot();
 
+    bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
