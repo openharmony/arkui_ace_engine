@@ -588,6 +588,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsert
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.GetInsertOffset());
     aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.GetInsertValue());
+    aboutToIMEInputObj->SetProperty<std::string>("previewText", insertValue.GetPreviewText());
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -619,6 +620,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
     onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
+    onIMEInputCompleteObj->SetProperty<std::string>("previewText", textSpanResult.GetPreviewText());
     onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
     onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
@@ -964,6 +966,20 @@ void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
+void JSRichEditor::JsEnablePreviewText(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        RichEditorModel::GetInstance()->SetSupportPreviewText(true);
+        return;
+    }
+    auto enable = tmpInfo->ToBoolean();
+    RichEditorModel::GetInstance()->SetSupportPreviewText(enable);
+}
+
 void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1182,6 +1198,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
+    JSClass<JSRichEditor>::StaticMethod("enablePreviewText", &JSRichEditor::JsEnablePreviewText);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
