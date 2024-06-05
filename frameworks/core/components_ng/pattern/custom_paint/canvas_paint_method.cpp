@@ -32,7 +32,6 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/font_manager.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/render/drawing.h"
@@ -568,6 +567,7 @@ bool CanvasPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, 
         txtStyle.shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));

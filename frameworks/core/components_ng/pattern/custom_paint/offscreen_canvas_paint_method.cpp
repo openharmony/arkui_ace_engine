@@ -403,6 +403,7 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(
         txtStyle.shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));

@@ -24,6 +24,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/image_cache.h"
@@ -192,6 +193,24 @@ void CustomPaintPaintMethod::UpdateLineDash(RSPen& pen)
         }
         RSScalar phase = static_cast<RSScalar>(state_.strokeState.GetLineDash().dashOffset);
         pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+    }
+}
+
+void CustomPaintPaintMethod::UpdateFontFamilies()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!fontManager->IsUseAppCustomFont()) {
+        return;
+    }
+    auto fontFamilies = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (state_.fillState.GetTextStyle().GetFontFamilies().empty()) {
+        state_.fillState.SetFontFamilies(fontFamilies);
+    }
+    if (state_.strokeState.GetTextStyle().GetFontFamilies().empty()) {
+        state_.strokeState.SetFontFamilies(fontFamilies);
     }
 }
 
