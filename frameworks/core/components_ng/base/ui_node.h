@@ -347,7 +347,8 @@ public:
     virtual void OnRecycle();
     virtual void OnReuse();
 
-    virtual bool MarkRemoving();
+    virtual void ApplyGeometryTransition() {}
+    virtual bool MarkRemoving(bool applyGeometryTransition = true);
 
     bool IsOnMainTree() const
     {
