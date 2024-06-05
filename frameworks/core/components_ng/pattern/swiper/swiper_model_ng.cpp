@@ -413,9 +413,8 @@ void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMar
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNextMarginIgnoreBlank(ignoreBlank);
 }
@@ -424,9 +423,8 @@ void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& pre
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
 }
