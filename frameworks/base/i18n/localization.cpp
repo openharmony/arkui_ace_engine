@@ -334,11 +334,11 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UDate date = calendar_->getTime(status);
     CHECK_RETURN(status, "");
     
-    CHECK_RETURN(patternGenerator_, "");
+    CHECK_NULL_RETURN(patternGenerator_, "");
     UnicodeString pattern = patternGenerator_->getBestPattern(UnicodeString(format.c_str()), status);
     CHECK_RETURN(status, "");
 
-    CHECK_RETURN(simpleDateFormat_, "");
+    CHECK_NULL_RETURN(simpleDateFormat_, "");
     simpleDateFormat_->applyPattern(pattern);
     UnicodeString dateTimeStr;
     simpleDateFormat_->format(date, dateTimeStr, status);
