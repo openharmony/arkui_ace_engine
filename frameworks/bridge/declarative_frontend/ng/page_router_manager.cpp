@@ -86,11 +86,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
-    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
-    if (pagePath.empty()) {
-        pagePath = url;
-    }
-    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
+    ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
 #if !defined(PREVIEW)
@@ -161,11 +157,6 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
-    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(name);
-    if (pagePath.empty()) {
-        pagePath = name;
-    }
-    ACE_SCOPED_TRACE_COMMERCIAL("PageRouterManager::RunPage, Router Main Page: %s", pagePath.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -1187,6 +1178,33 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     } else {
         loadJs_(target.path, target.errorCallback);
     }
+    // record full path info of every pageNode
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto keyInfo = target.url;
+    if (keyInfo.empty()) {
+        keyInfo = manifestParser_->GetRouter()->GetEntry("");
+    }
+#if !defined(PREVIEW)
+    if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        // deal with @bundle url
+        size_t bundleEndPos = keyInfo.find('/');
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = keyInfo.find('/', moduleStartPos);
+        std::string moduleName = keyInfo.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+        keyInfo = keyInfo.substr(moduleEndPos + 1);
+        keyInfo = moduleName + keyInfo;
+    }
+#endif
+    auto pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    if (pagePath.empty()) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto moduleName = container->GetModuleName();
+        keyInfo = moduleName + keyInfo;
+        pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    }
+    pageInfo->SetFullPath(pagePath);
 
 #if defined(PREVIEW)
     if (!isComponentPreview_()) {

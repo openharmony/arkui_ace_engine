@@ -111,7 +111,6 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
 
 void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
 {
-    AddPageTransitionTrace(srcPage, destPage);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto sharedManager = pipeline->GetSharedOverlayManager();
@@ -182,6 +181,14 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
     needTransition &= !children.empty();
+    if (children.empty()) {
+        auto pagePattern = node->GetPattern<NG::PagePattern>();
+        CHECK_NULL_RETURN(pagePattern, false);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_RETURN(pageInfo, false);
+        auto pagePath = pageInfo->GetFullPath();
+        ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
+    }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -225,7 +232,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     // close keyboard
     PageChangeCloseKeyboard();
-
+    AddPageTransitionTrace(outPageNode, node);
     FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
@@ -287,6 +294,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
+    AddPageTransitionTrace(outPageNode, inPageNode);
     FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
@@ -338,6 +346,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    AddPageTransitionTrace(outPageNode, inPageNode);
 
     FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
@@ -407,6 +416,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
 
     stageNode_->RebuildRenderContextTree();
     auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
+    AddPageTransitionTrace(outPageNode, node);
     FireAutoSave(outPageNode, node);
     if (needTransition) {
         StartTransition(outPageNode, node, RouteType::PUSH);
@@ -551,39 +561,19 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
 {
     CHECK_NULL_VOID(srcPage);
     CHECK_NULL_VOID(destPage);
+
     auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(srcPattern);
-    auto destPattern = destPage->GetPattern<NG::PagePattern>();
-    CHECK_NULL_VOID(destPattern);
-    auto srcUrl = srcPattern->GetPageUrl();
-    if (srcUrl.empty()) {
-        return;
-    }
     auto srcPageInfo = srcPattern->GetPageInfo();
     CHECK_NULL_VOID(srcPageInfo);
-    auto srcPagePath = srcPageInfo->GetPagePath();
-    if (srcPagePath.empty()) {
-        srcPagePath = srcUrl;
-    }
-    constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
-    auto srcPos = srcPagePath.rfind(".js");
-    if (srcPos == srcPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
-        srcPagePath = srcPagePath.substr(0, srcPos);
-    }
-    auto destUrl = destPattern->GetPageUrl();
-    if (destUrl.empty()) {
-        return;
-    }
+    auto srcFullPath = srcPageInfo->GetFullPath();
+
+    auto destPattern = destPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(destPattern);
     auto destPageInfo = destPattern->GetPageInfo();
     CHECK_NULL_VOID(destPageInfo);
-    auto destPagePath = destPageInfo->GetPagePath();
-    if (destPagePath.empty()) {
-        destPagePath = destUrl;
-    }
-    auto destPos = destPagePath.rfind(".js");
-    if (destPos == destPagePath.length() - JS_FILE_EXTENSION_LENGTH) {
-        destPagePath = destPagePath.substr(0, destPos);
-    }
-    ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcPagePath.c_str(), destPagePath.c_str());
+    auto destFullPath = destPageInfo->GetFullPath();
+
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 } // namespace OHOS::Ace::NG
