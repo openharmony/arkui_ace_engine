@@ -124,12 +124,8 @@ export class SubHeader extends ViewPU {
         this.__ageing = new ObservedPropertySimplePU(true, this, "ageing");
         this.__textArrowBgColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "textArrowBgColor");
         this.__buttonBgColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "buttonBgColor");
-        this.__textArrowFocus = new ObservedPropertySimplePU(false, this, "textArrowFocus");
-        this.__buttonFocus = new ObservedPropertySimplePU(false, this, "buttonFocus");
         this.__textArrowStyleWidth = new ObservedPropertySimplePU(0, this, "textArrowStyleWidth");
         this.__textArrowStyleHeight = new ObservedPropertySimplePU(0, this, "textArrowStyleHeight");
-        this.__buttonStyleWidth = new ObservedPropertySimplePU(0, this, "buttonStyleWidth");
-        this.__buttonStyleHeight = new ObservedPropertySimplePU(0, this, "buttonStyleHeight");
         this.__iconWidth = new ObservedPropertySimplePU(0, this, "iconWidth");
         this.__selectedIndex = new ObservedPropertyObjectPU(-1, this, "selectedIndex");
         this.__selectValue = new ObservedPropertyObjectPU('', this, "selectValue");
@@ -195,23 +191,11 @@ export class SubHeader extends ViewPU {
         if (c13.buttonBgColor !== undefined) {
             this.buttonBgColor = c13.buttonBgColor;
         }
-        if (c13.textArrowFocus !== undefined) {
-            this.textArrowFocus = c13.textArrowFocus;
-        }
-        if (c13.buttonFocus !== undefined) {
-            this.buttonFocus = c13.buttonFocus;
-        }
         if (c13.textArrowStyleWidth !== undefined) {
             this.textArrowStyleWidth = c13.textArrowStyleWidth;
         }
         if (c13.textArrowStyleHeight !== undefined) {
             this.textArrowStyleHeight = c13.textArrowStyleHeight;
-        }
-        if (c13.buttonStyleWidth !== undefined) {
-            this.buttonStyleWidth = c13.buttonStyleWidth;
-        }
-        if (c13.buttonStyleHeight !== undefined) {
-            this.buttonStyleHeight = c13.buttonStyleHeight;
         }
         if (c13.iconWidth !== undefined) {
             this.iconWidth = c13.iconWidth;
@@ -365,18 +349,6 @@ export class SubHeader extends ViewPU {
     set buttonBgColor(p12) {
         this.__buttonBgColor.set(p12);
     }
-    get textArrowFocus() {
-        return this.__textArrowFocus.get();
-    }
-    set textArrowFocus(o12) {
-        this.__textArrowFocus.set(o12);
-    }
-    get buttonFocus() {
-        return this.__buttonFocus.get();
-    }
-    set buttonFocus(n12) {
-        this.__buttonFocus.set(n12);
-    }
     get textArrowStyleWidth() {
         return this.__textArrowStyleWidth.get();
     }
@@ -388,18 +360,6 @@ export class SubHeader extends ViewPU {
     }
     set textArrowStyleHeight(l12) {
         this.__textArrowStyleHeight.set(l12);
-    }
-    get buttonStyleWidth() {
-        return this.__buttonStyleWidth.get();
-    }
-    set buttonStyleWidth(k12) {
-        this.__buttonStyleWidth.set(k12);
-    }
-    get buttonStyleHeight() {
-        return this.__buttonStyleHeight.get();
-    }
-    set buttonStyleHeight(j12) {
-        this.__buttonStyleHeight.set(j12);
     }
     get iconWidth() {
         return this.__iconWidth.get();
@@ -895,23 +855,35 @@ export class SubHeader extends ViewPU {
         Text.pop();
         Column.pop();
     }
-    ButtonStyle(n5, o5 = null) {
-        this.observeComponentCreation2((x6, y6) => {
+    ButtonStyle(l5, m5 = null) {
+        this.observeComponentCreation((i6, j6) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(i6);
             Row.create();
             Row.margin({
                 start: LengthMetrics.resource(this.ageing ? { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.padding_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             });
             Row.justifyContent(FlexAlign.End);
-        }, Row);
-        this.observeComponentCreation2((v6, w6) => {
+            if (!j6) {
+                Row.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((g6, h6) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(g6);
             Stack.create();
             Stack.focusable(true);
-        }, Stack);
-        this.observeComponentCreation2((a6, b6) => {
+            if (!h6) {
+                Stack.pop();
+            }
+            ViewStackProcessor.StopGetAccessRecording();
+        });
+        this.observeComponentCreation((q5, r5) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(q5);
             If.create();
-            if (n5) {
+            if (l5) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i6, j6) => {
+                    this.observeComponentCreation((y5, z5) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(y5);
                         Row.create();
                         Row.padding({
                             start: LengthMetrics.resource(this.ageing ? { "id": -1, "type": 10002, params: ['sys.float.padding_level0'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
@@ -921,7 +893,7 @@ export class SubHeader extends ViewPU {
                         });
                         Row.margin({
                             start: (this.ageing && this.icon) ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
-                                Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
+                            Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
                                 LEFT_TEXT_NUMBER) : LengthMetrics.vp(0),
                             bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         });
@@ -930,47 +902,63 @@ export class SubHeader extends ViewPU {
                         Row.constraintSize({ minHeight: BUTTON_HEIGHT });
                         Row.justifyContent(FlexAlign.End);
                         Row.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Row.onFocus(() => {
-                            this.buttonFocus = true;
+                        ViewStackProcessor.visualState("focused");
+                        Row.border({
+                            radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            width: { "id": -1, "type": 10002, params: ['sys.float.outline_extra_larger'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            color: this.subHeaderTheme.borderFocusColor,
                         });
-                        Row.onBlur(() => {
-                            this.buttonFocus = false;
+                        ViewStackProcessor.visualState("pressed");
+                        Row.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.interactive_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        ViewStackProcessor.visualState("disabled");
+                        Row.opacity({ "id": -1, "type": 10002, params: ['sys.float.interactive_disable'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        ViewStackProcessor.visualState("normal");
+                        Row.border({
+                            radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            width: { "id": -1, "type": 10002, params: ['sys.float.border_none'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                         });
-                        Row.onHover((u6) => {
-                            if (u6) {
+                        ViewStackProcessor.visualState();
+                        Row.onHover((f6) => {
+                            if (f6) {
                                 this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                             }
                             else {
                                 this.buttonBgColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
                             }
                         });
-                        Row.onTouch((t6) => {
-                            if (t6.type === TouchType.Down) {
+                        Row.onTouch((e6) => {
+                            if (e6.type === TouchType.Down) {
                                 this.buttonBgColor = { "id": -1, "type": 10001, params: ['sys.color.interactive_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
                             }
-                            if (t6.type === TouchType.Up) {
+                            if (e6.type === TouchType.Up) {
                                 this.buttonBgColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
                             }
                         });
-                        Row.onClick((s6) => {
-                            if (n5.action) {
-                                n5.action();
+                        Row.onClick((d6) => {
+                            if (l5.action) {
+                                l5.action();
                             }
                         });
-                        Row.onAreaChange((q6, r6) => {
-                            this.buttonStyleWidth = Number(r6.width);
-                            this.buttonStyleHeight = Number(r6.height);
-                        });
-                    }, Row);
-                    this.observeComponentCreation2((g6, h6) => {
-                        Text.create(n5.value);
+                        if (!z5) {
+                            Row.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
+                    this.observeComponentCreation((w5, x5) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(w5);
+                        Text.create(l5.value);
                         __Text__secondaryTitleStyles({
                             fontWeight: FontWeight.Medium,
                             maxLines: DOUBLE_LINE_NUM,
                             fontColor: this.subHeaderTheme.fontButtonColor,
                         });
                         Text.focusable(true);
-                    }, Text);
+                        if (!x5) {
+                            Text.pop();
+                        }
+                        ViewStackProcessor.StopGetAccessRecording();
+                    });
                     Text.pop();
                     Row.pop();
                 });
@@ -979,31 +967,11 @@ export class SubHeader extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
-        }, If);
-        If.pop();
-        this.observeComponentCreation2((t5, u5) => {
-            If.create();
-            if (this.buttonFocus) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((y5, z5) => {
-                        Row.create();
-                        Row.height(this.buttonStyleHeight);
-                        Row.width(this.buttonStyleWidth);
-                        Row.hitTestBehavior(HitTestMode.None);
-                        Row.border({
-                            width: BORDER_WIDTH,
-                            color: this.subHeaderTheme.borderFocusColor
-                        });
-                        Row.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level4'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                    }, Row);
-                    Row.pop();
-                });
+            if (!r5) {
+                If.pop();
             }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
+            ViewStackProcessor.StopGetAccessRecording();
+        });
         If.pop();
         Stack.pop();
         Row.pop();
@@ -1056,12 +1024,6 @@ export class SubHeader extends ViewPU {
             Row.focusable(true);
             Row.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
             Row.constraintSize({ minHeight: BUTTON_ZONE_SIZE });
-            Row.onFocus(() => {
-                this.textArrowFocus = true;
-            });
-            Row.onBlur(() => {
-                this.textArrowFocus = false;
-            });
             Row.padding({
                 start: this.getTextArrowPaddingLeft(),
                 bottom: LengthMetrics.vp(0),
