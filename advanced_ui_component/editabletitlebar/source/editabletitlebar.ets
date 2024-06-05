@@ -106,6 +106,7 @@ export struct EditableTitleBar {
   }
   @State backActive: boolean = false;
   @State fontSize: number = 1;
+  constraintWidth: number = 0;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -285,22 +286,24 @@ export struct EditableTitleBar {
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     children.forEach((child) => {
-      let width: number = Number(constraint.maxWidth);
-      if (!this.contentMargin) {
-        if (width < EditableTitleBar.breakpointS) {
-          this.titleBarMargin = {
-            start: LengthMetrics.resource($r('sys.float.margin_level1')),
-            end: LengthMetrics.resource($r('sys.float.margin_level1')),
-          }
-        } else if (width >= EditableTitleBar.breakpointM) {
-          this.titleBarMargin = {
-            start: LengthMetrics.resource($r('sys.float.margin_level3')),
-            end: LengthMetrics.resource($r('sys.float.margin_level3')),
-          }
-        } else {
-          this.titleBarMargin = {
-            start: LengthMetrics.resource($r('sys.float.margin_level2')),
-            end: LengthMetrics.resource($r('sys.float.margin_level2')),
+      if (Math.abs(this.constraintWidth - Number(constraint.maxWidth)) > Number.EPSILON) {
+        if (!this.contentMargin) {
+          this.constraintWidth = Number(constraint.maxWidth);
+          if (this.constraintWidth < EditableTitleBar.breakpointS) {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level1')),
+              end: LengthMetrics.resource($r('sys.float.margin_level1')),
+            }
+          } else if (this.constraintWidth >= EditableTitleBar.breakpointM) {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level3')),
+              end: LengthMetrics.resource($r('sys.float.margin_level3')),
+            }
+          } else {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level2')),
+              end: LengthMetrics.resource($r('sys.float.margin_level2')),
+            }
           }
         }
       }
@@ -366,13 +369,12 @@ struct ImageMenuItem {
   attribute: ItemType = ItemType.Image;
   callbackId: number | undefined = undefined;
   minFontSize: number = 1.75;
-  maxFontSize: number = 3.25;
+  maxFontSize: number = 3.2;
   @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   @Consume editableTitleBarTheme: EditableTitleBarTheme;
-
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EditableTitleBarDialog({
       cancel: () => {
@@ -389,11 +391,11 @@ struct ImageMenuItem {
   })
 
   private textDialog(): ResourceStr {
-    if (this.item.value === PUBLIC_OK ) {
+    if (this.item.value === PUBLIC_OK) {
       return $r('sys.string.icon_save');
-    } else if (this.item.value === PUBLIC_CANCEL ) {
+    } else if (this.item.value === PUBLIC_CANCEL) {
       return $r('sys.string.icon_cancel');
-    }  else if (this.item.value === PUBLIC_BACK ) {
+    } else if (this.item.value === PUBLIC_BACK) {
       return $r('sys.string.icon_back');
     } else {
       return this.item.label ? this.item.label : '';
@@ -427,6 +429,36 @@ struct ImageMenuItem {
     })
   }
 
+  private keyEventAction(event: KeyEvent): void {
+    if (!this.item.isEnabled) {
+      return;
+    }
+    if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+      return;
+    }
+    if (event.type === KeyType.Down) {
+      this.isOnClick = true;
+    }
+    if (event.type === KeyType.Up) {
+      this.isOnClick = false;
+    }
+  }
+
+  private touchEventAction(event: TouchEvent): void {
+    if (!this.item.isEnabled) {
+      return;
+    }
+    if (event.type === TouchType.Down) {
+      this.isOnClick = true;
+    }
+    if (event.type === TouchType.Up) {
+      if (this.fontSize >= this.minFontSize) {
+        this.dialogController?.close()
+      }
+      this.isOnClick = false;
+    }
+  }
+
   @Styles
   buttonEventStyle() {
     .onFocus(() => {
@@ -443,32 +475,10 @@ struct ImageMenuItem {
       this.isOnHover = isOn;
     })
     .onKeyEvent((event) => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return;
-      }
-      if (event.type === KeyType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === KeyType.Up) {
-        this.isOnClick = false;
-      }
+      this.keyEventAction(event);
     })
     .onTouch((event) => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === TouchType.Up) {
-        if (this.fontSize >= this.minFontSize) {
-          this.dialogController?.close()
-        }
-        this.isOnClick = false;
-      }
+      this.touchEventAction(event);
     })
     .gesture(GestureGroup(GestureMode.Exclusive,
       LongPressGesture({ repeat: false, duration: 500 })
@@ -588,7 +598,7 @@ struct EditableTitleBarDialog {
   mainWindowStage: window.Window | undefined = undefined;
   controller?: CustomDialogController
   minFontSize: number = 1.75;
-  maxFontSize: number = 3.25;
+  maxFontSize: number = 3.2;
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @Prop fontSize: number = 1;
   @State maxLines: number = 1;
@@ -599,7 +609,7 @@ struct EditableTitleBarDialog {
   }
 
   build() {
-    if (this.textEditableTitleBarDialog){
+    if (this.textEditableTitleBarDialog) {
       Column() {
         Image(this.itemEditableDialog.value)
           .width(IMAGE_SIZE)
@@ -609,20 +619,25 @@ struct EditableTitleBarDialog {
             bottom: $r('sys.float.padding_level8'),
           })
           .fillColor($r('sys.color.icon_primary'))
-        Text(this.textEditableTitleBarDialog)
-          .fontSize(TEXT_EDITABLE_DIALOG)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .maxLines(this.maxLines)
-          .fontColor($r('sys.color.font_primary'))
-          .margin({
-            left: $r('sys.float.padding_level4'),
-            right: $r('sys.float.padding_level4'),
-            bottom: $r('sys.float.padding_level12'),
-          })
+        Column() {
+          Text(this.textEditableTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
     } else {
@@ -634,12 +649,13 @@ struct EditableTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
       .justifyContent(FlexAlign.Center)
     }
   }
+
   async aboutToAppear(): Promise<void> {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.mainWindowStage = context.windowStage.getMainWindowSync();
