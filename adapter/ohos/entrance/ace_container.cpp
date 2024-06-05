@@ -2589,7 +2589,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 }
 
 bool AceContainer::GetCurPointerEventInfo(
-    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     CHECK_NULL_RETURN(currentPointerEvent_, false);
@@ -2600,6 +2601,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent_->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
+    sourceTool = pointerItem.GetToolType();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;
 }
