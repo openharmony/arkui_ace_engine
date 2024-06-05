@@ -89,7 +89,7 @@ public:
     void Restore();
     void Scale(double x, double y);
     void Rotate(double angle);
-    virtual void SetTransform(const TransformParam& param) = 0;
+    void SetTransform(const TransformParam& param);
     virtual TransformParam GetTransform() const;
     void ResetTransform();
     void Transform(const TransformParam& param);
@@ -321,7 +321,7 @@ protected:
     void Path2DLineTo(const PathArgs& args);
     void Path2DArc(const PathArgs& args);
     void Path2DArcTo(const PathArgs& args);
-    virtual void Path2DRect(const PathArgs& args) = 0;
+    void Path2DRect(const PathArgs& args);
     void Path2DEllipse(const PathArgs& args);
     void Path2DBezierCurveTo(const PathArgs& args);
     void Path2DQuadraticCurveTo(const PathArgs& args);
@@ -365,11 +365,10 @@ protected:
         RSRect* srcRect, RSRect* dstRect);
 #endif
     void DrawSvgImage(const Ace::CanvasImage& canvasImage);
-    virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
-    virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
-    virtual void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
+    void PaintShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
+    void PaintImageShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
+        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
     void PaintText(const float width, double x, double y,
         std::optional<double> maxWidth, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, double width);
@@ -418,7 +417,6 @@ protected:
 #endif
 
     RefPtr<CanvasModifier> contentModifier_;
-    std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
 
     SizeF lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;

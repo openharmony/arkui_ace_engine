@@ -40,7 +40,6 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
-    void SetTransform(const TransformParam& param) override;
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);
@@ -67,15 +66,6 @@ private:
     void ImageObjFailed() override;
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void Path2DRect(const PathArgs& args) override;
-    RSCanvas* GetRawPtrOfRSCanvas() override
-    {
-        return rsCanvas_.get();
-    }
 
     RSBitmap bitmap_;
 
