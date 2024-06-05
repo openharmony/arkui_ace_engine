@@ -473,10 +473,22 @@ public:
     {
         canExpand_ = false;
     }
+    
     bool CanExpand()
     {
         return canExpand_;
     }
+
+    RefPtr<FrameNode> GetLastSelectedItem()
+    {
+        return lastSelectedItem_;
+    }
+
+    void SetLastSelectedItem(const RefPtr<FrameNode>& lastSelectedItem)
+    {
+        lastSelectedItem_ = lastSelectedItem;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -559,6 +571,7 @@ private:
     SizeF targetSize_;
     bool expandDisplay_ = false;
     bool canExpand_ = true;
+    RefPtr<FrameNode> lastSelectedItem_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

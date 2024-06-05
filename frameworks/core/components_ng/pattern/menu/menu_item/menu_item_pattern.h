@@ -216,6 +216,8 @@ public:
         return isStackSubmenuHeader_;
     }
 
+    void HandleSubMenu();
+
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
