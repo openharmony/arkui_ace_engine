@@ -428,12 +428,12 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;
     std::atomic<int32_t> slideCount_ {0};
     double physicalCoeff_ = 0.0;
-    uint32_t rotation_ = 0;
 #endif
 };
 } // namespace OHOS::Ace::NG
