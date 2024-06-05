@@ -165,12 +165,8 @@ export struct SubHeader {
   // 内部变量
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-  @State textArrowFocus: boolean = false;
-  @State buttonFocus: boolean = false;
   @State textArrowStyleWidth: number = 0;
   @State textArrowStyleHeight: number = 0;
-  @State buttonStyleWidth: number = 0;
-  @State buttonStyleHeight: number = 0;
   @State iconWidth: number = 0;
   @State selectedIndex: number | Resource | undefined = -1;
   @State selectValue: ResourceStr | undefined = '';
@@ -576,11 +572,23 @@ export struct SubHeader {
           .constraintSize({ minHeight: BUTTON_HEIGHT })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
-          .onFocus(() => {
-            this.buttonFocus = true;
-          })
-          .onBlur(() => {
-            this.buttonFocus = false;
+          .stateStyles({
+            focused: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                width: $r('sys.float.outline_extra_larger'),
+                color: this.subHeaderTheme.borderFocusColor,
+              })
+            },
+            pressed: pressedStyle,
+            disabled: disabledStyle,
+            normal: {
+              .border({
+                radius: $r('sys.float.corner_radius_level4'),
+                width: $r('sys.float.border_none'),
+                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+              })
+            }
           })
           .onHover((isHover: boolean) => {
             if (isHover) {
@@ -602,21 +610,6 @@ export struct SubHeader {
               button.action();
             }
           })
-          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.buttonStyleWidth = Number(newValue.width);
-            this.buttonStyleHeight = Number(newValue.height);
-          })
-        }
-        if (this.buttonFocus) {
-          Row()
-            .height(this.buttonStyleHeight)
-            .width(this.buttonStyleWidth)
-            .hitTestBehavior(HitTestMode.None)
-            .border({
-              width: BORDER_WIDTH,
-              color: this.subHeaderTheme.borderFocusColor
-            })
-            .borderRadius($r('sys.float.corner_radius_level4'))
         }
       }
       .focusable(true)
@@ -663,15 +656,10 @@ export struct SubHeader {
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
         .constraintSize({ minHeight: BUTTON_ZONE_SIZE })
-        .onFocus(() => {
-          this.textArrowFocus = true;
-        })
-        .onBlur(() => {
-          this.textArrowFocus = false;
-        })
         .padding({
           start: this.getTextArrowPaddingLeft(),
-          bottom: LengthMetrics.vp(0),
+          top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource($r('sys.float.padding_level2')),
+          bottom: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource($r('sys.float.padding_level2')),
         })
         .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
           this.textArrowStyleWidth = Number(newValue.width);
