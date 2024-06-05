@@ -1322,19 +1322,372 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     buffer = letterSpacingSpan->ToString();
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
-
+   
     Shadow textShadow;
     textShadow.SetBlurRadius(1.0);
     textShadow.SetColor(Color::BLACK);
     textShadow.SetOffsetX(6.0);
     textShadow.SetOffsetY(6.0);
     vector<Shadow> textShadows { textShadow };
+    vector<Shadow> textShadows2;
+    textShadow.SetColor(Color::RED);
+    vector<Shadow> textShadows3 {textShadow};
     auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9);
+    auto textShadowSpan2 = AceType::MakeRefPtr<TextShadowSpan>(textShadows2, 7, 9);
+    auto textShadowSpan3 = AceType::MakeRefPtr<TextShadowSpan>(textShadows3, 7, 9);
     EXPECT_FALSE(textShadowSpan->IsAttributesEqual(decorationSpan));
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(textShadowSpan2));
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(textShadowSpan3));
     textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
-    buffer.clear();
     buffer = textShadowSpan->ToString();
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("TextShadowSpan"), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest010
+ * @tc.desc: Test basic function of span object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
+{
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    imageSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::ADD);
+    imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::REMOVE);
+    imageSpan->GetSubSpan(0, 3);
+    buffer = imageSpan->ToString();
+    EXPECT_TRUE(buffer.empty());
+
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    customSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::ADD);
+    customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::REMOVE);
+    buffer = customSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("CustomSpan"), 0);
+
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10);
+    auto paragraphStyleSpan = AceType::MakeRefPtr<ParagraphStyleSpan>();
+    paragraphStyleSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    EXPECT_FALSE(paragraphStyleSpan->IsAttributesEqual(fontSpan));
+    buffer = paragraphStyleSpan->ToString();
+    EXPECT_TRUE(buffer.empty());
+
+    auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>();
+    EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(fontSpan));
+    buffer = lineHeightSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("LineHeightSpan"), 0);
+
+    GestureStyle gestureInfo;
+    auto gestureSpan = AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3);
+    EXPECT_FALSE(gestureSpan->IsAttributesEqual(lineHeightSpan));
+    gestureSpan->AddSpanStyle(spanItem);
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureInfo.onClick = std::move(tmpClickFunc);
+    gestureSpan->AddSpanStyle(spanItem);
+}
+
+/**
+ * @tc.name: Tlv001
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv001, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    std::vector<std::string> writeFontFamily = { "f1", "f2" };
+    std::vector<uint8_t> result = { 0x25, 0x2, 0x20, 0x2, 0x66, 0x31, 0x20, 0x2, 0x66, 0x32 };
+    TLVUtil::WriteFontFamily(buffer, writeFontFamily);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    std::vector<std::string> readFontFamily = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(writeFontFamily == readFontFamily);
+    buffer.clear();
+    readFontFamily.clear();
+    cursor = 0;
+    readFontFamily = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(readFontFamily.empty());
+}
+
+/**
+ * @tc.name: Tlv002
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv002, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    Shadow textShadow1;
+    textShadow1.SetBlurRadius(2.0);
+    textShadow1.SetColor(Color::BLACK);
+    textShadow1.SetOffsetX(8.0);
+    textShadow1.SetOffsetY(8.0);
+    std::vector<uint8_t> result = { 0x23, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x22, 0xff, 0x0, 0x0, 0x0, 0x0,
+        0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40 };
+    TLVUtil::WriteTextShadow(buffer, textShadow1);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    Shadow readShadow = TLVUtil::ReadTextShadow(buffer, cursor);
+    EXPECT_TRUE(textShadow1 == readShadow);
+    buffer.clear();
+    Shadow errShadow = TLVUtil::ReadTextShadow(buffer, cursor);
+    EXPECT_FALSE(textShadow1 == errShadow);
+
+    std::vector<Shadow> writeShadows = { textShadow1 };
+    std::vector<uint8_t> result2 = { 0x26, 0x1, 0x23, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x22, 0xff, 0x0,
+        0x0, 0x0, 0x0, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40 };
+    buffer.clear();
+    TLVUtil::WriteTextShadows(buffer, writeShadows);
+    EXPECT_TRUE(buffer == result2);
+
+    cursor = 0;
+    std::vector<Shadow> readShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(writeShadows == readShadows);
+    buffer.clear();
+    cursor = 0;
+    std::vector<Shadow> errShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(errShadows.empty());
+}
+
+/**
+ * @tc.name: Tlv003
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv003, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    std::list<std::pair<std::string, int32_t>> writeFontFeature = { { "f1", 1 }, { "f2", 2 } };
+    std::vector<uint8_t> result = { 0x29, 0x2, 0x20, 0x2, 0x66, 0x31, 0x1, 0x20, 0x2, 0x66, 0x32, 0x2 };
+    TLVUtil::WriteFontFeature(buffer, writeFontFeature);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    std::list<std::pair<std::string, int32_t>> readFontFeature = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(writeFontFeature == readFontFeature);
+    buffer.clear();
+    readFontFeature.clear();
+    cursor = 0;
+    readFontFeature = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(readFontFeature.empty());
+}
+
+/**
+ * @tc.name: Tlv004
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv004, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::BorderRadiusProperty writeBorderRadiusProperty;
+    writeBorderRadiusProperty.SetRadius(2.0_vp);
+    std::vector<uint8_t> result = { 0x27, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1 };
+    TLVUtil::WriteBorderRadiusProperty(buffer, writeBorderRadiusProperty);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::BorderRadiusProperty readBorderRadiusProperty = TLVUtil::ReadBorderRadiusProperty(buffer, cursor);
+    EXPECT_TRUE(writeBorderRadiusProperty == readBorderRadiusProperty);
+    buffer.clear();
+    cursor = 0;
+    readBorderRadiusProperty = TLVUtil::ReadBorderRadiusProperty(buffer, cursor);
+    EXPECT_FALSE(writeBorderRadiusProperty == readBorderRadiusProperty);
+}
+
+/**
+ * @tc.name: Tlv005
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv005, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    RefPtr<Ace::PixelMap> writePixelMap = Ace::PixelMap::CreatePixelMap(nullptr);
+    std::vector<uint8_t> result = { 0x28, 0x0 };
+    TLVUtil::WritePixelMap(buffer, writePixelMap);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    RefPtr<Ace::PixelMap> readPixelMap = TLVUtil::ReadPixelMap(buffer, cursor);
+    EXPECT_FALSE(writePixelMap == readPixelMap);
+    buffer.clear();
+    cursor = 0;
+    readPixelMap = TLVUtil::ReadPixelMap(buffer, cursor);
+    EXPECT_FALSE(writePixelMap == readPixelMap);
+}
+
+/**
+ * @tc.name: Tlv006
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv006, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    Dimension dim(8);
+    CalcDimension writeCalcDimension = CalcDimension(dim);
+    std::vector<uint8_t> result = { 0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0 };
+    TLVUtil::WriteCalcDimension(buffer, writeCalcDimension);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    CalcDimension readCalcDimension = TLVUtil::ReadCalcDimension(buffer, cursor);
+    EXPECT_TRUE(writeCalcDimension == readCalcDimension);
+    buffer.clear();
+    cursor = 0;
+    readCalcDimension = TLVUtil::ReadCalcDimension(buffer, cursor);
+    EXPECT_FALSE(writeCalcDimension == readCalcDimension);
+}
+
+/**
+ * @tc.name: Tlv007
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv007, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::CalcLength writeCalcLength(8);
+    std::vector<uint8_t> result = { 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0 };
+    TLVUtil::WriteCalcLength(buffer, writeCalcLength);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::CalcLength readCalcLength = TLVUtil::ReadCalcLength(buffer, cursor);
+    EXPECT_TRUE(writeCalcLength == readCalcLength);
+    buffer.clear();
+    cursor = 0;
+    readCalcLength = TLVUtil::ReadCalcLength(buffer, cursor);
+    EXPECT_FALSE(writeCalcLength == readCalcLength);
+}
+
+/**
+ * @tc.name: Tlv008
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv008, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    ImageSpanSize writeImageSpanSize { .width = 60.0_vp, .height = 60.0_vp };
+    std::vector<uint8_t> result = { 0x42, 0x43, 0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4e, 0x40, 0x1, 0x44,
+        0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4e, 0x40, 0x1, 0x45 };
+    TLVUtil::WriteImageSpanSize(buffer, writeImageSpanSize);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    ImageSpanSize readImageSpanSize = TLVUtil::ReadImageSpanSize(buffer, cursor);
+    EXPECT_TRUE(writeImageSpanSize == readImageSpanSize);
+    buffer.clear();
+    cursor = 0;
+    readImageSpanSize = TLVUtil::ReadImageSpanSize(buffer, cursor);
+    EXPECT_FALSE(writeImageSpanSize == readImageSpanSize);
+}
+
+/**
+ * @tc.name: Tlv009
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv009, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::PaddingProperty writePaddingProperty;
+    writePaddingProperty.left = CalcLength(5);
+    writePaddingProperty.right = CalcLength(5);
+    writePaddingProperty.top = CalcLength(8);
+    writePaddingProperty.bottom = CalcLength(8);
+    std::vector<uint8_t> result = { 0x46, 0x49, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40,
+        0x0, 0x4a, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0,
+        0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0, 0x48, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x20, 0x40, 0x0, 0x4b };
+    TLVUtil::WritePaddingProperty(buffer, writePaddingProperty);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::PaddingProperty readPaddingProperty = TLVUtil::ReadPaddingProperty(buffer, cursor);
+    EXPECT_TRUE(writePaddingProperty == readPaddingProperty);
+    buffer.clear();
+    cursor = 0;
+    readPaddingProperty = TLVUtil::ReadPaddingProperty(buffer, cursor);
+    EXPECT_FALSE(writePaddingProperty == readPaddingProperty);
+}
+
+/**
+ * @tc.name: Tlv010
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv010, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(10.0));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(5.0));
+    ImageSpanAttribute writeImageSpanAttribute { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM };
+    std::vector<uint8_t> result = { 0x3a, 0x3c, 0x2c, 0x3, 0x3d, 0x2d, 0x2, 0x3e, 0x46, 0x49, 0x2b, 0x20, 0x0, 0x24,
+        0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x4a, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0,
+        0x0, 0x24, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x48,
+        0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x4b, 0x3f, 0x27, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x40,
+        0x46, 0x49, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x4a, 0x2b, 0x20, 0x0,
+        0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x48, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40,
+        0x0, 0x4b, 0x41 };
+    TLVUtil::WriteImageSpanAttribute(buffer, writeImageSpanAttribute);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    ImageSpanAttribute readImageSpanAttribute = TLVUtil::ReadImageSpanAttribute(buffer, cursor);
+    EXPECT_TRUE(writeImageSpanAttribute == readImageSpanAttribute);
+    buffer.clear();
+    cursor = 0;
+    readImageSpanAttribute = TLVUtil::ReadImageSpanAttribute(buffer, cursor);
+    EXPECT_FALSE(writeImageSpanAttribute == readImageSpanAttribute);
+}
+
+/**
+ * @tc.name: Tlv011
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::LeadingMargin writeLeadingMargin;
+    writeLeadingMargin.size = LeadingMarginSize(Dimension(12.0), Dimension(48.0));
+    std::vector<uint8_t> result = { 0x4c, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x28, 0x40, 0x0, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x48, 0x40, 0x0, 0x4e };
+    TLVUtil::WriteLeadingMargin(buffer, writeLeadingMargin);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::LeadingMargin readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
+    EXPECT_TRUE(writeLeadingMargin == readLeadingMargin);
+    buffer.clear();
+    cursor = 0;
+    readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
+    EXPECT_FALSE(writeLeadingMargin == readLeadingMargin);
 }
 } // namespace OHOS::Ace::NG
