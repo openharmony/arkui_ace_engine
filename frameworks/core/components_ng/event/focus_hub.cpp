@@ -265,7 +265,6 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     }
 
     currentFocus_ = true;
-    UpdateAccessibilityFocusInfo();
 
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
@@ -291,9 +290,12 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     return true;
 }
 
-void FocusHub::UpdateAccessibilityFocusInfo()
+bool FocusHub::IsViewRootScope()
 {
-    // Need update
+    auto focusManager = GetFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    auto lastFocusView = focusManager->GetLastFocusView().Upgrade();
+    return (lastFocusView && lastFocusView->GetViewRootScope() == this);
 }
 
 void FocusHub::LostFocusToViewRoot()
@@ -323,7 +325,6 @@ void FocusHub::LostFocus(BlurReason reason)
     if (IsCurrentFocus()) {
         blurReason_ = reason;
         currentFocus_ = false;
-        UpdateAccessibilityFocusInfo();
         OnBlur();
     }
 }
@@ -1382,12 +1383,10 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         focusPaddingVp = box_.paintStyle_->margin.value();
     } else if (HasFocusPadding()) {
         focusPaddingVp = GetFocusPadding();
-    } else {
-        if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
-            focusPaddingVp = -appTheme->GetFocusWidthVp();
-        } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER || focusStyleType_ == FocusStyleType::FORCE_BORDER) {
-            focusPaddingVp = appTheme->GetFocusOutPaddingVp();
-        }
+    } else if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
+        focusPaddingVp = -appTheme->GetFocusWidthVp();
+    } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER || focusStyleType_ == FocusStyleType::FORCE_BORDER) {
+        focusPaddingVp = appTheme->GetFocusOutPaddingVp();
     }
     if (HasPaintRect()) {
         renderContext->PaintFocusState(
@@ -1435,6 +1434,9 @@ bool FocusHub::PaintAllFocusState()
 
     // Force paint focus box for the component on the tail of focus-chain.
     // This is designed for the focus-chain that all components' focus style are none.
+    if (IsViewRootScope()) {
+        return !isFocusActiveWhenFocused_;
+    }
     focusStyleType_ = FocusStyleType::FORCE_BORDER;
     if (PaintFocusState()) {
         RaiseZIndex();
