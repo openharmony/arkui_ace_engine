@@ -377,10 +377,7 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
-    auto pattern = WeakClaim(this).Upgrade();
-    if (pattern) {
-        pattern->SetRotation(pipeline->GetTransformHint());
-    }
+    SetRotation(pipeline->GetTransformHint());
     auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
         auto pattern = weak.Upgrade();
         if (pattern) {
