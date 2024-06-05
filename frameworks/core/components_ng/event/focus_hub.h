@@ -770,6 +770,9 @@ public:
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
+    // Only for the currently loaded children, do not expand.
+    std::list<RefPtr<FocusHub>>::iterator FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     std::list<RefPtr<FocusHub>> GetChildren()
     {
         std::list<RefPtr<FocusHub>> focusNodes;
