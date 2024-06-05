@@ -621,6 +621,70 @@ void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStylePropert
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
 }
 
+void ViewAbstract::SetDashGap(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty dashGap;
+    dashGap.SetBorderWidth(value);
+
+    ACE_UPDATE_RENDER_CONTEXT(DashGap, dashGap);
+}
+
+void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
+{
+    BorderWidthProperty dashGap;
+    dashGap.SetBorderWidth(value);
+
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
+}
+
+void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DashGap, value);
+}
+
+void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, value, frameNode);
+}
+
+void ViewAbstract::SetDashWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty dashWidth;
+    dashWidth.SetBorderWidth(value);
+
+    ACE_UPDATE_RENDER_CONTEXT(DashWidth, dashWidth);
+}
+
+void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
+{
+    BorderWidthProperty dashWidth;
+    dashWidth.SetBorderWidth(value);
+
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
+}
+
+void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DashWidth, value);
+}
+
+void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, value, frameNode);
+}
+
 void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

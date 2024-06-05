@@ -328,6 +328,40 @@ public:
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
+    void SetDashGap(const Dimension& value) override
+    {
+        ViewAbstract::SetDashGap(value);
+    }
+
+    void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashGap;
+        dashGap.leftDimen = left;
+        dashGap.rightDimen = right;
+        dashGap.topDimen = top;
+        dashGap.bottomDimen = bottom;
+        dashGap.multiValued = true;
+        ViewAbstract::SetDashGap(dashGap);
+    }
+
+    void SetDashWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetDashWidth(value);
+    }
+
+    void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashWidth;
+        dashWidth.leftDimen = left;
+        dashWidth.rightDimen = right;
+        dashWidth.topDimen = top;
+        dashWidth.bottomDimen = bottom;
+        dashWidth.multiValued = true;
+        ViewAbstract::SetDashWidth(dashWidth);
+    }
+
     void SetOuterBorderRadius(const Dimension& value) override
     {
         ViewAbstract::SetOuterBorderRadius(value);
