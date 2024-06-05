@@ -165,8 +165,12 @@ export struct SubHeader {
   // 内部变量
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State textArrowFocus: boolean = false;
+  @State buttonFocus: boolean = false;
   @State textArrowStyleWidth: number = 0;
   @State textArrowStyleHeight: number = 0;
+  @State buttonStyleWidth: number = 0;
+  @State buttonStyleHeight: number = 0;
   @State iconWidth: number = 0;
   @State selectedIndex: number | Resource | undefined = -1;
   @State selectValue: ResourceStr | undefined = '';
@@ -179,6 +183,7 @@ export struct SubHeader {
     end: LengthMetrics.vp(0)
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
+  constraintWidth: number = 0;
 
   onWillApplyTheme(theme: Theme) {
     this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
@@ -216,10 +221,14 @@ export struct SubHeader {
     }
   }
 
+  private isSuitableAging(): boolean | null {
+    return (this.fontSize >= 1.75) && ((this.operationType === OperationType.TEXT_ARROW) ||
+      this.operationType === OperationType.BUTTON) && this.operationItem &&
+      (this.operationItem?.length > 0) && this.operationItem[0].value !== '';
+  }
+
   build() {
-    if (this.ageing && ((this.operationType === OperationType.TEXT_ARROW) ||
-      this.operationType === OperationType.BUTTON) && this.operationItem&&
-      (this.operationItem?.length > 0) && this.operationItem[0].value !== '') {
+    if (this.isSuitableAging()) {
       Column() {
         Row() {
           this.leftArea();
@@ -268,25 +277,33 @@ export struct SubHeader {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.fontSize = context.config?.fontSizeScale ?? 1;
-    this.ageing = this.fontSize >= MIN_FONT_SIZE ? true : false;
-    this.subHeaderModifier.isAgeing = this.ageing;
+    if (this.isSuitableAging()) {
+      this.ageing = true;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    }
+    else {
+      this.ageing = false;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    }
     children.forEach((child) => {
-      if (!this.contentMargin) {
-        let width: number = Number(constraint.maxWidth);
-        if (width < Util.BREAKPOINT_S) {
-          this.subHeaderMargin = {
-            start: LengthMetrics.resource($r('sys.float.padding_level8')),
-            end: LengthMetrics.resource($r('sys.float.padding_level8'))
-          }
-        } else if (width < Util.BREAKPOINT_M) {
-          this.subHeaderMargin = {
-            start: LengthMetrics.resource($r('sys.float.padding_level12')),
-            end: LengthMetrics.resource($r('sys.float.padding_level12'))
-          }
-        } else {
-          this.subHeaderMargin = {
-            start: LengthMetrics.resource($r('sys.float.padding_level16')),
-            end: LengthMetrics.resource($r('sys.float.padding_level16')),
+      if (Math.abs(this.constraintWidth - Number(constraint.maxWidth)) > Number.EPSILON) {
+        if (!this.contentMargin) {
+          this.constraintWidth = Number(constraint.maxWidth);
+          if (this.constraintWidth < Util.BREAKPOINT_S) {
+            this.subHeaderMargin = {
+              start: LengthMetrics.resource($r('sys.float.padding_level8')),
+              end: LengthMetrics.resource($r('sys.float.padding_level8'))
+            }
+          } else if (this.constraintWidth < Util.BREAKPOINT_M) {
+            this.subHeaderMargin = {
+              start: LengthMetrics.resource($r('sys.float.padding_level12')),
+              end: LengthMetrics.resource($r('sys.float.padding_level12'))
+            }
+          } else {
+            this.subHeaderMargin = {
+              start: LengthMetrics.resource($r('sys.float.padding_level16')),
+              end: LengthMetrics.resource($r('sys.float.padding_level16')),
+            }
           }
         }
       }
@@ -551,9 +568,7 @@ export struct SubHeader {
             bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
           })
           .margin({
-            start: (this.ageing && this.icon) ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
-            Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
-              LEFT_TEXT_NUMBER) : LengthMetrics.vp(0),
+            start: this.leftIconMargin(),
             bottom: $r('sys.float.padding_level2'),
           })
           .backgroundColor(this.buttonBgColor)
@@ -561,23 +576,11 @@ export struct SubHeader {
           .constraintSize({ minHeight: BUTTON_HEIGHT })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.outline_extra_larger'),
-                color: this.subHeaderTheme.borderFocusColor,
-              })
-            },
-            pressed: pressedStyle,
-            disabled: disabledStyle,
-            normal: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.border_none'),
-                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
-              })
-            }
+          .onFocus(() => {
+            this.buttonFocus = true;
+          })
+          .onBlur(() => {
+            this.buttonFocus = false;
           })
           .onHover((isHover: boolean) => {
             if (isHover) {
@@ -599,6 +602,21 @@ export struct SubHeader {
               button.action();
             }
           })
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            this.buttonStyleWidth = Number(newValue.width);
+            this.buttonStyleHeight = Number(newValue.height);
+          })
+        }
+        if (this.buttonFocus) {
+          Row()
+            .height(this.buttonStyleHeight)
+            .width(this.buttonStyleWidth)
+            .hitTestBehavior(HitTestMode.None)
+            .border({
+              width: BORDER_WIDTH,
+              color: this.subHeaderTheme.borderFocusColor
+            })
+            .borderRadius($r('sys.float.corner_radius_level4'))
         }
       }
       .focusable(true)
@@ -607,6 +625,18 @@ export struct SubHeader {
       start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level4')),
     })
     .justifyContent(FlexAlign.End)
+  }
+
+  private leftIconMargin(): LengthMetrics {
+    if (this.icon && Util.isSymbolResource(this.icon)) {
+      return this.ageing ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
+      Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
+        LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
+    } else {
+      return (this.ageing && this.icon) ? LengthMetrics.vp(LEFT_ICON_SIZE_NUMBER +
+        LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
+    }
+
   }
 
   @Builder
@@ -633,11 +663,17 @@ export struct SubHeader {
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
         .constraintSize({ minHeight: BUTTON_ZONE_SIZE })
+        .onFocus(() => {
+          this.textArrowFocus = true;
+        })
+        .onBlur(() => {
+          this.textArrowFocus = false;
+        })
         .padding({
           start: this.getTextArrowPaddingLeft(),
           bottom: LengthMetrics.vp(0),
         })
-        .onAreaChange((oldValue: Area, newValue: Area) => {
+        .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
           this.textArrowStyleWidth = Number(newValue.width);
           this.textArrowStyleHeight = Number(newValue.height);
         })
@@ -680,9 +716,7 @@ export struct SubHeader {
         })
       }
       .margin({
-        start: (this.ageing && this.icon) ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
-        Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
-          LEFT_TEXT_NUMBER) : LengthMetrics.vp(0),
+        start: this.leftIconMargin(),
       })
       .onHover((isHover: boolean) => {
         if (isHover) {
@@ -851,14 +885,18 @@ struct SingleIconStyle {
     }
   }
 
+  private fontSizeValue(item: ContentIconOption): Length {
+    return item.iconOptions?.symbolicIconOption?.fontSize ?
+    Util.symbolFontSize(item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE
+  }
+
   @Builder
   IconZone(): void {
     if (this.item && this.item.iconOptions) {
       if (Util.isSymbolResource(this.item.iconOptions.icon)) {
         SymbolGlyph(this.item.iconOptions?.icon)
           .focusable(true)
-          .fontSize(this.item.iconOptions?.symbolicIconOption?.fontSize ?
-          Util.symbolFontSize(this.item.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE)
+          .fontSize(this.fontSizeValue(this.item))
           .fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.rightIconColor])
           .fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight)
           .renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy)
