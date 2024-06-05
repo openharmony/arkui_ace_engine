@@ -465,7 +465,6 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     averageDistance_ += delta_;
 
     UpdateAxisPointInVelocityTracker(event);
-    lastAxisEvent_ = event;
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
