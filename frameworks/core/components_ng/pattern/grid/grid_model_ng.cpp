@@ -51,6 +51,14 @@ void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController,
     pattern->AddScrollableFrameInfo(SCROLL_FROM_NONE);
 }
 
+RefPtr<ScrollControllerBase> GridModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreatePositionController();
+}
+
 void GridModelNG::Pop()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();
