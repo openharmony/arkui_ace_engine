@@ -187,9 +187,11 @@ template("cj_frontend") {
       "bundle_framework:appexecfwk_core",
     ]
 
-    deps += [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
+    deps += [
+      "$ace_root/frameworks/core:ace_container_scope",
+      "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
+    ]
 
-    external_deps += [ "napi:ace_container_scope" ]
     if (platform_config.is_ohos) {
       external_deps += [
         "c_utils:utils",
