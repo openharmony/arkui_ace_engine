@@ -433,6 +433,7 @@ private:
     OH_NativeXComponent_TouchEvent lastTouchInfo_;
     std::atomic<int32_t> slideCount_ {0};
     double physicalCoeff_ = 0.0;
+    uint32_t rotation_ = 0;
 #endif
 };
 } // namespace OHOS::Ace::NG

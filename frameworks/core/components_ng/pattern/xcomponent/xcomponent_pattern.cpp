@@ -377,6 +377,10 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    auto pattern = WeakClaim(this).Upgrade();
+    if (pattern) {
+        pattern->SetRotation(pipeline->GetTransformHint());
+    }
     auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -612,9 +616,10 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
 
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
-    if (type_ != XComponentType::SURFACE || isSurfaceLock_) {
+    if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
         return;
     }
+    rotation_ = rotation;
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(rotation);
 }

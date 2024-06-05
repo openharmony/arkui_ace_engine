@@ -634,6 +634,11 @@ public:
 
     void OnTransformHintChanged(uint32_t transform) override;
 
+    uint32_t GetTransformHint() const
+    {
+        return transform_;
+    }
+
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -996,6 +1001,7 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    uint32_t transform_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1259,6 +1259,7 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform)
             callback(transform);
         }
     }
+    transform_ = transform;
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
