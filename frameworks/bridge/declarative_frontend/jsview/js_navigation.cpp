@@ -19,8 +19,10 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
@@ -369,6 +371,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
+    JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -930,5 +933,18 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
         opts.edges = safeAreaEdge;
     }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
+}
+
+void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
+{
+    RefPtr<SystemBarStyle> style = nullptr;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);
+        auto env = GetCurrentEnv();
+        if (env) {
+            style = SystemBarStyle::CreateStyleFromJsObj(env, styleObj);
+        }
+    }
+    NavigationModel::GetInstance()->SetSystemBarStyle(style);
 }
 } // namespace OHOS::Ace::Framework

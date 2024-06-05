@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "base/utils/utils.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
@@ -183,6 +184,12 @@ public:
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
+    void OnDetachFromMainTree() override
+    {
+        backupStyle_.reset();
+        currStyle_.reset();
+    }
+
     bool OverlayOnBackPressed();
 
     void CreateOverlayManager(bool isShow)
@@ -235,6 +242,16 @@ public:
 
     bool NeedIgnoreKeyboard();
 
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+    const std::optional<RefPtr<SystemBarStyle>>& GetBackupStyle() const
+    {
+        return backupStyle_;
+    }
+    const std::optional<RefPtr<SystemBarStyle>>& GetCurrentStyle() const
+    {
+        return backupStyle_;
+    }
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -259,6 +276,9 @@ private:
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<FrameNode> dialogNode_;
+
+    std::optional<RefPtr<SystemBarStyle>> backupStyle_;
+    std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
 
 } // namespace OHOS::Ace::NG

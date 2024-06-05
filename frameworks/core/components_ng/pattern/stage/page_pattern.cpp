@@ -227,6 +227,9 @@ void PagePattern::OnShow()
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
     }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(true);
+    }
     if (onPageShow_) {
         onPageShow_();
     }
@@ -266,6 +269,9 @@ void PagePattern::OnHide()
         if (pageUrlChecker != nullptr) {
             pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
         }
+    }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(false);
     }
     if (onPageHide_) {
         onPageHide_();

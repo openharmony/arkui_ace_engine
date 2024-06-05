@@ -41,6 +41,7 @@ public:
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
+    static void SetSystemBarStyle(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

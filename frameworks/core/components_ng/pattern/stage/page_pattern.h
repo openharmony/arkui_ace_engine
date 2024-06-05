@@ -35,6 +35,11 @@ using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 
 using DynamicPageSizeCallback = std::function<void(SizeF size)>;
+/**
+ * When the page triggers 'onHide' or 'onShow', the callback is called,
+ * and the input parameter is 'true' for onHide and false for onShow.
+ */
+using PageVisibilityChangeCallback = std::function<void(bool)>;
 
 enum class RouterPageState {
     ABOUT_TO_APPEAR = 0,
@@ -207,6 +212,11 @@ public:
         isModalCovered_ = isModalCovered;
     }
 
+    void SetPageVisibilityChangeCallback(PageVisibilityChangeCallback&& callback)
+    {
+        visibilityChangeCallback_ = std::move(callback);
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -239,6 +249,7 @@ private:
     std::function<void()> firstBuildCallback_;
     std::function<void(bool)> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
+    PageVisibilityChangeCallback visibilityChangeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
