@@ -282,12 +282,13 @@ private:
 #ifdef ACE_DEBUG
         bool result = false;
         if (OnPreSyncTask(type)) {
-            result = OnPostTask(Task(task), type, 0, name) && task.WaitUntilComplete(timeoutMs);
+            result =
+                OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
             OnPostSyncTask();
         }
         return result;
 #else
-        return OnPostTask(Task(task), type, 0, name) && task.WaitUntilComplete(timeoutMs);
+        return OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
 #endif
     }
 };
