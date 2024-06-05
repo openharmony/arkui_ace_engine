@@ -116,6 +116,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
+    JSClass<JSSearch>::StaticMethod("selectionMenuOptions", &JSSearch::SelectionMenuOptions);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -1054,5 +1055,14 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     SearchModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSSearch::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
 }
 } // namespace OHOS::Ace::Framework

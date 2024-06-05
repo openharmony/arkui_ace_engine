@@ -3120,6 +3120,25 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     RecoverCopyOption();
 }
 
+void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    menuOptionItems_ = std::move(menuOptionsItems);
+    for (auto& menuOption : menuOptionItems_) {
+        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
+        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
+                                const std::string selectInfo) {
+            auto textPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textPattern);
+            if (actionRange) {
+                auto start = textPattern->textSelector_.GetTextStart();
+                auto end = textPattern->textSelector_.GetTextEnd();
+                actionRange(start, end);
+            }
+            textPattern->CloseSelectOverlay();
+        };
+    }
+}
+
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
 {
     if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {

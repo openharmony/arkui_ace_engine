@@ -122,6 +122,7 @@ public:
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

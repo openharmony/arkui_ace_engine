@@ -10151,6 +10151,57 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
+bool JSViewAbstract::ParseSelectionMenuOptions(const JSCallbackInfo& info, std::vector<NG::MenuOptionsParam>& items)
+{
+    auto tmpInfo = info[0];
+    if (info.Length() != 1 || tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsArray()) {
+        return false;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto menuItamArray = JSRef<JSArray>::Cast(tmpInfo);
+    for (size_t i = 0; i < menuItamArray->Length(); i++) {
+        NG::MenuOptionsParam menuOption;
+        auto menuItem = menuItamArray->GetValueAt(i);
+        if (!menuItem->IsObject()) {
+            return false;
+        }
+        auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
+        auto jsContent = menuItemObject->GetProperty("content");
+        auto jsStartIcon = menuItemObject->GetProperty("startIcon");
+        std::string content;
+        if (!ParseJsMedia(jsContent, content)) {
+            return false;
+        }
+        menuOption.content = content;
+        std::string icon;
+        if (ParseJsMedia(jsStartIcon, icon)) {
+            menuOption.icon = icon;
+        }
+        auto jsAction = menuItemObject->GetProperty("action");
+        if (jsAction.IsEmpty() || !jsAction->IsFunction()) {
+            return false;
+        }
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsAction));
+        auto jsCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            instanceId = Container::CurrentId(), node = frameNode](int32_t start, int32_t end) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            auto textRangeObj = JSRef<JSObject>::New();
+            textRangeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(start)));
+            textRangeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(end)));
+            auto param = JSRef<JSVal>::Cast(textRangeObj);
+            pipelineContext->SetCallBackNode(node);
+            func->ExecuteJS(1, &param);
+        };
+        menuOption.actionRange = std::move(jsCallback);
+        items.push_back(menuOption);
+    }
+    return true;
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)
 {
     napi_value napiValue = reinterpret_cast<napi_value>(value);

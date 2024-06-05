@@ -617,6 +617,8 @@ public:
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
