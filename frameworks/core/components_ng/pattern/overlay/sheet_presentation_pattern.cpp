@@ -1444,8 +1444,7 @@ void SheetPresentationPattern::ScrollTo(float height)
     SetColumnMinSize(!isScrolling_);
     if (!AdditionalScrollTo(scroll, height)) {
         scrollHeight_ = height;
-        layoutProp->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(geometryNode->GetFrameSize().Width()), CalcLength(GetScrollHeight() - scrollHeight_)));
+        layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - scrollHeight_)));
         scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
     }
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1474,8 +1473,8 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     CHECK_NULL_RETURN(scrollPattern, false);
     // Scroll first shrinks to the same size as childHeight, then reduces the height to allow it to scroll
     scrollHeight_ = scrollHeight - childHeight + height;
-    layoutProp->UpdateUserDefinedIdealSize(CalcSize(CalcLength(geometryNode->GetFrameSize().Width()),
-        CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
     // And then scroll move the content with '-height' offset
     scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
     return true;
@@ -1509,8 +1508,7 @@ void SheetPresentationPattern::SetColumnMinSize(bool reset)
         props->ResetCalcMinSize();
         return;
     }
-    props->UpdateCalcMinSize(
-        CalcSize(CalcLength(geometryNode->GetFrameSize().Width()), CalcLength(builderHeight_)));
+    props->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(builderHeight_)));
 }
 
 std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius)
