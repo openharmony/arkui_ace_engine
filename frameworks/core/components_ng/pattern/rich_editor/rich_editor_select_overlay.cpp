@@ -359,7 +359,10 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
-        pattern->StartTwinkling();
+        if (pattern->IsEditing()) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
+            pattern->StartTwinkling();
+        }
     }
 }
 
