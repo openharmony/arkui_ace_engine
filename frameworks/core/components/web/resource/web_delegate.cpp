@@ -3753,6 +3753,25 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutVerticalScrollBarAccess");
 }
 
+void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutOverlayScrollbarEnabled(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutOverlayScrollbarEnabled");
+}
+
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
 {
     auto context = context_.Upgrade();

@@ -1980,6 +1980,13 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnOverlayScrollbarEnabledUpdate(bool enable)
+{
+    if (delegate_) {
+        delegate_->UpdateOverlayScrollbarEnabled(enable);
+    }
+}
+
 void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -2264,6 +2271,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
+        delegate_->UpdateOverlayScrollbarEnabled(GetOverlayScrollbarEnabledValue(false));
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateOverScrollMode(
