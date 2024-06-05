@@ -69,13 +69,49 @@ void IndexerPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
 
     enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
-    auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
+    bool itemCountChanged = false;
+    InitArrayValue(autoCollapseModeChanged, itemCountChanged);
+    BuildArrayValueItems();
+    bool removeBubble = false;
+    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
+    if (isPopup_ != usePopup) {
+        isPopup_ = usePopup;
+        removeBubble = !isPopup_;
+    }
+    // Remove bubble if auto-collapse mode switched on/off or if items count changed
+    removeBubble |= autoCollapseModeChanged || itemCountChanged;
+    if (removeBubble) {
+        RemoveBubble();
+    }
+
+    isNewHeightCalculated_ = false;
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
+    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
+    lastItemSize_ = itemSize;
+    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    if (gesture) {
+        InitPanEvent(gesture);
+        InitTouchEvent(gesture);
+    }
+    InitInputEvent();
+    InitOnKeyEvent();
+    SetAccessibilityAction();
+}
+
+void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCountChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!isNewHeightCalculated_) {
         auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
         autoCollapseModeChanged = autoCollapse != autoCollapse_;
         autoCollapse_ = autoCollapse;
-
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
@@ -83,14 +119,14 @@ void IndexerPattern::OnModifyDone()
         }
         fullArrayValue_ = newArray;
     }
-
     auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
-                lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
+                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) &&
+                (propSelect > sharpItemCount_)) {
                 propSelect = GetAutoCollapseIndex(propSelect);
             }
         } else {
@@ -105,21 +141,6 @@ void IndexerPattern::OnModifyDone()
         itemCount_ = 0;
         arrayValue_.clear();
     }
-    BuildArrayValueItems();
-
-    bool removeBubble = false;
-    auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
-    if (isPopup_ != usePopup) {
-        isPopup_ = usePopup;
-        removeBubble = !isPopup_;
-    }
-
-    // Remove bubble if auto-collapse mode switched on/off or if items count changed
-    removeBubble |= autoCollapseModeChanged || itemCountChanged;
-    if (removeBubble) {
-        RemoveBubble();
-    }
-
     if (propSelect != selected_) {
         selected_ = propSelect;
         selectChanged_ = true;
@@ -127,20 +148,12 @@ void IndexerPattern::OnModifyDone()
     } else if (!isNewHeightCalculated_) {
         selectChanged_ = false;
     }
-    isNewHeightCalculated_ = false;
-    auto itemSize =
-        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
-    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
-    lastItemSize_ = itemSize;
-    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    if (gesture) {
-        InitPanEvent(gesture);
-    }
-    InitInputEvent();
+}
+
+void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
     if (!touchListener_) {
-        CHECK_NULL_VOID(gesture);
+        CHECK_NULL_VOID(gestureHub);
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
@@ -153,10 +166,8 @@ void IndexerPattern::OnModifyDone()
             }
         };
         touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-        gesture->AddTouchEvent(touchListener_);
+        gestureHub->AddTouchEvent(touchListener_);
     }
-    InitOnKeyEvent();
-    SetAccessibilityAction();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
