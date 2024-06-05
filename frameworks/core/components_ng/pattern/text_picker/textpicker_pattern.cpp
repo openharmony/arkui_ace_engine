@@ -965,8 +965,9 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     PaddingPropertyF padding = pickerLayoutProperty->CreatePaddingAndBorder();
     auto minSize = SizeF(pickerLayoutConstraint->minSize.Width(), pickerLayoutConstraint->minSize.Height());
     MinusPaddingToSize(padding, minSize);
-    auto version10OrLarger =
-        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto version10OrLarger = context->GetMinPlatformVersion() > 9;
     pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));

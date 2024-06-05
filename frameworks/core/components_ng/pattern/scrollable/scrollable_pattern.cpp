@@ -768,7 +768,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
         } else {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = GetContext();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
             CHECK_NULL_VOID(theme);

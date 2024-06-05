@@ -510,7 +510,7 @@ void ScrollBarPattern::StartDisappearAnimator()
     if (disapplearDelayTask_) {
         disapplearDelayTask_.Cancel();
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

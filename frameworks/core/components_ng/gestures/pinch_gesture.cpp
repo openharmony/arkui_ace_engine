@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, nullptr);
 
     double distance = context->NormalizeToPx(Dimension(distance_, DimensionUnit::VP));
