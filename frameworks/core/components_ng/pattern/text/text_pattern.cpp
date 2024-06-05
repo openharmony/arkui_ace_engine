@@ -2222,7 +2222,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
 
 bool TextPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, false);

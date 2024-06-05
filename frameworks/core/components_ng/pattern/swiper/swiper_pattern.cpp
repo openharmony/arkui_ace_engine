@@ -117,7 +117,7 @@ void SwiperPattern::OnAttachToFrameNode()
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -920,7 +920,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
             float targetPos = iter->second.startPos + IgnoreBlankOffset(false);
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = GetContext();
             auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
             bool isNeedForwardTranslate = false;
             if (!hasCachedCapture_ && IsLoop()) {

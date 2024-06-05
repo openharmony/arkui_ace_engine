@@ -165,7 +165,7 @@ bool SliderPattern::UpdateParameters()
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -1042,7 +1042,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
 {
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, SliderContentModifier::Parameters());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
@@ -1376,7 +1376,7 @@ bool SliderPattern::IsSliderVisible()
 void SliderPattern::UpdateTipState()
 {
     if (focusFlag_) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = GetContext();
         CHECK_NULL_VOID(context);
         isFocusActive_ = context->GetIsFocusActive();
     } else {

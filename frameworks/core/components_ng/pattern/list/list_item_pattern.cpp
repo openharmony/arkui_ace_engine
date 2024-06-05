@@ -59,7 +59,7 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(listItemTheme);
@@ -632,7 +632,7 @@ void ListItemPattern::DoDeleteAnimation(bool isStartDelete)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     float itemWidth = GetContentSize().CrossSize(axis_);
 
@@ -949,7 +949,7 @@ void ListItemPattern::HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>
 {
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -985,7 +985,7 @@ void ListItemPattern::HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNod
 {
     auto renderContext = itemNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
