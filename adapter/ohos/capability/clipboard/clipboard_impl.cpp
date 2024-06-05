@@ -16,6 +16,7 @@
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/capability/html/html_to_span.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 
@@ -263,22 +264,36 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
             CHECK_NULL_VOID(ok);
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                if (pasteDataRecord == nullptr || pasteDataRecord->GetCustomData() == nullptr) {
+                if (pasteDataRecord == nullptr) {
                     continue;
                 }
-                auto customData = pasteDataRecord->GetCustomData();
-                auto itemData = customData->GetItemData();
-                if (itemData.find(SPAN_STRING_TAG) == itemData.end()) {
-                    continue;
+                if (pasteDataRecord->GetCustomData() == nullptr) {
+                    auto customData = pasteDataRecord->GetCustomData();
+                    auto itemData = customData->GetItemData();
+                    if (itemData.find(SPAN_STRING_TAG) == itemData.end()) {
+                        continue;
+                    }
+                    auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
+                    if (spanStr) {
+                        result = spanStr->GetString();
+                        break;
+                    }
                 }
-                auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
-                if (spanStr) {
-                    result = spanStr->GetString();
+                if (pasteDataRecord->GetHtmlText() != nullptr) {
+                    auto htmlText = pasteDataRecord->GetHtmlText();
+                    HtmlToSpan toSpan;
+                    auto spanStr = toSpan.ToSpanString(*htmlText);
+                    if (spanStr) {
+                        result = spanStr->GetString();
+                        break;
+                    }
                 }
             }
-            auto textData = pasteData.GetPrimaryText();
-            CHECK_NULL_VOID(textData);
-            result = *textData;
+            if (result.empty()) {
+                auto textData = pasteData.GetPrimaryText();
+                CHECK_NULL_VOID(textData);
+                result = *textData;
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataSync");
     callback(result);
@@ -287,7 +302,8 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
 void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& callback)
 {
     taskExecutor_->PostTask(
-        [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
+        [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
+            auto clip = weak.Upgrade();
             auto taskExecutor = weakExecutor.Upgrade();
             CHECK_NULL_VOID(taskExecutor);
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData()) {
@@ -305,24 +321,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
             }
             std::string resText;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                if (pasteDataRecord == nullptr) {
-                    continue;
-                }
-                if (pasteDataRecord->GetPlainText() != nullptr) {
-                    auto textData = pasteDataRecord->GetPlainText();
-                    resText.append(*textData);
-                }
-                if (pasteDataRecord->GetCustomData() == nullptr) {
-                    continue;
-                }
-                auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
-                if (itemData.find(SPAN_STRING_TAG) == itemData.end()) {
-                    continue;
-                }
-                auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
-                if (spanStr) {
-                    resText.append(spanStr->GetString());
-                }
+                clip->ProcessPasteDataRecord(pasteDataRecord, resText);
             }
             if (resText.empty()) {
                 LOGW("GetDataAsync: Get SystemKeyboardTextData fail from MiscServices");
@@ -336,6 +335,37 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback");
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataAsync");
+}
+
+void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+    std::string& resText)
+{
+    if (pasteDataRecord == nullptr) {
+        return;
+    }
+    if (pasteDataRecord->GetHtmlText() != nullptr) {
+        auto htmlText = pasteDataRecord->GetHtmlText();
+        HtmlToSpan toSpan;
+        auto spanStr = toSpan.ToSpanString(*htmlText);
+        if (spanStr) {
+            resText = spanStr->GetString();
+            return;
+        }
+    }
+    if (pasteDataRecord->GetCustomData() != nullptr) {
+        auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
+        if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
+            auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
+            if (spanStr) {
+                resText = spanStr->GetString();
+                return;
+            }
+        }
+    }
+    if (pasteDataRecord->GetPlainText() != nullptr) {
+        auto textData = pasteDataRecord->GetPlainText();
+        resText.append(*textData);
+    }
 }
 
 void ClipboardImpl::GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
