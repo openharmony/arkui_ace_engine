@@ -751,7 +751,7 @@ public:
         menuOptionItems_ = std::move(menuOptionItems);
     }
 
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    const std::vector<MenuOptionsParam> && GetMenuOptionItems() const
     {
         return std::move(menuOptionItems_);
     }
