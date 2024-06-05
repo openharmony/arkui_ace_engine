@@ -715,12 +715,31 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
            LessOrEqual(offset.GetX(), contentRect_.GetX() + contentRect_.Width());
 }
 
+bool TextFieldPattern::CheckSelectAreaVisible()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, false);
+    auto pipeline = tmpHost->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
+    auto selectArea = selectOverlay_->GetSelectArea();
+    auto globalOffset = GetPaintRectGlobalOffset();
+    auto globalContentRect = contentRect_;
+    globalContentRect.SetOffset(globalContentRect.GetOffset() + globalOffset);
+    if (selectArea.Bottom() < 0) {
+        return false;
+    } else if (!globalContentRect.IsInnerIntersectWith(selectArea)) {
+        return false;
+    } else if (keyboardInset.Length() > 0 && selectArea.Top() >= keyboardInset.start) {
+        return false;
+    }
+    return true;
+}
+
 void TextFieldPattern::OnScrollEndCallback()
 {
     ScheduleDisappearDelayTask();
-    auto selectArea = selectOverlay_->GetSelectArea();
-    if (!IsUsingMouse() && SelectOverlayIsOn() &&
-        !(Negative(selectArea.Width()) || Negative(selectArea.Height()))) {
+    if (!IsUsingMouse() && SelectOverlayIsOn() && isTextSelectionMenuShow_ && CheckSelectAreaVisible()) {
         selectOverlay_->ShowMenu();
     }
 }
@@ -5435,6 +5454,11 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         PlayScrollBarAppearAnimation();
+        if (selectOverlay_->IsCurrentMenuVisibile()) {
+            isTextSelectionMenuShow_ = true;
+        } else if (CheckSelectAreaVisible()) {
+            isTextSelectionMenuShow_ = false;
+        }
         selectOverlay_->HideMenu();
         return true;
     }
