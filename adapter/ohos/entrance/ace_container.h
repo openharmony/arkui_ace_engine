@@ -388,6 +388,16 @@ public:
         }
     }
 
+    bool IsUseCustomBg() const
+    {
+        return isUseCustomBg_;
+    }
+
+    void SetIsUseCustomBg(bool isUseCustomBg)
+    {
+        isUseCustomBg_ = isUseCustomBg;
+    }
+
     bool IsTransparentBg() const;
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -681,6 +691,7 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
+    bool isUseCustomBg_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 

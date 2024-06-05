@@ -1872,6 +1872,10 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, color);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -2538,8 +2542,12 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
     if (!Color::ParseColorString(color, bgColor)) {
         return;
     }
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

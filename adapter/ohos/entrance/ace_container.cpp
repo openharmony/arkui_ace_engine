@@ -2404,7 +2404,8 @@ void AceContainer::NotifyConfigurationChange(
                         (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
                         return;
                     }
-                    if (configurationChange.colorModeUpdate && !container->IsTransparentBg()) {
+                    if (configurationChange.colorModeUpdate && !container->IsUseCustomBg() &&
+                        !container->IsTransparentBg()) {
                         pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
