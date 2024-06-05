@@ -21,6 +21,12 @@
 #include "frameworks/core/components_ng/pattern/text/layout_info_interface.h"
  
 namespace OHOS::Ace::Framework {
+
+struct NapiMap {
+    napi_value instance;
+    napi_value setFunction;
+};
+
 class JSLayoutManager : public Referenced {
 public:
     JSLayoutManager() = default;
@@ -64,6 +70,12 @@ public:
     JSRef<JSObject> CreateJSRunMetrics(const RunMetrics& runMetrics);
  
     void CreateJSLineMetrics(JSRef<JSObject>& lineMetricsObj, const TextLineMetrics& lineMetrics);
+
+    NapiMap CreateNapiMap(napi_env env);
+
+    bool NapiMapSet(napi_env& env, NapiMap& map, uint32_t key, const RunMetrics& runMetrics);
+
+    JSRef<JSVal> ConvertMapToJSMap(const std::map<size_t, RunMetrics>& map);
  
 private:
     WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> layoutInfoInterface_;

@@ -694,4 +694,21 @@ ArkUINativeModuleValue RenderNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtim
     GetArkUINodeModifiers()->getRenderNodeModifier()->invalidate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RenderNodeBridge::SetMarkNodeGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    Local<JSValueRef> isNodeGroup = runtimeCallInfo->GetCallArgRef(1);
+    bool isNodeGroupValue = false;
+    if (isNodeGroup->IsBoolean()) {
+        isNodeGroupValue = isNodeGroup->ToBoolean(vm)->Value();
+    }
+
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setMarkNodeGroup(nativeNode, isNodeGroupValue);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

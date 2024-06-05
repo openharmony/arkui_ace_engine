@@ -182,6 +182,66 @@ bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string&
         || relation == EmojiRelation::MIDDLE_EMOJI;
 }
 
+bool TextEmojiProcessor::IsIndexBeforeOrInEmoji(int32_t index, const std::string& content,
+    int32_t& startIndex, int32_t& endIndex)
+{
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    EmojiRelation relation = GetIndexRelationToEmoji(index, content, emojiStartIndex, emojiEndIndex);
+    if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::BEFORE_EMOJI
+        || relation == EmojiRelation::MIDDLE_EMOJI) {
+        startIndex = emojiStartIndex;
+        endIndex = emojiEndIndex;
+        return true;
+    }
+    startIndex = index;
+    endIndex = index;
+    return false;
+}
+
+bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string& content,
+    int32_t& startIndex, int32_t& endIndex)
+{
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    EmojiRelation relation = GetIndexRelationToEmoji(index, content, emojiStartIndex, emojiEndIndex);
+    if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::AFTER_EMOJI
+        || relation == EmojiRelation::MIDDLE_EMOJI) {
+        startIndex = emojiStartIndex;
+        endIndex = emojiEndIndex;
+        return true;
+    }
+    startIndex = index;
+    endIndex = index;
+    return false;
+}
+
+std::wstring TextEmojiProcessor::SubWstring(int32_t index, int32_t length, const std::wstring& content)
+{
+    int32_t startIndex = index;
+    int32_t endIndex = index + length - 1;
+    int32_t emojiStartIndex = index;
+    int32_t emojiEndIndex = index;
+    // need to be converted to string for processing
+    // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
+    std::string curStr = StringUtils::ToString(content);
+    // clamp left emoji
+    if (IsIndexBeforeOrInEmoji(startIndex, curStr, emojiStartIndex, emojiEndIndex)) {
+        // [emojiStartIndex, emojiEndIndex)
+        if (startIndex != emojiStartIndex) {
+            startIndex = emojiEndIndex;
+        }
+    }
+    // clamp right emoji
+    if (IsIndexAfterOrInEmoji(endIndex, curStr, emojiStartIndex, emojiEndIndex)) {
+        // [emojiStartIndex, emojiEndIndex)
+        if (endIndex != emojiEndIndex - 1) {
+            endIndex = emojiStartIndex - 1;
+        }
+    }
+    return content.substr(startIndex, endIndex - startIndex + 1);
+}
+
 std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> u8ToU16converter;
@@ -618,7 +678,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthAtFront(const std::u32string& u32Conte
 {
     int32_t deleteCount = 0;
     int32_t state = STATE_BEGIN;
-    int32_t tempOffset = 0;
+    uint32_t tempOffset = 0;
     int32_t u32ContentLength = static_cast<int32_t>(u32Content.length());
     do {
         int32_t codePoint = static_cast<int32_t>(u32Content[tempOffset]);

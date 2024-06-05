@@ -87,6 +87,9 @@ void JSFontSpan::Constructor(const JSCallbackInfo& args)
         Font font;
         span = AceType::MakeRefPtr<FontSpan>(font);
     } else {
+        if (!args[0]->IsObject()) {
+            return;
+        }
         span = JSFontSpan::ParseJsFontSpan(JSRef<JSObject>::Cast(args[0]));
     }
     fontSpan->fontSpan_ = span;
@@ -386,7 +389,7 @@ void JSBaselineOffsetSpan::Constructor(const JSCallbackInfo& args)
     auto baselineOffsetSpan = Referenced::MakeRefPtr<JSBaselineOffsetSpan>();
     baselineOffsetSpan->IncRefCount();
     RefPtr<BaselineOffsetSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<BaselineOffsetSpan>();
     } else {
         span = JSBaselineOffsetSpan::ParseJSBaselineOffsetSpan(JSRef<JSObject>::Cast(args[0]));
@@ -443,7 +446,7 @@ void JSLetterSpacingSpan::Constructor(const JSCallbackInfo& args)
     letterSpacingSpan->IncRefCount();
 
     RefPtr<LetterSpacingSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<LetterSpacingSpan>();
     } else {
         span = JSLetterSpacingSpan::ParseJSLetterSpacingSpan(JSRef<JSObject>::Cast(args[0]));
@@ -646,7 +649,7 @@ void JSImageAttachment::Constructor(const JSCallbackInfo& args)
     imageAttachment->IncRefCount();
 
     RefPtr<ImageSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         ImageSpanOptions imageOption;
         span = AceType::MakeRefPtr<ImageSpan>(imageOption);
     } else {
@@ -972,24 +975,28 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();
         contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        JSRef<JSObject> result = JSRef<JSObject>::Cast(func->ExecuteJS(1, &jsVal));
-        float width = 0;
-        if (result->HasProperty("width")) {
-            auto widthObj = result->GetProperty("width");
-            width = widthObj->ToNumber<float>();
-            if (width < 0) {
-                width = 0;
+        auto obj = func->ExecuteJS(1, &jsVal);
+        if (obj->IsObject()) {
+            JSRef<JSObject> result = JSRef<JSObject>::Cast(obj);
+            float width = 0;
+            if (result->HasProperty("width")) {
+                auto widthObj = result->GetProperty("width");
+                width = widthObj->ToNumber<float>();
+                if (width < 0) {
+                    width = 0;
+                }
             }
-        }
-        std::optional<float> heightOpt;
-        if (result->HasProperty("height")) {
-            auto heightObj = result->GetProperty("height");
-            auto height = heightObj->ToNumber<float>();
-            if (height >= 0) {
-                heightOpt = height;
+            std::optional<float> heightOpt;
+            if (result->HasProperty("height")) {
+                auto heightObj = result->GetProperty("height");
+                auto height = heightObj->ToNumber<float>();
+                if (height >= 0) {
+                    heightOpt = height;
+                }
             }
+            return { width, heightOpt };
         }
-        return { width, heightOpt };
+        return { 0, 0 };
     };
     return drawCallback;
 }
@@ -1060,7 +1067,7 @@ void JSLineHeightSpan::Constructor(const JSCallbackInfo& args)
     lineHeightSpan->IncRefCount();
 
     RefPtr<LineHeightSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         span = AceType::MakeRefPtr<LineHeightSpan>();
     } else {
         span = JSLineHeightSpan::ParseJSLineHeightSpan(JSRef<JSObject>::Cast(args[0]));
@@ -1127,7 +1134,7 @@ void JSParagraphStyleSpan::Constructor(const JSCallbackInfo& args)
     paragraphSpan->IncRefCount();
 
     RefPtr<ParagraphStyleSpan> span;
-    if (args.Length() <= 0) {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
         SpanParagraphStyle paragraphStyle;
         span = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle);
     } else {
@@ -1234,7 +1241,7 @@ void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanPara
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("wordBreak");
-    int32_t index = WORD_BREAK_TYPES_DEFAULT;
+    uint32_t index = WORD_BREAK_TYPES_DEFAULT;
     if (args->IsNumber()) {
         index = args->ToNumber<int32_t>();
     }

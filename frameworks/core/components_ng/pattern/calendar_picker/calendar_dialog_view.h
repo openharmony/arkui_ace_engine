@@ -31,7 +31,8 @@ class ACE_EXPORT CalendarDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const CalendarSettingData& settingData,
         const std::vector<ButtonInfo>& buttonInfos, const std::map<std::string, NG::DialogEvent>& dialogEvent,
-        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+        TextDirection direction = TextDirection::AUTO);
 
 private:
     static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
@@ -80,6 +81,11 @@ private:
         const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline);
     static void UpdateOptionLayoutProps(
         const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext);
+    static void SetCalendarIdealSize(
+        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+    static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
+    static void OperationsToPattern(const RefPtr<FrameNode>& frameNode, const CalendarSettingData& settingData,
+        const DialogProperties& dialogProperties, const std::vector<ButtonInfo>& buttonInfos);
 };
 } // namespace OHOS::Ace::NG
 

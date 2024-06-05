@@ -351,9 +351,13 @@ void JSTextField::SetInputStyle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto styleString = info[0]->ToString();
-    if (styleString == "Inline") {
-        TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
+    if (info[0]->IsString()) {
+        auto styleString = info[0]->ToString();
+        if (styleString == "Inline") {
+            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
+        } else {
+            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
+        }
     } else {
         TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
     }
@@ -905,7 +909,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1 || !info[0]->IsObject() || !info[0]->IsFunction()) {
         return;
     }
     auto jsValue = info[0];

@@ -439,6 +439,17 @@ void SetCommandPathMask(
     renderContext->RequestNextFrame();
 }
 
+void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->SetMarkNodeGroup(isNodeGroup);
+    renderContext->RequestNextFrame();
+}
+
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
@@ -446,7 +457,7 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
         SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
-        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition };
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition, SetMarkNodeGroup };
 
     return &modifier;
 }

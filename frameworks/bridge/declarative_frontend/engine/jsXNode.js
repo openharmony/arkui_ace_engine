@@ -725,9 +725,9 @@ class FrameNode {
         if (node === null) {
             return;
         }
-        let child = node.getFirstChild();
+        let child = node.getFirstChildWithoutExpand();
         FrameNode.disposeTreeRecursively(child);
-        let sibling = node.getNextSibling();
+        let sibling = node.getNextSiblingWithoutExpand();
         FrameNode.disposeTreeRecursively(sibling);
         node.dispose();
     }
@@ -800,7 +800,7 @@ class FrameNode {
         }
     }
     removeComponentContent(content) {
-        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -868,8 +868,32 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
+    getFirstChildWithoutExpand() {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
     getNextSibling() {
         const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getNextSiblingWithoutExpand() {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1566,6 +1590,7 @@ class RenderNode {
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
         this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        this.markNodeGroupValue = false;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
@@ -1711,6 +1736,14 @@ class RenderNode {
             this.lengthMetricsUnitValue = unit;
         }
     }
+    set markNodeGroup(isNodeGroup) {
+        if (isNodeGroup === undefined || isNodeGroup === null) {
+            this.markNodeGroupValue = false;
+        } else {
+            this.markNodeGroupValue = isNodeGroup;
+        }
+        getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+    }
     get backgroundColor() {
         return this.backgroundColorValue;
     }
@@ -1761,6 +1794,9 @@ class RenderNode {
     }
     get lengthMetricsUnit() {
         return this.lengthMetricsUnitValue;
+    }
+    get markNodeGroup() {
+        return this.markNodeGroupValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
@@ -2088,8 +2124,8 @@ class ComponentContent extends Content {
     }
     dispose() {
         this.detachFromParent();
-        this.attachNodeRef_.dispose();
-        this.builderNode_.dispose();
+        this.attachNodeRef_?.dispose();
+        this.builderNode_?.dispose();
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {

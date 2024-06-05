@@ -178,14 +178,24 @@ void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, Touc
     }
 }
 
+void BaseTextSelectOverlay::OnTouchTestHit(SourceType hitTestType)
+{
+    // OnTouchTestHit在事件做碰撞检测时最先调用，避免标志位在没有SelectOveraly时无法重置。
+    if (SelectOverlayIsOn()) {
+        hasTouchTestHit_ = true;
+    }
+    if (accepResetSelectionHitTest_) {
+        resetSelectionHitTest_ = true;
+    }
+}
+
 bool BaseTextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
 {
-    auto offset = OffsetF(touchPoint.GetX(), touchPoint.GetY());
-    if (hasTransform_) {
-        RevertLocalPointWithTransform(offset);
-        offset += GetPaintOffsetWithoutTransform();
+    if (hasTouchTestHit_) {
+        hasTouchTestHit_ = false;
+        return true;
     }
-    return GetVisibleFrameRect().IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    return false;
 }
 
 void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -203,6 +213,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
             .paintOffset = GetPaintRectOffsetWithTransform()
         };
     }
+    overlayInfo.ancestorViewPort = GetAncestorNodeViewPort();
 }
 
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
@@ -243,11 +254,16 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnResetTextSelection();
+        overlay->accepResetSelectionHitTest_ = false;
     };
     selectionInfo.checkTouchInArea = [weak = WeakClaim(this)](const PointF& point) {
         auto overlay = weak.Upgrade();
         CHECK_NULL_RETURN(overlay, false);
-        return overlay->CheckTouchInHostNode(point);
+        if (overlay->resetSelectionHitTest_) {
+            overlay->resetSelectionHitTest_ = false;
+            return true;
+        }
+        return false;
     };
     selectionInfo.eventFilter = [weak = WeakClaim(this)](SourceType sourceType, TouchType touchType) {
         auto overlay = weak.Upgrade();
@@ -255,6 +271,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
         return overlay->IsAcceptResetSelectionEvent(sourceType, touchType);
     };
     overlayManager->SetHoldSelectionCallback(GetOwnerId(), selectionInfo);
+    accepResetSelectionHitTest_ = true;
 }
 
 RectF BaseTextSelectOverlay::GetVisibleContentRect()
@@ -268,25 +285,9 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect()
     CHECK_NULL_RETURN(context, visibleContentRect);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, visibleContentRect);
-    auto paintOffset = GetPaintOffsetWithoutTransform() - context->GetRootRect().GetOffset();
+    auto paintOffset = host->GetTransformRelativeOffset();
     visibleContentRect = RectF(geometryNode->GetContentOffset() + paintOffset, geometryNode->GetContentSize());
     return GetVisibleRect(pattern->GetHost(), visibleContentRect);
-}
-
-RectF BaseTextSelectOverlay::GetVisibleFrameRect()
-{
-    RectF frameRect;
-    auto pattern = GetPattern<Pattern>();
-    CHECK_NULL_RETURN(pattern, frameRect);
-    auto host = pattern->GetHost();
-    CHECK_NULL_RETURN(host, frameRect);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, frameRect);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, frameRect);
-    auto paintOffset = GetPaintOffsetWithoutTransform() - context->GetRootRect().GetOffset();
-    frameRect = RectF(paintOffset, geometryNode->GetFrameSize());
-    return GetVisibleRect(host, frameRect);
 }
 
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
@@ -603,11 +604,9 @@ void BaseTextSelectOverlay::SetkeyBoardChangeCallback()
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->AddKeyboardChangeCallback(
         tmpHost->GetId(), [weak = WeakClaim(this)](bool isKeyboardChanged, bool isKeyboardShow) {
-            if (isKeyboardChanged) {
-                auto overlay = weak.Upgrade();
-                CHECK_NULL_VOID(overlay);
-                overlay->OnKeyboardChanged(isKeyboardShow);
-            }
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->OnKeyboardChanged(isKeyboardShow);
         });
 }
 
@@ -701,5 +700,30 @@ void BaseTextSelectOverlay::OnKeyboardChanged(bool isKeyboardShow)
     auto textBase = GetPattern<TextBase>();
     CHECK_NULL_VOID(textBase);
     textBase->OnHandleAreaChanged();
+}
+
+std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
+{
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scrollableContainer = host->GetPattern<NestableScrollContainer>();
+        if (scrollableContainer) {
+            return parent->GetTransformRectRelativeToWindow();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
+bool BaseTextSelectOverlay::IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType)
+{
+    if ((sourceType == SourceType::MOUSE) && (touchType == TouchType::MOVE)) {
+        resetSelectionHitTest_ = false;
+    }
+    return (sourceType == SourceType::MOUSE || sourceType == SourceType::TOUCH) && touchType == TouchType::DOWN;
 }
 } // namespace OHOS::Ace::NG

@@ -63,13 +63,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
     auto viewPort = paintWrapper->GetGeometryNode()->GetFrameRect() - offset;
-    auto frameNode = info_.callerFrameNode.Upgrade();
-    if (frameNode) {
-        auto viewPortOption = frameNode->GetViewPort();
-        if (viewPortOption.has_value()) {
-            viewPort = viewPortOption.value();
-        }
-    }
+    info_.GetCallerNodeAncestorViewPort(viewPort);
+
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);

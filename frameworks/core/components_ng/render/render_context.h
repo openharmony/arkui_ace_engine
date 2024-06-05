@@ -137,6 +137,10 @@ public:
 
     virtual void SetBorderWidth(const BorderWidthProperty& value) {};
 
+    virtual void SetDashGap(const BorderWidthProperty& value) {};
+
+    virtual void SetDashWidth(const BorderWidthProperty& value) {};
+
     virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
 
     virtual void SetOuterBorderStyle(const BorderStyleProperty& value) {};
@@ -188,6 +192,8 @@ public:
     };
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
+
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -334,6 +340,7 @@ public:
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
+    virtual void SetMarkNodeGroup(bool isNodeGroup) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -497,7 +504,7 @@ public:
 
     virtual void SetActualForegroundColor(const Color& value) {}
 
-    virtual void ResetSurface() {}
+    virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -572,6 +579,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -676,6 +685,10 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    void SetHandleChildBounds(bool value) {
+        handleChildBounds_ = value;
+    }
+
     virtual Matrix4 GetRevertMatrix()
     {
         return Matrix4();
@@ -690,6 +703,7 @@ protected:
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
+    bool handleChildBounds_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -716,6 +730,8 @@ protected:
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+    virtual void OnDashGapUpdate(const BorderWidthProperty& value) {}
+    virtual void OnDashWidthUpdate(const BorderWidthProperty& value) {}
 
     virtual void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) {}

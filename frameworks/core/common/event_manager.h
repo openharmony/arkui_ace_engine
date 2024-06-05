@@ -112,6 +112,9 @@ public:
     static bool DispatchRotationEvent(
         const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode);
 
+    // If current focus node is Web, will skip some events processing.
+    static bool IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode);
+
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
     bool DispatchMouseEvent(const MouseEvent& event);
@@ -279,6 +282,7 @@ private:
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
+    void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;

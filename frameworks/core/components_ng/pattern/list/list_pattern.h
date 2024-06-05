@@ -160,7 +160,8 @@ public:
 
     // scroller
     void ScrollTo(float position) override;
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
@@ -182,7 +183,7 @@ public:
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
-    void CalculateCurrentOffset(float delta);
+    void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();

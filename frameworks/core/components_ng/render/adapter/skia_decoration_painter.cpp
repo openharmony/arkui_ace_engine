@@ -40,6 +40,16 @@ namespace {
 
 constexpr int32_t CORNER_NUMS = 4;
 constexpr uint32_t COLOR_MASK = 0xff000000;
+constexpr double RIGHT_ANGLE_D = 90.0;
+constexpr float RIGHT_ANGLE_F = 90.0f;
+constexpr int32_t STRAIGHT_ANGLE = 180;
+constexpr double STRAIGHT_ANGLE_D = 180.0;
+constexpr int32_t REFLEX_ANGLE = 270;
+constexpr double REFLEX_ANGLE_D = 270.0;
+constexpr int32_t FULL_ROTATION_F = 360;
+constexpr double FULL_ROTATION_F = 360.0f;
+constexpr int32_t MIN_COLOR_STOPS = 2;
+constexpr int32_t MIN_COLOR_SIZE = 2;
 
 template<typename T>
 class Evaluator : public AceType {
@@ -132,7 +142,7 @@ protected:
     {
         // deal with not specified color stop
         uint32_t colorSize = colorStops_.size();
-        if (colorSize <= 2) {
+        if (colorSize <= MIN_COLOR_SIZE) {
             return;
         }
         int32_t noValueStartIndex = 0;
@@ -160,7 +170,7 @@ protected:
 
     bool NeedAdjustColorStops() const
     {
-        if (colorStops_.size() < 2) {
+        if (colorStops_.size() < MIN_COLOR_STOPS) {
             return false;
         }
 
@@ -261,7 +271,7 @@ public:
                 if (linearGradient->linearY == NG::GradientDirection::BOTTOM) {
                     width *= -1;
                 }
-                float angle = 90.0f - Rad2deg(atan2(width, height));
+                float angle = RIGHT_ANGLE_F - Rad2deg(atan2(width, height));
                 EndPointsFromAngle(angle, size, firstPoint, secondPoint);
             } else if (linearGradient->linearX || linearGradient->linearY) {
                 secondPoint = DirectionToPoint(linearGradient->linearX, linearGradient->linearY, size);
@@ -288,49 +298,49 @@ private:
 
     static float Deg2rad(float deg)
     {
-        return static_cast<float>(deg * M_PI / 180.0);
+        return static_cast<float>(deg * M_PI / STRAIGHT_ANGLE_D);
     }
 
     static float Rad2deg(float rad)
     {
-        return static_cast<float>(rad * 180.0 / M_PI);
+        return static_cast<float>(rad * STRAIGHT_ANGLE_D / M_PI);
     }
 
     static void EndPointsFromAngle(float angle, const SkSize& size, SkPoint& firstPoint, SkPoint& secondPoint)
     {
-        angle = fmod(angle, 360.0f);
+        angle = fmod(angle, FULL_ROTATION_F);
         if (LessNotEqual(angle, 0.0)) {
-            angle += 360.0f;
+            angle += FULL_ROTATION_F;
         }
 
         if (NearEqual(angle, 0.0)) {
             firstPoint.set(0.0f, size.height());
             secondPoint.set(0.0f, 0.0f);
             return;
-        } else if (NearEqual(angle, 90.0)) {
+        } else if (NearEqual(angle, RIGHT_ANGLE_D)) {
             firstPoint.set(0.0f, 0.0f);
             secondPoint.set(size.width(), 0.0f);
             return;
-        } else if (NearEqual(angle, 180.0)) {
+        } else if (NearEqual(angle, STRAIGHT_ANGLE_D)) {
             firstPoint.set(0.0f, 0.0f);
             secondPoint.set(0, size.height());
             return;
-        } else if (NearEqual(angle, 270.0)) {
+        } else if (NearEqual(angle, REFLEX_ANGLE_D)) {
             firstPoint.set(size.width(), 0.0f);
             secondPoint.set(0.0f, 0.0f);
             return;
         }
-        float slope = tan(Deg2rad(90.0f - angle));
+        float slope = tan(Deg2rad(RIGHT_ANGLE_F - angle));
         float perpendicularSlope = -1 / slope;
 
         float halfHeight = size.height() / 2;
         float halfWidth = size.width() / 2;
         SkPoint cornerPoint { 0.0f, 0.0f };
-        if (angle < 90.0) {
+        if (angle < RIGHT_ANGLE_D) {
             cornerPoint.set(halfWidth, halfHeight);
-        } else if (angle < 180) {
+        } else if (angle < STRAIGHT_ANGLE) {
             cornerPoint.set(halfWidth, -halfHeight);
-        } else if (angle < 270) {
+        } else if (angle < REFLEX_ANGLE) {
             cornerPoint.set(-halfWidth, -halfHeight);
         } else {
             cornerPoint.set(-halfWidth, halfHeight);
@@ -631,9 +641,9 @@ public:
         SkPoint center = GetCenter(sweepGradient, size);
         float rotationAngle = 0.0f;
         if (sweepGradient->rotation) {
-            rotationAngle = fmod(sweepGradient->rotation.value().Value(), 360.0f);
+            rotationAngle = fmod(sweepGradient->rotation.value().Value(), FULL_ROTATION_F);
             if (LessNotEqual(rotationAngle, 0.0f)) {
-                rotationAngle += 360.0f;
+                rotationAngle += FULL_ROTATION_F;
             }
         }
         float startAngle = 0.0f;
@@ -1078,8 +1088,8 @@ void SkiaDecorationPainter::PaintHueRotate(const SkRRect& rRect, SkCanvas* canva
             canvas->clipRRect(rRect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-            while (GreatOrEqual(hueRotate, 360)) {
-                hueRotate -= 360;
+            while (GreatOrEqual(hueRotate, FULL_ROTATION)) {
+                hueRotate -= FULL_ROTATION;
             }
             float matrix[20] = { 0.0f };
             int32_t type = hueRotate / 120;

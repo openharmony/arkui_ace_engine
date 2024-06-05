@@ -30,4 +30,19 @@ Dimension SelectHandleInfo::GetDefaultLineWidth()
     CHECK_NULL_RETURN(theme, defaultLineWidth);
     return theme->GetHandleLineWidth();
 }
+
+void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
+{
+    if (ancestorViewPort) {
+        viewPort = ancestorViewPort.value();
+    } else {
+        auto frameNode = callerFrameNode.Upgrade();
+        if (frameNode) {
+            auto viewPortOption = frameNode->GetViewPort();
+            if (viewPortOption.has_value()) {
+                viewPort = viewPortOption.value();
+            }
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

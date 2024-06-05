@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
-constexpr int32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -67,7 +67,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto isRequestSelectAll = (request.requestCode & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
+    auto isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
     selectController->CalculateHandleOffset();
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -183,13 +183,16 @@ std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(HandleInde
     return handleInfo;
 }
 
-bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& paintRect)
+bool TextFieldSelectOverlay::CheckHandleVisible(const RectF& handlePaintRect)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     // use global offset.
     auto contentRect = pattern->GetContentRect();
     auto visibleRect = GetVisibleContentRect();
+    // revert to original offset.
+    auto paintRect = handlePaintRect;
+    paintRect.SetOffset(OffsetF(paintRect.GetX() + paintRect.Width() / 2.0f, paintRect.GetY()));
     if (!pattern->IsTextArea()) {
         auto verticalEpsilon = std::max(0.0f, paintRect.Height() - contentRect.Height());
         return GreatOrEqual(paintRect.Top() + verticalEpsilon, visibleRect.Top()) &&
@@ -290,9 +293,11 @@ RectF TextFieldSelectOverlay::GetSelectArea()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, {});
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, {});
     auto selectRects = pattern->GetTextBoxes();
     RectF res(pattern->GetCaretRect());
-    auto textPaintOffset = GetPaintOffsetWithoutTransform();
+    auto textPaintOffset = host->GetTransformRelativeOffset();
     if (selectRects.empty()) {
         if (hasTransform_) {
             GetGlobalRectWithTransform(res);
@@ -403,7 +408,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset() - GetPaintOffsetWithoutTransform();
     auto selectController = pattern->GetTextSelectController();
-    if (pattern->GetMagnifierController()) {
+    if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         GetLocalPointWithTransform(movingCaretOffset);
@@ -472,7 +477,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& request)
 {
     OverlayRequest newRequest = request;
-    newRequest.requestCode = newRequest.requestCode | REQUEST_SELECT_ALL;
+    newRequest.requestCode = static_cast<uint32_t>(newRequest.requestCode) | REQUEST_SELECT_ALL;
     ProcessOverlay(newRequest);
 }
 } // namespace OHOS::Ace::NG

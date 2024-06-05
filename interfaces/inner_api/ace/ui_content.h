@@ -32,7 +32,6 @@
 #include "serializeable_object.h"
 #include "viewport_config.h"
 #include "constants.h"
-
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -137,6 +136,7 @@ public:
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
@@ -197,7 +197,6 @@ public:
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
     virtual void DeregisterAccessibilityChildTree() {};
     virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
-
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -410,6 +409,15 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+    
+    virtual sptr<IRemoteObject> GetRemoteObj()
+    {
+        return {};
+    }
+
+    virtual void PreLayout() {};
+    
+    virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 
 } // namespace OHOS::Ace

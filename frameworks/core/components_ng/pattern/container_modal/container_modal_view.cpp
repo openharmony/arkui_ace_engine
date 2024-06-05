@@ -252,15 +252,8 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     auto clickGesture = MakeRefPtr<TapGesture>();
     clickGesture->SetOnActionId(clickCallback);
-    auto gestureGroup = MakeRefPtr<NG::GestureGroup>(GestureMode::Parallel);
-    gestureGroup->AddGesture(clickGesture);
-    if (!canDrag) {
-        // if can not be drag, cover father panEvent
-        PanDirection panDirection;
-        auto panGesture = MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0.0);
-        gestureGroup->AddGesture(panGesture);
-    }
-    buttonEventHub->AddGesture(gestureGroup);
+    buttonEventHub->AddGesture(clickGesture);
+    buttonNode->SetDraggable(canDrag);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);

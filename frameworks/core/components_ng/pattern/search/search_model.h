@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class SearchModel {
+class ACE_FORCE_EXPORT SearchModel {
 public:
     static SearchModel* GetInstance();
     virtual ~SearchModel() = default;

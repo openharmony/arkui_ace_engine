@@ -213,12 +213,6 @@ enum NavDestinationLifecycle {
     ON_DISAPPEAR
 };
 
-struct NavContentInfo {
-    std::string name;
-    int32_t index = 0;
-    NavDestinationMode mode;
-};
-
 struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;

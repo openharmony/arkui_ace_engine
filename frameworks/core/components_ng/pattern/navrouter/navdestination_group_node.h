@@ -105,10 +105,7 @@ public:
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
 
-    void SetNavDestinationMode(NavDestinationMode mode)
-    {
-        mode_ = mode;
-    }
+    void SetNavDestinationMode(NavDestinationMode mode);
 
     NavDestinationMode GetNavDestinationMode() const
     {

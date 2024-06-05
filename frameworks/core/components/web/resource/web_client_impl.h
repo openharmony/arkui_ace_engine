@@ -33,7 +33,6 @@ class WebDelegate;
 class DownloadListenerImpl : public OHOS::NWeb::NWebDownloadCallback {
 public:
     DownloadListenerImpl() = default;
-    explicit DownloadListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~DownloadListenerImpl() = default;
 
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
@@ -46,13 +45,11 @@ public:
 
 private:
     WeakPtr<WebDelegate> webDelegate_;
-    int32_t instanceId_ = -1;
 };
 
 class AccessibilityEventListenerImpl : public OHOS::NWeb::NWebAccessibilityEventCallback {
 public:
     AccessibilityEventListenerImpl() = default;
-    explicit AccessibilityEventListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~AccessibilityEventListenerImpl() = default;
 
     void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
@@ -64,13 +61,11 @@ public:
 
 private:
     WeakPtr<WebDelegate> webDelegate_;
-    int32_t instanceId_ = -1;
 };
 
 class ReleaseSurfaceImpl : public OHOS::NWeb::NWebReleaseSurfaceCallback {
 public:
     ReleaseSurfaceImpl() = default;
-    explicit ReleaseSurfaceImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~ReleaseSurfaceImpl() = default;
 
     void ReleaseSurface() override;
@@ -80,18 +75,39 @@ public:
         surfaceDelegate_ = surfaceDelegate;
     }
 
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
 private:
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_ = nullptr;
-    int32_t instanceId_ = -1;
+    WeakPtr<WebDelegate> webDelegate_;
 };
 class FindListenerImpl : public OHOS::NWeb::NWebFindCallback {
 public:
     FindListenerImpl() = default;
-    explicit FindListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~FindListenerImpl() = default;
 
     void OnFindResultReceived(
         const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
+class SpanstringConvertHtmlImpl : public OHOS::NWeb::NWebSpanstringConvertHtmlCallback {
+public:
+    SpanstringConvertHtmlImpl() = default;
+    explicit SpanstringConvertHtmlImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~SpanstringConvertHtmlImpl() = default;
+
+    virtual std::string SpanstringConvertHtml(const std::vector<uint8_t> &content) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
@@ -108,7 +124,6 @@ class WebClientImpl :
     public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;
-    explicit WebClientImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~WebClientImpl() = default;
 
     void SetNWeb(std::shared_ptr<OHOS::NWeb::NWeb> nweb) override;
@@ -240,6 +255,8 @@ public:
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
+
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
@@ -265,10 +282,10 @@ public:
 
     void OnCustomKeyboardClose() override;
 
+    void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
-    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace
 

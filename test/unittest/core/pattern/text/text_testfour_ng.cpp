@@ -379,43 +379,4 @@ HWTEST_F(TextTestFourNg, TextRace001, TestSize.Level1)
     textPaintMethod.DoStartTextRace();
     textContentModifier->StopTextRace();
 }
-
-/**
- * @tc.name: TextSetFadeout001
- * @tc.desc: test text_pattern.cpp SetFadeout function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFourNg, TextSetFadeout001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern
-     */
-    auto [frameNode, pattern] = Init();
-
-    /**
-     * @tc.steps: step2. Set default fadeout
-     * @tc.expected: step2. Check the overlay node, it should not be created by EnsureOverlayExists()
-     */
-    pattern->SetFadeout(false, false, 0.0f);
-    auto overlayNode = frameNode->GetOverlayNode();
-    EXPECT_EQ(overlayNode, nullptr);
-
-    /**
-     * @tc.steps: step3. Set common fadeout values
-     * @tc.expected: step3. Check the overlay node
-     */
-    pattern->EnsureOverlayExists();
-    pattern->SetFadeout(true, false, 0.04f);
-    overlayNode = frameNode->GetOverlayNode();
-    ASSERT_NE(overlayNode, nullptr);
-
-    pattern->SetFadeout(false, true, 0.04f);
-    overlayNode = frameNode->GetOverlayNode();
-    ASSERT_NE(overlayNode, nullptr);
-
-    pattern->SetFadeout(true, true, 0.04f);
-    overlayNode = frameNode->GetOverlayNode();
-    ASSERT_NE(overlayNode, nullptr);
-}
-
 } // namespace OHOS::Ace::NG

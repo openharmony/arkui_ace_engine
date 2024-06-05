@@ -105,7 +105,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* r
         nextMargin.SetValue(0.0);
     }
     int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(nativeNode, nextMargin.Value(), nextMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
+        nativeNode, nextMargin.Value(), nextMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -131,7 +132,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperPrevMargin(ArkUIRuntimeCallInfo* r
         prevMargin.SetValue(0.0);
     }
     int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
-    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(nativeNode, prevMargin.Value(), prevMarginUnit);
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
+        nativeNode, prevMargin.Value(), prevMarginUnit, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperPrevMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -141,6 +143,34 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperPrevMargin(ArkUIRuntimeCallInfo*
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperPrevMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    if (valueArg->IsNumber()) {
+        int32_t index = valueArg->Int32Value(vm);
+        int32_t values[1] = { 0 };
+        values[0] = index;
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNestedScroll(nativeNode, &values);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperNestedScroll(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -196,6 +226,28 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperDisplayCount(ArkUIRuntimeCallInf
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperDisplayCount(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperSwipeByGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    bool swipeByGroup = valueArg->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperSwipeByGroup(nativeNode, swipeByGroup);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperSwipeByGroup(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperSwipeByGroup(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 std::string GetDimensionUnitString(DimensionUnit unit)

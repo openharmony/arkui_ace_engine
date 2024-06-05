@@ -205,12 +205,12 @@ void ResetListSpace(ArkUINodeHandle node)
     ListModelNG::SetListSpace(frameNode, Dimension(0, DimensionUnit::VP));
 }
 
-ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[INDEX_0] = ListModelNG::GetEdgeEffect(frameNode);
-    values[INDEX_1] = ListModelNG::GetEdgeEffectAlways(frameNode);
+    (*values)[INDEX_0] = ListModelNG::GetEdgeEffect(frameNode);
+    (*values)[INDEX_1] = ListModelNG::GetEdgeEffectAlways(frameNode);
     return INDEX_2;
 }
 
@@ -271,13 +271,13 @@ void ResetListFriction(ArkUINodeHandle node)
     ListModelNG::SetListFriction(frameNode, friction);
 }
 
-void GetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NestedScrollOptions options = ListModelNG::GetListNestedScroll(frameNode);
-    values[0] = static_cast<ArkUI_Int32>(options.forward);
-    values[1] = static_cast<ArkUI_Int32>(options.backward);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.forward);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.backward);
 }
 
 void SetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward)
@@ -607,6 +607,13 @@ void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onF
         scrollControllerBase->CloseAllSwipeActions(nullptr);
     }
 }
+
+ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ListModelNG::GetInitialIndex(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -624,7 +631,7 @@ const ArkUIListModifier* GetListModifier()
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex };
     return &modifier;
 }
 

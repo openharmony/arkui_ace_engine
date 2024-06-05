@@ -1077,9 +1077,9 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     /**
      * @tc.steps: step5. Test JumpTo
      */
-    controller->ScrollToIndex(1, false, ScrollAlign::START);
+    controller->ScrollToIndex(1, false, ScrollAlign::START, std::nullopt);
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    controller->ScrollToIndex(0, false, ScrollAlign::NONE);
+    controller->ScrollToIndex(0, false, ScrollAlign::NONE, std::nullopt);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 
     /**

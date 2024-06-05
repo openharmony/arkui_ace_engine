@@ -50,11 +50,13 @@ constexpr float PATTERNLOCK_WIDTH = 400.f;
 constexpr float PATTERNLOCK_HEIGHT = 400.f;
 constexpr Dimension SIDE_LENGTH = 300.0_vp;
 constexpr Dimension CIRCLE_RADIUS = 14.0_vp;
+constexpr Dimension ACTIVE_CIRCLE_RADIUS = 18.0_vp;
 const Color REGULAR_COLOR = Color::BLACK;
 const Color SELECTED_COLOR = Color::BLUE;
 const Color ACTIVE_COLOR = Color::RED;
 const Color PATH_COLOR = Color::GRAY;
 const Color HOVER_COLOR = Color::GRAY;
+const Color ACTIVE_CIRCLE_COLOR = Color::GREEN;
 constexpr Dimension PATH_STROKE_WIDTH = 34.0_vp;
 constexpr Dimension HOTSPOT_CIRCLE_RADIUS = 48.0_vp;
 constexpr float SIDE_LENGH = 36.0f;
@@ -156,6 +158,9 @@ HWTEST_F(PatternLockTestNg, PaintProperty001, TestSize.Level1)
         model.SetStrokeWidth(PATH_STROKE_WIDTH);
         model.SetAutoReset(true);
         model.SetSideLength(SIDE_LENGTH);
+        model.SetActiveCircleColor(ACTIVE_CIRCLE_COLOR);
+        model.SetActiveCircleRadius(ACTIVE_CIRCLE_RADIUS);
+        model.SetEnableWaveEffect(false);
     });
     EXPECT_EQ(paintProperty_->GetCircleRadiusValue(), CIRCLE_RADIUS);
     EXPECT_EQ(paintProperty_->GetRegularColorValue(), REGULAR_COLOR);
@@ -165,6 +170,9 @@ HWTEST_F(PatternLockTestNg, PaintProperty001, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetPathStrokeWidthValue(), PATH_STROKE_WIDTH);
     EXPECT_TRUE(paintProperty_->GetAutoResetValue());
     EXPECT_EQ(layoutProperty_->GetSideLength(), SIDE_LENGTH);
+    EXPECT_EQ(paintProperty_->GetActiveCircleColorValue(), ACTIVE_CIRCLE_COLOR);
+    EXPECT_EQ(paintProperty_->GetActiveCircleRadiusValue(), ACTIVE_CIRCLE_RADIUS);
+    EXPECT_FALSE(paintProperty_->GetEnableWaveEffectValue());
 }
 
 /**
@@ -1103,6 +1111,65 @@ HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PatternLockPaintMethodTest002
+ * @tc.desc: Test PatternLockPaintMethod GetThemeProp and UpdateContentModifier Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPaintMethodTest002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create patternLock PaintMethod and PatternLockTheme.
+     */
+    std::vector<PatternLockCell> vecCell;
+    auto modifier = AceType::MakeRefPtr<PatternLockModifier>();
+    PatternLockPaintMethod paintMethod(OffsetF(), false, vecCell, modifier);
+    auto paintProperty_ = AceType::MakeRefPtr<PatternLockPaintProperty>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF());
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto patternlockTheme = AceType::MakeRefPtr<V2::PatternLockTheme>();
+    patternlockTheme->activeColor_ = ACTIVE_COLOR;
+    patternlockTheme->pathColor_ = PATH_COLOR;
+    patternlockTheme->circleRadius_ = CIRCLE_RADIUS;
+    patternlockTheme->backgroundCircleRadius_ = ACTIVE_CIRCLE_RADIUS;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(patternlockTheme));
+    /**
+     * @tc.case: case1. call GetThemeProp with PatternLockTheme.
+     */
+    paintMethod.GetThemeProp();
+    EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
+    EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
+    EXPECT_EQ(paintMethod.pathColor_, PATH_COLOR);
+    EXPECT_EQ(paintMethod.backgroundCircleRadius_, Dimension(.0));
+    /**
+     * @tc.case: case2. call UpdateContentModifier with unvalid PatternLockPaintProperty.
+     */
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    paintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(paintMethod.circleRadius_, CIRCLE_RADIUS);
+    EXPECT_EQ(paintMethod.activeColor_, ACTIVE_COLOR);
+    EXPECT_EQ(paintMethod.pathColor_, PATH_COLOR);
+    EXPECT_EQ(paintMethod.activeCircleColor_, PATH_COLOR);
+    /**
+     * @tc.case: case3. call UpdateContentModifier with valid PatternLockPaintProperty.
+     */
+    paintProperty_->UpdateCircleRadius(Dimension(20.0));
+    paintProperty_->UpdateActiveColor(Color::BLACK);
+    paintProperty_->UpdatePathColor(Color::WHITE);
+    paintProperty_->UpdateActiveCircleColor(Color::BLUE);
+    paintProperty_->UpdateActiveCircleRadius(Dimension(25.0));
+    paintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(paintMethod.circleRadius_, paintProperty_->GetCircleRadiusValue());
+    EXPECT_EQ(paintMethod.activeColor_, paintProperty_->GetActiveColorValue());
+    EXPECT_EQ(paintMethod.pathColor_, paintProperty_->GetPathColorValue());
+    EXPECT_EQ(paintMethod.activeCircleColor_, paintProperty_->GetActiveCircleColor());
+    EXPECT_EQ(paintMethod.backgroundCircleRadius_, paintProperty_->GetActiveCircleRadius());
+}
+
+/**
  * @tc.name: PatternLockModifierTest001
  * @tc.desc: Test PatternLockModifier onDraw function.
  * @tc.type: FUNC
@@ -1214,6 +1281,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest004, TestSize.Level1)
      * @tc.case: case1. Current Point (x, y) is not checked.
      */
     patternlockModifier->SetCircleRadius(POINT_NOT_CHECK_FLOAT);
+    patternlockModifier->SetActiveCircleRadius(POINT_NOT_CHECK_FLOAT);
     EXPECT_FALSE(patternlockModifier->CheckChoosePoint(1, 4));
     EXPECT_CALL(canvas, AttachBrush(_)).Times(1).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(1);
@@ -1224,6 +1292,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest004, TestSize.Level1)
      * current Point index and the selected Point is not the last Point.
      */
     patternlockModifier->SetCircleRadius(POINT_CHECK_FLOAT);
+    patternlockModifier->SetActiveCircleRadius(POINT_CHECK_FLOAT);
     patternlockModifier->SetHoverIndex(GetPointIndex(0, 0));
     EXPECT_FALSE(patternlockModifier->isMoveEventValid_->Get());
     EXPECT_FALSE(patternlockModifier->isHover_->Get());
@@ -1505,6 +1574,35 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest011, TestSize.Level1)
         DEFAULT_SIDE_LENGTH / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER);
     EXPECT_EQ(patternlockModifier->connectedLineTailPoint_->Get(), firstPointOffset);
     EXPECT_EQ(patternlockModifier->canceledLineTailPoint_->Get(), firstPointOffset);
+}
+
+/**
+ * @tc.name: PatternLockModifierTest012
+ * @tc.desc: Test ConnectedCircleAnimate functions when disableWaveEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockModifierTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create patternlockModifier and  Set ChoosePoint
+     */
+    auto patternlockModifier = AceType::MakeRefPtr<PatternLockModifier>();
+    std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
+    patternlockModifier->SetChoosePoint(vecCell);
+    /**
+     * @tc.steps: step2. set wave, call ConnectedCircleAnimate and ConnectedLineAnimate func
+     * @tc.expected:the value of Animatable Properties is updated
+     */
+    patternlockModifier->SetCircleRadius(CIRCLE_RADIUS.Value());
+    patternlockModifier->SetEnableWaveEffect(false);
+    patternlockModifier->StartConnectedCircleAnimate(1, 1);
+    patternlockModifier->StartConnectedLineAnimate(1, 1);
+    EXPECT_EQ(patternlockModifier->GetBackgroundCircleRadius(0), 0);
+    EXPECT_EQ(patternlockModifier->GetActiveCircleRadius(0), 0);
+    EXPECT_EQ(patternlockModifier->GetLightRingCircleRadius(0), 0);
+    EXPECT_EQ(patternlockModifier->GetLightRingAlphaF(0), 0);
+    OffsetF pointEnd = patternlockModifier->GetCircleCenterByXY(patternlockModifier->offset_->Get(), 1, 1);
+    EXPECT_TRUE(patternlockModifier->GetConnectedLineTailPoint() == pointEnd);
 }
 
 /**

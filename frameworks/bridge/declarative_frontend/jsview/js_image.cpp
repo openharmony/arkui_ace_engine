@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
@@ -263,31 +264,22 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = container->IsFormRender() && !container->IsDynamicRender();
 
     // Interim programme
     std::string bundleName;
     std::string moduleName;
     std::string src;
-    bool srcValid = ParseJsMedia(info[0], src);
+    auto imageInfo = info[0];
     int32_t resId = 0;
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> tmp = jsObj->GetProperty("id");
-        if (!tmp->IsNull() && tmp->IsNumber()) {
-            resId = tmp->ToNumber<int32_t>();
-        }
-    }
-    if (isCard && info[0]->IsString()) {
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    if (isCard && imageInfo->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
             src.clear();
         }
     }
-    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
 
     // input is PixelMap / Drawable
@@ -296,14 +288,14 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
         std::vector<RefPtr<PixelMap>> pixelMaps;
         int32_t duration = -1;
         int32_t iterations = 1;
-        if (IsDrawable(info[0])) {
-            if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
+        if (IsDrawable(imageInfo)) {
+            if (GetPixelMapListFromAnimatedDrawable(imageInfo, pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
-            pixmap = GetDrawablePixmap(info[0]);
+            pixmap = GetDrawablePixmap(imageInfo);
         } else {
-            pixmap = CreatePixelMapFromNapiValue(info[0]);
+            pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
 #endif
     }
@@ -311,6 +303,21 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
         std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
     );
     ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
+
+    if (info.Length() > 1) {
+        auto options = info[1];
+        if (!options->IsObject()) {
+            return;
+        }
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
+    }
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -368,9 +375,11 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
-    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    static std::array<int32_t, 4> keys = {
+        static_cast<int32_t>(ArkUIIndex::LEFT), static_cast<int32_t>(ArkUIIndex::RIGHT),
+        static_cast<int32_t>(ArkUIIndex::TOP), static_cast<int32_t>(ArkUIIndex::BOTTOM)};
     for (uint32_t i = 0; i < keys.size(); i++) {
-        auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());
+        auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
         if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
             continue;
@@ -807,6 +816,7 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
     panda::Local<JsiValue> value = configParams.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));

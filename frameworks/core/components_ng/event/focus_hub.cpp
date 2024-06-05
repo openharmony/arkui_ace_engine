@@ -119,6 +119,21 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
 }
 
+std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    focusNodes.clear();
+    auto frameNode = GetFrameNode();
+    if (frameNode) {
+        frameNode->GetCurrentChildrenFocusHub(focusNodes);
+    }
+
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (!lastFocusNode) {
+        return focusNodes.end();
+    }
+    return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
+}
+
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (!IsCurrentFocus()) {
@@ -170,7 +185,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
             information += (" previous-focus-in-" + focusScopeId_);
         }
         auto focusMgr = GetFocusManager();
-        if (focusMgr && focusMgr == this) {
+        if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
             information += " [Painted]";
         }
         DumpLog::GetInstance().Print(depth, information, 0);
@@ -211,7 +226,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
             information += (" previous-focus-in-" + focusScopeId_);
         }
         auto focusMgr = GetFocusManager();
-        if (focusMgr && focusMgr == this) {
+        if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
             information += " [Painted]";
         }
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
@@ -348,7 +363,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     }
 
     std::list<RefPtr<FocusHub>> focusNodes;
-    auto itLastFocusNode = FlushChildrenFocusHub(focusNodes);
+    auto itLastFocusNode = FlushCurrentChildrenFocusHub(focusNodes);
 
     if (focusNode->IsCurrentFocus()) {
         // Try to goto next focus, otherwise goto previous focus.
@@ -647,6 +662,10 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
+    // ReDispatch keyEvent will NOT be consumed again.
+    if (keyEvent.isRedispatch) {
+        return false;
+    }
 
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -859,7 +878,8 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
                 nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
             return ret;
         }
-        if (!IsFocusStepTab(moveStep) && focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
+        if (focusAlgorithm_.direction != ScopeFocusDirection::UNIVERSAL && !IsFocusStepTab(moveStep) &&
+            focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
@@ -979,7 +999,9 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1, focusNode->GetFrameName().c_str(),
         focusNode->GetFrameId());
     if (IsCurrentFocus()) {
-        GetFocusManager()->UpdateCurrentFocus(Claim(this));
+        auto focusManger = GetFocusManager();
+        CHECK_NULL_VOID(focusManger);
+        focusManger->UpdateCurrentFocus(Claim(this));
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -1343,6 +1365,9 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
+    if (NEAR_ZERO(paintWidth.Value())) {
+        return true;
+    }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
         if (!HasPaintRect()) {
@@ -1448,6 +1473,9 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
         paintWidth = appTheme->GetFocusWidthVp();
     }
     renderContext->ClearFocusState();
+    if (NEAR_ZERO(paintWidth.Value())) {
+        return true;
+    }
     renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
     return true;
 }
@@ -2225,6 +2253,10 @@ void FocusHub::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
     if (focusManager && !focusManager->AddFocusScope(focusScopeId, AceType::Claim(this))) {
         TAG_LOGW(AceLogTag::ACE_FOCUS, "node(%{public}s/%{public}d) focusScopeId exist.", GetFrameName().c_str(),
             GetFrameId());
+        bool isValidFocusScope = (isFocusScope_ && !focusScopeId_.empty());
+        if (isValidFocusScope) {
+            isGroup_ = isGroup;
+        }
         return;
     }
     focusScopeId_ = focusScopeId;

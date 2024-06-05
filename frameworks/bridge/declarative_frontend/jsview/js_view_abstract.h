@@ -102,12 +102,12 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
-        const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
+        int32_t key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
     static void GetJsAngleWithDefault(
-        const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
+        int32_t key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
     static inline void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
-    static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
+    static void GetJsPerspective(int32_t key, const JSRef<JSObject>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
     static void GetFractionStops(
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
@@ -211,6 +211,8 @@ public:
     static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args);
+    static void ParseDashGap(const JSRef<JSVal>& args);
+    static void ParseDashWidth(const JSRef<JSVal>& args);
     static void JsBorderImage(const JSCallbackInfo& info);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
@@ -247,6 +249,8 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
+    static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
+    static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
@@ -268,6 +272,8 @@ public:
 
     // for dynamic $r
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
+    static void CompleteResourceObjectWithBundleName(
+        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
         std::string& resName, bool isParseType);
@@ -284,6 +290,7 @@ public:
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
@@ -308,6 +315,8 @@ public:
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
+    static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName,
+        std::string& moduleName, int32_t& resId);
     static bool ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result);
@@ -315,8 +324,9 @@ public:
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
-    static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
+    static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static void ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
@@ -502,16 +512,15 @@ public:
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
     {
-        if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-            LOGE("arg is not number or Object.");
-            return false;
-        }
-
         if (jsValue->IsNumber()) {
             result = jsValue->ToNumber<T>();
             return true;
         }
 
+        if (!jsValue->IsObject()) {
+            LOGE("arg is not number or Object.");
+            return false;
+        }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
         if (resType == -1) {
@@ -532,6 +541,9 @@ public:
                 return false;
             }
             JSRef<JSVal> args = jsObj->GetProperty("params");
+            if (!args->IsArray()) {
+                return false;
+            }
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
@@ -583,6 +595,8 @@ public:
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
+    static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
@@ -596,6 +610,9 @@ public:
     static void JsBackgroundFilter(const JSCallbackInfo& info);
     static void JsForegroundFilter(const JSCallbackInfo& info);
     static void JsCompositingFilter(const JSCallbackInfo& info);
+
+private:
+    static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

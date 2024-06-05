@@ -819,10 +819,22 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3]?.i32: animation delay duration, in milliseconds. \n
+     * .value[4]?.i32: number of times that the animation is played. \n
+     * .value[5]?.i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6]?.f32: animation playback speed. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3].i32: animation delay duration, in milliseconds. \n
+     * .value[4].i32: number of times that the animation is played. \n
+     * .value[5].i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6].f32: animation playback speed. \n
      *
      */
     NODE_MOVE_TRANSITION,
@@ -4162,6 +4174,16 @@ typedef enum {
      * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
      */
     NODE_LIST_CHILDREN_MAIN_SIZE = 1003007,
+    /**
+     * @brief 设置当前List初次加载时视口起始位置显示的item的索引值，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值，默认值：0。 \n
+     */
+    NODE_LIST_INITIAL_INDEX = 1003008,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4367,34 +4389,45 @@ typedef enum {
     NODE_SWIPER_CACHED_COUNT,
 
     /**
-     * @brief 设置 Swiper 组件的前边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the front margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：前边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：前边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the front margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the front margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_PREV_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的后边距，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the back margin of the wiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：后边距数值，单位为vp，默认值为0。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：后边距数值，单位为vp。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: the back margin. The unit is vp. The default value is <b>0.0</b>\n
+     * .value[1]?.i32: whether to ignore blanks, the default value is 0.
+     * The value <b>1</b> means to ignore blank areas, and <b>0</b> means the opposite. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: the back margin, the unit is vp. \n
+     * .value[1].i32: whether to ignore blank areas. The value <b>1</b> means to ignore blank areas, and <b>0</b> means
+     * the opposite. \n
      */
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief 设置 Swiper 组件的导航指示器类型，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the navigation indicator type of the swiper.
+     * The attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：设置导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].i32：导航指示器的类型，参数类型{@link ArkUI_SwiperIndicatorType}。 \n
-     * .object：参数类型为{@link ArkUI_SwiperIndicator}。 \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
+     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
      *
      */
     NODE_SWIPER_INDICATOR,
@@ -4607,6 +4640,32 @@ typedef enum {
      *
      */
     NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
+    /**
+     * @brief Sets the pull-down offset that initiates a refresh.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: pull-down offset, in vp. The default value is <b>64vp</b>.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: pull-down offset, in vp. The default value is <b>64vp</b>.
+     *
+     */
+    NODE_REFRESH_OFFSET = 1009003,
+    /**
+     * @brief Sets whether to initiate a refresh when the pull-down distance exceeds the value of <b>refreshOffset</b>.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to initiate a refresh. The value <b>true</b> means to initiate a refresh, and
+     * <b>false</b> means the opposite.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to initiate a refresh. The value <b>1</b> means to initiate a refresh, and
+     * <b>0</b> means the opposite.
+     *
+     */
+    NODE_REFRESH_PULL_TO_REFRESH = 1009004,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
@@ -4620,7 +4679,6 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_LAYOUT_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
-
     /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used
      * by default. This attribute can be set, reset, and obtained as required through APIs.
@@ -5123,6 +5181,16 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters.
      */
     NODE_EVENT_ON_DETACH,
+    /**
+     * @brief 无障碍支持操作事件触发。
+     *
+     * 触发该事件的条件：已设置无障碍操作类型，并进行相应操作。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].u32</b>: 触发回调的操作类型，参数类型{@link ArkUI_AccessibilityActionType} \n
+     *
+     */
+    NODE_ON_ACCESSIBILITY_ACTIONS,
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *

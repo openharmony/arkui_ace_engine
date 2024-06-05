@@ -244,6 +244,17 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName,
     return ret;
 }
 
+bool ArkJSRuntime::ExecuteJsBinForAOT(const std::string& fileName,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    bool ret = JSNApi::ExecuteForAbsolutePath(vm_, fileName, PANDA_MAIN_FUNCTION);
+    HandleUncaughtException(trycatch, errorCallback);
+    return ret;
+}
+
 shared_ptr<JsValue> ArkJSRuntime::GetGlobal()
 {
     LocalScope scope(vm_);

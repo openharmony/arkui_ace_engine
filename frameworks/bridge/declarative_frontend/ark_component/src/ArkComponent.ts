@@ -302,6 +302,24 @@ class HeightModifier extends ModifierWithKey<Length> {
   }
 }
 
+class ChainModeifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('chainMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    } else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   constructor(value: Length | BorderRadiuses) {
     super(value);
@@ -2813,6 +2831,63 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
     getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
+class PixelRoundModifier extends ModifierWithKey<PixelRoundPolicy> {
+  constructor(value: PixelRoundPolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pixelRound');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    } else {
+      let start: PixelRoundCalcPolicy;
+      let top: PixelRoundCalcPolicy;
+      let end: PixelRoundCalcPolicy;
+      let bottom: PixelRoundCalcPolicy;
+      if (isObject(this.value)) {
+        start = (this.value as PixelRoundCalcPolicy)?.start;
+        top = (this.value as PixelRoundCalcPolicy)?.top;
+        end = (this.value as PixelRoundCalcPolicy)?.end;
+        bottom = (this.value as PixelRoundCalcPolicy)?.bottom;
+      }
+      getUINativeModule().common.setPixelRound(node, start, top, end, bottom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
+
+class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
+  constructor(value: ArkFocusScopeId) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopeId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopeId(node);
+    } else {
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+    }
+  }
+}
+
+class FocusScopePriorityModifier extends ModifierWithKey<ArkFocusScopePriority> {
+  constructor(value: ArkFocusScopePriority) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('focusScopePriority');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetFocusScopePriority(node);
+    } else {
+      getUINativeModule().common.setFocusScopePriority(node, this.value.scopeId, this.value.priority);
+    }
+  }
+}
 
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
@@ -3893,6 +3968,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  chainMode(direction: Axis, style: ChainStyle): this {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+  
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4058,6 +4141,35 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   systemBarEffect(): this {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
     return this;
+  }
+
+  focusScopeId(id: string, isGroup?: boolean): this {
+    let arkFocusScopeId = new ArkFocusScopeId();
+    if (isString(id)) {
+      arkFocusScopeId.id = id;
+    }
+    if (typeof isGroup === 'boolean') {
+      arkFocusScopeId.isGroup = isGroup;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
+    return this;
+  }
+
+  focusScopePriority(scopeId: string, priority?: number): this {
+    let arkFocusScopePriority = new ArkFocusScopePriority();
+    if (isString(scopeId)) {
+      arkFocusScopePriority.scopeId = scopeId;
+    }
+    if (typeof priority === 'number') {
+      arkFocusScopePriority.priority = priority;
+    }
+    modifierWithKey(
+      this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
+    return this;
+  }
+  pixelRound(value:PixelRoundPolicy):this {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
   }
 }
 

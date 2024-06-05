@@ -148,6 +148,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
+        if (info_->segmentTails_.empty()) {
+            info_->InitSegments(sections, 0);
+        }
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
@@ -155,9 +158,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentInit(sections, frameSize);
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
     } else {
         RegularInit(frameSize);
         if (info_->footerIndex_ >= 0) {
@@ -225,7 +225,7 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     if (axis_ == Axis::VERTICAL) {
         cross = ParseTemplateArgs(
             WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], info_->childrenCount_);
@@ -237,9 +237,7 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
     }
-    if (cross.second) {
-        crossGaps_ = { 0 };
-    }
+    crossGaps_ = { cross.second };
 
     itemsCrossSize_ = { {} };
 
@@ -336,6 +334,10 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
         info_->align_ = TransformAutoScroll(item);
     }
     info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
+    if (info_->extraOffset_.has_value()) {
+        info_->currentOffset_ += info_->extraOffset_.value();
+        info_->extraOffset_.reset();
+    }
 
     Fill(jumpIdx);
     info_->Sync(mainSize_, false);

@@ -125,6 +125,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
     return this;
   }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, EnableHapticFeedbackModifier.identity, EnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent): void {
@@ -530,6 +534,24 @@ class AutoCollapseModifier extends ModifierWithKey<boolean> {
       getUINativeModule().alphabetIndexer.resetAutoCollapse(node);
     } else {
       getUINativeModule().alphabetIndexer.setAutoCollapse(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class EnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('enableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setEnableHapticFeedback(node, this.value);
     }
   }
 

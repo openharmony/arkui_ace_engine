@@ -151,7 +151,9 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 
 bool PipelineContext::NeedSoftKeyboard()
 {
-    return InputMethodManager::GetInstance()->NeedSoftKeyboard();
+    auto needSoftKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch need keyboard %d", needSoftKeyboard);
+    return needSoftKeyboard;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t containerId)
@@ -236,6 +238,11 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 #endif
     hasIdleTasks_ = true;
     RequestFrame();
+}
+
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
+{
+    taskScheduler_->AddLayoutNode(layoutNode);
 }
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -384,18 +391,18 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     if (history.empty() || current.empty()) {
         return std::make_pair(0.0f, 0.0f);
     }
-    uint64_t lastTime = 0;
+    uint64_t lastNanoTime = 0;
     float x = 0.0f;
     float y = 0.0f;
-    for (auto iter : current) {
-        uint64_t currentTime = static_cast<uint64_t>(iter.time.time_since_epoch().count());
-        if (lastTime < currentTime) {
-            lastTime = currentTime;
-            x = iter.x;
-            y = iter.y;
+    for (const auto& item : current) {
+        uint64_t currentNanoTime = static_cast<uint64_t>(item.time.time_since_epoch().count());
+        if (lastNanoTime < currentNanoTime) {
+            lastNanoTime = currentNanoTime;
+            x = item.x;
+            y = item.y;
         }
     }
-    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastTime) {
+    if (nanoTimeStamp > RESAMPLE_COORD_TIME_THRESHOLD + lastNanoTime) {
         return std::make_pair(x, y);
     }
     auto historyPoint = GetAvgPoint(history, isScreen);
@@ -700,7 +707,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
 {
     auto focusNodeHub = focusNode->GetFocusHub();
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",  
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
             isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
     }
     dirtyFocusNode_.Reset();
@@ -925,11 +932,14 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
         SubwindowManager::GetInstance()->HideMenuNG(false);
         overlay->HideCustomPopups();
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
@@ -1426,8 +1436,6 @@ void PipelineContext::CheckVirtualKeyboardHeight()
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
-    dirtyNodes_.erase(uiNode);
-
     auto frameNode = DynamicCast<FrameNode>(uiNode);
 
     CHECK_NULL_VOID(frameNode);
@@ -1849,6 +1857,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
@@ -1858,6 +1867,15 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
             "type=%{public}d",
             scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
     }
+
+    if (scalePoint.type == TouchType::MOVE) {
+        for (auto listenerItem : listenerVector_) {
+            if (listenerItem) {
+                listenerItem->OnTouchEvent();
+            }
+        }
+    }
+
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type != TouchType::MOVE && historyPointsById_.find(scalePoint.id) != historyPointsById_.end()) {
         historyPointsById_.erase(scalePoint.id);
@@ -2073,6 +2091,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
     if (isDensityChanged_) {
         UIObserverHandler::GetInstance().NotifyDensityChange(density_);
+        PipelineBase::OnSurfaceDensityChanged(density);
     }
 }
 
@@ -2461,9 +2480,30 @@ bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
         return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
     }
 
+    if (!IsSkipShortcutAndFocusMove() && DispatchTabKey(event, curFocusView)) {
+        return true;
+    }
+    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+}
+
+bool PipelineContext::IsSkipShortcutAndFocusMove()
+{
+    // Web component will NOT dispatch shortcut during the first event dispatch process.
+    // Web component will NOT trigger focus move during the third event dispatch process.
+    auto focusHub = focusManager_ ? focusManager_->GetCurrentFocus() : nullptr;
+    RefPtr<FrameNode> curFrameNode = focusHub ? focusHub->GetFrameNode() : nullptr;
+    return EventManager::IsSkipEventNode(curFrameNode);
+}
+
+bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
+{
+    CHECK_NULL_RETURN(curFocusView, false);
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
+
     if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
         // Current focused on the view root scope. Tab key used to extend focus.
         // If return true. This tab key will just trigger onKeyEvent process.
@@ -2477,7 +2517,28 @@ bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
     if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
     }
-    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
+    return false;
+}
+
+void PipelineContext::ReDispatch(KeyEvent& keyEvent)
+{
+    CHECK_NULL_VOID(eventManager_);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
+        keyEvent.action);
+    // Set keyEvent coming from Redispatch
+    keyEvent.isRedispatch = true;
+
+    if (eventManager_->DispatchKeyboardShortcut(keyEvent)) {
+        return;
+    }
+
+    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
+    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
+    if (DispatchTabKey(keyEvent, curFocusView)) {
+        return;
+    }
+    eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -2490,7 +2551,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         if (TriggerKeyEventDispatch(event)) {
             return true;
         }
-        return eventManager_->DispatchKeyboardShortcut(event);
+        if (!IsSkipShortcutAndFocusMove()) {
+            return eventManager_->DispatchKeyboardShortcut(event);
+        }
     }
 
     // process drag cancel
@@ -3611,7 +3674,7 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
+void PipelineContext::ChangeDarkModeBrightness()
 {
     auto windowManager = GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -3628,7 +3691,7 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
         !container->IsDynamicRender()) {
-        if (!isFocus && mode == WindowMode::WINDOW_MODE_FLOATING) {
+        if (!onFocus_ && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
             dimension.SetValue(1 + percent.first);
@@ -3645,6 +3708,11 @@ bool PipelineContext::IsContainerModalVisible()
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    FlushVsync(nanoTimestamp, frameCount);
 }
 
 void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
@@ -3683,6 +3751,26 @@ void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
         decltype(frameCallbackFuncs_) tasks(std::move(frameCallbackFuncs_));
         for (const auto& frameCallbackFunc : tasks) {
             frameCallbackFunc(nanoTimestamp);
+        }
+    }
+}
+
+void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener)
+{
+    if (!listener) {
+        return;
+    }
+    listenerVector_.emplace_back(listener);
+}
+
+void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern)
+{
+    for (auto iter = listenerVector_.begin(); iter != listenerVector_.end();) {
+        auto patternPtr = (*iter)->GetPatternFromListener();
+        if (patternPtr.Invalid() || patternPtr == pattern) {
+            iter = listenerVector_.erase(iter);
+        } else {
+            iter++;
         }
     }
 }

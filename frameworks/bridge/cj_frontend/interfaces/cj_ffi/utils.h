@@ -21,6 +21,8 @@
 #include <string>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "core/common/container.h"
+#include "core/common/frontend.h"
 
 extern "C" struct ExternalString {
     const char* value;
@@ -38,11 +40,7 @@ public:
 
     static ExternalString MallocCString(const std::string& origin);
 
-    static bool IsStageModel();
-
-    static std::weak_ptr<void> GetAbilityPointer();
-
-    static std::weak_ptr<void> GetRuntimeContextPointer();
+    static RefPtr<Frontend> GetCurrentFrontend();
 
     static std::string GetFunctionKey(int32_t functionKey);
 

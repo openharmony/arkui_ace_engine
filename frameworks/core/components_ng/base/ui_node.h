@@ -71,7 +71,7 @@ public:
     virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
-
+    virtual int32_t CurrentFrameCount() const;
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
@@ -90,6 +90,10 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
@@ -103,6 +107,16 @@ public:
 
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
+
+    bool IsProhibitedAddChildNode()
+    {
+        return isProhibitedAddChildNode_;
+    }
+
+    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
+    {
+        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+    }
 
     int32_t TotalChildCount() const;
 
@@ -136,6 +150,8 @@ public:
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -271,7 +287,7 @@ public:
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-        bool isDispatch = false);
+        TouchTestResult& responseLinkResult, bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -401,8 +417,9 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false);
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
-
+    virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
+    // Get current frameNode index with or without expanded all LazyForEachNode;
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -695,6 +712,9 @@ protected:
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
 
+    virtual void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
+
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
         for (const auto& child : GetChildren()) {
@@ -784,6 +804,7 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
+    bool isProhibitedAddChildNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

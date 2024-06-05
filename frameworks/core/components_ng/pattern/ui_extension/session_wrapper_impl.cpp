@@ -244,7 +244,8 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
-void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding)
+void SessionWrapperImpl::CreateSession(
+    const AAFwk::Want& want, bool isAsyncModalBinding, bool isCallerSystem)
 {
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -285,12 +286,20 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
         .isAsyncModalBinding_ = isAsyncModalBinding,
+        .isModal_ = !isCallerSystem,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(AceType::WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
     InitAllCallback();
+}
+
+void SessionWrapperImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("NotifyWindowMode: %{public}d.", static_cast<int32_t>(mode));
+    session_->NotifyHostWindowMode(mode);
 }
 
 void SessionWrapperImpl::DestroySession()
@@ -460,6 +469,9 @@ void SessionWrapperImpl::OnConnect()
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionConnect");
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        NotifyWindowMode(container->GetMode());
 }
 
 void SessionWrapperImpl::OnDisconnect(bool isAbnormal)

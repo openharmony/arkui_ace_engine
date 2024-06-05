@@ -49,6 +49,11 @@ public:
         const std::string& content, int32_t& startIndex, int32_t& endIndex);
     static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content);
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content,
+        int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content,
+        int32_t& startIndex, int32_t& endIndex);
+    static std::wstring SubWstring(int32_t index, int32_t length, const std::wstring& content);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);

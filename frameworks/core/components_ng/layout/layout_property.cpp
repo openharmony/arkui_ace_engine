@@ -1214,11 +1214,12 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     if (!preContentConstraint || !contentConstraint_) {
         return false;
     }
+    bool isNeedPercent = false;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_RETURN(pattern, false);
-    auto isNeedPercent = pattern->IsNeedPercent();
+    if (host) {
+        auto pattern = host->GetPattern();
+        isNeedPercent = pattern ? pattern->IsNeedPercent() : false;
+    }
     const auto& layout = layoutConstraint_.value();
     const auto& content = contentConstraint_.value();
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {

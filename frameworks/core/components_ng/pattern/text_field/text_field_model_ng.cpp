@@ -636,17 +636,18 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
         auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
-    } else {
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
     }
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -1843,7 +1844,7 @@ void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
 
 int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
 {
-    uint32_t value = -1;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
     return value;
 }

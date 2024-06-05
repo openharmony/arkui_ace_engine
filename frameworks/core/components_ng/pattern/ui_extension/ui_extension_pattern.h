@@ -93,6 +93,7 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
+    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -158,6 +159,7 @@ public:
     virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -206,6 +208,7 @@ private:
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
+    bool ShouldCallSystem(const AAFwk::Want& want);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

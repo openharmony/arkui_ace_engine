@@ -29,7 +29,7 @@ using SwipeToWithoutAnimationImpl = std::function<void(const int32_t)>;
 using TurnPageRateFunc = std::function<void(const int32_t, float)>;
 using ChangeIndexImpl = std::function<void(const int32_t, bool)>;
 using PreloadItemsFunc = std::function<void(const std::set<int32_t>)>;
-using PreloadItemsFinishFunc = std::function<void(const int32_t)>;
+using PreloadItemsFinishFunc = std::function<void(const int32_t, const std::string)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);

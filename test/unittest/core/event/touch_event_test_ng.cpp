@@ -166,9 +166,10 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorOnCollectTouchTargetTest003, TestSi
      * @tc.expected: TouchTestResult size has been increased one.
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     touchEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, Touch_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, Touch_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
 
     EXPECT_EQ(touchEventActuator->coordinateOffset_, Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), TOUCH_TEST_RESULT_SIZE_1);

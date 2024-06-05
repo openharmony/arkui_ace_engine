@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
@@ -89,6 +90,8 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
@@ -127,13 +130,13 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
-    auto fontSize = paramObject->GetProperty("size");
+    auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
     }
     std::string weight;
-    auto fontWeight = paramObject->GetProperty("weight");
+    auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
@@ -142,14 +145,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
-    auto fontFamily = paramObject->GetProperty("family");
+    auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
-    auto style = paramObject->GetProperty("style");
+    auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
     if (!style->IsNull() || style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
@@ -307,6 +310,24 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
         return;
     }
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
+}
+
+void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(TEXT_SELECTABLE_MODE.size())) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    TextModel::GetInstance()->SetTextSelectableMode(TEXT_SELECTABLE_MODE[index]);
 }
 
 void JSText::SetMaxLines(const JSCallbackInfo& info)
@@ -914,6 +935,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
+    JSClass<JSText>::StaticMethod("textSelectable", &JSText::SetTextSelectableMode, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);

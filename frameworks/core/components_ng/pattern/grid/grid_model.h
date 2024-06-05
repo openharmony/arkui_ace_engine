@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace {
 
-class GridModel {
+class ACE_FORCE_EXPORT GridModel {
 public:
     static GridModel* GetInstance();
     virtual ~GridModel() = default;

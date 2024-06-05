@@ -118,6 +118,13 @@ var LineBreakStrategy;
   LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
 })(LineBreakStrategy || (LineBreakStrategy = {}));
 
+var TextSelectableMode;
+(function (TextSelectableMode) {
+  TextSelectableMode[TextSelectableMode["SELECTABLE_UNFOCUSABLE"] = 0] = "selectable-unfocusable";
+  TextSelectableMode[TextSelectableMode["SELECTABLE_FOCUSABLE"] = 1] = "selectable-focusable";
+  TextSelectableMode[TextSelectableMode["UNSELECTABLE"] = 2] = "unselectable";
+})(TextSelectableMode || (TextSelectableMode = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
@@ -317,6 +324,14 @@ var BarrierDirection;
   BarrierDirection[BarrierDirection["TOP"] = 2] = "TOP";
   BarrierDirection[BarrierDirection["BOTTOM"] = 3] = "BOTTOM";
 })(BarrierDirection || (BarrierDirection = {}));
+
+var LocalizedBarrierDirection;
+(function (LocalizedBarrierDirection) {
+  LocalizedBarrierDirection[LocalizedBarrierDirection["START"] = 0] = "START";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["END"] = 1] = "END";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["TOP"] = 2] = "TOP";
+  LocalizedBarrierDirection[LocalizedBarrierDirection["BOTTOM"] = 3] = "BOTTOM";
+})(LocalizedBarrierDirection || (LocalizedBarrierDirection = {}));
 
 var BlendMode;
 (function (BlendMode) {
@@ -760,6 +775,13 @@ var BarMode;
   BarMode["Fixed"] = "Fixed";
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
+
+var AnimationMode;
+(function (AnimationMode) {
+  AnimationMode[AnimationMode["CONTENT_FIRST"] = 0] = "CONTENT_FIRST";
+  AnimationMode[AnimationMode["ACTION_FIRST"] = 1] = "ACTION_FIRST";
+  AnimationMode[AnimationMode["NO_ANIMATION"] = 2] = "NO_ANIMATION";
+})(AnimationMode || (AnimationMode = {}));
 
 var SelectedMode;
 (function (SelectedMode) {
@@ -1965,8 +1987,6 @@ class NavPathInfo {
     this.param = param;
     this.onPop = onPop;
     this.index = -1;
-    // index that if check navdestination exists first
-    this.checkNavDestinationFlag = false;
     this.needUpdate = false;
   }
 }
@@ -2065,7 +2085,6 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2144,7 +2163,6 @@ class NavPathStack {
     if (ret) {
       return promiseRet;
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2365,7 +2383,7 @@ class NavPathStack {
   }
   removeInvalidPage(name, param) {
     for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].checkNavDestinationFlag && this.pathArray[i].name === name &&
+      if (this.pathArray[i].name === name &&
         this.pathArray[i].param === param) {
         this.pathArray.splice(i, 1);
         return;
@@ -2407,13 +2425,6 @@ class NavPathStack {
       return undefined;
     }
     return item.name;
-  }
-  getCheckNavDestinationFlagByIndex(index) {
-    let item = this.pathArray[index];
-    if (item === undefined) {
-      return undefined;
-    }
-    return item.checkNavDestinationFlag;
   }
   getOnPopByIndex(index) {
     let item = this.pathArray[index];
@@ -2712,6 +2723,7 @@ var SaveIconStyle;
 (function (SaveIconStyle) {
   SaveIconStyle[SaveIconStyle["FULL_FILLED"] = 0] = "FULL_FILLED";
   SaveIconStyle[SaveIconStyle["LINES"] = 1] = "LINES";
+  SaveIconStyle[SaveIconStyle["PICTURE"] = 2] = "PICTURE";
 })(SaveIconStyle || (SaveIconStyle = {}));
 
 var SaveDescription;
@@ -3163,3 +3175,13 @@ var TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
     TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
 })(TextDeleteDirection || (TextDeleteDirection = {}));
+
+var GestureRecognizerState;
+(function (GestureRecognizerState) {
+  GestureRecognizerState[GestureRecognizerState["READY"] = 0] = "READY";
+  GestureRecognizerState[GestureRecognizerState["DETECTING"] = 1] = "DETECTING";
+  GestureRecognizerState[GestureRecognizerState["PENDING"] = 2] = "PENDING";
+  GestureRecognizerState[GestureRecognizerState["BLOCKED"] = 3] = "BLOCKED";
+  GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
+  GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
+})(GestureRecognizerState || (GestureRecognizerState = {}));

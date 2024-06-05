@@ -36,7 +36,8 @@ public:
     ~SessionWrapperImpl() override;
 
     // About session
-    void CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding = false) override;
+    void CreateSession(const AAFwk::Want& want,
+        bool isAsyncModalBinding = false, bool isCallerSystem = false) override;
     void DestroySession() override;
     bool IsSessionValid() override;
     int32_t GetSessionId() override;
@@ -98,6 +99,7 @@ public:
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
 
 private:
     void InitAllCallback();

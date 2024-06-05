@@ -39,6 +39,10 @@ abstract class ViewPU extends PUV2ViewBase
 
   private hasBeenRecycled_: boolean = false;
 
+  private delayRecycleNodeRerender: boolean = false;
+
+  private delayRecycleNodeRerenderDeep: boolean = false;
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -270,6 +274,20 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
+   /**
+   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+   * or depending how UI compiler works also with 'undefined'
+   * @param freezeState only value 'true' will be used, otherwise inherits from parent
+   * if not parent, set to false.
+   */
+   protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
+    // set to true if freeze parameter set for this @Component to true
+    // otherwise inherit from parent @Component (if it exists).
+    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+  }
+
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive
@@ -413,6 +431,16 @@ abstract class ViewPU extends PUV2ViewBase
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
+  }
+
+  public delayCompleteRerender(deep: boolean = false): void {
+    this.delayRecycleNodeRerender = true;
+    this.delayRecycleNodeRerenderDeep = deep;
+  }
+
+  public flushDelayCompleteRerender(): void {
+    this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+    this.delayRecycleNodeRerender = false;
   }
 
   /**
@@ -706,6 +734,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId_.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -732,6 +761,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
+        stateMgmtDFX.inRenderingElementId_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -843,7 +873,11 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     }
-    this.updateDirtyElements();
+    if (!this.delayRecycleNodeRerender) {
+      this.updateDirtyElements();
+    } else {
+      this.flushDelayCompleteRerender();
+    }
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -1138,7 +1172,7 @@ abstract class ViewPU extends PUV2ViewBase
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
             value: observedProp.getRawObjectValue(),
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false, false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);

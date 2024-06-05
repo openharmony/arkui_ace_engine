@@ -16,7 +16,14 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("menu_test_ng") {
   type = "new"
   sources = [
+    "menu_layoutFst_test_ng.cpp",
+    "menu_layoutScd_test_ng.cpp",
+    "menu_origin_test_ng.cpp",
+    "menu_patternEx_test_ng.cpp",
     "menu_pattern_test_ng.cpp",
-    "menu_test_ng.cpp",
+    "menuitem_pattern_test_ng.cpp",
+    "menuitem_test_ng.cpp",
+    "menuitemgroup_test_ng.cpp",
+    "menuwrapper_test_ng.cpp",
   ]
 }

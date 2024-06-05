@@ -126,6 +126,13 @@ public:
             theme->defaultLightIlliminated_ =
                 static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_default_light_illiminated", 0.0));
             theme->normalBackgroundFocus_ = buttonPattern->GetAttr<Color>("normal_button_focus_bgcolor", Color());
+            theme->bigFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_big_font_size_scale", 0.0);
+            theme->largeFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_large_font_size_scale", 0.0);
+            theme->maxFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_max_font_size_scale", 0.0);
+            theme->agingNormalPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_normal_padding", 0.0_vp);
+            theme->agingSmallPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_small_padding", 0.0_vp);
+            theme->agingTextMaxLines_ =
+                static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_aging_text_max_lines", 0.0));
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -489,6 +496,36 @@ public:
         return normalBackgroundFocus_;
     }
 
+    float GetBigFontSizeScale() const
+    {
+        return bigFontSizeScale_;
+    }
+
+    float GetLargeFontSizeScale() const
+    {
+        return largeFontSizeScale_;
+    }
+
+    float GetMaxFontSizeScale() const
+    {
+        return maxFontSizeScale_;
+    }
+
+    const Dimension& GetAgingNormalPadding() const
+    {
+        return agingNormalPadding_;
+    }
+
+    const Dimension& GetAgingSmallPadding() const
+    {
+        return agingSmallPadding_;
+    }
+
+    uint32_t GetAgingTextMaxLines() const
+    {
+        return agingTextMaxLines_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -549,6 +586,12 @@ private:
     uint32_t shadowFocus_ = 6;  // no shadow
     bool focusBoxGlow_ = false;
     uint32_t defaultLightIlliminated_ = 0;
+    float bigFontSizeScale_ = 1.75f;
+    float largeFontSizeScale_ = 2.0f;
+    float maxFontSizeScale_ = 3.2f;
+    Dimension agingNormalPadding_;
+    Dimension agingSmallPadding_;
+    uint32_t agingTextMaxLines_ = 2;
 };
 
 } // namespace OHOS::Ace

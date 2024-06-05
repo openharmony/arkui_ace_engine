@@ -81,6 +81,7 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override {}
     void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
@@ -144,6 +145,10 @@ public:
     void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};
 
     void SetContentNodeGrayScale(float grayscale) override {};
+
+    void PreLayout() override {};
+    
+    void SetStatusBarItemColor(uint32_t color) override;
 
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,

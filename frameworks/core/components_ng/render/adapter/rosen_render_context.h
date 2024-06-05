@@ -70,6 +70,8 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
+
     void SyncGeometryPropertiesWithoutAnimation(
         GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
@@ -86,6 +88,10 @@ public:
     void SetBorderColor(const BorderColorProperty& value) override;
 
     void SetBorderWidth(const BorderWidthProperty& value) override;
+
+    void SetDashGap(const BorderWidthProperty& value) override;
+
+    void SetDashWidth(const BorderWidthProperty& value) override;
 
     void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -379,7 +385,8 @@ public:
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
-    void ResetSurface() override;
+    void ResetSurface(int width, int height) override;
+    void SetMarkNodeGroup(bool isNodeGroup) override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
@@ -409,6 +416,8 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnDashGapUpdate(const BorderWidthProperty& value) override;
+    void OnDashWidthUpdate(const BorderWidthProperty& value) override;
 
     void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;
@@ -469,6 +478,7 @@ private:
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
+    void SetChildBounds(const RectF& paintRect) const;
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
@@ -573,12 +583,8 @@ private:
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
-    float OnePixelValueRounding(float value);
-    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
-    void OnePixelRounding();
-    void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;

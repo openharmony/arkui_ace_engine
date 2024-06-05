@@ -229,7 +229,28 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density) = 0;
+    virtual void OnSurfaceDensityChanged(double density)
+    {
+        for (auto&& [id, callback] : densityChangedCallbacks_) {
+            if (callback) {
+                callback(density);
+            }
+        }
+    }
+
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+    {
+        if (callback) {
+            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
+            return densityChangeCallbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterDensityChangedCallback(int32_t callbackId)
+    {
+        densityChangedCallbacks_.erase(callbackId);
+    }
 
     virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
@@ -279,7 +300,7 @@ public:
         appBgColor_ = color;
     }
 
-    virtual void ChangeDarkModeBrightness(bool isFocus) {}
+    virtual void ChangeDarkModeBrightness() {}
 
     void SetFormRenderingMode(int8_t renderMode)
     {
@@ -821,12 +842,22 @@ public:
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
-        virtualKeyBoardCallback_.push_back(std::move(listener));
+        static std::atomic<int32_t> pseudoId(-1); // -1 will not be conflict with real node ids.
+        auto nodeId = pseudoId.fetch_sub(1, std::memory_order_relaxed);
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void SetVirtualKeyBoardCallback(int32_t nodeId, virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveVirtualKeyBoardCallback(int32_t nodeId)
+    {
+        virtualKeyBoardCallback_.erase(nodeId);
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
         bool isConsume = false;
-        for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+        for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
                 isConsume = true;
             }
@@ -835,14 +866,18 @@ public:
     }
 
     using configChangedCallback = std::function<void()>;
-    void SetConfigChangedCallback(configChangedCallback&& listener)
+    void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
     {
-        configChangedCallback_.push_back(std::move(listener));
+        configChangedCallback_.emplace(make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveConfigChangedCallback(int32_t nodeId)
+    {
+        configChangedCallback_.erase(nodeId);
     }
 
     void NotifyConfigurationChange()
     {
-        for (const auto& callback : configChangedCallback_) {
+        for (const auto& [nodeId, callback] : configChangedCallback_) {
             if (callback) {
                 callback();
             }
@@ -1256,8 +1291,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
 
-    std::list<configChangedCallback> configChangedCallback_;
-    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::map<int32_t, configChangedCallback> configChangedCallback_;
+    std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
     std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
@@ -1390,6 +1425,9 @@ private:
     uint32_t frameCount_ = 0;
     bool stateProfilerStatus_ = false;
     std::function<void(bool)> jsStateProfilerStatusCallback_;
+
+    int32_t densityChangeCallbackId_ = 0;
+    std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

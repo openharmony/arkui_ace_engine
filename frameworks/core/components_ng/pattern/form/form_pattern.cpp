@@ -15,18 +15,24 @@
 
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "form_constants.h"
 #include "form_info_base.h"
+#include "locale_config.h"
+#include "locale_info.h"
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
 
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/form_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
@@ -37,11 +43,11 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#include "form_constants.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -63,6 +69,10 @@ constexpr int32_t MAX_CLICK_DURATION = 500000000; // ns
 constexpr int32_t DOUBLE = 2;
 constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
+constexpr Dimension TIME_LIMIT_FONT_SIZE_VAL = 18.0_fp;
+constexpr double TIME_LIMIT_TRANSPARENT_VAL = 0.3;
+constexpr int32_t TIME_LIMIT_RADIUS_SIZE = 60;
+constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -264,6 +274,16 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
     }
 }
 
+void FormPattern::HandleEnableForm(const bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::HandleEnableForm, enable = %{public}d", enable);
+    if (enable) {
+        RemoveDisableFormStyle();
+    } else {
+        LoadDisableFormStyle();
+    }
+}
+
 void FormPattern::TakeSurfaceCaptureForUI()
 {
     if (isFrsNodeDetached_) {
@@ -349,6 +369,11 @@ void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& p
     formManagerBridge_->OnAccessibilityDumpChildInfo(params, info);
 }
 
+RefPtr<AccessibilitySessionAdapter> FormPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
+}
+
 void FormPattern::UpdateStaticCard()
 {
     // 1. Use imageNode to display pixelMap
@@ -373,7 +398,7 @@ void FormPattern::DeleteImageNode()
     }
 }
 
-void FormPattern::DeleteImageNodeAfterRecover()
+void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 {
     // delete image rs node
     auto host = GetHost();
@@ -400,6 +425,11 @@ void FormPattern::DeleteImageNodeAfterRecover()
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
+
+    // handle cached pointer event
+    if (needHandleCachedClick && formManagerBridge_) {
+        formManagerBridge_->HandleCachedClickEvents();
+    }
 }
 
 RefPtr<FrameNode> FormPattern::CreateImageNode()
@@ -593,6 +623,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
 
 void FormPattern::AddFormComponent(const RequestFormInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // When cardInfo has changed, it will call AddForm in Fwk
@@ -689,6 +720,9 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "form manager delagate is nullptr, card id is %{public}" PRId64 ".",
+            cardInfo_.id);
     }
     if (isSnapshot_) {
         auto imageNode = GetImageNode();
@@ -715,6 +749,70 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     }
 }
 
+void FormPattern::RemoveDisableFormStyle()
+{
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<UINode> findText = FindUINodeByTag(V2::TEXT_ETS_TAG);
+    RefPtr<UINode> findColumn = FindUINodeByTag(V2::COLUMN_ETS_TAG);
+    if (findText && findColumn) {
+        host->RemoveChild(findText);
+        host->RemoveChild(findColumn);
+    }
+    // FormNode节点标脏;
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void FormPattern::LoadDisableFormStyle()
+{
+    auto findColumnNode = FindUINodeByTag(V2::COLUMN_ETS_TAG);
+    auto findTextNode = FindUINodeByTag(V2::TEXT_ETS_TAG);
+    if (findColumnNode && findTextNode) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "findColumnNode && findTextNode ready exit");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::LoadDisableFormStyle");
+    int32_t dimension = cardInfo_.dimension;
+    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    if (dimensionHeight <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, invalid dimensionHeight!");
+        return;
+    }
+    auto columnNode = CreateColumnNode();
+    CHECK_NULL_VOID(columnNode);
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle(), renderContext is null");
+        return;
+    }
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurOption.grayscale.data(),
+        blurOption.grayscale.data() + blurOption.grayscale.size());
+    CalcDimension dimensionRadius(TIME_LIMIT_RADIUS_SIZE, DimensionUnit::PX);
+    renderContext->UpdateFrontBlur(dimensionRadius, blurOption);
+    if (renderContext->GetFrontBlurStyle().has_value()) {
+        renderContext->UpdateFrontBlurStyle(std::nullopt);
+    }
+    renderContext->UpdateBackgroundColor(Color(CONTENT_BG_COLOR_DARK));
+    renderContext->UpdateOpacity(TIME_LIMIT_TRANSPARENT_VAL);
+
+    auto textNode = CreateTimeLimitNode();
+    CHECK_NULL_VOID(textNode);
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    columnNode->MarkModifyDone();
+    columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    layoutProperty->UpdateVisibility(visible);
+}
+
 void FormPattern::LoadFormSkeleton()
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "LoadFormSkeleton");
@@ -737,7 +835,7 @@ void FormPattern::LoadFormSkeleton()
     std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
         cardHeight, dimension, dimensionHeight, isDarkMode);
     CreateSkeletonView(columnNode, params, dimensionHeight);
-    
+
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext != nullptr) {
         BlurStyleOption styleOption;
@@ -775,6 +873,40 @@ int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
         return 0;
     }
     return StringUtils::StringToInt(dimensionHeightStr);
+}
+
+RefPtr<FrameNode> FormPattern::CreateTimeLimitNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+
+    std::string content;
+    GetTimeLimitResource(content);
+    TAG_LOGI(AceLogTag::ACE_FORM, "GetTimeLimitContent, content = %{public}s", content.c_str());
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+
+    auto width = static_cast<float>(cardInfo_.width.Value()) - cardInfo_.borderWidth * DOUBLE;
+    auto height = static_cast<float>(cardInfo_.height.Value()) - cardInfo_.borderWidth * DOUBLE;
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    textNode->UpdateLayoutConstraint(layoutConstraint);
+    textLayoutProperty->UpdateContent(content);
+    textLayoutProperty->UpdateFontWeight(FontWeight::BOLDER);
+    textLayoutProperty->UpdateFontSize(TIME_LIMIT_FONT_SIZE_VAL);
+    textLayoutProperty->UpdateTextColor(Color::WHITE);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto externalContext = DynamicCast<NG::RosenRenderContext>(textNode->GetRenderContext());
+    CHECK_NULL_RETURN(externalContext, nullptr);
+    externalContext->SetVisible(true);
+    host->AddChild(textNode);
+    return textNode;
 }
 
 void FormPattern::CreateSkeletonView(const RefPtr<FrameNode>& parent,
@@ -829,6 +961,21 @@ void FormPattern::RemoveFormSkeleton()
     if (children.size() > 0 && child->GetTag() == V2::COLUMN_ETS_TAG) {
         host->RemoveChildAtIndex(children.size() - 1);
     }
+}
+
+RefPtr<UINode> FormPattern::FindUINodeByTag(const std::string &tag)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+     std::list<RefPtr<UINode>> children = host->GetChildren();
+     for (auto child : children) {
+        if (child->GetTag() == tag) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "FindUINodeByTag Sucessful, child->GetTag() = %{public}s,",
+                child->GetTag().c_str());
+            return child;
+        }
+    }
+    return nullptr;
 }
 
 RefPtr<FrameNode> FormPattern::CreateColumnNode()
@@ -902,6 +1049,7 @@ void FormPattern::InitFormManagerDelegate()
         formManagerBridge_->SetFormUtils(formUtils);
     }
     int32_t instanceID = context->GetInstanceId();
+    accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
@@ -982,7 +1130,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](
-            const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
+            const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
             ContainerScope scope(instanceID);
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
@@ -990,11 +1138,11 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(executor);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic, isRecover] {
+            uiTaskExecutor.PostTask([weak, instanceID, node, want] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->FireFormSurfaceNodeCallback(node, isDynamic, isRecover);
+                form->FireFormSurfaceNodeCallback(node, want);
                 }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
@@ -1068,6 +1216,14 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formPattern);
             formPattern->GetRectRelativeToWindow(top, left);
         });
+
+    formManagerBridge_->AddEnableFormCallback(
+        [weak = WeakClaim(this), instanceID](const bool enable) {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleEnableForm(enable);
+        });
 }
 
 void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
@@ -1081,25 +1237,20 @@ void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
         host->GetAccessibilityId(), top, left);
 }
 
-void FormPattern::ProcDeleteImageNode(bool isRecover)
+void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
 {
-    if (isRecover) {
-        DelayDeleteImageNode();
+    if (want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false)) {
+        DelayDeleteImageNode(want.GetBoolParam(
+            OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else {
         DeleteImageNode();
     }
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
+void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
 {
-    CHECK_NULL_VOID(node);
-    node->CreateNodeInRenderThread();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    RemoveFormSkeleton();
-
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
     externalRenderContext->SetRSNode(node);
@@ -1114,6 +1265,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
     }
     externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
+    bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+    bool isDynamic = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
     if (isRecover) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
@@ -1125,7 +1278,20 @@ void FormPattern::FireFormSurfaceNodeCallback(
         renderContext->ClearChildren();
     }
     renderContext->AddChild(externalRenderContext, 0);
+}
 
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(node);
+    node->CreateNodeInRenderThread();
+
+    RemoveFormSkeleton();
+    AttachRSNode(node, want);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -1136,15 +1302,17 @@ void FormPattern::FireFormSurfaceNodeCallback(
     isLoaded_ = true;
     isUnTrust_ = false;
     isFrsNodeDetached_ = false;
-    isDynamic_ = isDynamic;
+    isDynamic_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
 
-    ProcDeleteImageNode(isRecover);
+    ProcDeleteImageNode(want);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->RequestNextFrame();
     OnLoadEvent();
 
@@ -1153,7 +1321,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     formNode->NotifyAccessibilityChildTreeRegister();
 }
 
-void FormPattern::DelayDeleteImageNode()
+void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1162,10 +1330,10 @@ void FormPattern::DelayDeleteImageNode()
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->DeleteImageNodeAfterRecover();
+            pattern->DeleteImageNodeAfterRecover(needHandleCachedClick);
         },
         DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
 }
@@ -1491,5 +1659,59 @@ void FormPattern::UpdateConfiguration()
         localeTag_ = localeTag;
         subContainer_->UpdateConfiguration();
     }
+}
+
+void FormPattern::OnLanguageConfigurationUpdate()
+{
+    std::string content;
+    GetTimeLimitResource(content);
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnLanguageConfigurationUpdate, %{public}s", content.c_str());
+    UpdateTimeLimitResource(content);
+}
+
+void FormPattern::GetTimeLimitResource(std::string &content)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> sysResMgr(Global::Resource::CreateResourceManager());
+    if (sysResMgr == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "init sysMgr failed!");
+        return;
+    }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "init resConfig failed!");
+        return;
+    }
+
+    sysResMgr->GetResConfig(*resConfig);
+    UErrorCode status = U_ZERO_ERROR;
+    std::string language = Global::I18n::LocaleConfig::GetSystemLanguage();
+    icu::Locale locale = icu::Locale::forLanguageTag(language, status);
+    if (status != U_ZERO_ERROR) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "forLanguageTag failed, errCode:%{public}d", status);
+        return;
+    }
+
+    resConfig->SetLocaleInfo(locale.getLanguage(), locale.getScript(), locale.getCountry());
+    Global::Resource::RState state = sysResMgr->UpdateResConfig(*resConfig);
+    if (state != Global::Resource::RState::SUCCESS) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "UpdateResConfig failed! errcode:%{public}d.", state);
+        return;
+    }
+    sysResMgr->GetStringByName(TIME_LIMIT_RESOURCE_NAME, content);
+}
+
+void FormPattern::UpdateTimeLimitResource(std::string &content)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "UpdateTimeLimitResource");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto findTextNode = FindUINodeByTag(V2::TEXT_ETS_TAG);
+    if (findTextNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Not find TimeLimitTextNode");
+        return;
+    }
+    auto textNode = AceType::DynamicCast<FrameNode>(findTextNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(content);
 }
 } // namespace OHOS::Ace::NG

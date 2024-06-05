@@ -126,6 +126,10 @@ protected:
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IsNeedAdaptFontSize(const TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint);
+    bool AdaptFontSizeForLineHeight(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
@@ -155,6 +159,10 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
+    static void UpdateTextFadeoutTextStyle(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+    void UpdateParagraphTextFadeoutWidth(
+        const LayoutConstraintF& contentConstraint, const RefPtr<FrameNode>& frameNode);
     void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
         bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;

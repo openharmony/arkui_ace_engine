@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class NavigatorModel {
+class ACE_FORCE_EXPORT NavigatorModel {
 public:
     static NavigatorModel* GetInstance();
     virtual ~NavigatorModel() = default;

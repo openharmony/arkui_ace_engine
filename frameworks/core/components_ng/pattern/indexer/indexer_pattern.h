@@ -107,6 +107,7 @@ private:
     void CollapseArrayValue();
     void ApplySevenPlusOneMode(int32_t fullArraySize);
     void ApplyFivePlusOneMode(int32_t fullArraySize);
+    int32_t GetAutoCollapseIndex(int32_t propSelect);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -180,7 +181,7 @@ private:
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
-    
+
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -219,6 +220,7 @@ private:
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
     bool autoCollapse_ = false;
+    bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;

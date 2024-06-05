@@ -322,9 +322,12 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (menuTheme->GetNormalPlacement()) {
         ModifyNormalPreviewMenuPlacement(layoutWrapper);
     } else {
         if (!hasPlacement) {
@@ -669,6 +672,58 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     geometryNode->SetFrameSize(idealSize);
 }
 
+void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
+    RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
+{
+    auto hostNode = child->GetHostNode();
+    auto geometryNode = child->GetGeometryNode();
+    if (!hostNode || !geometryNode) {
+        return;
+    }
+    bool isImageNode = hostNode->GetTag() == V2::IMAGE_ETS_TAG;
+    if (hostNode->GetTag() != V2::MENU_PREVIEW_ETS_TAG && !isImageNode) {
+        return;
+    }
+
+    if (isImageNode && isShowHoverImage) {
+        return;
+    }
+
+    RefPtr<GridColumnInfo> columnInfo =
+        GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_VOID(columnInfo);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
+    auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
+    auto frameSize = geometryNode->GetMarginFrameSize();
+    static SizeF previewSize;
+    static int32_t hostId = -1;
+    if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+        if (previewSize == SizeF(0.0f, 0.0f) || hostId != hostNode->GetId()) {
+            previewSize = frameSize;
+            hostId = hostNode->GetId();
+        } else {
+            frameSize = previewSize;
+        }
+        if (LessOrEqual(frameSize.Width(), maxWidth)) {
+            geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
+        } else {
+            geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+        }
+    } else {
+        geometryNode->SetFrameSize(frameSize);
+    }
+    frameSize = geometryNode->GetMarginFrameSize() * previewScale_;
+    auto widthLeftSpace = windowGlobalRect.Width() - paddingStart_ - paddingEnd_;
+    if (GreatNotEqual(frameSize.Width(), widthLeftSpace)) {
+        auto unitSpace = widthLeftSpace / frameSize.Width() / previewScale_;
+        geometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, unitSpace * frameSize.Height()));
+    }
+    previewLayoutWrapper = child;
+    size += frameSize;
+}
+
 SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper)
 {
@@ -676,6 +731,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
     CHECK_NULL_RETURN(frameNode, size);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, size);
+    bool isShowHoverImage = false;
     auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
                                                     : pipelineContext->GetDisplayWindowRectInfo();
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
@@ -684,45 +740,12 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         if (!hostNode || !geometryNode) {
             continue;
         }
-        if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostNode->GetTag() == V2::IMAGE_ETS_TAG) {
-            RefPtr<GridColumnInfo> columnInfo =
-                GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-            CHECK_NULL_RETURN(columnInfo, size);
-            auto parent = columnInfo->GetParent();
-            CHECK_NULL_RETURN(parent, size);
-            parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
-            auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
-            auto frameSize = geometryNode->GetMarginFrameSize();
-            static SizeF previewSize;
-            static int32_t hostId = -1;
-            if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
-                if (previewSize == SizeF(0.0f, 0.0f) || hostId != hostNode->GetId()) {
-                    previewSize = frameSize;
-                    hostId = hostNode->GetId();
-                } else {
-                    frameSize = previewSize;
-                }
-                if (LessOrEqual(frameSize.Width(), maxWidth)) {
-                    geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
-                } else {
-                    geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
-                }
-            } else {
-                geometryNode->SetFrameSize(frameSize);
-            }
-            frameSize = geometryNode->GetMarginFrameSize() * previewScale_;
-            auto widthLeftSpace = windowGlobalRect.Width() - paddingStart_ - paddingEnd_;
-            if (GreatNotEqual(frameSize.Width(), widthLeftSpace)) {
-                auto unitSpace = widthLeftSpace / frameSize.Width() / previewScale_;
-                geometryNode->SetFrameSize(SizeF(widthLeftSpace / previewScale_, unitSpace * frameSize.Height()));
-            }
-            previewLayoutWrapper = child;
-            size += frameSize;
-        }
+        GetPreviewNodeTotalSize(child, windowGlobalRect, previewLayoutWrapper, size, isShowHoverImage);
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
         if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize();
+            isShowHoverImage = menuPattern->GetIsShowHoverImage();
         }
     }
     return size;
@@ -1210,7 +1233,11 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(false);
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetNormalLayout()) {
         LayoutNormalPreviewMenu(layoutWrapper);
     } else {
         LayoutOtherDevicePreviewMenu(layoutWrapper);
@@ -2397,26 +2424,31 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperNode = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto containerId = Container::CurrentIdSafely();
     if (expandDisplay && !isShowInSubWindow) {
-        hierarchicalParameters_ = false;
+        if (containerId >= MIN_SUBCONTAINER_ID && menuWrapperPattern->IsSelectMenu()) {
+            hierarchicalParameters_ = true;
+        } else {
+            hierarchicalParameters_ = false;
+        }
         return;
     }
 
     hierarchicalParameters_ = expandDisplay;
 
     RefPtr<Container> container = Container::Current();
-    auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
 
     if (container && container->IsUIExtensionWindow()) {
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWrapperNode = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapperNode);
-        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+        if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;
         }
     }

@@ -100,7 +100,7 @@ public:
     ~RichEditorPattern() override;
 
     struct OperationRecord {
-        OperationRecord() : deleteCaretPostion(-1) {}
+        OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
         std::optional<std::string> addText;
         std::optional<std::string> deleteText;
         int32_t beforeCaretPosition;
@@ -176,6 +176,11 @@ public:
     void UpdatePreviewTextOnInsert(const std::string& insertValue);
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
+
+    void SetSupportPreviewText(bool isTextPreviewSupported)
+    {
+        isTextPreviewSupported_ = isTextPreviewSupported;
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
@@ -329,6 +334,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
+    bool BeforeStatusCursorMove(bool isLeft);
     bool CursorMoveLeft();
     bool CursorMoveRight();
     bool CursorMoveUp();
@@ -339,8 +345,10 @@ public:
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
     bool CursorMoveEnd();
+    float CalcLineHeightByPosition(int32_t position);
     int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
     int32_t CalcLineBeginPosition();
+    float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
     bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
@@ -734,6 +742,16 @@ public:
         return contentRect_;
     }
 
+    bool IsMoveCaretAnywhere() const
+    {
+        return isMoveCaretAnywhere_;
+    }
+
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -952,6 +970,9 @@ private:
     void SetAccessibilityAction();
     bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
+    void UpdateSelectionByTouchMove(const Offset& offset);
+    void MoveCaretAnywhere(const Offset& touchOffset);
+    void ShowCaretNoTwinkling(const Offset& textOffset);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1046,10 +1067,13 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    bool isTextPreviewSupported_ = true;
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     bool mouseClickRelease_ = false;
+    int32_t initSelectStart_ = 0;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

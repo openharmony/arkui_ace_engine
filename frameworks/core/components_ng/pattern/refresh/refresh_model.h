@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RefreshModel {
+class ACE_FORCE_EXPORT RefreshModel {
 public:
     static RefreshModel* GetInstance();
     virtual ~RefreshModel() = default;

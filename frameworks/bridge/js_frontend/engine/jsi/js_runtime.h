@@ -57,6 +57,12 @@ public:
         return true;
     }
 
+    virtual bool ExecuteJsBinForAOT([[maybe_unused]] const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr)
+    {
+        return true;
+    }
+
     // Get the global object.
     virtual shared_ptr<JsValue> GetGlobal() = 0;
     virtual void RunGC() = 0;
@@ -82,6 +88,7 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual const panda::EcmaVM* GetEcmaVm() const { return nullptr; }
     virtual void DestroyHeapProfiler() {}
     virtual void ForceFullGC() {}
     virtual void SetErrorEventHandler(

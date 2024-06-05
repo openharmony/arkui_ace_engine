@@ -52,6 +52,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimStart;
+    std::optional<Dimension> dimEnd;
     std::optional<Color> fontColor;
     std::optional<Color> selectedFontColor;
     std::optional<Dimension> fontSize;
@@ -83,6 +85,11 @@ struct AnimationCallbackInfo {
     std::optional<float> velocity;
 };
 
+struct SwiperMarginOptions {
+    float margin;
+    bool ignoreBlank;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -91,12 +98,12 @@ using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallb
 using ContentDidScrollEvent =
     std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
 
-class ACE_EXPORT SwiperModel {
+class ACE_FORCE_EXPORT SwiperModel {
 public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}

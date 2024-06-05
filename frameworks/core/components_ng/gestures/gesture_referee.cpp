@@ -77,8 +77,17 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
         if (gesture == recognizer) {
             continue;
         }
-        if (gesture) {
-            gesture->OnRejected();
+        if (!gesture || gesture->IsBridgeMode()) {
+            continue;
+        }
+        gesture->OnRejected();
+        auto bridgeObjList = gesture->GetBridgeObj();
+        for (const auto& item : bridgeObjList) {
+            auto bridgeObj = item.Upgrade();
+            if (bridgeObj) {
+                bridgeObj->OnRejected();
+                bridgeObj->OnRejectBridgeObj();
+            }
         }
     }
     if (queryStateFunc_) {

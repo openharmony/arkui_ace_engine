@@ -24,6 +24,7 @@ public:
     void SetImageAnalyzerConfig(void* config) override;
     void* GetImageAnalyzerConfig() override;
     void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) override;
+    bool HasImageAnalyzerConfig() override;
 };
 }
 #endif

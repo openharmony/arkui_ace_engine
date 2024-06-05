@@ -41,6 +41,7 @@ constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
+constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -404,11 +405,13 @@ void SetIndicatorInteractive(ArkUINodeHandle node, ArkUI_Bool value)
 
 void ResetIndicatorInteractive(ArkUINodeHandle node) {}
 
-void SetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit)
+void SetSwiperNextMargin(
+    ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit, ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetNextMargin(frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit));
+    SwiperModelNG::SetNextMargin(
+        frameNode, CalcDimension(nextMarginValue, (DimensionUnit)nextMarginUnit), static_cast<bool>(ignoreBlank));
 }
 
 void ResetSwiperNextMargin(ArkUINodeHandle node)
@@ -419,11 +422,13 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
 }
 
-void SetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit)
+void SetSwiperPrevMargin(
+    ArkUINodeHandle node, ArkUI_Float32 prevMarginValue, ArkUI_Int32 prevMarginUnit, ArkUI_Bool ignoreBlank)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetPreviousMargin(frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit));
+    SwiperModelNG::SetPreviousMargin(
+        frameNode, CalcDimension(prevMarginValue, (DimensionUnit)prevMarginUnit), static_cast<bool>(ignoreBlank));
 }
 
 void ResetSwiperPrevMargin(ArkUINodeHandle node)
@@ -464,6 +469,20 @@ void ResetSwiperDisplayCount(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
+}
+
+void SetSwiperSwipeByGroup(ArkUINodeHandle node, ArkUI_Bool swipeByGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, swipeByGroup);
+}
+
+void ResetSwiperSwipeByGroup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetSwipeByGroup(frameNode, DEFAULT_SWIPE_BY_GROUP);
 }
 
 void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
@@ -895,11 +914,11 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return SwiperModelNG::GetCachedCount(frameNode);
 }
 
-void SetSwiperNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetSwiperNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[1])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetNestedScroll(frameNode, values[0]);
+    SwiperModelNG::SetNestedScroll(frameNode, (*values)[0]);
 }
 
 void ResetSwiperNestedScroll(ArkUINodeHandle node)
@@ -916,24 +935,32 @@ ArkUI_Int32 GetSwiperNestedScroll(ArkUINodeHandle node)
     return SwiperModelNG::GetNestedScroll(frameNode);
 }
 
-void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetSwiperToIndex(frameNode, values[0], values[1]);
+    SwiperModelNG::SetSwiperToIndex(frameNode, (*values)[0], (*values)[1]);
 }
-ArkUI_Float32 GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit)
+void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<ArkUI_Float32>(SwiperModelNG::GetPreviousMargin(frameNode, unit));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    SwiperMarginOptions marginOptions;
+    SwiperModelNG::GetPreviousMargin(frameNode, unit, &marginOptions);
+    options->margin = static_cast<ArkUI_Float32>(marginOptions.margin);
+    options->ignoreBlank = static_cast<ArkUI_Bool>(marginOptions.ignoreBlank);
 }
 
-ArkUI_Float32 GetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Int32 unit)
+void GetSwiperNextMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<ArkUI_Float32>(SwiperModelNG::GetNextMargin(frameNode, unit));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    SwiperMarginOptions marginOptions;
+    SwiperModelNG::GetNextMargin(frameNode, unit, &marginOptions);
+    options->margin = static_cast<ArkUI_Float32>(marginOptions.margin);
+    options->ignoreBlank = static_cast<ArkUI_Bool>(marginOptions.ignoreBlank);
 }
 
 void SetSwiperIndicatorStyle(ArkUINodeHandle node, ArkUISwiperIndicator* indicator)
@@ -999,19 +1026,19 @@ namespace NodeModifier {
 const ArkUISwiperModifier* GetSwiperModifier()
 {
     static const ArkUISwiperModifier modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
-        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperDisplayArrow,
-        ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve, SetSwiperDisableSwipe, ResetSwiperDisableSwipe,
-        SetSwiperEffectMode, ResetSwiperEffectMode, SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode,
-        ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
-        SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
-        SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
-        GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
-        GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
-        GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll,
-        SetSwiperToIndex, GetSwiperPrevMargin, GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator,
-        GetSwiperController };
+        ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperSwipeByGroup,
+        ResetSwiperSwipeByGroup, SetSwiperDisplayArrow, ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve,
+        SetSwiperDisableSwipe, ResetSwiperDisableSwipe, SetSwiperEffectMode, ResetSwiperEffectMode,
+        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode, ResetSwiperDisplayMode, SetSwiperItemSpace,
+        ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical, SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval,
+        ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay, SetSwiperIndex, ResetSwiperIndex,
+        SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration, ResetSwiperDuration, SetSwiperEnabled,
+        ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex, GetSwiperVertical, GetSwiperDuration,
+        GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace,
+        GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
+        ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
+        SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
+        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController };
     return &modifier;
 }
 

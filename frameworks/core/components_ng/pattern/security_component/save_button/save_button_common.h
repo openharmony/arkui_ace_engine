@@ -24,7 +24,8 @@ namespace OHOS::Ace {
 enum class SaveButtonIconStyle : int32_t {
     ICON_NULL = -1,
     ICON_FULL_FILLED = 0,
-    ICON_LINE = 1
+    ICON_LINE = 1,
+    ICON_PICTURE = 2
 };
 
 enum class SaveButtonSaveDescription : int32_t {

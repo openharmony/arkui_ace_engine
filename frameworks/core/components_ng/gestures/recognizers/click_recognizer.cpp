@@ -33,7 +33,7 @@ int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
@@ -461,8 +461,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !sysJudge_) {
+    if (!callback && !sysJudge_ && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<TapGestureEvent>();
@@ -484,6 +485,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }

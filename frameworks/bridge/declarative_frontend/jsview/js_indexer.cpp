@@ -533,6 +533,15 @@ void JSIndexer::SetWidth(const JSCallbackInfo& args)
     }
 }
 
+void JSIndexer::SetEnableHapticFeedback(const JSCallbackInfo& args)
+{
+    bool state = true;
+    if (args.Length() > 0 && args[0]->IsBoolean()) {
+        state = args[0]->ToBoolean();
+    }
+    IndexerModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
 void JSIndexer::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -565,6 +574,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupBackgroundBlurStyle", &JSIndexer::SetPopupBackgroundBlurStyle);
     JSClass<JSIndexer>::StaticMethod("popupTitleBackground", &JSIndexer::SetPopupTitleBackground, opt);
     JSClass<JSIndexer>::StaticMethod("width", &JSIndexer::SetWidth);
+    JSClass<JSIndexer>::StaticMethod("enableHapticFeedback", &JSIndexer::SetEnableHapticFeedback, opt);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);

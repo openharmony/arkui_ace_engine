@@ -425,6 +425,7 @@ build_component_ng("pattern_ng") {
     "stepper/stepper_model_ng.cpp",
     "stepper/stepper_node.cpp",
     "stepper/stepper_pattern.cpp",
+    "swiper/arc_swiper_pattern.cpp",
     "swiper/swiper_accessibility_property.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_model_ng.cpp",
@@ -562,6 +563,10 @@ build_component_ng("pattern_ng") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
+    if (product_name == "ohos-sdk") {
+      sources +=
+          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
+    }
   } else if (is_arkui_x) {
     deps += [
       "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",

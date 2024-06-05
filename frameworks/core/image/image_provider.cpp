@@ -330,14 +330,14 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
                 if (skiaDom) {
                     taskExecutor->PostTask(
                         [successCallback, skiaDom] { successCallback(skiaDom); },
-                        TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
+                        TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromSrcSuccess");
                     return;
                 }
             }
         }
         LOGE("svg data wrong!");
         taskExecutor->PostTask(
-            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromSrcFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {
@@ -381,13 +381,13 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& d
             if (skiaDom) {
                 taskExecutor->PostTask(
                     [successCallback, skiaDom] { successCallback(skiaDom); },
-                    TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
+                    TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromDataSuccess");
                 return;
             }
         }
         LOGE("svg data wrong!");
         taskExecutor->PostTask(
-            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFromDataFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {

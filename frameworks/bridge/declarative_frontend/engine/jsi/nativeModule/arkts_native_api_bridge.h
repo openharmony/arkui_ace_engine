@@ -37,6 +37,8 @@ public:
     static ArkUINativeModuleValue GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportedUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RequireDynamicSyncScene(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

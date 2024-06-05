@@ -73,6 +73,8 @@ public:
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
     bool ExecuteJsBin(const std::string& fileName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    bool ExecuteJsBinForAOT(const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
     void RunFullGC() override;
@@ -105,7 +107,7 @@ public:
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);
 
-    const EcmaVM* GetEcmaVm() const
+    const EcmaVM* GetEcmaVm() const override
     {
         return GetThreadVm() ? GetThreadVm() : vm_;
     }

@@ -68,13 +68,13 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     RefPtr<FrameNode> frameNode;
     if (imageInfoConfig.isImageSpan) {
         frameNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+            nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     }
     stack->Push(frameNode);
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
         pattern->SetSrcUndefined(true);
@@ -83,7 +83,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
 
     // set draggable for framenode
     if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto draggable = pipeline->GetDraggable<ImageTheme>();
         if (draggable && !frameNode->IsDraggable()) {
@@ -148,7 +148,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     }
     stack->Push(frameNode);
 
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->GetIsAnimation()) {
         auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
@@ -249,6 +249,11 @@ void ImageModelNG::SetBorder(const Border &border) {}
 void ImageModelNG::SetBackBorder()
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedBorderRadius(true);
 }
 
 void ImageModelNG::SetBackBorder(FrameNode *frameNode)
@@ -633,6 +638,13 @@ void ImageModelNG::SetImageAnalyzerConfig(void* config)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::SetImageAIOptions(void* options)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAIOptions(options);
 }
 
 bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)

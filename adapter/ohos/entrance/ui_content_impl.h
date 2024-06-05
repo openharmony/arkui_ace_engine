@@ -20,14 +20,15 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
+#include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "wm/window.h"
-#include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "adapter/ohos/entrance/ace_viewport_config.h"
@@ -79,6 +80,7 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -89,6 +91,7 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -312,6 +315,17 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void PreLayout() override;
+    
+    sptr<IRemoteObject> GetRemoteObj() override
+    {
+        return instance_;
+    }
+    
+    void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -338,8 +352,6 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -376,6 +388,7 @@ private:
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
+    sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;

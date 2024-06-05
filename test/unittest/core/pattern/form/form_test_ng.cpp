@@ -1088,7 +1088,11 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     ASSERT_NE(externalRenderContext, nullptr);
     auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
+
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, true);
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 } // namespace OHOS::Ace::NG

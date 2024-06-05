@@ -189,9 +189,14 @@ public:
         state_.strokeState.SetMiterLimit(limit);
     }
 
-    LineDashParam GetLineDash() const
+    virtual LineDashParam GetLineDash() const
     {
-        return state_.strokeState.GetLineDash();
+        return lineDash_;
+    }
+
+    void SetLineDashParam(const std::vector<double>& segments)
+    {
+        lineDash_.lineDash = segments;
     }
 
     void SetLineDash(const std::vector<double>& segments)
@@ -365,7 +370,10 @@ protected:
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
     virtual void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
-    double GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph);
+    void PaintText(const float width, double x, double y,
+        std::optional<double> maxWidth, bool isStroke, bool hasShadow = false);
+    double GetAlignOffset(TextAlign align, double width);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
 #ifndef ACE_UNITTEST
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
@@ -377,6 +385,7 @@ protected:
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;
     std::vector<PaintHolder> saveStates_;
+    LineDashParam lineDash_;
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
 

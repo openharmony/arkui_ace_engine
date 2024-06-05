@@ -24,6 +24,7 @@ public:
     RefPtr<AceType> Create() override;
     void SetOnReady(std::function<void()>&& onReady) override;
     void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady);
     static RefPtr<AceType> GetCanvasPattern(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

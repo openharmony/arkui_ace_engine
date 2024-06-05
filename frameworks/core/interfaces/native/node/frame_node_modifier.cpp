@@ -116,57 +116,77 @@ void ClearChildrenInFrameNode(ArkUINodeHandle node)
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node)
+ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, 0);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, 0);
-    return frameNode->GetAllChildrenWithBuild(false).size();
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    return isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
+                      : frameNode->GetTotalChildCountWithoutExpanded();
 }
 
-ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
+ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetFrameNodeChildByIndex(index);
+    CHECK_NULL_RETURN(index >= 0, nullptr);
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    auto child = frameNode->GetFrameNodeChildByIndex(index, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
-ArkUINodeHandle GetFirst(ArkUINodeHandle node)
+ArkUINodeHandle GetFirst(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetFrameNodeChildByIndex(0);
+    if (isExpanded) {
+        frameNode->GetAllChildrenWithBuild(false);
+    }
+    auto child = frameNode->GetFrameNodeChildByIndex(0, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
-ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
+ArkUINodeHandle GetNextSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
     CHECK_NULL_RETURN(parent, nullptr);
-    parent->GetAllChildrenWithBuild(false);
-    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetFrameNodeChildByIndex(index + 1);
+    auto index = -1;
+    if (isExpanded) {
+        parent->GetAllChildrenWithBuild(false);
+        index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    } else {
+        index = parent->GetFrameNodeIndex(Referenced::Claim<FrameNode>(currentNode), false);
+    }
+    CHECK_NULL_RETURN(index > -1, nullptr);
+    auto sibling = parent->GetFrameNodeChildByIndex(index + 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
-ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
+ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
-    CHECK_NULL_RETURN(parent, nullptr);
-    parent->GetAllChildrenWithBuild(false);
-    auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetFrameNodeChildByIndex(index - 1);
+    auto index = -1;
+    if (isExpanded) {
+        parent->GetAllChildrenWithBuild(false);
+        index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
+    } else {
+        index = parent->GetFrameNodeIndex(Referenced::Claim<FrameNode>(currentNode), false);
+    }
+    CHECK_NULL_RETURN(index > 0, nullptr);
+    auto sibling = parent->GetFrameNodeChildByIndex(index - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
@@ -364,7 +384,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
-            node = node->GetFirstChild();
+            node = node->GetFrameChildByIndexWithoutExpanded(0);
         }
     }
 
@@ -385,14 +405,16 @@ void PropertyUpdate(ArkUINodeHandle node)
     }
 }
 
-ArkUINodeHandle GetLast(ArkUINodeHandle node)
+ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto size = frameNode->GetAllChildrenWithBuild(false).size();
-    auto child = frameNode->GetFrameNodeChildByIndex(size - 1);
+    auto size =
+        isExpanded ? frameNode->GetAllChildrenWithBuild(false).size() : frameNode->GetTotalChildCountWithoutExpanded();
+    CHECK_NULL_RETURN(size > 0, nullptr);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);
 }
 

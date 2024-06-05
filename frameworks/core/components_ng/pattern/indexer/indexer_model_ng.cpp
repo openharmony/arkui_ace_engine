@@ -34,6 +34,9 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     stack->Push(frameNode);
+    if (selected < 0 || selected >= static_cast<int32_t>(arrayValue.size())) {
+        selected = 0;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
 }
@@ -278,6 +281,11 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
 void IndexerModelNG::SetAutoCollapse(bool autoCollapse)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse);
+}
+
+void IndexerModelNG::SetEnableHapticFeedback(bool state)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, EnableHapticFeedback, state);
 }
 
 void IndexerModelNG::SetPopupBorderRadius(const Dimension& radius)
@@ -582,6 +590,11 @@ void IndexerModelNG::SetPopupPositionY(FrameNode* frameNode, const std::optional
 void IndexerModelNG::SetAutoCollapse(FrameNode* frameNode, bool autoCollapse)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse, frameNode);
+}
+
+void IndexerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, EnableHapticFeedback, state, frameNode);
 }
 
 void IndexerModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)

@@ -72,6 +72,9 @@ public:
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
+    void UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -137,6 +140,7 @@ public:
     {
         systemToastWindow_ = systemToastWindow;
     }
+    void ClearToastInSystemSubwindow();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);

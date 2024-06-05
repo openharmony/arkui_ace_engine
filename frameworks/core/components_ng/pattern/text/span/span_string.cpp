@@ -30,7 +30,7 @@ const std::unordered_set<SpanType> specailTypes = { SpanType::Image, SpanType::C
 
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start, length);
@@ -38,7 +38,7 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
 
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start);
@@ -88,7 +88,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
     auto wString = StringUtils::ToWstring((*it)->content);
     auto newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
     int32_t offset = (*it)->interval.first;
-    while (newlineIndex != -1 && newlineIndex != wString.size() - 1) {
+    while (newlineIndex != -1 && newlineIndex != static_cast<int32_t>(wString.size()) - 1) {
         auto newSpan = (*it)->GetSameStyleSpanItem();
         newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
         (*it)->interval = { offset, offset + newlineIndex + 1 };
@@ -789,6 +789,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto spanItem = (*it);
         if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
             auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
             placeHolderSpan->content = " ";
             placeHolderSpan->interval = spanItem->interval;

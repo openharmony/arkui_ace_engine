@@ -90,7 +90,7 @@ public:
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("menu_inner_border_radius", 0.0_vp);
             theme->innerBorderColor_ = pattern->GetAttr<Color>("menu_inner_border_color", Color::TRANSPARENT);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
-            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->filterAnimationDuration_ = 250;
             theme->previewAnimationDuration_ = 300;
             theme->hoverImageSwitchToPreviewOpacityDuration_ = HOVER_IMAGE_OPACITY_CHANGE_DURATION;
@@ -117,6 +117,9 @@ public:
             theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
             theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
             theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
+            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
+            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
+            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
         }
     };
 
@@ -327,6 +330,21 @@ public:
         return textMaxLines_;
     }
 
+    bool GetNormalLayout() const
+    {
+        return normalLayout_;
+    }
+
+    bool GetNormalPlacement() const
+    {
+        return normalPlacement_;
+    }
+
+    bool GetHasBackBlur() const
+    {
+        return hasBackBlur_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -372,6 +390,9 @@ private:
     float largeFontSizeScale_ = 2.0f;
     float maxFontSizeScale_ = 3.2f;
     int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
+    bool normalLayout_ = true;
+    bool normalPlacement_ = true;
+    bool hasBackBlur_ = true;
 };
 
 } // namespace OHOS::Ace::NG

@@ -365,6 +365,25 @@ void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue
     }
 }
 
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    if (!obj->HasProperty("value")) {
+        return false;
+    }
+    auto value = obj->GetProperty("value");
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty("unit");
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
+
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
@@ -413,6 +432,45 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottom) && NonNegative(bottom.Value()) &&
             bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
+        }
+    }
+    if (info->IsObject()) {
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
+        CalcDimension start;
+        CalcDimension end;
+        CalcDimension top;
+        CalcDimension bottom;
+        if (paddingObj->GetProperty("start")->IsObject()) {
+            JSRef<JSObject> startObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("start"));
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                ParseJsLengthMetrics(startObj, start);
+                padding.right = NG::CalcLength(start);
+            } else {
+                ParseJsLengthMetrics(startObj, start);
+                padding.left = NG::CalcLength(start);
+            }
+        }
+        if (paddingObj->GetProperty("end")->IsObject()) {
+            JSRef<JSObject> endObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("end"));
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                ParseJsLengthMetrics(endObj, end);
+                padding.left = NG::CalcLength(end);
+            } else {
+                ParseJsLengthMetrics(endObj, end);
+                padding.right = NG::CalcLength(end);
+            }
+        }
+        if (paddingObj->GetProperty("top")->IsObject()) {
+            JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
+            if (ParseJsLengthMetrics(topObj, top)) {
+                padding.top = NG::CalcLength(top);
+            }
+        }
+        if (paddingObj->GetProperty("bottom")->IsObject()) {
+            JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
+            if (ParseJsLengthMetrics(bottomObj, bottom)) {
+                padding.bottom = NG::CalcLength(bottom);
+            }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);

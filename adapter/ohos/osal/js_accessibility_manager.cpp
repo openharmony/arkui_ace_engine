@@ -102,6 +102,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionCut(); } },
     { ActionType::ACCESSIBILITY_ACTION_PASTE,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionPaste(); } },
+    { ActionType::ACCESSIBILITY_ACTION_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionClick(); } },
+    { ActionType::ACCESSIBILITY_ACTION_LONG_CLICK,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionLongClick(); } },
     { ActionType::ACCESSIBILITY_ACTION_SELECT,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionSelect(); } },
     { ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION,
@@ -1127,6 +1131,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     CHECK_NULL_VOID(node);
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasAccessibilityRole()) {
+        nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
+    }
 
     if (accessibilityProperty->HasUserTextValue()) {
         nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
@@ -1194,6 +1201,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             accessibilityProperty->GetChildWindowId());
     }
     nodeInfo.SetBelongTreeId(treeId_);
+    nodeInfo.SetParentWindowId(parentWindowId_);
 
     GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
         accessibilityProperty->GetCollectionInfo().columns, accessibilityProperty->GetCollectionInfo().selectMode);
@@ -1365,10 +1373,12 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
         auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
-        auto left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion();
-        auto top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion();
-        auto right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.Width();
-        auto bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
+        int32_t left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX();
+        int32_t top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY();
+        int32_t right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.GetX() +
+            virtualNodeRect.Width();
+        int32_t bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.GetY() +
+            virtualNodeRect.Height();
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -1414,15 +1424,15 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     if (node->IsVisible()) {
         auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
         auto parentRect = parent->GetTransformRectRelativeToWindow();
-        auto left = parentRect.Left();
-        auto top = parentRect.Top();
-        auto right = parentRect.Left() + virtualNodeRect.Width();
+        auto left = parentRect.Left() + commonProperty.windowLeft;
+        auto top = parentRect.Top() + commonProperty.windowTop;
+        auto right = parentRect.Left() + virtualNodeRect.Width() + commonProperty.windowLeft;
         if (virtualNodeRect.Width() > (parentRect.Right() - parentRect.Left())) {
-            right = parentRect.Right();
+            right = parentRect.Right() + commonProperty.windowLeft;
         }
-        auto bottom = parentRect.Top() + virtualNodeRect.Height();
+        auto bottom = parentRect.Top() + virtualNodeRect.Height() + commonProperty.windowTop;
         if (virtualNodeRect.Height() > (parentRect.Bottom() - parentRect.Top())) {
-            bottom = parentRect.Bottom();
+            bottom = parentRect.Bottom() + commonProperty.windowTop;
         }
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
@@ -1568,15 +1578,8 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
             nodeInfo, virtualInfo, ngPipeline);
         virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
-        infos.push_back(virtualInfo);
-        auto virtualNodeRect = frameNodeChild->GetTransformRectRelativeToWindow();
-        auto left = nodeInfo.GetRectInScreen().GetLeftTopXScreenPostion();
-        auto top = nodeInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
-        auto right = left + virtualNodeRect.Width();
-        auto bottom = top + virtualNodeRect.Height();
-        Accessibility::Rect bounds { left, top, right, bottom };
-        nodeInfo.SetRectInScreen(bounds);
         UpdateVirtualNodeInfo(infos, virtualInfo, item, commonProperty, ngPipeline);
+        infos.push_back(virtualInfo);
     }
 }
 
@@ -1657,11 +1660,11 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
                     nodeInfo.RemoveChild(child);
                 }
                 nodeInfo.AddChild(virtualNode->GetAccessibilityId());
-                infos.push_back(virtualInfo);
                 auto uiParentNode = AceType::DynamicCast<NG::UINode>(frameNodeParent);
                 if (!uiVirtualNode->GetChildren().empty()) {
                     UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline);
                 }
+                infos.push_back(virtualInfo);
                 infos.push_back(nodeInfo);
                 continue;
             }
@@ -2224,6 +2227,7 @@ void JsAccessibilityManager::SendExtensionAccessibilityEvent(
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
+    ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
@@ -2560,7 +2564,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
-        TaskExecutor::TaskType::UI, "ArkUIAccessibilityAction");
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityActionEvent");
 }
 
 void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)
@@ -3157,8 +3161,12 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
-    if (textJson.is_null() || !textJson.contains("type")) {
+    nlohmann::json textJson;
+    if (!nlohmann::json::accept(text)) {
+        return;
+    }
+    textJson = nlohmann::json::parse(text, nullptr, false);
+    if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
         return;
     }
     if (textJson["type"] == "textType") {
@@ -3426,6 +3434,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", action: %{public}d", elementId, action);
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
@@ -3992,6 +4001,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
+    parentWindowId_ = parentWindowId;
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4014,6 +4024,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     instance->DeregisterElementOperator(windowId);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
+    parentWindowId_ = -1;
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
@@ -4737,14 +4748,23 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode && !frameNode->IsInternal()) {
         std::string text = searchParam.text;
-        nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+        nlohmann::json textJson;
+        if (!nlohmann::json::accept(text)) {
+            return;
+        }
+        textJson = nlohmann::json::parse(text, nullptr, false);
         std::string value = "";
-        if (!textJson.is_null() && textJson.contains("value")) {
+        if (!textJson.is_null() && textJson.contains("value") && !textJson.is_discarded()) {
             value = textJson["value"];
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
-        nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
-        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
+        nlohmann::json textTypeJson;
+        if (!nlohmann::json::accept(textType)) {
+            return;
+        }
+        textTypeJson = nlohmann::json::parse(textType, nullptr, false);
+        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value &&
+            !textJson.is_discarded()) {
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
             infos.emplace_back(nodeInfo);

@@ -52,6 +52,8 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 
@@ -648,7 +650,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
     //set index start
-    int index = 0;
+    uint32_t index = 0;
     for (auto& family : fontFamilies) {
         families += family;
         if (index != fontFamilies.size() - 1) {
@@ -702,7 +704,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     if (!value.fontFamilies.empty()) {
         std::string families;
         //set index start
-        int index = 0;
+        std::size_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {
@@ -796,7 +798,7 @@ void SetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI
     std::string textTypes;
     for (int i = 0; i < size; i++) {
         auto index = values[i];
-        if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
+        if (index < 0 || index >= TEXT_DETECT_TYPES.size()) {
             continue;
         }
         if (i != 0) {
@@ -809,16 +811,16 @@ void SetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI
     TextModelNG::SetTextDetectConfig(frameNode, textTypes);
 }
 
-ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetTextDataDetectorConfig(ArkUINodeHandle node, ArkUI_Int32 (*values)[32])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
     auto typeString = TextModelNG::GetTextDetectConfig(frameNode);
     std::vector<std::string> types;
     StringUtils::StringSplitter(typeString, ',', types);
-    for (int i = 0; i < types.size(); i++) {
+    for (uint32_t i = 0; i < types.size(); i++) {
         auto ret = std::find(TEXT_DETECT_TYPES.begin(), TEXT_DETECT_TYPES.end(), types[i]);
-        values[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
+        (*values)[i] = ret != TEXT_DETECT_TYPES.end() ? ret - TEXT_DETECT_TYPES.begin() : -1;
     }
     return types.size();
 }
@@ -911,6 +913,23 @@ void ResetTextSelection(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextSelection(frameNode, DEFAULT_SELECTION, DEFAULT_SELECTION);
+}
+
+void SetTextSelectableMode(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textSelectableMode < 0 || textSelectableMode >= TEXT_SELECTABLE_MODE.size()) {
+        textSelectableMode = 0;
+    }
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[textSelectableMode]);
+}
+
+void ResetTextSelectableMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[0]);
 }
 
 void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
@@ -1071,6 +1090,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextContentWithStyledString,
         SetTextSelection,
         ResetTextSelection,
+        SetTextSelectableMode,
+        ResetTextSelectableMode,
         SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent,
         SetTextOnCopy,

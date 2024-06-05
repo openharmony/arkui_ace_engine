@@ -190,7 +190,7 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
@@ -379,6 +379,8 @@ UITaskScheduler::UITaskScheduler() {}
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -606,6 +608,9 @@ void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, Mou
 void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
 void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -764,6 +769,11 @@ bool PipelineBase::HasFloatTitle() const
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetFontScale(float fontScale)
+{
+    fontScale_ = fontScale;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

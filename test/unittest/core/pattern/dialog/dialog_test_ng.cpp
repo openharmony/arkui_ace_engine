@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -1869,5 +1870,180 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest019, TestSize.Level1)
     dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
     EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 1);
     EXPECT_EQ(dialog->GetGeometryNode()->GetFrameSize().Height(), param.height.value().ConvertToPx());
+}
+
+/**
+ * @tc.name: DialogPatternTest020
+ * @tc.desc: Test dialogPattern.UpdatePropertyForElderly function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogProperties.
+     * @tc.expected: the DialogProperties created successfully.
+     */
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttonDirection = DialogButtonDirection::HORIZONTAL;
+    vector<ButtonInfo> btnItems = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLACK,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+        },
+        ButtonInfo {
+            .text = "three button",
+            .bgColor = Color::BLUE,
+        },
+    };
+    props.buttons = btnItems;
+    /**
+     * @tc.steps: step2. create dialog node and dialogForOld node.
+     * @tc.expected: the dialog node and dialogForOld node created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    float expectedFontScale = 2.0f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(expectedFontScale);
+    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineContext::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+        []() -> WindowMode { return WindowMode::WINDOW_MODE_FULLSCREEN; });
+    auto dialogForOld = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialogForOld, nullptr);
+    auto dialogPatternOld = dialogForOld->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPatternOld, nullptr);
+
+    EXPECT_EQ(dialogPattern->isSuitableForElderly_, false);
+    EXPECT_EQ(dialogPattern->isThreeButtonsDialog_, false);
+    EXPECT_EQ(dialogPattern->isLandspace_, false);
+
+    EXPECT_EQ(dialogPatternOld->isSuitableForElderly_, true);
+    EXPECT_EQ(dialogPatternOld->isThreeButtonsDialog_, true);
+    EXPECT_EQ(dialogPatternOld->isLandspace_, true);
+}
+
+/**
+ * @tc.name: DialogPatternTest021
+ * @tc.desc: Test dialogPattern.NeedsButtonDirectionChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogProperties.
+     * @tc.expected: the DialogProperties created successfully.
+     */
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttonDirection = DialogButtonDirection::HORIZONTAL;
+    vector<ButtonInfo> btnItems = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLACK,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+        },
+        ButtonInfo {
+            .text = "three button",
+            .bgColor = Color::BLUE,
+        },
+    };
+    props.buttons = btnItems;
+    /**
+     * @tc.steps: step2. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    EXPECT_EQ(dialogPattern->buttonContainer_->GetTag(), V2::ROW_ETS_TAG);
+    
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
+    dialogPattern->isSuitableForElderly_ = true;
+    dialogPattern->AddButtonAndDivider(btnItems, dialogPattern->buttonContainer_, false);
+    dialogPattern->BuildChild(props);
+    EXPECT_EQ(dialogPattern->buttonContainer_->GetTag(), V2::COLUMN_ETS_TAG);
+}
+
+/**
+ * @tc.name: DialogPatternTest022
+ * @tc.desc: Test dialogPattern.UpdateDeviceOrientation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. create DialogProperties.
+     * @tc.expected: the DialogProperties created successfully.
+     */
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttonDirection = DialogButtonDirection::HORIZONTAL;
+    vector<ButtonInfo> btnItems = {
+        ButtonInfo {
+            .text = "main button",
+            .bgColor = Color::BLACK,
+        },
+        ButtonInfo {
+            .text = "second button",
+            .bgColor = Color::BLUE,
+        },
+        ButtonInfo {
+            .text = "three button",
+            .bgColor = Color::BLUE,
+        },
+    };
+    props.buttons = btnItems;
+
+    /**
+     * @tc.steps: step3. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->deviceOrientation_ = DeviceOrientation::PORTRAIT;
+    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    auto dialogLayoutProps = dialog->GetLayoutProperty<DialogLayoutProperty>();
+    auto buttonLayoutConstraint = dialogLayoutProps->GetLayoutConstraint();
+    dialog->Measure(buttonLayoutConstraint);
+    auto children = dialogPattern->titleContainer_->GetChildren();
+    for (auto child : children) {
+        auto textNode = AceType::DynamicCast<FrameNode>(child->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textNode);
+        auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+        CHECK_NULL_VOID(titleProp);
+        std::cout << (titleProp->GetFontSize().value_or(Dimension(10.0))).Value() << std::endl;
+        EXPECT_EQ(titleProp->GetFontSize().value_or(Dimension(10.0)), Dimension(40.0, DimensionUnit::VP));
+    }
 }
 } // namespace OHOS::Ace::NG

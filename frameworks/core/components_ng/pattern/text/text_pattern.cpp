@@ -62,7 +62,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr double DIMENSION_FADEOUT_ANGLE = 90.0;
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
@@ -117,9 +116,6 @@ void TextPattern::OnAttachToFrameNode()
             host->GetRenderContext()->UpdateClipEdge(true);
             host->GetRenderContext()->SetClipToFrame(true);
         }
-    }
-    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
-        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
@@ -528,7 +524,7 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        if (isSpanStringMode_) {
+        if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else {
             clipboard_->SetData(value, copyOption_);
@@ -594,7 +590,10 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                     return;
                 }
             }
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (mode == TextSelectableMode::UNSELECTABLE ||
+                textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
@@ -926,7 +925,11 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (mode == TextSelectableMode::UNSELECTABLE ||
+        copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -1066,7 +1069,10 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    if (copyOption_ == CopyOptions::None || mode == TextSelectableMode::UNSELECTABLE) {
         return;
     }
 
@@ -1367,6 +1373,21 @@ int32_t TextPattern::GetTextLength()
         return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     }
     return static_cast<int32_t>(GetWideText().length());
+}
+
+void TextPattern::SetTextSelectableMode(TextSelectableMode value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (value == TextSelectableMode::SELECTABLE_FOCUSABLE) {
+        focusHub->SetFocusable(true);
+        focusHub->SetIsFocusOnTouch(true);
+    } else {
+        focusHub->SetFocusable(false);
+        focusHub->SetIsFocusOnTouch(false);
+    }
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
@@ -2024,7 +2045,9 @@ void TextPattern::OnModifyDone()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         std::string textCache = textForDisplay_;
-        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        if (!isSpanStringMode_) {
+            textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        }
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
             dataDetectorAdapter_->aiDetectInitialized_ = false;
@@ -2365,93 +2388,6 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     }
 }
 
-void TextPattern::EnsureOverlayExists()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto overlayNode = frameNode->GetOverlayNode();
-    if (!overlayNode) {
-        auto builderFunc = []() -> RefPtr<UINode> {
-            auto uiNode =
-                FrameNode::GetOrCreateFrameNode(V2::RECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            return uiNode;
-        };
-        overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
-        CHECK_NULL_VOID(overlayNode);
-        frameNode->SetOverlayNode(overlayNode);
-        overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-        overlayNode->SetActive(true);
-
-        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->SetIsOverlayNode(true);
-        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-
-        auto overlayOffsetX = std::make_optional<Dimension>(0.0f);
-        auto overlayOffsetY = std::make_optional<Dimension>(0.0f);
-        layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
-
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto focusHub = overlayNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
-
-        auto frameRenderContext = GetRenderContext();
-        CHECK_NULL_VOID(frameRenderContext);
-        frameRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-        frameRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
-
-        auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM) |
-                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-
-        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        if (0 == textLayoutProperty->GetPixelRound()) {
-            textLayoutProperty->UpdatePixelRound(pixelRound);
-        }
-
-        layoutProperty->UpdatePixelRound(pixelRound);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
-void TextPattern::SetFadeout(const bool& left, const bool& right, const float& gradientPercent)
-{
-    if (left == leftFadeout_ && right == rightFadeout_ && NearEqual(gradientPercent_, gradientPercent)) {
-        return;
-    }
-
-    leftFadeout_ = left;
-    rightFadeout_ = right;
-    gradientPercent_ = gradientPercent;
-
-    EnsureOverlayExists();
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto overlayNode = frameNode->GetOverlayNode();
-    CHECK_NULL_VOID(overlayNode);
-    auto overlayRenderContext = overlayNode->GetRenderContext();
-    CHECK_NULL_VOID(overlayRenderContext);
-
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    gradient.GetLinearGradient()->angle = CalcDimension(DIMENSION_FADEOUT_ANGLE, DimensionUnit::PX);
-    gradient.AddColor(CreateTextGradientColor(0, Color::TRANSPARENT));
-    gradient.AddColor(CreateTextGradientColor(leftFadeout_ ? gradientPercent : 0, Color::WHITE));
-    gradient.AddColor(CreateTextGradientColor(rightFadeout_ ? (1 - gradientPercent) : 1, Color::WHITE));
-    gradient.AddColor(CreateTextGradientColor(1, Color::TRANSPARENT));
-    overlayRenderContext->UpdateLinearGradient(gradient);
-    overlayRenderContext->UpdateZIndex(INT32_MAX);
-    overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
-    overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::FAST);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void TextPattern::BeforeCreateLayoutWrapper()
 {
     if (!isSpanStringMode_) {
@@ -2476,7 +2412,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         UpdateContainerChildren(current.containerSpanNode, current.node);
         auto spanNode = DynamicCast<SpanNode>(current.node);
         auto tag = current.node->GetTag();
-        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2857,7 +2793,9 @@ void TextPattern::SetAccessibilityAction()
             CHECK_NULL_VOID(pattern);
             auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                mode != TextSelectableMode::UNSELECTABLE) {
                 pattern->ActSetSelection(start, end);
             }
         });
@@ -2867,7 +2805,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
         }
@@ -2878,7 +2818,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
@@ -3471,7 +3413,7 @@ RectF TextPattern::GetTextContentRect(bool isActualText) const
 size_t TextPattern::GetLineCount() const
 {
     CHECK_NULL_RETURN(pManager_, 0);
-    return pManager_->GetLineCount();
+    return pManager_->GetLineCount(true);
 }
 
 bool TextPattern::DidExceedMaxLines() const
@@ -3482,12 +3424,19 @@ bool TextPattern::DidExceedMaxLines() const
 
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
+    CHECK_NULL_RETURN(pManager_, TextLineMetrics());
     if (lineNumber < 0 || lineNumber > GetLineCount()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();
     }
-    return pManager_->GetLineMetrics(lineNumber);
+    auto lineMetrics = pManager_->GetLineMetrics(lineNumber);
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    lineMetrics.x += textContentRect.GetX();
+    lineMetrics.y += textContentRect.GetY();
+    lineMetrics.baseline += textContentRect.GetY();
+    return lineMetrics;
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)

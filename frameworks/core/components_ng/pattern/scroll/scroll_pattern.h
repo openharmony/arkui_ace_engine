@@ -384,6 +384,7 @@ private:
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     bool ScrollSnapTrigger();
     void CheckScrollable();
+    void SetEdgeRtl();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
 
     float currentOffset_ = 0.0f;

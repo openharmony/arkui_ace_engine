@@ -290,13 +290,13 @@ ArkUI_Float32 GetRowsGap(ArkUINodeHandle node)
     return WaterFlowModelNG::GetRowsGap(frameNode);
 }
 
-void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetWaterFlowNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NestedScrollOptions options = WaterFlowModelNG::GetNestedScroll(frameNode);
-    values[0] = static_cast<ArkUI_Int32>(options.forward);
-    values[1] = static_cast<ArkUI_Int32>(options.backward);
+    (*values)[0] = static_cast<ArkUI_Int32>(options.forward);
+    (*values)[1] = static_cast<ArkUI_Int32>(options.backward);
 }
 
 ArkUI_Int32 SetNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
@@ -408,12 +408,12 @@ ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarColor(frameNode);
 }
 
-ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[INDEX_0] = WaterFlowModelNG::GetEdgeEffect(frameNode);
-    values[INDEX_1] = WaterFlowModelNG::GetEdgeEffectAlways(frameNode);
+    (*values)[INDEX_0] = WaterFlowModelNG::GetEdgeEffect(frameNode);
+    (*values)[INDEX_1] = WaterFlowModelNG::GetEdgeEffectAlways(frameNode);
     return INDEX_2;
 }
 
@@ -467,29 +467,29 @@ void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
     WaterFlowModelNG::ResetSections(frameNode);
 }
 
-void GetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUIWaterFlowSectionOption option)
+ArkUI_WaterFlowSectionOption GetWaterFlowSectionOptions(ArkUINodeHandle node)
 {
+    ArkUI_WaterFlowSectionOption option;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, option);
     auto newSection = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode)->GetSectionInfo();
-    CHECK_NULL_VOID(frameNode);
     auto sectionsCount = newSection.size();
-    option->sections.resize(sectionsCount);
+    option.sections.resize(sectionsCount);
     for (size_t i = 0; i < sectionsCount; ++i) {
-        option->sections[i].itemsCount = newSection[i].itemsCount ? newSection[i].itemsCount : 0;
-        option->sections[i].crossCount = newSection[i].crossCount.has_value() ? newSection[i].crossCount.value() : 0;
-        option->sections[i].columnsGap =
-            newSection[i].columnsGap.has_value() ? newSection[i].columnsGap->Value() : 0.0f;
-        option->sections[i].rowsGap = newSection[i].rowsGap.has_value() ? newSection[i].rowsGap->Value() : 0.0f;
-        option->sections[i].margin[0] =
+        option.sections[i].itemsCount = newSection[i].itemsCount ? newSection[i].itemsCount : 0;
+        option.sections[i].crossCount = newSection[i].crossCount.has_value() ? newSection[i].crossCount.value() : 0;
+        option.sections[i].columnsGap = newSection[i].columnsGap.has_value() ? newSection[i].columnsGap->Value() : 0.0f;
+        option.sections[i].rowsGap = newSection[i].rowsGap.has_value() ? newSection[i].rowsGap->Value() : 0.0f;
+        option.sections[i].margin[0] =
             newSection[i].margin->top.has_value() ? newSection[i].margin->top->GetDimension().Value() : 0.0f;
-        option->sections[i].margin[1] =
+        option.sections[i].margin[1] =
             newSection[i].margin->right.has_value() ? newSection[i].margin->right->GetDimension().Value() : 0.0f;
-        option->sections[i].margin[2] =
+        option.sections[i].margin[2] =
             newSection[i].margin->bottom.has_value() ? newSection[i].margin->bottom->GetDimension().Value() : 0.0f;
-        option->sections[i].margin[3] =
+        option.sections[i].margin[3] =
             newSection[i].margin->left.has_value() ? newSection[i].margin->left->GetDimension().Value() : 0.0f;
     }
+    return option;
 }
 
 ArkUI_Float32 GetItemMinWidth(ArkUINodeHandle node, ArkUI_Int32 unit)

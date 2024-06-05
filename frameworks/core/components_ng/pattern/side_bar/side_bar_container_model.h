@@ -31,7 +31,7 @@ enum class WidthType : uint32_t {
     MAX_SIDEBAR_WIDTH,
 };
 
-class ACE_EXPORT SideBarContainerModel {
+class ACE_FORCE_EXPORT SideBarContainerModel {
 public:
     static SideBarContainerModel* GetInstance();
     virtual ~SideBarContainerModel() = default;

@@ -50,6 +50,13 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   fillColor: $r('sys.color.ohos_id_color_primary')
 }
 
+enum ChipGroupHeight {
+  NORMAL = 64,
+  SMALL = 52,
+  DEFAULT = 64,
+  AMEND = 32
+}
+
 interface IconOptions {
   src: ResourceStr;
   size?: SizeOptions;
@@ -405,6 +412,34 @@ export struct ChipGroup {
     }
   }
 
+  private getChipGroupHeight() {
+    if (typeof this.chipSize === 'string') {
+      if (this.chipSize === ChipSize.NORMAL) {
+        return ChipGroupHeight.NORMAL;
+      } else {
+        return ChipGroupHeight.SMALL;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number + ChipGroupHeight.AMEND
+    } else {
+      return ChipGroupHeight.DEFAULT
+    }
+  }
+
+  private getIconGroupSuffixHeight() {
+    if(typeof this.chipSize === 'string'){
+      if (this.chipSize === ChipSize.SMALL) {
+        return iconGroupSuffixTheme.smallBackgroundSize;
+      } else {
+        return iconGroupSuffixTheme.normalBackgroundSize;
+      }
+    } else if (typeof this.chipSize === 'object') {
+      return this.chipSize.height as number + ChipGroupHeight.AMEND
+    } else {
+      return ChipGroupHeight.DEFAULT
+    }
+  }
+
   private getPaddingTop() {
     return parseDimension(
       this.getUIContext(),
@@ -490,10 +525,7 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(
-              this.getChipSize() === ChipSize.SMALL ?
-              iconGroupSuffixTheme.smallBackgroundSize :
-              iconGroupSuffixTheme.normalBackgroundSize)
+            .height(this.getIconGroupSuffixHeight())
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
@@ -511,6 +543,7 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width("100%")
+    .height(this.getChipGroupHeight())
     .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }

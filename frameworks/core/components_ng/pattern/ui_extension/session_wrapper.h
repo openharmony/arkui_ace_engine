@@ -40,6 +40,7 @@ class OccupiedAreaChangeInfo;
 class RSSurfaceNode;
 class RSTransaction;
 class AvoidArea;
+enum class WindowMode : uint32_t;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -67,7 +68,8 @@ public:
     virtual ~SessionWrapper() = default;
 
     // About session
-    virtual void CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding = false) = 0;
+    virtual void CreateSession(
+        const AAFwk::Want& want, bool isAsyncModalBinding = false, bool isCallerSystem = false) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
     virtual int32_t GetSessionId() = 0;
@@ -129,6 +131,7 @@ public:
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

@@ -73,9 +73,9 @@ void SetListItemSwiperAction(ArkUINodeHandle node, ArkUIListItemSwipeActionOptio
 
     auto onOffsetChange = [option](int32_t offset) {
         if (option->onOffsetChange) {
-            using FuncType = float (*)(int32_t, void*);
+            using FuncType = float (*)(float, void*);
             FuncType func = reinterpret_cast<FuncType>(option->onOffsetChange);
-            func(offset, option->userData);
+            func(static_cast<float>(offset), option->userData);
         }
     };
     auto edgeEffect = static_cast<V2::SwipeEdgeEffect>(option->edgeEffect);

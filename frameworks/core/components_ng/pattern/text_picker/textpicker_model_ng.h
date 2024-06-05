@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextPickerModelNG : public TextPickerModel {
+class ACE_FORCE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
     void Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind) override;
     void SetSelected(uint32_t value) override;

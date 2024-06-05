@@ -417,7 +417,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navigation.title.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
@@ -617,7 +617,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navigation.menu.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
@@ -787,6 +787,10 @@ void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction()) {
@@ -832,7 +836,7 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
     RefPtr<JsNavigationFunction> jsNavigationFunction =
         AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onNavigationAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsNavigationFunction)](
-                                     NG::NavContentInfo from, NG::NavContentInfo to,
+                                     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to,
                                      NG::NavigationOperation operation) -> NG::NavigationTransition {
         NG::NavigationTransition transition;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transition);
@@ -844,14 +848,25 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
         }
 
         auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> interactive = transitionObj->GetProperty("isInteractive");
+        if (interactive->IsBoolean()) {
+            transition.interactive = interactive->ToBoolean();
+        } else {
+            transition.interactive = false;
+        }
+        int32_t timeout = -1;
         JSRef<JSVal> time = transitionObj->GetProperty("timeout");
         if (time->IsNumber()) {
-            auto timeout = time->ToNumber<int32_t>();
-            transition.timeout = (timeout >= 0) ? timeout : NAVIGATION_ANIMATION_TIMEOUT;
-        } else {
-            transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
+            timeout = time->ToNumber<int32_t>();
         }
+        if (!transition.interactive) {
+            timeout = timeout < 0 ? NAVIGATION_ANIMATION_TIMEOUT : timeout;
+        }
+        transition.timeout = timeout;
         JSRef<JSVal> transitionContext = transitionObj->GetProperty("transition");
+        if (!transitionContext->IsFunction()) {
+            return transition;
+        }
         auto jsOnTransition = AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(transitionContext));
         if (transitionContext->IsFunction()) {
             auto onTransition = [execCtx, func = std::move(jsOnTransition)](

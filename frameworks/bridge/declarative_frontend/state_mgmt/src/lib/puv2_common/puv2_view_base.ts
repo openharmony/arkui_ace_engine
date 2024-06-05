@@ -244,8 +244,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   }
 
   // KEEP
-  public debugInfoElmtId(elmtId: number): string {
-    return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
+  public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
+
+    return isProfiler ? {
+      elementId: elmtId,
+      elementTag: this.updateFuncByElmtId.get(elmtId).getComponentName(),
+      isCustomNode: this.childrenWeakrefMap_.has(elmtId)
+    } : this.updateFuncByElmtId.debugInfoElmtId(elmtId);
   }
 
   public dumpStateVars(): void {
@@ -256,20 +261,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   public isViewActive(): boolean {
     return this.isActive_;
-  }
-
-  /**
-   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
-   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
-   * or depending how UI compiler works also with 'undefined'
-   * @param freezeState only value 'true' will be used, otherwise inherits from parent
-   *      if not parent, set to false.
-   */
-  protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
-    // set to true if freeze parameter set for this @Component to true
-    // otherwise inherit from parent @Component (if it exists).
-    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
-    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
   }
 
   // abstract functions to be implemented by application defined class / transpiled code

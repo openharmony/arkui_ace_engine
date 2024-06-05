@@ -1934,6 +1934,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("selectionMenuOptions", &JSWeb::SelectionMenuOptions);
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
+    JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2194,6 +2195,22 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     return JSRef<JSVal>::Cast(requestObj);
 }
 
+JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+
+    JSRef<JSArray> adsBlockedArr = JSRef<JSArray>::New();
+    const std::vector<std::string>& adsBlocked = eventInfo.GetAdsBlocked();
+    for (int32_t idx = 0; idx < static_cast<int32_t>(adsBlocked.size()); ++idx) {
+        JSRef<JSVal> blockedUrl = JSRef<JSVal>::Make(ToJSValue(adsBlocked[idx]));
+        adsBlockedArr->SetValueAt(idx, blockedUrl);
+    }
+    obj->SetPropertyObject("adsBlocked", adsBlockedArr);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
 {
     if (!srcValue->IsObject() || webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
@@ -2339,12 +2356,28 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        if (!getCmdLineFunction->IsFunction()) {
+            return;
+        }
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
             WebModel::GetInstance()->SetCustomScheme(cmdLine);
         }
 
+        auto updateInstanceIdFunction = controller->GetProperty("updateInstanceId");
+        if (updateInstanceIdFunction->IsFunction()) {
+            std::function<void(int32_t)> updateInstanceIdCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(updateInstanceIdFunction)](int32_t newId) {
+                auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
+                auto result = func->Call(webviewController, 1, &newIdVal);
+            };
+            NG::WebModelNG::GetInstance()->SetUpdateInstanceIdCallback(std::move(updateInstanceIdCallback));
+        }
+
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
+        if (!getWebDebugingFunction->IsFunction()) {
+            return;
+        }
         bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
         if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
             return;
@@ -4692,7 +4725,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
 
 void JSWeb::CopyOption(int32_t copyOption)
 {
-    auto mode = CopyOptions::Distributed;
+    auto mode = CopyOptions::Local;
     switch (copyOption) {
         case static_cast<int32_t>(CopyOptions::None):
             mode = CopyOptions::None;
@@ -4707,7 +4740,7 @@ void JSWeb::CopyOption(int32_t copyOption)
             mode = CopyOptions::Distributed;
             break;
         default:
-            mode = CopyOptions::Distributed;
+            mode = CopyOptions::Local;
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
@@ -4983,6 +5016,29 @@ void JSWeb::OnInterceptKeyboardAttach(const JSCallbackInfo& args)
         return opt;
     };
     WebModel::GetInstance()->SetOnInterceptKeyboardAttach(std::move(uiCallback));
+}
+
+void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AdsBlockedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AdsBlockedEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
 } // namespace OHOS::Ace::Framework

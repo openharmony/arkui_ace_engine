@@ -112,6 +112,16 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    bool IsOnModeSwitchAnimation()
+    {
+        return isOnModeSwitchAnimation_;
+    }
+
+    void SetDoingModeSwitchAnimationFlag(bool isOnAnimation)
+    {
+        isOnModeSwitchAnimation_ = isOnAnimation;
+    }
+
     std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
     {
         return pushAnimations_;
@@ -211,6 +221,7 @@ private:
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

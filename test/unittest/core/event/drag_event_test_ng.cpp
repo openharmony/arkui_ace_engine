@@ -234,7 +234,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
     EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
     EXPECT_EQ(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
@@ -266,7 +268,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      * @tc.steps: step4. Invoke OnCollectTouchTarget when userCallback_ is not null.
      * @tc.expected: panRecognizer_ action and finalResult will be assigned value.
      */
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
 
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
@@ -279,7 +282,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      * @tc.expected: Result size will be increased by one.
      */
     dragEventActuator->SequencedRecognizer_ = nullptr;
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_TRUE(finalResult.size() != TOUCH_TEST_RESULT_SIZE_2);
 
     /**
@@ -395,6 +399,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.expected: dragEventActuator's userCallback_ is not null.
      */
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
     double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
         unknownPropertyValue = info.GetScale();
@@ -420,7 +425,8 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
     EXPECT_NE(dragEventActuator->longPressRecognizer_->callback_, nullptr);
 
@@ -471,12 +477,15 @@ HWTEST_F(DragEventTestNg, DragEventTestNg003, TestSize.Level1)
      * @tc.expected: longPressRecognizer is not nullptr and longPressRecognizer's HasThumbnailCallback() return true.
      */
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), false);
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), true);
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), true);
     /**
      * @tc.steps: step4. Invoke thumbnail callback.
@@ -537,8 +546,9 @@ HWTEST_F(DragEventTestNg, DragEventTestNg004, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
+    TouchTestResult responseLinkResult;
     dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT_MOUSE, getEventTargetImpl, finalResult);
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT_MOUSE, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_FALSE(finalResult.empty());
 }
 
@@ -581,7 +591,9 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->previewLongPressRecognizer_->onAction_, nullptr);
     /**
      * @tc.steps: step4. Invoke longPressUpdateValue callback.
@@ -673,7 +685,9 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
     /**
      * @tc.steps: step4. Invoke onActionStart callback, when info.GetSourceDevice() is SourceType::MOUSE.
@@ -749,7 +763,9 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
-    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    TouchTestResult responseLinkResult;
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     /**
      * @tc.steps: step4. Invoke onActionCancel callback, when gestureHub->GetTextDraggable() is true.
@@ -1310,7 +1326,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode001, TestSize.Level1)
     /**
      * @tc.steps: step4. Create GatherNode.
      */
-    dragEventActuator->FindItemFatherNode(listItemNode1);
+    dragEventActuator->FindItemParentNode(listItemNode1);
     auto gatherNode = DragEventActuator::CreateGatherNode(dragEventActuator);
     EXPECT_EQ(gatherNode, nullptr);
 }
@@ -1367,7 +1383,7 @@ HWTEST_F(DragEventTestNg, TestCreateGatherNode002, TestSize.Level1)
     /**
      * @tc.steps: step4. Create GatherNode.
      */
-    dragEventActuator->FindItemFatherNode(gridItemNode1);
+    dragEventActuator->FindItemParentNode(gridItemNode1);
     auto gatherNode = DragEventActuator::CreateGatherNode(dragEventActuator);
     EXPECT_EQ(gatherNode, nullptr);
 }
@@ -1702,7 +1718,7 @@ HWTEST_F(DragEventTestNg, TestIsNeedGather001, TestSize.Level1)
      */
     dragEventActuator->IsBelongToMultiItemNode(listItemNode1);
     EXPECT_EQ(dragEventActuator->isSelectedItemNode_, true);
-    dragEventActuator->FindItemFatherNode(listItemNode1);
+    dragEventActuator->FindItemParentNode(listItemNode1);
     bool isNeedGather = dragEventActuator->IsNeedGather();
     EXPECT_EQ(isNeedGather, false);
 }

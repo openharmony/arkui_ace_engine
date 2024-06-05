@@ -119,6 +119,7 @@ private:
     void InitHoverEvent();
     void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
+    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
 

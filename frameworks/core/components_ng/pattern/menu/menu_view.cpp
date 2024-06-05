@@ -184,8 +184,10 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    float contentPadding = 0.0f;
+    if (theme) {
+        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
@@ -195,7 +197,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto renderContext = scroll->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (theme) {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
@@ -238,8 +242,21 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
     return false;
 }
 
-OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
+OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap = nullptr)
 {
+    if (pixelMap) {
+        CHECK_NULL_RETURN(frameNode, OffsetF());
+        auto centerPosition = frameNode->GetPaintRectCenter(true);
+        float width = 0.0f;
+        float height = 0.0f;
+        if (pixelMap) {
+            width = pixelMap->GetWidth();
+            height = pixelMap->GetHeight();
+        }
+        auto offsetX = centerPosition.GetX() - width / 2.0f;
+        auto offsetY = centerPosition.GetY() - height / 2.0f;
+        return OffsetF(offsetX, offsetY);
+    }
     auto offsetToWindow = frameNode->GetPaintRectOffset();
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
@@ -394,7 +411,14 @@ void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameN
     textNode->MarkModifyDone();
     auto menuPattern = GetMenuPattern(menuNode);
     CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
+    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
+        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
+        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
+        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
+        auto imageNode = weakImageNode.Upgrade();
+        auto manager = weakManager.Upgrade();
+        auto textNode = weakTextNode.Upgrade();
+        auto menuPattern = weakMenuPattern.Upgrade();
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
@@ -413,8 +437,16 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     wrapperPattern->HideMenu();
 }
 
-void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuWrapper)
+void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<GestureEventHub>& gestureHub,
+    const RefPtr<FrameNode>& menuWrapper)
 {
+    auto dragEventActuator = targetGestureHub->GetDragEventActuator();
+    auto actionStartTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](
+                               const GestureEvent& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->RestartDragTask(info);
+    };
     auto actionEndTask = [menuWrapper](const GestureEvent& info) {
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
@@ -426,8 +458,25 @@ void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameN
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    auto panEvent =
+        AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
+    auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance, DimensionUnit::VP));
+
+    // add TouchEvent for Menu dragStart Move
+    auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        auto touchPoint = Point(
+            info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
+        }
+    };
+    auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchListener);
 }
 
 float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_t width, int32_t height,
@@ -463,6 +512,11 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
     previewPattern->SetCustomPreviewScaleTo(previewScaleTo);
     previewPattern->SetHoverImageDisAppearScaleTo(previewScaleTo / scale);
 
@@ -485,8 +539,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     SetHoverImageCustomPreviewInfo(previewNode, menuParam, width, height);
-
-    auto imageOffset = GetFloatImageOffset(target);
+    auto imageOffset = GetFloatImageOffset(target, pixelMap);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
@@ -501,7 +554,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
-    InitPanEvent(imageGestureHub, wrapperNode);
+    InitPanEvent(gestureHub, imageGestureHub, wrapperNode);
 
     if (!menuParam.isShowHoverImage) {
         ShowGatherAnimation(target, wrapperNode);
@@ -511,6 +564,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(wrapperNode);
+    auto geometryNode = imageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameOffset(imageOffset);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     ShowPixelMapAnimation(imageNode, wrapperNode, previewNode, menuParam);
@@ -564,6 +620,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
             manager->ShowFilterAnimation(columnNode);
         }
+    }
+}
+
+void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode != MenuPreviewMode::NONE || targetNode->IsDraggable()) {
+        SetFilter(targetNode, wrapperNode);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+        menuParam.isShowHoverImage) {
+        SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::NONE) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
     }
 }
 
@@ -715,7 +790,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_RETURN(previewNode, nullptr);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
-    MountTextNode(wrapperNode, previewCustomNode);
 
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -747,16 +821,14 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         wrapperNode.Reset();
         return menuNode;
     }
-    if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
-            SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
-        }
+        SetPreviewInfoToMenu(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
             previewNode->MountToParent(wrapperNode);
             previewNode->MarkModifyDone();
             SetSelfAndChildDraggableFalse(previewCustomNode);
+            MountTextNode(wrapperNode, previewCustomNode);
             SetCustomPreviewOpacityWhenHoverImage(wrapperNode, menuParam);
         }
     }

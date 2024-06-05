@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class PatternLockModel {
+class ACE_FORCE_EXPORT PatternLockModel {
 public:
     static PatternLockModel* GetInstance();
     virtual ~PatternLockModel() = default;

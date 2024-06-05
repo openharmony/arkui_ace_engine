@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ColumnModel {
+class ACE_FORCE_EXPORT ColumnModel {
 public:
     static ColumnModel* GetInstance();
     virtual ~ColumnModel() = default;
