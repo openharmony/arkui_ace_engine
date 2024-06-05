@@ -459,7 +459,8 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    bool MarkRemoving() override;
+    void ApplyGeometryTransition() override;
+    bool MarkRemoving(bool applyGeometryTransition = true) override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
