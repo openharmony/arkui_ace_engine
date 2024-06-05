@@ -854,6 +854,10 @@ public:
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
+    void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
+    {
+        predictLayoutNode_.emplace_back(node);
+    }
 protected:
     void DumpInfo() override;
 
@@ -1034,6 +1038,7 @@ private:
         RectF currFrameRect;
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
+    std::list<WeakPtr<FrameNode>> predictLayoutNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;
