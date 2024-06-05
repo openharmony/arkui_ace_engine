@@ -48,8 +48,7 @@ group("core_pattern_unittest") {
     "indexer:indexer_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
-
-    # "list:list_test_ng",
+    "list:list_test_ng",
     "loading_progress:loading_progress_test_ng",
     "marquee:marquee_test_ng",
     "menu:menu_test_ng",
@@ -86,8 +85,7 @@ group("core_pattern_unittest") {
     "stack:stack_test_ng",
     "stage:stage_test_ng",
     "stepper:stepper_test_ng",
-
-    # "swiper:swiper_test_ng",
+    "swiper:swiper_test_ng",
     "symbol:symbol_test_ng",
     "tabs:tabs_test_ng",
 
