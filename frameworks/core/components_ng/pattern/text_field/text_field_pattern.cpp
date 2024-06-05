@@ -718,11 +718,9 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 bool TextFieldPattern::CheckSelectAreaVisible()
 {
     auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, {});
+    CHECK_NULL_RETURN(tmpHost, false);
     auto pipeline = tmpHost->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipeline, {});
-    auto manager = pipeline->GetSafeAreaManager();
-    CHECK_NULL_RETURN(manager, {});
+    CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     auto selectArea = selectOverlay_->GetSelectArea();
     auto globalOffset = GetPaintRectGlobalOffset();
@@ -730,11 +728,9 @@ bool TextFieldPattern::CheckSelectAreaVisible()
     globalContentRect.SetOffset(globalContentRect.GetOffset() + globalOffset);
     if (selectArea.Bottom() < 0) {
         return false;
-    } else if (selectArea.Bottom() <= globalContentRect.Top() ||
-               selectArea.Top() >= globalContentRect.Bottom() ||
-               selectArea.Top() >= keyboardInset.start ||
-               selectArea.Right() <= globalContentRect.Left() ||
-               selectArea.Left() >= globalContentRect.Right()) {
+    } else if (!globalContentRect.IsInnerIntersectWith(selectArea)) {
+        return false;
+    } else if (keyboardInset.Length() > 0 && selectArea.Top() >= keyboardInset.start) {
         return false;
     }
     return true;
