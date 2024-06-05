@@ -65,7 +65,6 @@ public:
 
     void FireFinishCallback()
     {
-        isSuccess_ = true;
         if (interactive_) {
             FinishInteractiveAnimation();
             return;
@@ -109,7 +108,6 @@ public:
         if (!cancelAnimation_ || hasFinished_ || !interactive_) {
             return;
         }
-        isSuccess_ = false;
         cancelAnimation_();
     }
 
@@ -156,6 +154,9 @@ public:
     void UpdateTransition(float progress)
     {
         if (!interactive_ || hasFinished_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "update transition failed interactive: %{public}d, hasFinished: %{public}d",
+                interactive_, hasFinished_);
             return;
         }
         AnimationUtils::UpdateInteractiveAnimation(interactiveAnimation_, progress);
@@ -166,6 +167,7 @@ public:
         if (!interactive_ || hasFinished_) {
             return;
         }
+        isSuccess_ = true;
         AnimationUtils::ContinueInteractiveAnimation(interactiveAnimation_);
     }
 
@@ -174,6 +176,7 @@ public:
         if (!interactive_ || hasFinished_) {
             return;
         }
+        isSuccess_ = false;
         AnimationUtils::ReverseInteractiveAnimation(interactiveAnimation_);
     }
 

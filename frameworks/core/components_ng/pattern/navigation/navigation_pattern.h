@@ -372,7 +372,7 @@ private:
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedInvisible = false);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
     void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);

@@ -771,8 +771,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
         navigationNode->RemoveDialogDestination();
         return;
     }
-    if (isCustomAnimation_) {
-        TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
+    if (isCustomAnimation_ && TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, isPopPage)) {
         return;
     }
     StartDefaultAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
@@ -1343,7 +1342,7 @@ void NavigationPattern::DumpInfo()
 }
 
 bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedInvisible)
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
 {
     if ((!preTopNavDestination && !newTopNavDestination) || !onTransition_) {
         return false;
@@ -1359,46 +1358,45 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     proxy->SetPreDestination(preTopNavDestination);
     proxy->SetTopDestination(newTopNavDestination);
     currentProxy_ = proxy;
-    auto addAnimationCallback = [weakPattern = WeakClaim(this),
-        weakTopDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
-        weakPreTopDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
-        isPopPage, proxy, isNeedInvisible]() {
-            auto navigationPattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(navigationPattern);
-            auto preDestination = weakPreTopDestination.Upgrade();
-            auto topDestination = weakTopDestination.Upgrade();
-            if (navigationPattern->ExecuteAddAnimation(preDestination, topDestination, isPopPage, proxy)) {
-                return;
-            }
-            navigationPattern->StartDefaultAnimation(preDestination, topDestination,
-                isPopPage, isNeedInvisible);
-    };
-    auto finishCallback = [weakNavigation = WeakClaim(this),
+    auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
+    if (!navigationTransition.isValid) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition value is invalid, do default animation");
+        return false;
+    }
+    ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy);
+    if (navigationTransition.interactive) {
+        auto finishCallback = [weakNavigation = WeakClaim(this),
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                         isPopPage, proxy]() {
-        if (proxy == nullptr || proxy->GetIsFinished() || !proxy->GetInteractive()) {
-            return;
-        }
-        auto pattern = weakNavigation.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto preDestination = weakPreNavDestination.Upgrade();
-        auto topDestination = weakNewNavDestination.Upgrade();
-        proxy->SetIsFinished(true);
+            if (proxy == nullptr || proxy->GetIsFinished() || !proxy->GetInteractive()) {
+                return;
+            }
+            auto pattern = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto preDestination = weakPreNavDestination.Upgrade();
+            auto topDestination = weakNewNavDestination.Upgrade();
+            proxy->SetIsFinished(true);
 
-        // this flag will be update in cancelTransition or finishTransition
-        if (proxy->GetIsSuccess()) {
-            pattern->GetNavigationStack()->SetPreNavPathList(
-                pattern->GetNavigationStack()->GetAllNavDestinationNodes());
-            pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
-        } else {
-            // fire page cancel transition
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
-            pattern->RecoveryToLastStack();
-        }
-        proxy->FireEndCallback();
-    };
-    proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(addAnimationCallback, finishCallback));
+            // this flag will be update in cancelTransition or finishTransition
+            if (proxy->GetIsSuccess()) {
+                pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
+            } else {
+                // fire page cancel transition
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
+                pattern->RecoveryToLastStack();
+            }
+            proxy->FireEndCallback();
+        };
+        auto addAnimationCallback = [proxy, navigationTransition]() {
+            navigationTransition.transition(proxy);
+        };
+        proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
+            addAnimationCallback, finishCallback));
+        proxy->StartAnimation();
+    } else {
+        navigationTransition.transition(proxy);
+    }
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1412,8 +1410,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     }
     CHECK_NULL_RETURN(eventHub, true);
     eventHub->SetEnabledInternal(false);
-    proxy->StartAnimation();
-    return proxy->GetIsSuccess();
+    return true;
 }
 
 void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -2002,6 +1999,10 @@ void NavigationPattern::RefreshFocusToDestination()
 
 void NavigationPattern::RecoveryToLastStack()
 {
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    // clear last sync stack last nodes
+    hostNode->CleanHideNodes();
     CHECK_NULL_VOID(navigationStack_);
     navigationStack_->SetNavPathList(navigationStack_->GetPreNavPathList());
 
@@ -2024,8 +2025,6 @@ void NavigationPattern::RecoveryToLastStack()
         }
         navigationStack_->AddCacheNode(childNode.first, childNode.second);
     }
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(nullptr, navigationModeChange_);
 
     // recover lifecycle state before transition
@@ -2073,7 +2072,6 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
             pattern->GetNavigationStack()->GetAllNavDestinationNodes());
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
     });
-    navigationTransition.transition(proxy);
     // add timeout callback
     auto timeout = navigationTransition.timeout;
     auto pipeline = GetHost()->GetContext();
