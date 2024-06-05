@@ -329,6 +329,13 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         }
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        if (GreatOrEqual(geometryNode->GetPaddingSize().Width(), pattern->childrenMainSize_)) {
+            return false;
+        }
 
         if (pattern->IsOutOfBoundary()) {
             // over scroll in drag update from normal to over scroll or during over scroll.
@@ -340,10 +347,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
                 return false;
             }
 
-            auto host = pattern->GetHost();
-            CHECK_NULL_RETURN(host, false);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_RETURN(geometryNode, false);
             auto overScrollInfo = pattern->GetOverScrollInfo(geometryNode->GetPaddingSize());
             if (source == SCROLL_FROM_UPDATE) {
                 // adjust offset.
