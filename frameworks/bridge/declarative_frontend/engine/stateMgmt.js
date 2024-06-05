@@ -3866,6 +3866,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
         // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
         this.currentlyRenderedElmtIdStack_ = new Array();
+        // Set of elmtIds that need re-render
+        this.dirtDescendantElementIds_ = new Set();
         // Map elmtId -> Repeat instance in this ViewPU
         this.elmtId2Repeat_ = new Map();
         this.parent_ = undefined;
@@ -4067,6 +4069,49 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // unregister the removed elmtIds requested from the cpp side for all ViewPUs/ViewV2, it will make the first ViewPUs/ViewV2 slower
         // than before, but the rest ViewPUs/ViewV2 will be faster
         UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+        
+    }
+    /**
+    * force a complete rerender / update by executing all update functions
+    * exec a regular rerender first
+    *
+    * @param deep recurse all children as well
+    *
+    * framework internal functions, apps must not call
+    */
+    forceCompleteRerender(deep = false) {
+        
+        stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+        // see which elmtIds are managed by this View
+        // and clean up all book keeping for them
+        this.purgeDeletedElmtIds();
+        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
+        if (deep) {
+            for (const child of this.childrenWeakrefMap_.values()) {
+                const childView = child.deref();
+                if (childView) {
+                    childView.forceCompleteRerender(true);
+                }
+            }
+        }
+        
+        
+    }
+    /**
+    * force a complete rerender / update on specific node by executing update function.
+    *
+    * @param elmtId which node needs to update.
+    *
+    * framework internal functions, apps must not call
+    */
+    forceRerenderNode(elmtId) {
+        
+        // see which elmtIds are managed by this View
+        // and clean up all book keeping for them
+        this.purgeDeletedElmtIds();
+        this.UpdateElement(elmtId);
+        // remove elemtId from dirtDescendantElementIds.
+        this.dirtDescendantElementIds_.delete(elmtId);
         
     }
     // KEEP
@@ -6001,9 +6046,6 @@ class ViewPU extends PUV2ViewBase {
         this.delayRecycleNodeRerenderDeep = false;
         // @Provide'd variables by this class and its ancestors
         this.providedVars_ = new Map();
-        // Set of dependent elmtIds that need partial update
-        // during next re-render
-        this.dirtDescendantElementIds_ = new Set();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
@@ -6240,9 +6282,9 @@ class ViewPU extends PUV2ViewBase {
         // Remove the active component from the Map for Dfx
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
-            const childViewPU = child.deref();
-            if (childViewPU) {
-                childViewPU.setActiveInternal(this.isActive_);
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(this.isActive_);
             }
         }
     }
@@ -6257,9 +6299,9 @@ class ViewPU extends PUV2ViewBase {
         // Add the inactive Components to Map for Dfx listing
         ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
-            const childViewPU = child.deref();
-            if (childViewPU) {
-                childViewPU.setActiveInternal(this.isActive_);
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(this.isActive_);
             }
         }
     }
@@ -6299,39 +6341,6 @@ class ViewPU extends PUV2ViewBase {
             this.isRenderInProgress = false;
             
         }
-        
-    }
-    /**
-     * force a complete rerender / update by executing all update functions
-     * exec a regular rerender first
-     *
-     * @param deep recurse all children as well
-     *
-     * framework internal functions, apps must not call
-     */
-    forceCompleteRerender(deep = false) {
-        
-        stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds();
-        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        if (deep) {
-            this.childrenWeakrefMap_.forEach((weakRefChild) => {
-                const child = weakRefChild.deref();
-                if (child) {
-                    if (child instanceof ViewPU) {
-                        if (!child.hasBeenRecycled_) {
-                            child.forceCompleteRerender(true);
-                        }
-                    }
-                    else {
-                        throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
-                    }
-                }
-            });
-        }
-        
         
     }
     delayCompleteRerender(deep = false) {
@@ -8593,15 +8602,15 @@ class ViewV2 extends PUV2ViewBase {
             this.setDeleteStatusRecursively();
         }
         // tell UINodeRegisterProxy that all elmtIds under
-        // this ViewPU should be treated as already unregistered
+        // this ViewV2 should be treated as already unregistered
         
-        // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
+        // purge the elmtIds owned by this ViewV2 from the updateFuncByElmtId and also the state variable dependent elmtIds
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId) => {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
         // unregistration of ElementIDs
         
-        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        // it will unregister removed elementids from all the ViewV2, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
         // unregisters its own id once its children are unregistered above
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
@@ -8649,7 +8658,7 @@ class ViewV2 extends PUV2ViewBase {
         // needs to move set before updateFunc.
         // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
-        // add element id -> owning ViewPU
+        // add element id -> owning ViewV2
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
@@ -8728,7 +8737,7 @@ class ViewV2 extends PUV2ViewBase {
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
-            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewV2.compareNumber);
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
@@ -8745,8 +8754,7 @@ class ViewV2 extends PUV2ViewBase {
     UpdateElement(elmtId) {
         
         if (elmtId === this.id__()) {
-            // do not attempt to update itself.
-            // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            // do not attempt to update itself
             
             return;
         }
