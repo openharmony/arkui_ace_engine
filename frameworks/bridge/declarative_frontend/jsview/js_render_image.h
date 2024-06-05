@@ -70,14 +70,14 @@ public:
         pixelMap_ = pixelMap;
     }
 
-    std::unique_ptr<Ace::ImageData> GetImageData() const
+    std::shared_ptr<Ace::ImageData> GetImageData() const
     {
-        return std::make_unique<Ace::ImageData>(*imageData_);
+        return imageData_;
     }
 
-    void SetImageData(const std::unique_ptr<Ace::ImageData>& imageData)
+    void SetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
     {
-        imageData_ = std::make_unique<Ace::ImageData>(*imageData);
+        imageData_ = imageData;
     }
 
     RefPtr<NG::SvgDomBase> GetSvgDom()
@@ -122,7 +122,8 @@ public:
 
     double GetDensity()
     {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
@@ -149,7 +150,7 @@ private:
     RefPtr<NG::ImageObject> imageObj_;
     RefPtr<NG::ImageLoadingContext> loadingCtx_;
     RefPtr<PixelMap> pixelMap_;
-    std::unique_ptr<Ace::ImageData> imageData_;
+    std::shared_ptr<Ace::ImageData> imageData_;
     RefPtr<NG::SvgDomBase> svgDom_;
     ImageSourceInfo sourceInfo_;
     ImageFit imageFit_ = ImageFit::NONE;

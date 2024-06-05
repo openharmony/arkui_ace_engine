@@ -75,6 +75,11 @@ public:
         itemPosition_ = itemPosition;
     }
 
+    const PositionMap& GetRecycledItemPosition() const
+    {
+        return recycledItemPosition_;
+    }
+
     void ClearAllItemPosition(LayoutWrapper* layoutWrapper);
 
     void SetOverScrollFeature()
@@ -444,6 +449,7 @@ private:
     ScrollAutoType scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
 
     PositionMap itemPosition_;
+    PositionMap recycledItemPosition_;
     float currentOffset_ = 0.0f;
     float totalOffset_ = 0.0f;
     float currentDelta_ = 0.0f;

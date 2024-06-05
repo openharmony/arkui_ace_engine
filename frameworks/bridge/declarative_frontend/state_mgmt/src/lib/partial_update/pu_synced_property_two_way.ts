@@ -144,7 +144,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     this.setObject(newValue);
     TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue,
       this.notifyPropertyHasChangedPU,
-      this.notifyTrackedObjectPropertyHasChanged, this, true);
+      this.notifyTrackedObjectPropertyHasChanged, this);
     this.changeNotificationIsOngoing_ = false;
     stateMgmtProfiler.end();
   }

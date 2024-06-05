@@ -1681,6 +1681,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     }
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    CHECK_NULL_VOID(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -3940,6 +3941,7 @@ Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     auto& property = target->GetForeground();
+    CHECK_NULL_RETURN(property, value);
     auto getValue = property->propBlurRadius;
     if (getValue.has_value()) {
         return getValue.value();

@@ -92,6 +92,7 @@ public:
     virtual void EnableAnalyzer(bool isEnableAnalyzer) = 0;
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
     virtual void SetImageAnalyzerConfig(void* config) = 0;
+    virtual void SetImageAIOptions(void* options) = 0;
     virtual void SetSmoothEdge(float value) = 0;
     virtual void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) = 0;
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;

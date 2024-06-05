@@ -45,6 +45,7 @@
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/target_component.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -3216,7 +3217,7 @@ void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
 bool FrameNode::CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin)
 {
     for (auto originRect : origin) {
-        if (originRect.IsInnerIntersectWith(dest)) {
+        if (originRect.IsInnerIntersectWithRound(dest)) {
             return true;
         }
     }
@@ -4612,15 +4613,15 @@ void FrameNode::TriggerShouldParallelInnerWith(
             currentRecognizer->GetRecognizerType() != GestureTypeName::PAN_GESTURE) {
             continue;
         }
-        auto iter = sortedResponseLinkRecognizers.find(currentRecognizer->GetRecognizerType());
-        std::vector<RefPtr<TouchEventTarget>> recognizersInSpecifiedType = {};
-        if (iter != sortedResponseLinkRecognizers.end()) {
-            recognizersInSpecifiedType = iter->second;
-        }
-        if (recognizersInSpecifiedType.empty()) {
+        auto multiRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(item);
+        if (!multiRecognizer || multiRecognizer->GetTouchPointsSize() > 1) {
             continue;
         }
-        auto result = shouldBuiltInRecognizerParallelWithFunc(item, recognizersInSpecifiedType);
+        auto iter = sortedResponseLinkRecognizers.find(currentRecognizer->GetRecognizerType());
+        if (iter == sortedResponseLinkRecognizers.end() || iter->second.empty()) {
+            continue;
+        }
+        auto result = shouldBuiltInRecognizerParallelWithFunc(item, iter->second);
         if (result && currentRecognizer != result) {
             currentRecognizer->SetBridgeMode(true);
             result->AddBridgeObj(currentRecognizer);

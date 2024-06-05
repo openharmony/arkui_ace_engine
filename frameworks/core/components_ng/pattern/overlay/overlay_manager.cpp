@@ -2323,8 +2323,9 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
-    auto dialogNode = CalendarDialogView::Show(
-        dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = CalendarDialogView::Show(dialogProps, settingData,
+        buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent), calendarDialogDirection_);
+    calendarDialogDirection_ = TextDirection::AUTO;
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
@@ -2726,10 +2727,8 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
-        if (sheetPattern->HasShouldDismiss() || sheetPattern->HasOnWillDismiss()) {
-            sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
-            return true;
-        }
+        sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
+        return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_RETURN(modalPattern, false);
@@ -3528,7 +3527,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             ComputeSheetOffset(sheetStyle, topModalNode);
             auto sheetType = topModalNodePattern->GetSheetType();
             if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetDismissProcess()) {
-                PlaySheetTransition(topModalNode, true, false, false);
+                PlaySheetTransition(topModalNode, true, false);
             }
             return;
         }
@@ -3858,7 +3857,7 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 }
 
 void OverlayManager::PlaySheetTransition(
-    RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition, bool isModeChangeToAuto)
+    RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
     // current sheet animation
     AnimationOption option;
@@ -3888,10 +3887,6 @@ void OverlayManager::PlaySheetTransition(
             if (NearZero(sheetHeight_)) {
                 return;
             }
-        }
-        if (isModeChangeToAuto) {
-            option.SetDuration(0);
-            option.SetCurve(Curves::LINEAR);
         }
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange(sheetNode);
@@ -4214,7 +4209,7 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
         statusBarHeight = 0.0f;
     }
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
-    auto selection = sheetStyle.detents[0];
+    auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
         if (selection.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;

@@ -1826,4 +1826,37 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest040, TestSize.Level1)
     frameNodeList = dragDropManager->FindHitFrameNodes(Point(1.0f, 1.0f));
     EXPECT_TRUE(frameNodeList.empty());
 }
+
+/**
+ * @tc.name: DragDropManagerTest041
+ * @tc.desc: Test SetDragDampStartPoint and GetDragDampStartPoint
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create a point, than call SetDragDampStartPoint.
+     * @tc.expected: The values of dragDampStartPoint_ and point are equal
+     */
+    Point point(1.0f, 1.0f);
+    dragDropManager->SetDragDampStartPoint(point);
+    EXPECT_EQ(dragDropManager->dragDampStartPoint_, point);
+
+    /**
+     * @tc.steps: step3. create a point, than call GetDragDampStartPoint.
+     * @tc.expected: The return values of dragDampStartPoint_ and point are equal
+     */
+    Point point2(2.0f, 2.0f);
+    dragDropManager->dragDampStartPoint_ = point2;
+    auto returnPoint = dragDropManager->GetDragDampStartPoint();
+    EXPECT_EQ(returnPoint, point2);
+}
 } // namespace OHOS::Ace::NG

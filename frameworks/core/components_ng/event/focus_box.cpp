@@ -19,10 +19,14 @@
 namespace OHOS::Ace::NG {
 void FocusBox::SetStyle(const FocusBoxStyle& style)
 {
-    if (style.strokeColor || style.strokeWidth || style.margin) {
-        paintStyle_ = style;
-    } else {
+    paintStyle_ = style;
+
+    if (paintStyle_->strokeWidth.has_value() && paintStyle_->strokeWidth->IsNegative()) {
+        paintStyle_->strokeWidth.reset();
+    }
+    if (!paintStyle_->strokeColor && !paintStyle_->strokeWidth && !paintStyle_->margin) {
         paintStyle_.reset();
+        return;
     }
 }
 

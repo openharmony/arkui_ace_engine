@@ -183,18 +183,40 @@ public:
         }
     }
 
-    void UpdatePrevMarginWithoutMeasure(const Dimension& value)
+    void ResetIgnorePrevMarginAndNextMargin()
     {
-        if (propPrevMargin_ != value) {
-            propPrevMargin_ = value;
-        }
+        ignorePrevMarginAndNextMargin_ = false;
     }
 
-    void UpdateNextMarginWithoutMeasure(const Dimension& value)
+    void MarkIgnorePrevMarginAndNextMargin()
     {
-        if (propNextMargin_ != value) {
-            propNextMargin_ = value;
+        ignorePrevMarginAndNextMargin_ = true;
+    }
+
+    float GetCalculatedPrevMargin() const
+    {
+        if (!IsStretch() || ignorePrevMarginAndNextMargin_) {
+            return 0.0f;
         }
+        return GetPrevMarginValue(0.0_vp).ConvertToPx();
+    }
+
+    float GetCalculatedNextMargin() const
+    {
+        if (!IsStretch() || ignorePrevMarginAndNextMargin_) {
+            return 0.0f;
+        }
+        return GetNextMarginValue(0.0_vp).ConvertToPx();
+    }
+
+    bool IsStretch() const
+    {
+        // If display count is setted, use stretch mode.
+        if (HasDisplayCount() && !HasMinSize()) {
+            return true;
+        }
+
+        return GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
     }
 
     void ResetIgnoreItemSpace()
@@ -246,6 +268,7 @@ public:
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might
                                    // be ignored in some situations.
+    bool ignorePrevMarginAndNextMargin_ = false;
 };
 } // namespace OHOS::Ace::NG
 

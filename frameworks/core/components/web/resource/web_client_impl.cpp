@@ -148,6 +148,16 @@ void FindListenerImpl::OnFindResultReceived(
     delegate->OnSearchResultReceive(activeMatchOrdinal, numberOfMatches, isDoneCounting);
 }
 
+std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<uint8_t> &content)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return "";
+    }
+    return delegate->SpanstringConvertHtml(content);
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();

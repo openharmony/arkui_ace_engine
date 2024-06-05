@@ -751,7 +751,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::list<std::pair<std::string, int32_t>> fontFeatures_ { { "\"pnum\"", 1 } };
+    std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;

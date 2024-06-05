@@ -1436,8 +1436,6 @@ void PipelineContext::CheckVirtualKeyboardHeight()
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
-    dirtyNodes_.erase(uiNode);
-
     auto frameNode = DynamicCast<FrameNode>(uiNode);
 
     CHECK_NULL_VOID(frameNode);
@@ -3710,6 +3708,11 @@ bool PipelineContext::IsContainerModalVisible()
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    FlushVsync(nanoTimestamp, frameCount);
 }
 
 void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)

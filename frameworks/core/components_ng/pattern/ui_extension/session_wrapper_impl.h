@@ -99,6 +99,7 @@ public:
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
 
 private:
     void InitAllCallback();

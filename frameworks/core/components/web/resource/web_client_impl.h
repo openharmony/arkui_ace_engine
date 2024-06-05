@@ -101,6 +101,24 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
+class SpanstringConvertHtmlImpl : public OHOS::NWeb::NWebSpanstringConvertHtmlCallback {
+public:
+    SpanstringConvertHtmlImpl() = default;
+    explicit SpanstringConvertHtmlImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~SpanstringConvertHtmlImpl() = default;
+
+    virtual std::string SpanstringConvertHtml(const std::vector<uint8_t> &content) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl :
     public std::enable_shared_from_this<WebClientImpl>,
     public OHOS::NWeb::NWebHandler {

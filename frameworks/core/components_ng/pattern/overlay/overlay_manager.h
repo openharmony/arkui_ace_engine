@@ -450,8 +450,7 @@ public:
 
     void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
 
-    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
-        bool isModeChangeToAuto = false);
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
@@ -539,6 +538,11 @@ public:
     void DeleteUIExtensionNode(int32_t sessionId);
     void SetCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
+
+    void SetCalendarDialogDirection(TextDirection textDirection)
+    {
+        calendarDialogDirection_ = textDirection;
+    }
 
 private:
     void PopToast(int32_t targetId);
@@ -719,6 +723,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     int32_t curSessionId_ = -1;
+    TextDirection calendarDialogDirection_ = TextDirection::AUTO;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1106,6 +1106,20 @@ class ArkDisplayArrow {
   }
 }
 
+class ArkDisplayCount {
+  value: string | number | SwiperAutoFill;
+  swipeByGroup: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+
+  isEqual(another: ArkDisplayCount): boolean {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
+
 class ArkGridEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -1357,6 +1371,47 @@ class ArkDragPreviewOptions {
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
     );
   }
+}
+
+class ArkRelativeContainerGuideLine {
+  ids: Array<string> | undefined;
+  directions: Array<Axis> | undefined;
+  positions: Array<GuideLinePosition> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  ids: Array<string> | undefined;
+  directions: Array<BarrierDirection> | undefined;
+  referencedIds: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
 
 class ArkFocusScopeId {
   id: string | undefined;

@@ -38,6 +38,15 @@ template("card_frontend") {
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }
+
+    if (!defined(config.build_for_preview) || !config.build_for_preview) {
+      if (form_fwk_enable) {
+        external_deps += [
+          "form_fwk:fmskit_native",
+          "form_fwk:form_manager",
+        ]
+      }
+    }
   }
 }
 

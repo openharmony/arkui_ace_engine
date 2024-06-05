@@ -57,6 +57,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOTAL_NUMBER = 1000;
 constexpr double PERCENT_100 = 100.0;
+constexpr int32_t MODE_SEVEN = 6; // items is divided into 6 groups in (7 + #) mode
+constexpr int32_t MODE_FIVE = 4; // items is divided into 4 groups in (5 + #) mode
 }
 void IndexerPattern::OnModifyDone()
 {
@@ -82,10 +84,15 @@ void IndexerPattern::OnModifyDone()
         fullArrayValue_ = newArray;
     }
 
+    auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
+            if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
+                lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
+                propSelect = GetAutoCollapseIndex(propSelect);
+            }
         } else {
             sharpItemCount_ = 0;
             BuildFullArrayValue();
@@ -113,11 +120,6 @@ void IndexerPattern::OnModifyDone()
         RemoveBubble();
     }
 
-    auto propSelect = layoutProperty->GetSelected().value();
-    if (propSelect < 0 || propSelect >= itemCount_) {
-        propSelect = 0;
-        layoutProperty->UpdateSelected(propSelect);
-    }
     if (propSelect != selected_) {
         selected_ = propSelect;
         selectChanged_ = true;
@@ -326,6 +328,31 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+}
+
+int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
+{
+    int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
+    int32_t index = sharpItemCount_;
+    int32_t mode = MODE_FIVE;
+    propSelect -= sharpItemCount_;
+    if (lastCollapsingMode_ == IndexerCollapsingMode::SEVEN) {
+        mode = MODE_SEVEN;
+    }
+    // minimum items in one group including
+    // visible character in the group and excluding the first always visible item and # item if exists
+    auto cmin = static_cast<int32_t>((fullArraySize - 1 - sharpItemCount_) / mode);
+    auto gmax = (fullArraySize - 1 - sharpItemCount_) - cmin * mode; // number of groups with maximum items count
+    auto cmax = cmin + 1; // maximum items in one group including visible character in the group
+    auto gmin = mode - gmax; // number of groups with minimum items count
+    if (propSelect > gmin * cmin) {
+        index += gmin * 2; // one group includes two index
+        propSelect -= gmin * cmin;
+        index += propSelect / cmax * 2 + (propSelect % cmax == 0 ? 0 : 1);
+    } else {
+        index += propSelect / cmin * 2 + (propSelect % cmin == 0 ? 0 : 1);
+    }
+    return  index;
 }
 
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1822,11 +1849,11 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
         auto onChangeEvent = indexerEventHub->GetChangeEvent();
         if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onChangeEvent(selected_);
+            onChangeEvent(actualIndex);
         }
         auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
         if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onCreatChangeEvent(selected_);
+            onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {

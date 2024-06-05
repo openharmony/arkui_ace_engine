@@ -125,11 +125,14 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
         pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
         auto stepperHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
-        buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
-        PaddingProperty textPadding;
-        textPadding.top = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
-        textPadding.bottom = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
-        leftButtonWrapper->GetLayoutProperty()->UpdatePadding(textPadding);
+        MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
+        auto ButtonRow = leftButtonWrapper->GetChildByIndex(0);
+        CHECK_NULL_VOID(ButtonRow);
+        auto ButtonText = ButtonRow->GetChildByIndex(1);
+        CHECK_NULL_VOID(ButtonText);
+        float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
+        buttonLayoutConstraint.selfIdealSize =
+            OptionalSizeF(std::nullopt, TextHeight + PADDING.ConvertToPx() * HEIGHT_DOUBLE_RATIO);
     } else {
         buttonLayoutConstraint.maxSize = { buttonWidth, buttonHeight };
         buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);
@@ -160,11 +163,21 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
         pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
         auto stepperHeight = hostNode->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
-        buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
-        PaddingProperty textPadding;
-        textPadding.top = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
-        textPadding.bottom = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
-        rightButtonWrapper->GetLayoutProperty()->UpdatePadding(textPadding);
+        MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
+        auto ButtonRow = rightButtonWrapper->GetChildByIndex(0);
+        CHECK_NULL_VOID(ButtonRow);
+        auto ButtonText = ButtonRow->GetChildByIndex(0);
+        if (!ButtonText) {
+            PaddingProperty textPadding;
+            textPadding.top = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
+            textPadding.bottom = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
+            rightButtonWrapper->GetLayoutProperty()->UpdatePadding(textPadding);
+            buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
+        } else {
+            float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
+            buttonLayoutConstraint.selfIdealSize =
+                OptionalSizeF(std::nullopt, TextHeight + PADDING.ConvertToPx() * HEIGHT_DOUBLE_RATIO);
+        }
     } else {
         buttonLayoutConstraint.maxSize = { buttonWidth, buttonHeight };
         buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);

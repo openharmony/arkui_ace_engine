@@ -408,7 +408,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset() - GetPaintOffsetWithoutTransform();
     auto selectController = pattern->GetTextSelectController();
-    if (pattern->GetMagnifierController()) {
+    if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         GetLocalPointWithTransform(movingCaretOffset);

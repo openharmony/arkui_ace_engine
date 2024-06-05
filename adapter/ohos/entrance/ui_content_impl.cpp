@@ -141,6 +141,18 @@ void AddMccAndMncToResConfig(
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
 }
+
+void AddSetAppColorModeToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    CHECK_NULL_VOID(context);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_VOID(config);
+    auto colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    if (!colorModeIsSetByApp.empty()) {
+        aceResCfg.SetColorModeIsSetByApp(true);
+    }
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -1060,6 +1072,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
@@ -1107,6 +1120,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         frontend->SetModuleName(moduleName_);
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
+        container->SetBundleName(bundleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
@@ -1533,6 +1547,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -2119,7 +2134,28 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is "
          "%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDeco);
+    NotifyWindowMode(mode);
     UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
+}
+
+void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    taskExecutor->PostTask(
+        [weakPipeLine = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
+            auto pipeline = weakPipeLine.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            auto uiExtMgr = pipeline->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtMgr);
+            uiExtMgr->NotifyWindowMode(mode);
+        },
+        TaskExecutor::TaskType::UI, "NotifyWindowMode");
 }
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
@@ -3247,6 +3283,22 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+}
+
+void UIContentImpl::PreLayout()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [pipelineContext] {
+            pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
 
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)

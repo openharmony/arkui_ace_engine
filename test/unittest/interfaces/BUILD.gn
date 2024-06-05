@@ -32,17 +32,17 @@ ohos_unittest("ui_content_test") {
 
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
-    "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",
     "cJSON:cjson",
+    "graphic_2d:librender_service_client",
     "image_framework:image",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -106,7 +106,6 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -121,6 +120,7 @@ ohos_unittest("form_render_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
+    "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -179,7 +179,6 @@ ohos_unittest("form_render_group_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -194,6 +193,7 @@ ohos_unittest("form_render_group_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
+    "graphic_2d:librender_service_client",
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -220,19 +220,13 @@ ohos_unittest("drawable_descriptor_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor",
   ]
 
-  deps = [
-    "$skia_root_new:skia_ohos",
-    "//third_party/googletest:gmock_main",
-  ]
-
-  public_deps = [
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-  ]
+  deps = [ "//third_party/googletest:gmock_main" ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -315,6 +309,45 @@ ohos_unittest("navigation_controller_test") {
   ]
 }
 
+ohos_unittest("native_node_napi_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
+    "native_node_napi_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+    "$ace_root/interfaces/inner_api/drawable_descriptor",
+  ]
+
+  deps = [ "//third_party/googletest:gmock_main" ]
+
+  public_deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
@@ -323,6 +356,7 @@ group("interfaces_unittest") {
     ":extension_custom_node_test_ng",
     ":form_render_group_test",
     ":form_render_test",
+    ":native_node_napi_test",
     ":navigation_controller_test",
     ":ui_content_test",
     ":ui_event_test",

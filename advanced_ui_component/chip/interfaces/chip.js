@@ -1364,6 +1364,7 @@ export class ChipComponent extends ViewPU {
             Button.createWithChild();
             Button.direction(this.chipDirection);
             Button.type(ButtonType.Normal);
+            Button.constraintSize(this.getChipConstraintWidth());
             Button.clip(false);
             Button.backgroundColor(this.getChipNodeBackGroundColor());
             Button.borderRadius(this.getChipNodeRadius());

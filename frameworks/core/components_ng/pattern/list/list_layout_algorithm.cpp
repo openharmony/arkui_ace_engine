@@ -1016,6 +1016,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
             break;
         }
+        recycledItemPosition_.emplace(pos->first, pos->second);
         itemPosition_.erase(pos++);
     }
 }
@@ -1084,6 +1085,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             }
             break;
         }
+        recycledItemPosition_.emplace(pos->first, pos->second);
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {
@@ -1353,6 +1355,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (frameNode) {
             frameNode->MarkAndCheckNewOpIncNode();
         }
+    }
+    for (auto& pos : recycledItemPosition_) {
+        pos.second.startPos -= currentOffset_;
+        pos.second.endPos -= currentOffset_;
     }
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
     if (!itemPosition_.empty() && cacheCount > 0) {

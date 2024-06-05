@@ -23,6 +23,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
@@ -252,52 +253,75 @@ void TextContentModifier::UpdateImageNodeVisible(const VisibleType visible)
 
 void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-        CHECK_NULL_VOID(pattern);
-        size_t index = 0;
-        auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
-        auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
-        for (const auto& imageWeak : imageNodeList_) {
-            auto imageChild = imageWeak.Upgrade();
-            if (!imageChild) {
-                continue;
-            }
-            auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
-            auto imagePattern = DynamicCast<ImagePattern>(imageChild->GetPattern());
-            if (!imagePattern) {
-                continue;
-            }
-            auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
-            if (!layoutProperty) {
-                continue;
-            }
-            const auto& marginProperty = layoutProperty->GetMarginProperty();
-            float marginTop = 0.0f;
-            float marginLeft = 0.0f;
-            if (marginProperty) {
-                marginLeft =
-                    marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
-                marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
-            }
-            auto canvasImage = imagePattern->GetCanvasImage();
-            if (!canvasImage) {
-                canvasImage = imagePattern->GetAltCanvasImage();
-            }
-            auto geometryNode = imageChild->GetGeometryNode();
-            if (!canvasImage || !geometryNode) {
-                continue;
-            }
-            RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
-                geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-            if (!pixelMapImage) {
-                continue;
-            }
-            pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
-            ++index;
-        }
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
     }
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    size_t index = 0;
+    auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+    auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
+    for (const auto& imageWeak : imageNodeList_) {
+        auto imageChild = imageWeak.Upgrade();
+        if (!imageChild) {
+            continue;
+        }
+        auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
+        if (!DrawImage(imageChild, canvas, x, y, rect)) {
+            continue;
+        }
+        ++index;
+    }
+}
+
+bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y,
+    const RectF& rect)
+{
+    CHECK_NULL_RETURN(imageNode, false);
+    auto imagePattern = DynamicCast<ImagePattern>(imageNode->GetPattern());
+    if (!imagePattern) {
+        return false;
+    }
+    auto layoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (!layoutProperty) {
+        return false;
+    }
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    float marginTop = 0.0f;
+    float marginLeft = 0.0f;
+    if (marginProperty) {
+        marginLeft = marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+        marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    }
+    auto canvasImage = imagePattern->GetCanvasImage();
+    if (!canvasImage) {
+        canvasImage = imagePattern->GetAltCanvasImage();
+    }
+    auto geometryNode = imageNode->GetGeometryNode();
+    if (!canvasImage || !geometryNode) {
+        return false;
+    }
+    RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    const auto config = canvasImage->GetPaintConfig();
+    if (config.isSvg_) {
+        ImagePainter imagePainter(canvasImage);
+        OffsetF offset(0, 0);
+        SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+        auto clipRect = RSRect(0, 0, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+        canvas.Save();
+        canvas.Translate(rect.Left() + x + marginLeft, rect.Top() + y + marginTop);
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+        imagePainter.DrawSVGImage(canvas, offset, contentSize);
+        canvas.Restore();
+    } else {
+        auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+        if (!pixelMapImage) {
+            return false;
+        }
+        pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
+    }
+    return true;
 }
 
 void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
@@ -432,6 +456,9 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             CHECK_NULL_VOID(paragraph);
             paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
             paintOffsetY += paragraph->GetHeight();
+        }
+        if (marqueeSet_) {
+            PaintImage(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
         }
     } else {
         // Racing

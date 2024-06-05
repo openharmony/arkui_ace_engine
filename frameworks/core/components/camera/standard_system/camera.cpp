@@ -28,7 +28,6 @@
 #include <unistd.h>
 
 #include "base/log/log.h"
-#include "display_type.h"
 
 #include "core/image/image_file_cache.h"
 
@@ -56,6 +55,7 @@ const char REGION_HEIGHT[] = "region_height";
 constexpr int32_t DEFAULT_WIDTH = 640;
 constexpr int32_t DEFAULT_HEIGHT = 480;
 constexpr int32_t SURFACE_STRIDE_ALIGNMENT_VAL = 8;
+constexpr int32_t PIXEL_FMT_RGBA_8888 = 12;
 constexpr int32_t PREVIEW_SURFACE_WIDTH = 640;
 constexpr int32_t PREVIEW_SURFACE_HEIGHT = 480;
 constexpr int32_t PHOTO_SURFACE_WIDTH = 1280;

@@ -1362,26 +1362,41 @@ bool AceContainer::RequestAutoFill(
 
 class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
 public:
-    explicit SaveRequestCallback(const std::function<void()>& onFinish): onFinish_(onFinish) {}
+    SaveRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const std::function<void()>& onFinish)
+        : pipelineContext_(pipelineContext), onFinish_(onFinish) {}
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
-        if (onFinish_) {
-            onFinish_();
-            onFinish_ = nullptr;
-        }
+        ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
-        if (onFinish_) {
-            onFinish_();
-            onFinish_ = nullptr;
+        ProcessOnFinish();
+    }
+
+    void ProcessOnFinish()
+    {
+        if (!onFinish_) {
+            return;
         }
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [onFinish = std::move(onFinish_)]() mutable {
+                if (onFinish) {
+                    onFinish();
+                    onFinish = nullptr;
+                }
+            },
+            TaskExecutor::TaskType::UI, "ProcessOnFinish");
     }
 private:
+    WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     std::function<void()> onFinish_;
 };
 
@@ -1395,7 +1410,9 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     uiContentImpl->DumpViewData(node, viewDataWrap);
 
-    auto callback = std::make_shared<SaveRequestCallback>(onFinish);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto callback = std::make_shared<SaveRequestCallback>(pipelineContext, onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -2099,6 +2116,12 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
         return avoidArea;
     }
     return {};
+}
+
+Rosen::WindowMode AceContainer::GetMode()
+{
+    CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+    return uiWindow_->GetMode();
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(

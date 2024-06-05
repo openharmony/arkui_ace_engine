@@ -47,11 +47,13 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
     richEditorPattern->ClearSelectionMenu();
-
+    auto host = richEditorPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    richEditorPattern->SetSupportPreviewText(pipelineContext->GetSupportPreviewText());
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto draggable = pipeline->GetDraggable<RichEditorTheme>();
+        auto draggable = pipelineContext->GetDraggable<RichEditorTheme>();
         SetDraggable(draggable);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);

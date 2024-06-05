@@ -351,6 +351,9 @@ void WaterFlowLayoutSW::ClearBack(float bound)
         }
         lane.items_.pop_back();
         lane.endPos = itemStartPos - mainGap_;
+        if (lane.items_.empty()) {
+            lane.endPos += mainGap_;
+        }
     }
 }
 
@@ -366,6 +369,9 @@ void WaterFlowLayoutSW::ClearFront()
         }
         lane.items_.pop_front();
         lane.startPos = itemEndPos + mainGap_;
+        if (lane.items_.empty()) {
+            lane.startPos -= mainGap_;
+        }
     }
 }
 

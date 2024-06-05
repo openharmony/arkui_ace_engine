@@ -524,7 +524,7 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        if (isSpanStringMode_) {
+        if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else {
             clipboard_->SetData(value, copyOption_);
@@ -2045,7 +2045,9 @@ void TextPattern::OnModifyDone()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         std::string textCache = textForDisplay_;
-        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        if (!isSpanStringMode_) {
+            textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        }
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
             dataDetectorAdapter_->aiDetectInitialized_ = false;

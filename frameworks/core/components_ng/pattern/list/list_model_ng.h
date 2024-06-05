@@ -128,7 +128,7 @@ public:
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
-
+    static int32_t GetInitialIndex(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
 };

@@ -426,18 +426,6 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
-            if (it != hotAreasMap_.end()) {
-                auto hotAreaRect = it->second;
-                OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
-                if (ret != OHOS::Rosen::WMError::WM_OK) {
-                    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
-                        static_cast<int32_t>(ret));
-                }
-            }
-            return;
-        }
-        if (!rootNode->GetChildren().empty()) {
             return;
         }
         auto focusHub = rootNode->GetFocusHub();

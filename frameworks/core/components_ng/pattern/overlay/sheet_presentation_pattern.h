@@ -504,11 +504,14 @@ public:
     // Get ScrollHeight before avoid keyboard
     float GetScrollHeight() const
     {
+        auto titleHeight = GetFirstChildHeight();
         if (sheetType_ == SheetType::SHEET_CENTER) {
-            return centerHeight_;
+            return centerHeight_ - titleHeight;
         }
-        return height_;
+        return height_ - titleHeight;
     }
+    
+    float GetFirstChildHeight() const;
 
     RefPtr<OverlayManager> GetOverlayManager();
     RefPtr<FrameNode> GetOverlayRoot();
@@ -544,6 +547,11 @@ public:
             sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
+    
+    int32_t GetDetentsIndex() const
+    {
+        return detentsFinalIndex_;
     }
 
 protected:
@@ -626,9 +634,15 @@ private:
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     bool windowChanged_ = false;
 
+    //record sheet sored detent index
+    int32_t detentsIndex_ = 0;
+
+    //record sheet unsoreddetent index
+    int32_t detentsFinalIndex_ = 0;
     std::string sheetThemeType_ = "auto";
 
     std::vector<float> sheetDetentHeight_;
+    std::vector<float> unSortedSheetDentents_;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
 

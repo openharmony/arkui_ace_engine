@@ -130,10 +130,13 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
         layoutInfo_->targetIndex_ = targetIndex_;
     }
     RefPtr<WaterFlowLayoutBase> algorithm;
-    if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
-        algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
-    } else if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
+        if (sections_) {
+            return nullptr;
+        }
         algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
+    } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else {
         int32_t footerIndex = -1;
         auto footer = footer_.Upgrade();
@@ -700,7 +703,7 @@ void WaterFlowPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
         std::string res = std::string("");
         int32_t index = 0;
-        for (auto& section : sections_->GetSectionInfo()) {
+        for (const auto& section : sections_->GetSectionInfo()) {
             res.append("[section:" + std::to_string(index) + "]");
             res.append("{ itemCount:" + std::to_string(section.itemsCount) + " },")
                 .append("{ crossCount:" + std::to_string(section.crossCount.value_or(1)) + " },")

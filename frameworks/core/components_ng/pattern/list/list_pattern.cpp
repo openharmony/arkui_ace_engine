@@ -177,7 +177,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             needReEstimateOffset_ = false;
             posMap_->ClearPosMap();
         }
-        CalculateCurrentOffset(relativeOffset);
+        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
@@ -1792,18 +1792,22 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
 }
 
-void ListPattern::CalculateCurrentOffset(float delta)
+void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
 {
     if (itemPosition_.empty()) {
         return;
     }
+    auto itemPos = itemPosition_;
+    for (auto& [index, pos] : recycledItemPosition) {
+        itemPos.try_emplace(index, pos);
+    }
     posMap_->UpdatePosMapStart(
-        delta, currentOffset_, spaceWidth_, itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
-    for (auto& [index, pos] : itemPosition_) {
+        delta, currentOffset_, spaceWidth_, itemPos.begin()->first, itemPos.begin()->second.startPos);
+    for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
     }
-    posMap_->UpdatePosMapEnd(itemPosition_.rbegin()->first, spaceWidth_);
+    posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_);
 }
 
 void ListPattern::UpdateScrollBarOffset()

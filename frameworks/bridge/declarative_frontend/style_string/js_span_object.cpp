@@ -975,8 +975,9 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();
         contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
         auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        if (func->ExecuteJS(1, &jsVal)->IsFunction()) {
-            JSRef<JSObject> result = JSRef<JSObject>::Cast(func->ExecuteJS(1, &jsVal));
+        auto obj = func->ExecuteJS(1, &jsVal);
+        if (obj->IsObject()) {
+            JSRef<JSObject> result = JSRef<JSObject>::Cast(obj);
             float width = 0;
             if (result->HasProperty("width")) {
                 auto widthObj = result->GetProperty("width");

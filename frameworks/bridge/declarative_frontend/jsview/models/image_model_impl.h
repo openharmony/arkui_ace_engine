@@ -59,6 +59,7 @@ public:
     void EnableAnalyzer(bool isEnableAnalyzer) override {}
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
     void SetImageAnalyzerConfig(void* config) override {}
+    void SetImageAIOptions(void* config) override {}
     void SetSmoothEdge(float value)  override {}
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}

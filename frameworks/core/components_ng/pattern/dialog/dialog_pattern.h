@@ -307,7 +307,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
-    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -322,6 +322,7 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpObjectProperty();
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);

@@ -239,6 +239,13 @@ public:
         return false;
     }
 
+    virtual bool IsFormRender() const
+    {
+        return false;
+    }
+    
+    virtual void SetIsFormRender(bool isFormRender) {};
+
     const std::string& GetCardHapPath() const
     {
         return cardHapPath_;

@@ -618,7 +618,7 @@ public:
     }
 
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
-    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
@@ -1085,7 +1085,7 @@ public:
     }
 
     virtual RefPtr<FocusHub> GetFocusHub() const;
-    void UpdateCaretInfoToController() const;
+    void UpdateCaretInfoToController();
     void OnObscuredChanged(bool isObscured);
     const RefPtr<TextInputResponseArea>& GetResponseArea()
     {
@@ -1446,6 +1446,7 @@ private:
 
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
+    void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void SetIsSingleHandle(bool isSingleHandle)
     {
@@ -1693,6 +1694,7 @@ private:
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     int32_t clickTimes_ = -1;
 };

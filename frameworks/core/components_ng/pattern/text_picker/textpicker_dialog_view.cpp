@@ -782,7 +782,9 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
 {
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonForwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("stepper.next"));
@@ -801,9 +803,12 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
 void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     const RefPtr<FrameNode>& buttonBackwardNode, const RefPtr<PipelineContext>& pipeline)
 {
+    CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     UpdateBackwardButtonMargin(buttonBackwardNode, dialogTheme);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("stepper.back"));
@@ -977,9 +982,11 @@ bool TextPickerDialogView::GetIsOverRange(const float& scale)
 RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent& moveForwardEvent,
     const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
+    CHECK_NULL_RETURN(textPickerNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, nullptr);
     auto buttonForwardNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonForwardNode, nullptr);
@@ -1022,9 +1029,11 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
 RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEvent& moveBackwardEvent,
     const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
+    CHECK_NULL_RETURN(textPickerNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, nullptr);
     auto buttonBackwardNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonBackwardNode, nullptr);
@@ -1066,8 +1075,10 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
 
 void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow)
 {
+    CHECK_NULL_VOID(contentRow);
     auto buttonCancel = contentRow->GetFirstChild();
     auto buttonCancelNode = AceType::DynamicCast<FrameNode>(buttonCancel);
+    CHECK_NULL_VOID(buttonCancelNode);
     buttonCancelNode->SetActive(true);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
@@ -1075,6 +1086,7 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonForward = contentRow->GetChildAtIndex(2);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
+    CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(true);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
@@ -1082,6 +1094,7 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonBackward = contentRow->GetChildAtIndex(1);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
+    CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(false);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
@@ -1089,6 +1102,7 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonConfirm = contentRow->GetChildAtIndex(3);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
+    CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(false);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
@@ -1097,8 +1111,10 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
 
 void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRow)
 {
+    CHECK_NULL_VOID(contentRow);
     auto buttonCancel = contentRow->GetFirstChild();
     auto buttonCancelNode = AceType::DynamicCast<FrameNode>(buttonCancel);
+    CHECK_NULL_VOID(buttonCancelNode);
     buttonCancelNode->SetActive(false);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
@@ -1106,6 +1122,7 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
 
     auto buttonForward = contentRow->GetChildAtIndex(2);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
+    CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(true);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
@@ -1113,6 +1130,7 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
 
     auto buttonBackward = contentRow->GetChildAtIndex(1);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
+    CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(true);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
@@ -1120,6 +1138,7 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
 
     auto buttonConfirm = contentRow->GetChildAtIndex(3);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
+    CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(false);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
@@ -1128,8 +1147,10 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
 
 void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow)
 {
+    CHECK_NULL_VOID(contentRow);
     auto buttonCancel = contentRow->GetFirstChild();
     auto buttonCancelNode = AceType::DynamicCast<FrameNode>(buttonCancel);
+    CHECK_NULL_VOID(buttonCancelNode);
     buttonCancelNode->SetActive(false);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
@@ -1137,6 +1158,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonForward = contentRow->GetChildAtIndex(2);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
+    CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(false);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
@@ -1144,6 +1166,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonBackward = contentRow->GetChildAtIndex(1);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
+    CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(true);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
@@ -1151,6 +1174,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
 
     auto buttonConfirm = contentRow->GetChildAtIndex(3);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
+    CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(true);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
@@ -1160,6 +1184,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
 void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColumn,
     const uint32_t& dialogNodePage, const uint32_t& columnCount)
 {
+    CHECK_NULL_VOID(contentColumn);
     auto contentRow = contentColumn->GetLastChild();
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
@@ -1174,8 +1199,10 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
     RefPtr<FrameNode>& textPickerNode,
     const uint32_t& dialogNodePage, const uint32_t& columnCount)
 {
+    CHECK_NULL_VOID(textPickerNode);
     for (int i = 0; i < columnCount; i++) {
         auto selectedStackNode = AceType::DynamicCast<FrameNode>(textPickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(selectedStackNode);
         if (i != dialogNodePage) {
             selectedStackNode->SetActive(false);
             auto layoutProperty = selectedStackNode->GetLayoutProperty<LayoutProperty>();
@@ -1214,9 +1241,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
     auto buttonCancelNode = CreateCancelNode(cancelEvent, frameNode, buttonInfos);
+    CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     auto buttonConfirmNode = CreateConfirmNode(frameNode, frameNode, buttonInfos, acceptEvent);
+    CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     auto buttonForwardNode = CreateForwardNode(moveForwardEvent, frameNode, buttonInfos);
+    CHECK_NULL_RETURN(buttonForwardNode, nullptr);
     auto buttonBackwardNode = CreateBackwardNode(moveBackwardEvent, frameNode, buttonInfos);
+    CHECK_NULL_RETURN(buttonBackwardNode, nullptr);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonBackwardNode->MountToParent(contentRow);
@@ -1292,6 +1323,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
         CreateAgingButtonNode(textPickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent),
             std::move(dialogMoveForwardEvent), std::move(dialogMoveBackwardFunc),
             closeCallBack, nextCallBack, previousCallBack);
+    CHECK_NULL_RETURN(contentRow, nullptr);
     contentRow->MountToParent(contentColumn);
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

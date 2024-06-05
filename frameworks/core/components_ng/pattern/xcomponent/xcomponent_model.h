@@ -76,6 +76,7 @@ public:
         return "";
     }
     virtual void EnableAnalyzer(bool enable) {}
+    virtual void SetImageAIOptions(void* options) {}
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}

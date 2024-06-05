@@ -295,6 +295,13 @@ void SessionWrapperImpl::CreateSession(
     InitAllCallback();
 }
 
+void SessionWrapperImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("NotifyWindowMode: %{public}d.", static_cast<int32_t>(mode));
+    session_->NotifyHostWindowMode(mode);
+}
+
 void SessionWrapperImpl::DestroySession()
 {
     CHECK_NULL_VOID(session_);
@@ -462,6 +469,9 @@ void SessionWrapperImpl::OnConnect()
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionConnect");
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        NotifyWindowMode(container->GetMode());
 }
 
 void SessionWrapperImpl::OnDisconnect(bool isAbnormal)

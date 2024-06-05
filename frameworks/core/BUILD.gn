@@ -262,7 +262,6 @@ template("ace_core_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "$skia_root_new:skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
@@ -537,8 +536,6 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/preview_mock:ace_core_components_preview_mock_pattern_ng_$platform" ]
     }
 
-    include_dirs +=
-        [ "//foundation/window/window_manager/interfaces/innerkits" ]
     if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
@@ -572,8 +569,7 @@ template("ace_core_source_set") {
         "common/rosen/rosen_asset_manager.cpp",
         "common/rosen/rosen_window.cpp",
       ]
-      deps += [ "//third_party/libuv:uv" ]
-
+      external_deps += [ "libuv:uv" ]
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
@@ -854,7 +850,6 @@ template("ace_core_ng_source_set") {
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
-      "$skia_root_new:skia_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 

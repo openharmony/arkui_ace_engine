@@ -461,7 +461,7 @@ void GestureEventHub::InitDragDropEvent()
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance));
+    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance, DimensionUnit::VP));
 }
 
 bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)

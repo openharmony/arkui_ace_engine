@@ -22,6 +22,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -527,9 +528,10 @@ void ParseJsRotate(
         rotate.centerZ = Dimension(0.5f, DimensionUnit::PERCENT);
     }
     // if specify angle
-    Framework::JSViewAbstract::GetJsAngle("angle", jsObj, angle);
+    Framework::JSViewAbstract::GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, angle);
     rotate.perspective = 0.0f;
-    Framework::JSViewAbstract::GetJsPerspective("perspective", jsObj, rotate.perspective);
+    Framework::JSViewAbstract::GetJsPerspective(static_cast<int32_t>(ArkUIIndex::PERSPECTIVE), jsObj,
+        rotate.perspective);
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(

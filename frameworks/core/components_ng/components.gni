@@ -115,12 +115,12 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         ]
+        deps += [ "//third_party/skia:skia_canvaskit_static" ]
         defines += [ "CROSS_PLATFORM" ]
         if (ace_enable_gpu) {
           defines += [ "ACE_ENABLE_GPU" ]
         }
       }
-      deps += [ "$skia_root_new:skia_$platform" ]
       if (!is_arkui_x && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
         external_deps += [ "device_status:devicestatus_client" ]
@@ -156,11 +156,12 @@ template("build_component_ng") {
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]
         }
-
-        include_dirs += [
-          "//foundation/window/window_manager",
-          "//foundation/window/window_manager/interfaces/innerkits",
-        ]
+        if (use_mingw_win || use_mac || use_linux) {
+          include_dirs += [
+            "//foundation/window/window_manager",
+            "//foundation/window/window_manager/interfaces/innerkits",
+          ]
+        }
       }
 
       if (defined(config.enable_standard_input) &&
