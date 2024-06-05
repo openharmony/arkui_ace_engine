@@ -1596,6 +1596,7 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
     const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize)
 {
     auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
+    auto direction = menuProp->GetNonAutoLayoutDirection();
     auto targetSize = menuProp->GetTargetSizeValue(SizeF());
     switch (alignType) {
         case MenuAlignType::CENTER: {
@@ -1603,6 +1604,16 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
             break;
         }
         case MenuAlignType::END: {
+            if (direction == TextDirection::RTL) {
+                return;
+            }
+            position_.AddX(targetSize.Width() - menuSize.Width());
+            break;
+        }
+        case MenuAlignType::START: {
+            if (direction != TextDirection::RTL) {
+                return;
+            }
             position_.AddX(targetSize.Width() - menuSize.Width());
             break;
         }
