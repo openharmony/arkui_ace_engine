@@ -152,6 +152,11 @@ public:
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetDefaultMask();
 
+    bool GetCompositePixelMapWithBadge(
+        const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+        const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+        std::shared_ptr<Media::PixelMap> &compositePixelMap);
+
 private:
     friend class ImageConverter;
     void InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
