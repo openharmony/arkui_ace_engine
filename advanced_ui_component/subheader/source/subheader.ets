@@ -276,8 +276,7 @@ export struct SubHeader {
     if (this.isSuitableAging()) {
       this.ageing = true;
       this.subHeaderModifier.isAgeing = this.ageing;
-    }
-    else {
+    } else {
       this.ageing = false;
       this.subHeaderModifier.isAgeing = this.ageing;
     }
