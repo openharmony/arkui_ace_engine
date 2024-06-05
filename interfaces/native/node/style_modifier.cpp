@@ -8836,6 +8836,7 @@ int32_t SetImageSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!drawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    node->drawableDescriptor = drawableDescriptor;
     if (!drawableDescriptor->drawableDescriptor && !drawableDescriptor->resource &&
         !drawableDescriptor->animatedDrawableDescriptor) {
         return ERROR_CODE_PARAM_INVALID;
@@ -8907,8 +8908,13 @@ int32_t SetColorFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_TWENTY_PARAM);
-    if (actualSize < 0) {
+    bool isObject = CheckAttributeObject(item);
+    if ((actualSize < 0 && !isObject) || (actualSize > 0 && isObject)) {
         return ERROR_CODE_PARAM_INVALID;
+    }
+    if (isObject) {
+        fullImpl->getNodeModifiers()->getImageModifier()->setDrawingColorFilter(node->uiNodeHandle, item->object);
+        return ERROR_CODE_NO_ERROR;
     }
     std::vector<float> colorFloatArray;
     for (size_t i = 0; i < actualSize && i < REQUIRED_TWENTY_PARAM; i++) {
@@ -10005,6 +10011,9 @@ const ArkUI_AttributeItem* GetImageSpanSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -10026,6 +10035,9 @@ const ArkUI_AttributeItem* GetImageSrc(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getImageSrc(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->drawableDescriptor) {
+        g_attributeItem.object = node->drawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -10064,6 +10076,12 @@ const ArkUI_AttributeItem* GetObjectRepeat(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetColorFilter(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
+    auto colorFilter = fullImpl->getNodeModifiers()->getImageModifier()->getDrawingColorFilter(node->uiNodeHandle);
+    if (colorFilter) {
+        g_attributeItem.object = colorFilter;
+        g_attributeItem.size = 0;
+        return &g_attributeItem;
+    }
     g_attributeItem.size = REQUIRED_TWENTY_PARAM;
     for (size_t i = 0; i < REQUIRED_TWENTY_PARAM; i++) {
         g_numberValues[i].f32 = 0;

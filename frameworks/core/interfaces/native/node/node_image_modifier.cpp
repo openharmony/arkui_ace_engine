@@ -16,6 +16,7 @@
 
 #include <cstdint>
 
+#include "base/image/drawing_color_filter.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -25,6 +26,8 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
+
+#include "effect/color_filter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -388,6 +391,28 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     }
 }
 
+void SetDrawingColorFilter(ArkUINodeHandle node, void* colorFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto filter = reinterpret_cast<OHOS::Rosen::Drawing::ColorFilter*>(colorFilter);
+    auto filterPtr = std::make_shared<OHOS::Rosen::Drawing::ColorFilter>(*filter);
+    auto drawingColorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(static_cast<void*>(&filterPtr));
+    ImageModelNG::SetDrawingColorFilter(frameNode, drawingColorFilter);
+}
+
+void* GetDrawingColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto drawingColorFilter = ImageModelNG::GetDrawingColorFilter(frameNode);
+    CHECK_NULL_RETURN(drawingColorFilter, nullptr);
+    auto filterSptr = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(
+        drawingColorFilter->GetDrawingColorFilterSptrAddr());
+    CHECK_NULL_RETURN(filterSptr, nullptr);
+    return (*filterSptr).get();
+}
+
 void ResetColorFilter(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -667,7 +692,7 @@ const ArkUIImageModifier* GetImageModifier()
         ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
         GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
         GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
-        SetPixelMap, SetPixelMapArray, SetResourceSrc };
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, SetDrawingColorFilter, GetDrawingColorFilter };
     return &modifier;
 }
 

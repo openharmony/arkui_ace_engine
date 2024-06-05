@@ -27,6 +27,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/animation/curves.h"
+#include "interfaces/native/node/node_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -565,13 +566,24 @@ void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_WILL_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
-        event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        if (usePx) {
+            event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.ConvertToPx());
+            event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.ConvertToPx());
+        } else {
+            event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
+            event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        }
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[3].i32 = static_cast<int>(source);
         SendArkUIAsyncEvent(&event);
-        scrollRes.xOffset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
-        scrollRes.yOffset = Dimension(event.componentAsyncEvent.data[1].f32, DimensionUnit::VP);
+        if (usePx) {
+            scrollRes.xOffset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::PX);
+            scrollRes.yOffset = Dimension(event.componentAsyncEvent.data[1].f32, DimensionUnit::PX);
+        } else {
+            scrollRes.xOffset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+            scrollRes.yOffset = Dimension(event.componentAsyncEvent.data[1].f32, DimensionUnit::VP);
+        }
         return scrollRes;
     };
     ScrollModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
@@ -588,8 +600,14 @@ void SetScrollOnDidScroll(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_DID_SCROLL;
-        event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
-        event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        if (usePx) {
+            event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.ConvertToPx());
+            event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.ConvertToPx());
+        } else {
+            event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
+            event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        }
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
     };
