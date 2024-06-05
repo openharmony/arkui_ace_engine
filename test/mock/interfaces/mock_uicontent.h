@@ -61,7 +61,6 @@ public:
     MOCK_METHOD3(UpdateViewportConfig, void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
                                            const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
-    MOCK_METHOD1(NotifyWindowMode, void(OHOS::Rosen::WindowMode mode));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD2(UpdateDecorVisible, void(bool visible, bool hasDeco));
     MOCK_METHOD3(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize));

@@ -2134,28 +2134,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is "
          "%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDeco);
-    NotifyWindowMode(mode);
     UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
-}
-
-void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipeline);
-    taskExecutor->PostTask(
-        [weakPipeLine = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
-            auto pipeline = weakPipeLine.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            auto uiExtMgr = pipeline->GetUIExtensionManager();
-            CHECK_NULL_VOID(uiExtMgr);
-            uiExtMgr->NotifyWindowMode(mode);
-        },
-        TaskExecutor::TaskType::UI, "NotifyWindowMode");
 }
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
