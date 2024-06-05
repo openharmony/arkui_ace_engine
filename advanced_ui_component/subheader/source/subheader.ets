@@ -218,7 +218,7 @@ export struct SubHeader {
   }
 
   private isSuitableAging(): boolean | null {
-    return (this.fontSize >= 1.75) && ((this.operationType === OperationType.TEXT_ARROW) ||
+    return (this.fontSize >= MIN_FONT_SIZE) && ((this.operationType === OperationType.TEXT_ARROW) ||
       this.operationType === OperationType.BUTTON) && this.operationItem &&
       (this.operationItem?.length > 0) && this.operationItem[0].value !== '';
   }
