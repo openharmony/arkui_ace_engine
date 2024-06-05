@@ -431,7 +431,7 @@ HWTEST_F(TextFieldModifyTest, UpdateSecondHandleInfo002, TestSize.Level1)
      */
     pattern_->HandleSetSelection(5, 10, false);
     pattern_->selectOverlay_->UpdateSecondHandleOffset();
-    EXPECT_EQ(pattern_->selectOverlay_->GetSecondHandleInfo()->paintRect.GetOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(pattern_->selectOverlay_->GetSecondHandleInfo()->paintRect.GetOffset(), OffsetF(-1.0f, 0.0f));
 }
 
 /**

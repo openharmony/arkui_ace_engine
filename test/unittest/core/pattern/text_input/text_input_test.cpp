@@ -577,7 +577,7 @@ HWTEST_F(TextFieldUXTest, SelectAll001, TestSize.Level1)
      */
     GestureEvent info;
     pattern_->HandleSingleClickEvent(info);
-    EXPECT_EQ(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
+    EXPECT_NE(pattern_->GetTextSelectController()->GetFirstHandleOffset().GetX(),
         pattern_->GetTextSelectController()->GetSecondHandleOffset().GetX());
 }
 

@@ -48,7 +48,6 @@ HWTEST_F(TextInputUpdateTestNg, HandleLongPress001, TestSize.Level1)
      */
     pattern_->obscureTickCountDown_ = 1;
     pattern_->longPressEvent_->operator()(gestureEvent);
-    pattern_->processOverlayDelayTask_();
     EXPECT_TRUE(pattern_->showSelect_);
 }
 
