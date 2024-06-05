@@ -211,9 +211,9 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
 
     UErrorCode status = U_ZERO_ERROR;
     simpleDateFormat_ = std::make_shared<SimpleDateFormat>(UnicodeString("mm:ss"), locale_->instance, status);
-    calendar_.reset(Calendar::createInstance(locale->instance, status));
-    patternGenerator_.reset(DateTimePatternGenerator::createInstance(locale->instance, status));
-    timeZone_.reset(TimeZone::createInstance("GMT+0:00"));
+    calendar_.reset(Calendar::createInstance(locale_->instance, status));
+    patternGenerator_.reset(DateTimePatternGenerator::createInstance(locale_->instance, status));
+    timeZone_.reset(TimeZone::createTimeZone("GMT+0:00"));
 
     status = U_ZERO_ERROR;
     std::vector<std::string> keyValuePairs;
@@ -331,7 +331,7 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UErrorCode status = U_ZERO_ERROR;
     CHECK_NULL_RETURN(calendar_, "");
     calendar_->set(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, dateTime.second);
-    UDate date = cal->getTime(status);
+    UDate date = calendar_->getTime(status);
     CHECK_RETURN(status, "");
     
     CHECK_RETURN(patternGenerator_, "");
