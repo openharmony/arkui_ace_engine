@@ -635,7 +635,8 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         tabBarLayoutProperty->UpdateIndicator(index);
         PaintFocusState(false);
     } else {
-        if (GetAnimationDuration().has_value()) {
+        if (GetAnimationDuration().has_value()
+            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             swiperController_->SwipeTo(index);
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
@@ -1038,7 +1039,8 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
     } else {
-        if (GetAnimationDuration().has_value()) {
+        if (GetAnimationDuration().has_value()
+            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
         } else {
@@ -1393,7 +1395,11 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         TriggerTranslateAnimation(layoutProperty, index, swiperPattern->GetCurrentIndex());
     } else {
         TriggerTranslateAnimation(layoutProperty, index, indicator);
-        swiperController_->SwipeTo(index);
+        if (tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+            swiperController_->SwipeTo(index);
+        } else {
+            swiperController_->SwipeToWithoutAnimation(index);
+        }
     }
 
     layoutProperty->UpdateIndicator(index);
@@ -2411,8 +2417,12 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsFrameNode);
+    auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     tabBarLayoutProperty->UpdateIndicator(index);
-    if (GetAnimationDuration().has_value()) {
+    if (GetAnimationDuration().has_value()
+        && (!tabsPattern || tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION)) {
         swiperController_->SwipeTo(index);
     } else {
         swiperController_->SwipeToWithoutAnimation(index);

@@ -952,4 +952,23 @@ void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&&
     tabPattern->SetInterceptStatus(true);
     tabPattern->SetOnContentWillChange(std::move(callback));
 }
+
+void TabsModelNG::SetAnimateMode(TabAnimateMode mode)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
+}
+
+void TabsModelNG::SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
+}
 } // namespace OHOS::Ace::NG

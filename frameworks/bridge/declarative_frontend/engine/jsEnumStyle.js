@@ -753,6 +753,13 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
+var AnimationMode;
+(function (AnimationMode) {
+  AnimationMode[AnimationMode["CONTENT_FIRST"] = 0] = "CONTENT_FIRST";
+  AnimationMode[AnimationMode["ACTION_FIRST"] = 1] = "ACTION_FIRST";
+  AnimationMode[AnimationMode["NO_ANIMATION"] = 2] = "NO_ANIMATION";
+})(AnimationMode || (AnimationMode = {}));
+
 var SelectedMode;
 (function (SelectedMode) {
   SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";

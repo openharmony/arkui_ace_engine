@@ -2162,6 +2162,8 @@ struct ArkUITabsModifier {
     void (*resetTabWidthAuto)(ArkUINodeHandle node);
     void (*setTabHeightAuto)(ArkUINodeHandle node);
     void (*resetTabHeightAuto)(ArkUINodeHandle node);
+    void (*setAnimateMode)(ArkUINodeHandle node, ArkUI_Uint32 mode);
+    void (*resetAnimateMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIStepperItemModifier {

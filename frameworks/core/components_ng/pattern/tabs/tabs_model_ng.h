@@ -65,6 +65,7 @@ public:
     void SetIsCustomAnimation(bool isCustom) override;
     void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
+    void SetAnimateMode(TabAnimateMode mode) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
@@ -85,6 +86,7 @@ public:
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
+    static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
 
 private:
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();

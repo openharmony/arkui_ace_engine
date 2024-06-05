@@ -564,6 +564,13 @@ enum class TabBarMode {
     FIXED_START,
 };
 
+enum class TabAnimateMode {
+    CONTENT_FIRST = 0,
+    ACTION_FIRST,
+    NO_ANIMATION,
+    MAX_VALUE,
+};
+
 enum class ShowInNavigationBar {
     SHOW = 0,
     POPUP,
