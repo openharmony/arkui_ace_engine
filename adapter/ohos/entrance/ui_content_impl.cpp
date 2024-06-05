@@ -3072,6 +3072,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetIsCaretMode(false);
+            popupParam->SetBlockEvent(false);
             auto popupConfig = customPopupConfigMap_.find(targetId);
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;
