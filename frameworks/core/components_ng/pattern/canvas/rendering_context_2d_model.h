@@ -129,7 +129,13 @@ public:
     virtual ~CanvasRenderingContext2DModel() = default;
     virtual void GetWidth(RefPtr<AceType>& canvasPattern, double& width) = 0;
     virtual void GetHeight(RefPtr<AceType>& canvasPattern, double& height) = 0;
-    virtual void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern) = 0;
+    virtual void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern) {};
+#ifdef PIXEL_MAP_SUPPORTED
+    virtual void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) {};
+#else
+    virtual void TransferFromImageBitmap(
+        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
+#endif
     virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
     virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
