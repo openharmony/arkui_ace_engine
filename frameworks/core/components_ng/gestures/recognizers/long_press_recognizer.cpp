@@ -344,7 +344,10 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
-    if (callback && *callback && !gestureInfo_->GetDisposeTag()) {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
+    if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
