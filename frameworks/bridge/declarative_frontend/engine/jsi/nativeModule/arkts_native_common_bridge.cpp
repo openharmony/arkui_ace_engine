@@ -32,6 +32,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/common/ace_application_info.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -6426,5 +6427,42 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
     std::string windowName = context->GetWindow()->GetWindowName();
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
+}
+
+ArkUINativeModuleValue CommonBridge::GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::GreatOrEqualAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::LessThanAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    return panda::NumberRef::New(vm, apiTargetVersion);
 }
 } // namespace OHOS::Ace::NG
