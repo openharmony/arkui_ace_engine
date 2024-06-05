@@ -49,8 +49,10 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
-constexpr float BADGED_SIDE_X = 20.0f;
+#ifdef USE_ROSEN_DRAWING
+constexpr float BADGED_SIDE_X = 21.0f;
 constexpr float BADGED_SIDE_Y = 7.0f;
+#endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
 
