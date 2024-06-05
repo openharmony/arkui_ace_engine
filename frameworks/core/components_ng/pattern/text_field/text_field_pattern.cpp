@@ -2882,6 +2882,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
+    UpdateCaretInfoToController();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
