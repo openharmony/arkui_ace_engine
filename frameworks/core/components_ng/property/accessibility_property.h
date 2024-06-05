@@ -486,7 +486,10 @@ public:
         return accessibilityVirtualNode_ != nullptr;
     }
 
-    std::string GetAccessibilityText() const;
+    virtual std::string GetAccessibilityText() const
+    {
+        return accessibilityText_.value_or("");
+    }
 
     std::string GetAccessibilityDescription() const
     {

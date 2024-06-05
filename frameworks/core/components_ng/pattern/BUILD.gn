@@ -441,6 +441,7 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
+    "swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "symbol/symbol_effect_options.cpp",

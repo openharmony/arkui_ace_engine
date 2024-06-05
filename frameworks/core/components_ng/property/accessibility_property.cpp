@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,11 +107,6 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
 float AccessibilityProperty::GetScrollOffSet() const
 {
     return DEFAULT_ACCESSIBILITY_SCROLL_OFFSET;
-}
-
-std::string AccessibilityProperty::GetAccessibilityText() const
-{
-    return accessibilityText_.value_or("");
 }
 
 AccessibilityHoverTestPath AccessibilityProperty::HoverTest(
