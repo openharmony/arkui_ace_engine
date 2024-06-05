@@ -228,4 +228,47 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level1)
     FormRendererGroup group(nullptr, nullptr, eventHandler);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_011 end";
 }
+/**
+ * @tc.name: FormRenderGroupTest_012
+ * @tc.desc: Test EnableForm() funtion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_012");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.bundleName = "bundleName";
+    formJsInfo.moduleName = "moduleName";
+    formJsInfo.formId = 1;
+    group->EnableForm(formJsInfo, true);
+    EXPECT_EQ(formJsInfo.formId, 1);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 end";
+}
+/**
+ * @tc.name: FormRenderGroupTest_013
+ * @tc.desc: Test EnableForm() funtion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_013 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_013");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.bundleName = "bundleName";
+    formJsInfo.moduleName = "moduleName";
+    formJsInfo.formId = 1;
+    group->EnableForm(formJsInfo, false);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_013 end";
+}
 }
