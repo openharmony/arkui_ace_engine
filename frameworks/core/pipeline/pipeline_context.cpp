@@ -722,7 +722,7 @@ void PipelineContext::FlushReloadTransition()
     });
 }
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange)
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate)
 {
     if (!rootElement_) {
         LOGE("PipelineContext::FlushReload rootElement is nullptr");

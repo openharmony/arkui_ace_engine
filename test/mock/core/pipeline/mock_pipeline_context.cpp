@@ -290,7 +290,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange) {}
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 

@@ -96,6 +96,7 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
+constexpr uint32_t DENSITY_KEY = 0b0100;
 constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
@@ -928,7 +929,16 @@ void AceContainer::InitializeCallback()
     auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density]() { context->OnSurfaceDensityChanged(density); };
+        auto callback = [context, density, id]() {
+            context->OnSurfaceDensityChanged(density);
+            if (context->IsDensityChanged()) {
+                auto container = Container::GetContainer(id);
+                CHECK_NULL_VOID(container);
+                auto aceContainer = DynamicCast<AceContainer>(container);
+                CHECK_NULL_VOID(aceContainer);
+                aceContainer->NotifyDensityUpdate();
+            }
+        };
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
@@ -2915,5 +2925,22 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
         container->HotReload();
 #endif
     });
+}
+
+void AceContainer::NotifyDensityUpdate()
+{
+    auto themeManager = pipelineContext_->GetThemeManager();
+    bool fullUpdate = true;
+    if (!themeManager || (themeManager->GetResourceLimitKeys() & DENSITY_KEY) == 0) {
+        fullUpdate = false;
+    }
+
+    auto frontend = GetFrontend();
+    if (frontend) {
+        frontend->FlushReload();
+    }
+
+    ConfigurationChange configurationChange { .dpiUpdate = true };
+    pipelineContext_->FlushReload(configurationChange, fullUpdate);
 }
 } // namespace OHOS::Ace::Platform

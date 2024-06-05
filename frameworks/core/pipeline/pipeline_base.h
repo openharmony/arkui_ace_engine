@@ -800,7 +800,7 @@ public:
     void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload(const ConfigurationChange& configurationChange) {}
+    virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -1254,6 +1254,8 @@ public:
     {
         return 0.0f;
     }
+
+    virtual bool IsDensityChanged() const = 0;
 
 protected:
     virtual bool MaybeRelease() override;

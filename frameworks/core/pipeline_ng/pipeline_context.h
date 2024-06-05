@@ -435,7 +435,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -774,6 +774,11 @@ public:
     }
 
     void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
+
+    bool IsDensityChanged() const override
+    {
+        return isDensityChanged_;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

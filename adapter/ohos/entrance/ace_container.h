@@ -620,6 +620,8 @@ public:
     OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
+    void NotifyDensityUpdate();
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
