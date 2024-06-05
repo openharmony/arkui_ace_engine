@@ -2145,4 +2145,165 @@ HWTEST_F(TextTestNg, TextTestNg_SetTextDetectEnable001, TestSize.Level1)
     auto retTextAlign = textModelNG.GetTextAlign(frameNode);
     EXPECT_EQ(retTextAlign, TextAlign::START);
 }
+
+/**
+ * @tc.name: TextPattern001
+ * @tc.desc: Test TextPattern GetGlyphPositionAtCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern GetGlyphPositionAtCoordinate
+     */
+    auto [frameNode, pattern] = Init();
+    auto positionWithAffinity = pattern->GetGlyphPositionAtCoordinate(1, 1);
+    EXPECT_EQ(positionWithAffinity.position_, 0);
+}
+
+/**
+ * @tc.name: TextPattern002
+ * @tc.desc: Test TextPattern ConvertLocalOffsetToParagraphOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern ConvertLocalOffsetToParagraphOffset
+     */
+    auto [frameNode, pattern] = Init();
+    Offset offset = Offset(1, 1);
+    auto paragraphOffset = pattern->ConvertLocalOffsetToParagraphOffset(offset);
+    EXPECT_EQ(paragraphOffset.GetX(), 1);
+}
+
+/**
+ * @tc.name: TextPattern003
+ * @tc.desc: Test TextPattern GetLineMetrics
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern GetLineMetrics
+     */
+    auto [frameNode, pattern] = Init();
+    auto textLineMetrics = pattern->GetLineMetrics(1);
+    EXPECT_EQ(textLineMetrics.lineNumber, 0);
+}
+
+/**
+ * @tc.name: TextPattern004
+ * @tc.desc: Test TextPattern DidExceedMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern DidExceedMaxLines
+     */
+    auto [frameNode, pattern] = Init();
+    auto didExceedMaxLines = pattern->DidExceedMaxLines();
+    EXPECT_EQ(didExceedMaxLines, false);
+}
+
+/**
+ * @tc.name: TextPattern005
+ * @tc.desc: Test TextPattern GetTextContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern GetTextContentRect
+     */
+    auto [frameNode, pattern] = Init();
+    auto textRect = pattern->GetTextContentRect(true);
+    EXPECT_EQ(textRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: TextPattern006
+ * @tc.desc: Test TextPattern SetExternalSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern SetExternalSpanItem
+     */
+    auto [frameNode, pattern] = Init();
+    std::list<RefPtr<SpanItem>> spanItems;
+    pattern->SetExternalSpanItem(spanItems);
+    EXPECT_EQ(pattern->isSpanStringMode_, false);
+}
+
+/**
+ * @tc.name: TextPattern007
+ * @tc.desc: Test TextPattern ConvertGlobalToLocalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern ConvertGlobalToLocalOffset
+     */
+    auto [frameNode, pattern] = Init();
+    Offset globalOffset = Offset(1, 1);
+    auto localPoint = pattern->ConvertGlobalToLocalOffset(globalOffset);
+    EXPECT_EQ(localPoint.GetY(), 1);
+}
+
+/**
+ * @tc.name: TextPattern008
+ * @tc.desc: Test TextPattern OnSensitiveStyleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern OnSensitiveStyleChange
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->OnSensitiveStyleChange(true);
+    EXPECT_EQ(pattern->isSensitive_, 1);
+}
+
+/**
+ * @tc.name: TextPattern009
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern ProcessSpanString
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    pattern->ProcessSpanString();
+    EXPECT_EQ(StringUtils::ToWstring(pattern->textForDisplay_).length(), 0);
+}
+
+/**
+ * @tc.name: TextPattern010
+ * @tc.desc: Test TextPattern CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
+     */
+    auto [frameNode, pattern] = Init();
+    ImageSpanAttribute imageStyle;
+    ImageSpanOptions options;
+    options.imageAttribute = imageStyle;
+    options.image = IMAGE_VALUE;
+    options.bundleName = BUNDLE_NAME;
+    options.moduleName = MODULE_NAME;
+    options.offset = 1;
+    auto imageSourceInfo = pattern->CreateImageSourceInfo(options);
+    EXPECT_EQ(imageSourceInfo.isFromReset_, 0);
+}
 } // namespace OHOS::Ace::NG
