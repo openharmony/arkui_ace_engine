@@ -658,6 +658,13 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
         return;
     }
 
+    if (gridLayoutInfo_.hasMultiLineItem_ && gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
+        if (!CheckLastLineItemFullyShowed(layoutWrapper)) {
+            gridLayoutInfo_.offsetEnd_ = false;
+            return;
+        }
+    }
+
     // Step3. modify [currentOffset_]
     if (!canOverScroll_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
@@ -1682,8 +1689,8 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
     return crossSpan;
 }
 
-bool GridScrollLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper,
-    const LayoutConstraintF& layoutConstraint) const
+bool GridScrollLayoutAlgorithm::CheckNeedMeasure(
+    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const
 {
     if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
         return true;
@@ -1712,7 +1719,7 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     }
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
-        GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+                                         GetCrossAxisSize(childConstraint.maxSize, axis_))) {
         auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
         if (layoutAlgorithmWrapper->SkipMeasure()) {
             layoutAlgorithmWrapper->SetNeedMeasure();
@@ -1788,8 +1795,7 @@ float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutW
 int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex)
 {
     int32_t firstIndex = 0;
-    currentIndex =
-        currentIndex < gridLayoutInfo_.childrenCount_ ? currentIndex : gridLayoutInfo_.childrenCount_ - 1;
+    currentIndex = currentIndex < gridLayoutInfo_.childrenCount_ ? currentIndex : gridLayoutInfo_.childrenCount_ - 1;
     auto index = currentIndex;
     if (gridLayoutInfo_.hasBigItem_) {
         while (index > 0) {
@@ -2206,6 +2212,35 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
             }
         }
     }
+}
+
+bool GridScrollLayoutAlgorithm::CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper)
+{
+    auto lastLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_);
+    if (lastLine != gridLayoutInfo_.gridMatrix_.end()) {
+        for (const auto [corssIndex, itemIndex] : lastLine->second) {
+            auto itemWrapper = layoutWrapper->GetChildByIndex(itemIndex);
+            if (!itemWrapper) {
+                continue;
+            }
+            auto itemLayoutProperty = DynamicCast<GridItemLayoutProperty>(itemWrapper->GetLayoutProperty());
+            if (!itemLayoutProperty) {
+                continue;
+            }
+            if (itemLayoutProperty->GetMainSpan(axis_) == 1) {
+                continue;
+            }
+            auto it = gridLayoutInfo_.FindStartLineInMatrix(lastLine, itemIndex);
+            if (it == gridLayoutInfo_.gridMatrix_.end()) {
+                continue;
+            }
+            int32_t startLine = it->first;
+            if (startLine + itemLayoutProperty->GetMainSpan(axis_) > gridLayoutInfo_.endMainLineIndex_ + 1) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 // only for debug use
