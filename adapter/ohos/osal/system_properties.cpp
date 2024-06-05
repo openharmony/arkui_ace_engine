@@ -259,7 +259,8 @@ void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 
 uint32_t GetSysDumpFrameCount()
 {
-    return system::GetUintParameter<uint32_t>("persist.ace.framedumpcount", 10);
+    return system::GetUintParameter<uint32_t>(
+        "persist.ace.framedumpcount", 10); // 10: Pipeline dump of the last 10 frames' task.
 }
 
 bool GetAstcEnabled()
@@ -269,7 +270,7 @@ bool GetAstcEnabled()
 
 int32_t GetAstcMaxErrorProp()
 {
-    return system::GetIntParameter<int>("persist.astc.max", 50000);
+    return system::GetIntParameter<int>("persist.astc.max", 50000); // 50000: Anomaly threshold of astc.
 }
 
 int32_t GetAstcPsnrProp()
