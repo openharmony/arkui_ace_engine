@@ -226,6 +226,10 @@ void SwiperPattern::OnLoopChange()
         return;
     }
 
+    if (!layoutProperty->GetLoop().value_or(true)) {
+        UpdateCurrentIndex(GetLoopIndex(currentIndex_));
+    }
+
     if (preLoop_.value() != layoutProperty->GetLoop().value_or(true) &&
         (layoutProperty->GetPrevMargin().has_value() || layoutProperty->GetNextMargin().has_value())) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
