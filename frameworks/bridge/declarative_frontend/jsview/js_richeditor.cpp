@@ -563,7 +563,9 @@ void JSRichEditor::SetOnCopy(const JSCallbackInfo& info)
 void JSRichEditor::SelectionMenuOptions(const JSCallbackInfo& info)
 {
     std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems);
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
 }
 
