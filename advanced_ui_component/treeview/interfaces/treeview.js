@@ -1009,6 +1009,8 @@ export class TreeView extends ViewPU {
                         Image.height(b23.getNodeItem().imageNode?.itemHeight);
                         Image.width(b23.getNodeItem().imageNode?.itemWidth);
                         Image.opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity);
+                        Image.matchTextDirection((b23.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || b23.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                     }, Image);
                     Row.pop();
                 });
@@ -3331,6 +3333,9 @@ export class TreeViewInner extends ViewPU {
                                     Image.focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true);
                                     Image.fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                                     this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor);
+                                    Image.matchTextDirection((this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
@@ -3522,6 +3527,9 @@ export class TreeViewInner extends ViewPU {
                                         n5.stopPropagation();
                                     });
                                     Image.focusable(true);
+                                    Image.matchTextDirection((this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
