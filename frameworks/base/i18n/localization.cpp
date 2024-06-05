@@ -88,6 +88,7 @@ const char DEFAULT_LANGUAGE[] = "en-US";
 constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
 constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
 constexpr uint32_t SECONDS_IN_HOUR = 3600;
+constexpr double SECOND_TO_MILLISECOND = 1000.0;
 
 const char CHINESE_LEAP[] = u8"\u95f0";
 const char CHINESE_FIRST[] = u8"\u521d";
@@ -294,7 +295,7 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
     simpleDateFormat_->setTimeZone(*timeZone_);
 
     UnicodeString simpleStr;
-    simpleDateFormat_->format(1000.0 * duration, simpleStr, status);
+    simpleDateFormat_->format(SECOND_TO_MILLISECOND * duration, simpleStr, status);
     CHECK_RETURN(status, "");
 
     std::string ret;
@@ -336,7 +337,7 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     CHECK_RETURN(patternGenerator_, "");
     UnicodeString pattern = patternGenerator_->getBestPattern(UnicodeString(format.c_str()), status);
     CHECK_RETURN(status, "");
-    
+
     CHECK_RETURN(simpleDateFormat_, "");
     simpleDateFormat_->applyPattern(pattern);
     UnicodeString dateTimeStr;
