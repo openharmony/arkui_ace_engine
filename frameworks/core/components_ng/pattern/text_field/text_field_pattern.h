@@ -1275,6 +1275,8 @@ public:
         return showKeyBoardOnFocus_;
     }
 
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+
     void SetSupportPreviewText(bool isSupported)
     {
         hasSupportedPreviewText_ = isSupported;

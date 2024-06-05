@@ -1060,4 +1060,11 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
 }
+
+void TextModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+}
 } // namespace OHOS::Ace::NG

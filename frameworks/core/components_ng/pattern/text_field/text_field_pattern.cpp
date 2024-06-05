@@ -7512,4 +7512,22 @@ void TextFieldPattern::OnCaretMoveDone(const TouchEventInfo& info)
     }
 }
 
+void TextFieldPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    menuOptionItems_ = std::move(menuOptionsItems);
+    for (auto& menuOption : menuOptionItems_) {
+        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
+        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
+                                const std::string selectInfo) {
+            auto textFiledPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textFiledPattern);
+            if (actionRange) {
+                auto start = textFiledPattern->selectController_->GetStartIndex();
+                auto end = textFiledPattern->selectController_->GetEndIndex();
+                actionRange(start, end);
+            }
+            textFiledPattern->CloseSelectOverlay();
+        };
+    }
+}
 } // namespace OHOS::Ace::NG
