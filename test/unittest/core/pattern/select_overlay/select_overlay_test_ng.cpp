@@ -66,6 +66,7 @@ constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF offset(10, 10);
 int32_t callBackFlag = 0;
 constexpr float RK356_HEIGHT = 1136.0f;
+const OffsetF OFFSET_ITEM1 = OffsetF(5, 5);
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -2839,6 +2840,104 @@ HWTEST_F(SelectOverlayTestNg, CalculateCustomMenuByMouseOffset, TestSize.Level1)
     auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
     newNode->CalculateCustomMenuByMouseOffset(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(pattern->info_->menuInfo.menuOffset, testCase);
+}
+
+/**
+ * @tc.name: CalculateCustomMenuLayoutConstraint
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm CalculateCustomMenuLayoutConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CalculateCustomMenuLayoutConstraint, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    SelectHandleInfo firstHandle;
+    firstHandle.paintRect = FIRST_HANDLE_REGION;
+    SelectHandleInfo secondHandle;
+    secondHandle.paintRect = SECOND_HANDLE_REGION2;
+    selectInfo.firstHandle = firstHandle;
+    selectInfo.secondHandle = secondHandle;
+    selectInfo.selectArea = { 100, 500, 200, 50 };
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    pattern->info_->menuInfo.menuBuilder = []() { return; };
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(selectOverlayLayoutAlgorithm));
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = SizeF(FIRST_ITEM_SIZE);
+
+    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto item = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "test", TYPE); });
+    selectOverlayNode->AddChild(item);
+
+    layoutWrapper->GetGeometryNode()->GetFrameOffset() = OFFSET_ITEM1;
+    infoPtr->isNewAvoid = false;
+    infoPtr->isUsingMouse = false;
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+    newNode->CalculateCustomMenuLayoutConstraint(AceType::RawPtr(layoutWrapper), childLayoutConstraint);
+    EXPECT_EQ(childLayoutConstraint.selfIdealSize.Height(), 45);
+}
+
+/**
+ * @tc.name: CalculateCustomMenuByMouseOffset002
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm CalculateCustomMenuByMouseOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, CalculateCustomMenuByMouseOffset002, TestSize.Level1)
+{
+    SelectOverlayInfo selectInfo;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(selectOverlayLayoutAlgorithm));
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto item = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
+    selectOverlayNode->AddChild(item);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstGeometryNode->SetFrameSize({ 2, 1 });
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(item, firstGeometryNode, item->GetLayoutProperty());
+    ASSERT_NE(firstLayoutWrapper, nullptr);
+    auto itemPattern = item->GetPattern<MenuPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto itemLayoutAlgorithm = itemPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(itemLayoutAlgorithm, nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(itemLayoutAlgorithm));
+    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper->AppendChild(firstLayoutWrapper);
+
+    SelectMenuInfo infoMenu;
+    OffsetF testCase(4, 5);
+    infoMenu.menuOffset = testCase;
+    pattern->UpdateSelectMenuInfo(infoMenu);
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+    newNode->CalculateCustomMenuByMouseOffset(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(pattern->info_->menuInfo.menuOffset->GetX(), 4.0f);
 }
 
 /**
