@@ -23632,6 +23632,48 @@ class ListScrollBarModifier extends ModifierWithKey {
   }
 }
 ListScrollBarModifier.identity = Symbol('listScrollBar');
+class ListScrollBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListScrollBarWidth(node);
+    }
+    else {
+      getUINativeModule().list.setListScrollBarWidth(node, this.value);
+    }
+  }
+}
+ListScrollBarWidthModifier.identity = Symbol('listScrollBarWidth');
+class ListScrollBarColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListScrollBarColor(node);
+    }
+    else {
+      getUINativeModule().list.setListScrollBarColor(node, this.value);
+    }
+  }
+}
+ListScrollBarColorModifier.identity = Symbol('listScrollBarColor');
+class ListFlingSpeedLimitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetFlingSpeedLimit(node);
+    }
+    else {
+      getUINativeModule().list.setFlingSpeedLimit(node, this.value);
+    }
+  }
+}
+ListFlingSpeedLimitModifier.identity = Symbol('listFlingSpeedLimit');
 class ListLanesModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23757,6 +23799,18 @@ class ArkListComponent extends ArkComponent {
   }
   scrollBar(value) {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarModifier.identity, ListScrollBarModifier, value);
+    return this;
+  }
+  scrollBarWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, ListScrollBarWidthModifier.identity, ListScrollBarWidthModifier, value);
+    return this;
+  }
+  scrollBarColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ListScrollBarColorModifier.identity, ListScrollBarColorModifier, value);
+    return this;
+  }
+  flingSpeedLimit(value) {
+    modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
     return this;
   }
   edgeEffect(value, options) {

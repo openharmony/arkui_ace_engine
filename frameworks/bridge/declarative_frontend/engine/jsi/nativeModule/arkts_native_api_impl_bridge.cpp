@@ -4349,6 +4349,18 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListScrollBar));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListScrollBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListScrollBar));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListScrollBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListScrollBarWidth));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListScrollBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListScrollBarWidth));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListScrollBarColor));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListScrollBarColor));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlingSpeedLimit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetFlingSpeedLimit));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlingSpeedLimit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetFlingSpeedLimit));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignListItem"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetAlignListItem));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignListItem"),
