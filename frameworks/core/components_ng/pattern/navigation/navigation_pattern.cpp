@@ -569,6 +569,7 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
             NavigationPattern::FireNavigationChange(curDestination, true, false);
+            NavigationPattern::NotifyPerfMonitorPageMsg(navDestinationPattern->GetName());
         }
         return;
     }
@@ -1981,6 +1982,15 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
+    }
+}
+
+void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
+{
+    auto container = Container::Current();
+    if (container != nullptr && PerfMonitor::GetPerfMonitor() != nullptr) {
+        std::string bundleName = container->GetBundleName();
+        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg("", bundleName, pageName);
     }
 }
 

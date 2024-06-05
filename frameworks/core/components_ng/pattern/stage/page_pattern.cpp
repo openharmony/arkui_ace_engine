@@ -206,13 +206,15 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), true);
-    }
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
         return;
+    }
+    std::string bundleName = container->GetBundleName();
+    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    if (pageInfo_) {
+        context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -221,8 +223,6 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
-    std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -436,7 +436,7 @@ void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std
         PerfMonitor::GetPerfMonitor()->SetPageUrl(pageUrl);
         // The page contains only page url but not the page name
         PerfMonitor::GetPerfMonitor()->SetPageName("");
-        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName);
+        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName, "");
     }
 }
 
