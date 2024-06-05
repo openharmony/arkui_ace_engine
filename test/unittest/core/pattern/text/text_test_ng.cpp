@@ -174,6 +174,203 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTextDetectEnable002
+ * @tc.desc: Test SetTextDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextDetectEnable002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    ASSERT_EQ(textModelNG.GetTextOverflow(frameNode), TextOverflow::CLIP);
+    ASSERT_EQ(textModelNG.GetTextIndent(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    ASSERT_EQ(textModelNG.GetCopyOption(frameNode), CopyOptions::None);
+    textModelNG.GetMarqueeOptions(frameNode);
+    ASSERT_EQ(textModelNG.GetHeightAdaptivePolicy(frameNode), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    ASSERT_EQ(textModelNG.GetAdaptMinFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    ASSERT_EQ(textModelNG.GetAdaptMaxFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    ASSERT_EQ(textModelNG.GetDefaultColor(), Color::BLACK);
+    ASSERT_EQ(textModelNG.GetFontColor(frameNode), Color::BLACK);
+    ASSERT_EQ(textModelNG.GetTextBaselineOffset(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+    std::vector<Shadow> defaultShadow;
+    ASSERT_EQ(textModelNG.GetTextShadow(frameNode), defaultShadow);
+    ASSERT_EQ(textModelNG.GetWordBreak(frameNode), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: SetTextDetectEnable003
+ * @tc.desc: Test SetTextDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    textModelNG.SetFontSize(frameNode, ADAPT_ZERO_FONT_SIZE_VALUE);
+    EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+
+    textModelNG.SetTextDetectConfig(frameNode, "apple, orange, banana");
+    ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
+
+    auto onResult = [](const std::string&) {};
+    textModelNG.SetTextDetectConfig(frameNode, "apple, orange, banana", std::move(onResult));
+    ASSERT_NE(textModelNG.GetTextDetectConfig(frameNode), "apple, orange, banana");
+
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textModelNG.SetOnDetectResultUpdate(frameNode, std::move(onResult));
+    EXPECT_NE(textPattern->dataDetectorAdapter_->onResult_, nullptr);
+
+    FONT_FEATURES_LIST value;
+    ASSERT_EQ(textModelNG.GetFontFeature(frameNode), value);
+    ASSERT_EQ(textModelNG.GetLineBreakStrategy(frameNode), TEXT_LINE_BREAK_STRATEGY);
+
+    textModelNG.SetSelectedBackgroundColor(frameNode, Color::BLACK);
+    ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
+    textModelNG.ResetSelectedBackgroundColor(frameNode);
+    ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
+    textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
+    ASSERT_EQ(textPattern->GetExternalParagraph(), nullptr);
+
+    int32_t startIndex = 1;
+    int32_t endIndex = 10;
+    textModelNG.SetTextSelection(frameNode, startIndex, endIndex);
+    EXPECT_NE(textPattern->textSelector_.GetStart(), startIndex);
+
+    std::string EventValue;
+    auto onCopyResult = [&EventValue](const std::string& param) { EventValue = param; };
+
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    textModelNG.SetOnCopy(frameNode, onCopyResult);
+    EXPECT_NE(eventHub->onCopy_, nullptr);
+
+    bool isSelectChanged = false;
+    auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) { isSelectChanged = true; };
+    textModelNG.SetOnTextSelectionChange(frameNode, onSelectionChanged);
+    EXPECT_NE(eventHub->onSelectionChange_, nullptr);
+}
+
+/**
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: Test GetSelectedBackgroundColor when GetHost is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
+
+    Font font;
+    textModelNG.SetFont(font);
+    EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: GetMarqueeOptions001
+ * @tc.desc: Test GetMarqueeOptions when GetHost is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetMarqueeOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    TextMarqueeOptions options;
+    options.UpdateTextMarqueeStart(true);
+    options.UpdateTextMarqueeStep(3);
+    options.UpdateTextMarqueeLoop(3);
+    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    options.UpdateTextMarqueeDelay(3);
+    options.UpdateTextMarqueeFadeout(false);
+    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    textModelNG.SetMarqueeOptions(options);
+    textModelNG.GetMarqueeOptions(frameNode);
+
+    EXPECT_EQ(textLayoutProperty->HasTextMarqueeStart(), true);
+}
+
+/**
+ * @tc.name: SetOnMarqueeStateChange001
+ * @tc.desc: Test SetOnMarqueeStateChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetOnMarqueeStateChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    bool isSelectChanged = false;
+    auto onSelectionChanged = [&isSelectChanged](int32_t) { isSelectChanged = true; };
+    textModelNG.SetOnMarqueeStateChange(onSelectionChanged);
+
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    EXPECT_NE(eventHub->onMarqueeStateChange_, nullptr);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode001
  * @tc.desc: Test TextPattern OnAttachToFrameNode when GetHost is nullptr.
  * @tc.type: FUNC
@@ -1999,7 +2196,7 @@ HWTEST_F(TextTestNg, CreateImageSourceInfo001, TestSize.Level1)
  * @tc.desc: Test create with spanstring.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextTestNg_create001, TestSize.Level1)
+HWTEST_F(TextTestNg, create001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -2011,7 +2208,7 @@ HWTEST_F(TextTestNg, TextTestNg_create001, TestSize.Level1)
      * @tc.steps: step2. call spanBases
      */
     textModelNG.Create(spanStringWithSpans);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(textModelNG->GetSpanStringMode(), true);
 }
 
 /**
@@ -2019,7 +2216,7 @@ HWTEST_F(TextTestNg, TextTestNg_create001, TestSize.Level1)
  * @tc.desc: Test SetTextSelectableMode by frameNode..
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextTestNg_SetTextSelectableMode001, TestSize.Level1)
+HWTEST_F(TextTestNg, SetTextSelectableMode001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -2042,7 +2239,6 @@ HWTEST_F(TextTestNg, TextTestNg_SetTextSelectableMode001, TestSize.Level1)
     textModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
     textModelNG.SetEllipsisMode(EllipsisMode::HEAD);
     ASSERT_EQ(textModelNG.GetEllipsisMode(frameNode), EllipsisMode::HEAD);
-    EXPECT_TRUE(true);
 }
 
 /**
@@ -2050,7 +2246,7 @@ HWTEST_F(TextTestNg, TextTestNg_SetTextSelectableMode001, TestSize.Level1)
  * @tc.desc: Test InitSpanStringController.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextTestNg_InitSpanStringController001, TestSize.Level1)
+HWTEST_F(TextTestNg, InitSpanStringController001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -2065,7 +2261,7 @@ HWTEST_F(TextTestNg, TextTestNg_InitSpanStringController001, TestSize.Level1)
     auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567893421");
 
     textModelNG.InitSpanStringController(frameNode, spanStringWithSpans);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(textModelNG->GetSpanStringMode(), true);
 }
 
 /**
@@ -2073,7 +2269,7 @@ HWTEST_F(TextTestNg, TextTestNg_InitSpanStringController001, TestSize.Level1)
  * @tc.desc: Test InitTextController.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextTestNg_InitTextController001, TestSize.Level1)
+HWTEST_F(TextTestNg, InitTextController001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -2094,7 +2290,7 @@ HWTEST_F(TextTestNg, TextTestNg_InitTextController001, TestSize.Level1)
  * @tc.desc: Test SetTextDetectEnable.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextTestNg_SetTextDetectEnable001, TestSize.Level1)
+HWTEST_F(TextTestNg, SetTextDetectEnable001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -2113,7 +2309,7 @@ HWTEST_F(TextTestNg, TextTestNg_SetTextDetectEnable001, TestSize.Level1)
     EXPECT_NE(ret, nullptr);
 
     textModelNG.SetClipEdge(true);
-    EXPECT_TRUE(true);
+    EXPECT_NE(frameNode->renderContext_, nullptr);
 
     auto strContent = textModelNG.GetContent(frameNode);
     EXPECT_EQ(strContent, CREATE_VALUE);
