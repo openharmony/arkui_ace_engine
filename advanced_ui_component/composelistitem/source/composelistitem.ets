@@ -682,15 +682,15 @@ export struct ComposeListItem {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
       }
       else {
-        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
+        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
+        ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
     }
     else if (this.contentItem.description === undefined) {
       if (this.contentItem.icon === undefined ||
         (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT
-      }
-      else {
+      } else {
         this.itemHeight = ItemHeight.FOURTH_HEIGHT
       }
     } else {
