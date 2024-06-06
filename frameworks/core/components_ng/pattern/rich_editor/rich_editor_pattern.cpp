@@ -107,6 +107,7 @@ constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr float DEFAILT_OPACITY = 0.2f;
 constexpr int64_t COLOR_OPAQUE = 255;
+constexpr int32_t MAX_CLICK = 3;
 
 constexpr Color SYSTEM_CARET_COLOR = Color(0xff007dff);
 constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
@@ -2091,6 +2092,13 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+
+    if (CheckTripClickEvent(info)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleTripleClickEvent");
+        HandleTripleClickEvent(info);
+        return;
+    }
+
     selectionMenuOffsetClick_ = OffsetF(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     if (dataDetectorAdapter_->hasClickedAISpan_) {
@@ -2379,51 +2387,15 @@ std::pair<OffsetF, float> RichEditorPattern::CalcAndRecordLastClickCaretInfo(con
 void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!clickEventInitialized_);
-    GestureMode mode = GestureMode::Exclusive;
-    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(mode);
-    auto tapTripleGesture = AceType::MakeRefPtr<NG::TapGesture>(3, 1);
-    CHECK_NULL_VOID(tapTripleGesture);
-    auto tripleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "triple click callback, sourceType=%{public}d", info.GetSourceDevice());
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "click callback, sourceType=%{public}d", info.GetSourceDevice());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
-        pattern->HandleTripleClickEvent(info);
+        pattern->HandleClickEvent(info);
     };
-    tapTripleGesture->SetOnActionId(tripleClickCallback);
-    gestureGroup->AddGesture(tapTripleGesture);
-
-    auto doubleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click callback, sourceType=%{public}d", info.GetSourceDevice());
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
-        if (pattern->BeforeGestureAndClickOperate(info, true)) {
-            pattern->HandleDoubleClickEvent(info);
-        }
-    };
-    auto tapDoubleGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
-    CHECK_NULL_VOID(tapDoubleGesture);
-    tapDoubleGesture->SetOnActionId(doubleClickCallback);
-    gestureGroup->AddGesture(tapDoubleGesture);
-
-    auto clickSingleCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "single click callback, sourceType=%{public}d", info.GetSourceDevice());
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->sourceType_ = info.GetSourceDevice();
-        if (pattern->BeforeGestureAndClickOperate(info, false)) {
-            pattern->HandleSingleClickEvent(info);
-        }
-    };
-    auto tapSingleGesture = AceType::MakeRefPtr<NG::TapGesture>(1, 1);
-    CHECK_NULL_VOID(tapSingleGesture);
-    tapSingleGesture->SetOnActionId(clickSingleCallback);
-    gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::Parallel);
-    
-    gestureHub->AddGesture(gestureGroup);
-    gestureHub->OnModifyDone();
+    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener);
     clickEventInitialized_ = true;
 }
 
@@ -5436,7 +5408,6 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isMousePressed_ = false;
     isFirstMouseSelect_ = true;
     isOnlyImageDrag_ = false;
-    mouseClickRelease_ = oldMouseStatus == MouseStatus::MOVE;
     if (dataDetectorAdapter_->pressedByLeftMouse_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
         dataDetectorAdapter_->ResponseBestMatchItem(dataDetectorAdapter_->clickedAISpan_);
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
@@ -8502,24 +8473,6 @@ const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
     return childNodes_;
 }
 
-bool RichEditorPattern::BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick)
-{
-    auto focusHub = GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    if (!focusHub->IsFocusable() || mouseClickRelease_) {
-        mouseClickRelease_ = false;
-        return false;
-    }
-    selectionMenuOffsetClick_ = OffsetF(
-        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
-    dataDetectorAdapter_->hasClickedAISpan_ = false;
-    lastClickTimeStamp_ = info.GetTimeStamp();
-    if (isDoubleClick) {
-        HandleSingleClickEvent(info);
-    }
-    return true;
-}
-
 void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
 {
     auto focusHub = GetFocusHub();
@@ -8565,6 +8518,9 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if (textSelector_.IsValid() && info.GetSourceTool() == SourceTool::FINGER && IsSelected()) {
+        showSelect_ = true;
+        RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
@@ -8653,5 +8609,24 @@ void RichEditorPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptio
             richEditorPattern->CloseSelectOverlay();
         };
     }
+}
+
+bool RichEditorPattern::CheckTripClickEvent(GestureEvent& info)
+{
+    clickInfo_.push_back(info.GetTimeStamp());
+    if (clickInfo_.size() > MAX_CLICK) {
+        clickInfo_.erase(clickInfo_.begin());
+    }
+    if (clickInfo_.size() == MAX_CLICK) {
+        std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>>
+            clickTimeIntervalOne = clickInfo_[1] - clickInfo_[0];
+        std::chrono::duration<float, std::ratio<1, InputAIChecker::SECONDS_TO_MILLISECONDS>>
+            clickTimeIntervalTwo = clickInfo_[2] - clickInfo_[1];
+        if (clickTimeIntervalOne.count() < DOUBLE_CLICK_INTERVAL_MS
+            && clickTimeIntervalTwo.count() < DOUBLE_CLICK_INTERVAL_MS) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
