@@ -3512,6 +3512,20 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     auto spanItem = spanNode->GetSpanItem();
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
+    } else {
+        auto beforeSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index - 1));
+        bool isParagraphHead = !beforeSpanNode; // is first span
+        if (beforeSpanNode) {
+            auto& beforeNodeContent = beforeSpanNode->GetSpanItem()->content;
+            bool isAfterNewLine = !beforeNodeContent.empty() && beforeNodeContent.back() == L'\n';
+            isParagraphHead |= isAfterNewLine; // after \n
+        }
+        auto afterSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index + 1));
+        if (isParagraphHead && afterSpanNode) {
+            CopyTextSpanStyle(afterSpanNode, spanNode, true);
+        } else if (beforeSpanNode) {
+            CopyTextSpanStyle(beforeSpanNode, spanNode, true);
+        }
     }
     spanItem->SetTextStyle(typingTextStyle_);
     previewTextRecord_.previewTextSpan = spanItem;
