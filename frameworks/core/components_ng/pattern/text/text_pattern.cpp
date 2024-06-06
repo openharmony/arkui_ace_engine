@@ -2695,7 +2695,7 @@ void TextPattern::DumpInfo()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
         DumpLog::GetInstance().AddDesc(
             std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
     }
