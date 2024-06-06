@@ -885,8 +885,6 @@ struct CustomDialogContentComponent {
           ButtonComponent({
             buttons: this.buttons,
             windowSize: this.windowSize,
-            fontSizeScale: this.fontSizeScale,
-            needResponseScale: this.needResponseScale,
             buttonHeight: this.buttonHeight,
             controller: this.controller,
             theme: this.theme,
@@ -1233,10 +1231,8 @@ struct ButtonComponent {
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
   @State isButtonVertical: boolean = false;
-  @Link fontSizeScale: number;
   @Link windowSize: Size;
   @Link buttonHeight: Length;
-  @Link needResponseScale: boolean;
 
   build() {
     Column() {
@@ -1253,7 +1249,6 @@ struct ButtonComponent {
   }
 
   aboutToAppear(): void {
-    this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Math.min(this.windowSize.width - BUTTON_HORIZONTAL_MARGIN * 2,
       MAX_DIALOG_WIDTH));
   }
@@ -1261,9 +1256,7 @@ struct ButtonComponent {
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
     constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Number(constraint.maxWidth));
-
     children.forEach((child) => {
       let measureResult: MeasureResult = child.measure(constraint);
       sizeResult.height = measureResult.height;
@@ -1377,20 +1370,6 @@ struct ButtonComponent {
     return Color.Transparent;
   }
 
-  private updateFontSize(): void {
-    if (this.needResponseScale) {
-      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
-      } else {
-        this.buttonMaxFontSize = BODY_L + 'fp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
-      }
-    } else {
-      this.buttonMaxFontSize = BODY_L + 'vp';
-      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
-    }
-  }
 
   /**
    * is button buttonStyle and role properties high priority
