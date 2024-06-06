@@ -1577,7 +1577,11 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     if (pos == tabItemOffsets_.end()) {
         return -1;
     }
-    if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, -1);
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, -1);
+    if (tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         return tabItemOffsets_.size() - std::distance(tabItemOffsets_.begin(), pos) - 1;
     }
     return isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
