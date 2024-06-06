@@ -933,6 +933,8 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
      * @tc.steps: step3. touch down caret position
      */
     auto touchOffset = Offset(0, 0);
+    AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)
+        ->SetCaretOffsetAndHeight(OffsetF(0, 0), 50.0f);
     richEditorPattern->HandleTouchDown(touchOffset);
     EXPECT_TRUE(richEditorPattern->isTouchCaret_);
     /**
