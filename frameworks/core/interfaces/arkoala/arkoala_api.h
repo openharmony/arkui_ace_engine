@@ -763,7 +763,7 @@ enum ArkUIGestureDirection {
     ArkUI_GESTURE_DIRECTION_RIGHT = 2,
     ArkUI_GESTURE_DIRECTION_HORIZONTAL = 3,
     ArkUI_GESTURE_DIRECTION_UP = 4,
-    ArkUI_GESTURE_DIRECTION_DOWN = 5,
+    ArkUI_GESTURE_DIRECTION_DOWN = 8,
     ArkUI_GESTURE_DIRECTION_VERTICAL = 12,
     ArkUI_GESTURE_DIRECTION_ALL = 15,
 };
@@ -1346,7 +1346,7 @@ struct ArkUICommonModifier {
     ArkUIAnchorType (*getMarkAnchor)(ArkUINodeHandle node);
     void (*getAlignRules)(ArkUINodeHandle node, ArkUI_CharPtr* anchors, ArkUI_Int32* direction, ArkUI_Int32 length);
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
-    ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
+    ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
     void (*setOutlineWidthFloat)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
         ArkUI_Float32 right, ArkUI_Float32 bottom);
@@ -2438,6 +2438,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
+    void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUITextInputModifier {
@@ -2625,6 +2626,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextInputMargin)(ArkUINodeHandle node);
+    void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUIWebModifier {

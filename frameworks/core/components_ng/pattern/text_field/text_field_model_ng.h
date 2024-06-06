@@ -253,6 +253,7 @@ public:
     static int32_t GetNumberOfLines(FrameNode* frameNode);
     static void ResetNumberOfLines(FrameNode* frameNode);
     static void SetMargin(FrameNode* frameNode, NG::PaddingProperty& margin);
+    static PaddingProperty GetMargin(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

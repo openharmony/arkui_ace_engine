@@ -706,7 +706,7 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
         bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_WATER_FLOW_WILL_SCROLL;
+        event.componentAsyncEvent.subKind = ON_LIST_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
