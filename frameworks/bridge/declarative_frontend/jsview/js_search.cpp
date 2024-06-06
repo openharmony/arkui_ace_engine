@@ -100,7 +100,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSearch>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);

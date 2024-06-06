@@ -671,6 +671,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDisappear));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDisappear));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAttach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnAttach));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnAttach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnAttach));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDetach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnDetach));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDetach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnDetach));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnKeyEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnKeyEvent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnKeyEvent"),
@@ -2868,6 +2876,10 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnAppear));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDisappear"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnDisappear));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnAttach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnAttach));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDetach"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnDetach));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnKeyEvent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnKeyEvent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFocus"),

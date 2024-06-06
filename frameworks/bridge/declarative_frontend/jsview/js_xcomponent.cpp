@@ -128,6 +128,8 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::JsOnDestroy);
     JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::JsOnAppear);
     JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::JsOnDisAppear);
+    JSClass<JSXComponent>::StaticMethod("onAttach", &JSXComponent::JsOnAttach);
+    JSClass<JSXComponent>::StaticMethod("onDetach", &JSXComponent::JsOnDetach);
 
     JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::JsOnTouch);
     JSClass<JSXComponent>::StaticMethod("onClick", &JSXComponent::JsOnClick);
@@ -351,6 +353,26 @@ void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
         return;
     }
     JSInteractableView::JsOnDisAppear(args);
+}
+
+void JSXComponent::JsOnAttach(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
+        return;
+    }
+    JSInteractableView::JsOnAttach(args);
+}
+
+void JSXComponent::JsOnDetach(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
+        return;
+    }
+    JSInteractableView::JsOnDetach(args);
 }
 
 void JSXComponent::JsOnTouch(const JSCallbackInfo& args)

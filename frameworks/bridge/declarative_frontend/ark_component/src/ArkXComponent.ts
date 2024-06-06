@@ -277,6 +277,12 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
   onDisAppear(event: () => void): this {
     throw new Error('Method not implemented.');
   }
+  onAttach(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
+  onDetach(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
     throw new Error('Method not implemented.');
   }

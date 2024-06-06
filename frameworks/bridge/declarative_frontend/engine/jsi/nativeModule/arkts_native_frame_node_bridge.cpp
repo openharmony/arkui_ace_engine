@@ -1011,6 +1011,72 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::SetOnAttach(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::DisableOnAttach(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onAttach = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                        containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetOnDetach(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        NG::ViewAbstract::DisableOnDetach(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = GetInstanceId(runtimeCallInfo);
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = obj;
+    auto onDetach = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                           containerId]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
+        PipelineContext::SetCallBackNode(node);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
+    };
+    NG::ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

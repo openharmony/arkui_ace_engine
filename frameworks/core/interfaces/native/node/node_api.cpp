@@ -265,6 +265,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {

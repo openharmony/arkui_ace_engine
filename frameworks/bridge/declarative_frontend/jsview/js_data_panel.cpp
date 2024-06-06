@@ -69,7 +69,9 @@ void JSDataPanel::JSBind(BindingTarget globalObj)
     JSClass<JSDataPanel>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDataPanel>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSDataPanel>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSDataPanel>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSDataPanel>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDataPanel>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDataPanel>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDataPanel>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 

@@ -647,7 +647,9 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("create", &JSTabContent::Create);
     JSClass<JSTabContent>::StaticMethod("pop", &JSTabContent::Pop);
     JSClass<JSTabContent>::StaticMethod("tabBar", &JSTabContent::SetTabBar);
+    JSClass<JSTabContent>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabContent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTabContent>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTabContent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabContent>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTabContent>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

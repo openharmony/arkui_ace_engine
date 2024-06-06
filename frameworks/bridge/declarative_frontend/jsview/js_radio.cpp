@@ -131,7 +131,9 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRadio>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRadio>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
 }
