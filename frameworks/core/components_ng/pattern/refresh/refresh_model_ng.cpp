@@ -249,7 +249,7 @@ void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
 
 float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
 {
-    float value = 0.0;
+    float value = 1.0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullDownRatio, value, frameNode, value);
     return value;
 }
