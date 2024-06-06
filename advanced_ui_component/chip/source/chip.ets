@@ -612,9 +612,6 @@ export struct ChipComponent {
       currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
 
-    if (!this.isShowPressedBackGroundColor) {
-      return currentColor
-    }
     let sourceColor: ColorMetrics;
 
     try {
@@ -626,6 +623,9 @@ export struct ChipComponent {
       } else {
         sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
       }
+    }
+    if (!this.isShowPressedBackGroundColor) {
+      return sourceColor
     }
 
     return sourceColor
