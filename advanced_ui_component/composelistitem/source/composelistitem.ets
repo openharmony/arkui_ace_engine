@@ -406,6 +406,7 @@ struct OperateItemStruct {
       this.isParentCanTouch = true;
     })
     .onClick(param.icon?.action)
+    .flexShrink(0)
   }
 
   @Builder
