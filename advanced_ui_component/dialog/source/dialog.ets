@@ -900,12 +900,12 @@ struct CustomDialogContentComponent {
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
-        Color.Transparent : $r('sys.color.comp_background_primary'))
+      Color.Transparent : $r('sys.color.comp_background_primary'))
     }
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
@@ -929,8 +929,8 @@ struct CustomDialogContentComponent {
       }
       measureResult = child.measure(constraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     return sizeResult;
   }
 
@@ -941,11 +941,10 @@ struct CustomDialogContentComponent {
     if (this.targetSdk >= VERSION_TWELVE) {
       return;
     }
-    let marginStart: number = getNumberByResource('ohos_id_dialog_margin_start');
-    let marginEnd: number = getNumberByResource('ohos_id_dialog_margin_end');
-    if (Math.abs(dialogWidth - this.screenSize.width) < marginStart + marginEnd ||
-      Math.abs(dialogHeight - this.screenSize.height) < 1) {
-      this.customStyle = true;
+    if (this.screenSize.width > MAX_DIALOG_WIDTH) {
+      this.customStyle = dialogWidth > MAX_DIALOG_WIDTH;
+    } else {
+      this.customStyle = dialogWidth >= this.screenSize.width;
     }
     this.initCustomStyle = true;
   }
@@ -966,8 +965,7 @@ struct CustomDialogContentComponent {
   private initEnvInfo(): void {
     try {
       let screenSize: display.Display = display.getDefaultDisplaySync();
-      this.windowSize = { width: px2vp(screenSize.width), height: px2vp(screenSize.height) };
-      this.screenSize = { width: this.windowSize.width, height: this.windowSize.height };
+      this.screenSize = { width: px2vp(screenSize.width), height: px2vp(screenSize.height) };
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
@@ -1109,14 +1107,20 @@ struct TitleComponent {
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     this.updateFontSize();
+    let titleConstraint: ConstraintSizeOptions = {
+      minWidth: constraint.minWidth,
+      minHeight: this.getTitleAreaMinHeight(),
+      maxWidth: constraint.maxWidth,
+      maxHeight: constraint.maxHeight
+    }
     children.forEach((child) => {
-      let measureResult: MeasureResult = child.measure(constraint);
+      let measureResult: MeasureResult = child.measure(titleConstraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     this.titleHeight = sizeResult.height;
     return sizeResult;
   }
@@ -1236,7 +1240,7 @@ struct ButtonComponent {
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Number(constraint.maxWidth));
@@ -1244,8 +1248,8 @@ struct ButtonComponent {
     children.forEach((child) => {
       let measureResult: MeasureResult = child.measure(constraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     this.buttonHeight = Number(sizeResult.height);
     return sizeResult;
   }
