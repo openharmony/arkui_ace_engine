@@ -188,17 +188,21 @@ bool RenderSlidingPanel::InitializeLayoutProps()
                                                     ? maxSize.Height() - NormalizeToPx(miniHeight_.first)
                                                     : maxSize.Height() - NormalizeToPx(DRAG_UP_THRESHOLD);
         defaultBlankHeights_[PanelMode::HALF] =
-            halfHeight_.second ? maxSize.Height() - NormalizeToPx(halfHeight_.first) : maxSize.Height() / 2;
+            halfHeight_.second ? maxSize.Height() - NormalizeToPx(halfHeight_.first)
+            : maxSize.Height() / 2; // 2: half of height
         defaultBlankHeights_[PanelMode::FULL] =
             fullHeight_.second ? maxSize.Height() - NormalizeToPx(fullHeight_.first) : NormalizeToPx(BLANK_MIN_HEIGHT);
         CheckHeightValidity();
         isFirstLayout_ = true;
         fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::HALF] -
+                            defaultBlankHeights_[PanelMode::FULL]) / 2.0; // 2.0: half of height
         halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::MINI] -
+                            defaultBlankHeights_[PanelMode::HALF]) / 2.0; // 2.0: half of height
         fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+                            (defaultBlankHeights_[PanelMode::MINI] -
+                            defaultBlankHeights_[PanelMode::FULL]) / 2.0; // 2.0: half of height
     }
     minBlankHeight_ = NormalizeToPx(BLANK_MIN_HEIGHT);
     if (dragBar_ && !(dragBar_->HasClickArrowCallback())) {
@@ -361,7 +365,7 @@ void RenderSlidingPanel::UpdateTouchRect()
     touchRect_ = GetPaintRect();
     touchRectList_.emplace_back(touchRect_);
     SetTouchRectList(touchRectList_);
-    if (GetChildren().size() < 2) {
+    if (GetChildren().size() < 2) { // 2: at least 2 children
         return;
     }
     touchRect_ = GetChildren().back()->GetPaintRect();

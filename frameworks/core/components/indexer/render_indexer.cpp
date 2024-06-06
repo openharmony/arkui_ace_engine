@@ -510,6 +510,7 @@ void RenderIndexer::HandleFocusAnimation(const Size& size, const Offset& offset)
     }
 
     double focusPadding = NormalizeToPx(FOCUS_PADDING);
+    // four focusPadding.
     context->ShowFocusAnimation(
         RRect::MakeRRect(Rect(Offset(), size - Size(focusPadding, focusPadding) * 2), focusPadding, focusPadding),
         Color::BLUE, offset + Offset(focusPadding, focusPadding));
