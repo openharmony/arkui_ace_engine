@@ -236,7 +236,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     if (!safeAreaManager->IsSafeAreaValid()) {
         parentAdjust = RectF();
     }
-    auto frame = geometryNode->GetPixelGridRoundRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
 
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
