@@ -322,6 +322,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -331,6 +332,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -340,6 +342,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -349,6 +352,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -358,6 +362,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
