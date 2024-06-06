@@ -858,6 +858,8 @@ struct CustomDialogContentComponent {
   @State needResponseScale: boolean = true;
   screenSize: Size = { width: 0, height: 0 };
   initCustomStyle: boolean = false;
+  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
+  @State buttonMinFontSize: Length = 9;
 
   build() {
     WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
@@ -887,7 +889,9 @@ struct CustomDialogContentComponent {
             needResponseScale: this.needResponseScale,
             buttonHeight: this.buttonHeight,
             controller: this.controller,
-            theme: this.theme
+            theme: this.theme,
+            buttonMaxFontSize: this.buttonMaxFontSize,
+            buttonMinFontSize: this.buttonMinFontSize
           })
         }
         .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
@@ -913,7 +917,7 @@ struct CustomDialogContentComponent {
     this.updateFontScale();
     this.updateNeedResponseScale();
     this.updateCustomStyle(Number(constraint.maxWidth), Number(constraint.maxHeight));
-
+    this.updateFontSize();
     children.forEach((child) => {
       let measureResult: MeasureResult = child.measure(constraint);
       if (this.updateButtonHeight) {
@@ -960,6 +964,21 @@ struct CustomDialogContentComponent {
 
   aboutToAppear(): void {
     this.initEnvInfo();
+  }
+
+  private updateFontSize(): void {
+    if (this.needResponseScale) {
+      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+      } else {
+        this.buttonMaxFontSize = BODY_L + 'fp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
+      }
+    } else {
+      this.buttonMaxFontSize = BODY_L + 'vp';
+      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
+    }
   }
 
   private initEnvInfo(): void {
@@ -1208,8 +1227,8 @@ struct TitleComponent {
 struct ButtonComponent {
   controller?: CustomDialogController;
   buttons?: ButtonOptions[];
-  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
-  @State buttonMinFontSize: Length = 9;
+  @Link buttonMaxFontSize: Length;
+  @Link buttonMinFontSize: Length;
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
