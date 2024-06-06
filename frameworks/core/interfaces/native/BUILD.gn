@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/core/interfaces/arkoala/generated/interface/node_interface.gni")
 
 # build core sources
 template("ace_core_interfaces_native_node") {
@@ -127,6 +128,10 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
     ]
+    if (include_generated_sources) {
+      sources += generated_sources
+      defines += [ "INCLUDE_GENERATED_SOURCES" ]
+    }
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     if (is_arkui_x) {
       deps += [
@@ -138,6 +143,7 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",
       "${ace_root}/interfaces/native/node",
+      "${ace_root}/frameworks/core/interfaces/arkoala/generated/interface",
     ]
 
     if (defined(config.model_component_support) &&
@@ -171,7 +177,8 @@ template("ace_core_interfaces_native_node") {
       external_deps += [ "hilog:libhilog" ]
     }
 
-    cflags_cc = []
+    # TODO: this is for zero sized generated structs in arkoala_api.h
+    cflags_cc += [ "-Wno-extern-c-compat" ]
     cflags_cc += invoker.cflags_cc
   }
 }

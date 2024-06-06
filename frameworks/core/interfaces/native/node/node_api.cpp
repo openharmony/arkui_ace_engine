@@ -14,6 +14,9 @@
  */
 
 #include "core/interfaces/native/node/node_api.h"
+#ifdef INCLUDE_GENERATED_SOURCES
+#include "core/interfaces/arkoala/generated/interface/arkoala_api_generated.h"
+#endif
 
 #include <deque>
 #include <securec.h>
@@ -181,12 +184,12 @@ int CheckEvent(ArkUINodeEvent* event)
     return 0;
 }
 
-static EventReceiver globalEventReceiver = nullptr;
+static EventReceiver eventReceiver = nullptr;
 
 void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 {
-    if (globalEventReceiver) {
-        globalEventReceiver(event);
+    if (eventReceiver) {
+        eventReceiver(event);
     } else {
         g_eventQueue.push_back(*event);
     }
@@ -205,18 +208,18 @@ int CheckEvent(ArkUICustomNodeEvent* event)
     return 0;
 }
 
-void (*g_fliter)(ArkUICustomNodeEvent* event) = nullptr;
+static CustomEventReceiver customEventReceiver;
 void SendArkUIAsyncEvent(ArkUICustomNodeEvent* event)
 {
-    if (g_fliter) {
-        g_fliter(event);
+    if (customEventReceiver) {
+        customEventReceiver(event);
     } else {
         g_eventQueue.push_back(*event);
     }
 }
 } // namespace CustomNodeEvent
 
-namespace {
+namespace ApiImpl {
 
 void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32 callback)
 {
@@ -302,10 +305,10 @@ ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
     return ViewModel::IsBuilderNode(node);
 }
 
-ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit)
+ArkUI_Float32 ConvertLengthMetricsUnit(ArkUI_Float32 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit)
 {
     Dimension lengthMetric(value, static_cast<DimensionUnit>(originUnit));
-    return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
+    return static_cast<ArkUI_Float32>(lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit)));
 }
 
 ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
@@ -1226,12 +1229,12 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
 
 void RegisterNodeAsyncEventReceiver(EventReceiver eventReceiver)
 {
-    NodeEvent::globalEventReceiver = eventReceiver;
+    NodeEvent::eventReceiver = eventReceiver;
 }
 
 void UnregisterNodeAsyncEventReceiver()
 {
-    NodeEvent::globalEventReceiver = nullptr;
+    NodeEvent::eventReceiver = nullptr;
 }
 
 void ApplyModifierFinish(ArkUINodeHandle nodePtr)
@@ -1251,7 +1254,7 @@ void MarkDirty(ArkUINodeHandle nodePtr, ArkUI_Uint32 flag)
     }
 }
 
-static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
+void SetCallbackMethod(ArkUIAPICallbackMethod* method)
 {
     ViewModel::SetCallbackMethod(method);
 }
@@ -1358,9 +1361,9 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
     return 0;
 }
 
-void RegisterCustomNodeEventReceiver(void (*eventReceiver)(ArkUICustomNodeEvent* event))
+void RegisterCustomNodeEventReceiver(CustomEventReceiver eventReceiver)
 {
-    CustomNodeEvent::g_fliter = eventReceiver;
+    CustomNodeEvent::customEventReceiver = eventReceiver;
 }
 
 void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1766,6 +1769,17 @@ void SetLazyItemIndexer(ArkUIVMContext vmContext, ArkUINodeHandle nodePtr, int i
     }
 }
 
+ArkUI_Int32 GetContextByNode(ArkUINodeHandle node)
+{
+    ArkUI_Int32 instanceId = -1;
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, instanceId);
+    auto pipeline = currentNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, instanceId);
+    instanceId = pipeline->GetInstanceId();
+    return instanceId;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -1796,7 +1810,6 @@ const ArkUIBasicAPI* GetBasicAPI()
         MarkDirty,
         IsBuilderNode,
         ConvertLengthMetricsUnit,
-
         GetContextByNode,
     };
     /* clang-format on */
@@ -2186,8 +2199,13 @@ ArkUIFullNodeAPI impl_full = {
     NodeAdapter::GetNodeAdapterAPI,         // adapter.
 };
 /* clang-format on */
-} // namespace
+} // namespace ApiImpl
 
+namespace GeneratedModifier {
+    const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI();
+    const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI();
+    const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI();
+}
 } // namespace OHOS::Ace::NG
 
 extern "C" {
@@ -2196,7 +2214,7 @@ ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {
     switch (version) {
         case ARKUI_NODE_API_VERSION:
-            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
+            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::ApiImpl::impl_full);
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                 "Requested version %{public}d is not supported, we're version %{public}d", version,
@@ -2208,7 +2226,7 @@ ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 
 const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
 {
-    return &OHOS::Ace::NG::impl_full;
+    return &OHOS::Ace::NG::ApiImpl::impl_full;
 }
 
 void SendArkUIAsyncEvent(ArkUINodeEvent* event)
@@ -2227,7 +2245,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         case ArkUIAPIVariantKind::BASIC: {
             switch (version) {
                 case ARKUI_BASIC_API_VERSION:
-                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetBasicAPI());
+                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::ApiImpl::GetBasicAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "Requested basic version %{public}d is not supported, we're version %{public}d\n", version,
@@ -2240,7 +2258,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         case ArkUIAPIVariantKind::FULL: {
             switch (version) {
                 case ARKUI_FULL_API_VERSION:
-                    return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
+                    return reinterpret_cast<const ArkUIAnyAPI*>(GetArkUIFullNodeAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "Requested full version %{public}d is not supported, we're version %{public}d\n", version,
@@ -2253,7 +2271,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         case ArkUIAPIVariantKind::GRAPHICS: {
             switch (version) {
                 case ARKUI_NODE_GRAPHICS_API_VERSION:
-                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetGraphicsAPI());
+                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::ApiImpl::GetGraphicsAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "Requested graphics version %{public}d is not supported, we're version %{public}d\n", version,
@@ -2266,7 +2284,7 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         case ArkUIAPIVariantKind::EXTENDED: {
             switch (version) {
                 case ARKUI_EXTENDED_API_VERSION:
-                    return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_extended);
+                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::ApiImpl::GetExtendedAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                         "Requested extended version %{public}d is not supported, we're version %{public}d\n", version,
@@ -2276,13 +2294,60 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                 }
             }
         }
-        default: {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "API kind %{public}d is not supported\n",
-                static_cast<int>(kind));
-
+        case ArkUIAPIVariantKind::COUNT: {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                "Requested extended version %{public}d is not supported, we're version %{public}d\n", version,
+                ARKUI_EXTENDED_API_VERSION);
             return nullptr;
         }
     }
+
+#ifdef INCLUDE_GENERATED_SOURCES
+// GENERATED API
+    switch(static_cast<GENERATED_Ark_APIVariantKind>(kind)) {
+        case GENERATED_Ark_APIVariantKind::GENERATED_BASIC: {
+            if (version == GENERATED_ARKUI_BASIC_NODE_API_VERSION) {
+                return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GeneratedModifier::GENERATED_GetBasicAPI());
+            } else {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested GENERATED basic version %{public}d is not supported, we're version %{public}d\n", version,
+                    GENERATED_ARKUI_BASIC_NODE_API_VERSION);
+                return nullptr;
+            }
+        }
+        case GENERATED_Ark_APIVariantKind::GENERATED_FULL: {
+            if (version == GENERATED_ARKUI_FULL_API_VERSION) {
+                return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GeneratedModifier::GENERATED_GetFullAPI());
+            } else {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested GENERATED full version %{public}d is not supported, we're version %{public}d\n", version,
+                    GENERATED_ARKUI_FULL_API_VERSION);
+                return nullptr;
+            }
+        }
+        case GENERATED_Ark_APIVariantKind::GENERATED_GRAPHICS: {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                "Requested GENERATED graphics API version %{public}d is not implemented\n", version);
+            return nullptr;
+        }
+        case GENERATED_Ark_APIVariantKind::GENERATED_EXTENDED: {
+            if (version == GENERATED_ARKUI_EXTENDED_NODE_API_VERSION) {
+                return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GeneratedModifier::GENERATED_GetExtendedAPI());
+            } else {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested GENERATED extended version %{public}d is not supported, we're version %{public}d\n", version,
+                    GENERATED_ARKUI_EXTENDED_NODE_API_VERSION);
+                return nullptr;
+            }
+        }
+        case GENERATED_Ark_APIVariantKind::GENERATED_COUNT: {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                "Requested GENERATED extended version %{public}d is not supported, we're version %{public}d\n", version,
+                ARKUI_EXTENDED_API_VERSION);
+            return nullptr;
+        }
+    }
+#endif
 }
 
 __attribute__((constructor)) static void provideEntryPoint(void)

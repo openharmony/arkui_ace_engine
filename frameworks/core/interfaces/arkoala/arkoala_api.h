@@ -59,6 +59,7 @@ typedef double ArkUI_Float64;
 typedef const char* ArkUI_CharPtr;
 
 // Several opaque struct declarations.
+#ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
 struct _ArkUIVMContext;
 struct _ArkUIPipelineContext;
 struct _ArkUIVMObject;
@@ -73,6 +74,9 @@ struct ArkUI_WaterFlowSectionOption;
 struct ArkUI_ListItemSwipeActionOption;
 struct ArkUI_ListItemSwipeActionItem;
 struct ArkUI_ListChildrenMainSize;
+#else
+#error "Do not include arkoala_api_generated.h before arkoala_api.h"
+#endif
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -4609,6 +4613,7 @@ typedef enum {
 } ArkUIDirtyFlag;
 
 typedef void (*EventReceiver)(ArkUINodeEvent* event);
+typedef void (*CustomEventReceiver)(ArkUICustomNodeEvent* event);
 
 struct ArkUIBasicAPI {
     /// Tree operations.
@@ -4645,8 +4650,7 @@ struct ArkUIBasicAPI {
     // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
-
-    ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
+    ArkUI_Float32 (*convertLengthMetricsUnit)(ArkUI_Float32 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 
     ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
 };
@@ -4694,7 +4698,7 @@ struct ArkUIExtendedNodeAPI {
 
     void (*registerCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
     ArkUI_Int32 (*unregisterCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind);
-    void (*registerCustomNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUICustomNodeEvent* event));
+    void (*registerCustomNodeAsyncEventReceiver)(CustomEventReceiver eventReceiver);
 
     void (*setCustomCallback)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 callbackId);
     ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext, ArkUINodeHandle node);
