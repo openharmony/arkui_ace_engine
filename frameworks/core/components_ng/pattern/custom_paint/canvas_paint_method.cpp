@@ -404,39 +404,15 @@ void CanvasPaintMethod::GetImageData(
     }
 }
 
-void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvas)
-{
-    CHECK_NULL_VOID(offscreenCanvas);
 #ifdef PIXEL_MAP_SUPPORTED
-    OHOS::Media::InitializationOptions options;
-    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
-    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
-    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    auto width = offscreenCanvas->GetWidth();
-    auto height = offscreenCanvas->GetHeight();
-    options.size.width = width;
-    options.size.height = height;
-    options.editable = true;
-    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
-    if (pixelMap) {
-        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
-        imageData->pixelMap = pixelMap;
-        imageData->dirtyX = 0.0f;
-        imageData->dirtyY = 0.0f;
-        imageData->dirtyWidth = width;
-        imageData->dirtyHeight = height;
-        offscreenCanvas->GetImageData(imageData);
-        Ace::CanvasImage canvasImage;
-        canvasImage.flag = 0;
-        DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
-    }
-#else
-    std::unique_ptr<Ace::ImageData> imageData =
-        offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
-    CHECK_NULL_VOID(imageData);
-    PutImageData(*imageData);
-#endif
+void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_VOID(pixelMap);
+    Ace::CanvasImage canvasImage;
+    canvasImage.flag = 0;
+    DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
 }
+#endif
 
 void CanvasPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {

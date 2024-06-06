@@ -456,8 +456,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 #else
     CHECK_NULL_VOID(jsImage);
     isImage = true;
-    std::string imageValue = jsImage->GetSrc();
-    image.src = imageValue;
+    image.src = jsImage->GetSrc();
+    image.imageData = jsImage->GetImageData();
     imageInfo.imgWidth = jsImage->GetWidth();
     imageInfo.imgHeight = jsImage->GetHeight();
     imageInfo.isImage = true;

@@ -218,11 +218,21 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
+
+    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id));
+    CHECK_NULL_VOID(offscreenCanvasPattern);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    CHECK_NULL_VOID(pixelMap);
+    jsImage->SetPixelMap(pixelMap);
+#else
+    auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
+    CHECK_NULL_VOID(imageData);
+    jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
+#endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());
     jsImage->SetHeight(GetHeight());
-    jsImage->SetContextId(id);
-
     info.SetReturnValue(JsConverter::ConvertNapiValueToJsVal(renderImage));
 }
 

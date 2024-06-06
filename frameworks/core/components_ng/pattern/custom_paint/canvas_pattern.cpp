@@ -405,13 +405,25 @@ void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
+#ifdef PIXEL_MAP_SUPPORTED
+void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
-    auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod) {
-        paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
+    auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
+        paintMethod.TransferFromImageBitmap(pixelMap);
     };
     paintMethod_->PushTask(task);
 }
+#else
+void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
+{
+#ifndef ACE_UNITTEST
+    auto task = [imageData](CanvasPaintMethod& paintMethod) {
+        paintMethod.PutImageData(imageData);
+    };
+    paintMethod_->PushTask(task);
+#endif
+}
+#endif
 
 void CanvasPattern::CloseImageBitmap(const std::string& src)
 {

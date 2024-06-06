@@ -455,4 +455,9 @@ void OffscreenCanvasPattern::UpdateTextDefaultDirection()
     offscreenPaintMethod_->SetTextDirection(
         AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
+
+RefPtr<PixelMap> OffscreenCanvasPattern::TransferToImageBitmap()
+{
+    return offscreenPaintMethod_->TransferToImageBitmap();
+}
 } // namespace OHOS::Ace::NG
