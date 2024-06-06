@@ -1027,6 +1027,7 @@ void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositi
     auto childrens = host->GetChildren();
     auto it = childrens.begin();
     std::advance(it, info.spanIndex_);
+    CHECK_NULL_VOID(it != childrens.end());
     if (start == info.spanStart_ && end == info.spanEnd_) {
         ClearContent(*it);
         host->RemoveChild(*it);
@@ -1050,9 +1051,7 @@ void RichEditorPattern::DeleteSpansByRange(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrens = host->GetChildren();
-    if (childrens.empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!childrens.empty());
 
     auto itStart = childrens.begin();
     if (startInfo.spanIndex_ >= static_cast<int32_t>(childrens.size())) {
@@ -1061,6 +1060,7 @@ void RichEditorPattern::DeleteSpansByRange(
     } else {
         std::advance(itStart, startInfo.spanIndex_);
     }
+    CHECK_NULL_VOID(itStart != childrens.end());
     auto saveStartSpan = (start == startInfo.spanStart_) ? 0 : 1;
     if (saveStartSpan) {
         auto spanNodeStart = DynamicCast<SpanNode>(*itStart);
