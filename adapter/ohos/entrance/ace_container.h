@@ -546,7 +546,7 @@ public:
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        StopDragCallback&& stopDragCallback) override;
+        int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
         AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
