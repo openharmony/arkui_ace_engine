@@ -180,6 +180,8 @@ private:
 
     void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
+    bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
