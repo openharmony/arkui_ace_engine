@@ -18,7 +18,9 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/system_bar/system_bar_style.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -491,7 +493,20 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
+    JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+void JSNavDestination::SetSystemBarStyle(const JSCallbackInfo& info)
+{
+    RefPtr<SystemBarStyle> style = nullptr;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);
+        auto env = GetCurrentEnv();
+        if (env) {
+            style = SystemBarStyle::CreateStyleFromJsObj(env, styleObj);
+        }
+    }
+    NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
+}
 } // namespace OHOS::Ace::Framework

@@ -41,6 +41,7 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
+#include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -2081,6 +2082,14 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowGetMaximizeModeCallBack(
         [window = uiWindow_]() -> MaximizeMode {
             return static_cast<MaximizeMode>(window->GetGlobalMaximizeMode());
+        });
+    windowManager->SetGetSystemBarStyleCallBack(
+        [window = uiWindow_]() -> RefPtr<SystemBarStyle> {
+            return SystemBarStyleOhos::GetCurrentSystemBarStyle(window);
+        });
+    windowManager->SetSetSystemBarStyleCallBack(
+        [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
+            SystemBarStyleOhos::SetSystemBarStyle(window, style);
         });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {

@@ -222,6 +222,266 @@ void NavigationPattern::OnModifyDone()
     }
 }
 
+void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    if (!backupStyle_.has_value()) {
+        backupStyle_ = windowManager->GetSystemBarStyle();
+    }
+    currStyle_ = style;
+
+    // The systemBarStyle may only take effect when navigation fills the entire page.
+    if (!isFullPageNavigation_) {
+        return;
+    }
+
+    // When there is NavDestination in the stack, the systemBarStyle set for Navigation does not take effect.
+    do {
+        if (!navigationStack_) {
+            break;
+        }
+        auto topPath = navigationStack_->GetTopNavPath();
+        if (!topPath.has_value()) {
+            break;
+        }
+        auto topNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(topPath->second));
+        if (topNavDestination) {
+            return;
+        }
+    } while (false);
+
+    /**
+     * When developers provide a valid style to systemBarStyle, we should set the style to window;
+     * when 'undefined' was provided, we should restore the style.
+     */
+    if (currStyle_.value() != nullptr) {
+        windowManager->SetSystemBarStyle(currStyle_.value());
+    } else {
+        TryRestoreSystemBarStyle(windowManager);
+    }
+}
+
+void NavigationPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    InitPageNode(host);
+}
+
+void NavigationPattern::OnDetachFromMainTree()
+{
+    isFullPageNavigation_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    TryRestoreSystemBarStyle(windowManager);
+    backupStyle_.reset();
+    currStyle_.reset();
+    pageNode_ = nullptr;
+}
+
+bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
+{
+    if (!navigationStack_) {
+        return false;
+    }
+    auto topPath = navigationStack_->GetTopNavPath();
+    if (!topPath.has_value()) {
+        return false;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(topPath->second));
+    return navDestination == node;
+}
+
+void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frame = geometryNode->GetFrameRect();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+
+    bool isFullPage = false;
+    auto pageNode = pageNode_.Upgrade();
+    if (pageNode) {
+        auto pageNodeGeometryNode = pageNode->GetGeometryNode();
+        if (pageNodeGeometryNode) {
+            auto pageFrame = pageNodeGeometryNode->GetFrameRect();
+            isFullPage = pageFrame.GetSize() == frame.GetSize();
+        }
+    }
+    pageNode = nullptr;
+
+    if (isFullPage == isFullPageNavigation_) {
+        return;
+    }
+
+    isFullPageNavigation_ = isFullPage;
+    UpdateSystemBarStyleOnFullPageStateChange(windowManager);
+    if (isFullPageNavigation_) {
+        RegisterPageVisibilityChangeCallback();
+    }
+}
+
+void NavigationPattern::UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager)
+{
+    // full page -> partial page
+    if (!isFullPageNavigation_) {
+        TryRestoreSystemBarStyle(windowManager);
+        return;
+    }
+
+    // partial page -> full page
+    auto topPath = navigationStack_->GetTopNavPath();
+    UpdateSystemBarStyleWithTopNavPath(windowManager, topPath);
+}
+
+void NavigationPattern::UpdateSystemBarStyleOnTopNavPathChange(
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+{
+    if (!isFullPageNavigation_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    UpdateSystemBarStyleWithTopNavPath(windowManager, newTopNavPath);
+}
+
+void NavigationPattern::UpdateSystemBarStyleWithTopNavPath(const RefPtr<WindowManager>& windowManager,
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath)
+{
+    if (ApplyTopNavPathSystemBarStyleOrRestore(windowManager, topNavPath)) {
+        return;
+    }
+
+    if (currStyle_.has_value() && currStyle_.value() != nullptr) {
+        windowManager->SetSystemBarStyle(currStyle_.value());
+    } else {
+        TryRestoreSystemBarStyle(windowManager);
+    }
+}
+
+void NavigationPattern::TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager)
+{
+    if (backupStyle_.has_value()) {
+        windowManager->SetSystemBarStyle(backupStyle_.value());
+    }
+}
+
+void NavigationPattern::UpdateSystemBarStyleOnPageVisibilityChange(bool show)
+{
+    if (!isFullPageNavigation_) {
+        return;
+    }
+
+    CHECK_NULL_VOID(navigationStack_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    if (show) {
+        // page containing Navigation, hide -> show
+        auto topPath = navigationStack_->GetTopNavPath();
+        UpdateSystemBarStyleWithTopNavPath(windowManager, topPath);
+    } else {
+        // page containing Navigation, show -> hide
+        TryRestoreSystemBarStyle(windowManager);
+    }
+}
+
+void NavigationPattern::RegisterPageVisibilityChangeCallback()
+{
+    auto pageNode = pageNode_.Upgrade();
+    CHECK_NULL_VOID(pageNode);
+    RefPtr<PagePattern> pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto callback = [weak = WeakClaim(this)](bool show) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        // we need update the "systemBarStyle" at the beginning of the transition animation on the router page
+        pattern->UpdateSystemBarStyleOnPageVisibilityChange(show);
+    };
+    pagePattern->SetPageVisibilityChangeCallback(std::move(callback));
+}
+
+bool NavigationPattern::ApplyTopNavPathSystemBarStyleOrRestore(
+    const RefPtr<WindowManager>& windowManager,
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath)
+{
+    if (!topNavPath.has_value()) {
+        return false;
+    }
+
+    auto topNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(topNavPath->second));
+    if (!topNavDestination) {
+        return false;
+    }
+
+    auto navDestinationPattern = topNavDestination->GetPattern<NavDestinationPattern>();
+    if (!navDestinationPattern) {
+        return false;
+    }
+    /**
+     * Backup is only performed when the developer sets the "systemBarStyle" attribute,
+     * and the entire Navigation is only backed up once.
+     * Therefore, when developer only set the "systemBarStyle" attribute to NavDestination, we need to
+     * save the attribute to Navigation.
+     */
+    auto backupFromNavDestination = navDestinationPattern->GetBackupStyle();
+    if (!backupStyle_.has_value() && backupFromNavDestination.has_value()) {
+        backupStyle_ = backupFromNavDestination;
+    }
+
+    auto destCurrStyle = navDestinationPattern->GetCurrentStyle();
+    if (destCurrStyle.has_value() && destCurrStyle.value() != nullptr) {
+        windowManager->SetSystemBarStyle(destCurrStyle.value());
+    } else {
+        TryRestoreSystemBarStyle(windowManager);
+    }
+    return true;
+}
+
+void NavigationPattern::InitPageNode(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    RefPtr<FrameNode> pageNode = nullptr;
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+            pageNode = AceType::DynamicCast<FrameNode>(parent);
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    if (!pageNode) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to find PageNode of Navigation");
+    } else {
+        pageNode_ = WeakPtr<FrameNode>(pageNode);
+    }
+}
+
 void NavigationPattern::OnLanguageConfigurationUpdate()
 {
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -378,6 +638,9 @@ void NavigationPattern::CheckTopNavPathChange(
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    if (preTopNavPath != newTopNavPath) {
+        UpdateSystemBarStyleOnTopNavPathChange(newTopNavPath);
+    }
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
@@ -912,6 +1175,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
+    UpdateIsFullPageNavigation(hostNode);
     if (navigationModeChange_) {
         if (NavigationMode::STACK == navigationMode_) {
             // Set focus on navDestination when mode changes to STACK

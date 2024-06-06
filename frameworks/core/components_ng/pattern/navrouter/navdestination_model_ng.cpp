@@ -669,4 +669,14 @@ void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleN
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationPathInfo(moduleName, pagePath);
 }
+
+void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSystemBarStyle(style);
+}
 } // namespace OHOS::Ace::NG

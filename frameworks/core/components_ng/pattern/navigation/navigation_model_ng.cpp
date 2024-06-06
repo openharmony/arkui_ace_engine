@@ -1932,4 +1932,14 @@ void NavigationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const Safe
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
 }
+
+void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSystemBarStyle(style);
+}
 } // namespace OHOS::Ace::NG
