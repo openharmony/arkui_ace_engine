@@ -2292,7 +2292,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
 
 int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
+    if (item->size < 4) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -2313,9 +2313,6 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, pathAttributes, item->string);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
-        if (item->size != NUM_4) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
         ArkUI_Float32 progressAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
@@ -2326,13 +2323,6 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
-        if (item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE && item->size != NUM_8) {
-            return ERROR_CODE_PARAM_INVALID;
-        } else if ((item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_ELLIPSE ||
-                       item->value[NUM_3].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_CIRCLE) &&
-                   item->size != NUM_4) {
-            return ERROR_CODE_PARAM_INVALID;
-        }
         int fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
         int stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
@@ -5125,6 +5115,9 @@ int32_t SetListCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->size != 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     GetFullImpl()->getNodeModifiers()->getListModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -6465,6 +6458,9 @@ int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperCachedCount(
@@ -10832,6 +10828,9 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     if (item->size != 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
@@ -11309,6 +11308,9 @@ int32_t SetGridCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getGridModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
