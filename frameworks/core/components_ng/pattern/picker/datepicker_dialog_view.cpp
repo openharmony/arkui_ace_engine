@@ -1745,7 +1745,7 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::v
     CHECK_NULL_VOID(cancelButtonNode);
     auto cancelButtonGesturHub = cancelButtonNode->GetOrCreateGestureEventHub();
     cancelButtonGesturHub->AddClickEvent(onClick);
-    if (settingData.showTime && !settingData.useMilitary) {
+    if ((settingData.showTime && !settingData.useMilitary) || !settingData.showTime) {
         auto confirmButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetLastChild());
         CHECK_NULL_VOID(confirmButtonNode);
         auto confirmButtonGesturHub = confirmButtonNode->GetOrCreateGestureEventHub();
