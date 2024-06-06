@@ -1603,18 +1603,21 @@ void ResetForegroundBlurStyle(ArkUINodeHandle node)
 
 ArkUIBlurStyleOptionType GetForegroundBlurStyle(ArkUINodeHandle node)
 {
-    ArkUIBlurStyleOptionType styleOptionType = { 0, 0, 0, 1.0f };
+    ArkUIBlurStyleOptionType styleOptionType = { 0, 0, 0, 1.0f, 0, 0 };
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, styleOptionType);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, styleOptionType);
-    if (!renderContext->GetFrontBlurStyle().has_value()) {
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    if (!blurStyleOption.has_value()) {
         return styleOptionType;
     }
-    styleOptionType.blurStyle = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->blurStyle);
-    styleOptionType.colorMode = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->colorMode);
-    styleOptionType.adaptiveColor = static_cast<int32_t>(renderContext->GetFrontBlurStyle()->adaptiveColor);
-    styleOptionType.scale = renderContext->GetFrontBlurStyle()->scale;
+    styleOptionType.blurStyle = static_cast<int32_t>(blurStyleOption->blurStyle);
+    styleOptionType.colorMode = static_cast<int32_t>(blurStyleOption->colorMode);
+    styleOptionType.adaptiveColor = static_cast<int32_t>(blurStyleOption->adaptiveColor);
+    styleOptionType.scale = blurStyleOption->scale;
+    styleOptionType.grayScaleStart = blurStyleOption->blurOption.grayscale[NUM_0];
+    styleOptionType.grayScaleEnd = blurStyleOption->blurOption.grayscale[NUM_1];
     return styleOptionType;
 }
 
@@ -1725,8 +1728,8 @@ ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
     styleOptionType.adaptiveColor = static_cast<int32_t>(backBlurStyleOption->adaptiveColor);
     styleOptionType.scale = backBlurStyleOption->scale;
     auto greyScaleVector = backBlurStyleOption->blurOption.grayscale;
-    styleOptionType.greyScaleStart = greyScaleVector.size() > NUM_0 ? greyScaleVector[NUM_0] : 0.0f;
-    styleOptionType.greyScaleEnd = greyScaleVector.size() > NUM_1 ? greyScaleVector[NUM_1] : 0.0f;
+    styleOptionType.grayScaleStart = greyScaleVector.size() > NUM_0 ? greyScaleVector[NUM_0] : 0.0f;
+    styleOptionType.grayScaleEnd = greyScaleVector.size() > NUM_1 ? greyScaleVector[NUM_1] : 0.0f;
     return styleOptionType;
 }
 
