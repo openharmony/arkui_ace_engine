@@ -192,6 +192,11 @@ public:
     virtual void FinishTextPreview() {}
     virtual void ReceivePreviewTextStyle (const std::string& style) {}
 
+    virtual int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range)
+    {
+        return 0;
+    }
+
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 
     static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;

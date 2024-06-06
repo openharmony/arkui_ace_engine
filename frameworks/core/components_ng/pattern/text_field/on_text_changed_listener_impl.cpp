@@ -359,14 +359,17 @@ int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, co
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{public}s in range (%{public}d, %{public}d)",
         StringUtils::Str16ToStr8(text).c_str(), range.start, range.end);
-    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
-    auto task = [textFieldPattern = pattern_, text, range, &ret] {
+    int32_t ret = CheckPreviewTextParams(text, {range.start, range.end});
+    if (ret != MiscServices::ErrorCode::NO_ERROR) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
+        return ret;
+    }
+    auto task = [textFieldPattern = pattern_, text, range] {
         ACE_SCOPED_TRACE("SetPreviewText");
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        ret = client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
+        client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
     };
     PostTaskToUI(task, "ArkUITextFieldSetPreviewText");
     return ret;
@@ -415,6 +418,20 @@ int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
             ret = MiscServices::ErrorCode::NO_ERROR;
         }
     }
+    return ret;
+}
+
+int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range)
+{
+    int32_t ret = MiscServices::ErrorCode::NO_ERROR;
+    auto task = [textFieldPattern = pattern_, text, range, &ret] {
+        ACE_SCOPED_TRACE("SetPreviewText");
+        auto client = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        ret = client->CheckPreviewTextValidate(StringUtils::Str16ToStr8(text), {range.start, range.end});
+    };
+    PostSyncTaskToUI(task, "ArkUICheckPreviewTextParams");
     return ret;
 }
 } // namespace OHOS::Ace::NG
