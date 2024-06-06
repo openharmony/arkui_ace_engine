@@ -671,7 +671,8 @@ export struct ComposeListItem {
 
   onPropChange() {
     if (this.contentItem === undefined) {
-      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined || this.operateItem?.subIcon !== undefined) {
+      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined ||
+        this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
       }
       return
@@ -680,8 +681,7 @@ export struct ComposeListItem {
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
-      }
-      else {
+      } else {
         this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
         ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
