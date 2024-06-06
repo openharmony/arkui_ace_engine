@@ -33,11 +33,14 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
+constexpr uint32_t DEFAULT_STYLE = 1;
+constexpr uint32_t DEFAULT_ROLE = 0;
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
 constexpr int32_t CALL_ARG_3 = 3;
 constexpr int32_t CALL_ARG_4 = 4;
+constexpr int32_t CALL_ARG_5 = 5;
 constexpr int32_t MAX_LINES_ARG_2 = 2;
 constexpr int32_t MIN_FONT_SIZE_ARG_3 = 3;
 constexpr int32_t MAX_FONT_SIZE_ARG_4 = 4;
@@ -69,6 +72,89 @@ panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo*
     auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ButtonModelNG::TriggerClick(frameNode, xPos, yPos);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetCreateWithLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool createWithLabel = false;
+    if (secondArg->IsBoolean()) {
+        createWithLabel = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setCreateWithLabel(nativeNode, createWithLabel);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::string value;
+    ArkTSUtils::ParseJsString(vm, secondArg, value);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelWithCheck(nativeNode, value.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonLabelWithCheck(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> stateEffectArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    Local<JSValueRef> buttonStyleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    Local<JSValueRef> controlSizeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
+    Local<JSValueRef> roleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_5);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (typeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonType(nativeNode, typeArg->Int32Value(vm));
+    }
+    if (stateEffectArg->IsBoolean()) {
+        bool stateEffect = stateEffectArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonStateEffect(nativeNode, stateEffect);
+    }
+    if (controlSizeArg->IsNumber()) {
+        uint32_t controlSize = controlSizeArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonControlSize(nativeNode, controlSize);
+    }
+    uint32_t buttonStyle = DEFAULT_STYLE;
+    if (buttonStyleArg->IsNumber()) {
+        buttonStyle = buttonStyleArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonStyle(nativeNode, buttonStyle);
+    }
+    uint32_t buttonRole = DEFAULT_ROLE;
+    if (roleArg->IsNumber()) {
+        buttonRole = roleArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonRole(nativeNode, buttonRole);
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonOptions(nativeNode, buttonStyle, buttonRole);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

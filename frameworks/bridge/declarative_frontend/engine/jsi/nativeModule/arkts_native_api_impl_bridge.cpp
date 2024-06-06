@@ -2700,6 +2700,16 @@ void ArkUINativeModule::RegisterPanelAttributes(Local<panda::ObjectRef> object, 
 void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto button = panda::ObjectRef::New(vm);
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCreateWithLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetCreateWithLabel));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetLabel));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetLabel));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetOptions));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::ResetOptions));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ButtonBridge::SetType));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetType"),
