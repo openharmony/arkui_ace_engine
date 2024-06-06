@@ -81,7 +81,6 @@ const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
 const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
-constexpr int32_t SWIPER_HALF = 2;
 constexpr int32_t CAPTURE_COUNT = 2;
 constexpr uint8_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                               static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
@@ -2674,7 +2673,8 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
 
     auto dragDistance = iter->second.endPos;
     auto dragForward = currentIndex_ > firstIndex;
-    auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / 2 : dragDistance < swiperWidth / 2;
+    auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / swiperProportion_ :
+        dragDistance < swiperWidth / swiperProportion_;
     auto nextIndex = currentIndex_;
     if (dragThresholdFlag) {
         nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
@@ -2714,10 +2714,10 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
     if (iter == itemPosition_.end() || overTurnPageVelocity) {
         return direction ? currentIndex_ - 1 : currentIndex_ + 1;
     }
-    if (-iter->second.startPos > swiperWidth / SWIPER_HALF) {
+    if (-iter->second.startPos > swiperWidth / swiperProportion_) {
         return currentIndex_ + 1;
     }
-    if (iter->second.startPos > swiperWidth / SWIPER_HALF) {
+    if (iter->second.startPos > swiperWidth / swiperProportion_) {
         return currentIndex_ - 1;
     }
     return currentIndex_;
@@ -2745,7 +2745,8 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     }
     auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag =
-        direction ? dragDistance > firstItemLength / 2 : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
+        direction ? dragDistance > firstItemLength / swiperProportion_ :
+        firstItemInfoInVisibleArea.second.endPos < firstItemLength / swiperProportion_;
     auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
@@ -2846,6 +2847,17 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
     }
 
     return false;
+}
+
+void SwiperPattern::PlayDisplacementAnimation(SwiperLayoutAlgorithm::PositionMap &positionMap, const OffsetF& offset)
+{
+    for (auto &item : positionMap) {
+        auto frameNode = item.second.node;
+        if (frameNode) {
+            frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
+            item.second.finalOffset = offset;
+        }
+    }
 }
 
 void SwiperPattern::PlayPropertyTranslateAnimation(
@@ -2956,13 +2968,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
             offset.GetY());
         ACE_SCOPED_TRACE("Swiper start property animation, X: %f, Y: %f", offset.GetX(), offset.GetY());
-        for (auto& item : swiperPattern->itemPosition_) {
-            auto frameNode = item.second.node;
-            if (frameNode) {
-                frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
-                item.second.finalOffset = offset;
-            }
-        }
+        swiperPattern->PlayDisplacementAnimation(swiperPattern->itemPosition_, offset);
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
         if (swiperPattern->IsCaptureNodeValid()) {
             swiperPattern->GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
@@ -4114,7 +4120,7 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     auto firstItemLength = firstItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
     auto firstIndexStartPos = firstItemInfoInVisibleArea.second.startPos;
-    if (std::abs(firstIndexStartPos) < (firstItemLength / 2)) {
+    if (std::abs(firstIndexStartPos) < (firstItemLength / swiperProportion_)) {
         currentIndexOffset_ = firstItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(firstItemInfoInVisibleArea.first);
     } else {
@@ -4130,7 +4136,7 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToRight()
     auto firstItemLength = firstItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
     auto secondItemInfoInVisibleArea = GetSecondItemInfoInVisibleArea();
     auto secondIndexStartPos = secondItemInfoInVisibleArea.second.startPos;
-    if (std::abs(secondIndexStartPos) < (firstItemLength / 2)) {
+    if (std::abs(secondIndexStartPos) < (firstItemLength / swiperProportion_)) {
         currentIndexOffset_ = secondItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(secondItemInfoInVisibleArea.first);
     } else {
@@ -4164,7 +4170,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
 
     auto swiperWidth = MainSize();
     auto currentOffset = iter->second.startPos;
-    if (std::abs(currentOffset) < (swiperWidth / SWIPER_HALF)) {
+    if (std::abs(currentOffset) < (swiperWidth / swiperProportion_)) {
         return;
     }
 

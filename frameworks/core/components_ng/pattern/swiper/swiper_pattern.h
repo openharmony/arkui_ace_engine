@@ -669,6 +669,12 @@ public:
 protected:
     void MarkDirtyNodeSelf();
 
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
+    int32_t currentIndex_ = 0;
+    SwiperLayoutAlgorithm::PositionMap itemPosition_;
+    std::optional<int32_t> targetIndex_;
+    int32_t swiperProportion_ = 2;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -709,6 +715,8 @@ private:
     void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
+
+    virtual void PlayDisplacementAnimation(SwiperLayoutAlgorithm::PositionMap &positionMap, const OffsetF& offset);
     void PlayTranslateAnimation(
         float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, float velocity = 0.0f);
     void OnTranslateAnimationFinish();
@@ -993,7 +1001,7 @@ private:
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
-    int32_t currentIndex_ = 0;
+    
     int32_t oldIndex_ = 0;
     int32_t nextIndex_ = 0;
 
@@ -1003,7 +1011,7 @@ private:
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
-    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
+    
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
@@ -1061,7 +1069,7 @@ private:
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
-    std::optional<int32_t> targetIndex_;
+
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
@@ -1069,7 +1077,7 @@ private:
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event
     float mainDeltaSum_ = 0.0f;
-    SwiperLayoutAlgorithm::PositionMap itemPosition_;
+
     std::optional<float> velocity_;
     float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
