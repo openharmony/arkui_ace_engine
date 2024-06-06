@@ -98,7 +98,8 @@ public:
     void TryGetDataBackGround(
         const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
         const std::string& udKey, int32_t count = 0);
-    void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point);
+    void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
+        const OHOS::Ace::PointerEvent& pointerEvent);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
     bool CheckRemoteData(
         const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey);
@@ -436,7 +437,7 @@ private:
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
-    void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void PrintDragFrameNode(const OHOS::Ace::PointerEvent& pointerEvent, const RefPtr<FrameNode>& dragFrameNode);
     void PrintGridDragFrameNode(const float globalX, const float globalY, const RefPtr<FrameNode>& dragFrameNode);
     void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);

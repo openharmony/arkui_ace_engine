@@ -426,6 +426,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
 {
     event.rawPointerEvent = pointerEvent;
+    event.pointerEventId = pointerEvent->GetId();
     event.pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
@@ -466,10 +467,10 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {
-            LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
-                "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
-                item.GetTiltX(), item.GetTiltY());
+            LOGI("action point info: id: %{public}d, pointerId: %{public}d, x: %{public}d, y: %{public}d, action: "
+                "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                pointerEvent->GetId(), actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(),
+                item.GetPressure(), item.GetTiltX(), item.GetTiltY());
         }
         auto ids = pointerEvent->GetPointerIds();
         for (auto&& id : ids) {

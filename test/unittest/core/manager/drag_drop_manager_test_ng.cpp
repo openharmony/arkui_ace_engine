@@ -1478,7 +1478,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest034, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
 
-    Point point;
+    OHOS::Ace::PointerEvent point;
     RefPtr<FrameNode> dragFrameNode = nullptr;
     dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, dragFrameNode);
 
