@@ -27,5 +27,9 @@ build_component_ng("syntax_ng") {
     "lazy_layout_wrapper_builder.cpp",
     "node_content.cpp",
     "repeat_model_ng.cpp",
+    "repeat_node.cpp",
+    "repeat_virtual_scroll_model_ng.cpp",
+    "repeat_virtual_scroll_caches.cpp",
+    "repeat_virtual_scroll_node.cpp"
   ]
 }

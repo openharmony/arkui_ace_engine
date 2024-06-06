@@ -125,6 +125,11 @@ class ObserveV2 {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
 
+  public static getCurrentRecordedId(): number {
+    const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
+    return bound ? bound[0] : -1;
+  }
+
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
   public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2, id: number): void {
@@ -291,8 +296,15 @@ class ObserveV2 {
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
-    const id = bound[0];
+    this.addRef4IdInternal(bound[0], target, attrName);
+  }
 
+  public addRef4Id(id: number, target: object, attrName: string): void {
+    stateMgmtConsole.propertyAccess(`ObserveV2.addRef4Id '${attrName}' for id ${id} ...`);
+    this.addRef4IdInternal(id, target, attrName);
+  }
+
+  private addRef4IdInternal(id: number, target: object, attrName: string): void {
     // Map: attribute/symbol -> dependent id
     const symRefs = target[ObserveV2.SYMBOL_REFS] ??= {};
     symRefs[attrName] ??= new Set();
@@ -409,15 +421,29 @@ class ObserveV2 {
     } // for
   }
 
-  private updateDirty(): void {
+  public updateDirty(): void {
     this.startDirty_ = true;
-    this.updateDirty2();
+    this.updateDirty2(false);
     this.startDirty_ = false;
   }
 
-  private updateDirty2(): void {
+  /**
+   * execute /update in this order
+   * - @Computed variables
+   * - @Monitor functions
+   * - UINode re-render
+   * three nested loops, means:
+   * process @Computed until no more @Computed need update
+   * process @Monitor until no more @Computed and @Monitor
+   * process UINode update until no more @Computed and @Monitor and UINode rerender
+   * 
+   * @param updateUISynchronously should be set to true if called during VSYNC only
+   * 
+   */
+
+  public updateDirty2(updateUISynchronously: boolean = false): void {
     aceTrace.begin('updateDirty2');
-    stateMgmtConsole.debug(`ObservedV3.updateDirty2 ... `);
+    stateMgmtConsole.debug(`ObservedV3.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
     // obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
@@ -448,9 +474,11 @@ class ObserveV2 {
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
         this.elmtIdsChanged_ = new Set<number>();
-        this.updateUINodes(elmtIds);
+        updateUISynchronously ? this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+
+    stateMgmtConsole.debug(`ObservedV3.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
     aceTrace.end();
   }
 
@@ -500,10 +528,11 @@ class ObserveV2 {
    * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
    * Code left here to reproduce benchmark measurements, compare with future optimisation
    * @param elmtIds
+   * 
    */
-  private updateUINodesWithoutVSync(elmtIds: Array<number>): void {
-    stateMgmtConsole.debug(`ObserveV2.updateUINodes: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
-    aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
+  private updateUINodesSynchronously(elmtIds: Array<number>): void {
+    stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
+    aceTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
     let view: Object;
     let weak: any;
     elmtIds.forEach((elmtId) => {
@@ -526,8 +555,8 @@ class ObserveV2 {
   // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
   // much slower
   private updateUINodes(elmtIds: Array<number>): void {
-    stateMgmtConsole.debug(`ObserveV2.updateUINodesSlow: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
-    aceTrace.begin(`ObserveV2.updateUINodesSlow: ${elmtIds.length} elmtId`);
+    stateMgmtConsole.debug(`ObserveV2.updateUINodes: ${elmtIds.length} elmtIds need rerender: ${JSON.stringify(elmtIds)} ...`);
+    aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
     let viewWeak: WeakRef<Object>;
     let view: Object | undefined;
     elmtIds.forEach((elmtId) => {
@@ -866,5 +895,3 @@ const trackInternal = (
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal
-
-

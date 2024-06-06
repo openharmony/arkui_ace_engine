@@ -33,6 +33,7 @@ declare class ForEach {
   static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
 }
 
+// Repeat maps to C++ RepeatNode 
 declare class RepeatNative {
   static startRender(): void;
   static finishRender(removedChildElmtIds: Array<number>): void;
@@ -40,4 +41,20 @@ declare class RepeatNative {
   static createNewChildStart(id: string): void;
   static createNewChildFinish(id: string): void;
   static onMove(handler: (from: number, to: number) => void);
+}
+
+// Repeat.virtualScroll maps to C++ RepeatVirtualScrollNode 
+declare class RepeatVirtualScrollNative {
+  static create(
+    totalCount: number,
+    templateOptions: [string, RepeatTemplateOptions][],
+    handlers: {
+      onCreateNode: (forIndex: number) => void;
+      onUpdateNode: (fromKey: string, forIndex: number) => void;
+      onGetKeys4Range: (from: number, toNumber: number) => Array<string>;
+      onGetTypes4Range: (from: number, toNumber: number) => Array<string>;
+    }
+  ): void;
+  // invalidate C++ side map index -> key
+  static invalidateKeyCache(totalCount : number): void;
 }

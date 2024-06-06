@@ -56,6 +56,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
@@ -178,8 +179,12 @@ public:
             return;
         }
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(UiNode);
+        auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(UiNode);
         if (lazyForEachNode) {
+            LOGE("Guido Found LazyForEach child, Calling BuildAllChildren");
             lazyForEachNode->BuildAllChildren();
+        } else if (repeatVirtualScrollNode) {
+            LOGE("Guido Found RepeatNodeLazyForEach child, done nothing");
         } else {
             auto customNode = AceType::DynamicCast<CustomNode>(UiNode);
             if (customNode) {

@@ -40,9 +40,9 @@ class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     private _observedIndex?: ObservedPropertyPU<number>;
 
     constructor(owningView: ViewPU, initialItem: T, initialIndex?: number) {
-        this._observedItem = new ObservedPropertyPU<T>(initialItem, owningView, "Repeat item");
+        this._observedItem = new ObservedPropertyPU<T>(initialItem, owningView, 'Repeat item');
         if (initialIndex !== undefined) {
-            this._observedIndex = new ObservedPropertyPU<number>(initialIndex, owningView, "Repeat index");
+            this._observedIndex = new ObservedPropertyPU<number>(initialIndex, owningView, 'Repeat index');
         }
     }
 
@@ -116,13 +116,13 @@ class __RepeatDefaultKeyGen {
     }
 
     // Return the same IDs for the same pairs <item, index>
-    public static funcWithIndex<T>(item: T, index:number) {
+    public static funcWithIndex<T>(item: T, index: number) {
         return `${index}__` + __RepeatDefaultKeyGen.func(item);
     }
 
     private static funcImpl<T>(item: T) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item !== 'object' && typeof item !== 'symbol') {
+        if (typeof item != 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -132,196 +132,115 @@ class __RepeatDefaultKeyGen {
         // use cached key
         return `${this.weakMap_.get(item)}`;
     }
-}
+};
+
+// TBD comments
+interface __RepeatAPIConfig<T> {
+    arr?: Array<T>;
+    itemGenFuncs?: { [type: string]: RepeatItemGenFunc<T> };
+    keyGenFunc?: RepeatKeyGenFunc<T>;
+    typeGenFunc?: RepeatTypeGenFunc<T>;
+    //
+    totalCount?: number;
+    onLazyLoading?: RepeatOnLazyLoadingFunc;
+    templateOptions?: { [type: string]: RepeatTemplateOptions };
+    //
+    mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
+    onMoveHandler?: OnMoveHandler;
+};
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __RepeatV2<T> implements RepeatAPI<T> {
-    private arr_: Array<T>;
-    private itemGenFunc_?: RepeatItemGenFunc<T>;
-    private keyGenFunction_?: RepeatKeyGenFunc<T>;
-    private onMoveHandler_?: OnMoveHandler;
-    private isVirtualScroll: boolean = false;
-    private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
+    private config: __RepeatAPIConfig<T> = {};
+    private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T>;
 
     constructor(arr: Array<T>) {
-        this.arr_ = arr ?? [];
-        this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
-    }
-
-    public updateArr(arr: Array<T>): RepeatAPI<T> {
-        this.arr_ = arr ?? [];
-        return this;
+        //console.log('__RepeatV2 ctor')
+        this.config.arr = arr ?? [];
+        this.config.itemGenFuncs = {};
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.typeGenFunc= (() => '');
+        this.config.totalCount = this.config.arr.length;
+        this.config.templateOptions = {};
+        this.config.mkRepeatItem = this.mkRepeatItem;
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
-        this.itemGenFunc_ = itemGenFunc;
+        //console.log('__RepeatV2.each()')
+        this.config.itemGenFuncs[''] = itemGenFunc;
         return this;
     }
 
-    public key(idGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
-        this.keyGenFunction_ = idGenFunc ?? __RepeatDefaultKeyGen.func;
+    public key(keyGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
+        //console.log('__RepeatV2.key()')
+        this.config.keyGenFunc = keyGenFunc ?? __RepeatDefaultKeyGen.func;
         return this;
     }
 
-    public virtualScroll(): RepeatAPI<T> {
-        this.isVirtualScroll = true;
+    public virtualScroll(options? : {
+        totalCount: number, onLazyLoading?: RepeatOnLazyLoadingFunc
+    }): RepeatAPI<T> {
+        //console.log('__RepeatV2.virtualScroll()')
+        this.config.totalCount = options?.totalCount ?? this.config.arr.length;
+        this.config.onLazyLoading = options?.onLazyLoading ?? (() => {});
         return this;
+    }
+
+    // function to decide which template to use, each template has an id
+    public templateId(typeFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
+        //console.log('__RepeatV2.templateId()')
+        this.config.typeGenFunc = typeFunc;
+        return this;
+    }
+
+    // template: id + builder function to render specific type of data item 
+    public template(type: string, itemGenFunc: RepeatItemGenFunc<T>,
+        options?: RepeatTemplateOptions): RepeatAPI<T>
+    {
+        //console.log('__RepeatV2.template()')
+        this.config.itemGenFuncs[type] = itemGenFunc;
+        this.config.templateOptions[type] = options ?? {};
+        this.config.templateOptions[type].cacheCount ??= 0;
+        return this;
+    }
+
+    public updateArr(arr: Array<T>): RepeatAPI<T> {
+        this.config.arr = arr ?? [];
+        return this;
+    }
+
+    public render(isInitialRender: boolean): void {
+        //console.log('__RepeatV2.render()')
+        if (!this.config.itemGenFuncs?.['']) {
+            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+        }
+        if (!this.config.onLazyLoading) {
+          // Repeat
+          this.impl ??= new __RepeatImpl<T>(this.config);
+          this.impl.render(isInitialRender);
+        } else {
+          // RepeatVirtualScroll
+          this.impl ??= new __RepeatVirtualScrollImpl<T>(this.config);
+          this.impl.render(isInitialRender);
+        }
     }
 
     public onMove(handler: OnMoveHandler): RepeatAPI<T> {
-        this.onMoveHandler_ = handler;
+        this.config.onMoveHandler = handler;
         return this;
-    }
-
-    private genKeys(): Map<string, __RepeatItemInfo<T>> {
-        const key2Item = new Map<string, __RepeatItemInfo<T>>();
-        this.arr_.forEach((item, index) => {
-            const key = this.keyGenFunction_(item, index);
-            key2Item.set(key, { key, index });
-        });
-        if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.");
-            // Causes all items to be re-rendered
-            this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
-            return this.genKeys();
-
-        }
-        return key2Item;
     }
 
     protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
         return new __RepeatItemV2(item as T, index);
     }
-
-    public render(isInitialRender: boolean): void {
-        if (!this.itemGenFunc_) {
-            throw new Error(`itemGen function undefined. Usage error`);
-        }
-        if (this.isVirtualScroll) {
-            // TODO: Add render for LazyforEach with child update.
-            throw new Error("TODO virtual code path");
-        } else {
-            isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
-        }
-    }
-
-    private initialRenderNoneVirtual(): void {
-        this.key2Item_ = this.genKeys();
-
-        RepeatNative.startRender();
-
-        let index = 0;
-        this.key2Item_.forEach((itemInfo, key) => {
-            itemInfo.repeatItem = this.mkRepeatItem(this.arr_[index], index);
-            this.initialRenderItem(key, itemInfo.repeatItem);
-            index++;
-        });
-        let removedChildElmtIds = new Array<number>();
-        // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
-        RepeatNative.onMove(this.onMoveHandler_);
-        RepeatNative.finishRender(removedChildElmtIds);
-        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-        stateMgmtConsole.debug(`RepeatPU: initialRenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
-    }
-
-    private rerenderNoneVirtual(): void {
-        const oldKey2Item: Map<string, __RepeatItemInfo<T>> = this.key2Item_;
-        this.key2Item_ = this.genKeys();
-
-        // identify array items that have been deleted
-        // these are candidates for re-use
-        const deletedKeysAndIndex = new Array<__RepeatItemInfo<T>>();
-        for (const [key, feInfo] of oldKey2Item) {
-            if (!this.key2Item_.has(key)) {
-                deletedKeysAndIndex.push(feInfo);
-            }
-        }
-
-        // C++: mv children_ aside to tempchildren_
-        RepeatNative.startRender();
-
-        let index = 0;
-        this.key2Item_.forEach((itemInfo, key) => {
-            const item = this.arr_[index];
-            let oldItemInfo = oldKey2Item.get(key);
-
-            if (oldItemInfo) {
-                // case #1 retained array item
-                // moved from oldIndex to index
-                const oldIndex = oldItemInfo.index;
-                itemInfo.repeatItem = oldItemInfo!.repeatItem!;
-                stateMgmtConsole.debug(`retained: key ${key} ${oldIndex}->${index}`);
-                itemInfo.repeatItem.updateIndex(index);
-                // C++ mv from tempChildren[oldIndex] to end of children_
-                RepeatNative.moveChild(oldIndex);
-
-            } else if (deletedKeysAndIndex.length) {
-                // case #2:
-                // new array item, there is an deleted array items whose
-                // UINode children cab re-used
-                const oldItemInfo = deletedKeysAndIndex.pop();
-                const reuseKey = oldItemInfo!.key;
-                const oldKeyIndex = oldItemInfo!.index;
-                const oldRepeatItem = oldItemInfo!.repeatItem!;
-                itemInfo.repeatItem = oldRepeatItem;
-                stateMgmtConsole.debug(`new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`);
-
-                itemInfo.repeatItem.updateItem(item);
-                itemInfo.repeatItem.updateIndex(index);
-
-                // update key2item_ Map
-                this.key2Item_.set(key, itemInfo);
-
-                // C++ mv from tempChildren[oldIndex] to end of children_
-                RepeatNative.moveChild(oldKeyIndex);
-            } else {
-                // case #3:
-                // new array item, there are no deleted array items
-                // render new UINode children
-                itemInfo.repeatItem = this.mkRepeatItem(item, index);
-                this.initialRenderItem(key, itemInfo.repeatItem);
-            }
-
-            index++;
-        })
-
-        // keep  this.id2item_. by removing all entries for remaining
-        // deleted items
-        deletedKeysAndIndex.forEach(delItem => {
-            this.key2Item_.delete(delItem!.key);
-        });
-
-        // Finish up for.each update
-        // C++  tempChildren.clear() , trigger re-layout
-        let removedChildElmtIds = new Array<number>();
-        // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
-        RepeatNative.onMove(this.onMoveHandler_);
-        RepeatNative.finishRender(removedChildElmtIds);
-        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-        stateMgmtConsole.debug(`RepeatPU: rerenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
-    }
-
-    private initialRenderItem(key: string, repeatItem: __RepeatItemFactoryReturn<T>): void {
-        // render new UINode children
-        stateMgmtConsole.debug(`new: key ${key} n/a->${repeatItem.index}`);
-
-        // C++: initial render will render to the end of children_
-        RepeatNative.createNewChildStart(key);
-
-        // execute the ItemGen function
-        this.itemGenFunc_!(repeatItem);
-
-        RepeatNative.createNewChildFinish(key);
-    }
-
-}
+}; // __RepeatV2<T>
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 
 class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
-    private owningView_ : ViewPU;
+    private owningView_: ViewPU;
 
     constructor(owningView: ViewPU, arr: Array<T>) {
         super(arr);

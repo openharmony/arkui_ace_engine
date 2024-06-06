@@ -87,6 +87,8 @@
 
     // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
+    "src/lib/partial_update/pu_repeat_impl.ts",
+    "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
 
     // init
     "src/index.ts",

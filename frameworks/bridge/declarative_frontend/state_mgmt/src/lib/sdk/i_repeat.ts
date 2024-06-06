@@ -23,7 +23,10 @@ interface RepeatItem<T> {
 }
 
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
+type RepeatTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
+type RepeatTemplateOptions =  { cacheCount?: number };
+type RepeatOnLazyLoadingFunc = (index: number, direction: "Up" | "Down") => void;
 type OnMoveHandler = (from: number, to: number) => void;
 
 /*
@@ -43,11 +46,28 @@ const Repeat: <T>(arr: Array<T>, owningView?: PUV2ViewBase) => RepeatAPI<T> =
     repeat attribute function and internal function render()
 */
 interface RepeatAPI<T> {
-    each: (itemGenFunc: RepeatItemGenFunc<T>) => RepeatAPI<T>; // chainable, call in this order
+    // unique key from array item, to identify changed, added array items
     key: (keyGenFunc: RepeatKeyGenFunc<T>) => RepeatAPI<T>;
-    virtualScroll: () => RepeatAPI<T>;
-    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
+
+    // default render function for data items, framework will use when no template found
+    each: (itemGenFunc: RepeatItemGenFunc<T>) => RepeatAPI<T>;
+
+    // when call virtualScroll, framework will use virtual scroll
+    // totalCount: number of logical items, can be larger than number of loaded
+    // data items of lazy loading array source, can be larger than that array.length
+    // onLazyLoading: framework will call this function when showing last
+    // index >= items.length && index < totalCount
+    virtualScroll: (options?: { totalCount: number, onLazyLoading?: RepeatOnLazyLoadingFunc }) => RepeatAPI<T>;
+
+    // function to decide which template to use, each template has an id
+    templateId: (typeFunc: RepeatTypeGenFunc<T>) => RepeatAPI<T>;
+
+    // template: id + builder function to render specific type of data item
+    template: (type: string, itemGenFunc: RepeatItemGenFunc<T>, options?: RepeatTemplateOptions) => RepeatAPI<T>;
 
     // do NOT use in app, transpiler adds as last of chained call
     render(isInitialRender: boolean): void;       
+
+    // not used by Repeat
+    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
 }

@@ -7349,6 +7349,10 @@ class ObserveV2 {
     static IsObservedObjectV2(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
     }
+    static getCurrentRecordedId() {
+        const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
+        return bound ? bound[0] : -1;
+    }
     // At the start of observeComponentCreation or
     // MonitorV2 observeObjectAccess
     startRecordDependencies(cmp, id) {
@@ -7498,8 +7502,6 @@ class ObserveV2 {
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
     addRef(target, attrName) {
-        var _a, _b, _c, _d;
-        var _e, _f;
         const bound = this.stackOfRenderedComponents_.top();
         if (!bound) {
             return;
@@ -7510,7 +7512,15 @@ class ObserveV2 {
             throw new TypeError(error);
         }
         
-        const id = bound[0];
+        this.addRef4IdInternal(bound[0], target, attrName);
+    }
+    addRef4Id(id, target, attrName) {
+        
+        this.addRef4IdInternal(id, target, attrName);
+    }
+    addRef4IdInternal(id, target, attrName) {
+        var _a, _b, _c, _d;
+        var _e, _f;
         // Map: attribute/symbol -> dependent id
         const symRefs = (_a = target[_e = ObserveV2.SYMBOL_REFS]) !== null && _a !== void 0 ? _a : (target[_e] = {});
         (_b = symRefs[attrName]) !== null && _b !== void 0 ? _b : (symRefs[attrName] = new Set());
@@ -7619,10 +7629,23 @@ class ObserveV2 {
     }
     updateDirty() {
         this.startDirty_ = true;
-        this.updateDirty2();
+        this.updateDirty2(false);
         this.startDirty_ = false;
     }
-    updateDirty2() {
+    /**
+     * execute /update in this order
+     * - @Computed variables
+     * - @Monitor functions
+     * - UINode re-render
+     * three nested loops, means:
+     * process @Computed until no more @Computed need update
+     * process @Monitor until no more @Computed and @Monitor
+     * process UINode update until no more @Computed and @Monitor and UINode rerender
+     *
+     * @param updateUISynchronously should be set to true if called during VSYNC only
+     *
+     */
+    updateDirty2(updateUISynchronously = false) {
         aceTrace.begin('updateDirty2');
         
         // obtain and unregister the removed elmtIds
@@ -7652,9 +7675,10 @@ class ObserveV2 {
             if (this.elmtIdsChanged_.size) {
                 const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
                 this.elmtIdsChanged_ = new Set();
-                this.updateUINodes(elmtIds);
+                updateUISynchronously ? this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
             }
         } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+        
         aceTrace.end();
     }
     updateDirtyComputedProps(computed) {
@@ -7702,10 +7726,11 @@ class ObserveV2 {
      * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
      * Code left here to reproduce benchmark measurements, compare with future optimisation
      * @param elmtIds
+     *
      */
-    updateUINodesWithoutVSync(elmtIds) {
+    updateUINodesSynchronously(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
+        aceTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
         let view;
         let weak;
         elmtIds.forEach((elmtId) => {
@@ -7729,7 +7754,7 @@ class ObserveV2 {
     // much slower
     updateUINodes(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodesSlow: ${elmtIds.length} elmtId`);
+        aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
         let viewWeak;
         let view;
         elmtIds.forEach((elmtId) => {
@@ -9222,9 +9247,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 // implementation for existing state observation system
 class __RepeatItemPU {
     constructor(owningView, initialItem, initialIndex) {
-        this._observedItem = new ObservedPropertyPU(initialItem, owningView, "Repeat item");
+        this._observedItem = new ObservedPropertyPU(initialItem, owningView, 'Repeat item');
         if (initialIndex !== undefined) {
-            this._observedIndex = new ObservedPropertyPU(initialIndex, owningView, "Repeat index");
+            this._observedIndex = new ObservedPropertyPU(initialIndex, owningView, 'Repeat index');
         }
     }
     get item() {
@@ -9289,7 +9314,7 @@ class __RepeatDefaultKeyGen {
     }
     static funcImpl(item) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item !== 'object' && typeof item !== 'symbol') {
+        if (typeof item != 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -9302,34 +9327,127 @@ class __RepeatDefaultKeyGen {
 }
 __RepeatDefaultKeyGen.weakMap_ = new WeakMap();
 __RepeatDefaultKeyGen.lastKey_ = 0;
+;
+;
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __RepeatV2 {
     constructor(arr) {
-        this.isVirtualScroll = false;
-        this.key2Item_ = new Map();
-        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
-        this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
-    }
-    updateArr(arr) {
-        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
-        return this;
+        this.config = {};
+        //console.log('__RepeatV2 ctor')
+        this.config.arr = arr !== null && arr !== void 0 ? arr : [];
+        this.config.itemGenFuncs = {};
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.typeGenFunc = (() => '');
+        this.config.totalCount = this.config.arr.length;
+        this.config.templateOptions = {};
+        this.config.mkRepeatItem = this.mkRepeatItem;
     }
     each(itemGenFunc) {
-        this.itemGenFunc_ = itemGenFunc;
+        //console.log('__RepeatV2.each()')
+        this.config.itemGenFuncs[''] = itemGenFunc;
         return this;
     }
-    key(idGenFunc) {
-        this.keyGenFunction_ = idGenFunc !== null && idGenFunc !== void 0 ? idGenFunc : __RepeatDefaultKeyGen.func;
+    key(keyGenFunc) {
+        //console.log('__RepeatV2.key()')
+        this.config.keyGenFunc = keyGenFunc !== null && keyGenFunc !== void 0 ? keyGenFunc : __RepeatDefaultKeyGen.func;
         return this;
     }
-    virtualScroll() {
-        this.isVirtualScroll = true;
+    virtualScroll(options) {
+        var _a, _b;
+        //console.log('__RepeatV2.virtualScroll()')
+        this.config.totalCount = (_a = options === null || options === void 0 ? void 0 : options.totalCount) !== null && _a !== void 0 ? _a : this.config.arr.length;
+        this.config.onLazyLoading = (_b = options === null || options === void 0 ? void 0 : options.onLazyLoading) !== null && _b !== void 0 ? _b : (() => { });
         return this;
+    }
+    // function to decide which template to use, each template has an id
+    templateId(typeFunc) {
+        //console.log('__RepeatV2.templateId()')
+        this.config.typeGenFunc = typeFunc;
+        return this;
+    }
+    // template: id + builder function to render specific type of data item 
+    template(type, itemGenFunc, options) {
+        var _a;
+        var _b;
+        //console.log('__RepeatV2.template()')
+        this.config.itemGenFuncs[type] = itemGenFunc;
+        this.config.templateOptions[type] = options !== null && options !== void 0 ? options : {};
+        (_a = (_b = this.config.templateOptions[type]).cacheCount) !== null && _a !== void 0 ? _a : (_b.cacheCount = 0);
+        return this;
+    }
+    updateArr(arr) {
+        this.config.arr = arr !== null && arr !== void 0 ? arr : [];
+        return this;
+    }
+    render(isInitialRender) {
+        var _a, _b, _c;
+        //console.log('__RepeatV2.render()')
+        if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
+            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+        }
+        if (!this.config.onLazyLoading) {
+            // Repeat
+            (_b = this.impl) !== null && _b !== void 0 ? _b : (this.impl = new __RepeatImpl(this.config));
+            this.impl.render(isInitialRender);
+        }
+        else {
+            // RepeatVirtualScroll
+            (_c = this.impl) !== null && _c !== void 0 ? _c : (this.impl = new __RepeatVirtualScrollImpl(this.config));
+            this.impl.render(isInitialRender);
+        }
     }
     onMove(handler) {
-        this.onMoveHandler_ = handler;
+        this.config.onMoveHandler = handler;
         return this;
+    }
+    mkRepeatItem(item, index) {
+        return new __RepeatItemV2(item, index);
+    }
+}
+; // __RepeatV2<T>
+// __Repeat implements ForEach with child re-use for both existing state observation
+// and deep observation , for non-virtual and virtual code paths (TODO)
+class __RepeatPU extends __RepeatV2 {
+    constructor(owningView, arr) {
+        super(arr);
+        this.owningView_ = owningView;
+    }
+    mkRepeatItem(item, index) {
+        return new __RepeatItemPU(this.owningView_, item, index);
+    }
+}
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * all definitions in this file are framework internal
+*/
+class __RepeatImpl {
+    /**/
+    constructor(config) {
+        this.key2Item_ = new Map();
+        //console.log('__RepeatImpl ctor')
+        this.arr_ = config.arr;
+        this.itemGenFuncs_ = config.itemGenFuncs;
+        this.typeGenFunc_ = config.typeGenFunc;
+        this.keyGenFunction_ = config.keyGenFunc;
+        this.mkRepeatItem_ = config.mkRepeatItem;
+        this.onMoveHandler_ = config.onMoveHandler;
+    }
+    /**/
+    render(isInitialRender) {
+        isInitialRender ? this.initialRender() : this.reRender();
     }
     genKeys() {
         const key2Item = new Map();
@@ -9338,34 +9456,20 @@ class __RepeatV2 {
             key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.");
+            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.");
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
         }
         return key2Item;
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemV2(item, index);
-    }
-    render(isInitialRender) {
-        if (!this.itemGenFunc_) {
-            throw new Error(`itemGen function undefined. Usage error`);
-        }
-        if (this.isVirtualScroll) {
-            // TODO: Add render for LazyforEach with child update.
-            throw new Error("TODO virtual code path");
-        }
-        else {
-            isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
-        }
-    }
-    initialRenderNoneVirtual() {
+    initialRender() {
+        //console.log('__RepeatImpl initialRender() 0')
         this.key2Item_ = this.genKeys();
         RepeatNative.startRender();
         let index = 0;
         this.key2Item_.forEach((itemInfo, key) => {
-            itemInfo.repeatItem = this.mkRepeatItem(this.arr_[index], index);
+            itemInfo.repeatItem = this.mkRepeatItem_(this.arr_[index], index);
             this.initialRenderItem(key, itemInfo.repeatItem);
             index++;
         });
@@ -9376,7 +9480,7 @@ class __RepeatV2 {
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         
     }
-    rerenderNoneVirtual() {
+    reRender() {
         const oldKey2Item = this.key2Item_;
         this.key2Item_ = this.genKeys();
         // identify array items that have been deleted
@@ -9424,7 +9528,7 @@ class __RepeatV2 {
                 // case #3:
                 // new array item, there are no deleted array items
                 // render new UINode children
-                itemInfo.repeatItem = this.mkRepeatItem(item, index);
+                itemInfo.repeatItem = this.mkRepeatItem_(item, index);
                 this.initialRenderItem(key, itemInfo.repeatItem);
             }
             index++;
@@ -9444,26 +9548,161 @@ class __RepeatV2 {
         
     }
     initialRenderItem(key, repeatItem) {
+        var _a, _b;
+        //console.log('__RepeatImpl initialRenderItem()')
         // render new UINode children
         
         // C++: initial render will render to the end of children_
         RepeatNative.createNewChildStart(key);
-        // execute the ItemGen function
-        this.itemGenFunc_(repeatItem);
+        // execute the itemGen function
+        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
+        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
+        itemFunc(repeatItem);
         RepeatNative.createNewChildFinish(key);
     }
 }
-// __Repeat implements ForEach with child re-use for both existing state observation
-// and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatPU extends __RepeatV2 {
-    constructor(owningView, arr) {
-        super(arr);
-        this.owningView_ = owningView;
+;
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * all definitions in this file are framework internal
+*/
+// Implements ForEach with child re-use for both existing state observation and
+// deep observation. For virtual-scroll code paths
+class __RepeatVirtualScrollImpl {
+    /**/
+    constructor(config) {
+        this.arr_ = config.arr;
+        this.itemGenFuncs_ = config.itemGenFuncs;
+        this.keyGenFunc_ = config.keyGenFunc;
+        this.typeGenFunc_ = config.typeGenFunc;
+        this.totalCount_ = config.totalCount;
+        this.onLazyLoading_ = config.onLazyLoading;
+        this.templateOptions_ = config.templateOptions;
+        this.mkRepeatItem_ = config.mkRepeatItem;
+        this.onMoveHandler_ = config.onMoveHandler;
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemPU(this.owningView_, item, index);
+    render(isInitialRender) {
+        if (isInitialRender) {
+            this.initialRender(ObserveV2.getCurrentRecordedId());
+        }
+        else {
+            this.reRender();
+        }
+    }
+    /**/
+    initialRender(repeatElmtId) {
+        // Map key -> RepeatItem
+        // added to closure of following lambdas
+        const _repeatItem4Key = new Map();
+        const repeatElmtId1 = repeatElmtId;
+        const onCreateNode = (forIndex) => {
+            
+            if (forIndex < 0) {
+                // FIXME check also index < totalCount
+                throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
+            }
+            // create dependency array item [forIndex] -> Repeat
+            // so Repeat updates when the array item changes
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
+            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            _repeatItem4Key.set(forKey, repeatItem);
+            // execute the itemGen function
+            this.initialRenderItem(repeatItem);
+            
+        };
+        const onUpdateNode = (fromKey, forIndex) => {
+            if (!fromKey || fromKey == "" || forIndex < 0) {
+                // FIXME check also index < totalCount
+                throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
+            }
+            // create dependency array item [forIndex] -> Repeat
+            // so Repeat updates when the array item changes
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            const repeatItem = _repeatItem4Key.get(fromKey);
+            if (!repeatItem) {
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                return;
+            }
+            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            
+            repeatItem.updateItem(this.arr_[forIndex]);
+            repeatItem.updateIndex(forIndex);
+            // update Map according to made update:
+            // del fromKey entry and add forKey
+            _repeatItem4Key.delete(fromKey);
+            _repeatItem4Key.set(forKey, repeatItem);
+            
+            // FIXME request re-render right away!
+            ObserveV2.getObserve().updateDirty2(true);
+        };
+        const onGetKeys4Range = (from, to) => {
+            
+            // when c++ requests not yet existing item(s), invoke onLazyLoading_()
+            for (let i = this.arr_.length; i <= to && i < this.totalCount_; i++) {
+                this.onLazyLoading_(i, "Down");
+            }
+            const result = new Array();
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                // create dependency array item [i] -> Repeat
+                // so Repeat updates when the array item changes
+                // FIXME observe dependencies, adding the array is insurgent for Array of objects
+                ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+                result.push(this.keyGenFunc_(this.arr_[i], i));
+            }
+            
+            return result;
+        };
+        const onGetTypes4Range = (from, to) => {
+            var _a;
+            
+            const result = new Array();
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                // ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+                result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
+            }
+            
+            return result;
+        };
+        
+        // FIXME templateOptions_  cacheCount for each ttype need to passed to C++ side as well
+        RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
+            onCreateNode,
+            onUpdateNode,
+            onGetKeys4Range,
+            onGetTypes4Range
+        });
+        
+    }
+    reRender() {
+        
+        RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
+        
+    }
+    initialRenderItem(repeatItem) {
+        var _a, _b;
+        // execute the itemGen function
+        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
+        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
+        itemFunc(repeatItem);
     }
 }
+;
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
