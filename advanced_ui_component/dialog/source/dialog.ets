@@ -245,6 +245,7 @@ export struct TipsDialog {
       }
       .margin({ right: $r('sys.float.padding_level8') })
     }
+    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
     .margin({ right: `${this.marginOffset}vp` })
   }
 
@@ -430,6 +431,7 @@ export struct SelectDialog {
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
+    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
     .onDidScroll((xOffset: number, yOffset: number) => {
       let scrollHeight: number = (this.itemHeight - this.radioHeight) / 2
       if (this.isFocus) {
@@ -576,6 +578,7 @@ export struct ConfirmDialog {
               })
               .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
           }
+          .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
           .width('100%')
         }
         .padding({ bottom: 8 })
@@ -732,6 +735,7 @@ export struct AlertDialog {
             }
           })
       }
+      .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
       .width('100%')
     }
     .margin({ right: `${this.getMargin()}vp`, })
