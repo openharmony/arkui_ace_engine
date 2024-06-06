@@ -131,6 +131,7 @@ public:
     }
     bool QueryAllDone(size_t touchId);
     bool QueryAllDone();
+    bool CheckEventTypeChange(SourceType type, bool isAxis = false) const;
     bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
     void CleanAll(bool isBlocked = false);
     void CleanRedundanceScope();
