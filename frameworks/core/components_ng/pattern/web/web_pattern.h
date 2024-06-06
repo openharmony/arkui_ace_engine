@@ -768,8 +768,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
     void UpdateSlideOffset(bool isNeedReset = false);
-    void ClearKeyEventBeforeUp(
-        const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
+    void ClearKeyEventByKeyCode(int32_t keyCode);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
