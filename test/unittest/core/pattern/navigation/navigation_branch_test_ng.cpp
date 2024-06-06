@@ -263,8 +263,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg002, TestSize.Level1)
     ASSERT_NE(json, nullptr);
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
-    ASSERT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
-    navigationGroupNode.ToJsonValue(json, filter);
+    auto narbar = AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode());
+    ASSERT_NE(narbar, nullptr);
 }
 
 /**

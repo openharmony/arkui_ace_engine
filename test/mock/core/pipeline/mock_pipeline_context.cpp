@@ -39,6 +39,7 @@ void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
