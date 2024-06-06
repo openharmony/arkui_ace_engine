@@ -1089,12 +1089,10 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
-        return SheetType::SHEET_BOTTOM;
-    }
-    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+    // only bottom when width is less than 600vp
+    if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
+        (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
         return SheetType::SHEET_BOTTOM;
     }
     if (sheetThemeType_ == "auto") {
@@ -1112,7 +1110,13 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
+#ifdef PREVIEW
+    auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
+    if (windowGlobalRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx() &&
+        windowGlobalRect.Width() <= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+#else
     if (IsFold() && !sheetTheme->IsOnlyBottom()) {
+#endif
         sheetType = SheetType::SHEET_CENTER;
     } else {
         if (LessNotEqual(rootHeight, rootWidth)) {
