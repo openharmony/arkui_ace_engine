@@ -327,7 +327,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

@@ -336,7 +336,9 @@ TextStyle SpanModelNG::GetDefaultTextStyle()
     TextStyle textStyle;
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, textStyle);
-    return pipelineContext->GetTheme<TextTheme>()->GetTextStyle();
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, textStyle);
+    return textTheme->GetTextStyle();
 }
 
 Color SpanModelNG::GetFontColor(UINode* uiNode)

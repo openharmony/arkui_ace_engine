@@ -365,7 +365,7 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
 }
 
-RefPtr<CalendarTheme> GetDefaultTextTheme()
+RefPtr<CalendarTheme> GetCalendarTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -376,7 +376,7 @@ PickerTextStyle CalendarPickerModelNG::GetTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle textStyle;
     CHECK_NULL_RETURN(frameNode, textStyle);
-    auto calendarTheme = GetDefaultTextTheme();
+    auto calendarTheme = GetCalendarTheme();
     CHECK_NULL_RETURN(calendarTheme, textStyle);
     auto calendarPickerProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_RETURN(calendarPickerProperty, textStyle);

@@ -37,6 +37,7 @@ void Dispose(ArkUI_NativeDialogHandle handle)
     }
     impl->getDialogAPI()->dispose(handle->controller);
     delete handle;
+    handle = nullptr;
 }
 
 int32_t SetContent(ArkUI_NativeDialogHandle handle, ArkUI_NodeHandle content)
