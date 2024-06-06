@@ -249,7 +249,7 @@ public:
     }
     const std::optional<RefPtr<SystemBarStyle>>& GetCurrentStyle() const
     {
-        return backupStyle_;
+        return currStyle_;
     }
 
 private:
