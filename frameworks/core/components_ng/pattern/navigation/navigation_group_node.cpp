@@ -150,8 +150,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         const auto& childNode = navDestinationNodes[index];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index, navDestinationNodes.size(), preLastStandardNode)
-         || hasChanged);
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index,
+            navDestinationNodes.size(), preLastStandardNode) || hasChanged);
     }
 
     RemoveRedundantNavDestination(navigationContentNode, remainChild, slot, hasChanged, beforeLastStandardIndex);
