@@ -1857,6 +1857,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
+    eventManager_->CheckDownEvent(scalePoint);
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
