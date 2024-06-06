@@ -29,7 +29,7 @@ overrideMap.set(
 );
 function applyAndMergeModifier(instance, modifier) {
   let myMap = modifier._modifiersWithKeys;
-  myMap.setOnChange((value) => {
+  myMap.setOnChange((key, value) => {
     modifier._changed = !modifier._changed;
   });
   let component = instance;
@@ -84,11 +84,11 @@ class ModifierUtils {
   static applySetOnChange(modifier) {
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
-      myMap.setOnChange((value) => {
+      myMap.setOnChange((key, value) => {
         this.putDirtyModifier(modifier, value);
       });
     } else {
-      myMap.setOnChange((value) => {
+      myMap.setOnChange((key, value) => {
         modifier._changed = !modifier._changed;
       });
     }
@@ -151,7 +151,7 @@ class ModifierMap {
   set(key, value) {
     const _a = this.changeCallback;
     this.map_.set(key, value);
-    _a === null || _a === void 0 ? void 0 : _a.call(this, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
     return this;
   }
   get size() {

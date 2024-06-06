@@ -29,7 +29,7 @@ overrideMap.set('ArkTextComponent', new Map([
 
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
-  myMap.setOnChange((value: AttributeModifierWithKey) => {
+  myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
     modifier._changed = !modifier._changed;
   });
 
@@ -126,11 +126,11 @@ class ModifierUtils {
   static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
-      myMap.setOnChange((value: AttributeModifierWithKey) => {
+      myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
         this.putDirtyModifier(modifier, value);
       });
     } else {
-      myMap.setOnChange((value: AttributeModifierWithKey) => {
+      myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
         modifier._changed = !modifier._changed;
       });
     }
@@ -173,7 +173,7 @@ class ModifierUtils {
 
 class ModifierMap {
   private map_: Map<Symbol, AttributeModifierWithKey>;
-  private changeCallback: ((value: AttributeModifierWithKey) => void) | undefined;
+  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
 
   constructor() {
     this.map_ = new Map();
@@ -221,7 +221,7 @@ class ModifierMap {
   public get [Symbol.toStringTag](): string {
     return 'ModifierMapTag';
   }
-  public setOnChange(callback: (value: AttributeModifierWithKey) => void): void {
+  public setOnChange(callback: (key: Symbol, value: AttributeModifierWithKey) => void): void {
     this.changeCallback = callback;
   }
 }
