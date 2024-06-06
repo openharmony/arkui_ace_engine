@@ -4155,11 +4155,11 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
 
 RefPtr<FrameNode> FrameNode::GetNodeContainer()
 {
-    if (GetTag() == "NodeContainer") {
+    if (GetTag() == V2::NODE_CONTAINER_ETS_TAG) {
         return Claim(this);
     }
     auto parent = GetParent();
-    while (parent && parent->GetTag() != "NodeContainer") {
+    while (parent && parent->GetTag() != V2::NODE_CONTAINER_ETS_TAG) {
         parent = parent->GetParent();
     }
     return AceType::DynamicCast<FrameNode>(parent);
