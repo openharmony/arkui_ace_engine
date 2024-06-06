@@ -298,6 +298,7 @@ void RichEditorTestNg::AddSpan(const std::string& content)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
+    richEditorPattern->childNodes_.push_back(spanNode);
     int32_t spanTextLength = 0;
     for (auto& span : richEditorPattern->spans_) {
         spanTextLength += StringUtils::ToWstring(span->content).length();
