@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -47,6 +48,8 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
