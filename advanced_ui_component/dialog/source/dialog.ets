@@ -102,6 +102,7 @@ export struct TipsDialog {
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
   updateButtonHeight: (height: number) => void = (height: number) => {
@@ -116,6 +117,7 @@ export struct TipsDialog {
       },
       buttons: this.buttons,
       theme: this.theme,
+      themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize,
       updateButtonHeight: this.updateButtonHeight
@@ -333,6 +335,7 @@ export struct SelectDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   // the controller of content list
   contentScroller: Scroller = new Scroller();
   @State fontSizeScale: number = 1;
@@ -458,6 +461,7 @@ export struct SelectDialog {
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
       theme: this.theme,
+      themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize
     }).constraintSize({ maxHeight: '100%' });
@@ -529,8 +533,8 @@ export struct ConfirmDialog {
   primaryButton?: ButtonOptions = { value: "" }
   secondaryButton?: ButtonOptions = { value: "" }
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State buttonFontColorWithTheme: ResourceColor = $r('sys.color.font_emphasize');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
@@ -583,17 +587,15 @@ export struct ConfirmDialog {
       }
 
       Row() {
-        WithTheme({ theme: this.theme }) {
-          Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-            .onChange((checked: boolean) => {
-              this.isChecked = checked;
-              if (this.onCheckedChange) {
-                this.onCheckedChange(this.isChecked);
-              }
-            })
-            .hitTestBehavior(HitTestMode.Block)
-            .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
-        }
+        Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+          .onChange((checked: boolean) => {
+            this.isChecked = checked;
+            if (this.onCheckedChange) {
+              this.onCheckedChange(this.isChecked);
+            }
+          })
+          .hitTestBehavior(HitTestMode.Block)
+          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
         Text(this.checkTips)
           .fontSize(this.getCheckBoxFontSize())
@@ -643,6 +645,7 @@ export struct ConfirmDialog {
       updateButtonHeight: this.updateButtonHeight,
       buttons: this.buttons,
       theme: this.theme,
+      themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize
     }).constraintSize({ maxHeight: '100%' });
@@ -651,8 +654,6 @@ export struct ConfirmDialog {
   aboutToAppear(): void {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-    this.theme.colors.fontEmphasize : $r('sys.color.font_emphasize');
     this.initButtons();
     this.initMargin();
   }
@@ -689,6 +690,7 @@ export struct AlertDialog {
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State windowSize: Size = { width: MAX_DIALOG_WIDTH, height: 0 };
   @State fontSizeScale: number = 1;
 
@@ -702,6 +704,7 @@ export struct AlertDialog {
       },
       buttons: this.buttons,
       theme: this.theme,
+      themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize,
     }).constraintSize({ maxHeight: '100%' });
@@ -805,6 +808,7 @@ export struct CustomContentDialog {
   contentAreaPadding?: Padding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
 
@@ -819,6 +823,7 @@ export struct CustomContentDialog {
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
       theme: this.theme,
+      themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize
     }).constraintSize({ maxHeight: '100%' });
@@ -835,6 +840,7 @@ struct CustomDialogContentComponent {
   contentAreaPadding?: Padding;
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
 
   @Builder
   defaultContentBuilder(): void {
@@ -854,7 +860,7 @@ struct CustomDialogContentComponent {
   initCustomStyle: boolean = false;
 
   build() {
-    WithTheme({ theme: this.theme }) {
+    WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
       Scroll() {
         Column() {
           // title area
@@ -893,6 +899,8 @@ struct CustomDialogContentComponent {
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
+      .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
+        Color.Transparent : $r('sys.color.comp_background_primary'))
     }
   }
 
@@ -1199,8 +1207,6 @@ struct ButtonComponent {
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
   keyIndex: number = 0;
-  @State buttonFontColorWithTheme: ResourceColor = '';
-  @State errorButtonFontColorWithTheme: ResourceColor = '';
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
   @State isButtonVertical: boolean = false;
@@ -1224,10 +1230,6 @@ struct ButtonComponent {
   }
 
   aboutToAppear(): void {
-    this.buttonFontColorWithTheme = this.theme?.colors?.fontEmphasize ?
-    this.theme.colors.fontEmphasize : '';
-    this.errorButtonFontColorWithTheme = this.theme?.colors?.warning ?
-    this.theme.colors.warning : '';
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Math.min(this.windowSize.width - BUTTON_HORIZONTAL_MARGIN * 2,
       MAX_DIALOG_WIDTH));
@@ -1290,14 +1292,6 @@ struct ButtonComponent {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.controller)
         .backgroundColor(buttonOptions.background)
-        .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
-    } else if (buttonOptions.background !== undefined && buttonOptions.fontColor === undefined || '') {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
-        .backgroundColor(buttonOptions.background)
-        .fontColor(buttonOptions.role === ButtonRole.ERROR ?
-        this.errorButtonFontColorWithTheme : this.buttonFontColorWithTheme)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
@@ -1515,6 +1509,7 @@ export struct LoadingDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
+  themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
 
@@ -1526,6 +1521,7 @@ export struct LoadingDialog {
           this.contentBuilder();
         },
         theme: this.theme,
+        themeColorMode: this.themeColorMode,
         fontSizeScale: this.fontSizeScale,
         windowSize: this.windowSize
       }).constraintSize({ maxHeight: '100%' });
