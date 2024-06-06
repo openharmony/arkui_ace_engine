@@ -154,6 +154,19 @@ void NativeView::MarkNeedUpdate()
     }
 }
 
+void NativeView::FlushReload()
+{
+    auto node = node_.Upgrade();
+    if (!node) {
+        LOGE("fail to update due to custom Node is null");
+        return;
+    }
+    if (AceType::InstanceOf<NG::CustomNode>(node)) {
+        auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+        customNode->FlushReload();
+    }
+}
+
 void NativeView::FinishUpdateFunc(int32_t elmtId)
 {
     LOGI("FinishUpdateFunc start");
