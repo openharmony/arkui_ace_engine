@@ -985,11 +985,11 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
     void SetAccessibilityAction();
-    bool BeforeGestureAndClickOperate(GestureEvent& info, bool isDoubleClick);
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     void MoveCaretAnywhere(const Offset& touchOffset);
     void ShowCaretNoTwinkling(const Offset& textOffset);
+    bool CheckTripClickEvent(GestureEvent& info);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1088,9 +1088,9 @@ private:
     float lastFontScale_ = -1;
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
-    bool mouseClickRelease_ = false;
     int32_t initSelectStart_ = 0;
     bool isMoveCaretAnywhere_ = false;
+    std::vector<TimeStamp> clickInfo_;
 };
 } // namespace OHOS::Ace::NG
 
