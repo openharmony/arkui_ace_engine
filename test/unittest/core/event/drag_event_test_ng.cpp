@@ -1967,4 +1967,23 @@ HWTEST_F(DragEventTestNg, GetDefaultBorderRadiusTest001, TestSize.Level1)
     EXPECT_EQ(radiusBottomRight, 12.0);
     EXPECT_EQ(radiusBottomLeft, 12.0);
 }
+
+/**
+ * @tc.name: GetSetPressedKeyCodesTest001
+ * @tc.desc: Test GetPressedKeyCodes and SetPressedKeyCodes function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
+{
+    GestureEventFunc actionStart = [](GestureEvent& info) {};
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(std::move(actionStart), std::move(actionUpdate),
+        std::move(actionEnd), std::move(actionCancel));
+    dragEvent->SetPressedKeyCodes({KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT});
+    auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
+    EXPECT_EQ(pressedKeyCodes.size(), 2);
+    EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_DPAD_RIGHT);
+}
 } // namespace OHOS::Ace::NG
