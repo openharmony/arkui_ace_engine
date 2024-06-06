@@ -548,11 +548,9 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     }
     ++currentIndex;
     {
-        if (wrapper->GetHostNode()) {
-            ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d][start:%f]", currentIndex,
-                wrapper->GetHostNode()->GetId(),
-                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, startPos);
-        }
+        auto host = wrapper->GetHostNode();
+        ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d][start:%f]", currentIndex, host->GetId(),
+            host->GetParent() ? host->GetParent()->GetId() : 0, startPos);
         wrapper->Measure(layoutConstraint);
         measuredItems_.insert(measureIndex);
     }
@@ -600,11 +598,9 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     }
     --currentIndex;
     {
-        if (wrapper->GetHostNode()) {
-            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][endPos:%f]", currentIndex,
-                wrapper->GetHostNode()->GetId(),
-                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, endPos);
-        }
+        auto host = wrapper->GetHostNode();
+        ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][endPos:%f]", currentIndex, host->GetId(),
+            host->GetParent() ? host->GetParent()->GetId() : 0, endPos);
         wrapper->Measure(layoutConstraint);
         measuredItems_.insert(measureIndex);
     }
