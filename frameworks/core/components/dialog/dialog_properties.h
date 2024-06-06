@@ -263,6 +263,8 @@ struct DialogProperties {
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
+
+    WordBreak wordBreak = WordBreak::BREAK_ALL;
 };
 
 struct PromptDialogAttr {
