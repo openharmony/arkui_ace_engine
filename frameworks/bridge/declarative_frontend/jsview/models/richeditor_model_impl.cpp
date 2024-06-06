@@ -53,6 +53,8 @@ void RichEditorModelImpl::SetPlaceholder(PlaceholderOptions& options) {}
 
 void RichEditorModelImpl::SetTextDetectEnable(bool value) {}
 
+void RichEditorModelImpl::SetSupportPreviewText(bool value) {}
+
 void RichEditorModelImpl::SetTextDetectConfig(const std::string& value,
     std::function<void(const std::string&)>&& onResult) {}
 

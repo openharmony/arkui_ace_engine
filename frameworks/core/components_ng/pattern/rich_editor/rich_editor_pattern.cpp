@@ -3498,10 +3498,14 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     options.value = previewTextValue;
     options.offset = caretPosition_;
     previewTextRecord_.startOffset = caretPosition_;
+    previewTextRecord_.deltaStr = previewTextValue;
+    BeforeIMEInsertValue("");
     auto index = AddTextSpan(options);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index));
+    CHECK_NULL_RETURN(spanNode, false);
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length()), false);
     if (!spanNode || !spanNode->GetSpanItem()) {
         return false;
     }
@@ -3520,15 +3524,22 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
 bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
     auto previewTextSpan = previewTextRecord_.previewTextSpan;
+    int32_t delta = 0;
     if (range.start == -1 && range.end == -1 && previewTextSpan) {
+        auto beforeCallbackSucess = CallbackBeforeSetPreviewText(delta, previewTextValue, range, true);
+        CHECK_NULL_RETURN(beforeCallbackSucess, false);
         previewTextSpan->content = previewTextValue;
         auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
+        auto afterCallbackSucess = CallbackAfterSetPreviewText(delta);
+        CHECK_NULL_RETURN(afterCallbackSucess, false);
         previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     } else {
         if (range.start < previewTextRecord_.startOffset || range.end > previewTextRecord_.endOffset) {
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
             return false;
         }
+        auto beforeCallbackSucess = CallbackBeforeSetPreviewText(delta, previewTextValue, range, false);
+        CHECK_NULL_RETURN(beforeCallbackSucess, false);
         auto& content = previewTextSpan->content;
         auto replaceIndex = range.start - previewTextRecord_.startOffset;
         auto replaceLength = range.end - range.start;
@@ -3538,10 +3549,65 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
         }
         content = StringUtils::ToString(StringUtils::ToWstring(content).replace(
             replaceIndex, replaceLength, StringUtils::ToWstring(previewTextValue)));
+        auto afterCallbackSucess = CallbackAfterSetPreviewText(delta);
+        CHECK_NULL_RETURN(afterCallbackSucess, false);
         auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextSpan->content).length());
         previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     }
     UpdateSpanPosition();
+    return true;
+}
+
+bool RichEditorPattern::CallbackBeforeSetPreviewText(
+    int32_t& delta, const std::string& previewTextValue, const PreviewRange& range, bool isReplaceAll)
+{
+    auto previewTextLentgh = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
+    auto previewTextSpan = previewTextRecord_.previewTextSpan;
+    auto spanContentLength = static_cast<int32_t>(StringUtils::ToWstring(previewTextSpan->content).length());
+    delta = isReplaceAll ? previewTextLentgh - (previewTextRecord_.endOffset - previewTextRecord_.startOffset)
+                         : previewTextLentgh - (range.end - range.start);
+    if (delta > 0) {
+        CHECK_NULL_RETURN(previewTextLentgh - delta >= 0, false);
+        previewTextRecord_.deltaStr =
+            StringUtils::ToString(StringUtils::ToWstring(previewTextValue).substr(previewTextLentgh - delta, delta));
+        BeforeIMEInsertValue("");
+    } else if (delta < 0) {
+        RichEditorDeleteValue info;
+        if (isReplaceAll) {
+            CHECK_NULL_RETURN(spanContentLength + delta >= 0, false);
+            previewTextRecord_.deltaStr = StringUtils::ToString(
+                StringUtils::ToWstring(previewTextSpan->content).substr(spanContentLength + delta, -delta));
+        } else {
+            CHECK_NULL_RETURN(previewTextLentgh >= 0 && previewTextLentgh - delta <= spanContentLength, false);
+            previewTextRecord_.deltaStr = StringUtils::ToString(
+                StringUtils::ToWstring(previewTextSpan->content).substr(previewTextLentgh, -delta));
+        }
+        info.SetOffset(caretPosition_ + delta);
+        info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
+        info.SetLength(-delta);
+        int32_t currenPositon_ = std::clamp((caretPosition_ + delta), 0, static_cast<int32_t>(GetTextContentLength()));
+        if (spans_.empty()) {
+            CalcDeleteValueObj(currenPositon_, -delta, info);
+        }
+        auto eventHub = GetEventHub<RichEditorEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        eventHub->FireAboutToDelete(info);
+    }
+    return true;
+}
+
+bool RichEditorPattern::CallbackAfterSetPreviewText(int32_t& delta)
+{
+    auto previewTextSpan = previewTextRecord_.previewTextSpan;
+    if (delta > 0) {
+        auto spanNode = GetSpanNodeBySpanItem(previewTextSpan);
+        CHECK_NULL_RETURN(spanNode, false);
+        AfterIMEInsertValue(spanNode, delta, false);
+    } else if (delta < 0) {
+        auto eventHub = GetEventHub<RichEditorEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
+        eventHub->FireOnDeleteComplete();
+    }
     return true;
 }
 
@@ -3951,7 +4017,11 @@ bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
     CHECK_NULL_RETURN(eventHub, true);
     RichEditorInsertValue insertValueInfo;
     insertValueInfo.SetInsertOffset(caretPosition_);
-    insertValueInfo.SetInsertValue(insertValue);
+    if (previewTextRecord_.isPreviewTextInputting && !previewTextRecord_.deltaStr.empty()) {
+        insertValueInfo.SetPreviewText(previewTextRecord_.deltaStr);
+    } else {
+        insertValueInfo.SetInsertValue(insertValue);
+    }
     return eventHub->FireAboutToIMEInput(insertValueInfo);
 }
 
@@ -3980,7 +4050,11 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetSpanIndex(host->GetChildIndex(spanNode));
     retInfo.SetEraseLength(insertValueLength);
     auto spanItem = spanNode->GetSpanItem();
-    retInfo.SetValue(spanItem->content);
+    if (previewTextRecord_.isPreviewTextInputting && !previewTextRecord_.deltaStr.empty()) {
+        retInfo.SetPreviewText(previewTextRecord_.deltaStr);
+    } else {
+        retInfo.SetValue(spanItem->content);
+    }
     auto contentLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     retInfo.SetSpanRangeStart(spanItem->position - contentLength);
     retInfo.SetSpanRangeEnd(spanItem->position);
@@ -4993,7 +5067,11 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         eraseLength = spanItem->position - currentPosition;
     }
     spanResult.SetSpanRangeEnd(spanItem->position);
-    spanResult.SetValue(spanItem->content);
+    if (previewTextRecord_.isPreviewTextInputting && !previewTextRecord_.deltaStr.empty()) {
+        spanResult.SetPreviewText(previewTextRecord_.deltaStr);
+    } else {
+        spanResult.SetValue(spanItem->content);
+    }
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
     if (!spanItem->GetTextStyle().has_value()) {

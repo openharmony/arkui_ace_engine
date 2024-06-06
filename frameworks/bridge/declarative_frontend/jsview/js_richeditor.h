@@ -48,6 +48,7 @@ public:
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsEnablePreviewText(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void SetOnWillChange(const JSCallbackInfo& info);
     static void SetOnDidChange(const JSCallbackInfo& info);

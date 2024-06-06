@@ -38,6 +38,7 @@ public:
     void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetPlaceholder(PlaceholderOptions& options) override;
     void SetTextDetectEnable(bool value) override;
+    void SetSupportPreviewText(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     void SetSelectedBackgroundColor(const Color& selectedColor) override;
     void SetCaretColor(const Color& color) override;

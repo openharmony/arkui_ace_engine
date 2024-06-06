@@ -114,6 +114,7 @@ public:
         int32_t spanIndex = INVALID_VALUE;
         int32_t currentClickedPosition = INVALID_VALUE;
         bool isPreviewTextInputting = false;
+        std::string deltaStr;
         RefPtr<SpanItem> previewTextSpan;
 
         std::string ToString() const
@@ -138,6 +139,7 @@ public:
             spanIndex = INVALID_VALUE;
             currentClickedPosition = INVALID_VALUE;
             isPreviewTextInputting = false;
+            deltaStr.clear();
             previewTextSpan = nullptr;
         }
 
@@ -152,6 +154,11 @@ public:
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
 
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    bool CallbackBeforeSetPreviewText(
+        int32_t& delta, const std::string& previewTextValue, const PreviewRange& range, bool isReplaceAll);
+
+    bool CallbackAfterSetPreviewText(int32_t& delta);
 
     void FinishTextPreview() override;
 
