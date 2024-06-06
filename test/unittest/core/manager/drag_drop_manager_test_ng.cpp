@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -1645,6 +1646,10 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
      */
     dragDropManager->draggedGridFrameNode_ = gridNode;
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    gridNode->renderContext_ = mockRenderContext;
+    mockRenderContext->rect_ = { 0.0f, 0.0f, 1.0f, 1.0f };
     bool retFlag = gridEvent->CheckPostionInGrid(0, 0);
     EXPECT_TRUE(retFlag);
 }
