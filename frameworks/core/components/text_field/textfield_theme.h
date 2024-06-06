@@ -186,6 +186,7 @@ public:
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_delete", "");
         }
     };
 
@@ -566,6 +567,11 @@ public:
         return previewBoardColor_;
     }
 
+    const std::string& GetCancelButton() const
+    {
+        return cancelButton_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -662,6 +668,8 @@ private:
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+
+    std::string cancelButton_;
 };
 
 } // namespace OHOS::Ace
