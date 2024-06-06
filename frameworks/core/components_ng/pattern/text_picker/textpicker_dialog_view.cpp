@@ -570,7 +570,7 @@ void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
     auto textBackwardLayoutProperty = textBackwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textBackwardLayoutProperty);
     auto pickerThemeOptionStyle = pickerTheme->GetOptionStyle(true, false);
-    textBackwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.back"));
+    textBackwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
     textBackwardLayoutProperty->UpdateTextColor(pickerThemeOptionStyle.GetTextColor());
     textBackwardLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textBackwardLayoutProperty->UpdateFontWeight(pickerThemeOptionStyle.GetFontWeight());
@@ -812,7 +812,7 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     CHECK_NULL_VOID(pickerTheme);
     UpdateBackwardButtonMargin(buttonBackwardNode, dialogTheme);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("stepper.back"));
+    buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonBackwardLayoutProperty->UpdateFlexShrink(1.0);
