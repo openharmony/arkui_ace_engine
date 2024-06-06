@@ -111,6 +111,7 @@ const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>
 
 constexpr int32_t ROOT_MIN_NODE = 1;
 constexpr int32_t TOAST_MIN_NODE = 2;
+constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
 
 //  OVERLAY_EXISTS:  overlay was removed
 // OVERLAY_REMOVE:: overlay exists
@@ -596,7 +597,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
         root = dialogPattern->GetDialogProperties().windowScene.Upgrade();
     }
     CHECK_NULL_VOID(root);
-    node->MountToParent(root);
+    MountToParentWithService(root, node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
 
@@ -720,7 +721,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node)
     }
 
     CHECK_NULL_VOID(root);
-    node->MountToParent(root);
+    MountToParentWithService(root, node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
@@ -1248,7 +1249,7 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
         if (!popupNode->GetRenderContext()->HasDisappearTransition()) {
             popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
             popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            rootNode->RemoveChild(popupNode);
+            RemoveChildWithService(rootNode, popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
@@ -1332,7 +1333,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     const auto& rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
     if (iter == rootChildren.rend()) {
-        popupNode->MountToParent(rootNode);
+        MountToParentWithService(rootNode, popupNode);
     }
 
     // attach popupNode before entering animation
@@ -1408,9 +1409,12 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     }
     CHECK_NULL_VOID(rootNode);
 
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     const auto& rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
-    if (iter == rootChildren.rend()) {
+    // There is no overlay under the root node or it is not in atomicservice
+    if (iter == rootChildren.rend() && !pipeline->GetInstallationFree()) {
         return;
     }
 
@@ -1442,7 +1446,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
-        rootNode->RemoveChild(popupNode);
+        overlayManager->RemoveChildWithService(rootNode, popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         overlayManager->ErasePopupInfo(targetId);
         if ((isTypeWithOption && !isShowInSubWindow) ||
@@ -1520,7 +1524,7 @@ void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
     CHECK_NULL_VOID(rootNode);
     auto iter = customPopupMap_.find(targetId);
     if (iter != customPopupMap_.end()) {
-        rootNode->RemoveChild(iter->second);
+        RemoveChildWithService(rootNode, iter->second);
         customPopupMap_.erase(iter);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
@@ -1536,7 +1540,7 @@ void OverlayManager::RemoveIndexerPopup()
     CHECK_NULL_VOID(rootNode);
     for (const auto& popup : customPopupMap_) {
         auto popupNode = popup.second;
-        rootNode->RemoveChild(popupNode);
+        RemoveChildWithService(rootNode, popupNode);
     }
     customPopupMap_.clear();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -1616,7 +1620,7 @@ void OverlayManager::ErasePopup(int32_t targetId)
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
         }
-        rootNode->RemoveChild(popupNode);
+        RemoveChildWithService(rootNode, popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         popupMap_.erase(targetId);
     }
@@ -2593,9 +2597,12 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
-    if (rootNode->GetChildren().size() > ROOT_MIN_NODE) {
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    // There is overlay under the root node or it is in atomicservice
+    if (rootNode->GetChildren().size() > ROOT_MIN_NODE || pipeline->GetInstallationFree()) {
         // stage node is at index 0, remove overlay at last
-        auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+        auto overlay = GetOverlayFrameNode();
         CHECK_NULL_RETURN(overlay, false);
         auto ret = ExceptComponent(rootNode, overlay, isBackPressed, isPageRouter);
         if (ret == OVERLAY_REMOVE) {
@@ -2609,8 +2616,6 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // remove navDestination in navigation first
         do {
             CHECK_NULL_BREAK(rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_BREAK(pipeline);
             auto navigationGroupNode =
                 AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay));
             CHECK_NULL_BREAK(navigationGroupNode);
@@ -2633,6 +2638,32 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         }
     }
     return false;
+}
+
+RefPtr<FrameNode> OverlayManager::GetOverlayFrameNode()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+    // There is no overlay under the root node or it is not in atomicservice
+    if (!pipeline->GetInstallationFree() || rootNode->GetChildren().size() > ROOT_MIN_NODE) {
+        return overlay;
+    }
+    for (auto child : rootNode->GetChildren()) {
+        if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            auto atomicNode = child;
+            CHECK_NULL_RETURN(atomicNode, nullptr);
+            if (atomicNode->GetChildren().size() <= ATOMIC_SERVICE_MIN_SIZE) {
+                return nullptr;
+            }
+            overlay = DynamicCast<FrameNode>(
+                atomicNode->GetChildAtIndex(atomicNode->GetChildren().size() - ATOMIC_SERVICE_MIN_SIZE));
+            break;
+        }
+    }
+    return overlay;
 }
 
 int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
@@ -5672,6 +5703,56 @@ void OverlayManager::OnUIExtensionWindowSizeChange()
         CHECK_NULL_VOID(dialogPattern);
         dialogPattern->InitHostWindowRect();
         dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(rootNode);
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetInstallationFree()) {
+        // it is in atomicservice
+        SetNodeBeforeAppbar(rootNode, node);
+    } else {
+        node->MountToParent(rootNode);
+    }
+}
+ 
+void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_VOID(node);
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetInstallationFree()) {
+        // it is in atomicservice
+        auto parent = node->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(node);
+    } else {
+        rootNode->RemoveChild(node);
+    }
+}
+ 
+void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_VOID(node);
+    for (auto child : rootNode->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
+            continue;
+        }
+        for (auto childNode : child->GetChildren()) {
+            CHECK_NULL_VOID(childNode);
+            if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
+                TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
+                child->AddChildBefore(node, childNode);
+                return;
+            }
+        }
     }
 }
 } // namespace OHOS::Ace::NG
