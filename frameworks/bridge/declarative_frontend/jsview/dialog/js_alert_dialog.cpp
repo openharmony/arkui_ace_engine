@@ -331,6 +331,24 @@ void ParseAlertOffset(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
+void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto textStyleObj = obj->GetProperty("textStyle");
+    if (textStyleObj->IsNull() || !textStyleObj->IsObject()) {
+        return;
+    }
+    auto textStyle = JSRef<JSObject>::Cast(textStyleObj);
+    auto args = textStyle->GetProperty("wordBreak");
+    int32_t index = 1;
+    if (args->IsNumber()) {
+        index = args->ToNumber<int32_t>();
+    }
+    if (index < 0 || index >= WORD_BREAK_TYPES.size()) {
+        index = 1;
+    }
+    properties.wordBreak = WORD_BREAK_TYPES[index];
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -353,6 +371,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertRadius(properties, obj);
         ParseAlertAlignment(properties, obj);
         ParseAlertOffset(properties, obj);
+        ParseTextStyle(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
                                     parseButton = ParseButtons, parseShadow = ParseAlertShadow,
