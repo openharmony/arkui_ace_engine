@@ -7244,10 +7244,6 @@ int32_t TextFieldPattern::SetPreviewText(const std::string &previewValue, const 
         .text = previewValue,
         .range = range
     };
-    if (!CheckPreviewTextValidate(info)) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "wrong info, can't show preview text");
-        return PREVIEW_BAD_PARAMETERS;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PREVIEW_NULL_POINTER);
     inputOperations_.emplace(InputOperation::SET_PREVIEW_TEXT);
@@ -7297,8 +7293,13 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
 
     UpdatePreviewIndex(start, newCaretPosition);
     hasPreviewText_ = true;
-    cursorVisible_ = true;
-    StartTwinkling();
+    if (HasFocus()) {
+        cursorVisible_ = true;
+        StartTwinkling();
+    } else {
+        cursorVisible_ = false;
+        StopTwinkling();
+    }
 }
 
 void TextFieldPattern::FinishTextPreview()
@@ -7317,8 +7318,13 @@ void TextFieldPattern::FinishTextPreviewOperation()
     }
 
     UpdateEditingValueToRecord();
-    cursorVisible_ = true;
-    StartTwinkling();
+    if (HasFocus()) {
+        cursorVisible_ = true;
+        StartTwinkling();
+    } else {
+        cursorVisible_ = false;
+        StopTwinkling();
+    }
 
     hasPreviewText_ = false;
     previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
@@ -7391,20 +7397,20 @@ bool TextFieldPattern::NeedDrawPreviewText()
     return needDraw;
 }
 
-bool TextFieldPattern::CheckPreviewTextValidate(PreviewTextInfo info) const
+int32_t TextFieldPattern::CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range)
 {
-    auto start = info.range.start;
-    auto end = info.range.end;
+    auto start = range.start;
+    auto end = range.end;
     if (start != end && (start == PREVIEW_TEXT_RANGE_DEFAULT || end == PREVIEW_TEXT_RANGE_DEFAULT)) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "range is not [-1,-1] or legal range");
-        return false;
+        return PREVIEW_BAD_PARAMETERS;
     }
 
     if (start != PREVIEW_TEXT_RANGE_DEFAULT && IsSelected()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "unsupported insert preview text when IsSelected");
-        return false;
+        return PREVIEW_BAD_PARAMETERS;
     }
-    return true;
+    return PREVIEW_NO_ERROR;
 }
 
 PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const

@@ -1287,6 +1287,8 @@ public:
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
+    int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1504,8 +1506,6 @@ private:
     {
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
-
-    bool CheckPreviewTextValidate(PreviewTextInfo info) const;
 
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
