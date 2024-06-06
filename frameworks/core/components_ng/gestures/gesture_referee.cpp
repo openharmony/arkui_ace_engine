@@ -213,7 +213,7 @@ bool GestureScope::IsReady()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer && recognizer->GetRefereeState() != RefereeState::READY) {
+        if (recognizer && !recognizer->IsReady()) {
             return false;
         }
     }
@@ -232,6 +232,17 @@ bool GestureScope::HasFailRecognizer()
 }
 
 void GestureScope::ForceCleanGestureScope()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->ForceCleanRecognizer();
+        }
+    }
+    recognizers_.clear();
+}
+
+void GestureScope::ForceCleanGestureScopeState()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
@@ -365,6 +376,13 @@ void GestureReferee::ForceCleanGestureReferee()
         iter->second->ForceCleanGestureScope();
     }
     gestureScopes_.clear();
+}
+
+void GestureReferee::ForceCleanGestureRefereeState()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->ForceCleanGestureScopeState();
+    }
 }
 
 void GestureReferee::CleanGestureRefereeState(int32_t touchId)

@@ -231,7 +231,8 @@ public:
         return responseCtrl_;
     }
 
-    void CheckTouchEvent(TouchEvent touchEvent);
+    void CheckDownEvent(const TouchEvent& touchEvent);
+    void CheckUpEvent(const TouchEvent& touchEvent);
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
