@@ -32,6 +32,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -133,6 +134,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
+    JSClass<JSSelect>::StaticMethod("divider", &JSSelect::SetDivider);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
 
@@ -835,6 +837,59 @@ void JSSelect::SetControlSize(const JSCallbackInfo& info)
     } else {
         LOGE("JSSelect::SetControlSize Is not Number.");
     }
+}
+
+void JSSelect::SetDivider(const JSCallbackInfo& info)
+{
+    NG::SelectDivider divider;
+    auto selectTheme = GetTheme<SelectTheme>();
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    // Set default strokeWidth and color
+    if (selectTheme) {
+        defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+       
+        Dimension strokeWidth = defaultStrokeWidth;
+        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
+            divider.strokeWidth = strokeWidth;
+        }
+        
+        Color color = defaultColor;
+        if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
+            divider.color = color;
+        }
+
+        Dimension startMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) && CheckDividerValue(startMargin)) {
+            divider.startMargin = startMargin;
+        }
+
+        Dimension endMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) &&  CheckDividerValue(endMargin)) {
+            divider.endMargin = endMargin;
+        }
+    } else if (info.Length() >= 1 && info[0]->IsNull()) {
+        divider.strokeWidth = 0.0_vp;
+    }
+    SelectModel::GetInstance()->SetDivider(divider);
+}
+
+bool JSSelect::CheckDividerValue(const Dimension &dimension)
+{
+    if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
+        return true;
+    }
+    return false;
 }
 
 void JSSelect::SetDirection(const std::string& dir)

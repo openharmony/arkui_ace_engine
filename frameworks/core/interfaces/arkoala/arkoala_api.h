@@ -3658,6 +3658,10 @@ struct ArkUISelectModifier {
     void (*resetMenuBgColor)(ArkUINodeHandle node);
     void (*setMenuBgBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetMenuBgBlurStyle)(ArkUINodeHandle node);
+    void (*setSelectDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*resetSelectDivider)(ArkUINodeHandle node);
+    void (*resetSelectDividerNull)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

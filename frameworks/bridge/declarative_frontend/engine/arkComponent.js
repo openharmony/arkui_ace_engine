@@ -15930,6 +15930,10 @@ class ArkSelectComponent extends ArkComponent {
     this.menuItemNodes.build(this.builder, menuItemConfiguration);
     return this.menuItemNodes.getFrameNode();
   }
+  divider(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
+    return this;
+  }
 }
 class MenuBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -16057,6 +16061,28 @@ class MenuAlignModifier extends ModifierWithKey {
   }
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
+class SelectDividerModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      var _a, _b, _c, _d;
+      if (reset) {
+          getUINativeModule().select.resetDivider(node, this.value);
+      }
+      else {
+          getUINativeModule().select.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
+      }
+  }
+  checkObjectDiff() {
+      var _a, _b, _c, _d, _e, _f, _g, _h;
+      return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
+          ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+          ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
+          ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
+  }
+}
+SelectDividerModifier.identity = Symbol('selectDivider');
 class ControlSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);

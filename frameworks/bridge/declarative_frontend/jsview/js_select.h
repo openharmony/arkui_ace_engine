@@ -57,6 +57,8 @@ public:
     static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
     static void SetMenuBackgroundColor(const JSCallbackInfo& info);
     static void SetMenuBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void SetDivider(const JSCallbackInfo& info);
+    static bool CheckDividerValue(const Dimension &dimension);
     static void SetControlSize(const JSCallbackInfo& info);
     static void SetDirection(const std::string& dir);
 

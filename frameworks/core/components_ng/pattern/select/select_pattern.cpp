@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -973,6 +974,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
+    ToJsonDivider(json, filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1027,6 +1029,26 @@ void SelectPattern::ToJsonMenuBackgroundStyle(
             jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
     } else {
         json->PutExtAttr("menuBackgroundBlurStyle", "", filter);
+    }
+}
+
+void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+    CHECK_NULL_VOID(props);
+    auto divider = JsonUtil::Create(true);
+    if (props->HasDivider()) {
+        divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
+        divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
+        divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
+        divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+        json->PutExtAttr("divider", divider->ToString().c_str(), filter);
+    } else {
+        json->PutExtAttr("divider", "", filter);
     }
 }
 
@@ -1428,5 +1450,14 @@ void SelectPattern::SetLayoutDirection(TextDirection value)
 ControlSize SelectPattern::GetControlSize()
 {
     return controlSize_;
+}
+
+void SelectPattern::SetDivider(const SelectDivider& divider)
+{
+    for (auto&& option : options_) {
+        auto props = option->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        props->UpdateDivider(divider);
+    }
 }
 } // namespace OHOS::Ace::NG
