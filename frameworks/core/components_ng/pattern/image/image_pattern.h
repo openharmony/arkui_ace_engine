@@ -239,7 +239,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();
@@ -310,7 +311,16 @@ public:
     }
 
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
-
+    bool GetDefaultAutoResize()
+    {
+        InitDefaultValue();
+        return autoResizeDefault_;
+    }
+    ImageInterpolation GetDefaultInterpolation()
+    {
+        InitDefaultValue();
+        return interpolationDefault_;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();

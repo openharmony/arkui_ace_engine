@@ -1880,6 +1880,7 @@ typedef enum {
      *
      */
     NODE_SPAN_TEXT_BACKGROUND_STYLE,
+    NODE_SPAN_BASELINE_OFFSET,
     /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.

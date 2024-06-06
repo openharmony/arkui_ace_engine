@@ -42,6 +42,7 @@ struct ArkUI_Node {
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
     void* drawableDescriptor = nullptr;
+    void* customEventListeners = nullptr;
 };
 
 struct ArkUI_Context {
