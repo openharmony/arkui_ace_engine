@@ -681,7 +681,8 @@ void TextSelectController::FireSelectEvent()
     auto eventHub = textFiled->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    if (needReport && textFiled->IsModifyDone() && textFiled->HasFocus()) {
+    if (needReport && textFiled->IsModifyDone() && (textFiled->HasFocus()
+        || (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)))) {
         UpdateFirstIndex(firstHandleInfo_.index);
         UpdateSecondIndex(secondHandleInfo_.index);
         onAccessibilityCallback_();
