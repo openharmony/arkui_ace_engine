@@ -30,6 +30,7 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
     void updateEmitterPosition(std::vector<EmitterProperty>& property);
 
@@ -53,6 +54,16 @@ public:
         disturbance_ = disturbance;
     }
 
+    const std::vector<EmitterProperty>& GetEmitterProperty() const
+    {
+        return emitterProperty_;
+    }
+
+    void SetEmitterProperty(std::vector<EmitterProperty> emitterProperty)
+    {
+        emitterProperty_ = emitterProperty;
+    }
+
     uint32_t GetEmitterCount() const
     {
         return emitterCount_;
@@ -61,6 +72,7 @@ public:
 private:
     bool haveUnVisibleParent_ = false;
     std::vector<ParticleDisturbance> disturbance_;
+    std::vector<EmitterProperty> emitterProperty_;
     uint32_t emitterCount_ = 0;
 };
 } // namespace OHOS::Ace
