@@ -158,10 +158,8 @@ constexpr int32_t PREVIEW_NULL_POINTER = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
 
-constexpr int32_t CLICK_SINGLE = 1;
 constexpr int32_t CLICK_DOUBLE = 2;
 constexpr int32_t CLICK_TRIPLE = 3;
-constexpr int32_t CLICK_FINGER_ONE = 1;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -2058,47 +2056,14 @@ void TextFieldPattern::InitClickEvent()
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto gesture = tmpHost->GetOrCreateGestureEventHub();
-    GestureMode mode = GestureMode::Exclusive;
-    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(mode);
-    auto tapTripleGesture = AceType::MakeRefPtr<NG::TapGesture>(CLICK_TRIPLE, CLICK_FINGER_ONE);
-    CHECK_NULL_VOID(tapTripleGesture);
-    auto tripleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Triple click callback, sourceType=%{public}d", info.GetSourceDevice());
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->clickTimes_ = CLICK_TRIPLE;
         pattern->HandleClickEvent(info);
     };
-    tapTripleGesture->SetOnActionId(tripleClickCallback);
-    gestureGroup->AddGesture(tapTripleGesture);
 
-    auto doubleClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Double click callback, sourceType=%{public}d", info.GetSourceDevice());
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->clickTimes_ = CLICK_DOUBLE;
-        pattern->HandleClickEvent(info);
-    };
-    auto tapDoubleGesture = AceType::MakeRefPtr<NG::TapGesture>(CLICK_DOUBLE, CLICK_FINGER_ONE);
-    CHECK_NULL_VOID(tapDoubleGesture);
-    tapDoubleGesture->SetOnActionId(doubleClickCallback);
-    gestureGroup->AddGesture(tapDoubleGesture);
-
-    auto clickSingleCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Single click callback, sourceType=%{public}d", info.GetSourceDevice());
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->clickTimes_ = CLICK_SINGLE;
-        pattern->HandleClickEvent(info);
-    };
-    auto tapSingleGesture = AceType::MakeRefPtr<NG::TapGesture>(CLICK_SINGLE, CLICK_FINGER_ONE);
-    CHECK_NULL_VOID(tapSingleGesture);
-    tapSingleGesture->SetOnActionId(clickSingleCallback);
-    gestureGroup->AddGesture(tapSingleGesture);
-    gestureGroup->SetPriority(GesturePriority::Parallel);
-    gesture->AddGesture(gestureGroup);
-    gesture->OnModifyDone();
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickSingleCallback));
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
 }
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
@@ -2126,10 +2091,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
-    if (clickTimes_== CLICK_TRIPLE) {
-        HandleTripleClickEvent(info); // Register the triple click gesture event
-    } else if (clickTimes_ == CLICK_DOUBLE) {
-        HandleDoubleClickEvent(info); // Register the single click gesture event
+    auto clickTimes = CheckClickLocation(info);
+    if (clickTimes == CLICK_TRIPLE) {
+        HandleTripleClickEvent(info);  // triple click event
+    } else if (clickTimes == CLICK_DOUBLE) {
+        HandleDoubleClickEvent(info); // 注册手势事件
     } else {
         HandleSingleClickEvent(info);
     }
@@ -2141,10 +2107,13 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     isFocusedBeforeClick_ = false;
 }
 
-bool TextFieldPattern::CheckClickLocation(GestureEvent& info)
+int32_t TextFieldPattern::CheckClickLocation(GestureEvent& info)
 {
     TimeStamp clickTimeStamp = info.GetTimeStamp();
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
+    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeoutLast =
+	    lastClickTimeStamp_ - penultimateClickTimeStamp_;
+    penultimateClickTimeStamp_ = lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
 
     Offset location = info.GetLocalLocation();
@@ -2152,8 +2121,16 @@ bool TextFieldPattern::CheckClickLocation(GestureEvent& info)
     auto deltaDistance = deltaOffset.GetDistance();
     clickLocation_ = location;
 
-    return timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
-           deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx();
+    if (timeoutLast.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeoutLast.count() < DOUBLECLICK_INTERVAL_MS &&
+        timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
+        deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx()) {
+        return CLICK_TRIPLE;
+    }
+    if (timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
+        deltaDistance < DOUBLECLICK_DISTANCE.ConvertToPx()) {
+        return CLICK_DOUBLE;
+    }
+    return 0;
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)

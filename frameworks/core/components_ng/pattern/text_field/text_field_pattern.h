@@ -825,7 +825,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
-    bool CheckClickLocation(GestureEvent& info);
+    int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -1646,6 +1646,7 @@ private:
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
     TimeStamp lastClickTimeStamp_;
+    TimeStamp penultimateClickTimeStamp_;
     float paragraphWidth_ = 0.0f;
 
     std::queue<int32_t> deleteBackwardOperations_;
@@ -1701,7 +1702,6 @@ private:
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
-    int32_t clickTimes_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
