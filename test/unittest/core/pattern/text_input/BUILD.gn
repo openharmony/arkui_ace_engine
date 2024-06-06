@@ -17,6 +17,7 @@ ace_unittest("TextInputTest") {
   type = "new"
   sources = [
     "text_area_decoration_test.cpp",
+    "text_area_menu_test.cpp",
     "text_area_test.cpp",
     "text_field_algorithm_test.cpp",
     "text_field_controller_test.cpp",
@@ -27,6 +28,7 @@ ace_unittest("TextInputTest") {
     "text_input_cursor_test.cpp",
     "text_input_decoration_test.cpp",
     "text_input_emoji_test.cpp",
+    "text_input_menu_test.cpp",
     "text_input_modify_test.cpp",
     "text_input_preview_test.cpp",
     "text_input_sub_2_test.cpp",
