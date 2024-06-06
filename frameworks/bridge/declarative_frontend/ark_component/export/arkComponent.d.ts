@@ -1780,6 +1780,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
         offsetRemain: number;
     }): this;
     fadingEdge(value: boolean): this;
+    childrenMainSize(value: ChildrenMainSize): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1798,6 +1799,7 @@ declare class ArkListItemGroupComponent extends ArkComponent implements ListItem
         startMargin?: any;
         endMargin?: any;
     } | null): this;
+    childrenMainSize(value: ChildrenMainSize): this;
 }
 declare class ArkRelativeContainerComponent extends ArkComponent implements RelativeContainerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

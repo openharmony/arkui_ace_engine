@@ -329,6 +329,23 @@ class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
+  constructor(value: ChildrenMainSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listChildrenMainSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListChildrenMainSize(node);
+    } else {
+      getUINativeModule().list.setListChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ListSpaceModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
@@ -516,6 +533,10 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   fadingEdge(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
+    return this;
+  }
+  childrenMainSize(value: ChildrenMainSize): this {
+    modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
     return this;
   }
 }
