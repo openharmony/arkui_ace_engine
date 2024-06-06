@@ -982,7 +982,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             if (result->HasProperty("width")) {
                 auto widthObj = result->GetProperty("width");
                 width = widthObj->ToNumber<float>();
-                if (width < 0) {
+                if (LessNotEqual(width, 0.0)) {
                     width = 0;
                 }
             }
@@ -990,7 +990,7 @@ std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMea
             if (result->HasProperty("height")) {
                 auto heightObj = result->GetProperty("height");
                 auto height = heightObj->ToNumber<float>();
-                if (height >= 0) {
+                if (GreatOrEqual(height, 0.0)) {
                     heightOpt = height;
                 }
             }
