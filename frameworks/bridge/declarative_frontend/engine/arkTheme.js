@@ -698,7 +698,8 @@ class ArkThemeScopeManager {
     constructor() {
         this.localThemeScopes = [];
         this.themeScopes = [];
-        this.ifElseScope = undefined;
+        this.ifElseLastScope = undefined;
+        this.ifElseScopes = [];
         this.listeners = [];
         this.defaultTheme = undefined;
     }
@@ -711,15 +712,19 @@ class ArkThemeScopeManager {
         const scopesLength = this.localThemeScopes.length;
         let scope = undefined;
         if (isFirstRender) {
-            if (scopesLength > 0) {
-                scope = this.localThemeScopes[scopesLength - 1];
+            const currentLocalScope = this.localThemeScopes[this.localThemeScopes.length - 1];
+            const currentIfElseScope = this.ifElseScopes[this.ifElseScopes.length - 1];
+            if (currentLocalScope) {
+                scope = currentLocalScope;
                 scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
-            }
-            else {
+            } else if (currentIfElseScope) {
+                scope = currentIfElseScope;
+                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
+            } else {
                 const parentScope = ownerComponent.themeScope_;
                 if (parentScope) {
-                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
                     scope = parentScope;
+                    scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
                 }
             }
         }
@@ -731,7 +736,7 @@ class ArkThemeScopeManager {
             this.onEnterLocalColorMode(this.handledColorMode);
         }
         if (componentName === 'If') {
-            this.ifElseScope = isFirstRender === true ? undefined : scope;
+            this.ifElseLastScope = scope;
         }
     }
     onComponentCreateExit(elmtId) {
@@ -776,20 +781,13 @@ class ArkThemeScopeManager {
         });
     }
     onIfElseBranchUpdateEnter() {
-        if (!this.ifElseScope) {
-            return;
-        }
-        this.localThemeScopes.push(this.ifElseScope);
+        this.ifElseScopes.push(this.ifElseLastScope);
     }
     onIfElseBranchUpdateExit(removedElmtIds) {
-        if (!this.ifElseScope) {
-            return;
+        const scope = this.ifElseScopes.pop();
+        if (removedElmtIds && scope) {
+            removedElmtIds.forEach(elmtId => scope.removeComponentFromScope(elmtId));
         }
-        if (removedElmtIds && this.ifElseScope) {
-            removedElmtIds.forEach(elmtId => this.ifElseScope.removeComponentFromScope(elmtId));
-        }
-        this.ifElseScope = undefined;
-        this.localThemeScopes.pop();
     }
     onDeepRenderScopeEnter(themeScope) {
         if (themeScope) {
