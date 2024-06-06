@@ -94,6 +94,10 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
     }
+    if (adapter_) {
+        result->SetItemAdapterFeature(adapter_->requestFeature);
+        result->SetLazyFeature(!!adapter_->requestItemFunc);
+    }
     return result;
 }
 
@@ -424,7 +428,32 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
+    if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
+        CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
+    }
     return false;
+}
+
+void GridPattern::CheckGridItemRange(const std::pair<int32_t, int32_t>& range)
+{
+   if (!adapter_) {
+       return;
+   }
+   adapter_->requestFeature.first = false;
+   adapter_->requestFeature.second = false;
+   LOGI("CheckGridItemRange, range: %{public}d, %{public}d.", adapter_->range.first, adapter_->range.second);
+   if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
+       if (adapter_->range.first > range.first) {
+           adapter_->requestFeature.first = true;
+       }
+       if (adapter_->range.second < range.second) {
+           adapter_->requestFeature.second = true;
+       }
+       if (adapter_->requestItemFunc) {
+           LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
+           adapter_->requestItemFunc(range.first, range.second);
+       }
+   }
 }
 
 void GridPattern::CheckScrollable()

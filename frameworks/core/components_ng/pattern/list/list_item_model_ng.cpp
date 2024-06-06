@@ -71,6 +71,13 @@ void ListItemModelNG::OnDidPop()
     pattern->OnDidPop();
 }
 
+RefPtr<FrameNode> ListItemModelNG::CreateListItem(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    return frameNode;
+}
+
 RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,

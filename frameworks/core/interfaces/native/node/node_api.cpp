@@ -27,6 +27,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -1584,6 +1586,162 @@ int32_t GetContextByNode(ArkUINodeHandle node)
     return instanceId;
 }
 
+struct Continuation;
+std::unordered_map<int, Continuation*> continuations;
+int currentContinuationId = 1;
+
+// Continuation is invoked when managed callback is executed, and calls us back.
+struct Continuation {
+    Continuation()
+    {
+        _id = currentContinuationId++;
+    }
+    virtual ~Continuation() {}
+    int _id;
+    int id()
+    {
+        return this->_id;
+    }
+    virtual ArkUIEventCallbackArg args(int index)
+    {
+        ArkUIEventCallbackArg result;
+        result.i32 = 0;
+        return result;
+    }
+    virtual int numArgs()
+    {
+        return 0;
+    }
+    virtual void call(int argCount, ArkUIEventCallbackArg* args) {}
+};
+
+struct ListItemAdapterContinuation : Continuation {
+    ArkUINodeHandle nodePtr;
+    ListItemAdapterContinuation(ArkUINodeHandle nodePtr)
+    {
+        this->nodePtr = nodePtr;
+    }
+
+    void call(int argCount, ArkUIEventCallbackArg* args) override
+    {
+        auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
+        CHECK_NULL_VOID(frameNode);
+        ListModelNG::SetListItemAdapterCallFinish(frameNode, args[0].i32, args[1].i32);
+    }
+};
+
+struct GridItrmAdapterContinuation : Continuation {
+    ArkUINodeHandle nodePtr;
+    GridItrmAdapterContinuation(ArkUINodeHandle nodePtr)
+    {
+        this->nodePtr = nodePtr;
+    }
+
+    void call(int argCount, ArkUIEventCallbackArg* args) override
+    {
+        auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
+        CHECK_NULL_VOID(frameNode);
+        GridModelNG::SetGridItemAdapterCallFinish(frameNode, args[0].i32, args[1].i32);
+    }
+};
+
+void CallContinuation(int continuationId, int argCount, ArkUIEventCallbackArg* args)
+{
+    const auto iter = continuations.find(continuationId);
+    if (iter != continuations.end()) {
+        iter->second->call(argCount, args);
+    }
+}
+
+void SetChildTotalCount(ArkUINodeHandle node, int totalCount)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
+        ListModelNG::SetListItemTotalCount(frameNode, totalCount);
+        return;
+    }
+    if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
+        GridModelNG::SetGridItemTotalCount(frameNode, totalCount);
+        return;
+    }
+}
+
+int IndexerChecker(ArkUIVMContext vmContext, ArkUINodeHandle nodePtr)
+{
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "Arkoala IndexerChecker for %{public}p", nodePtr);
+    return 1;
+}
+
+void SetRangeUpdater(ArkUINodeHandle nodePtr, int updaterId)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
+        // TODO: delete continuations operation.
+        auto continuation = new ListItemAdapterContinuation(nodePtr);
+        continuations.emplace(continuation->id(), continuation);
+        auto requestFunc = [updaterId, id = continuation->id()](int start, int end) {
+            ArkUINodeEvent event;
+            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.callback.id = updaterId;
+            event.callback.continuationId = id;
+            event.callback.numArgs = 2;
+            event.callback.args[0] = { start };
+            event.callback.args[1] = { end };
+            SendArkUIAsyncEvent(&event);
+        };
+        ListModelNG::SetListItemAdapterFunc(frameNode, std::move(requestFunc));
+        return;
+    }
+    if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
+        auto continuation = new GridItrmAdapterContinuation(nodePtr);
+        // TODO: delete continuations operation.
+        continuations.emplace(continuation->id(), continuation);
+        auto requestFunc = [updaterId, id = continuation->id()](int start, int end) {
+            ArkUINodeEvent event;
+            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.callback.id = updaterId;
+            event.callback.continuationId = id;
+            event.callback.numArgs = 2;
+            event.callback.args[0] = { start };
+            event.callback.args[1] = { end };
+            SendArkUIAsyncEvent(&event);
+        };
+        GridModelNG::SetGridItemAdapterFunc(frameNode, std::move(requestFunc));
+        return;
+    }
+}
+
+template<typename T>
+inline T* fromBits(ArkUIEventCallbackArg* args)
+{
+    uint64_t raw = static_cast<uint64_t>(args[0].u32) | (static_cast<uint64_t>(args[1].u32) << 32);
+    return reinterpret_cast<T*>(static_cast<uintptr_t>(raw));
+}
+
+void SetLazyItemIndexer(ArkUIVMContext vmContext, ArkUINodeHandle nodePtr, int indexerId)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
+    CHECK_NULL_VOID(frameNode);
+    auto getNodeByIndex = [vmContext, indexerId](int32_t index) -> OHOS::Ace::RefPtr<FrameNode> {
+        ArkUIEventCallbackArg args[] = { { index }, { 0 }, { 0 } };
+        int found = GetArkUIAPICallbackMethod()->CallInt(vmContext, indexerId, 3, &args[0]);
+        if (found == 0) {
+            return nullptr;
+        }
+        return OHOS::Ace::AceType::Claim(fromBits<FrameNode>(&args[1]));
+    };
+    if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
+        ListModelNG::SetListItemGetFunc(frameNode, std::move(getNodeByIndex));
+        return;
+    }
+    if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
+        GridModelNG::SetGridItemGetFunc(frameNode, std::move(getNodeByIndex));
+        return;
+    }
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -1770,16 +1928,16 @@ ArkUIExtendedNodeAPI impl_extended = {
     GetLayoutConstraint,
     SetAlignment,
     GetAlignment,
-    nullptr, // indexerChecker
-    nullptr, // setRangeUpdater
-    nullptr, // setLazyItemIndexer
+    IndexerChecker,
+    SetRangeUpdater,
+    SetLazyItemIndexer,
     GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
     NodeEvent::CheckEvent,
-    NodeEvent::SendArkUIAsyncEvent, // sendEvent
-    nullptr, // callContinuation
-    nullptr, // setChildTotalCount
+    NodeEvent::SendArkUIAsyncEvent,
+    CallContinuation,
+    SetChildTotalCount,
     ShowCrash,
 };
 /* clang-format on */

@@ -79,6 +79,13 @@ void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeTy
     }
 }
 
+RefPtr<FrameNode> ListModelNG::CreateList(int32_t nodeId)
+{
+   auto listNode =
+       FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
+   return listNode;
+}
+
 void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
@@ -87,6 +94,11 @@ void ListModelNG::SetSpace(const Dimension& space)
 void ListModelNG::SetInitialIndex(int32_t initialIndex)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
+}
+
+void ListModelNG::SetListInitialIndex(FrameNode* frameNode, int32_t initialIndex)
+{
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
 }
 
 void ListModelNG::SetContentStartOffset(float startOffset)
@@ -112,9 +124,60 @@ void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<Scro
     list->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
+void ListModelNG::SetListScroller(
+   FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+   CHECK_NULL_VOID(pattern);
+   auto controller = AceType::DynamicCast<ListPositionController>(scroller);
+   CHECK_NULL_VOID(controller);
+   pattern->SetPositionController(controller);
+   auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+   CHECK_NULL_VOID(scrollBarProxy);
+   pattern->SetScrollBarProxy(scrollBarProxy);
+}
+
 void ListModelNG::SetListDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
+}
+
+void ListModelNG::SetListItemTotalCount(FrameNode* frameNode, int totalCount)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<ListPattern>();
+   CHECK_NULL_VOID(pattern);
+   if (pattern->GetListItemAdapter()->totalCount != totalCount) {
+       pattern->GetListItemAdapter()->totalCount = static_cast<int32_t>(totalCount);
+       frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+   }
+}
+
+void ListModelNG::SetListItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<ListPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetListItemAdapter()->requestItemFunc = std::move(requestFunc);
+}
+
+void ListModelNG::SetListItemAdapterCallFinish(FrameNode* frameNode, int start, int end)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<ListPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetListItemAdapter()->range.first = start;
+   pattern->GetListItemAdapter()->range.second = end;
+   frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ListModelNG::SetListItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<ListPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetListItemAdapter()->getItemFunc = std::move(getFunc);
 }
 
 void ListModelNG::SetScrollBar(DisplayMode scrollBar)

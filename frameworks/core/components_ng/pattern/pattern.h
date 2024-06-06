@@ -608,6 +608,16 @@ public:
         return false;
     }
 
+    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
+    {
+        return nullptr;
+    }
+
+    virtual int32_t GetTotalChildCount()
+    {
+        return -1;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

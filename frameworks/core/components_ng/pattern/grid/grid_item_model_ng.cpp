@@ -64,6 +64,13 @@ RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+RefPtr<FrameNode> GridItemModelNG::CreateGridItem(int32_t nodeId)
+{
+   auto frameNode = FrameNode::GetOrCreateFrameNode(
+       V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
+   return frameNode;
+}
+
 void GridItemModelNG::SetRowStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, value);
@@ -82,6 +89,16 @@ void GridItemModelNG::SetColumnStart(int32_t value)
 void GridItemModelNG::SetColumnEnd(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, value);
+}
+
+void GridItemModelNG::SetGridItemColumnStart(FrameNode* frameNode, int32_t value)
+{
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnStart, value, frameNode);
+}
+
+void GridItemModelNG::SetGridItemColumnEnd(FrameNode* frameNode, int32_t value)
+{
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, value, frameNode);
 }
 
 void GridItemModelNG::SetForceRebuild(bool value)

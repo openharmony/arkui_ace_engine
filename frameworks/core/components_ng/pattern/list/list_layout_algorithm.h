@@ -384,6 +384,27 @@ public:
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
 
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
+    void SetTotalItemCount(int32_t count, bool preferred = false)
+    {
+        totalItemCount_ = count;
+        isPreferredTotalItemCount_ = preferred;
+    }
+
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -508,6 +529,7 @@ private:
     bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
+    bool isPreferredTotalItemCount_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
@@ -525,6 +547,10 @@ private:
     OffsetF paddingOffset_;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     std::function<float(int32_t)> chainOffsetFunc_;
     float chainInterval_ = 0.0f;

@@ -73,6 +73,14 @@ public:
     void SetFadingEdge(bool fadingEdge) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
+    static void SetListInitialIndex(FrameNode* frameNode, int32_t initialIndex);
+    static void SetListItemTotalCount(FrameNode* frameNode, int totalCount);
+    static void SetListItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc);
+    static void SetListItemAdapterCallFinish(FrameNode* frameNode, int start, int end);
+    static void SetListItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
+    static void SetListScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
+    static RefPtr<FrameNode> CreateList(int32_t nodeId);
+
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);

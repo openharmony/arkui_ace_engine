@@ -59,6 +59,13 @@ RefPtr<ScrollControllerBase> GridModelNG::GetOrCreateController(FrameNode* frame
     return pattern->GetOrCreatePositionController();
 }
 
+RefPtr<FrameNode> GridModelNG::CreateGrid(int32_t nodeId)
+{
+   auto frameNode =
+       FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+   return frameNode;
+}
+
 void GridModelNG::Pop()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();
@@ -79,6 +86,16 @@ void GridModelNG::SetColumnsTemplate(const std::string& value)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value);
 }
 
+void GridModelNG::SetGridColumnsTemplate(FrameNode* frameNode, const std::string& value)
+{
+   if (value.empty()) {
+       TAG_LOGW(AceLogTag::ACE_GRID, "Columns Template [%{public}s] is not valid.", value.c_str());
+       ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
+       return;
+   }
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, value, frameNode);
+}
+
 void GridModelNG::SetRowsTemplate(const std::string& value)
 {
     if (value.empty()) {
@@ -89,6 +106,16 @@ void GridModelNG::SetRowsTemplate(const std::string& value)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, value);
 }
 
+void GridModelNG::SetGridRowsTemplate(FrameNode* frameNode, const std::string& value)
+{
+   if (value.empty()) {
+       TAG_LOGW(AceLogTag::ACE_GRID, "Rows Template [%{public}s] is not valid.", value.c_str());
+       ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "1fr", frameNode);
+       return;
+   }
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, value, frameNode);
+}
+
 void GridModelNG::SetColumnsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
@@ -96,11 +123,25 @@ void GridModelNG::SetColumnsGap(const Dimension& value)
     }
 }
 
+void GridModelNG::SetGridColumnsGap(FrameNode* frameNode, const Dimension& value)
+{
+   if (value.IsNonNegative()) {
+       ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, value, frameNode);
+   }
+}
+
 void GridModelNG::SetRowsGap(const Dimension& value)
 {
     if (value.IsNonNegative()) {
         ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value);
     }
+}
+
+void GridModelNG::SetGridRowsGap(FrameNode* frameNode, const Dimension& value)
+{
+   if (value.IsNonNegative()) {
+       ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, value, frameNode);
+   }
 }
 
 void GridModelNG::SetGridHeight(const Dimension& value)
@@ -111,6 +152,12 @@ void GridModelNG::SetGridHeight(const Dimension& value)
 void GridModelNG::SetScrollBarMode(DisplayMode value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
+}
+
+void GridModelNG::SetGridScrollBarMode(FrameNode* frameNode, int32_t value)
+{
+   auto displayMode = static_cast<DisplayMode>(value);
+   ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode, frameNode);
 }
 
 void GridModelNG::SetScrollBarColor(const std::string& value)
@@ -556,4 +603,42 @@ int32_t GridModelNG::GetCachedCount(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, CachedCount, cachedCount, frameNode, 1);
     return cachedCount;
 }
+
+void GridModelNG::SetGridItemTotalCount(FrameNode* frameNode, int totalCount)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<GridPattern>();
+   CHECK_NULL_VOID(pattern);
+   if (pattern->GetGridItemAdapter()->totalCount != totalCount) {
+       pattern->GetGridItemAdapter()->totalCount = static_cast<int32_t>(totalCount);
+       frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+   }
+}
+
+void GridModelNG::SetGridItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<GridPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetGridItemAdapter()->requestItemFunc = std::move(requestFunc);
+}
+
+void GridModelNG::SetGridItemAdapterCallFinish(FrameNode* frameNode, int start, int end)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<GridPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetGridItemAdapter()->range.first = start;
+   pattern->GetGridItemAdapter()->range.second = end;
+   frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void GridModelNG::SetGridItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc)
+{
+   CHECK_NULL_VOID(frameNode);
+   auto pattern = frameNode->GetPattern<GridPattern>();
+   CHECK_NULL_VOID(pattern);
+   pattern->GetGridItemAdapter()->getItemFunc = std::move(getFunc);
+}
+
 } // namespace OHOS::Ace::NG

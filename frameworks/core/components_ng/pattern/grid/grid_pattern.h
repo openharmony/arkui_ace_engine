@@ -37,6 +37,15 @@ struct GridItemIndexInfo {
     int32_t crossEnd = -1;
 };
 
+struct GridItemAdapter {
+   int32_t totalCount = 0;
+   std::pair<int32_t, int32_t> range = { 0, 0 };
+   std::function<void(int32_t start, int32_t end)> requestItemFunc;
+   // which directional item request.
+   std::pair<bool, bool> requestFeature = { false, false };
+   std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
+};
+
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -245,6 +254,28 @@ public:
         return gridLayoutInfo_.axis_;
     }
 
+   const std::shared_ptr<GridItemAdapter>& GetGridItemAdapter()
+   {
+       if (adapter_) {
+           return adapter_;
+       }
+       adapter_ = std::make_shared<GridItemAdapter>();
+       return adapter_;
+   }
+
+   int32_t GetTotalChildCount() override
+   {
+       return adapter_ ? adapter_->totalCount : -1;
+   }
+
+   RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override
+   {
+       if (adapter_ && adapter_->getItemFunc) {
+           return adapter_->getItemFunc(index);
+       }
+       return nullptr;
+   }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -301,6 +332,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
+    void CheckGridItemRange(const std::pair<int32_t, int32_t> &range);
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
@@ -324,6 +357,7 @@ private:
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
     std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+    std::shared_ptr<GridItemAdapter> adapter_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

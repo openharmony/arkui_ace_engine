@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
 
@@ -61,6 +62,7 @@ private:
                                OnExitDeleteAreaEvent&& onExitDeleteArea,
                                OnStateChangedEvent&& onStateChangeEvent,
                                bool isStartArea);
+    static RefPtr<FrameNode> CreateListItem(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

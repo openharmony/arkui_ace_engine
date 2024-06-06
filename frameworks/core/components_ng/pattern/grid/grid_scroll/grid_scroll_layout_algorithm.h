@@ -74,6 +74,21 @@ public:
         }
     }
 
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
@@ -192,6 +207,7 @@ protected:
 
 private:
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    int32_t prevStartMainLineIndex_ = -1;     // startMainLineIndex before upward lazy items request
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
@@ -212,6 +228,10 @@ private:
     OffsetF childFrameOffset_;
     std::list<int32_t> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
