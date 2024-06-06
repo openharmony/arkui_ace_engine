@@ -141,6 +141,7 @@ public:
         systemToastWindow_ = systemToastWindow;
     }
     void ClearToastInSystemSubwindow();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -170,6 +171,7 @@ private:
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     RefPtr<Subwindow> systemToastWindow_;
+    Rect uiExtensionWindowRect_;
 };
 
 } // namespace OHOS::Ace
