@@ -139,8 +139,8 @@ if (is_ohos_standard_system) {
     }
 
     sources = [
+      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
       "//third_party/icu/ohos_icu4j/data/icudt72l.dat",
-      "//third_party/skia/src/ports/skia_ohos/config/fontconfig.json",
     ]
 
     foreach(item, common_bin) {
