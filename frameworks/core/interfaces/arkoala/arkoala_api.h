@@ -477,6 +477,8 @@ struct ArkUIBlurStyleOptionType {
     ArkUI_Int32 colorMode;
     ArkUI_Int32 adaptiveColor;
     ArkUI_Float32 scale;
+    ArkUI_Float32 greyScaleStart;
+    ArkUI_Float32 greyScaleEnd;
 };
 
 struct ArkUITextDecorationType {
@@ -1702,6 +1704,7 @@ struct ArkUIImageModifier {
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
+    void (*resetImageSrc)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {

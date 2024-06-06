@@ -124,7 +124,9 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        pattern->OnImageLoadFail(errorMsg);
+        if (!currentSourceInfo.IsFromReset()) {
+            pattern->OnImageLoadFail(errorMsg);
+        }
     };
 }
 
@@ -1934,6 +1936,34 @@ void ImagePattern::ResetImageProperties()
 {
     SetCopyOption(CopyOptions::None);
     OnImageModifyDone();
+}
+
+void ImagePattern::ResetImage()
+{
+    image_ = nullptr;
+    imageQuality_ = AIImageQuality::NONE;
+    isImageQualityChange_ = false;
+    loadingCtx_.Reset();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!altImage_) {
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
+}
+
+void ImagePattern::ResetAltImage()
+{
+    altImage_ = nullptr;
+    altLoadingCtx_.Reset();
+    if (!image_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto rsRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(rsRenderContext);
+        rsRenderContext->ClearDrawCommands();
+    }
 }
 
 void ImagePattern::ResetImageAndAlt()

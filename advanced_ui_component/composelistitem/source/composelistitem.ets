@@ -114,13 +114,13 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
 
 @Component
 struct ContentItemStruct {
-  iconStyle: IconType | null = null;
-  icon: ResourceStr | null = null;
-  primaryText: ResourceStr | null = null;
-  secondaryText: ResourceStr | null = null;
-  description: ResourceStr | null = null;
-  private itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
-  @State leftWidth: string = LEFT_PART_WIDTH
+  @Prop @Watch('onPropChange') iconStyle: IconType | null = null;
+  @Prop @Watch('onPropChange') icon: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') primaryText: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') secondaryText: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') description: ResourceStr | null = null;
+  @State itemRowSpace: number = NORMAL_ITEM_ROW_SPACE
+  @Prop leftWidth: string = LEFT_PART_WIDTH
   @State primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
   @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
@@ -131,10 +131,16 @@ struct ContentItemStruct {
     this.descriptionColor = theme.colors.fontTertiary;
   }
 
-  aboutToAppear() {
+  onPropChange() {
     if (this.icon == null && this.iconStyle == null) {
-      this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE
+      this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
+    } else {
+      this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
+  }
+
+  aboutToAppear() {
+    this.onPropChange();
   }
 
   @Builder
@@ -217,21 +223,25 @@ struct ContentItemStruct {
   }
 }
 
+class CreateIconParam {
+  public icon?: OperateIcon;
+}
+
 @Component
 struct OperateItemStruct {
-  arrow: OperateIcon | null = null;
-  icon: OperateIcon | null = null;
-  subIcon: OperateIcon | null = null;
-  button: OperateButton | null = null;
-  switch: OperateCheck | null = null;
-  checkBox: OperateCheck | null = null;
-  radio: OperateCheck | null = null;
-  image: ResourceStr | null = null;
-  text: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') arrow: OperateIcon | null = null;
+  @Prop @Watch('onPropChange') icon: OperateIcon | null = null;
+  @Prop @Watch('onPropChange') subIcon: OperateIcon | null = null;
+  @Prop @Watch('onPropChange') button: OperateButton | null = null;
+  @Prop @Watch('onPropChange') switch: OperateCheck | null = null;
+  @Prop @Watch('onPropChange') checkBox: OperateCheck | null = null;
+  @Prop @Watch('onPropChange') radio: OperateCheck | null = null;
+  @Prop @Watch('onPropChange') image: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') text: ResourceStr | null = null;
   @State switchState: boolean = false
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
-  @State rightWidth: string = RIGHT_PART_WIDTH
+  @Prop rightWidth: string = RIGHT_PART_WIDTH
   @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State hoveringColor: ResourceColor = '#0d000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
@@ -241,7 +251,7 @@ struct OperateItemStruct {
   @Link parentCanHover: boolean
   @Link parentIsActive: boolean
   @Link parentFrontColor: ResourceColor;
-  private rowSpace: number = DEFAULT_ROW_SPACE
+  @State rowSpace: number = DEFAULT_ROW_SPACE
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -249,7 +259,7 @@ struct OperateItemStruct {
     this.activedColor = theme.colors.interactiveActive;
   }
 
-  aboutToAppear() {
+  onPropChange() {
     if (this.switch != null) {
       this.switchState = this.switch.isCheck as boolean;
     }
@@ -262,15 +272,21 @@ struct OperateItemStruct {
 
     if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
       (this.button == null && this.image == null && this.icon == null && this.arrow != null && this.text != null)) {
-      this.rowSpace = SPECICAL_ROW_SPACE
+      this.rowSpace = SPECICAL_ROW_SPACE;
+    } else {
+      this.rowSpace = DEFAULT_ROW_SPACE;
     }
   }
 
+  aboutToAppear() {
+    this.onPropChange();
+  }
+
   @Builder
-  createButton(text: ResourceStr) {
+  createButton() {
     Button() {
       Row() {
-        Text(text)
+        Text(this.button?.text as ResourceStr)
           .focusable(true)
       }
       .padding({
@@ -314,9 +330,9 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createIcon(icon: OperateIcon) {
+  createIcon(param: CreateIconParam) {
     Button({ type: ButtonType.Normal }) {
-      Image(icon.value)
+      Image(param.icon?.value)
         .height(OPERATEITEM_ICONLIKE_SIZE)
         .width(OPERATEITEM_ICONLIKE_SIZE)
         .focusable(true)
@@ -352,12 +368,12 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick((icon.action))
+    .onClick((param.icon?.action))
   }
 
   @Builder
-  createImage(image: ResourceStr) {
-    Image(image)
+  createImage() {
+    Image(this.image)
       .height(OPERATEITEM_IMAGE_SIZE)
       .width(OPERATEITEM_IMAGE_SIZE)
       .draggable(false)
@@ -365,8 +381,8 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createText(text: ResourceStr) {
-    Text(text)
+  createText() {
+    Text(this.text)
       .margin({ right: LISTITEM_PADDING })
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(this.secondaryTextColor)
@@ -376,9 +392,9 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createArrow(icon: OperateIcon) {
+  createArrow() {
     Button({ type: ButtonType.Normal }) {
-      Image(icon.value)
+      Image(this.arrow?.value)
         .height(OPERATEITEM_ICONLIKE_SIZE)
         .width(OPERATEITEM_ARROW_WIDTH)
         .focusable(true)
@@ -414,15 +430,15 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick(icon.action)
+    .onClick(this.arrow?.action)
   }
 
   @Builder
-  createRadio(radio: OperateCheck) {
+  createRadio() {
     Radio({ value: '', group: '' })
       .margin({ right: LISTITEM_PADDING })
       .checked(this.radioState)
-      .onChange(radio.onChange)
+      .onChange(this.radio?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
@@ -453,11 +469,11 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createCheckBox(checkBox: OperateCheck) {
+  createCheckBox() {
     Checkbox()
       .margin({ right: LISTITEM_PADDING })
       .select(this.checkBoxState)
-      .onChange(checkBox.onChange)
+      .onChange(this.checkBox?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
@@ -488,10 +504,10 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createSwitch(toggleParams: OperateCheck) {
+  createSwitch() {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
-        .onChange(toggleParams.onChange)
+        .onChange(this.switch?.onChange)
         .onClick(() => {
           this.switchState = !this.switchState
         })
@@ -528,10 +544,10 @@ struct OperateItemStruct {
   }
 
   @Builder
-  createTextArrow(text: ResourceStr, icon: OperateIcon) {
+  createTextArrow() {
     Button({ type: ButtonType.Normal }) {
       Row({ space: SPECICAL_ROW_SPACE }) {
-        Text(text)
+        Text(this.text)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
           .fontColor($r('sys.color.ohos_id_color_text_secondary'))
           .focusable(true)
@@ -539,7 +555,7 @@ struct OperateItemStruct {
           .constraintSize({
             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
           })
-        Image(icon.value)
+        Image(this.arrow?.value)
           .height(OPERATEITEM_ICONLIKE_SIZE)
           .width(OPERATEITEM_ARROW_WIDTH)
           .fillColor($r('sys.color.ohos_id_color_fourth'))
@@ -582,7 +598,7 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick(icon.action)
+    .onClick(this.arrow?.action)
   }
 
   build() {
@@ -590,38 +606,36 @@ struct OperateItemStruct {
       space: this.rowSpace
     }) {
       if (this.button != null) {
-        this.createButton(this.button.text as ResourceStr)
-      }
-
-      else if (this.image != null) {
-        this.createImage(this.image)
+        this.createButton();
+      } else if (this.image != null) {
+        this.createImage()
       }
       else if (this.icon != null && this.text != null) {
-        this.createText(this.text)
-        this.createIcon(this.icon)
+        this.createText()
+        this.createIcon({icon: this.icon})
       }
       else if (this.arrow != null && this.text == null) {
-        this.createArrow(this.arrow)
+        this.createArrow()
       }
       else if (this.arrow != null && this.text != null) {
-        this.createTextArrow(this.text, this.arrow)
+        this.createTextArrow()
       }
       else if (this.text != null) {
-        this.createText(this.text)
+        this.createText()
       }
       else if (this.radio != null) {
-        this.createRadio(this.radio)
+        this.createRadio()
       }
       else if (this.checkBox != null) {
-        this.createCheckBox(this.checkBox)
+        this.createCheckBox()
       }
       else if (this.switch != null) {
-        this.createSwitch(this.switch)
+        this.createSwitch()
       }
       else if (this.icon != null) {
-        this.createIcon(this.icon)
+        this.createIcon({icon: this.icon})
         if (this.subIcon != null) {
-          this.createIcon(this.subIcon)
+          this.createIcon({icon: this.subIcon});
         }
       }
     }
@@ -633,8 +647,8 @@ struct OperateItemStruct {
 
 @Component
 export struct ComposeListItem {
-  @Prop contentItem: ContentItem | null = null;
-  @Prop operateItem: OperateItem | null = null;
+  @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
+  @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
   @State frontColor: ResourceColor = Color.Transparent.toString();
   @State borderSize: number = 0;
   @State canFocus: boolean = false
@@ -655,9 +669,10 @@ export struct ComposeListItem {
     this.focusOutlineColor = theme.colors.interactiveFocus;
   }
 
-  aboutToAppear() {
+  onPropChange() {
     if (this.contentItem === undefined) {
-      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined || this.operateItem?.subIcon !== undefined) {
+      if (this.operateItem?.image !== undefined || this.operateItem?.icon !== undefined ||
+        this.operateItem?.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
       }
       return
@@ -666,20 +681,18 @@ export struct ComposeListItem {
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
+      } else {
+        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
+        ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
       }
-      else {
-        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
-      }
-    }
-    else if (this.contentItem.description === undefined) {
-      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
+    } else if (this.contentItem.description === undefined) {
+      if (this.contentItem.icon === undefined ||
+        (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT
-      }
-      else {
+      } else {
         this.itemHeight = ItemHeight.FOURTH_HEIGHT
       }
-    }
-    else {
+    } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT
     }
 
@@ -688,10 +701,14 @@ export struct ComposeListItem {
     }
   }
 
+  aboutToAppear() {
+    this.onPropChange();
+  }
+
   calculatedLeftWidth(): string {
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return RIGHT_CONTENT_NULL_LEFTWIDTH
-    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
       return LEFT_ONLY_ARROW_WIDTH
     } else {
       return LEFT_PART_WIDTH
@@ -701,7 +718,7 @@ export struct ComposeListItem {
   calculatedRightWidth(): string {
     if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
       return RIGHT_CONTENT_NULL_RIGHTWIDTH
-    } else if (this.operateItem.arrow != null && this.operateItem.text == null) {
+    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
       return RIGHT_ONLY_ARROW_WIDTH
     } else {
       return RIGHT_PART_WIDTH
@@ -716,25 +733,25 @@ export struct ComposeListItem {
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
-            icon: this.contentItem.icon,
-            iconStyle: this.contentItem.iconStyle,
-            primaryText: this.contentItem.primaryText,
-            secondaryText: this.contentItem.secondaryText,
-            description: this.contentItem.description,
+            icon: this.contentItem?.icon,
+            iconStyle: this.contentItem?.iconStyle,
+            primaryText: this.contentItem?.primaryText,
+            secondaryText: this.contentItem?.secondaryText,
+            description: this.contentItem?.description,
             leftWidth: this.calculatedLeftWidth()
           })
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
-            icon: this.operateItem.icon,
-            subIcon: this.operateItem.subIcon,
-            button: this.operateItem.button,
-            switch: this.operateItem.switch,
-            checkBox: this.operateItem.checkbox,
-            radio: this.operateItem.radio,
-            image: this.operateItem.image,
-            text: this.operateItem.text,
-            arrow: this.operateItem.arrow,
+            icon: this.operateItem?.icon,
+            subIcon: this.operateItem?.subIcon,
+            button: this.operateItem?.button,
+            switch: this.operateItem?.switch,
+            checkBox: this.operateItem?.checkbox,
+            radio: this.operateItem?.radio,
+            image: this.operateItem?.image,
+            text: this.operateItem?.text,
+            arrow: this.operateItem?.arrow,
             parentCanFocus: this.canFocus,
             parentCanTouch: this.canTouch,
             parentIsHover: this.isHover,

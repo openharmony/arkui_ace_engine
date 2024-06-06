@@ -43,6 +43,7 @@ struct ArkUI_Node {
     void* swiperIndicator = nullptr;
     void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
+    void* customEventListeners = nullptr;
 };
 
 struct ArkUI_Context {

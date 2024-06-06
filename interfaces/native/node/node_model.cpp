@@ -161,14 +161,39 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     return arkUINode;
 }
 
+void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
+{
+    CHECK_NULL_VOID(nativePtr);
+    if (nativePtr->customEventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+        nativePtr->customEventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->customEventListeners = nullptr;
+    }
+    if (nativePtr->eventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(
+        nativePtr->eventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->eventListeners = nullptr;
+    }
+}
+
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
     delete nativePtr;
+    nativePtr = nullptr;
 }
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
