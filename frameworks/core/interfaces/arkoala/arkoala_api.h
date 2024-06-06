@@ -34,7 +34,7 @@ extern "C" {
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
-#define ARKUI_NODE_MODIFIERS_API_VERSION 7
+#define ARKUI_NODE_MODIFIERS_API_VERSION 8
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
 #define ARKUI_MAX_ANCHOR_ID_SIZE 50
 enum ArkUIAPIVariantKind {
@@ -285,6 +285,14 @@ struct ArkUILengthType {
     ArkUI_CharPtr string;
     ArkUI_Float32 number;
     ArkUI_Int32 unit;
+};
+
+struct ArkUIResource {
+    ArkUI_Int32 id;
+    ArkUI_Int32 type;
+    ArkUI_CharPtr name;
+    ArkUI_CharPtr bundleName;
+    ArkUI_CharPtr moduleName;
 };
 
 struct ArkUIResourceLength {
@@ -1969,8 +1977,7 @@ struct ArkUIImageModifier {
     // Do we need resetSrc() ?
     void (*setImageShowSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
         ArkUI_Bool isUriPureNumber);
-    void (*setImageResource)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
-        ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
+    void (*setImageResource)(ArkUINodeHandle node, const ArkUIResource* resource);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, ArkUI_Bool autoResize);
@@ -2581,8 +2588,11 @@ struct ArkUIStepperItemModifier {
 };
 
 struct ArkUITabContentModifier {
+    void (*setTabContent)(ArkUINodeHandle node, const ArkUIResource* icon, const ArkUIResource* label);
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
+    void (*setLayoutMode)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
 };
 
 struct ArkUITabsControllerModifier {

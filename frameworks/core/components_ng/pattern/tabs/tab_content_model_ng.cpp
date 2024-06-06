@@ -645,19 +645,25 @@ void TabContentModelNG::SetCustomStyleNode(const RefPtr<FrameNode>& customStyleN
     pattern->SetCustomStyleNode(customStyleNode);
 }
 
-void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)
+void TabContentModelNG::SetTabBar(FrameNode* node, const std::string& label, const std::string& icon, TabBarBuilderFunc&& builder)
 {
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar("", "", std::nullopt, std::move(builder));
+    frameNodePattern->SetTabBar(label, icon, std::nullopt, std::move(builder));
 }
 
-void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label)
-{
+void TabContentModelNG::SetLayoutMode(FrameNode* node, LayoutMode layoutMode) {
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
+    frameNodePattern->SetLayoutMode(layoutMode);
+}
+
+void TabContentModelNG::SetId(FrameNode* node, const std::string& id) {
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetId(id);
 }
 } // namespace OHOS::Ace::NG
