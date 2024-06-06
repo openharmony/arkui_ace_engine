@@ -2137,12 +2137,6 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
     return {};
 }
 
-Rosen::WindowMode AceContainer::GetMode()
-{
-    CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
-    return uiWindow_->GetMode();
-}
-
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {

@@ -46,9 +46,4 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 {
     return nullptr;
 }
-
-Rosen::WindowMode AceContainer::GetMode()
-{
-    return Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
-}
 } // namespace OHOS::Ace::Platform
