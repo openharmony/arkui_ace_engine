@@ -2350,8 +2350,6 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.colorModeIsSetByApp.empty()) {
         resConfig.SetColorModeIsSetByApp(true);
-    } else {
-        resConfig.SetColorModeIsSetByApp(false);
     }
     if (!parsedConfig.mcc.empty()) {
         resConfig.SetMcc(StringUtils::StringToUint(parsedConfig.mcc));
