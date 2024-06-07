@@ -187,8 +187,8 @@ void PagePattern::OnAttachToMainTree()
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
         index = delegate->GetStackSize();
+        GetPageInfo()->SetPageIndex(index);
     }
-    GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
