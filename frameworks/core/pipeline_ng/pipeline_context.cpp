@@ -1493,7 +1493,7 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     auto page = stageManager_->GetLastPageWithTransition();
     if (page) {
         page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
-                                                                                        : PROPERTY_UPDATE_MEASURE);
+                                                                                       : PROPERTY_UPDATE_MEASURE);
         page->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
