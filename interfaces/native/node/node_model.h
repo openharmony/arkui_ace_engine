@@ -45,6 +45,7 @@ struct ArkUI_Node {
     void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
+    void* altDrawableDescriptor = nullptr;
 };
 
 struct ArkUI_Context {

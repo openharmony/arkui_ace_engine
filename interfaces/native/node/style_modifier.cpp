@@ -9549,11 +9549,26 @@ int32_t SetAutoResize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 int32_t SetAlt(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    auto* fullImpl = GetFullImpl();
-    if (!CheckAttributeString(item)) {
+    if (!item || !item->string || !item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setAlt(node->uiNodeHandle, item->string, "", "");
+    auto* fullImpl = GetFullImpl();
+    auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+    ArkUIImageSourceInfo imageInfo;
+    imageInfo.url = item->string;
+    node->altDrawableDescriptor = drawableDescriptor;
+    if (drawableDescriptor && drawableDescriptor->resource) {
+        imageInfo.resource = drawableDescriptor->resource.get();
+    } else if (drawableDescriptor && drawableDescriptor->drawableDescriptor) {
+        imageInfo.pixelMap = drawableDescriptor->drawableDescriptor.get();
+    } else {
+        node->altDrawableDescriptor = nullptr;
+        if (!item->string) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    imageInfo.pixelMapArray = nullptr;
+    fullImpl->getNodeModifiers()->getImageModifier()->setAltSourceInfo(node->uiNodeHandle, &imageInfo);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10719,6 +10734,9 @@ const ArkUI_AttributeItem* GetAlt(ArkUI_NodeHandle node)
     auto fullImpl = GetFullImpl();
     auto src = fullImpl->getNodeModifiers()->getImageModifier()->getAlt(node->uiNodeHandle);
     g_attributeItem.string = (src != nullptr ? src : EMPTY_STR.c_str());
+    if (node->altDrawableDescriptor) {
+        g_attributeItem.object = node->altDrawableDescriptor;
+    }
     return &g_attributeItem;
 }
 
@@ -12643,7 +12661,7 @@ void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign };
+    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12653,7 +12671,7 @@ int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 
 const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign };
+    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -12663,7 +12681,7 @@ const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t 
 
 void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign };
+    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
