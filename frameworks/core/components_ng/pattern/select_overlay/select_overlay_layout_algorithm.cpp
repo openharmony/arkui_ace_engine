@@ -154,9 +154,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     hasExtensionMenu_ = true;
     auto buttonSize = button->GetGeometryNode()->GetMarginFrameSize();
     auto menuSize = menu->GetGeometryNode()->GetMarginFrameSize();
+    bool isReverse = IsReverseLayout(layoutWrapper);
     OffsetF buttonOffset;
     if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
-        buttonOffset = OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+        buttonOffset = isReverse ? menuOffset :
+            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
     } else {
         buttonOffset = menuOffset;
     }
@@ -201,6 +203,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     CHECK_NULL_RETURN(theme, OffsetF());
     OffsetF menuPosition;
     bool isExtension = false;
+    bool isReverse = IsReverseLayout(layoutWrapper);
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
@@ -323,8 +326,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     menuPosition = info_->isNewAvoid && !info_->isSingleHandle ? NewMenuAvoidStrategy(menuWidth, menuHeight) :
         AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
     AdjustMenuInRootRect(menuPosition, menuRect.GetSize(), layoutWrapper->GetGeometryNode()->GetFrameSize());
+
+    defaultMenuStartOffset_ = menuPosition;
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
-    if (isExtension) {
+    // back and more button layout is on the left side of the selectmenu when reverse layout.
+    if (isExtension && !isReverse) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
     }
     return menuPosition;
@@ -505,5 +511,13 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
         offsetY = bottomLimitOffsetY;
     }
     return OffsetF(positionX, offsetY);
+}
+
+bool SelectOverlayLayoutAlgorithm::IsReverseLayout(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 } // namespace OHOS::Ace::NG

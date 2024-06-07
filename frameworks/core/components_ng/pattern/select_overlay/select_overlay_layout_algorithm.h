@@ -41,6 +41,11 @@ public:
 
     static bool CheckInShowArea(const SelectOverlayInfo& info);
 
+    const OffsetF& GetDefaultMenuStartOffset() const
+    {
+        return defaultMenuStartOffset_;
+    }
+
     const OffsetF& GetDefaultMenuEndOffset() const
     {
         return defaultMenuEndOffset_;
@@ -78,9 +83,11 @@ private:
     void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void CheckHideBackOrMoreButton(const RefPtr<LayoutWrapper>& extensionMenu, const RefPtr<LayoutWrapper>& button);
     bool IsTextAreaSelectAll();
+    bool IsReverseLayout(LayoutWrapper* layoutWrapper) const;
 
     std::shared_ptr<SelectOverlayInfo> info_;
 
+    OffsetF defaultMenuStartOffset_;
     OffsetF defaultMenuEndOffset_;
     std::optional<float> menuWidth_;
     std::optional<float> menuHeight_;

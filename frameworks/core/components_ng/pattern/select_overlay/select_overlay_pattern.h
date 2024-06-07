@@ -67,13 +67,18 @@ public:
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
         }
         SetSelectMenuHeight();
+        auto layoutProps = GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
+                defaultMenuStartOffset_, isReverse);
         } else {
             paintMethodCreated_ = true;
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_,
+                defaultMenuStartOffset_, isReverse);
         }
     }
 
@@ -219,6 +224,7 @@ private:
     std::optional<float> menuWidth_;
     std::optional<float> menuHeight_;
 
+    OffsetF defaultMenuStartOffset_;
     OffsetF defaultMenuEndOffset_;
 
     float selectMenuHeight_ = 0.0f;
