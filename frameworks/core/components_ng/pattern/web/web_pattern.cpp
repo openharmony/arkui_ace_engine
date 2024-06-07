@@ -1593,6 +1593,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         TAG_LOGE(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         isOfflineMode_ = false;
+        isVisible_ = true;
         OnWindowShow();
     }
 
@@ -2352,6 +2353,7 @@ void WebPattern::OnModifyDone()
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
+        isVisible_ = false;
     }
 }
 
@@ -3745,7 +3747,7 @@ void WebPattern::OnWindowShow()
         delegate_->OnOnlineRenderToForeground();
     }
 
-    if (isWindowShow_ || !isVisible_ || !isAttachedToMainTree_) {
+    if (isWindowShow_ || !isVisible_) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
@@ -4025,6 +4027,7 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
+        isVisible_ = false;
     }
 }
 
