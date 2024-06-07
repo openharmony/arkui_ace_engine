@@ -1215,24 +1215,6 @@ public:
         return false;
     }
 
-    void SetStateProfilerStatus(bool stateProfilerStatus)
-    {
-        stateProfilerStatus_ = stateProfilerStatus;
-        if (jsStateProfilerStatusCallback_) {
-            jsStateProfilerStatusCallback_(stateProfilerStatus);
-        }
-    }
-
-    void SetStateProfilerStatusCallback(std::function<void(bool)>&& callback)
-    {
-        jsStateProfilerStatusCallback_ = callback;
-    }
-
-    bool GetStateProfilerStatus() const
-    {
-        return stateProfilerStatus_;
-    }
-
     uint32_t GetFrameCount() const
     {
         return frameCount_;
@@ -1425,8 +1407,6 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool stateProfilerStatus_ = false;
-    std::function<void(bool)> jsStateProfilerStatusCallback_;
 
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;

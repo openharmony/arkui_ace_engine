@@ -33,6 +33,7 @@
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/layout_inspector.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_full_update_model.h"
@@ -44,9 +45,6 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
-#if defined(OHOS_PLATFORM)
-#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -994,14 +992,6 @@ void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
-void JSViewPartialUpdate::JSGetStateProfilerStatus(const JSCallbackInfo& info)
-{
-    ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(pipeline->GetStateProfilerStatus())));
-}
-
 void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 {
 #if defined(PREVIEW) || !defined(OHOS_PLATFORM)
@@ -1010,7 +1000,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     ContainerScope scope(GetInstanceId());
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pipeline->GetStateProfilerStatus()) {
+    if (!LayoutInspector::GetStateProfilerStatus()) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
@@ -1019,7 +1009,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(info->ToString());
+    LayoutInspector::SendStateProfilerMessage(info->ToString());
 #endif
 }
 
@@ -1052,8 +1042,6 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
-    JSClass<JSViewPartialUpdate>::CustomMethod(
-        "getStateProfilerStatus", &JSViewPartialUpdate::JSGetStateProfilerStatus);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);

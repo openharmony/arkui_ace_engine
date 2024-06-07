@@ -44,6 +44,7 @@
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/layout_inspector.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
@@ -2366,6 +2367,9 @@ panda::Global<panda::ObjectRef> JsiDeclarativeEngine::GetNavigationBuilder(std::
 
 void JsiDeclarativeEngine::JsStateProfilerResgiter()
 {
+#if defined(PREVIEW)
+    return;
+#else
     CHECK_NULL_VOID(runtime_);
     auto engine = reinterpret_cast<NativeEngine*>(runtime_);
     CHECK_NULL_VOID(engine);
@@ -2393,10 +2397,9 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
         CHECK_NULL_VOID(executor);
         executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
     };
-
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetStateProfilerStatusCallback(std::move(callback));
+    
+    LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
+#endif
 }
 
 // ArkTsCard start
