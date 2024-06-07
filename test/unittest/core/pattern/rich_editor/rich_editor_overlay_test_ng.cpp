@@ -1084,4 +1084,209 @@ HWTEST_F(RichEditorOverlayTestNg, BindSelectionMenu001, TestSize.Level1)
         TextResponseType::RIGHT_CLICK, TextSpanType::IMAGE, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richeditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+	
+    /**
+     * @tc.steps: step2. add text
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(textOptions);
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->SetSelection(0, 2);
+	
+    /**
+     * @tc.steps: step3. create RichEditorPaintMethod
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<RenderContext> renderContext = RenderContext::Create();
+    auto paintProperty = richEditorPattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    auto paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(richEditorPattern->CreateNodePaintMethod());
+	
+    /**
+     * @tc.steps: step4. test UpdateOverlayModifier
+     */
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    const auto& selection = richEditorPattern->GetTextSelector();
+    EXPECT_EQ(selection.baseOffset, -1);
+    EXPECT_EQ(selection.destinationOffset, -1);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: OnMenuItemAction001
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richeditor pattern and add text span
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+	
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+	
+    /**
+     * @tc.step: step3. create a scene where the text menu has popped up
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->textSelector_.Update(0, 2);
+
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+	
+    /**
+     * @tc.step: step4. test OnMenuItemAction
+     */
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::MOUSE_MENU);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: OnMenuItemAction002
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richeditor pattern and add add text span
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+	
+    /**
+     * @tc.step: step3. create a scene where the text menu has popped up
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->textSelector_.Update(1, 2);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+	
+    /**
+     * @tc.step: step4. test OnMenuItemAction
+     */
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+
+    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::NO_MENU);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+	
+    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
+    auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
+    EXPECT_FALSE(selectInfoFirstHandle.isShow);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: OnMenuItemAction003
+ * @tc.desc: test OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get richeditor pattern and add text span.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+	
+    /**
+     * @tc.step: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+	
+    /**
+     * @tc.step: step3. call SetSelection
+     */
+    int32_t start = 0;
+    int32_t end = 2;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    richEditorPattern->OnModifyDone();
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    richEditorPattern->SetSelection(start, end, options, false);
+
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+
+    /**
+     * @tc.step: step4. test OnMenuItemAction
+     */
+    richEditorPattern->isMousePressed_ = true;
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::TOUCH_MENU);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), start);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+	
+    /**
+     * @tc.step: step5. call SetSelection again
+     */
+    richEditorPattern->SetSelection(1, 2, options, false);
+    richEditorPattern->OnModifyDone();
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.step: step6. test OnMenuItemAction again
+     */
+    selectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
+    auto selectOverlayInfo = selectOverlay->GetSelectOverlayInfo();
+    auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
+    EXPECT_FALSE(selectInfoFirstHandle.isShow);
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+}
 } // namespace OHOS::Ace::NG
