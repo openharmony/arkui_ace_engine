@@ -649,6 +649,14 @@ void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value, frameNode);
 }
 
+int32_t TextPickerModelNG::GetCanLoop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 1);
+    return textPickerPattern->GetCanLoop();
+}
+
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
 {
     CHECK_NULL_VOID(frameNode);

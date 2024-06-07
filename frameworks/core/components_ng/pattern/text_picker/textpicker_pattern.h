@@ -364,6 +364,10 @@ public:
 
     void SetCanLoop(bool isLoop);
 
+    bool GetCanLoop() {
+        return canloop_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -416,6 +420,7 @@ private:
     Color backgroundColor_ = Color::WHITE;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool canloop_ = true;
 
     // inner focus switch
     bool operationOn_ = false;
