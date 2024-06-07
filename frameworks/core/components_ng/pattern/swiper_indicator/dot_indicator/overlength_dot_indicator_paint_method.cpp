@@ -24,10 +24,12 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
+
+namespace OHOS::Ace::NG {
 constexpr uint32_t NUM_0 = 0;
+constexpr uint32_t NUM_1 = 1;
 constexpr uint32_t NUM_2 = 2;
 constexpr uint32_t NUM_3 = 3;
-namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;

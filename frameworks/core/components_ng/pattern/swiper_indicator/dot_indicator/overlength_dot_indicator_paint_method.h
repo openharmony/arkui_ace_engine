@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 constexpr uint32_t DISPLAY_COUNT_MIN = 6;
 constexpr uint32_t DISPLAY_COUNT_MAX = 9;
-constexpr uint32_t NUM_1 = 1;
+constexpr int32_t NUMBER_ONE = 1;
 class ACE_EXPORT OverlengthDotIndicatorPaintMethod : public DotIndicatorPaintMethod {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorPaintMethod, DotIndicatorPaintMethod)
 public:
@@ -56,7 +56,7 @@ public:
         if (maxDisplayCount >= DISPLAY_COUNT_MIN && maxDisplayCount <= DISPLAY_COUNT_MAX) {
             maxDisplayCount_ = maxDisplayCount;
             realItemCount_ = itemCount_;
-            itemCount_ = maxDisplayCount_ < itemCount_ ? maxDisplayCount_ + NUM_1 : itemCount_;
+            itemCount_ = maxDisplayCount_ < itemCount_ ? maxDisplayCount_ + NUMBER_ONE : itemCount_;
         }
     }
 

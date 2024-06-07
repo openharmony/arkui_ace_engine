@@ -411,10 +411,22 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<f
     const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
     TouchBottomTypeLoop touchBottomTypeLoop)
 {
-    StopAnimation();
+    StopAnimation(false);
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
+}
+void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
+{
+    DotIndicatorModifier::StopAnimation(ifImmediately);
+    longPointLeftAnimEnd_ = true;
+    longPointRightAnimEnd_ = true;
+    ifNeedFinishCallback_ = false;
+    newPointColor_->Set(LinearColor::TRANSPARENT);
+    leftSecondPointSizeRate_->Set(FIRST_FADING_RATIO);
+    leftThirdPointSizeRate_->Set(SECOND_FADING_RATIO);
+    rightSecondPointSizeRate_->Set(SECOND_FADING_RATIO);
+    rightFirstPointSizeRate_->Set(FIRST_FADING_RATIO);
 }
 } // namespace OHOS::Ace::NG

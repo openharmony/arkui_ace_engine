@@ -482,9 +482,10 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
+    SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
     return swiperParameters;
 }
-void JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
+void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
     const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme)
 {
     JSRef<JSVal> maskValue = obj->GetProperty("maskValue");

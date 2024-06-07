@@ -21,6 +21,8 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 namespace OHOS::Ace::NG {
+constexpr float ONE_IN_TWO = 0.5f;
+constexpr float THREE_QUARTERS = 0.75f;
 class OverlengthDotIndicatorModifier : public DotIndicatorModifier {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorModifier, DotIndicatorModifier);
 
@@ -94,6 +96,7 @@ private:
     void PlayPointOpacityAnimation();
     void UpdateDisplayProperty(const LinearVector<float>& vectorBlackPointCenterX,
         const float variableOffset);
+    void StopAnimation(bool ifImmediately) override;
     RefPtr<AnimatablePropertyFloat> theFirstPointMove_;
     RefPtr<AnimatablePropertyFloat> theSecondPointMove_;
     RefPtr<AnimatablePropertyFloat> theThirdPointMove_;

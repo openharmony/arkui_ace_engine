@@ -170,7 +170,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
     } else if (dotIndicatorModifier_->GetIsHover()) {
         if (!mouseClickIndex_.has_value()) {
             dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes,
-            vectorBlackPointCenterX_, longPointCenterX_);
+                vectorBlackPointCenterX_, longPointCenterX_);
         }
     } else {
         dotIndicatorModifier_->UpdateNormalToHoverPaintProperty(

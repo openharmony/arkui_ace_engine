@@ -50,8 +50,6 @@ constexpr float LOOP_TRANSLATE_DURATION_PERCENT = 0.5f;
 constexpr float LOOP_OPACITY_DURATION_PERCENT = 0.25f;
 constexpr uint8_t TARGET_ALPHA = 255;
 constexpr int32_t BLACK_POINT_DURATION = 400;
-constexpr float FIRST_FADING_RATIO = 0.5f;
-constexpr float SECOND_FADING_RATIO = 0.75f;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -841,10 +839,5 @@ void DotIndicatorModifier::StopAnimation(bool ifImmediately)
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
-    newPointColor_->Set(LinearColor::TRANSPARENT);
-    leftSecondPointSizeRate_->Set(FIRST_FADING_RATIO); 
-    leftThirdPointSizeRate_->Set(SECOND_FADING_RATIO);
-    rightSecondPointSizeRate_->Set(SECOND_FADING_RATIO);
-    rightFirstPointSizeRate_->Set(FIRST_FADING_RATIO);
 }
 } // namespace OHOS::Ace::NG

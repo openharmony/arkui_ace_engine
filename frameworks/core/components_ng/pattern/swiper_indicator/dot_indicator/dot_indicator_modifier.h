@@ -24,10 +24,10 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
-constexpr float ONE_IN_TWO = 0.5f;
-constexpr float THREE_QUARTERS = 0.75f;
-constexpr int32_t NUM_4 = 4;
 namespace OHOS::Ace::NG {
+constexpr int32_t ITEM_SIZE = 4;
+constexpr int32_t INIT_SIZE_RATE = 1.0f;
+
 enum class TouchBottomType {
     NONE = 0,
     START,
@@ -53,7 +53,7 @@ public:
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
-          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(NUM_4))),
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZE))),
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
@@ -101,10 +101,10 @@ public:
         float eighthPointMove = 0;
         float ninthPointMove = 0;
         float newPointMove = 0;
-        float leftSecondPointSizeRate = NUM_1;
-        float leftThirdPointSizeRate = NUM_1;
-        float rightSecondPointSizeRate = NUM_1;
-        float rightFirstPointSizeRate = NUM_1;
+        float leftSecondPointSizeRate = INIT_SIZE_RATE;
+        float leftThirdPointSizeRate = INIT_SIZE_RATE;
+        float rightSecondPointSizeRate = INIT_SIZE_RATE;
+        float rightFirstPointSizeRate = INIT_SIZE_RATE;
         Color firstPointColor = Color::TRANSPARENT;
         Color newPointColor = Color::TRANSPARENT;
     };
@@ -112,7 +112,7 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     virtual void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    virtual void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, 
+    virtual void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
         const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
@@ -288,7 +288,7 @@ public:
     virtual void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
         TouchBottomTypeLoop touchBottomTypeLoop);
-    void StopAnimation(bool ifImmediately = false);
+    virtual void StopAnimation(bool ifImmediately = false);
     void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
     {
         headCurve_ = curve;
