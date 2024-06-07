@@ -54,32 +54,33 @@ constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
-    TextDirection direction)
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<CalendarDialogPattern>());
     OperationsToPattern(contentColumn, settingData, dialogProperties, buttonInfos);
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateLayoutDirection(direction);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    RefPtr<DialogTheme> dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    PaddingProperty padding;
-    padding.top = CalcLength(theme->GetCalendarTitleRowTopPadding());
-    padding.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
-    layoutProperty->UpdatePadding(padding);
+
+    auto textDirection = layoutProperty->GetLayoutDirection();
+    if (settingData.entryNode.Upgrade() != nullptr) {
+        auto entryNode = settingData.entryNode.Upgrade();
+        textDirection = entryNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+        layoutProperty->UpdateLayoutDirection(textDirection);
+    }
 
     auto calendarNode = CreateCalendarNode(contentColumn, settingData, dialogEvent);
     CHECK_NULL_RETURN(calendarNode, nullptr);
+    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(calendarLayoutProperty, nullptr);
+    calendarLayoutProperty->UpdateLayoutDirection(textDirection);
+
     auto titleNode = CreateTitleNode(calendarNode);
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
-    titleLayoutProperty->UpdateLayoutDirection(direction);
+
+    titleLayoutProperty->UpdateLayoutDirection(textDirection);
     titleNode->MountToParent(contentColumn);
     calendarNode->MountToParent(contentColumn);
 
@@ -87,22 +88,8 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
-    dialogLayoutProperty->UpdateLayoutDirection(direction);
-
-    auto childNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
-    CHECK_NULL_RETURN(childNode, nullptr);
-    auto renderContext = childNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    if (dialogProperties.customStyle) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(DIALOG_WIDTH), std::nullopt));
-        BorderRadiusProperty radius;
-        radius.SetRadius(theme->GetDialogBorderRadius());
-        renderContext->UpdateBorderRadius(radius);
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    }
-    UpdateBackgroundStyle(renderContext, dialogProperties);
+    dialogLayoutProperty->UpdateLayoutDirection(textDirection);
+    CreateChildNode(contentColumn, dialogNode, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
         auto contentRow =
             CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
@@ -114,6 +101,36 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
+    const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties)
+{
+    auto layoutProperty = contentColumn->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<DialogTheme> dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    PaddingProperty padding;
+    padding.top = CalcLength(theme->GetCalendarTitleRowTopPadding());
+    padding.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    layoutProperty->UpdatePadding(padding);
+    auto childNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (dialogProperties.customStyle) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(DIALOG_WIDTH), std::nullopt));
+        BorderRadiusProperty radius;
+        radius.SetRadius(theme->GetDialogBorderRadius());
+        renderContext->UpdateBorderRadius(radius);
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    }
+    UpdateBackgroundStyle(renderContext, dialogProperties);
 }
 
 void CalendarDialogView::OperationsToPattern(
@@ -318,22 +335,19 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
     CHECK_NULL_RETURN(calendarNode, nullptr);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(calendarLayoutProperty, nullptr);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    MarginProperty margin = {
-        .left = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
-        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
-        .top = CalcLength(theme->GetDistanceBetweenTitleAndDate()),
-    };
-    calendarLayoutProperty->UpdateMargin(margin);
-    SetCalendarIdealSize(theme, calendarLayoutProperty);
+    InitCalendarProperty(calendarNode);
+
+    auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (settingData.entryNode.Upgrade() != nullptr) {
+        auto entryNode = settingData.entryNode.Upgrade();
+        textDirection = entryNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    }
 
     auto swiperNode = CreateCalendarSwiperNode();
     CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateLayoutDirection(textDirection);
     swiperNode->MountToParent(calendarNode);
 
     InitOnRequestDataEvent(calendarDialogNode, calendarNode);
@@ -361,6 +375,23 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
 
     swiperNode->MarkModifyDone();
     return calendarNode;
+}
+
+void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
+{
+    auto pipelineContext = calendarNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    MarginProperty margin = {
+        .left = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
+        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
+        .top = CalcLength(theme->GetDistanceBetweenTitleAndDate()),
+    };
+    calendarLayoutProperty->UpdateMargin(margin);
+    SetCalendarIdealSize(theme, calendarLayoutProperty);
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()

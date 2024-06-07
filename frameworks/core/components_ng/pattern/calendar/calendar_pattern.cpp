@@ -59,12 +59,18 @@ void CalendarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto hostNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto hostLayoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto textDirection = hostLayoutProperty->GetNonAutoLayoutDirection();
     auto swiperNode = host->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(swiperEventHub);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateLayoutDirection(textDirection);
     auto calendarEventHub = host->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(calendarEventHub);
     if (swiperFrameNode->GetChildren().size() < 3) {
@@ -108,22 +114,7 @@ void CalendarPattern::OnModifyDone()
         } else {
             initialize_ = false;
         }
-        auto requestDataCallBack = [weak = WeakClaim(this),
-                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto swiperEventHub = swiperEventHubWeak.Upgrade();
-            CHECK_NULL_VOID(swiperEventHub);
-            auto direction = swiperEventHub->GetDirection();
-            if (direction == NG::Direction::NEXT) {
-                pattern->FireRequestData(MonthState::NEXT_MONTH);
-                pattern->SetMoveDirection(NG::Direction::NEXT);
-            } else {
-                pattern->FireRequestData(MonthState::PRE_MONTH);
-                pattern->SetMoveDirection(NG::Direction::PRE);
-            }
-        };
-        swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
+        InitSwiperChangeDoneEvent();
         for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
             auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
             CHECK_NULL_VOID(calenderMonthFrameNode);
@@ -133,6 +124,7 @@ void CalendarPattern::OnModifyDone()
         return;
     }
 
+    InitSwiperChangeDoneEvent();
     // Check JumpTo and BackToToday function.
     if (backToToday_ || goTo_) {
         JumpTo(preFrameNode, currentFrameNode, nextFrameNode, swiperFrameNode);
@@ -185,6 +177,48 @@ void CalendarPattern::OnModifyDone()
         default:
             return;
     }
+}
+
+void CalendarPattern::InitSwiperChangeDoneEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto hostLayoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto textDirection = hostLayoutProperty->GetNonAutoLayoutDirection();
+
+    auto swiperNode = host->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
+    CHECK_NULL_VOID(swiperFrameNode);
+    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    auto requestDataCallBack = [weak = WeakClaim(this), textDirection,
+                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto swiperEventHub = swiperEventHubWeak.Upgrade();
+        CHECK_NULL_VOID(swiperEventHub);
+        auto direction = swiperEventHub->GetDirection();
+        if (textDirection == TextDirection::RTL && !pattern->isClickEvent_) {
+            if (direction == NG::Direction::NEXT) {
+                direction = NG::Direction::PRE;
+            } else {
+                direction = NG::Direction::NEXT;
+            }
+        }
+        pattern->isClickEvent_ = false;
+        if (direction == NG::Direction::NEXT) {
+            pattern->FireRequestData(MonthState::NEXT_MONTH);
+            pattern->SetMoveDirection(NG::Direction::NEXT);
+        } else {
+            pattern->FireRequestData(MonthState::PRE_MONTH);
+            pattern->SetMoveDirection(NG::Direction::PRE);
+        }
+    };
+    swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
 }
 
 void CalendarPattern::FireFirstRequestData()
