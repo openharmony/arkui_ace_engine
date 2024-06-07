@@ -249,6 +249,7 @@ public:
     virtual void AddTaskObserver(Task&& callback) = 0;
     virtual void RemoveTaskObserver() = 0;
     virtual bool WillRunOnCurrentThread(TaskType type) const = 0;
+    virtual void RemoveTask(TaskType type, const std::string &name) = 0;
 
     virtual int32_t GetTid(TaskType type)
     {
