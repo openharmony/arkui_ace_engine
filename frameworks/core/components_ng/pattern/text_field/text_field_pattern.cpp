@@ -1507,6 +1507,11 @@ void TextFieldPattern::HandleOnPaste()
         textfield->CloseSelectOverlay(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "previewLongPress_: [%{public}d]", textfield->previewLongPress_);
+        if (textfield->previewLongPress_) {
+            textfield->RequestKeyboard(false, true, true);
+            textfield->previewLongPress_ = false;
+        }
     };
     CHECK_NULL_VOID(clipboard_);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste");
@@ -1594,6 +1599,10 @@ void TextFieldPattern::HandleOnCut()
     UpdateSelection(start);
     CloseSelectOverlay(true);
     StartTwinkling();
+    if (previewLongPress_) {
+        RequestKeyboard(false, true, true);
+        previewLongPress_ = false;
+    }
     HandleDeleteOnCounterScene();
 
     auto host = GetHost();
@@ -1652,9 +1661,10 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         OnCaretMoveDone(info);
-        if (isEdit_) {
+        if (!previewLongPress_) {
             RequestKeyboardAfterLongPress();
         }
+        isLongPress_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         if (isLongPress_) {
@@ -2925,6 +2935,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
+    if (!isEdit_) {
+        previewLongPress_ = true;
+    }
     UpdateParam(info, shouldProcessOverlayAfterLayout);
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
@@ -7491,7 +7504,7 @@ void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
 
 void TextFieldPattern::OnCaretMoveDone(const TouchEventInfo& info)
 {
-    if (IsSelected()) {
+    if (previewLongPress_) {
         // shall show menu, keep handles.
         SetIsSingleHandle(!IsSelected());
         ProcessOverlay({ .menuIsShow = true, .animation = false});
