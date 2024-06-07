@@ -1556,8 +1556,13 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
+        // haven't find page by named route's name. Try again with its page path.
+        if (pageInfo.second == nullptr && info.isNamedRouterMode) {
+            std::string pagePath = Framework::JsiDeclarativeEngine::GetPagePath(info.url);
+            pageInfo = FindPageInStack(pagePath);
+        }
         if (pageInfo.first == popIndex) {
-            // replace top self in SINGLE mode, do nothing
+            // replace top self in SINGLE mode, do nothing.
             return;
         }
         if (pageInfo.second) {
