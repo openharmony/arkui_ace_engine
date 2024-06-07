@@ -134,6 +134,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void UpdateGeometryTransition() override;
+
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
@@ -475,8 +477,7 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    void ApplyGeometryTransition() override;
-    bool MarkRemoving(bool applyGeometryTransition = true) override;
+    bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
