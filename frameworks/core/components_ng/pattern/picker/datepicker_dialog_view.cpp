@@ -290,8 +290,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
         margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
         buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     } else {
-        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+        if (!NeedadaptForAging()) {
+            buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+                CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+        }
     }
     textTitleNode->MountToParent(titleButtonRow);
     titleButtonRow->MountToParent(buttonTitleNode);
@@ -1458,8 +1460,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
         margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         layoutProps->UpdateMargin(margin);
-        layoutProps->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
+        if (!NeedadaptForAging()) {
+            layoutProps->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
+        }
     }
 
     buttonTitleNode->MountToParent(contentColumn);
