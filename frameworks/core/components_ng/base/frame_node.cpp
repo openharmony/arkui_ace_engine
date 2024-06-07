@@ -884,6 +884,20 @@ void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
     }
 }
 
+void FrameNode::UpdateGeometryTransition()
+{
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition) {
+        layoutProperty_->UpdateGeometryTransition("");
+        layoutProperty_->UpdateGeometryTransition(geometryTransition->GetId());
+        MarkDirtyNode();
+    }
+    auto children = GetChildren();
+    for (const auto& child: children) {
+        child->UpdateGeometryTransition();
+    }
+}
+
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
     eventHub_->FireOnAttach();
@@ -896,14 +910,6 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-    if (GetNodeStatus() == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
-        const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-        if (geometryTransition) {
-            layoutProperty_->UpdateGeometryTransition("");
-            layoutProperty_->UpdateGeometryTransition(geometryTransition->GetId());
-            MarkDirtyNode();
-        }
     }
     UINode::OnAttachToMainTree(recursive);
     auto context = GetContext();
@@ -2669,24 +2675,7 @@ void FrameNode::OnReuse()
     }
 }
 
-void FrameNode::ApplyGeometryTransition()
-{
-    if (!layoutProperty_ || !geometryNode_) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
-    }
-
-    const auto& children = GetChildren();
-    for (const auto& child : children) {
-        child->ApplyGeometryTransition();
-    }
-}
-
-bool FrameNode::MarkRemoving(bool applyGeometryTransition)
+bool FrameNode::MarkRemoving()
 {
     bool pendingRemove = false;
     if (!layoutProperty_ || !geometryNode_) {
@@ -2697,15 +2686,13 @@ bool FrameNode::MarkRemoving(bool applyGeometryTransition)
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        if (applyGeometryTransition) {
-            geometryTransition->Build(WeakClaim(this), false);
-        }
+        geometryTransition->Build(WeakClaim(this), false);
         pendingRemove = true;
     }
 
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving(applyGeometryTransition) || pendingRemove;
+        pendingRemove = child->MarkRemoving() || pendingRemove;
     }
     return pendingRemove;
 }
