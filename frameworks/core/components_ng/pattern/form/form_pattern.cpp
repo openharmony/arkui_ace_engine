@@ -212,7 +212,8 @@ void FormPattern::HandleUnTrustForm()
     isUnTrust_ = true;
     isLoaded_ = true;
     if (!isJsCard_) {
-        LoadFormSkeleton();
+        RequestFormInfo info;
+        LoadFormSkeleton(false, info);
     }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -656,9 +657,11 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         EnableDrag();
     }
 
+#if OHOS_STANDARD_SYSTEM
     if (!isJsCard_) {
-        LoadFormSkeleton();
+        LoadFormSkeleton(formInfo.transparencyEnabled, info);
     }
+#endif
 
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
@@ -813,8 +816,12 @@ void FormPattern::LoadDisableFormStyle()
     layoutProperty->UpdateVisibility(visible);
 }
 
-void FormPattern::LoadFormSkeleton()
+void FormPattern::LoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info)
 {
+    if (!ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
+        return;
+    }
+
     TAG_LOGI(AceLogTag::ACE_FORM, "LoadFormSkeleton");
     int32_t dimension = cardInfo_.dimension;
     int32_t dimensionHeight = GetFormDimensionHeight(dimension);
@@ -854,6 +861,36 @@ void FormPattern::LoadFormSkeleton()
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
     layoutProperty->UpdateVisibility(visible);
+}
+
+bool FormPattern::ShouldLoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info)
+{
+    auto wantWrap = info.wantWrap;
+    if (isUnTrust_) {
+        return true;
+    }
+
+    if (!wantWrap ||
+        !wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, not enable.");
+        return false;
+    }
+
+    if (isTransparencyEnabled) {
+        auto color = wantWrap->GetWant().GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+        Color bgColor;
+        if (Color::ParseColorString(color, bgColor) && bgColor == Color::TRANSPARENT) {
+            TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, bgColor: %{public}s", color.c_str());
+            return false;
+        }
+    }
+
+    if (info.renderingMode ==
+        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, single mode.");
+        return false;
+    }
+    return true;
 }
 
 int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
