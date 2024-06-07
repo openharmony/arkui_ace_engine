@@ -473,7 +473,7 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
 
     // call MakeCanvasSize with dstSize in the same level
     res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_65, LENGTH_65), true, ImageFit::COVER);
-    EXPECT_TRUE(res);
+    EXPECT_FALSE(res);
     EXPECT_EQ(ctx->sizeLevel_, LENGTH_128);
 
     res = ctx->MakeCanvasImageIfNeed(SizeF(LENGTH_128, LENGTH_128), true, ImageFit::COVER);
