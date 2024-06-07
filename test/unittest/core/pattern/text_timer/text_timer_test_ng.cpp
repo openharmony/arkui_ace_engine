@@ -484,7 +484,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
     EXPECT_EQ(pattern->GetFormatDuration(duration), hourOfMinute);
     EXPECT_EQ(pattern->GetMillisecondsDuration(1), secondsOfMillisecond * minuteOfSeconds);
 
-    format = "hh";
+    format = "HH";
     textTimerProperty->UpdateFormat(format);
     EXPECT_EQ(pattern->GetFormatDuration(duration), 1);
     EXPECT_EQ(pattern->GetMillisecondsDuration(1), duration);
