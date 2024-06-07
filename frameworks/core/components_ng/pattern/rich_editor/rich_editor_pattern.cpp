@@ -2124,7 +2124,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectOverlay_->ShowMenu();
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
         return;
     }
 
@@ -7160,6 +7160,40 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
     json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+}
+
+std::string RichEditorPattern::GetPlaceHolderInJson() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    bool hasPlaceHolder = layoutProperty && layoutProperty->HasPlaceholder()
+        && !layoutProperty->GetPlaceholder().value().empty();
+    CHECK_NULL_RETURN(hasPlaceHolder, "");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("value", layoutProperty->GetPlaceholderValue("").c_str());
+    auto jsonFont = JsonUtil::Create(true);
+    jsonFont->Put("size", GetFontSizeInJson(layoutProperty->GetPlaceholderFontSize()).c_str());
+    jsonFont->Put("weight", GetFontWeightInJson(layoutProperty->GetPlaceholderFontWeight()).c_str());
+    jsonFont->Put("family", GetFontFamilyInJson(layoutProperty->GetPlaceholderFontFamily()).c_str());
+    jsonFont->Put("style", GetFontStyleInJson(layoutProperty->GetPlaceholderItalicFontStyle()).c_str());
+    auto jsonStyle = JsonUtil::Create(true);
+    jsonStyle->Put("font", jsonFont->ToString().c_str());
+    jsonStyle->Put("fontColor", GetTextColorInJson(layoutProperty->GetPlaceholderTextColor()).c_str());
+    jsonValue->Put("style", jsonStyle->ToString().c_str());
+    return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+std::string RichEditorPattern::GetTextColorInJson(const std::optional<Color>& value) const
+{
+    CHECK_NULL_RETURN(!value, value->ColorToString());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, "");
+    Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
+    return textColor.ColorToString();
 }
 
 void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
