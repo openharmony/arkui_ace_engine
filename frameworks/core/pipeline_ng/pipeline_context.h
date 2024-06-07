@@ -395,7 +395,7 @@ public:
         return isTabJustTriggerOnKeyEvent_;
     }
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }

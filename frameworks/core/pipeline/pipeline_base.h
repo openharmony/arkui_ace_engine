@@ -1257,6 +1257,8 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    virtual bool GetOnShow() const = 0;
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

@@ -786,7 +786,7 @@ public:
 
     void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }

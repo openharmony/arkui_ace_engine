@@ -97,6 +97,10 @@ void AnimationUtils::OpenImplicitAnimation(
 bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
     return !animations.empty();
 }
 
@@ -113,6 +117,10 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback,
         wrappedOnFinish, wrappedOnRepeat);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
 }
 
 void AnimationUtils::AnimateWithCurrentOptions(
