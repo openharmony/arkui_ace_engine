@@ -238,6 +238,20 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
     return FlexAlign::AUTO;
 }
 
+inline std::string ConvertItemAlignToStirng(WrapAlignment align)
+{
+    static const LinearEnumMapNode<WrapAlignment, std::string> itemAlignTable[] = {
+        { WrapAlignment::START, "ItemAlign.Start" },
+        { WrapAlignment::CENTER, "ItemAlign.Center" },
+        { WrapAlignment::END, "ItemAlign.End" },
+        { WrapAlignment::STRETCH, "ItemAlign.Stretch" },
+        { WrapAlignment::BASELINE, "ItemAlign.Baseline" },
+    };
+
+    auto index = BinarySearchFindIndex(itemAlignTable, ArraySize(itemAlignTable), align);
+    return index < 0 ? "ItemAlign.Auto" : itemAlignTable[index].value;
+}
+
 inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
 {
     if (align == WrapAlignment::START) {
