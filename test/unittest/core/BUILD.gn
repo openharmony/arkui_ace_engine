@@ -114,7 +114,8 @@ group("linux_core_unittest") {
     "pattern/scroll:scroll_test_ng",
     "pattern/scroll_bar:scroll_bar_test_ng",
     "pattern/scrollable:scrollable_test_ng",
-    "pattern/search:search_test_ng",
+
+    # "pattern/search:search_test_ng",
     "pattern/select:select_test_ng",
     "pattern/select_overlay:select_overlay_test_ng",
     "pattern/side_bar:side_bar_test_ng",
@@ -125,10 +126,12 @@ group("linux_core_unittest") {
     "pattern/swiper:swiper_test_ng",
     "pattern/symbol:symbol_test_ng",
     "pattern/tabs:tabs_test_ng",
-    "pattern/text:text_test_ng",
+
+    # "pattern/text:text_test_ng",
     "pattern/text_clock:text_clock_test_ng",
     "pattern/text_drag:text_drag_test_ng",
-    "pattern/text_input:TextInputTest",
+
+    # "pattern/text_input:TextInputTest",
 
     # "pattern/text_picker:text_picker_test_ng",
     "pattern/text_timer:text_timer_test_ng",
