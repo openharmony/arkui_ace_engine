@@ -472,6 +472,11 @@ public:
         destroyCallbacks_.emplace_back(callback);
     }
 
+    std::list<std::function<void()>> GetDestroyCallback() const
+    {
+        return destroyCallbacks_;
+    }
+
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
