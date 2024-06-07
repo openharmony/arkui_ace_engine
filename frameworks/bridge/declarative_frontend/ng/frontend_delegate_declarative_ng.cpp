@@ -164,7 +164,6 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
     }
     jsAccessibilityManager_->AddSubPipelineContext(context);
     jsAccessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
-
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
