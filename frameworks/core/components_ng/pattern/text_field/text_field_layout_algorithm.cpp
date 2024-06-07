@@ -74,7 +74,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
-    
+
+    UpdateTextFadeoutTextStyle(frameNode, textFieldTheme, textStyle);
+
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -167,6 +169,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
             static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
         inlineMeasureItem_.inlineScrollRectOffsetX = contentWidth
             + pattern->GetHorizontalPaddingAndBorderSum() - inlineContentWidth - safeBoundary - PARAGRAPH_SAVE_BOUNDARY;
+        UpdateParagraphTextFadeoutWidth(contentConstraint, frameNode);
     }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
@@ -282,6 +285,8 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
     CounterNodeMeasure(contentWidth, layoutWrapper);
+
+    UpdateParagraphTextFadeoutWidth(contentConstraint, layoutWrapper->GetHostNode());
 
     auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
                       ? paragraph_->GetHeight()
@@ -845,6 +850,9 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
+    if (textStyle.HasHeightOverride()) {
+        return AdaptFontSizeForLineHeight(textStyle, layoutProperty, contentConstraint, layoutWrapper);
+    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -877,6 +885,35 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
             break;
     }
     return result;
+}
+
+bool TextFieldLayoutAlgorithm::IsNeedAdaptFontSize(const TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint)
+{
+    if (!textStyle.GetAdaptTextSize()) {
+        return false;
+    }
+    auto adaptivePolicy = layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    if ((adaptivePolicy != TextHeightAdaptivePolicy::MAX_LINES_FIRST) &&
+        (adaptivePolicy != TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST) &&
+        (adaptivePolicy != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
+        return false;
+    }
+    return TextAdaptFontSizer::IsNeedAdaptFontSize(textStyle, contentConstraint);
+}
+
+bool TextFieldLayoutAlgorithm::AdaptFontSizeForLineHeight(TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper)
+{
+    auto keepLineHeight = textStyle.GetLineHeight();
+    textStyle.SetLineHeight(Dimension(), false);
+    bool result = AddAdaptFontSizeAndAnimations(textStyle, layoutProperty, contentConstraint, layoutWrapper);
+    textStyle.SetLineHeight(keepLineHeight);
+    if (!result) {
+        return result;
+    }
+    return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
 }
 
 bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content,
@@ -1099,6 +1136,32 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     }
     if (layoutProperty->HasLineSpacing()) {
         placeholderTextStyle.SetLineSpacing(layoutProperty->GetLineSpacing().value());
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextFadeoutTextStyle(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+
+    if (theme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity()) {
+        textStyle.SetTextOverflow(TextOverflow::CLIP);
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateParagraphTextFadeoutWidth(
+    const LayoutConstraintF& contentConstraint, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (textFieldTheme->TextFadeoutEnabled() && pattern->GetTextFadeoutCapacity()) {
+        paragraph_->Layout(std::numeric_limits<double>::infinity());
+        paragraph_->Layout(std::ceil(paragraph_->GetLongestLine()));
     }
 }
 

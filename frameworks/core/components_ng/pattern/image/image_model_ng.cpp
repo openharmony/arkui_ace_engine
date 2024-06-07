@@ -74,7 +74,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
             V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     }
     stack->Push(frameNode);
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (src.empty() && !pixMap && pattern->GetIsAnimation()) {
         pattern->SetSrcUndefined(true);
@@ -83,7 +83,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
 
     // set draggable for framenode
     if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto draggable = pipeline->GetDraggable<ImageTheme>();
         if (draggable && !frameNode->IsDraggable()) {
@@ -148,7 +148,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     }
     stack->Push(frameNode);
 
-    auto pattern = GetImagePattern();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->GetIsAnimation()) {
         auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
@@ -249,6 +249,11 @@ void ImageModelNG::SetBorder(const Border &border) {}
 void ImageModelNG::SetBackBorder()
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedBorderRadius(true);
 }
 
 void ImageModelNG::SetBackBorder(FrameNode *frameNode)
@@ -502,14 +507,10 @@ void ImageModelNG::SetAutoResize(FrameNode *frameNode, bool autoResize)
 void ImageModelNG::ResetAutoResize(FrameNode *frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto autoResize = true;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        !container->IsScenceBoardWindow()) {
-        autoResize = false;
-    }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize, frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    auto defaultAutoResize = imagePattern->GetDefaultAutoResize();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, defaultAutoResize, frameNode);
 }
 
 void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
@@ -584,14 +585,10 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolatio
 void ImageModelNG::ResetImageInterpolation(FrameNode *frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto interpolationDefault = ImageInterpolation::NONE;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        !container->IsScenceBoardWindow()) {
-        interpolationDefault = ImageInterpolation::LOW;
-    }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolationDefault, frameNode);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    auto defaultInterpolation = imagePattern->GetDefaultInterpolation();
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, defaultInterpolation, frameNode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
@@ -633,6 +630,13 @@ void ImageModelNG::SetImageAnalyzerConfig(void* config)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
+}
+
+void ImageModelNG::SetImageAIOptions(void* options)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAIOptions(options);
 }
 
 bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
@@ -694,10 +698,13 @@ ImageFit ImageModelNG::GetObjectFit(FrameNode* frameNode)
 ImageInterpolation ImageModelNG::GetInterpolation(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, ImageInterpolation::NONE);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, ImageInterpolation::NONE);
+    auto defaultInterpolation = imagePattern->GetDefaultInterpolation();
     auto paintProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, ImageInterpolation::NONE);
-    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageInterpolation::NONE);
-    return paintProperty->GetImagePaintStyle()->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    CHECK_NULL_RETURN(paintProperty, defaultInterpolation);
+    CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), defaultInterpolation);
+    return paintProperty->GetImagePaintStyle()->GetImageInterpolation().value_or(defaultInterpolation);
 }
 
 ImageRepeat ImageModelNG::GetObjectRepeat(FrameNode* frameNode)
@@ -730,10 +737,13 @@ RefPtr<DrawingColorFilter> ImageModelNG::GetDrawingColorFilter(FrameNode* frameN
 bool ImageModelNG::GetAutoResize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, true);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, true);
+    auto defaultAutoResize = imagePattern->GetDefaultAutoResize();
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, true);
-    CHECK_NULL_RETURN(layoutProperty->GetImageSizeStyle(), true);
-    return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(true);
+    CHECK_NULL_RETURN(layoutProperty, defaultAutoResize);
+    CHECK_NULL_RETURN(layoutProperty->GetImageSizeStyle(), defaultAutoResize);
+    return layoutProperty->GetImageSizeStyle()->GetAutoResize().value_or(defaultAutoResize);
 }
 
 ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)

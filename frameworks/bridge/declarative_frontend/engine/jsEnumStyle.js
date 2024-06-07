@@ -3042,10 +3042,12 @@ var ControlSize;
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
   ControlSize[ControlSize["NORMAL"] = 1] = "NORMAL";
 })(ControlSize || (ControlSize = {}));
+
 var ImageAnalyzerType;
 (function (ImageAnalyzerType) {
   ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
   ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
+  ImageAnalyzerType[ImageAnalyzerType["OBJECT_LOOKUP"] = 2] = "OBJECT_LOOKUP";
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
 function wrapBuilder(builder) {
@@ -3185,3 +3187,23 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+class ImageAnalyzerController {
+  constructor() {
+  }
+
+  registerSupportTypesAction(getSupportTypesAction) {
+    this.getSupportTypesAction = getSupportTypesAction;
+  }
+
+  unRegisterSupportTypesAction() {
+    this.getSupportTypesAction = null;
+  }
+
+  getImageAnalyzerSupportTypes() {
+    if (this.getSupportTypesAction === null || this.getSupportTypesAction === undefined) {
+      return null;
+    }
+    return this.getSupportTypesAction();
+  }
+}

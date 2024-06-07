@@ -189,10 +189,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateCalendarNodeChild(int32_t content
     padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
     padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
     linearLayoutProperty->UpdatePadding(padding);
-
-    if (textDirection == TextDirection::RTL) {
-        linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
-    }
+    linearLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 
     CreateDateNode(contentId, settingData);
     contentNode->MarkModifyDone();
@@ -280,8 +277,12 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
 
 void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType);
-    ACE_UPDATE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetCalendarEdgeAlign(alignType);
+    pickerPattern->SetCalendarDialogOffset(offset);
 }
 
 void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
@@ -396,8 +397,12 @@ DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
 void CalendarPickerModelNG::SetEdgeAlign(
     FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetCalendarEdgeAlign(alignType);
+    pickerPattern->SetCalendarDialogOffset(offset);
 }
 
 void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)

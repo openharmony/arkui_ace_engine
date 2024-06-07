@@ -41,6 +41,7 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
+#include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -96,6 +97,7 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
+constexpr uint32_t DENSITY_KEY = 0b0100;
 constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
@@ -928,7 +930,16 @@ void AceContainer::InitializeCallback()
     auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        auto callback = [context, density]() { context->OnSurfaceDensityChanged(density); };
+        auto callback = [context, density, id]() {
+            context->OnSurfaceDensityChanged(density);
+            if (context->IsDensityChanged()) {
+                auto container = Container::GetContainer(id);
+                CHECK_NULL_VOID(container);
+                auto aceContainer = DynamicCast<AceContainer>(container);
+                CHECK_NULL_VOID(aceContainer);
+                aceContainer->NotifyDensityUpdate();
+            }
+        };
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
@@ -1362,20 +1373,45 @@ bool AceContainer::RequestAutoFill(
 
 class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
 public:
-    SaveRequestCallback() = default;
+    SaveRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const std::function<void()>& onFinish)
+        : pipelineContext_(pipelineContext), onFinish_(onFinish) {}
     virtual ~SaveRequestCallback() = default;
     void OnSaveRequestSuccess() override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        ProcessOnFinish();
     }
 
     void OnSaveRequestFailed() override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        ProcessOnFinish();
     }
+
+    void ProcessOnFinish()
+    {
+        if (!onFinish_) {
+            return;
+        }
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [onFinish = std::move(onFinish_)]() mutable {
+                if (onFinish) {
+                    onFinish();
+                    onFinish = nullptr;
+                }
+            },
+            TaskExecutor::TaskType::UI, "ProcessOnFinish");
+    }
+private:
+    WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
+    std::function<void()> onFinish_;
 };
 
-bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1385,7 +1421,9 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     uiContentImpl->DumpViewData(node, viewDataWrap);
 
-    auto callback = std::make_shared<SaveRequestCallback>();
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto callback = std::make_shared<SaveRequestCallback>(pipelineContext, onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -2045,6 +2083,14 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> MaximizeMode {
             return static_cast<MaximizeMode>(window->GetGlobalMaximizeMode());
         });
+    windowManager->SetGetSystemBarStyleCallBack(
+        [window = uiWindow_]() -> RefPtr<SystemBarStyle> {
+            return SystemBarStyleOhos::GetCurrentSystemBarStyle(window);
+        });
+    windowManager->SetSetSystemBarStyleCallBack(
+        [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
+            SystemBarStyleOhos::SetSystemBarStyle(window, style);
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -2667,7 +2713,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 }
 
 bool AceContainer::GetCurPointerEventInfo(
-    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     CHECK_NULL_RETURN(currentPointerEvent_, false);
@@ -2678,6 +2725,7 @@ bool AceContainer::GetCurPointerEventInfo(
     sourceType = currentPointerEvent_->GetSourceType();
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
+    sourceTool = pointerItem.GetToolType();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -2882,5 +2930,22 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
         container->HotReload();
 #endif
     });
+}
+
+void AceContainer::NotifyDensityUpdate()
+{
+    auto themeManager = pipelineContext_->GetThemeManager();
+    bool fullUpdate = true;
+    if (!themeManager || (themeManager->GetResourceLimitKeys() & DENSITY_KEY) == 0) {
+        fullUpdate = false;
+    }
+
+    auto frontend = GetFrontend();
+    if (frontend) {
+        frontend->FlushReload();
+    }
+
+    ConfigurationChange configurationChange { .dpiUpdate = true };
+    pipelineContext_->FlushReload(configurationChange, fullUpdate);
 }
 } // namespace OHOS::Ace::Platform

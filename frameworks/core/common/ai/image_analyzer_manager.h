@@ -41,6 +41,7 @@ public:
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
     void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
+    void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
 
 private:

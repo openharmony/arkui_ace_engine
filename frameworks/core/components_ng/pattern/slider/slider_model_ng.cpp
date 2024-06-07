@@ -324,7 +324,7 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
@@ -359,7 +359,7 @@ void SliderModelNG::SetBlockSize(FrameNode* frameNode, const Dimension& width, c
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     SizeT<Dimension> blockSize;
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -741,7 +741,7 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, defaultTrackThickness);
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultTrackThickness);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, defaultTrackThickness);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, defaultTrackThickness);

@@ -106,6 +106,7 @@ void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
 {
     SwiperModelNG model;
     model.Create();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
     ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     if (callback) {
@@ -932,7 +933,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper002, TestSize.Level
             }
             pattern_->mainSizeIsMeasured_ = true;
         }
-        pattern_->isNeedResetPrevMarginAndNextMargin_ = true;
     }
 }
 
@@ -2055,6 +2055,7 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });

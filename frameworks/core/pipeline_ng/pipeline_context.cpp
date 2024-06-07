@@ -1135,6 +1135,7 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform)
             callback(transform);
         }
     }
+    transform_ = transform;
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1436,8 +1437,6 @@ void PipelineContext::CheckVirtualKeyboardHeight()
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
-    dirtyNodes_.erase(uiNode);
-
     auto frameNode = DynamicCast<FrameNode>(uiNode);
 
     CHECK_NULL_VOID(frameNode);
@@ -1858,6 +1857,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
+    eventManager_->CheckDownEvent(scalePoint);
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
@@ -2635,7 +2635,6 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
     CHECK_NULL_VOID(overlayManager_);
     overlayManager_->HideAllMenus();
-    overlayManager_->HideCustomPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)
@@ -2939,14 +2938,14 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     containerPattern->SetAppIcon(icon);
 }
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange)
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate)
 {
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
-        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_))]() {
+        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         if (configurationChange.IsNeedUpdate()) {
@@ -2957,11 +2956,13 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
                 overlay->ReloadBuilderNodeConfig();
             }
         }
-        CHECK_NULL_VOID(pipeline->stageManager_);
-        pipeline->SetIsReloading(true);
-        pipeline->stageManager_->ReloadStage();
-        pipeline->SetIsReloading(false);
-        pipeline->FlushUITasks();
+        if (fullUpdate) {
+            CHECK_NULL_VOID(pipeline->stageManager_);
+            pipeline->SetIsReloading(true);
+            pipeline->stageManager_->ReloadStage();
+            pipeline->SetIsReloading(false);
+            pipeline->FlushUITasks();
+        }
     });
 }
 
@@ -3712,6 +3713,11 @@ bool PipelineContext::IsContainerModalVisible()
     return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
 }
 
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    FlushVsync(nanoTimestamp, frameCount);
+}
+
 void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type)
 {
     eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
@@ -3777,6 +3783,7 @@ void PipelineContext::RegisterFocusCallback()
     focusManager_->AddFocusListener([](const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current) {
         CHECK_NULL_VOID(current);
         auto node = current->GetFrameNode();
+        CHECK_NULL_VOID(node);
         InputMethodManager::GetInstance()->OnFocusNodeChange(node);
     });
 }

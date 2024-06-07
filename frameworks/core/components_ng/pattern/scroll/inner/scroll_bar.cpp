@@ -97,9 +97,10 @@ BarDirection ScrollBar::CheckBarDirection(const Point& point)
     auto pointOffset = OffsetF(point.GetX(), point.GetY());
     auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
     auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
-    if (pointOffset.GetMainOffset(axis_) < scrollBarTopOffset.GetMainOffset(axis_)) {
+    auto axis = positionMode_ == PositionMode::BOTTOM ? Axis::HORIZONTAL : Axis::VERTICAL;
+    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
         return BarDirection::PAGE_UP;
-    } else if (pointOffset.GetMainOffset(axis_) > scrollBarBottomOffset.GetMainOffset(axis_)) {
+    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
         return BarDirection::PAGE_DOWN;
     } else {
         return BarDirection::BAR_NONE;

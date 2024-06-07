@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
@@ -64,6 +65,7 @@ public:
     }
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

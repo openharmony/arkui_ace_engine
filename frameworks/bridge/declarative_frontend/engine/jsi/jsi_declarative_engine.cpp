@@ -50,6 +50,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
@@ -109,6 +110,7 @@ const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 #ifdef PREVIEW
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
 #endif
+constexpr uint32_t MAX_STRING_CACHE_SIZE = 100;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -374,6 +376,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             LOGD("init ace module for dynamic component");
             auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
             LocalScope scope(vm);
+            RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
             // preload js views
             JsRegisterViews(JSNApi::GetGlobalObject(vm));
 
@@ -461,6 +464,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     localRuntime_ = arkRuntime;
     LocalScope scope(vm);
 
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
@@ -503,6 +507,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         globalRuntime_ = arkRuntime;
     }
 
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
     JsRegisterViews(JSNApi::GetGlobalObject(vm), runtime);
 
@@ -647,6 +652,7 @@ void JsiDeclarativeEngineInstance::InitJsContextModuleObject()
 void JsiDeclarativeEngineInstance::InitGlobalObjectTemplate()
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    RegisterStringCacheTable(runtime->GetEcmaVm(), MAX_STRING_CACHE_SIZE);
     JsRegisterViews(JSNApi::GetGlobalObject(runtime->GetEcmaVm()), reinterpret_cast<void*>(nativeEngine_));
 }
 
@@ -1003,6 +1009,7 @@ napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeI
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, std::string> JsiDeclarativeEngine::routerPathInfoMap_;
 thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
@@ -1588,12 +1595,30 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
         LocalScope scope(vm);
         name = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
     }
+    std::string pageFullPath;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString()) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
+        }
+    }
     NamedRouterProperty namedRouterProperty({ pageGenerator, name,
         moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
         ret.first->second.pageGenerator.FreeGlobalHandleAddr();
         namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
+    }
+    auto pagePathKey = moduleName->ToString(vm)->ToString() + pagePath->ToString(vm)->ToString();
+    auto pageRet = routerPathInfoMap_.insert(std::make_pair(pagePathKey, pageFullPath));
+    if (!pageRet.second) {
+        routerPathInfoMap_[pagePathKey] = pageFullPath;
+    }
+    if (!namedRoute.empty()) {
+        auto ret = routerPathInfoMap_.insert(std::make_pair(namedRoute, pageFullPath));
+        if (!ret.second) {
+            routerPathInfoMap_[namedRoute] = pageFullPath;
+        }
     }
 }
 
@@ -2164,6 +2189,15 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
     return "";
 }
 
+std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
+{
+    auto iter = routerPathInfoMap_.find(url);
+    if (iter != routerPathInfoMap_.end()) {
+        return iter->second;
+    }
+    return "";
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
 #ifdef USE_ARK_ENGINE
@@ -2392,6 +2426,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         globalRuntime_ = arkRuntime;
     }
 
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, false, runtime);
     // preload aceConsole
@@ -2453,11 +2488,45 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
         return;
     }
     LocalScope scope(vm);
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif
+
+panda::Local<panda::StringRef> JsiDeclarativeEngineInstance::GetCachedString(const EcmaVM *vm, int32_t propertyIndex)
+{
+    return panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+}
+
+void JsiDeclarativeEngineInstance::SetCachedString(const EcmaVM* vm)
+{
+    #define REGISTER_ALL_CACHE_STRING(name, index)              \
+        panda::ExternalStringCache::SetCachedString(vm, name, static_cast<int32_t>(ArkUIIndex::index));
+    ARK_UI_KEY(REGISTER_ALL_CACHE_STRING)
+    #undef REGISTER_ALL_CACHE_STRING
+}
+
+bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, int32_t size)
+{
+    if (vm == nullptr) {
+        return false;
+    }
+    if (size > MAX_STRING_CACHE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table is oversize");
+        return false;
+    }
+
+    bool res = panda::ExternalStringCache::RegisterStringCacheTable(vm, size);
+    if (!res) {
+        TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table has been registered");
+        return false;
+    }
+    SetCachedString(vm);
+    return true;
+}
+
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

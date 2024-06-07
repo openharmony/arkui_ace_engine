@@ -391,4 +391,17 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
         return;
     }
 }
+
+napi_env GetCurrentEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return nullptr;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return nullptr;
+    }
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
 } // namespace OHOS::Ace::Framework

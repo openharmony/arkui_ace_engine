@@ -102,6 +102,7 @@ JSRef<JSVal> JsNavigationTransitionProxy::ConvertContentInfo(RefPtr<NG::NavDesti
     value->SetProperty<std::string>("name", info->GetName());
     value->SetProperty<int32_t>("index", context->GetIndex());
     value->SetProperty<int32_t>("mode", static_cast<int32_t>(context->GetMode()));
+    value->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
     auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
     if (jsPathInfo) {
         value->SetPropertyObject("param", jsPathInfo->GetParam());

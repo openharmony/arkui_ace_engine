@@ -161,14 +161,39 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     return arkUINode;
 }
 
+void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
+{
+    CHECK_NULL_VOID(nativePtr);
+    if (nativePtr->customEventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+        nativePtr->customEventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->customEventListeners = nullptr;
+    }
+    if (nativePtr->eventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(
+        nativePtr->eventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->eventListeners = nullptr;
+    }
+}
+
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
     delete nativePtr;
+    nativePtr = nullptr;
 }
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
@@ -250,6 +275,9 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
+    if (node == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (node->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -258,6 +286,9 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    if (node == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (node->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -266,6 +297,9 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    if (node == nullptr) {
+        return nullptr;
+    }
     return GetNodeAttribute(node, attribute);
 }
 
@@ -276,7 +310,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
-    if (!nodePtr) {
+    if (nodePtr == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
@@ -327,6 +361,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
+    if (nodePtr == nullptr) {
+        return;
+    }
     if (!nodePtr->extraData) {
         return;
     }

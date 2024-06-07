@@ -145,6 +145,8 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override {};
 
+    void PreLayout() override {};
+    
     void SetStatusBarItemColor(uint32_t color) override;
 
 private:

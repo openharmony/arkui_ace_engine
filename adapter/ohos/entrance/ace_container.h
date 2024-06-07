@@ -351,7 +351,7 @@ public:
         return isSubContainer_;
     }
 
-    bool IsFormRender() const
+    bool IsFormRender() const override
     {
         return isFormRender_;
     }
@@ -474,7 +474,7 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender)
+    void SetIsFormRender(bool isFormRender) override
     {
         isFormRender_ = isFormRender;
     }
@@ -546,11 +546,11 @@ public:
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        StopDragCallback&& stopDragCallback) override;
+        int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
         AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
-    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
@@ -617,6 +617,8 @@ public:
 
     OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
+
+    void NotifyDensityUpdate();
 
 private:
     virtual bool MaybeRelease() override;

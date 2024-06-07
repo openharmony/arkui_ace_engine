@@ -25,6 +25,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DELIMITER = '|';
 const char* ERR_CODE = "-1";
 const int32_t SIZE_OF_FONT_INFO = 3;
@@ -542,6 +543,70 @@ void ResetMenuBgBlurStyle(ArkUINodeHandle node)
     SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, styleOption);
 }
 
+void SetSelectDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+
+    NG::SelectDivider divider;
+    divider.color = Color(color);
+    divider.strokeWidth = Dimension(values[0], static_cast<OHOS::Ace::DimensionUnit>(units[0]));
+    divider.startMargin = Dimension(values[1], static_cast<OHOS::Ace::DimensionUnit>(units[1]));
+    divider.endMargin = Dimension(values[2], static_cast<OHOS::Ace::DimensionUnit>(units[2]));
+
+    SelectModelNG::SetDivider(frameNode, divider);
+}
+
+void ResetSelectDivider(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto selectTheme = themeManager->GetTheme<SelectTheme>();
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    NG::SelectDivider divider;
+    if (selectTheme) {
+        defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+    SelectModelNG::SetDivider(frameNode, divider);
+}
+
+void ResetSelectDividerNull(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto selectTheme = themeManager->GetTheme<SelectTheme>();
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    NG::SelectDivider divider;
+    if (selectTheme) {
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+    SelectModelNG::SetDivider(frameNode, divider);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -553,7 +618,8 @@ const ArkUISelectModifier* GetSelectModifier()
         ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
         SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetSelectValue,
-        ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle };
+        ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectDivider,
+        ResetSelectDivider, ResetSelectDividerNull };
 
     return &modifier;
 }

@@ -461,7 +461,7 @@ void GestureEventHub::InitDragDropEvent()
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance));
+    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance, DimensionUnit::VP));
 }
 
 bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
@@ -571,21 +571,16 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, result);
     auto frameTag = frameNode->GetTag();
-    if (needScale) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
+    auto coordinateX = frameNodeOffset_.GetX();
+    auto coordinateY = frameNodeOffset_.GetY();
+    if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     } else {
-        auto coordinateX = frameNodeOffset_.GetX();
-        auto coordinateY = frameNodeOffset_.GetY();
-        if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
-            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
-        } else {
-            auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
-            auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
-            result.SetX(-rateX * size.Width());
-            result.SetY(-rateY * size.Height());
-        }
+        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+        result.SetX(-rateX * size.Width());
+        result.SetY(-rateY * size.Height());
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);

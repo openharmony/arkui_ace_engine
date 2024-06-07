@@ -23,6 +23,10 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr Dimension MENU_ITEM_CHILD_MIN_HEIGHT = 32.0_vp;
+    constexpr Dimension MENU_ITEM_VERTICAL_PADDING = 8.0_vp;
+}
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -73,8 +77,12 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childConstraint = props->CreateChildConstraint();
     // set item min height
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-    childConstraint.minSize.SetHeight(minItemHeight);
-    
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        childConstraint.minSize.SetHeight(MENU_ITEM_CHILD_MIN_HEIGHT.ConvertToPx());
+    } else {
+        childConstraint.minSize.SetHeight(minItemHeight);
+    }
+
     auto iconSize = theme->GetIconSideLength().ConvertToPx();
     MeasureItemViews(maxRowWidth, middleSpace, minRowWidth, minItemHeight,
         iconSize, childConstraint, layoutConstraint, padding, layoutWrapper);
@@ -93,8 +101,12 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    const auto& padding =
-        layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_, 0.0f, 0.0f, 0.0f);
+    float verticalInteval = 0.0f;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        verticalInteval = static_cast<float>(MENU_ITEM_VERTICAL_PADDING.ConvertToPx());
+    }
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(horInterval_,
+        verticalInteval, 0.0f, 0.0f);
 
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);

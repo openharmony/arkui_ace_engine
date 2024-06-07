@@ -46,10 +46,6 @@ abstract class ViewPU extends PUV2ViewBase
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
-  // Set of dependent elmtIds that need partial update
-  // during next re-render
-  protected dirtDescendantElementIds_: Set<number> = new Set<number>();
-
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
@@ -274,6 +270,20 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
+   /**
+   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+   * or depending how UI compiler works also with 'undefined'
+   * @param freezeState only value 'true' will be used, otherwise inherits from parent
+   * if not parent, set to false.
+   */
+   protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
+    // set to true if freeze parameter set for this @Component to true
+    // otherwise inherit from parent @Component (if it exists).
+    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+  }
+
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive
@@ -305,9 +315,9 @@ abstract class ViewPU extends PUV2ViewBase
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -326,9 +336,9 @@ abstract class ViewPU extends PUV2ViewBase
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
 
     for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -380,42 +390,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.isRenderInProgress = false;
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} - DONE`);
     }
-    stateMgmtProfiler.end();
-  }
-
-  /**
-   * force a complete rerender / update by executing all update functions
-   * exec a regular rerender first
-   *
-   * @param deep recurse all children as well
-   *
-   * framework internal functions, apps must not call
-   */
-  public forceCompleteRerender(deep: boolean = false): void {
-    stateMgmtProfiler.begin('ViewPU.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
-
-    // see which elmtIds are managed by this View
-    // and clean up all book keeping for them
-    this.purgeDeletedElmtIds();
-
-    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-
-    if (deep) {
-      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
-        const child = weakRefChild.deref();
-        if (child) {
-          if (child instanceof ViewPU) {
-            if (!child.hasBeenRecycled_) {
-              child.forceCompleteRerender(true);
-            }
-          } else {
-            throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
-          }
-        }
-      });
-    }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
   }
 
@@ -720,6 +694,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId_.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -746,6 +721,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
+        stateMgmtDFX.inRenderingElementId_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1156,7 +1132,7 @@ abstract class ViewPU extends PUV2ViewBase
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
             value: observedProp.getRawObjectValue(),
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false, false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);

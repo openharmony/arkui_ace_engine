@@ -435,7 +435,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -627,6 +627,11 @@ public:
 
     void OnTransformHintChanged(uint32_t transform) override;
 
+    uint32_t GetTransformHint() const
+    {
+        return transform_;
+    }
+
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -772,6 +777,14 @@ public:
     {
         predictNode_.Reset();
     }
+
+    void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
+
+    bool IsDensityChanged() const override
+    {
+        return isDensityChanged_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1011,6 +1024,7 @@ private:
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    uint32_t transform_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -87,6 +87,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
+        refereeNG_->CleanAll(true);
+        touchTestResults_.clear();
+        axisTouchTestResults_.clear();
+    }
     refereeNG_->CheckSourceTypeChange(touchPoint.sourceType);
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
@@ -307,6 +312,8 @@ void EventManager::TouchTest(
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         refereeNG_->CleanAll(true);
+        touchTestResults_.clear();
+        axisTouchTestResults_.clear();
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
@@ -526,7 +533,7 @@ void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
     }
 }
 
-void EventManager::CheckTouchEvent(TouchEvent touchEvent)
+void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type == TouchType::DOWN) {
@@ -536,8 +543,15 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
             refereeNG_->ForceCleanGestureReferee();
+            touchTestResults_.clear();
         }
-    } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
+    }
+}
+
+void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
+{
+    auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
+    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
@@ -550,7 +564,6 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
-    CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
@@ -566,10 +579,13 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
+        CheckUpEvent(event);
         return false;
     }
 
     if (point.type == TouchType::DOWN) {
+        // first collect gesture into gesture referee.
+        refereeNG_->AddGestureToScope(point.id, iter->second);
         refereeNG_->CleanGestureRefereeState(event.id);
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
@@ -582,11 +598,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
                 TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
             eventTree_.eventTreeList.clear();
-            refereeNG_->ForceCleanGestureReferee();
-        }
-        // first collect gesture into gesture referee.
-        if (Container::IsCurrentUseNewPipeline()) {
-            refereeNG_->AddGestureToScope(point.id, iter->second);
+            refereeNG_->ForceCleanGestureRefereeState();
         }
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
@@ -636,6 +648,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         }
     }
 
+    CheckUpEvent(event);
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {

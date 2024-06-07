@@ -441,6 +441,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
+    event.x = event.windowX;
+    event.y = event.windowY;
     event.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
         event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));

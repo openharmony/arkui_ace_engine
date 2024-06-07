@@ -78,7 +78,11 @@ void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayou
     } else if (menuProperty && menuProperty->GetFontWeight().has_value()) {
         textProperty->UpdateFontWeight(menuProperty->GetFontWeight().value());
     } else {
-        textProperty->UpdateFontWeight(FontWeight::REGULAR);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+        } else {
+            textProperty->UpdateFontWeight(FontWeight::REGULAR);
+        }
     }
 }
 
@@ -457,7 +461,9 @@ void MenuItemPattern::ShowSubMenu()
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     MenuParam param;
-    param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
+    auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(outterMenuLayoutProps);
+    param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
@@ -662,6 +668,24 @@ void MenuItemPattern::CloseMenu()
     menuWrapperPattern->HideMenu();
 }
 
+void MenuItemPattern::HandleSubMenu()
+{
+    auto expandingMode = GetExpandingMode();
+    auto menuWrapper = GetMenuWrapper();
+    auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
+    if (GetSubBuilder() != nullptr && (expandingMode != SubMenuExpandingMode::STACK ||
+        (expandingMode == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu))) {
+        ShowSubMenu();
+        return;
+    }
+    if (expandingMode == SubMenuExpandingMode::STACK &&
+        ((!IsSubMenu() && hasSubMenu) || IsStackSubmenuHeader())) {
+        menuWrapperPattern->HideSubMenu();
+        return;
+    }
+}
+
 void MenuItemPattern::RegisterOnClick()
 {
     if (onClickEventSet_) return;
@@ -688,20 +712,18 @@ void MenuItemPattern::RegisterOnClick()
             pattern->RecordChangeEvent();
         }
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
-        auto expandingMode = pattern->GetExpandingMode();
-        auto menuWrapper = pattern->GetMenuWrapper();
-        auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
-        auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
-        if (pattern->GetSubBuilder() != nullptr && (expandingMode != SubMenuExpandingMode::STACK ||
-            (expandingMode == SubMenuExpandingMode::STACK && !pattern->IsSubMenu() && !hasSubMenu))) {
-            pattern->ShowSubMenu();
-            return;
+        auto menuNode = pattern->GetMenu();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto lastSelectedItem = menuPattern->GetLastSelectedItem();
+        if (lastSelectedItem && lastSelectedItem != host) {
+            auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetChange();
         }
-        if (expandingMode == SubMenuExpandingMode::STACK &&
-            ((!pattern->IsSubMenu() && hasSubMenu) || pattern->IsStackSubmenuHeader())) {
-            menuWrapperPattern->HideSubMenu();
-            return;
-        }
+        menuPattern->SetLastSelectedItem(host);
+        pattern->HandleSubMenu();
         // hide menu when menu item is clicked
         pattern->CloseMenu();
     };

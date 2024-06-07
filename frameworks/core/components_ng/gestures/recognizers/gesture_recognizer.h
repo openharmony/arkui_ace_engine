@@ -396,6 +396,11 @@ public:
 
     void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
 
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

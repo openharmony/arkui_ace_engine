@@ -114,8 +114,8 @@ void ExtensionCompanionNode::OnMeasure(const ExtensionLayoutConstraint& layoutCo
         event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
         event.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_MEASURE));
         event.data[NUM_0] = layoutConstraint.minWidth;
-        event.data[NUM_1] = layoutConstraint.maxWidth;
-        event.data[NUM_2] = layoutConstraint.minHeight;
+        event.data[NUM_1] = layoutConstraint.minHeight;
+        event.data[NUM_2] = layoutConstraint.maxWidth;
         event.data[NUM_3] = layoutConstraint.maxHeight;
         event.data[NUM_4] = layoutConstraint.parentIdealWidth;
         event.data[NUM_5] = layoutConstraint.parentIdealHeight;

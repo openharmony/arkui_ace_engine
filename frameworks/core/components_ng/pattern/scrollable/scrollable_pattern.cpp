@@ -584,7 +584,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     }
     animateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && (isAtTop || isAtBottom);
     isAnimateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && animateCanOverScroll_ &&
-                            ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)));
+                           ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)) || IsOutOfBoundary());
     return true;
 }
 
@@ -768,7 +768,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
         } else {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = GetContext();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
             CHECK_NULL_VOID(theme);

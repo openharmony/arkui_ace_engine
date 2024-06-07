@@ -1744,6 +1744,9 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     alignListItem(value: ListItemAlign): this;
     listDirection(value: Axis): this;
     scrollBar(value: BarState): this;
+    scrollBarWidth(value: string | number): this;
+    scrollBarColor(value: string | number | Color): this;
+    flingSpeedLimit(value: number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
     contentStartOffset(value: number): this;
     contentEndOffset(value: number): this;
@@ -1816,7 +1819,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
     cachedCount(value: number): this;
-    displayCount(value: string | number | SwiperAutoFill): this;
+    displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;

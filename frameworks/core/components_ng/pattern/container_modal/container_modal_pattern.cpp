@@ -116,7 +116,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius(isShow ? CONTAINER_INNER_RADIUS : 0.0_vp);
+    stageBorderRadius.SetRadius(isShow ? GetStackNodeRadius() : 0.0_vp);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
 
@@ -511,6 +511,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
+    LOGI("Set close button status %{public}s", isEnabled ? "enable" : "disable");
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
@@ -537,35 +538,25 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     customTitleSettedShow_ = customTitleSettedShow;
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
-    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
-    auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
-    PaddingProperty padding;
-    if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
-        !customTitleSettedShow) {
-        customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    } else if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN &&
-               windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-               windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
-        customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING) };
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    if (!customTitleSettedShow) {
+        customTitleRowProp->UpdateVisibility(VisibleType::GONE);
+    } else if (CanShowCustomTitle()) {
+        customTitleRowProp->UpdateVisibility(VisibleType::VISIBLE);
     }
-    containerModalLayoutProperty->UpdatePadding(padding);
-
     floatingTitleSettedShow_ = floatingTitleSettedShow;
     auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty();
-    CHECK_NULL_VOID(floatingTitleLayoutProperty);
-    if (floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
-        !floatingTitleSettedShow) {
-        floatingTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
+    if (!floatingTitleSettedShow) {
+        floatingTitleRowProp->UpdateVisibility(VisibleType::GONE);
     }
 
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     UpdateGestureRowVisible();
+    TrimFloatingWindowLayout();
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -811,5 +802,46 @@ Dimension ContainerModalPattern::GetCustomTitleHeight()
         return zeroHeight;
     }
     return titleHeight_;
+}
+
+Dimension ContainerModalPattern::GetStackNodeRadius()
+{
+    Dimension radius = customTitleSettedShow_ ? CONTAINER_INNER_RADIUS : CONTAINER_OUTER_RADIUS;
+    auto trimRadiusPx = Dimension(round(radius.ConvertToPx() * 2) / 2.0);
+    auto trimRadiusVp = Dimension(trimRadiusPx.ConvertToVp(), DimensionUnit::VP);
+    return trimRadiusVp;
+}
+
+bool ContainerModalPattern::CanShowCustomTitle()
+{
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_RETURN(buttonsRow, false);
+    auto visibility = buttonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::GONE);
+    return visibility == VisibleType::VISIBLE;
+}
+
+void ContainerModalPattern::TrimFloatingWindowLayout()
+{
+    if (windowMode_ != WindowMode::WINDOW_MODE_FLOATING) {
+        return;
+    }
+    auto stack = GetStackNode();
+    CHECK_NULL_VOID(stack);
+    auto stackRender = stack->GetRenderContext();
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(GetStackNodeRadius());
+    stackRender->UpdateBorderRadius(borderRadius);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostProp = host->GetLayoutProperty();
+    PaddingProperty padding;
+    auto customtitleRow = GetCustomTitleRow();
+    CHECK_NULL_VOID(customtitleRow);
+    auto customTitleRowProp = customtitleRow->GetLayoutProperty();
+    if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
+        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
+            CalcLength(CONTENT_PADDING) };
+    }
+    hostProp->UpdatePadding(padding);
 }
 } // namespace OHOS::Ace::NG

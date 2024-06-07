@@ -426,7 +426,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -475,7 +475,8 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    bool MarkRemoving() override;
+    void ApplyGeometryTransition() override;
+    bool MarkRemoving(bool applyGeometryTransition = true) override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
@@ -889,6 +890,18 @@ public:
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
     {
         predictLayoutNode_.emplace_back(node);
+    }
+
+    bool CheckAccessibilityLevelNo() const {
+        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (property) {
+            auto level = property->GetAccessibilityLevel();
+            if (level == NG::AccessibilityProperty::Level::NO ||
+                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,

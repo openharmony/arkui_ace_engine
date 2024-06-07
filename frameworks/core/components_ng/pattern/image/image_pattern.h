@@ -194,8 +194,14 @@ public:
         return syncLoad_;
     }
 
+    void SetNeedBorderRadius(bool needBorderRadius)
+    {
+        needBorderRadius_ = needBorderRadius;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -335,10 +341,21 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
+    bool GetDefaultAutoResize()
+    {
+        InitDefaultValue();
+        return autoResizeDefault_;
+    }
+    ImageInterpolation GetDefaultInterpolation()
+    {
+        InitDefaultValue();
+        return interpolationDefault_;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
 
@@ -416,7 +433,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -474,6 +491,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;

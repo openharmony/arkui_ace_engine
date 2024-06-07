@@ -217,13 +217,13 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_VOID(node);
     bool isRoot = layoutWrapper->IsRootMeasureNode();
     std::optional<bool> direction;
-
     if (isRoot && IsNodeInAndActive(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         inNodeActiveFrameSize_ = geometryNode->GetFrameSize();
+        CHECK_NULL_VOID(layoutPropertyIn_);
         layoutPropertyIn_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
@@ -242,7 +242,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         hasOutAnim_ = false;
         direction = false;
     }
-
     if (direction.has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);

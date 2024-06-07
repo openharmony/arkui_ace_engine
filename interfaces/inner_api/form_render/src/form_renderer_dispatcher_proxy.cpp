@@ -228,5 +228,32 @@ void FormRendererDispatcherProxy::OnAccessibilityDumpChildInfo(
         HILOG_ERROR("%{public}s, Read reply info failed.", __func__);
     }
 }
+
+void FormRendererDispatcherProxy::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+    if (!data.WriteFloat(pointX) ||
+        !data.WriteFloat(pointY) ||
+        !data.WriteInt32(sourceType) ||
+        !data.WriteInt32(eventType) ||
+        !data.WriteInt64(timeMs)) {
+        HILOG_ERROR("Write TransferAccessibilityHoverEvent data failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
 } // namespace Ace
 } // namespace OHOS

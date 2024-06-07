@@ -49,6 +49,10 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
+#ifdef USE_ROSEN_DRAWING
+constexpr float BADGED_SIDE_X = 21.0f;
+constexpr float BADGED_SIDE_Y = 7.0f;
+#endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
 
@@ -466,6 +470,15 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), opts);
     return true;
 }
+
+bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
+    const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+    const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+    std::shared_ptr<Media::PixelMap> &compositePixelMap)
+{
+    HILOGE("not support");
+    return false;
+}
 #else
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
@@ -548,6 +561,58 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     }
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
     layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache), opts);
+    return true;
+}
+
+bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
+    const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+    const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+    std::shared_ptr<Media::PixelMap> &compositePixelMap)
+{
+    if ((layeredPixelMap == nullptr) || (badgedPixelMap == nullptr)) {
+        HILOGE("failed due to nullptr");
+        return false;
+    }
+    Rosen::Drawing::Brush brush;
+    brush.SetAntiAlias(true);
+    Rosen::Drawing::ColorType colorType = ImageConverter::PixelFormatToColorType(layeredPixelMap->GetPixelFormat());
+    Rosen::Drawing::AlphaType alphaType = ImageConverter::AlphaTypeToAlphaType(layeredPixelMap->GetAlphaType());
+    Rosen::Drawing::ImageInfo imageInfo(SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y, colorType, alphaType);
+    Rosen::Drawing::Bitmap tempCache;
+    tempCache.Build(imageInfo);
+    Rosen::Drawing::Canvas bitmapCanvas;
+    bitmapCanvas.Bind(tempCache);
+    std::shared_ptr<Rosen::Drawing::Bitmap> layeredBitmap = ImageConverter::PixelMapToBitmap(layeredPixelMap);
+    if (layeredBitmap) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+        bitmapCanvas.AttachBrush(brush);
+        Rosen::Drawing::Rect srcRect(0, 0, layeredBitmap->GetWidth(), layeredBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(0, 0, SIDE, SIDE);
+        Rosen::Drawing::Image image;
+        image.BuildFromBitmap(*layeredBitmap);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
+    }
+    std::shared_ptr<Rosen::Drawing::Bitmap> badgedBitmap = ImageConverter::PixelMapToBitmap(badgedPixelMap);
+    if (badgedBitmap) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_OVER);
+        bitmapCanvas.AttachBrush(brush);
+        Rosen::Drawing::Rect srcRect(0, 0, badgedBitmap->GetWidth(), badgedBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(SIDE + BADGED_SIDE_X - badgedBitmap->GetWidth(),
+            SIDE + BADGED_SIDE_Y - badgedBitmap->GetHeight(), SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y);
+        Rosen::Drawing::Image image;
+        image.BuildFromBitmap(*badgedBitmap);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
+    }
+    bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
+    Media::InitializationOptions initializationOptions;
+    initializationOptions.alphaType = layeredPixelMap->GetAlphaType();
+    initializationOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
+    compositePixelMap = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache),
+        initializationOptions);
     return true;
 }
 #endif

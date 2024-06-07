@@ -636,17 +636,18 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
         auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
-    } else {
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
     }
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -1952,4 +1953,10 @@ void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
+void TextFieldModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+}
 } // namespace OHOS::Ace::NG

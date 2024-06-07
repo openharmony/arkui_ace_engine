@@ -188,16 +188,18 @@ public:
 
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        navigationPathInfo_.clear();
-        navigationPathInfo_.append(NAVIGATION_MODULE_NAME);
-        navigationPathInfo_ += ": " + moduleName + ", ";
-        navigationPathInfo_.append(NAVIGATION_PAGE_PATH);
-        navigationPathInfo_ += ": " + pagePath;
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
     }
 
     const std::string& GetNavigationPathInfo() const
     {
         return navigationPathInfo_;
+    }
+
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
     }
 
 private:
@@ -229,6 +231,7 @@ private:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
     std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

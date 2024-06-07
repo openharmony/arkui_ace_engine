@@ -1935,6 +1935,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
+    JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4725,7 +4726,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
 
 void JSWeb::CopyOption(int32_t copyOption)
 {
-    auto mode = CopyOptions::Distributed;
+    auto mode = CopyOptions::Local;
     switch (copyOption) {
         case static_cast<int32_t>(CopyOptions::None):
             mode = CopyOptions::None;
@@ -4740,7 +4741,7 @@ void JSWeb::CopyOption(int32_t copyOption)
             mode = CopyOptions::Distributed;
             break;
         default:
-            mode = CopyOptions::Distributed;
+            mode = CopyOptions::Local;
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
@@ -5041,4 +5042,12 @@ void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
+void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
 } // namespace OHOS::Ace::Framework

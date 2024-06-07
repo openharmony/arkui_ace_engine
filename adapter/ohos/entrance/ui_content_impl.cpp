@@ -141,6 +141,18 @@ void AddMccAndMncToResConfig(
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
 }
+
+void AddSetAppColorModeToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    CHECK_NULL_VOID(context);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_VOID(config);
+    auto colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    if (!colorModeIsSetByApp.empty()) {
+        aceResCfg.SetColorModeIsSetByApp(true);
+    }
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -1060,6 +1072,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
@@ -1107,6 +1120,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         frontend->SetModuleName(moduleName_);
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
+        container->SetBundleName(bundleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
@@ -1533,6 +1547,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -2080,6 +2095,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->CheckAndUpdateKeyboardInset();
             pipelineContext->ChangeDarkModeBrightness();
         }
+        SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
+            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
+            static_cast<WindowSizeChangeReason>(reason));
     };
 
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
@@ -3036,6 +3054,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetIsCaretMode(false);
+            popupParam->SetBlockEvent(false);
             auto popupConfig = customPopupConfigMap_.find(targetId);
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;
@@ -3247,6 +3266,22 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+}
+
+void UIContentImpl::PreLayout()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [pipelineContext] {
+            pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
 
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)

@@ -57,6 +57,11 @@ struct PreviewRange {
     {
         return start == range.start && end == range.end;
     }
+    void Set(int32_t startValue, int32_t endValue)
+    {
+        start = startValue;
+        end = endValue;
+    }
 };
 
 struct KeyComb final {
@@ -186,6 +191,11 @@ public:
 
     virtual void FinishTextPreview() {}
     virtual void ReceivePreviewTextStyle (const std::string& style) {}
+
+    virtual int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range)
+    {
+        return 0;
+    }
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 

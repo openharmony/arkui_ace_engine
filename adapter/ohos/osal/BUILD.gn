@@ -91,7 +91,7 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
-      deps = [ "$skia_root_new:skia_ohos" ]
+      deps = []
 
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
@@ -145,6 +145,7 @@ template("ace_osal_ohos_source_set") {
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",
+      "system_bar_style_ohos.cpp",
     ]
     external_deps += [
       "ability_runtime:abilitykit_native",
@@ -160,7 +161,9 @@ template("ace_osal_ohos_source_set") {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:libdm",
+      "window_manager:libwm",
       "window_manager:scene_session",
+      "window_manager:window_native_kit",
     ]
 
     if (defined(config.hichecker_exists) && config.hichecker_exists) {

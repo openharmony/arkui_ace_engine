@@ -87,8 +87,7 @@ group("linux_core_unittest") {
     "pattern/indexer:indexer_test_ng",
     "pattern/linear_layout:linear_layout_test_ng",
     "pattern/linear_split:linear_split_test_ng",
-
-    # "pattern/list:list_test_ng",
+    "pattern/list:list_test_ng",
     "pattern/loading_progress:loading_progress_test_ng",
     "pattern/marquee:marquee_test_ng",
     "pattern/menu:menu_test_ng",
@@ -124,8 +123,7 @@ group("linux_core_unittest") {
     "pattern/stack:stack_test_ng",
     "pattern/stage:stage_test_ng",
     "pattern/stepper:stepper_test_ng",
-
-    # "pattern/swiper:swiper_test_ng",
+    "pattern/swiper:swiper_test_ng",
     "pattern/symbol:symbol_test_ng",
     "pattern/tabs:tabs_test_ng",
 

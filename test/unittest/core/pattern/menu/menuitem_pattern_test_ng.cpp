@@ -73,7 +73,6 @@ const std::string MENU_TAG = "menu";
 const std::string MENU_ITEM_TEXT = "menuItem";
 const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
-constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -99,6 +98,7 @@ public:
     void TearDown() override;
     void InitMenuItemPatternTestNg();
     void InitMenuItemTestNg();
+    void MockPipelineContextGetTheme();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
@@ -119,6 +119,23 @@ void MenuItemPatternTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+}
+
+void MenuItemPatternTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 void MenuItemPatternTestNg::TearDown()
@@ -266,8 +283,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -474,6 +490,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.content = "content";
@@ -511,6 +528,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.labelInfo = "label";
@@ -549,8 +567,8 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
 {
     // mock theme
+    MockPipelineContextGetTheme();
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->SetDisabledMenuFontColor(ITEM_DISABLED_COLOR);
 
     // create menu item
     MenuItemModelNG MenuItemModelInstance;
@@ -590,7 +608,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_TRUE(content.has_value());
     EXPECT_EQ(content.value(), "item content");
     auto textRenderContext = contentNode->GetRenderContext();
-    EXPECT_EQ(textRenderContext->GetForegroundColor(), ITEM_DISABLED_COLOR);
+    EXPECT_EQ(textRenderContext->GetForegroundColor(), selectTheme->GetMenuFontColor());
 }
 
 /**

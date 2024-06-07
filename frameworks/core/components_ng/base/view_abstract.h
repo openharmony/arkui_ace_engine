@@ -131,6 +131,10 @@ public:
     static void SetBorderWidth(const BorderWidthProperty &value);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
+    static void SetDashGap(const Dimension &value);
+    static void SetDashGap(const BorderWidthProperty &value);
+    static void SetDashWidth(const Dimension &value);
+    static void SetDashWidth(const BorderWidthProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
@@ -426,6 +430,10 @@ public:
     static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const Dimension& value);
+    static void SetDashWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
@@ -679,6 +687,7 @@ public:
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
+    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
 
 private:
     static void AddDragFrameNodeToManager();

@@ -429,4 +429,22 @@ HWTEST_F(EventManagerTestNg, EventManagerTest043, TestSize.Level1)
     ret = eventManager->DispatchTouchEvent(event);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: GetSetPressedKeyCodesTest001
+ * @tc.desc: Test GetPressedKeyCodes and SetPressedKeyCodes function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. Call SetPressedKeyCodes GetPressedKeyCodes with event.
+     * @tc.expected: pressedKeyCodes size is 2.
+     */
+    BaseEventInfo event("test");
+    event.SetPressedKeyCodes({KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT});
+    auto pressedKeyCodes = event.GetPressedKeyCodes();
+    EXPECT_EQ(pressedKeyCodes.size(), 2);
+    EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_CTRL_RIGHT);
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -315,6 +316,8 @@ public:
 
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
+    static void NotifyPerfMonitorPageMsg(const std::string& pageName);
+
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
@@ -361,23 +364,43 @@ public:
         parentNode_ = parentNode;
     }
 
-    bool IsInitializationDone()
-    {
-        return isInitialDone_;
-    }
-
     WeakPtr<UINode> GetParentCustomNode() const
     {
         return parentNode_;
     }
 
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    bool IsFullPageNavigation() const
+    {
+        return isFullPageNavigation_;
+    }
+
+    bool IsTopNavDestination(const RefPtr<UINode>& node) const;
+    void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
+
 private:
+    void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
+    void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
+    void UpdateSystemBarStyleOnTopNavPathChange(
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+    void UpdateSystemBarStyleWithTopNavPath(const RefPtr<WindowManager>& windowManager,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
+    void UpdateSystemBarStyleOnPageVisibilityChange(bool show);
+    void RegisterPageVisibilityChangeCallback();
+    bool ApplyTopNavPathSystemBarStyleOrRestore(const RefPtr<WindowManager>& windowManager,
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& topNavPath);
+    void InitPageNode(const RefPtr<FrameNode>& host);
+
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedInvisible = false);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
     void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
@@ -437,6 +460,10 @@ private:
     RefPtr<DragEvent> dragEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
+    WeakPtr<FrameNode> pageNode_;
+    bool isFullPageNavigation_ = false;
+    std::optional<RefPtr<SystemBarStyle>> backupStyle_;
+    std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
@@ -459,7 +486,6 @@ private:
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
     bool isReplace_ = false;
-    bool isInitialDone_ = false;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;

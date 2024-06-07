@@ -1804,4 +1804,54 @@ HWTEST_F(ButtonTestNg, ButtonBuilderNameTest003, TestSize.Level1)
     buttonPattern->BuildContentModifierNode();
 }
 
+/**
+ * @tc.name: NeedAgingMeasureTest001
+ * @tc.desc: Test NeedAgingMeasureFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, NeedAgingMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble, set font scale to 1.75 and get frameNode.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto buttonLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<ButtonLayoutAlgorithm>(buttonPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. call NeedAgingMeasure and verify return value.
+     * @tc.expected: the NeedAgingMeasure return value is true
+     */
+    bool result = buttonLayoutAlgorithm->NeedAgingMeasure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG

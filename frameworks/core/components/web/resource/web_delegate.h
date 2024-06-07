@@ -724,6 +724,7 @@ public:
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
@@ -900,6 +901,7 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;

@@ -193,7 +193,6 @@ void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     width /= density;
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -217,7 +216,6 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
     canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     height /= density;
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);

@@ -147,6 +147,11 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     this.menuItemNodes.build(this.builder, menuItemConfiguration);
     return this.menuItemNodes.getFrameNode();
   }
+  divider(value: DividerOptions | null): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
+    return this;
+  }
 }
 
 class MenuBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
@@ -512,6 +517,27 @@ class SelectWidthModifier extends ModifierWithKey<Length> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectDividerModifier extends ModifierWithKey<DividerOptions | null> {
+  constructor(value: DividerOptions | null) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetDivider(node, this.value);
+    } else {
+      getUINativeModule().select.setDivider(node, this.value?.strokeWidth, this.value?.color, this.value?.startMargin, this.value?.endMargin);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
   }
 }
 

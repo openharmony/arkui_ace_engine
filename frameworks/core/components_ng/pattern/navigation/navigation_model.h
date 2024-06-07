@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -87,6 +88,7 @@ public:
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

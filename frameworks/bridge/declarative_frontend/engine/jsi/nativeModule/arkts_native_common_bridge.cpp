@@ -22,6 +22,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -527,9 +528,10 @@ void ParseJsRotate(
         rotate.centerZ = Dimension(0.5f, DimensionUnit::PERCENT);
     }
     // if specify angle
-    Framework::JSViewAbstract::GetJsAngle("angle", jsObj, angle);
+    Framework::JSViewAbstract::GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, angle);
     rotate.perspective = 0.0f;
-    Framework::JSViewAbstract::GetJsPerspective("perspective", jsObj, rotate.perspective);
+    Framework::JSViewAbstract::GetJsPerspective(static_cast<int32_t>(ArkUIIndex::PERSPECTIVE), jsObj,
+        rotate.perspective);
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
@@ -5967,6 +5969,36 @@ ArkUINativeModuleValue CommonBridge::ResetOnTouch(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    int32_t direction = 0;
+    int32_t style = 0;
+    if (!secondArg.IsNull() && !secondArg->IsUndefined()) {
+        direction = static_cast<int32_t>(secondArg->ToNumber(vm)->Value());
+    }
+    if (!thirdArg.IsNull() && !thirdArg->IsUndefined()) {
+        style = static_cast<int32_t>(thirdArg->ToNumber(vm)->Value());
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setChainStyle(nativeNode, direction, style);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetChainStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 ArkUINativeModuleValue CommonBridge::SetOnAppear(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -6875,5 +6907,86 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopePriority(ArkUIRuntimeCallInfo*
     }
     GetArkUINodeModifiers()->getCommonModifier()->setFocusScopePriority(nativeNode, scopeId.c_str(), priority);
     return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CommonBridge::SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto startArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto topArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto endArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    if (startArg->IsUndefined() && topArg->IsUndefined() && endArg->IsUndefined() && bottomArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getCommonModifier()->resetPixelRound(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t values[] = { -1, -1, -1, -1 };
+    if (startArg->IsInt()) {
+        values[NUM_0] = startArg->Int32Value(vm);
+    }
+    if (topArg->IsInt()) {
+        values[NUM_1] = topArg->Int32Value(vm);
+    }
+    if (endArg->IsInt()) {
+        values[NUM_2] = endArg->Int32Value(vm);
+    }
+    if (bottomArg->IsInt()) {
+        values[NUM_3] = bottomArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setPixelRound(
+        nativeNode, values, (sizeof(values) / sizeof(values[NUM_0])));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetPixelRound(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::GreatOrEqualAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsNumber()) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    int32_t apiTargetVersion = firstArg->Int32Value(vm);
+    auto platformVersion = static_cast<PlatformVersion>(apiTargetVersion);
+    return panda::BooleanRef::New(vm, Container::LessThanAPITargetVersion(platformVersion));
+}
+
+ArkUINativeModuleValue CommonBridge::GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    int32_t apiTargetVersion = container->GetApiTargetVersion();
+    return panda::NumberRef::New(vm, apiTargetVersion);
 }
 } // namespace OHOS::Ace::NG

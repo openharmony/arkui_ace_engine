@@ -133,7 +133,8 @@ public:
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
-    void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName);
+    void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
+                           const std::string& pageName);
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);

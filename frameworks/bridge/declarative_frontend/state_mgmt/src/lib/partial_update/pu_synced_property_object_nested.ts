@@ -90,7 +90,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       // notify value change to subscribing View
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_,
         this.notifyPropertyHasChangedPU,
-        this.notifyTrackedObjectPropertyHasChanged, this, false);
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 

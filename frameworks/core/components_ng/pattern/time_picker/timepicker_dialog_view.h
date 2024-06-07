@@ -40,7 +40,7 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
-    static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode, bool isCreateDivider = false);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
         const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
@@ -84,9 +84,12 @@ private:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static bool NeedadaptForAging();
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePicker,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode);
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
+        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
     static void SwitchTimePickerPage(const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
-        const RefPtr<FrameNode>& buttonConfirmNode);
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
+        const RefPtr<FrameNode>& nextConfirmDividerNode);
+    static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static bool switchFlag_;
 };
 } // namespace OHOS::Ace::NG

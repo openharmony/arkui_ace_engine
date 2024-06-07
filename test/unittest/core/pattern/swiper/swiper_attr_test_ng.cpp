@@ -1185,8 +1185,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set indicator type to DIGIT
-     * @tc.expected: Show indicator, indicator type is DIGIT
+     * @tc.steps: step1. create swiper and set parameters.
      */
     SwiperArcDotParameters swiperArcDotParameters;
     swiperArcDotParameters.arcDirection = SwiperArcDirection::NINE_CLOCK_DIRECTION;
@@ -1194,6 +1193,7 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
     swiperArcDotParameters.selectedItemColor = Color::RED;
     swiperArcDotParameters.containerColor = Color::BLUE;
     CreateWithItem([=](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
         model.SetArcDotIndicatorStyle(swiperArcDotParameters);
     });
@@ -1215,13 +1215,14 @@ HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set indicator type to DIGIT
-     * @tc.expected: Show indicator, indicator type is DIGIT
+     * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([=](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
-    pattern_->GetSwiperArcDotParameters();
-    EXPECT_NE(pattern_->swiperArcDotParameters_, nullptr);
+    RefPtr<ArcSwiperPattern> indicatorPattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    indicatorPattern->GetSwiperArcDotParameters();
+    EXPECT_NE(indicatorPattern->swiperArcDotParameters_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -1125,4 +1125,11 @@ void WebModelNG::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& call
 
     webPattern->SetUpdateInstanceIdCallback(std::move(callback));
 }
+
+void WebModelNG::SetOverlayScrollbarEnabled(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOverlayScrollbarEnabled(isEnabled);
+}
 } // namespace OHOS::Ace::NG

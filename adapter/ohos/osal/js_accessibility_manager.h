@@ -363,6 +363,7 @@ private:
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     int32_t treeId_ = 0;
     int64_t parentElementId_ = INVALID_PARENT_ID;
+    int32_t parentWindowId_ = -1;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 

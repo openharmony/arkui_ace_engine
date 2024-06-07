@@ -373,19 +373,23 @@ void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
     }
     if (calcLayoutConstraintMaxMinSize->Width().has_value()) {
         auto maxWidthPx = ConvertToPx(calcLayoutConstraintMaxMinSize->Width(), scaleProperty, percentReference.Width());
-        if (IsMaxSize) {
-            frameSize.SetWidth(std::min(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
-        } else {
-            frameSize.SetWidth(std::max(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+        if (maxWidthPx.has_value()) {
+            if (IsMaxSize) {
+                frameSize.SetWidth(std::min(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+            } else {
+                frameSize.SetWidth(std::max(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+            }
         }
     }
     if (calcLayoutConstraintMaxMinSize->Height().has_value()) {
         auto maxHeightPx =
             ConvertToPx(calcLayoutConstraintMaxMinSize->Height(), scaleProperty, percentReference.Height());
-        if (IsMaxSize) {
-            frameSize.SetHeight(std::min(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
-        } else {
-            frameSize.SetHeight(std::max(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+        if (maxHeightPx.has_value()) {
+            if (IsMaxSize) {
+                frameSize.SetHeight(std::min(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+            } else {
+                frameSize.SetHeight(std::max(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+            }
         }
     }
 }

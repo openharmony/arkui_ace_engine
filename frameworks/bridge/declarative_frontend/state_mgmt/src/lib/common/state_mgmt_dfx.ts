@@ -16,24 +16,30 @@ class stateMgmtDFX {
 
     // enable profile
     public static enableProfiler_: boolean = false;
-    public static changeId_: number = -1;
+    public static inRenderingElementId_: Array<number> = new Array<number>();
 }
 
 function setProfilerStatus(profilerStatus: boolean): void {
     stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
     stateMgmtDFX.enableProfiler_ = profilerStatus;
-    stateMgmtDFX.changeId_ = -1;
 }
 type PropertyDependenciesInfo = {
     mode: string,
-    trackPropertiesDependencies: MapItem<string, Array<number|string>>[],
-    propertyDependencies: Array<string|number>
+    trackPropertiesDependencies: MapItem<string, Array<ElementType | number | string>>[],
+    propertyDependencies: Array<ElementType>
+}
+
+type ElementType = {
+    elementId: number,
+    elementTag: string,
+    isCustomNode: boolean,
 }
 
 // Data struct send to profiler or Inspector
 type ViewPUInfo = { componentName: string, id: number };
 type ObservedPropertyInfo<T> = {
-    decorator: string, propertyName: string, value: any, id: number, changeId?: number, changedTrackPropertyName?: string | undefined,
+    decorator: string, propertyName: string, value: any, id: number, changeId?: number, inRenderingElementId?: number,
+    changedTrackPropertyName?: string | undefined,
     dependentElementIds: PropertyDependenciesInfo,
     owningView?: ViewPUInfo, syncPeers?: ObservedPropertyInfo<T>[]
 };

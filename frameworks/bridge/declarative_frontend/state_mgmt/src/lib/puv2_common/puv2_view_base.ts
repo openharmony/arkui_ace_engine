@@ -44,6 +44,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
   protected currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
+  
+  // Set of elmtIds that need re-render
+  protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
   // Map elmtId -> Repeat instance in this ViewPU
   protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
@@ -244,8 +247,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   }
 
   // KEEP
-  public debugInfoElmtId(elmtId: number): string {
-    return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
+  public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
+
+    return isProfiler ? {
+      elementId: elmtId,
+      elementTag: this.updateFuncByElmtId.get(elmtId).getComponentName(),
+      isCustomNode: this.childrenWeakrefMap_.has(elmtId)
+    } : this.updateFuncByElmtId.debugInfoElmtId(elmtId);
   }
 
   public dumpStateVars(): void {
@@ -258,20 +266,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return this.isActive_;
   }
 
-  /**
-   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
-   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
-   * or depending how UI compiler works also with 'undefined'
-   * @param freezeState only value 'true' will be used, otherwise inherits from parent
-   *      if not parent, set to false.
-   */
-  protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
-    // set to true if freeze parameter set for this @Component to true
-    // otherwise inherit from parent @Component (if it exists).
-    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
-    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
-  }
-
   // abstract functions to be implemented by application defined class / transpiled code
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
@@ -279,6 +273,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   public abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   public abstract updateStateVars(params: Object);
+  public abstract UpdateElement(elmtId: number): void;
 
   public dumpReport(): void {
     stateMgmtConsole.warn(`Printing profiler information`);
@@ -321,6 +316,54 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) end... `);
   }
 
+  /**
+  * force a complete rerender / update by executing all update functions
+  * exec a regular rerender first
+  *
+  * @param deep recurse all children as well
+  *
+  * framework internal functions, apps must not call
+  */
+  public forceCompleteRerender(deep: boolean = false): void {
+    stateMgmtProfiler.begin('ViewPU/V2.forceCompleteRerender');
+    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds();
+
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
+
+    if (deep) {
+      for (const child of this.childrenWeakrefMap_.values()) {
+        const childView: IView | undefined = child.deref();
+        if (childView) {
+          childView.forceCompleteRerender(true);
+        }
+      }
+    }
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
+    stateMgmtProfiler.end();
+  }
+
+  /**
+  * force a complete rerender / update on specific node by executing update function.
+  *
+  * @param elmtId which node needs to update.
+  *
+  * framework internal functions, apps must not call
+  */
+  public forceRerenderNode(elmtId: number): void {
+    stateMgmtProfiler.begin('ViewPU/V2.forceRerenderNode');
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds();
+    this.UpdateElement(elmtId);
+
+    // remove elemtId from dirtDescendantElementIds.
+    this.dirtDescendantElementIds_.delete(elmtId);
+    stateMgmtProfiler.end();
+  }
 
   // KEEP
   public static pauseRendering(): void {

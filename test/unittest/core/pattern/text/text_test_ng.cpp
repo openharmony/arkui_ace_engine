@@ -1907,4 +1907,242 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
         textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         false);
 }
+
+/**
+ * @tc.name: UpdateSelectOverlayOrCreate001
+ * @tc.desc: Test TextPattern UpdateSelectOverlayOrCreate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateSelectOverlayOrCreate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    /**
+     * @tc.steps: step2. Construct data and call UpdateSelectOverlayOrCreate
+     */
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    textPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
+    EXPECT_EQ(selectOverlayInfo.hitTestMode, HitTestMode::HTMDEFAULT);
+
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    textPattern->selectOverlayProxy_ = proxy;
+    textPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
+    EXPECT_TRUE(textPattern->selectOverlayProxy_ && !textPattern->selectOverlayProxy_->IsClosed());
+}
+
+/**
+ * @tc.name: HandleOnSelectAll
+ * @tc.desc: Test TextPattern HandleOnSelectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnModifyDone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    /**
+     * @tc.steps: step2. Construct data and call HandleOnSelectAll
+     */
+    textPattern->sourceType_ = SourceType::MOUSE;
+    textPattern->HandleOnSelectAll();
+    EXPECT_TRUE(textPattern->IsUsingMouse());
+}
+
+/**
+ * @tc.name: CreateImageSourceInfo001
+ * @tc.desc: Test TextPattern HandleOnSelectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateImageSourceInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    /**
+     * @tc.steps: step2. Construct data and call CreatImageSourceInfo
+     */
+    ImageSpanOptions textOptions;
+    textPattern->CreateImageSourceInfo(textOptions);
+    textOptions.image = "textImage";
+    textOptions.bundleName = "textBundleName";
+    textOptions.moduleName = "textModuleName";
+    textPattern->CreateImageSourceInfo(textOptions);
+    EXPECT_TRUE(textOptions.image.has_value());
+    EXPECT_TRUE(textOptions.bundleName.has_value());
+    EXPECT_TRUE(textOptions.moduleName.has_value());
+}
+
+/**
+ * @tc.name: create001
+ * @tc.desc: Test create with spanstring.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextTestNg_create001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+     /**
+     * @tc.steps: step1. Create spanBases
+     */
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    /**
+     * @tc.steps: step2. call spanBases
+     */
+    textModelNG.Create(spanStringWithSpans);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetTextSelectableMode001
+ * @tc.desc: Test SetTextSelectableMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextTestNg_SetTextSelectableMode001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    auto retFont = textModelNG.GetFont(frameNode);
+    textModelNG.SetFontSize(ADAPT_ZERO_FONT_SIZE_VALUE);
+    EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
+
+    textModelNG.SetTextSelectableMode(frameNode, TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    textModelNG.SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    ASSERT_EQ(textModelNG.GetTextSelectableMode(frameNode), TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+
+    textModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    textModelNG.SetEllipsisMode(EllipsisMode::HEAD);
+    ASSERT_EQ(textModelNG.GetEllipsisMode(frameNode), EllipsisMode::HEAD);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitSpanStringController001
+ * @tc.desc: Test InitSpanStringController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextTestNg_InitSpanStringController001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567893421");
+
+    textModelNG.InitSpanStringController(frameNode, spanStringWithSpans);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitTextController001
+ * @tc.desc: Test InitTextController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextTestNg_InitTextController001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    auto ret = textModelNG.InitTextController(frameNode);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: SetTextDetectEnable001
+ * @tc.desc: Test SetTextDetectEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextTestNg_SetTextDetectEnable001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+
+    textModelNG.SetTextDetectEnable(frameNode, true);
+    ASSERT_NE(textModelNG.GetTextDetectEnable(frameNode), false);
+
+    auto ret = textModelNG.GetTextController();
+    EXPECT_NE(ret, nullptr);
+
+    textModelNG.SetClipEdge(true);
+    EXPECT_TRUE(true);
+
+    auto strContent = textModelNG.GetContent(frameNode);
+    EXPECT_EQ(strContent, CREATE_VALUE);
+
+    auto retLineHeight = textModelNG.GetLineHeight(frameNode);
+    EXPECT_EQ(retLineHeight, 0.0f);
+
+    auto retLineSpacing = textModelNG.GetLineSpacing(frameNode);
+    EXPECT_EQ(retLineSpacing, 0.0f);
+
+    auto retDecoration = textModelNG.GetDecoration(frameNode);
+    EXPECT_EQ(retDecoration, TextDecoration::NONE);
+
+    auto retTextDecorationColor = textModelNG.GetTextDecorationColor(frameNode);
+    EXPECT_EQ(retTextDecorationColor, Color::BLACK);
+
+    auto retTextDecorationStyle = textModelNG.GetTextDecorationStyle(frameNode);
+    EXPECT_EQ(retTextDecorationStyle, TextDecorationStyle::SOLID);
+
+    auto retTextCase = textModelNG.GetTextCase(frameNode);
+    EXPECT_EQ(retTextCase, TextCase::NORMAL);
+
+    auto retLetterSpacing = textModelNG.GetLetterSpacing(frameNode);
+    EXPECT_EQ(retLetterSpacing, ADAPT_ZERO_FONT_SIZE_VALUE);
+
+    auto retMaxLines = textModelNG.GetMaxLines(frameNode);
+    EXPECT_NE(retMaxLines, 0.0f);
+
+    auto retTextAlign = textModelNG.GetTextAlign(frameNode);
+    EXPECT_EQ(retTextAlign, TextAlign::START);
+}
 } // namespace OHOS::Ace::NG

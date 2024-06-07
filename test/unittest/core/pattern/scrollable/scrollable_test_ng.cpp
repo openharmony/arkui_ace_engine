@@ -828,6 +828,9 @@ HWTEST_F(ScrollableTestNg, HandleMoveEventInComp, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     auto pt = PointF(0.0, 0.0);
+    auto host = scrollPn->GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    geometryNode->SetFrameWidth(100);
     scrollPn->HandleMoveEventInComp(pt);
     EXPECT_TRUE(scrollPn->velocityMotion_);
     EXPECT_TRUE(scrollPn->animator_);

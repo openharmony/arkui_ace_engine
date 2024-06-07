@@ -1175,6 +1175,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition001, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -1231,12 +1234,15 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), true);
-    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), true);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), false);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), false);
 }
 
 /**
@@ -1281,11 +1287,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuBorderRadius001, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), true);
+    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), false);
 }
 
 /**

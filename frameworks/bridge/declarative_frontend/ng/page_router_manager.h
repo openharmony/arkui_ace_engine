@@ -227,6 +227,7 @@ private:
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
     std::list<std::string> restorePageStack_;
     RouterPageInfo ngBackTarget_;
+    bool isNewPageReplacing_ = false;
 #if defined(PREVIEW)
     IsComponentPreviewCallback isComponentPreview_;
 #endif

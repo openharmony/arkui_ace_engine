@@ -524,7 +524,7 @@ void TextPattern::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        if (isSpanStringMode_) {
+        if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else {
             clipboard_->SetData(value, copyOption_);
@@ -546,6 +546,7 @@ void TextPattern::HandleOnCopySpanString()
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
+    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
     clipboard_->SetData(pasteData, copyOption_);
 }
 
@@ -2045,7 +2046,9 @@ void TextPattern::OnModifyDone()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         std::string textCache = textForDisplay_;
-        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        if (!isSpanStringMode_) {
+            textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        }
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
             dataDetectorAdapter_->aiDetectInitialized_ = false;
@@ -2220,7 +2223,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
 
 bool TextPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -2410,7 +2413,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         UpdateContainerChildren(current.containerSpanNode, current.node);
         auto spanNode = DynamicCast<SpanNode>(current.node);
         auto tag = current.node->GetTag();
-        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -3118,6 +3121,25 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     }
 
     RecoverCopyOption();
+}
+
+void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    menuOptionItems_ = std::move(menuOptionsItems);
+    for (auto& menuOption : menuOptionItems_) {
+        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
+        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
+                                const std::string selectInfo) {
+            auto textPattern = weak.Upgrade();
+            CHECK_NULL_VOID(textPattern);
+            if (actionRange) {
+                auto start = textPattern->textSelector_.GetTextStart();
+                auto end = textPattern->textSelector_.GetTextEnd();
+                actionRange(start, end);
+            }
+            textPattern->CloseSelectOverlay();
+        };
+    }
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)

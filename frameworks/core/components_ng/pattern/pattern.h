@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
@@ -357,6 +358,12 @@ public:
         return UnsafeRawPtr(frameNode_);
     }
 
+    PipelineContext* GetContext() {
+        auto frameNode = GetUnsafeHostPtr();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetContext();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
@@ -553,6 +560,7 @@ public:
 
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
+    virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

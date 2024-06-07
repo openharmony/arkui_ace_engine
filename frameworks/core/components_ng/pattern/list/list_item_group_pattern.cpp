@@ -40,7 +40,7 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(listItemGroupTheme);

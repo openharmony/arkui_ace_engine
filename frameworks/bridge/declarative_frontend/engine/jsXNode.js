@@ -1573,7 +1573,11 @@ class RenderNode {
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
+        this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
         this.clipToFrameValue = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrameValue = false;
+        }
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -1590,12 +1594,17 @@ class RenderNode {
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
         this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        this.markNodeGroupValue = false;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
         this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
         this.nodePtr = this._nativeRef?.getNativeHandle();
-        this.clipToFrame = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrame = false;
+        } else {
+            this.clipToFrame = true;
+        }
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -1735,6 +1744,14 @@ class RenderNode {
             this.lengthMetricsUnitValue = unit;
         }
     }
+    set markNodeGroup(isNodeGroup) {
+        if (isNodeGroup === undefined || isNodeGroup === null) {
+            this.markNodeGroupValue = false;
+        } else {
+            this.markNodeGroupValue = isNodeGroup;
+        }
+        getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+    }
     get backgroundColor() {
         return this.backgroundColorValue;
     }
@@ -1785,6 +1802,9 @@ class RenderNode {
     }
     get lengthMetricsUnit() {
         return this.lengthMetricsUnitValue;
+    }
+    get markNodeGroup() {
+        return this.markNodeGroupValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
+#include "base/log/ace_checker.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -686,6 +688,22 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         pushAnimations_.emplace_back(backButtonAnimation);
     }
     isOnAnimation_ = true;
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        int64_t startTime = GetSysTimestamp();
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        // After completing layout tasks at all nodes on the page, perform performance testing and management
+        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime]() {
+            auto navigation = weakNav.Upgrade();
+            CHECK_NULL_VOID(navigation);
+            auto curNode = weakNode.Upgrade();
+            int64_t endTime = GetSysTimestamp();
+            CHECK_NULL_VOID(curNode);
+            PerformanceCheckNodeMap nodeMap;
+            curNode->GetPerformanceCheckData(nodeMap);
+            AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
+                nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
+        });
+    }
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::BackButtonAnimation(

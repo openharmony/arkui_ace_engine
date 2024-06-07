@@ -887,6 +887,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto isCustomMenu = false;
     if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) != TitleBarParentType::NAV_DESTINATION) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
         isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
     } else {
         isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);

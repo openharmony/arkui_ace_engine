@@ -48,6 +48,7 @@ public:
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsEnablePreviewText(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void SetOnWillChange(const JSCallbackInfo& info);
     static void SetOnDidChange(const JSCallbackInfo& info);
@@ -74,6 +75,7 @@ public:
     static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

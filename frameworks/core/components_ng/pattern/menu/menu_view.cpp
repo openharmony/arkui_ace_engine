@@ -184,8 +184,10 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    float contentPadding = 0.0f;
+    if (theme) {
+        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
@@ -195,7 +197,9 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto renderContext = scroll->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (theme) {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
@@ -267,7 +271,8 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
     return menuHostNode->GetPattern<MenuPattern>();
 }
 
-void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext)
+void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
+    bool isShowHoverImage)
 {
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {
@@ -279,12 +284,14 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
     AnimationUtils::Animate(
         option,
-        [imageContext, previewBorderRadius, shadow]() mutable {
+        [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
             if (imageContext) {
                 auto color = shadow->GetColor();
                 auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
                 shadow->SetColor(newColor);
                 imageContext->UpdateBackShadow(shadow.value());
+
+                CHECK_NULL_VOID(!isShowHoverImage);
                 BorderRadiusProperty borderRadius;
                 borderRadius.SetRadius(previewBorderRadius);
                 imageContext->UpdateBorderRadius(borderRadius);
@@ -388,7 +395,7 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
         ShowPixelMapScaleAnimationProc(menuTheme, imageContext, menuPattern, menuParam);
     }
 
-    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
+    ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, menuParam.isShowHoverImage);
 }
 
 void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
@@ -457,7 +464,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto panEvent =
         AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance));
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, Dimension(distance, DimensionUnit::VP));
 
     // add TouchEvent for Menu dragStart Move
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
@@ -619,6 +626,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
     }
 }
 
+void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
+    const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(targetNode);
+    if (menuParam.previewMode != MenuPreviewMode::NONE || targetNode->IsDraggable()) {
+        SetFilter(targetNode, wrapperNode);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+        menuParam.isShowHoverImage) {
+        SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+    }
+    if (menuParam.previewMode == MenuPreviewMode::NONE) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(1);
+    }
+}
+
 void SetHasCustomRadius(
     const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
@@ -666,22 +692,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         if (!optionNode) {
             continue;
         }
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_RETURN(menuTheme, nullptr);
-        auto fontScale = pipeline->GetFontScale();
-        if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
-            NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
-            auto optionPattern = optionNode->GetPattern<OptionPattern>();
-            CHECK_NULL_RETURN(optionPattern, nullptr);
-            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
-            CHECK_NULL_RETURN(textNode, nullptr);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-            textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
-        }
+        NeedAgingUpdateNode(optionNode);
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         auto eventHub = optionNode->GetEventHub<EventHub>();
@@ -800,16 +811,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
-            menuParam.isShowHoverImage) {
-            SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
-        }
-        if (menuParam.previewMode == MenuPreviewMode::NONE) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, wrapperNode);
-            renderContext->UpdateZIndex(1);
-        }
+        SetPreviewInfoToMenu(targetNode, wrapperNode, previewNode, menuNode, menuParam);
         if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
             previewNode->MountToParent(wrapperNode);
             previewNode->MarkModifyDone();
@@ -947,6 +949,27 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
+}
+
+void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)
+{
+    CHECK_NULL_VOID(optionNode);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto fontScale = pipeline->GetFontScale();
+    if (NearEqual(fontScale, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale, menuTheme->GetMaxFontSizeScale())) {
+        auto optionPattern = optionNode->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
     }
 }
 } // namespace OHOS::Ace::NG

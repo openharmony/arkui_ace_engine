@@ -377,6 +377,7 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    SetRotation(pipeline->GetTransformHint());
     auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -612,9 +613,10 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
 
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
-    if (type_ != XComponentType::SURFACE || isSurfaceLock_) {
+    if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
         return;
     }
+    rotation_ = rotation;
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(rotation);
 }
@@ -1649,6 +1651,15 @@ void XComponentPattern::EnableAnalyzer(bool enable)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
+}
+
+void XComponentPattern::SetImageAIOptions(void *options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
 void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)

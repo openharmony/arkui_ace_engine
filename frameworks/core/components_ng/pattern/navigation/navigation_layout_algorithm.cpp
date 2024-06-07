@@ -299,9 +299,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto usrNavigationMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
-    bool isAutoMode = false;
     if (usrNavigationMode == NavigationMode::AUTO) {
-        isAutoMode = true;
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
             usrNavigationMode = NavigationMode::SPLIT;
             auto navBarNode = hostNode->GetNavBarNode();
@@ -314,7 +312,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
-    bool doModeSwitchAnimationInAnotherTask = isAutoMode && modeChange && !hostNode->IsOnModeSwitchAnimation();
+    bool doModeSwitchAnimationInAnotherTask = modeChange && !hostNode->IsOnModeSwitchAnimation();
     // First time layout, no need to do animation
     doModeSwitchAnimationInAnotherTask &= (navigationPattern->GetNavigationMode() != INITIAL_MODE);
     if (!doModeSwitchAnimationInAnotherTask) {

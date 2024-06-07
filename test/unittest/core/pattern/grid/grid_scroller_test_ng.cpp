@@ -1833,4 +1833,24 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 9);
     EXPECT_EQ(pattern_->GetEndOffset(), 0.0f);
 }
+
+/**
+ * @tc.name: MultiLineItemScroll001
+ * @tc.desc: Test multiLine item in last line scroll end
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, MultiLineItemScroll001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(6, GridItemStyle::NONE);
+    CreateBigItem(0, 1, 0, 1, 2 * ITEM_WIDTH, 2 * ITEM_HEIGHT);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollBy(-10);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_TRUE(info.reachEnd_);
+    EXPECT_FALSE(info.offsetEnd_);
+}
 } // namespace OHOS::Ace::NG

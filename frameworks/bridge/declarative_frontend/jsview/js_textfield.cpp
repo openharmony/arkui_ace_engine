@@ -348,12 +348,16 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1) {
         return;
     }
-    auto styleString = info[0]->ToString();
-    if (styleString == "Inline") {
-        TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
+    if (info[0]->IsString()) {
+        auto styleString = info[0]->ToString();
+        if (styleString == "Inline") {
+            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
+        } else {
+            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
+        }
     } else {
         TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
     }
@@ -1704,5 +1708,14 @@ void JSTextField::OnDidDelete(const JSCallbackInfo& info)
         func->ExecuteWithValue(deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
+}
+
+void JSTextField::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
 }
 } // namespace OHOS::Ace::Framework

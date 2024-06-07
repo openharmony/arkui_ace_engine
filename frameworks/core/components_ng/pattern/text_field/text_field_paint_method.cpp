@@ -117,6 +117,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         !textFieldPattern->IsNormalInlineState());
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    DoTextRaceIfNeed(paintWrapper);
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
@@ -196,6 +197,43 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetPreviewTextDecorationColor(textFieldPattern->GetPreviewDecorationColor());
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::DoTextRaceIfNeed(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldContentModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+
+    if (!(textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
+        return;
+    }
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto paintContentWidth = paintWrapper->GetContentSize().Width();
+    if (GreatNotEqual(paintContentWidth, 0.0) && GreatNotEqual(paragraph->GetTextWidth(), paintContentWidth)) {
+        textFieldContentModifier_->SetTextFadeoutEnabled(true);
+        if (!textFieldPattern->HasFocus()) {
+            auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
+            auto textRect = textFieldPattern->GetTextRect();
+            if (LessNotEqual(textRect.GetX(), contentRect.GetX())) {
+                textRect.SetLeft(contentRect.GetX());
+                textFieldPattern->SetTextRect(textRect);
+            }
+
+            textFieldContentModifier_->StartTextRace();
+        } else {
+            textFieldContentModifier_->StopTextRace();
+        }
+    } else {
+        textFieldContentModifier_->SetTextFadeoutEnabled(false);
+        textFieldContentModifier_->StopTextRace();
+    }
 }
 
 void TextFieldPaintMethod::UpdateScrollBar()

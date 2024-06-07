@@ -30,6 +30,10 @@ if (!is_arkui_x) {
   }
 }
 
+config("ace_ndk_public_configs") {
+  include_dirs = [ "$ace_root/interfaces" ]
+}
+
 ohos_shared_library("ace_ndk") {
   if (current_os == "ohos") {
     sanitize = {
@@ -43,6 +47,8 @@ ohos_shared_library("ace_ndk") {
     "//foundation/arkui/ace_engine/frameworks",
     "//foundation/arkui/ace_engine/interfaces/native",
   ]
+
+  public_configs = [ ":ace_ndk_public_configs" ]
 
   sources = [
     "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",

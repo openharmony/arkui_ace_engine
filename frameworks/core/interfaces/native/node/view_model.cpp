@@ -331,7 +331,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -704,7 +704,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
         }
         //minHeight == maxHeight
         if (data[1] == data[3]) {
-            constraint->selfIdealSize.SetHeight(data[0]);
+            constraint->selfIdealSize.SetHeight(data[1]);
         }
         //percentReferenceWidth
         constraint->percentReference.SetWidth(data[4]);

@@ -23,11 +23,6 @@ template("napi_dragcontroller_static") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    include_dirs = [
-      "$ark_ets_path",
-      "$ark_runtime_path",
-    ]
-
     sources = [ "js_drag_controller.cpp" ]
     deps = [ "../utils:napi_utils_static_${platform}" ]
     external_deps = []

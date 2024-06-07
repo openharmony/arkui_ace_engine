@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
@@ -93,10 +94,10 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
-        if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-        } else if (IsSystemTopMost()) {
+        if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+        } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (GetAboveApps()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
@@ -165,6 +166,10 @@ void SubwindowOhos::InitContainer()
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
+
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
+    CHECK_NULL_VOID(uiContentImpl);
+    uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
@@ -421,18 +426,6 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
-            if (it != hotAreasMap_.end()) {
-                auto hotAreaRect = it->second;
-                OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
-                if (ret != OHOS::Rosen::WMError::WM_OK) {
-                    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
-                        static_cast<int32_t>(ret));
-                }
-            }
-            return;
-        }
-        if (!rootNode->GetChildren().empty()) {
             return;
         }
         auto focusHub = rootNode->GetFocusHub();

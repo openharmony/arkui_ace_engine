@@ -69,6 +69,8 @@ public:
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
+    static Dimension GetRefreshOffset(FrameNode* frameNode);
+    static bool GetPullToRefresh(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

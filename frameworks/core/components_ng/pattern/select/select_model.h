@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -96,6 +97,7 @@ public:
     virtual void SetHasOptionWidth(bool hasOptionWidth);
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
+    virtual void SetDivider(const NG::SelectDivider& divider);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
     virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();

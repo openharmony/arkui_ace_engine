@@ -37,6 +37,28 @@ CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paint
     };
 }
 
+void PaintCustomDivider(SizeF optionSize, float horInterval, float iconHorInterval,
+    PaintWrapper* paintWrapper, RSPath& path)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto props = AceType::DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(props);
+    auto dividerWidth = static_cast<float>(props->GetDividerValue().strokeWidth.ConvertToPx());
+    auto startMargin = static_cast<float>(props->GetDividerValue().startMargin.ConvertToPx());
+    auto endMargin = static_cast<float>(props->GetDividerValue().endMargin.ConvertToPx());
+    if (startMargin < 0.0f || startMargin > optionSize.Width()) {
+        startMargin = horInterval + iconHorInterval;
+    }
+    if (endMargin < 0.0f || endMargin > optionSize.Width()) {
+        endMargin = horInterval;
+    }
+    if ((startMargin + endMargin) > optionSize.Width()) {
+        startMargin = horInterval + iconHorInterval;
+        endMargin = horInterval;
+    }
+    path.AddRect(startMargin, -dividerWidth, optionSize.Width() - endMargin, dividerWidth);
+}
+
 void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -64,11 +86,14 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     }
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval + iconHorInterval, 0, optionSize.Width() - horInterval,
-        static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
-
+    if (props->HasDivider()) {
+        PaintCustomDivider(optionSize, horInterval, iconHorInterval, paintWrapper, path);
+    } else {
+        path.AddRect(horInterval + iconHorInterval, 0, optionSize.Width() - horInterval,
+            static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
+    }
     RSBrush brush;
-    auto dividerColor = selectTheme->GetLineColor();
+    auto dividerColor = props->HasDivider() ? props->GetDividerValue().color : selectTheme->GetLineColor();
     brush.SetColor(dividerColor.GetValue());
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);

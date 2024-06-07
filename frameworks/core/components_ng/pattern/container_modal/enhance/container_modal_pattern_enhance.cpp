@@ -93,7 +93,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_INNER_RADIUS : 0.0_vp);
+    stageBorderRadius.SetRadius((isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();

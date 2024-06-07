@@ -15,5 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("radio_test_ng") {
   type = "new"
-  sources = [ "radio_test_ng.cpp" ]
+  sources = [
+    "radio_node_test_ng.cpp",
+    "radio_setbuilder_test_ng.cpp",
+    "radio_test_ng.cpp",
+    "radio_value_test_ng.cpp",
+  ]
 }

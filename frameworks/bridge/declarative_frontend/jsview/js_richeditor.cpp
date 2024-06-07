@@ -560,6 +560,15 @@ void JSRichEditor::SetOnCopy(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 
+void JSRichEditor::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    RichEditorModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+}
+
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
@@ -588,6 +597,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsert
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.GetInsertOffset());
     aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.GetInsertValue());
+    aboutToIMEInputObj->SetProperty<std::string>("previewText", insertValue.GetPreviewText());
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -619,6 +629,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
     onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
+    onIMEInputCompleteObj->SetProperty<std::string>("previewText", textSpanResult.GetPreviewText());
     onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
     onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
@@ -964,6 +975,20 @@ void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
+void JSRichEditor::JsEnablePreviewText(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        RichEditorModel::GetInstance()->SetSupportPreviewText(true);
+        return;
+    }
+    auto enable = tmpInfo->ToBoolean();
+    RichEditorModel::GetInstance()->SetSupportPreviewText(enable);
+}
+
 void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1182,6 +1207,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
     JSClass<JSRichEditor>::StaticMethod("enableDataDetector", &JSRichEditor::JsEnableDataDetector);
+    JSClass<JSRichEditor>::StaticMethod("enablePreviewText", &JSRichEditor::JsEnablePreviewText);
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
@@ -1193,6 +1219,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDidChange", &JSRichEditor::SetOnDidChange);
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
+    JSClass<JSRichEditor>::StaticMethod("selectionMenuOptions", &JSRichEditor::SelectionMenuOptions);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1260,7 +1287,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
         updateSpanStyle.updateSymbolColor = symbolColor;
         style.SetSymbolColorList(symbolColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2053,7 +2080,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
         updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
-        updateSpanStyle.hasResourceFontColor = fontColor->IsObject();
+        updateSpanStyle.hasResourceFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
@@ -2172,7 +2199,7 @@ void JSRichEditorBaseController::ParseTextDecoration(
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
             updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
-            updateSpanStyle.hasResourceDecorationColor = color->IsObject();
+            updateSpanStyle.hasResourceDecorationColor = false;
         }
     }
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {

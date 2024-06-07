@@ -443,7 +443,6 @@ ohos_source_set("ace_core_extra") {
 
 ohos_source_set("ace_engine_unittest_flutter_deps") {
   testonly = true
-  public_deps = [ "$skia_root_new:skia_ohos" ]
   cflags_cc = [ "-Wno-thread-safety-attributes" ]
   external_deps = [ "eventhandler:libeventhandler" ]
 }
@@ -960,6 +959,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_effect_options.cpp",
