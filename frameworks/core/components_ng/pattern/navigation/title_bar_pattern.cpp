@@ -123,6 +123,24 @@ void ApplyImageSourceInfo(const RefPtr<FrameNode>& backButtonNode,
     }
 }
 
+void ApplyThemeIconSize(RefPtr<TextLayoutProperty>& symbolProperty)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto theme = NavigationGetTheme();
+    if (theme) {
+        symbolProperty->UpdateFontSize(theme->GetIconWidth());
+    }
+}
+
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr<FrameNode>& backButtonIconNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
@@ -134,11 +152,12 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         if (theme) {
-            symbolProperty->UpdateFontSize(theme->GetIconWidth());
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         // User-defined color overrides the default color of the theme
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (IsImageBackIcon(titleBarLayoutProperty)) {
         // symbol -> image
@@ -215,10 +234,11 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         if (theme) {
-            symbolProperty->UpdateFontSize(theme->GetIconWidth());
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         symbolNode->MountToParent(backButtonNode);
         symbolNode->MarkDirtyNode();
         symbolNode->MarkModifyDone();
