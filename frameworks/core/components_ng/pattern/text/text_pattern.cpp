@@ -328,7 +328,7 @@ int32_t TextPattern::GetTextContentLength()
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
-    if (copyOption_ == CopyOptions::None || isMousePressed_) {
+    if (!IsSelectableAndCopy() || isMousePressed_) {
         return;
     }
     auto host = GetHost();
@@ -523,7 +523,7 @@ void TextPattern::HandleOnCopy()
         HiddenMenu();
         return;
     }
-    if (copyOption_ != CopyOptions::None) {
+    if (IsSelectableAndCopy()) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
         } else {
@@ -813,7 +813,7 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
 
 void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan)
 {
-    if (copyOption_ != CopyOptions::None) {
+    if (IsSelectableAndCopy()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
     TAG_LOGD(AceLogTag::ACE_TEXT, "HandleSpanSingleClickEvent clickedSpanPosition_: %{public}d", clickedSpanPosition_);
@@ -866,7 +866,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                                              const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->copyOption_ == CopyOptions::None) {
+        if (!(pattern->IsSelectableAndCopy())) {
             return;
         }
         pattern->CloseSelectOverlay();
@@ -926,11 +926,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
-    if (mode == TextSelectableMode::UNSELECTABLE ||
-        copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
+    if (!IsSelectableAndCopy() || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -1070,10 +1066,7 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
-    if (copyOption_ == CopyOptions::None || mode == TextSelectableMode::UNSELECTABLE) {
+    if (!IsSelectableAndCopy()) {
         return;
     }
 
@@ -1263,7 +1256,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
 
-    if (keyEvent.IsCtrlWith(KeyCode::KEY_C) && copyOption_ != CopyOptions::None) {
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_C)) {
         HandleOnCopy();
         return true;
     }
@@ -1309,13 +1302,11 @@ void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(0, secondHandleMetrics, TextAffinity::UPSTREAM);
-    auto firstIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
-    float height = GetTextHeight();
-    if (secondOffsetY - height < firstIndexOffsetY) {
+    double height = GetTextHeight(end, false);
+    if (NearZero(height)) {
         end = 0;
     } else {
         Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
@@ -1332,13 +1323,11 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(GetTextLength(), secondHandleMetrics, TextAffinity::UPSTREAM);
-    auto lastIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
-    float height = GetTextHeight();
-    if (secondOffsetY + height > lastIndexOffsetY) {
+    double height = GetTextHeight(end, true);
+    if (NearZero(height)) {
         end = GetTextLength();
     } else {
         Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
@@ -1360,12 +1349,25 @@ void TextPattern::HandleSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-float TextPattern::GetTextHeight()
+double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
 {
-    if (pManager_ && !NearZero(pManager_->GetHeight()) && pManager_->GetLineCount() > 0) {
-        return pManager_->GetHeight() / pManager_->GetLineCount();
+    double lineHeight = 0.0;
+    auto lineCount = static_cast<int32_t>(pManager_->GetLineCount());
+    for (auto lineNumber = 0; lineNumber < lineCount; lineNumber++) {
+        auto lineMetrics = GetLineMetrics(lineNumber);
+        auto startIndex = static_cast<int32_t>(lineMetrics.startIndex);
+        auto endIndex = static_cast<int32_t>(lineMetrics.endIndex);
+        if (isNextLine) {
+            if (index >= startIndex && index <= endIndex && endIndex != GetTextLength() - 1) {
+                lineHeight = GetLineMetrics(lineNumber + 1).height;
+            }
+        } else {
+            if (index >= startIndex && index <= endIndex && startIndex != 0) {
+                lineHeight = GetLineMetrics(lineNumber - 1).height;
+            }
+        }
     }
-    return 0.0;
+    return lineHeight;
 }
 
 int32_t TextPattern::GetTextLength()
@@ -1391,13 +1393,21 @@ void TextPattern::SetTextSelectableMode(TextSelectableMode value)
     }
 }
 
+bool TextPattern::IsSelectableAndCopy()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    return mode != TextSelectableMode::UNSELECTABLE && copyOption_ != CopyOptions::None;
+}
+
 bool TextPattern::IsDraggable(const Offset& offset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<EventHub>();
     bool draggable = eventHub->HasOnDragStart();
-    if (copyOption_ != CopyOptions::None && draggable &&
+    if (IsSelectableAndCopy() && draggable &&
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
@@ -2098,7 +2108,7 @@ void TextPattern::InitCopyOption()
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (copyOption_ != CopyOptions::None) {
+    if (IsSelectableAndCopy()) {
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         if (!clipboard_ && context) {
@@ -2117,7 +2127,7 @@ void TextPattern::InitCopyOption()
             gestureEventHub->SetTextDraggable(false);
         }
     }
-    if (onClick_ || copyOption_ != CopyOptions::None) {
+    if (onClick_ || IsSelectableAndCopy()) {
         InitClickEvent(gestureEventHub);
     }
     auto eventHub = host->GetEventHub<EventHub>();
@@ -3014,7 +3024,7 @@ void TextPattern::RemoveAreaChangeInner()
 
 bool TextPattern::NeedShowAIDetect()
 {
-    return textDetectEnable_ && copyOption_ != CopyOptions::None && enabled_ &&
+    return textDetectEnable_ && IsSelectableAndCopy() && enabled_ &&
            !dataDetectorAdapter_->aiSpanMap_.empty();
 }
 
