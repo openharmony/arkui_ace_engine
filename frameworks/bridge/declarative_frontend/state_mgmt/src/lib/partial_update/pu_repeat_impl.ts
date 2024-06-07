@@ -108,6 +108,15 @@ class __RepeatImpl<T>  {
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
 
+                // TBD moveChild() only when item types are same
+                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
+                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
+                //if (type0 == type1) {
+                //    // C++ mv from tempChildren[oldIndex] to end of children_
+                //    RepeatNative.moveChild(oldIndex);
+                //} else {
+                //    this.initialRenderItem(key, itemInfo.repeatItem);
+                //}
             } else if (deletedKeysAndIndex.length) {
                 // case #2:
                 // new array item, there is an deleted array items whose
@@ -124,6 +133,8 @@ class __RepeatImpl<T>  {
 
                 // update key2item_ Map
                 this.key2Item_.set(key, itemInfo);
+
+                // TBD moveChild() only when item types are same
 
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
