@@ -72,6 +72,7 @@ void LazyForEachNode::AdjustLayoutWrapperTree(
 void LazyForEachNode::BuildAllChildren()
 {
     for (int i = 0; i < FrameCount(); i++) {
+        LOGE("Guido: Calling GetFrameChildByIndex %{public}d", (int) i);
         GetFrameChildByIndex(i, true);
     }
     children_.clear();
@@ -88,11 +89,13 @@ void LazyForEachNode::PostIdleTask()
     if (needPredict_) {
         return;
     }
+    LOGE("Guido posting idle task");
     needPredict_ = true;
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
         ACE_SCOPED_TRACE("LazyForEach predict");
+        LOGE("Guido exec idle task");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->needPredict_ = false;
@@ -113,6 +116,7 @@ void LazyForEachNode::PostIdleTask()
 void LazyForEachNode::OnDataReloaded()
 {
     ACE_SCOPED_TRACE("OnDataReloaded");
+    LOGE("Guido");
     children_.clear();
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -129,6 +133,7 @@ void LazyForEachNode::OnDataReloaded()
 void LazyForEachNode::OnDataAdded(size_t index)
 {
     ACE_SCOPED_TRACE("OnDataAdded");
+    LOGE("Guido");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -143,6 +148,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
 void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
 {
     ACE_SCOPED_TRACE("OnDataBulkAdded");
+    LOGE("Guido");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -157,6 +163,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
     ACE_SCOPED_TRACE("OnDataDeleted");
+    LOGE("Guido");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -180,6 +187,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
 void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
 {
     ACE_SCOPED_TRACE("OnDataBulkDeleted");
+    LOGE("Guido");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -206,6 +214,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
 
 void LazyForEachNode::OnDataChanged(size_t index)
 {
+    LOGE("Guido");
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataChanged(index);
@@ -219,6 +228,7 @@ void LazyForEachNode::OnDataChanged(size_t index)
 void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
 {
     ACE_SCOPED_TRACE("OnDataBulkChanged");
+    LOGE("Guido");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -245,6 +255,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
 
 void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
 {
+    LOGE("Guido");
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataMoveToNewPlace(from, to);
@@ -257,6 +268,7 @@ void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
 
 void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 {
+    LOGE("Guido");
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataMoved(from, to);
@@ -269,6 +281,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 
 void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperations)
 {
+    LOGE("Guido");
     ACE_SCOPED_TRACE("OnDatasetChange");
     int32_t initialChangedIndex = 0;
     if (builder_) {
@@ -297,8 +310,10 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
 
 void LazyForEachNode::NotifyDataCountChanged(int32_t index)
 {
+    LOGE("Guido");
     auto parent = GetParent();
     if (parent) {
+        LOGE("Guido calling ChildrenUpdatedFrom");
         parent->ChildrenUpdatedFrom(index);
     }
 }
@@ -306,12 +321,15 @@ void LazyForEachNode::NotifyDataCountChanged(int32_t index)
 void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
 {
     if (needMarkParent_) {
+        LOGE("Guido");
         UINode::MarkNeedSyncRenderTree(needRebuild);
     }
 }
 
 RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    LOGE("Guido LazyForEachNode::GetFrameChildByIndex nodeId: %{public}d: index: %{public}d, needBuild: %{public}d", (int) GetId(),  (int) index, (int) needBuild);
+
     if (index >= static_cast<uint32_t>(FrameCount())) {
         return nullptr;
     }
@@ -366,6 +384,7 @@ void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
     if (!builder_) {
         return;
     }
+    LOGE("Guido");
     children_.clear();
     for (auto index = from; index < to; index++) {
         if (index >= startIndex_ && index < startIndex_ + count_) {
@@ -380,6 +399,7 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     if (!builder_) {
         return;
     }
+    LOGE("Guido");
     children_.clear();
     if (isAll) {
         builder_->RemoveAllChild();
@@ -390,6 +410,8 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 
 void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
 {
+    LOGE("Guido DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
+
     if (!builder_) {
         return;
     }
@@ -402,24 +424,31 @@ void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
 {
+    LOGE("Guido");
+
     if (children_.empty()) {
+    LOGE("Guido children_ is empty");
         std::list<std::pair<std::string, RefPtr<UINode>>> childList;
         const auto& items = builder_->GetItems(childList);
 
         for (auto& node : childList) {
             if (!node.second->OnRemoveFromParent(true)) {
+                 LOGE("Guido AddDisappearingChild");
                 const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
+                    LOGE("Guido DetachFromMainTree");   // without animation 
                 node.second->DetachFromMainTree();
             }
         }
         for (const auto& [index, item] : items) {
             if (item.second) {
                 const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
+                LOGE("Guido pushback child");
                 children_.push_back(item.second);
             }
         }
     }
+    LOGE("Guido done");
     return children_;
 }
 
@@ -467,6 +496,7 @@ void LazyForEachNode::FireOnMove(int32_t from, int32_t to)
 
 RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
 {
+    LOGE("Guido");
     CHECK_NULL_RETURN(builder_, nullptr);
     auto child = builder_->GetChildByIndex(index, false, false);
     CHECK_NULL_RETURN(child.second, nullptr);

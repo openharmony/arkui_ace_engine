@@ -3673,6 +3673,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
+    LOGE("Guido FrameNode::GetOrCreateChildByIndex nodeId: %{public}d: $index: %{public}d, addToRenderTree %{public}d, isCache: %{public}d", (int) GetId(),  (int) index, (int) addToRenderTree, (int) isCache);
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
@@ -3690,6 +3691,7 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 
 FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache, bool isExpand)
 {
+    LOGE("Guido GetFrameNodeChildByIndex nodeId: %{public}d: index: %{public}d, isCache: %{public}d", (int) GetId(),  (int) index, (int) isCache);
     auto frameNode = isExpand ? DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache, false))
                               : DynamicCast<FrameNode>(UINode::GetFrameChildByIndexWithoutExpanded(index));
     return RawPtr(frameNode);

@@ -53,7 +53,7 @@ public:
 
     void UpdateTotalCount(int32_t totalCount)
     {
-        caches_.setL2CacheCount(totalCount);
+        totalCount_= totalCount;
     }
 
     // Number of children that Repeat can product
@@ -121,12 +121,14 @@ private:
     void PostIdleTask();
 
     // try to find entry for given index in L1 or L2 cache
-    RefPtr<UINode> GetFromCaches(uint32_t forIndex, std::string key);
+    std::pair<bool, RefPtr<UINode>> GetFromCaches(uint32_t forIndex) {
+        return caches_.getNode4Index(forIndex);
+    }
 
     // index is not in L1 or L2 cache, need to make it
     // either by TS rendering new children or by TS updating
     // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, std::string forKey, bool addToCache);
+    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, std::string forKey);
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
@@ -141,12 +143,6 @@ private:
 
     // caches:
     RepeatVirtualScrollCaches caches_;
-
-    // request TS to create new sub-tree for given index or update existing
-    // update subtree cached for (old) index
-    // FIXME API might need to change to tell which old item to update
-    std::function<void(uint32_t)> onCreateNode_;
-    std::function<void(const std::string&, uint32_t)> onUpdateNode_;
 
     // FIXME used by one of the unknown functions
     std::list<std::string> ids_;
