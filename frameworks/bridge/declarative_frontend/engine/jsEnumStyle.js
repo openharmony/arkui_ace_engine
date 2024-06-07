@@ -1812,6 +1812,10 @@ class DotIndicator extends Indicator {
     this.selectedColorValue = value;
     return this;
   }
+  maxDisplayCount(value) {
+    this.maxDisplayCountValue = value;
+    return this;
+  }
 }
 
 class DigitIndicator extends Indicator {

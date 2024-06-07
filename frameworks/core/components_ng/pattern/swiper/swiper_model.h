@@ -45,6 +45,7 @@ struct SwiperParameters {
     std::optional<bool> maskValue;
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
+    std::optional<int32_t> maxDisplayCountVal;
 };
 
 struct SwiperDigitalParameters {
