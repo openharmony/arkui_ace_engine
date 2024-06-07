@@ -85,6 +85,7 @@ public:
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

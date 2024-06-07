@@ -62,6 +62,7 @@ public:
     }
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

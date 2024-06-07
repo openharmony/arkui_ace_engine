@@ -1829,4 +1829,12 @@ void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
 }
+
+void NavigationModelNG::SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetNavigationPathInfo(moduleName, pagePath);
+}
 } // namespace OHOS::Ace::NG

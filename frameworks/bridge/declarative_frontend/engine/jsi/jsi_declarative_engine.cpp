@@ -996,6 +996,7 @@ napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeI
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+thread_local std::unordered_map<std::string, std::string> JsiDeclarativeEngine::routerPathInfoMap_;
 thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
 thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
@@ -1581,12 +1582,30 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<p
         LocalScope scope(vm);
         name = JSNApi::GetBundleName(const_cast<EcmaVM *>(vm));
     }
+    std::string pageFullPath;
+    if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
+        auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
+        if (pageFullPathInfo->IsString()) {
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
+        }
+    }
     NamedRouterProperty namedRouterProperty({ pageGenerator, name,
         moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
     auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
         ret.first->second.pageGenerator.FreeGlobalHandleAddr();
         namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
+    }
+    auto pagePathKey = moduleName->ToString(vm)->ToString() + pagePath->ToString(vm)->ToString();
+    auto pageRet = routerPathInfoMap_.insert(std::make_pair(pagePathKey, pageFullPath));
+    if (!pageRet.second) {
+        routerPathInfoMap_[pagePathKey] = pageFullPath;
+    }
+    if (!namedRoute.empty()) {
+        auto ret = routerPathInfoMap_.insert(std::make_pair(namedRoute, pageFullPath));
+        if (!ret.second) {
+            routerPathInfoMap_[namedRoute] = pageFullPath;
+        }
     }
 }
 
@@ -2153,6 +2172,15 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
     auto iter = namedRouterRegisterMap_.find(url);
     if (iter != namedRouterRegisterMap_.end()) {
         return iter->second.pagePath;
+    }
+    return "";
+}
+
+std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
+{
+    auto iter = routerPathInfoMap_.find(url);
+    if (iter != routerPathInfoMap_.end()) {
+        return iter->second;
     }
     return "";
 }

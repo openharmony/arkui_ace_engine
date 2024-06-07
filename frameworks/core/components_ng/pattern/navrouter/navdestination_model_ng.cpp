@@ -587,4 +587,12 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& op
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
 }
+
+void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetNavDestinationPathInfo(moduleName, pagePath);
+}
 } // namespace OHOS::Ace::NG

@@ -1165,6 +1165,37 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         loadJs_(target.path, target.errorCallback);
     }
 
+    // record full path info of every pageNode
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto keyInfo = target.url;
+    if (keyInfo.empty() && manifestParser_) {
+        auto router = manifestParser_->GetRouter();
+        if (router) {
+            keyInfo = router->GetEntry("");
+        }
+    }
+#if !defined(PREVIEW)
+    if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        // deal with @bundle url
+        size_t bundleEndPos = keyInfo.find('/');
+        size_t moduleStartPos = bundleEndPos + 1;
+        size_t moduleEndPos = keyInfo.find('/', moduleStartPos);
+        std::string moduleName = keyInfo.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+        keyInfo = keyInfo.substr(moduleEndPos + 1);
+        keyInfo = moduleName + keyInfo;
+    }
+#endif
+    auto pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    if (pagePath.empty()) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto moduleName = container->GetModuleName();
+        keyInfo = moduleName + keyInfo;
+        pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
+    }
+    pageInfo->SetFullPath(pagePath);
+
 #if defined(PREVIEW)
     if (!isComponentPreview_()) {
 #endif

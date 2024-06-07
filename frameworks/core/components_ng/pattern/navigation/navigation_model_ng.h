@@ -84,6 +84,7 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
