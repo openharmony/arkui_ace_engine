@@ -110,6 +110,7 @@ void ParticlePattern::updateEmitterPosition(std::vector<EmitterProperty>& props)
     for (EmitterProperty& prop : props) {
         prop.index = prop.index >= GetEmitterCount() ? 0 : prop.index;
     }
+    SetEmitterProperty(props);
     RosenRenderParticle::updateEmitterPosition(frameNode, props);
 }
 } // namespace OHOS::Ace::NG
