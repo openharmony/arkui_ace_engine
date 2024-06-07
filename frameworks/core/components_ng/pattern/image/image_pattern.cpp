@@ -165,12 +165,23 @@ void ImagePattern::OnCompleteInDataReady()
     imageEventHub->FireCompleteEvent(event);
 }
 
+void ImagePattern::TriggerFirstVisibleAreaChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    OnVisibleAreaChange(GreatNotEqual(visibleRect.Width(), 0.0) && GreatNotEqual(visibleRect.Height(), 0.0));
+}
+
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
     if (image->IsStatic()) {
         return;
     }
     RegisterVisibleAreaChange();
+    TriggerFirstVisibleAreaChange();
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
     // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
