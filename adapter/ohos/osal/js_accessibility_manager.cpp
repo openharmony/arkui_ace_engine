@@ -2252,14 +2252,13 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
+        eventInfo.setWindowId(ngPipeline->GetFocusWindowId());
     } else {
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo);
     }
-    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE || accessibilityEvent.windowId == 0) {
-        eventInfo.SetWindowId(windowId);
-    } else {
+    if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
 
@@ -4700,8 +4699,6 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     CHECK_NULL_VOID(ngPipeline);
     auto stageManager = ngPipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
-    auto page = stageManager->GetLastPage();
-    CHECK_NULL_VOID(page);
     output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
     if (getParentRectHandler_) {
         getParentRectHandler_(output.windowTop, output.windowLeft);
@@ -4709,8 +4706,11 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     }
-    output.pageId = page->GetPageId();
-    output.pagePath = GetPagePath();
+    auto page = stageManager->GetLastPage();
+    if ( page != nullptr ){
+        output.pageId = page->GetPageId();
+        output.pagePath = GetPagePath();
+    }
     if (context->GetWindowId() != mainContext->GetWindowId()) {
         output.pageId = 0;
         output.pagePath = "";
