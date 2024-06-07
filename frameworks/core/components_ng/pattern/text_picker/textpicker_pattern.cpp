@@ -973,6 +973,7 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
+    canloop_ = isLoop;
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);

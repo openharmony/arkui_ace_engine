@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 
+#include "base/utils/utils.h"
 #include "base/i18n/localization.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -221,12 +222,11 @@ ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -250,12 +250,11 @@ ArkUI_CharPtr GetTimepickerTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -279,12 +278,11 @@ ArkUI_CharPtr GetTimepickerDisappearTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 

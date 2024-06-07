@@ -67,6 +67,16 @@ inline std::string ToString(const FontStyle& fontStyle)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToStringNDK(const FontStyle& fontStyle)
+{
+    static const LinearEnumMapNode<FontStyle, std::string> table[] = {
+        { FontStyle::NORMAL, "normal" },
+        { FontStyle::ITALIC, "italic" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace StringUtils
 
 enum class TextBaseline {
