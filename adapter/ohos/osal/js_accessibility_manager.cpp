@@ -2252,7 +2252,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
-        eventInfo.setWindowId(ngPipeline->GetFocusWindowId());
+        eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
     } else {
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
         CHECK_NULL_VOID(node);
