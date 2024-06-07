@@ -364,7 +364,7 @@ public:
 
     void SetCanLoop(bool isLoop);
 
-    bool GetCanLoop() 
+    bool GetCanLoop()
     {
         return canloop_;
     }
