@@ -17,7 +17,24 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+int32_t callBack1 = 0;
+int32_t callBack2 = 0;
+int32_t callBack3 = 0;
+const std::string IMAGE_VALUE = "image1";
+const std::string BUNDLE_NAME = "bundleName";
+const std::string MODULE_NAME = "moduleName";
+void ConstructGestureStyle(GestureStyle& gestureInfo)
+{
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureInfo.onClick = std::move(tmpClickFunc);
+
+    auto onLongPress = [](const BaseEventInfo* info) {};
+    auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+    gestureInfo.onLongPress = std::move(tmpLongPressFunc);
+}
+} // namespace
 
 class TextTestNg : public TextBases {
 public:
@@ -2743,5 +2760,273 @@ HWTEST_F(TextTestNg, TextPattern010, TestSize.Level1)
     options.offset = 1;
     auto imageSourceInfo = pattern->CreateImageSourceInfo(options);
     EXPECT_EQ(imageSourceInfo.isFromReset_, 0);
+}
+
+/**
+ * @tc.name: TextPattern011
+ * @tc.desc: Test TextPattern CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. Create spanBases and gestureInfo
+     */
+    std::vector<RefPtr<SpanBase>> spanBases;
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
+    auto spans = spanStringWithSpans->GetSpanItems();
+    pattern->SetSpanItemChildren(spans);
+
+    /**
+     * @tc.steps: step3. test pattern MountImageNode
+     */
+    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    spanItem->content = " ";
+    spanItem->placeholderIndex = 0;
+    pattern->MountImageNode(spanItem);
+    EXPECT_EQ(pattern->childNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: TextPattern012
+ * @tc.desc: Test TextPattern CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
+     */
+    auto [frameNode, pattern] = Init();
+    TextMarqueeState state = TextMarqueeState::START;
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_EQ(pattern->isMarqueeRunning_, true);
+    state = TextMarqueeState::FINISH;
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_EQ(pattern->isMarqueeRunning_, false);
+}
+
+/**
+ * @tc.name: TextPattern013
+ * @tc.desc: Test TextPattern CopyBindSelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->RemoveAreaChangeInner();
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern CopyBindSelectionMenuParams
+     */
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
+    pattern->CopyBindSelectionMenuParams(selectInfo, menuParams);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+}
+
+/**
+ * @tc.name: TextPattern014
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern CopySelectionMenuParams
+     */
+    selectInfo.isUsingMouse = true;
+    pattern->selectedType_ = TextSpanType::MIXED;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.menuInfo.menuIsShow, false);
+
+    pattern->selectedType_ = TextSpanType::TEXT;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+
+    pattern->selectedType_ = TextSpanType::IMAGE;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+
+    pattern->selectedType_ = TextSpanType(-1);
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+}
+
+/**
+ * @tc.name: TextPattern015
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. test pattern OnHandleAreaChanged
+     */
+    RectF handleRect = CONTENT_RECT;
+    pattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
+    pattern->OnHandleAreaChanged();
+    EXPECT_EQ(pattern->selectOverlay_->SelectOverlayIsOn(), false);
+}
+
+/**
+ * @tc.name: TextPattern016
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. test pattern HandleSurfaceChanged
+     */
+    int32_t newWidth = 1;
+    int32_t newHeight = 1;
+    int32_t prevWidth = 0;
+    int32_t prevHeight = 0;
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+
+    /**
+     * @tc.steps: step3. set Width Height equal before adn after, test pattern HandleSurfaceChanged
+     */
+    newWidth = 1;
+    newHeight = 1;
+    prevWidth = 1;
+    prevHeight = 1;
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+}
+
+/**
+ * @tc.name: TextPattern017
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern UpdateSelectOverlayOrCreate
+     */
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, true);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, false);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+}
+
+/**
+ * @tc.name: TextPattern018
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    auto IsShowHandle = pattern->IsShowHandle();
+    EXPECT_EQ(IsShowHandle, false);
 }
 } // namespace OHOS::Ace::NG
