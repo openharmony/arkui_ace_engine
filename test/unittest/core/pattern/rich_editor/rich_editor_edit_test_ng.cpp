@@ -544,6 +544,7 @@ HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level1)
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
 
     auto info = richEditorController->GetSpansInfo(0, 6);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto valueString = info.selection_.resultObjects.begin()->valueString;
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
@@ -590,6 +591,7 @@ HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level1)
      */
     richEditorController->AddImageSpan(options);
     auto info = richEditorController->GetSpansInfo(0, 1);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
     EXPECT_EQ(imageStyleout.borderRadius,
@@ -1141,6 +1143,7 @@ HWTEST_F(RichEditorEditTestNg, SetTypingStyle, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     UpdateSpanStyle typingStyle;
     richEditorPattern->SetTypingStyle(typingStyle, style);
@@ -1148,6 +1151,7 @@ HWTEST_F(RichEditorEditTestNg, SetTypingStyle, TestSize.Level1)
     options1.style = richEditorPattern->typingTextStyle_;
     AddSpan(INIT_VALUE_1);
     auto info1 = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info1.selection_.resultObjects.size(), 0);    
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle2.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1220,12 +1224,14 @@ HWTEST_F(RichEditorEditTestNg, SetTypingStyle2, TestSize.Level1)
     options.style = style;
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     UpdateSpanStyle typingStyle;
     richEditorPattern->SetTypingStyle(typingStyle, style);
     TextSpanOptions options1;
     options1.style = richEditorPattern->typingTextStyle_;
     auto info1 = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     for (const auto& pair : textStyle1.fontFeature) {
         EXPECT_EQ(pair.first, "subs");
