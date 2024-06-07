@@ -1735,14 +1735,6 @@ export class ComposeListItem extends ViewPU {
         }
         return LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH);
     }
-    getComposeItemLeftPadding() {
-        return this.composeItemPadding?.start !== undefined ?
-            this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING);
-    }
-    getComposeItemRightPadding() {
-        return this.composeItemPadding?.end !== undefined ?
-            this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING);
-    }
     getFlexOptions() {
         if (this.containerDirection === FlexDirection.Column) {
             return {
@@ -1772,6 +1764,7 @@ export class ComposeListItem extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
+            Stack.clip(true);
             Stack.padding({
                 start: this.getComposeItemLeftPadding(),
                 end: this.getComposeItemRightPadding()
@@ -1809,14 +1802,26 @@ export class ComposeListItem extends ViewPU {
             ViewStackProcessor.visualState("focused");
             Flex.border({
                 radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                width: { left: this.getFlexLeftOutlineWidth(), right: this.getFlexRightOutlineWidth() },
+                color: Color.Transparent
+            });
+            Flex.outline({
+                radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
-                style: BorderStyle.Solid
+                style: OutlineStyle.SOLID
             });
             ViewStackProcessor.visualState("normal");
             Flex.border({
                 radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                width: { left: this.getFlexLeftOutlineWidth(), right: this.getFlexRightOutlineWidth() },
                 color: Color.Transparent
+            });
+            Flex.outline({
+                radius: { "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                width: 0,
+                color: Color.Transparent,
+                style: OutlineStyle.SOLID
             });
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
@@ -1828,7 +1833,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 924, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 914, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -1871,7 +1876,7 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 927, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 917, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -1960,7 +1965,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth(),
                                     isParentCanTouch: this.__isCanTouch,
                                     parentDirection: this.containerDirection,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 946, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 936, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
@@ -2014,6 +2019,35 @@ export class ComposeListItem extends ViewPU {
         If.pop();
         Flex.pop();
         Stack.pop();
+    }
+    getFlexLeftOutlineWidth() {
+        return (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 12) ?
+            (this.composeItemPadding?.start?.value - 4) :
+            (this.composeItemPadding === null || this.composeItemPadding?.start === undefined ||
+                (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 8 &&
+                    this.composeItemPadding?.start?.value < 12)) ? 8 : this.composeItemPadding?.start?.value;
+    }
+    getFlexRightOutlineWidth() {
+        return (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 12) ?
+            (this.composeItemPadding?.end?.value - 4) :
+            (this.composeItemPadding === null || this.composeItemPadding?.end === undefined ||
+                (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 8 &&
+                    this.composeItemPadding?.end?.value < 12)) ? 8 : this.composeItemPadding?.end?.value;
+    }
+    getComposeItemLeftPadding() {
+        return this.composeItemPadding === null || this.composeItemPadding?.start === undefined ||
+            (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 12) ?
+        LengthMetrics.vp(4) :
+            (this.composeItemPadding?.start !== undefined &&
+                this.composeItemPadding?.start?.value >= 8 && this.composeItemPadding?.start?.value < 12) ?
+            LengthMetrics.vp(this.composeItemPadding?.start?.value - 8) : LengthMetrics.vp(0);
+    }
+    getComposeItemRightPadding() {
+        return this.composeItemPadding === null || this.composeItemPadding?.end === undefined ||
+            (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 12) ?
+        LengthMetrics.vp(4) : (this.composeItemPadding?.end !== undefined &&
+                this.composeItemPadding?.end?.value >= 8 && this.composeItemPadding?.end?.value < 12) ?
+            LengthMetrics.vp(this.composeItemPadding?.end?.value - 8) : LengthMetrics.vp(0);
     }
     rerender() {
         this.updateDirtyElements();
