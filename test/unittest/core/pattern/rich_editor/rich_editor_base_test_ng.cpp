@@ -1931,4 +1931,410 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorEventHub005, TestSize.Level1)
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
 }
+
+/**
+ * @tc.name: ParagraphManager001
+ * @tc.desc: Test the paragraph manager GetHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial height
+     */
+    auto height = richEditorPattern->paragraphs_.GetHeight();
+    EXPECT_EQ(height, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get height
+     */
+    height = richEditorPattern->paragraphs_.GetHeight();
+    EXPECT_EQ(height, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager002
+ * @tc.desc: Test the paragraph manager GetMaxIntrinsicWidth function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial max intrinsic width
+     */
+    double maxIntrinsicWidth = richEditorPattern->paragraphs_.GetMaxIntrinsicWidth();
+    EXPECT_EQ(maxIntrinsicWidth, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get maxIntrinsicWidth
+     */
+    maxIntrinsicWidth = richEditorPattern->paragraphs_.GetMaxIntrinsicWidth();
+    EXPECT_EQ(maxIntrinsicWidth, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager003
+ * @tc.desc: Test the paragraph manager DidExceedMaxLines function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial exceed max lines
+     */
+    bool didExceedMaxLines = richEditorPattern->paragraphs_.DidExceedMaxLines();
+    EXPECT_EQ(didExceedMaxLines, false);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test didExceedMaxLines
+     */
+    didExceedMaxLines = richEditorPattern->paragraphs_.DidExceedMaxLines();
+    EXPECT_EQ(didExceedMaxLines, false);
+}
+
+/**
+ * @tc.name: ParagraphManager004
+ * @tc.desc: Test the paragraph manager GetLongestLine function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial max intrinsic width
+     */
+    double longestLine = richEditorPattern->paragraphs_.GetLongestLine();
+    EXPECT_EQ(longestLine, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get longest line
+     */
+    longestLine = richEditorPattern->paragraphs_.GetLongestLine();
+    EXPECT_EQ(longestLine, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager005
+ * @tc.desc: Test the paragraph manager GetMaxWidth function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial max width
+     */
+    double maxWidth = richEditorPattern->paragraphs_.GetMaxWidth();
+    EXPECT_EQ(maxWidth, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get max width
+     */
+    maxWidth = richEditorPattern->paragraphs_.GetMaxWidth();
+    EXPECT_EQ(maxWidth, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager006
+ * @tc.desc: Test the paragraph manager GetTextWidth function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial max width
+     */
+    double maxTextWidth = richEditorPattern->paragraphs_.GetTextWidth();
+    EXPECT_EQ(maxTextWidth, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get text width
+     */
+    maxTextWidth = richEditorPattern->paragraphs_.GetTextWidth();
+    EXPECT_EQ(maxTextWidth, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager007
+ * @tc.desc: Test the paragraph manager GetTextWidthIncludeIndent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager007, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial text width include indent
+     */
+    double textWidthIncludeIndent = richEditorPattern->paragraphs_.GetTextWidthIncludeIndent();
+    EXPECT_EQ(textWidthIncludeIndent, 0.0f);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get text width include indent
+     */
+    textWidthIncludeIndent = richEditorPattern->paragraphs_.GetTextWidthIncludeIndent();
+    EXPECT_EQ(textWidthIncludeIndent, 0.0f);
+}
+
+/**
+ * @tc.name: ParagraphManager008
+ * @tc.desc: Test the paragraph manager GetLineCount function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager008, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step1. test to obtain initial line count
+     */
+    size_t dineCount = richEditorPattern->paragraphs_.GetLineCount();
+    EXPECT_EQ(dineCount, 0);
+
+    /**
+     * @tc.steps: step2. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step3. test get line count
+     */
+    dineCount = richEditorPattern->paragraphs_.GetLineCount();
+    EXPECT_EQ(dineCount, 0);
+}
+
+/**
+ * @tc.name: ParagraphManager009
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager009, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step2. test get index
+     */
+    auto textRect = richEditorPattern->GetTextRect();
+    textRect.SetTop(textRect.GetY() - 0.0f);
+    textRect.SetHeight(textRect.Height() - 0.0f);
+    Offset offset = Offset(textRect.GetX(), textRect.GetY());
+    bool clamp = false;
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(offset, clamp);
+    EXPECT_EQ(paragraphsIndex, 0);
+
+    /**
+     * @tc.steps: step3. test get glyph index
+     */
+    int32_t glyphIndex = richEditorPattern->paragraphs_.GetGlyphIndexByCoordinate(offset, clamp);
+    EXPECT_EQ(glyphIndex, 0);
+
+    /**
+     * @tc.steps: step4. test get word boundary
+     */
+    int32_t offset1 = 0;
+    int32_t start = 0;
+    int32_t end = 0;
+    bool wordBoundary = richEditorPattern->paragraphs_.GetWordBoundary(offset1, start, end);
+    EXPECT_EQ(wordBoundary, false);
+
+    /**
+     * @tc.steps: step5. test calc caret metrics
+     */
+    int32_t extent = 0;
+    CaretMetricsF caretCaretMetric;
+    TextAffinity textAffinity = TextAffinity::DOWNSTREAM;
+    bool caretMetrics = richEditorPattern->paragraphs_.CalcCaretMetricsByPosition(extent, caretCaretMetric,
+        textAffinity);
+    EXPECT_EQ(caretMetrics, false);
+}
+
+/**
+ * @tc.name: ParagraphManager010
+ * @tc.desc: Test the paragraph manager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, ParagraphManager010, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    /**
+     * @tc.steps: step2. test get line metrics
+     */
+    RectF rect = { 0.0, 0.0, 100.0, 100.0 };
+    int32_t paragraphIndex = 0;
+    LineMetrics lineMetrics = richEditorPattern->paragraphs_.GetLineMetricsByRectF(rect, paragraphIndex);
+    EXPECT_EQ(lineMetrics.ascender, 0.0f);
+
+    /**
+     * @tc.steps: step3. test editable status
+     */
+    auto accessibilityProperty = richEditorPattern->CreateAccessibilityProperty();
+    bool isEditable = accessibilityProperty->IsEditable();
+    EXPECT_EQ(isEditable, true);
+}
+
+/**
+ * @tc.name: Controller001
+ * @tc.desc: Test the controller function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, Controller001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorController->AddTextSpan(options);
+    AddSpan(INIT_VALUE_1);
+    auto info = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
+    UpdateSpanStyle typingStyle;
+    richEditorController->SetTypingStyle(typingStyle, style);
+    TextSpanOptions options1;
+    options1.style = richEditorPattern->typingTextStyle_;
+    AddSpan(INIT_VALUE_1);
+    auto info1 = richEditorController->GetSpansInfo(1, 5);
+    TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
+    EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
+    EXPECT_EQ(textStyle2.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : textStyle1.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    ClearSpan();
+}
+
+/**
+ * @tc.name: Controller002
+ * @tc.desc: Test the controller function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, Controller002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    AddSpan(INIT_VALUE_1);
+    richEditorController->SetSelection(1, 3);
+    auto info1 = richEditorController->GetSpansInfo(1, 2);
+    EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
+    EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
+    for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
+        EXPECT_EQ(pair.first, "subs");
+        EXPECT_EQ(pair.second, 1);
+    }
+    ClearSpan();
+    richEditorController->CloseSelectionMenu();
+}
 } // namespace OHOS::Ace::NG
