@@ -458,6 +458,9 @@ public:
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
+    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
+        uint32_t& statusBarHeight);
+
     void SetSheetHeight(float height)
     {
         sheetHeight_ = height;

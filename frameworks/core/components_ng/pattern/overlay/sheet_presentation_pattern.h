@@ -409,6 +409,7 @@ public:
     }
 
     SheetType GetSheetType();
+    bool IsPhoneOrFold();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
