@@ -5381,6 +5381,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
+    HandleOnlyImageSelected(info.GetLocalLocation(), false);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
