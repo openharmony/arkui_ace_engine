@@ -774,7 +774,7 @@ void MovingPhotoPattern::StopAnimation()
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
-        Seek(1);
+        Seek(0);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -844,7 +844,7 @@ void MovingPhotoPattern::Stop()
 
 void MovingPhotoPattern::Seek(int32_t position)
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
