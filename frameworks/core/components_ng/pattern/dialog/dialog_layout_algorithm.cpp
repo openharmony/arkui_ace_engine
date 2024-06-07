@@ -524,9 +524,16 @@ std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<Fra
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, maskRect);
     maskRect = dialogPattern->GetDialogProperties().maskRect;
-    if (isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
+    if (!isUIExtensionSubWindow_) {
+        return maskRect;
+    }
+
+    if (expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
         auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
         maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    } else {
+        maskRect = DimensionRect(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT),
+            DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
     }
     return maskRect;
 }
