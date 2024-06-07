@@ -50,6 +50,7 @@ public:
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
     void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
+    void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

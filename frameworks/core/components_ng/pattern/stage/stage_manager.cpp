@@ -184,6 +184,14 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
     needTransition &= !children.empty();
+    if (children.empty()) {
+        auto pagePattern = node->GetPattern<NG::PagePattern>();
+        CHECK_NULL_RETURN(pagePattern, false);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_RETURN(pageInfo, false);
+        auto pagePath = pageInfo->GetFullPath();
+        ACE_SCOPED_TRACE("Router Main Page: %s", pagePath.c_str());
+    }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -227,7 +235,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     // close keyboard
     PageChangeCloseKeyboard();
-
+    AddPageTransitionTrace(outPageNode, node);
     FireAutoSave(outPageNode);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
@@ -289,6 +297,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
+    AddPageTransitionTrace(outPageNode, inPageNode);
     FireAutoSave(outPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
@@ -340,7 +349,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
-
+    AddPageTransitionTrace(outPageNode, inPageNode);
     FireAutoSave(outPageNode);
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
@@ -412,6 +421,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
 
     stageNode_->RebuildRenderContextTree();
     auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
+    AddPageTransitionTrace(outPageNode, node);
     FireAutoSave(outPageNode);
     if (needTransition) {
         StartTransition(outPageNode, node, RouteType::PUSH);
@@ -525,6 +535,26 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     } else {
         return DynamicCast<FrameNode>(children.back());
     }
+}
+
+void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage)
+{
+    CHECK_NULL_VOID(srcPage);
+    CHECK_NULL_VOID(destPage);
+
+    auto srcPattern = srcPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(srcPattern);
+    auto srcPageInfo = srcPattern->GetPageInfo();
+    CHECK_NULL_VOID(srcPageInfo);
+    auto srcFullPath = srcPageInfo->GetFullPath();
+
+    auto destPattern = destPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(destPattern);
+    auto destPageInfo = destPattern->GetPageInfo();
+    CHECK_NULL_VOID(destPageInfo);
+    auto destFullPath = destPageInfo->GetFullPath();
+
+    ACE_SCOPED_TRACE("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
 } // namespace OHOS::Ace::NG

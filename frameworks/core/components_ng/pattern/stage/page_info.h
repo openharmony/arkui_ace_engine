@@ -80,11 +80,22 @@ public:
     {
         return pageIndex_;
     }
+
+    void SetFullPath(const std::string& fullPath)
+    {
+        fullPath_ = fullPath;
+    }
+
+    const std::string& GetFullPath() const
+    {
+        return fullPath_;
+    }
 private:
     int32_t pageId_ = 0;
     int32_t pageIndex_ = -1;
     std::string url_;
     std::string path_;
+    std::string fullPath_;
 
     std::function<void(int32_t)> alertCallback_;
     DialogProperties dialogProperties_;

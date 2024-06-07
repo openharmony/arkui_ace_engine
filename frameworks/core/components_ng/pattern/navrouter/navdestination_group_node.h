@@ -145,6 +145,17 @@ public:
         return isAnimated_;
     }
 
+    void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navDestinationPathInfo_ = pagePath;
+        navDestinationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavDestinationPathInfo() const
+    {
+        return navDestinationPathInfo_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -155,6 +166,8 @@ private:
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
     bool isAnimated_ = false;
+    std::string navDestinationPathInfo_;
+    std::string navDestinationModuleName_;
 };
 
 } // namespace OHOS::Ace::NG
