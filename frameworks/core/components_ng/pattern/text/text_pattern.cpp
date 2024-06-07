@@ -3433,7 +3433,7 @@ RectF TextPattern::GetTextContentRect(bool isActualText) const
 size_t TextPattern::GetLineCount() const
 {
     CHECK_NULL_RETURN(pManager_, 0);
-    return pManager_->GetLineCount(true);
+    return pManager_->GetLineCount();
 }
 
 bool TextPattern::DidExceedMaxLines() const
