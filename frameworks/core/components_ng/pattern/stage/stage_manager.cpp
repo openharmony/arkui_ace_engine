@@ -526,4 +526,5 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
         return DynamicCast<FrameNode>(children.back());
     }
 }
+
 } // namespace OHOS::Ace::NG
