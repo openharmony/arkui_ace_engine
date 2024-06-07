@@ -19,6 +19,7 @@
 
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/event_report.h"
+#include "base/log/ace_trace.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
@@ -52,6 +53,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
+            int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
@@ -66,8 +68,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
+            pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            JankFrameReport::GetInstance().JankFrameRecord(std::min(ts, timeStampNanos), window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
@@ -115,6 +117,19 @@ void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
         return;
     }
     rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
+}
+
+void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    if (!rsWindow_) {
+        return;
+    }
+    if (dvsyncSwitch) {
+        ACE_SCOPED_TRACE("enale dvsync");
+    } else {
+        ACE_SCOPED_TRACE("disable dvsync");
+    }
+    rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
 void RosenWindow::RequestFrame()

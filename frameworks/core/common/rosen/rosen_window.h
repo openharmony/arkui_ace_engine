@@ -34,6 +34,7 @@ public:
     void RequestFrame() override;
     void RegisterVsyncCallback(AceVsyncCallback&& callback) override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override;
+    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
 private:
     void VsyncThreadMain();

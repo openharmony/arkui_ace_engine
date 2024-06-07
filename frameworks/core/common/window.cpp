@@ -69,4 +69,14 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
         .containerId_ = Container::CurrentId(),
     });
 }
+
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    if (!onShow_) {
+        return;
+    }
+    if (platformWindow_ != nullptr) {
+        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+    }
+}
 } // namespace OHOS::Ace

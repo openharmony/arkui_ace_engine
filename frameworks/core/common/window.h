@@ -186,6 +186,8 @@ public:
 
     virtual void Unlock() {}
 
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

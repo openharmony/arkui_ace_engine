@@ -776,5 +776,9 @@ void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
 }
+
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

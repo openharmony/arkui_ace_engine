@@ -924,4 +924,11 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
     }
     LOGE("onFormRecover_ is null.");
 }
+
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
+    if (window_) {
+        window_->SetUiDvsyncSwitch(on);
+    }
+}
 } // namespace OHOS::Ace

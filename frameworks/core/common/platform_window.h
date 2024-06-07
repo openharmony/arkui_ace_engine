@@ -47,6 +47,8 @@ public:
     // Attach root render node to container
     virtual void SetRootRenderNode(const RefPtr<RenderNode>& root) = 0;
 
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PlatformWindow);
 };

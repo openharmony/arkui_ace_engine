@@ -312,6 +312,13 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
     return false;
 }
 
+static void SetUiDvsyncSwitch(bool on)
+{
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->SetUiDvsyncSwitch(on);
+}
+
 void ScrollablePattern::OnScrollEnd()
 {
     // Previous: Sets ScrollablePattern::OnScrollEnd to Scrollable->scrollEndCallback_
@@ -326,6 +333,9 @@ void ScrollablePattern::OnScrollEnd()
     if (isReactInParentMovement_) {
         isReactInParentMovement_ = false;
         ProcessNavBarReactOnEnd();
+    }
+    if (isAnimationStop_) {
+        SetUiDvsyncSwitch(false);
     }
 
     OnScrollEndCallback();
@@ -440,6 +450,11 @@ void ScrollablePattern::AddScrollEvent()
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (sceneStatus == NG::SceneStatus::START) {
+            SetUiDvsyncSwitch(false);
+        } else if (sceneStatus == NG::SceneStatus::END) {
+            SetUiDvsyncSwitch(true);
+        }
         return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
@@ -1016,12 +1031,14 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         [weak = AceType::WeakClaim(this), position]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            SetUiDvsyncSwitch(true);
             pattern->springOffsetProperty_->Set(position);
         },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            SetUiDvsyncSwitch(false);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
@@ -1054,6 +1071,7 @@ void ScrollablePattern::PlayCurveAnimation(
         [weak = AceType::WeakClaim(this), position]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            SetUiDvsyncSwitch(true);
             pattern->curveOffsetProperty_->Set(position);
         },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -1062,6 +1080,7 @@ void ScrollablePattern::PlayCurveAnimation(
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
+            SetUiDvsyncSwitch(false);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
         });

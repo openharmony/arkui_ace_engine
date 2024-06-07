@@ -115,6 +115,8 @@ public:
         return rsUIDirector_->GetAnimateExpectedRate();
     }
 
+    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

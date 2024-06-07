@@ -1257,6 +1257,8 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    void SetUiDvsyncSwitch(bool on);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
