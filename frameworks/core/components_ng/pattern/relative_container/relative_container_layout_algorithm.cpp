@@ -922,17 +922,14 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding_.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    for (const auto& mapItem : idNodeMap_) {
-        auto childWrapper = mapItem.second.layoutWrapper;
-        if (!childWrapper) {
-            continue;
-        }
+    for (auto && childWrapper : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto nodeName = GetOrCreateNodeInspectorId(childWrapper->GetHostNode());
         if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             childWrapper->Layout();
             continue;
         }
-        auto it = recordOffsetMap_.find(mapItem.second.id);
+        auto it = recordOffsetMap_.find(nodeName);
         if (it == recordOffsetMap_.end()) {
             continue;
         }
