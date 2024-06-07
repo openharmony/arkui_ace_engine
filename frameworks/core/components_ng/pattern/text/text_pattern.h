@@ -810,7 +810,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
+    SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;

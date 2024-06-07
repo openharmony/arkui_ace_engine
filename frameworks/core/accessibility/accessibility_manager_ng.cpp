@@ -101,8 +101,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     TimeStamp time)
 {
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
-    auto durationSigned = std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count();
-    size_t duration = static_cast<size_t>(durationSigned);
+    size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count();
     if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
         return;
     }

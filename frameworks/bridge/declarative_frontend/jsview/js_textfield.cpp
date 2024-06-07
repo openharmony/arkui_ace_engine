@@ -909,7 +909,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject() || !info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto jsValue = info[0];
