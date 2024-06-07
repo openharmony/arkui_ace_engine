@@ -4707,7 +4707,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     }
     auto page = stageManager->GetLastPage();
-    if ( page != nullptr ){
+    if (page != nullptr) {
         output.pageId = page->GetPageId();
         output.pagePath = GetPagePath();
     }
