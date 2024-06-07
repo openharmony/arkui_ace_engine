@@ -2225,6 +2225,79 @@ void JsAccessibilityManager::SendExtensionAccessibilityEvent(
     TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
 }
 
+void JsAccessibilityManager::FillEventInfoWithNode(
+    const RefPtr<NG::FrameNode>& node,
+    AccessibilityEventInfo& eventInfo,
+    const RefPtr<NG::PipelineContext>& context,
+    int64_t elementId)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::WEB_CORE_TAG) {
+        FillEventInfo(node, eventInfo, context, elementId, Claim(this));
+        return;
+    }
+    eventInfo.SetComponentType(node->GetTag());
+    eventInfo.SetPageId(node->GetPageId());
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    eventInfo.AddContent(accessibilityProperty->GetGroupText());
+    eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
+    eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    AccessibilityElementInfo elementInfo;
+
+    CommonProperty commonProperty;
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
+    GenerateCommonProperty(context, commonProperty, mainContext);
+    UpdateAccessibilityElementInfo(node, commonProperty, elementInfo, context);
+    eventInfo.SetElementInfo(elementInfo);
+}
+
+void JsAccessibilityManager::SendEventToAccessibilityWithNode(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context)
+{
+    ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(context);
+    int32_t windowId = static_cast<int32_t>(context->GetFocusWindowId());
+    if (windowId == 0) {
+        return;
+    }
+    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+        return;
+    }
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+
+    AccessibilityEventInfo eventInfo;
+    FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
+
+    if (accessibilityEvent.type != AccessibilityEventType::PAGE_CHANGE || accessibilityEvent.windowId == 0) {
+        eventInfo.SetWindowId(windowId);
+    } else {
+        eventInfo.SetWindowId(accessibilityEvent.windowId);
+    }
+    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
+
+    auto container = Container::GetContainer(context->GetInstanceId());
+    if (IsExtensionSendAccessibilitySyncEvent(ngPipeline)) {
+        SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    } else if (container && container->IsDynamicRender()) {
+        SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKNOW_ID);
+    } else {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
+                auto jsAccessibilityManager = weak.Upgrade();
+                CHECK_NULL_VOID(jsAccessibilityManager);
+                jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+            },
+            TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
+    }
+}
+
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
@@ -2461,7 +2534,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             rootId = StringUtils::StringToLongInt(*arg);
         } else if (*arg == "--hover-test") {
             mode = DumpMode::HOVER_TEST;
-            static constexpr size_t NUM_POINT_DIMENSION = 2;
+            static constexpr int32_t NUM_POINT_DIMENSION = 2;
             if (std::distance(arg, params.end()) <= NUM_POINT_DIMENSION) {
                 DumpLog::GetInstance().Print(std::string("Error: --hover-test is used to get nodes at a point ") +
                     "relative to the root node, e.g. '--hover-test ${x} ${y}'!");

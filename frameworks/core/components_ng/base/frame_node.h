@@ -455,7 +455,7 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void MarkNeedRenderOnly();
 
