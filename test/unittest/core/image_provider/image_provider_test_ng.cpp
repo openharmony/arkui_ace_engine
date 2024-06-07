@@ -1076,4 +1076,314 @@ HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState001, TestSize.Level1)
     ctx->stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
 }
+
+/**
+ * @tc.name: GetCurrentLoadingState002
+ * @tc.desc: Test GetCurrentLoadingState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+
+    ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    ctx->stateManager_->state_ = ImageLoadingState::DATA_LOADING;
+    ctx->GetCurrentLoadingState();
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::DATA_LOADING);
+}
+
+/**
+ * @tc.name: GetCurrentLoadingState003
+ * @tc.desc: Test GetCurrentLoadingState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState003, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+
+    ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    ctx->stateManager_->state_ = ImageLoadingState::DATA_READY;
+    ctx->GetCurrentLoadingState();
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::DATA_READY);
+}
+
+/**
+ * @tc.name: GetCurrentLoadingState004
+ * @tc.desc: Test GetCurrentLoadingState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState004, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+
+    ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    ctx->stateManager_->state_ = ImageLoadingState::MAKE_CANVAS_IMAGE;
+    ctx->GetCurrentLoadingState();
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::MAKE_CANVAS_IMAGE);
+}
+
+/**
+ * @tc.name: GetCurrentLoadingState005
+ * @tc.desc: Test GetCurrentLoadingState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState005, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+
+    ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    ctx->stateManager_->state_ = ImageLoadingState::LOAD_SUCCESS;
+    ctx->GetCurrentLoadingState();
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_SUCCESS);
+}
+
+/**
+ * @tc.name: GetCurrentLoadingState006
+ * @tc.desc: Test GetCurrentLoadingState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+
+    ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    ctx->stateManager_->state_ = ImageLoadingState::LOAD_FAIL;
+    ctx->GetCurrentLoadingState();
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
+}
+
+/**
+ * @tc.name: GetFrameCount001
+ * @tc.desc: Test GetFrameCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetFrameCount001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->GetFrameCount();
+    EXPECT_EQ(ctx->imageObj_, nullptr);
+
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(1000, 1000), nullptr);
+    ctx->GetFrameCount();
+    EXPECT_NE(ctx->imageObj_, nullptr);
+}
+
+/**
+ * @tc.name: CallbackAfterMeasureIfNeed001
+ * @tc.desc: Test CallbackAfterMeasureIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, CallbackAfterMeasureIfNeed001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->needErrorCallBack_ = false;
+    ctx->CallbackAfterMeasureIfNeed();
+
+    ctx->needErrorCallBack_ = true;
+    ctx->CallbackAfterMeasureIfNeed();
+    EXPECT_EQ(ctx->needErrorCallBack_, false);
+}
+
+/**
+ * @tc.name: CallbackAfterMeasureIfNeed002
+ * @tc.desc: Test CallbackAfterMeasureIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, CallbackAfterMeasureIfNeed002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->needErrorCallBack_ = false;
+    ctx->needDataReadyCallBack_ = false;
+    ctx->CallbackAfterMeasureIfNeed();
+
+    ctx->needDataReadyCallBack_ = true;
+    ctx->CallbackAfterMeasureIfNeed();
+    EXPECT_EQ(ctx->needDataReadyCallBack_, false);
+}
+
+/**
+ * @tc.name: FailCallback001
+ * @tc.desc: Test FailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, FailCallback001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::NETWORK;
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->measureFinish_ = true;
+    ctx->FailCallback("test error");
+    EXPECT_EQ(ctx->needErrorCallBack_, false);
+}
+
+/**
+ * @tc.name: FailCallback002
+ * @tc.desc: Test FailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, FailCallback002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::MEMORY;
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->measureFinish_ = false;
+    ctx->FailCallback("test error");
+    EXPECT_EQ(ctx->Downloadable(), false);
+}
+
+/**
+ * @tc.name: DataReadyCallback001
+ * @tc.desc: Test DataReadyCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DataReadyCallback001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::NETWORK;
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    SizeF size(LENGTH_100, LENGTH_100);
+    ctx->measureFinish_ = true;
+
+    ctx->DataReadyCallback(AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size));
+    EXPECT_EQ(ctx->GetImageSize(), size);
+}
+
+/**
+ * @tc.name: ResizableCalcDstSize001
+ * @tc.desc: Test ResizableCalcDstSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ResizableCalcDstSize001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->autoResize_ = true;
+    bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == ctx->GetSourceInfo().GetSrcType());
+    ctx->ResizableCalcDstSize();
+    EXPECT_FALSE(isPixelMapResource);
+}
+
+/**
+ * @tc.name: ResizableCalcDstSize002
+ * @tc.desc: Test ResizableCalcDstSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ResizableCalcDstSize002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->autoResize_ = false;
+    bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == ctx->GetSourceInfo().GetSrcType());
+    ctx->ResizableCalcDstSize();
+    EXPECT_TRUE(isPixelMapResource);
+}
+
+/**
+ * @tc.name: DownloadOnProgress001
+ * @tc.desc: Test DownloadOnProgress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownloadOnProgress001, TestSize.Level1)
+{
+    uint32_t dlNow = 0;
+    uint32_t dlTotal = 0;
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->onProgressCallback_ = [](const uint32_t& dlNow, const uint32_t& dlTotal) {};
+    ctx->DownloadOnProgress(dlNow, dlTotal);
+
+    ctx->onProgressCallback_ = nullptr;
+    bool isPixelMapResource = (SrcType::DATA_ABILITY == ctx->GetSourceInfo().GetSrcType());
+    ctx->DownloadOnProgress(dlNow, dlTotal);
+    EXPECT_FALSE(isPixelMapResource);
+}
+
+/**
+ * @tc.name: DownloadImageFailed001
+ * @tc.desc: Test DownloadImageFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownloadImageFailed001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->DownloadImageFailed("error message");
+    EXPECT_NE(ctx, nullptr);
+}
+
+/**
+ * @tc.name: DownloadImageSuccess001
+ * @tc.desc: Test DownloadImageSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownloadImageSuccess001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    ctx->DownloadImageSuccess("image data");
+    EXPECT_NE(ctx->imageDataCopy_, "image data");
+}
+
+/**
+ * @tc.name: PerformDownload001
+ * @tc.desc: Test PerformDownload
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, PerformDownload001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+
+    ctx->onProgressCallback_ = nullptr;
+    ctx->PerformDownload();
+    ctx->onProgressCallback_ = [](const uint32_t& dlNow, const uint32_t& dlTotal) {};
+    ctx->PerformDownload();
+    EXPECT_NE(ctx->onProgressCallback_, nullptr);
+}
+
+/**
+ * @tc.name: MakeCanvasImageIfNeed002
+ * @tc.desc: Test MakeCanvasImageIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, MakeCanvasImageIfNeed002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->stateManager_->state_ = ImageLoadingState::MAKE_CANVAS_IMAGE;
+    SizeF dstSize(LENGTH_100, LENGTH_100);
+    std::function<void()> func = []() {};
+    ctx->pendingMakeCanvasImageTask_ = func;
+    auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
+    EXPECT_TRUE(res);
+}
 } // namespace OHOS::Ace::NG
