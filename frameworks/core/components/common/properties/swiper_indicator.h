@@ -232,6 +232,7 @@ public:
     {
         isIndicatorDisabled_ = isIndicatorDisabled;
     }
+    
 private:
     Color color_;
     Color selectedColor_;

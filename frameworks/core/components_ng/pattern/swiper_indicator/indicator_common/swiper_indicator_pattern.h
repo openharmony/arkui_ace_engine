@@ -191,7 +191,7 @@ public:
             }
             auto paintMethod = CreateCircleDotIndicatorPaintMethod(swiperPattern);
             return paintMethod;
-        } 
+        }
         return nullptr;
     }
 

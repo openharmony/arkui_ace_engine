@@ -45,6 +45,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     virtual void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
+    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
     void CalculateNormalMargin(
         const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount);

@@ -27,7 +27,7 @@ class OverlengthDotIndicatorModifier : public DotIndicatorModifier {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorModifier, DotIndicatorModifier);
 
 public:
-    OverlengthDotIndicatorModifier() 
+    OverlengthDotIndicatorModifier()
         : DotIndicatorModifier(),
           theFirstPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           theSecondPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
@@ -44,7 +44,7 @@ public:
           rightSecondPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(THREE_QUARTERS)),
           rightFirstPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(ONE_IN_TWO)),
           firstPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
-          newPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)) 
+          newPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
     {
         AttachProperty(theFirstPointMove_);
         AttachProperty(theSecondPointMove_);

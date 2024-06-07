@@ -108,30 +108,28 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
         return;
     }
 }
+
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
-    std::map<size_t, float> maps;
-    maps[NUM_0] = contentProperty.theFirstPointMove;
-    maps[NUM_1] = contentProperty.theSecondPointMove;
-    maps[NUM_2] = contentProperty.theThirdPointMove;
-    maps[NUM_3] = contentProperty.fourthPointMove;
-    maps[NUM_4] = contentProperty.fifthPointMove;
-    maps[NUM_5] = contentProperty.sixthPointMove;
-    maps[NUM_6] = contentProperty.seventhPointMove;
-    maps[NUM_7] = contentProperty.eighthPointMove;
-    maps[NUM_8] = contentProperty.ninthPointMove;
-    maps[NUM_9] = contentProperty.newPointMove;
+    std::vector<float> vecPointInfo;
+    vecPointInfo.push_back(contentProperty.theFirstPointMove);
+    vecPointInfo.push_back(contentProperty.theSecondPointMove);
+    vecPointInfo.push_back(contentProperty.theThirdPointMove);
+    vecPointInfo.push_back(contentProperty.fourthPointMove);
+    vecPointInfo.push_back(contentProperty.fifthPointMove);
+    vecPointInfo.push_back(contentProperty.sixthPointMove);
+    vecPointInfo.push_back(contentProperty.seventhPointMove);
+    vecPointInfo.push_back(contentProperty.eighthPointMove);
+    vecPointInfo.push_back(contentProperty.ninthPointMove);
+    vecPointInfo.push_back(contentProperty.newPointMove);
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
-        if (currentIndex_ > maxDisplayCount_ - NUM_3 && !maps.empty()) {
-            auto tempPair = maps.find(i);
-            if (tempPair != maps.end()) {
-                float centerX = tempPair->second;
-                center = { centerX, centerY_ };
-            }
+        if (currentIndex_ > maxDisplayCount_ - NUM_3) {
+            float centerX = vecPointInfo[i];
+            center = { centerX, centerY_ };
         }
         if (currentIndex_ > maxDisplayCount_ - NUM_3) {
             if (i == NUM_0) {
@@ -170,7 +168,7 @@ LinearVector<float> OverlengthDotIndicatorModifier::GetItemHalfSizes(size_t inde
         if (currentIndex_ > maxDisplayCount_ - NUM_3) {
             specificPoint = index == contentProperty.vectorBlackPointCenterX.size() - NUM_2 || index == NUM_2;
             if (specificPoint) {
-                return contentProperty.itemHalfSizes * contentProperty.rightSecondPointSizeRate;
+                return contentProperty.itemHalfSizes * contentProperty.leftThirdPointSizeRate;
             }
             specificPoint = index == contentProperty.vectorBlackPointCenterX.size() - NUM_1 || index == NUM_1;
             if (specificPoint) {

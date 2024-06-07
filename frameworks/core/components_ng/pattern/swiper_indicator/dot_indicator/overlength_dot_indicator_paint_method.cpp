@@ -46,7 +46,6 @@ constexpr float SECOND_FADING_RATIO = 0.75f;
 
 void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "lkf UpdateContentModifier xin ");
     CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
 

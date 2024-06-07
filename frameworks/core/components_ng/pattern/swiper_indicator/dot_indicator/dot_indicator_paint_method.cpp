@@ -184,23 +184,24 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
-
+   PaintHoverIndicator(itemHalfSizes, paddingSide);
+}
+void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
+{
     if (mouseClickIndex_) {
         if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < itemCount_) {
-            longPointCenterX_ =
-                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
+            longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
 
-                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
             auto mouseClickIndex = mouseClickIndex_.value();
             if (isHorizontalAndRightToLeft_) {
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
-            longPointCenterX_ =
-                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
+            longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
 
-                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
@@ -211,7 +212,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->UpdateLongPointDilateRatio();
     }
 }
-
 void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);

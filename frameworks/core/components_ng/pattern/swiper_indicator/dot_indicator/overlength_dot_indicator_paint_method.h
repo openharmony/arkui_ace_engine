@@ -67,7 +67,7 @@ private:
     std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterX(
         const PaintWrapper* paintWrapper) override;
     std::pair<float, float> ForwardCalculation(
-        const LinearVector<float>& itemHalfSizes, float startCenterX, 
+        const LinearVector<float>& itemHalfSizes, float startCenterX,
         float endCenterX, float space, int32_t index) override;
     void UpdateNormalIndicator(LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper) override;
     void AnalysisIndexRange(int32_t& nposStation);
