@@ -354,4 +354,36 @@ void TaskExecutorImpl::FillTaskTypeTable(const WeakPtr<TaskExecutorImpl>& weak, 
         taskExecutor->FillTaskTypeTable(type);
     }
 }
+
+void TaskExecutorImpl::RemoveTask(TaskType type, const std::string &name)
+{
+    switch (type) {
+        case TaskType::PLATFORM:
+            RemoveTaskFromTaskRunner(platformRunner_, name);
+            break;
+        case TaskType::UI:
+            RemoveTaskFromTaskRunner(uiRunner_, name);
+            break;
+        case TaskType::IO:
+            RemoveTaskFromTaskRunner(ioRunner_, name);
+            break;
+        case TaskType::GPU:
+            RemoveTaskFromTaskRunner(gpuRunner_, name);
+            break;
+        case TaskType::JS:
+            RemoveTaskFromTaskRunner(jsRunner_, name);
+            break;
+        case TaskType::BACKGROUND:
+            // background task cannot remove,use ffrt not eventhander
+            break;
+        default:
+            break;
+    }
+}
+
+void TaskExecutorImpl::RemoveTaskFromTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, const std::string& name)
+{
+    CHECK_NULL_VOID(taskRunner);
+    taskRunner->RemoveTask(name);
+}
 } // namespace OHOS::Ace

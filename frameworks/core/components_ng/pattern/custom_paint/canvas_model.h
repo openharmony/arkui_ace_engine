@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 class CanvasModel {
 public:
-    static CanvasModel* GetInstance();
+    ACE_FORCE_EXPORT static CanvasModel* GetInstance();
     static CanvasModel* GetInstanceNG();
     virtual ~CanvasModel() = default;
 

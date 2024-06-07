@@ -412,6 +412,8 @@ private:
     void OpenSelectOverlay();
     void CloseSelectOverlay();
 
+    void TriggerFirstVisibleAreaChange();
+
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 

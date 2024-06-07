@@ -663,8 +663,9 @@ protected:
     void HandleSelectionUp(int32_t start, int32_t end);
     void HandleSelectionDown(int32_t start, int32_t end);
     void HandleSelection(int32_t start, int32_t end);
-    float GetTextHeight();
+    double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
+    bool IsSelectableAndCopy();
 
     virtual bool CanStartAITask()
     {

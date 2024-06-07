@@ -24003,6 +24003,22 @@ class ListItemSelectableModifier extends ModifierWithKey {
   }
 }
 ListItemSelectableModifier.identity = Symbol('listItemSelectable');
+class ListItemSwipeActionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetSwipeAction(node);
+    } else {
+      getUINativeModule().listItem.setSwipeAction(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListItemSwipeActionModifier.identity = Symbol('listItemSwipeAction');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24025,7 +24041,8 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
   swipeAction(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListItemSwipeActionModifier.identity, ListItemSwipeActionModifier, value);
+    return this;
   }
   onSelect(event) {
     throw new Error('Method not implemented.');
@@ -27020,7 +27037,7 @@ class ArkSymbolSpanComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.SymbolSpan !== undefined) {
   globalThis.SymbolSpan.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkSymbolSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SymbolSpanModifier(undefined, nativePtr, classType);

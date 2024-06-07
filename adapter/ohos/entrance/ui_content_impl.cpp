@@ -1520,7 +1520,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
-    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    if (!isCJFrontend) {
+        container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    }
     container->SetNavigationRoute(AceType::MakeRefPtr<NavigationRouteOhos>(context->GetBundleName()));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1529,6 +1531,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
+    } else if (isCJFrontend) {
+        container->GetSettings().SetUsingSharedRuntime(true);
     } else {
         container->GetSettings().SetUsingSharedRuntime(false);
     }

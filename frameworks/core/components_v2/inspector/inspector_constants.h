@@ -600,6 +600,9 @@ ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
 //RenderNode
 ACE_EXPORT extern const char RENDER_NODE_ETS_TAG[];
 
+//NodeContainer
+ACE_EXPORT extern const char NODE_CONTAINER_ETS_TAG[];
+
 //CustomFrameNode
 ACE_EXPORT extern const char CUSTOM_FRAME_NODE_ETS_TAG[];
 

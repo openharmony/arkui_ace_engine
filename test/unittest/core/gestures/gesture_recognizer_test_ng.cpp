@@ -240,7 +240,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest001,
     panRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     panRecognizerPtr->direction_.type = PanDirection::ALL;
     panRecognizerPtr->isFlushTouchEventsEnd_ = true;
-    panRecognizerPtr->averageDistance_ = Offset(0, -1);
+    panRecognizerPtr->touchInfoForPan.averageDistance_ = Offset(0, -1);
     panRecognizerPtr->distance_ = 0;
     panRecognizerPtr->currentFingers_ = 1;
     panRecognizerPtr->fingers_ = 1;
@@ -311,7 +311,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest002,
     panRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
     panRecognizerPtr->direction_.type = PanDirection::ALL;
     panRecognizerPtr->isFlushTouchEventsEnd_ = true;
-    panRecognizerPtr->averageDistance_ = Offset(0, -1);
+    panRecognizerPtr->axisInfoForPan.averageDistance_ = Offset(0, -1);
     panRecognizerPtr->distance_ = 0;
     panRecognizerPtr->currentFingers_ = 1;
     panRecognizerPtr->fingers_ = 1;

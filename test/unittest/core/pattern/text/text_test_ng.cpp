@@ -17,7 +17,24 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+int32_t callBack1 = 0;
+int32_t callBack2 = 0;
+int32_t callBack3 = 0;
+const std::string IMAGE_VALUE = "image1";
+const std::string BUNDLE_NAME = "bundleName";
+const std::string MODULE_NAME = "moduleName";
+void ConstructGestureStyle(GestureStyle& gestureInfo)
+{
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureInfo.onClick = std::move(tmpClickFunc);
+
+    auto onLongPress = [](const BaseEventInfo* info) {};
+    auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+    gestureInfo.onLongPress = std::move(tmpLongPressFunc);
+}
+} // namespace
 
 class TextTestNg : public TextBases {
 public:
@@ -374,6 +391,444 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     pattern->selectOverlayProxy_ = proxy;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_TextLayoutAlgorithmStruct001
+ * @tc.desc: Test TextLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_TextLayoutAlgorithmStruct001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. spans is empty nd Create TextLayoutAlgorithm
+     */
+    std::list<RefPtr<SpanItem>> spans1_;
+    auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_, nullptr);
+    auto textLayoutAlgorithm1 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans1_, pManager_, true);
+    ASSERT_NE(textLayoutAlgorithm1, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateSensitiveContent.
+     */
+    std::list<RefPtr<SpanItem>> spans2_;
+    ConstructSpanItemList1(spans2_);
+    EXPECT_EQ(spans2_.size(), 4);
+    auto pManager_1 = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_1, nullptr);
+    auto textLayoutAlgorithm2 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans2_, pManager_1, true, true);
+    ASSERT_NE(textLayoutAlgorithm2, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateSensitiveContent.
+     */
+    std::list<RefPtr<SpanItem>> spans3_;
+    ConstructSpanItemList1(spans3_);
+    EXPECT_EQ(spans3_.size(), 4);
+    RefPtr<SpanItem> span0 = nullptr;
+    spans3_.emplace_back(span0);
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = "span1\n";
+    spans3_.emplace_back(span1);
+    auto pManager_2 = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_2, nullptr);
+    auto textLayoutAlgorithm3 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans3_, pManager_2, true, false);
+    ASSERT_NE(textLayoutAlgorithm3, nullptr);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_TextLayoutAlgorithmStruct002
+ * @tc.desc: Test TextLayoutAlgorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_TextLayoutAlgorithmStruct002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call UpdateSensitiveContent.
+     */
+    std::list<RefPtr<SpanItem>> spans_;
+    ConstructSpanItemList1(spans_);
+    EXPECT_EQ(spans_.size(), 4);
+
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = "span1\n";
+    spans_.emplace_back(span1);
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = "span2\n";
+    spans_.emplace_back(span2);
+    auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_, nullptr);
+    auto textLayoutAlgorithm4 = AceType::MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, true, false);
+    ASSERT_NE(textLayoutAlgorithm4, nullptr);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_UpdateSensitiveContent001
+ * @tc.desc: Test UpdateSensitiveContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_UpdateSensitiveContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateSensitiveContent.
+     */
+    std::string content("test123\n");
+    rowLayoutAlgorithm->UpdateSensitiveContent(content);
+    std::cout << "call UpdateSensitiveContent end." << std::endl;
+    /**
+     * @tc.steps: step3. call OnReset.
+     */
+    rowLayoutAlgorithm->OnReset();
+    std::cout << "call OnReset end." << std::endl;
+}
+
+/**
+ * @tc.name: TextLayoutAlg_CreateParagraph001
+ * @tc.desc: Test CreateParagraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_CreateParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. call CreateParagraph.
+     */
+    pattern->isSensitive_ = true;
+    pattern->GetHost()->SetPrivacySensitive(true);
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width());
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_MeasureContent001
+ * @tc.desc: Test MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_MeasureContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. change param and call MeasureContent.
+     */
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->isSpanStringMode_ = true;
+    rowLayoutAlgorithm->spanStringHasMaxLines_ = true;
+    contentConstraint.maxSize.SetHeight(0.0f);
+    auto ret = rowLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode));
+    EXPECT_EQ(ret.has_value(), true);
+    /**
+     * @tc.steps: step3. change param and call MeasureContent.
+     */
+    rowLayoutAlgorithm->isSpanStringMode_ = false;
+    ret = rowLayoutAlgorithm->MeasureContent(contentConstraint, AceType::RawPtr(frameNode));
+    EXPECT_EQ(ret.has_value(), true);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_ResetAiSpanTextStyle001
+ * @tc.desc: Test ResetAiSpanTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_ResetAiSpanTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    TextStyle textStyle;
+    rowLayoutAlgorithm->ResetAiSpanTextStyle(frameNode, textStyle);
+    std::cout << "call ResetAiSpanTextStyle end.\n" << std::endl;
+}
+
+/**
+ * @tc.name: TextLayoutAlg_UpdateParagraphForAISpan001
+ * @tc.desc: Test UpdateParagraphForAISpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_UpdateParagraphForAISpan001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    /**
+     * @tc.steps: step2. change param and call function.
+     */
+    pattern->dataDetectorAdapter_->textForAI_ = "";
+    rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
+
+    /**
+     * @tc.steps: step3. change param and call function.
+     */
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan1;
+    aiSpan1.start = -1;
+    aiSpan1.end = 0;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    aiSpanMap[1] = aiSpan1;
+    pattern->dataDetectorAdapter_->textForAI_ = "";
+    rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
+    /**
+     * @tc.steps: step4. change param and call function.
+     */
+    AISpan aiSpan2;
+    aiSpan2.start = 2;
+    aiSpan2.end = 5;
+    aiSpan2.content = SPAN_PHONE;
+    aiSpan2.type = TextDataDetectType::PHONE_NUMBER;
+    aiSpanMap[2] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->textForAI_ = "TEST1234";
+    rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
+    std::cout << "call UpdateParagraphForAISpan001 end.\n" << std::endl;
+}
+
+/**
+ * @tc.name: TextLayoutAlg_GrayDisplayAISpan001
+ * @tc.desc: Test GrayDisplayAISpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_GrayDisplayAISpan001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    TextStyle textStyle;
+    ParagraphStyle paragraphStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    std::string textForAI = "TEST1234";
+    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    /**
+     * @tc.steps: step2. change param and call function.
+     * spanStart <= dragStart && spanEnd >= dragStart && spanEnd <= dragEnd
+    */
+    DragSpanPosition dragSpanPosition;
+    dragSpanPosition.dragStart = 2;
+    dragSpanPosition.dragEnd = 4;
+    dragSpanPosition.spanStart = 1;
+    dragSpanPosition.spanEnd = 3;
+    rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
+    /**
+     * @tc.steps: step3. change param and call function.
+     * spanStart >= dragStart && spanEnd <= dragEnd
+    */
+    dragSpanPosition.dragStart = 1;
+    dragSpanPosition.dragEnd = 4;
+    dragSpanPosition.spanStart = 2;
+    dragSpanPosition.spanEnd = 3;
+    rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
+    std::cout << "call GrayDisplayAISpan001 end." << std::endl;
+}
+
+/**
+ * @tc.name: TextLayoutAlg_GrayDisplayAISpan002
+ * @tc.desc: Test GrayDisplayAISpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_GrayDisplayAISpan002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    TextStyle textStyle;
+    ParagraphStyle paragraphStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    std::string textForAI = "TEST1234";
+    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    /**
+     * @tc.steps: step2. change param and call function.
+     * spanStart <= dragStart && spanEnd >= dragEnd
+    */
+    DragSpanPosition dragSpanPosition;
+    dragSpanPosition.dragStart = 2;
+    dragSpanPosition.dragEnd = 3;
+    dragSpanPosition.spanStart = 1;
+    dragSpanPosition.spanEnd = 4;
+    rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
+    /**
+     * @tc.steps: step3. change param and call function.
+     * default
+    */
+    dragSpanPosition.dragStart = 1;
+    dragSpanPosition.dragEnd = 3;
+    dragSpanPosition.spanStart = 2;
+    dragSpanPosition.spanEnd = 4;
+    rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
+    std::cout << "call GrayDisplayAISpan002 end." << std::endl;
+    /**
+     * @tc.steps: step4. change param and call function.
+     * default
+    */
+    dragSpanPosition.dragStart = 2;
+    dragSpanPosition.dragEnd = 15;
+    dragSpanPosition.spanStart = 1;
+    dragSpanPosition.spanEnd = 20;
+    rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
+}
+
+/**
+ * @tc.name: TextLayoutAlg_BuildTextRaceParagraph001
+ * @tc.desc: Test BuildTextRaceParagraph
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlg_BuildTextRaceParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create TextLayoutAlgorithm
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
+    
+    /**
+     * @tc.steps: step2. change param and call MeasureContent.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize.width_ = 100.0f;
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    TextStyle textStyle;
+    textStyle.adaptTextSize_ = true;
+    ParagraphStyle paragraphStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    rowLayoutAlgorithm->paragraphManager_->AddParagraph({ .paragraph = paragraph,
+        .paragraphStyle = paragraphStyle,
+        .start = 50.0f,
+        .end = 150.0f});
+    rowLayoutAlgorithm->BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint,
+        AceType::RawPtr(frameNode));
+
+    /**
+     * @tc.steps: step3. change param and call MeasureContent.
+     */
+    TextStyle textStyle1;
+    textStyle1.adaptTextSize_ = true;
+    LayoutConstraintF contentConstraint1;
+    contentConstraint1.selfIdealSize.width_ = std::nullopt;
+    rowLayoutAlgorithm->BuildTextRaceParagraph(textStyle1, textLayoutProperty, contentConstraint1,
+        AceType::RawPtr(frameNode));
 }
 
 /**
@@ -2305,5 +2760,273 @@ HWTEST_F(TextTestNg, TextPattern010, TestSize.Level1)
     options.offset = 1;
     auto imageSourceInfo = pattern->CreateImageSourceInfo(options);
     EXPECT_EQ(imageSourceInfo.isFromReset_, 0);
+}
+
+/**
+ * @tc.name: TextPattern011
+ * @tc.desc: Test TextPattern CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. Create spanBases and gestureInfo
+     */
+    std::vector<RefPtr<SpanBase>> spanBases;
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
+    auto spans = spanStringWithSpans->GetSpanItems();
+    pattern->SetSpanItemChildren(spans);
+
+    /**
+     * @tc.steps: step3. test pattern MountImageNode
+     */
+    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    spanItem->content = " ";
+    spanItem->placeholderIndex = 0;
+    pattern->MountImageNode(spanItem);
+    EXPECT_EQ(pattern->childNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: TextPattern012
+ * @tc.desc: Test TextPattern CreateImageSourceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
+     */
+    auto [frameNode, pattern] = Init();
+    TextMarqueeState state = TextMarqueeState::START;
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_EQ(pattern->isMarqueeRunning_, true);
+    state = TextMarqueeState::FINISH;
+    pattern->FireOnMarqueeStateChange(state);
+    EXPECT_EQ(pattern->isMarqueeRunning_, false);
+}
+
+/**
+ * @tc.name: TextPattern013
+ * @tc.desc: Test TextPattern CopyBindSelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->RemoveAreaChangeInner();
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern CopyBindSelectionMenuParams
+     */
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
+    pattern->CopyBindSelectionMenuParams(selectInfo, menuParams);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+}
+
+/**
+ * @tc.name: TextPattern014
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto [frameNode, pattern] = Init();
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern CopySelectionMenuParams
+     */
+    selectInfo.isUsingMouse = true;
+    pattern->selectedType_ = TextSpanType::MIXED;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.menuInfo.menuIsShow, false);
+
+    pattern->selectedType_ = TextSpanType::TEXT;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+
+    pattern->selectedType_ = TextSpanType::IMAGE;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+
+    pattern->selectedType_ = TextSpanType(-1);
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    EXPECT_EQ(selectInfo.singleLineHeight, NODE_ID);
+}
+
+/**
+ * @tc.name: TextPattern015
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. test pattern OnHandleAreaChanged
+     */
+    RectF handleRect = CONTENT_RECT;
+    pattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
+    pattern->OnHandleAreaChanged();
+    EXPECT_EQ(pattern->selectOverlay_->SelectOverlayIsOn(), false);
+}
+
+/**
+ * @tc.name: TextPattern016
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. test pattern HandleSurfaceChanged
+     */
+    int32_t newWidth = 1;
+    int32_t newHeight = 1;
+    int32_t prevWidth = 0;
+    int32_t prevHeight = 0;
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+
+    /**
+     * @tc.steps: step3. set Width Height equal before adn after, test pattern HandleSurfaceChanged
+     */
+    newWidth = 1;
+    newHeight = 1;
+    prevWidth = 1;
+    prevHeight = 1;
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+}
+
+/**
+ * @tc.name: TextPattern017
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. create SelectOverlayInfo
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectInfo, nullptr, false);
+    std::function<void()> buildFunc = []() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = []() {
+        callBack3 = 3;
+        return;
+    };
+
+    /**
+     * @tc.steps: step3. test pattern UpdateSelectOverlayOrCreate
+     */
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, true);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, false);
+    EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
+}
+
+/**
+ * @tc.name: TextPattern018
+ * @tc.desc: Test TextPattern CopySelectionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    auto IsShowHandle = pattern->IsShowHandle();
+    EXPECT_EQ(IsShowHandle, false);
 }
 } // namespace OHOS::Ace::NG

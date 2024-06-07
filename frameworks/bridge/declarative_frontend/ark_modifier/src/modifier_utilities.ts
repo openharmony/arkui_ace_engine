@@ -101,12 +101,17 @@ class ModifierUtils {
     newMap: Map<Symbol, AttributeModifierWithKey>,
     componentOverrideMap: Map<string, new (value: T0) => M0>): void {
       newMap.forEach((value, key) => {
-        if (componentOverrideMap.has(key.toString())) {
-          //@ts-ignore
-          const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
-          stageMap.set(key, newValue);
+        if (!key) {
+          ArkLogConsole.info("key of modifier map is undefined, ModifierWithKey is " +
+            (value ? value.constructor.name.toString() : "undefined"));
         } else {
-          stageMap.set(key, this.copyModifierWithKey(value));
+          if (componentOverrideMap.has(key.toString())) {
+            //@ts-ignore
+            const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
+            stageMap.set(key, newValue);
+          } else {
+            stageMap.set(key, this.copyModifierWithKey(value));
+          }
         }
       });
   }
@@ -140,7 +145,7 @@ class ModifierUtils {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
-        (attributeModifierWithKey.stageValue === undefined || attributeModifierWithKey.stageValue === null));
+        (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -155,7 +160,8 @@ class ModifierUtils {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
-            value.applyPeer(item.nativePtr, false);
+            value.applyPeer(item.nativePtr,
+              (value.value === undefined || value.value === null));
           });
           item._nativePtrChanged = false;
         }

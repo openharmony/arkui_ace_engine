@@ -53,6 +53,9 @@ const std::string EMPTY_TEXT = "";
 const std::string OPTION_TEST_TEXT = "option";
 const Dimension WIDTH = 50.0_vp;
 const Dimension HEIGHT = 50.0_vp;
+const Dimension DIVIDER_STROKE_WIDTH = 1.0_vp;
+const Dimension DIVIDER_START_MARGIN = 10.0_vp;
+const Dimension DIVIDER_END_MARGIN = 15.0_vp;
 } // namespace
 
 class OptionTestNg : public testing::Test {
@@ -728,6 +731,67 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg005
+ * @tc.desc: Verify ToJsonValue default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
+     */
+    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    paintProp->UpdatePress(false);
+    paintProp->UpdateHover(false);
+    paintProp->UpdateNeedDivider(true);
+    paintProp->UpdateHasIcon(true);
+    SelectDivider divider;
+    divider.color = Color::RED;
+    divider.strokeWidth = DIVIDER_STROKE_WIDTH;
+    divider.startMargin = DIVIDER_START_MARGIN;
+    divider.endMargin = DIVIDER_END_MARGIN;
+    paintProp->UpdateDivider(divider);
+    EXPECT_TRUE(paintProp->HasDivider());
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. Execute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    /**
+     * @tc.steps: step3. update hover to true.
+     * @tc.expected:  return value are as expected.
+     */
+    paintProp->UpdateHover(true);
+    paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    /**
+     * @tc.steps: step3. update press to true.
+     * @tc.expected:  return value are as expected.
+     */
+    paintProp->UpdatePress(true);
+    paintWrapper = GetPaintWrapper(paintProp);
+    paintMethod->PaintDivider(canvas, paintWrapper);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
     paintWrapper = nullptr;
