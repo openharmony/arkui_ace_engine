@@ -263,13 +263,11 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 void UINode::Clean(bool cleanDirectly, bool allowTransition)
 {
     bool needSyncRenderTree = false;
-    std::vector<RefPtr<UINode>> nodesWithGeometryTransition;
     int32_t index = 0;
     for (const auto& child : children_) {
         // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
-        if (!cleanDirectly && child->MarkRemoving(false)) {
+        if (!cleanDirectly && child->MarkRemoving()) {
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
-            nodesWithGeometryTransition.emplace_back(child);
         }
         // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
@@ -284,10 +282,6 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
             AddDisappearingChild(child, index);
         }
         ++index;
-    }
-
-    for (const auto& node : nodesWithGeometryTransition) {
-        node->ApplyGeometryTransition();
     }
 
     if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
@@ -651,6 +645,14 @@ void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
+}
+
+void UINode::UpdateGeometryTransition()
+{
+    auto children = GetChildren();
+    for (const auto& child: children) {
+        child->UpdateGeometryTransition();
+    }
 }
 
 bool UINode::IsAutoFillContainerNode()
@@ -1061,13 +1063,13 @@ void UINode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
-bool UINode::MarkRemoving(bool applyGeometryTransition)
+bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
     isRemoving_ = true;
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving(applyGeometryTransition) || pendingRemove;
+        pendingRemove = child->MarkRemoving() || pendingRemove;
     }
     return pendingRemove;
 }
