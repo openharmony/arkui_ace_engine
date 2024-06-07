@@ -4846,6 +4846,109 @@ void ResetConstraintSize(ArkUINodeHandle node)
     ViewAbstract::ResetMinSize(frameNode, false);
 }
 
+void BindCustomPopup(FrameNode* frameNode, ArkUIPopupParam* value, UINode* customNode)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    std::function<void(bool)> onStateChangeFunc =
+        (value->onStateChange == nullptr) ? std::function<void(bool)>([](bool) -> void {})
+        : ([stateChangeCallBack = value->onStateChange, id = value->onStateChangeId](bool input) -> void {
+            stateChangeCallBack(id, input);
+        });
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+
+    popupParam->SetIsShow(value->isShow);
+    popupParam->SetUseCustomComponent(value->useCustomComponent);
+    popupParam->SetPlacement(static_cast<Placement>(value->placement));
+    popupParam->SetMaskColor(Color(value->maskColor));
+    popupParam->SetBackgroundColor(Color(value->backgroundColor));
+    popupParam->SetEnableArrow(value->enableArrow);
+    popupParam->SetHasAction(!value->autoCancel);
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    if (popupParam->IsShow()) {
+        ViewAbstract::BindPopup(popupParam, AceType::Claim(frameNode),
+            AceType::Claim(customNode));
+    } else {
+        ViewAbstract::BindPopup(popupParam, AceType::Claim(frameNode), nullptr);
+    }
+}
+
+void BindBasePopup(FrameNode* frameNode, ArkUIPopupParam* value)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    std::function<void(bool)> onStateChangeFunc =
+        (value->onStateChange == nullptr) ? std::function<void(bool)>([](bool) -> void {})
+        : ([stateChangeCallBack = value->onStateChange, id = value->onStateChangeId](bool input) -> void {
+            stateChangeCallBack(id, input);
+        });
+    std::function<void()> primaryActionFunc =
+        (value->primaryAction == nullptr) ? std::function<void()>([]() -> void {})
+        : ([primaryActionCallBack = value->primaryAction, id = value->primaryActionId]() -> void {
+            primaryActionCallBack(id);
+        });
+    std::function<void()> secondaryActionFunc =
+        (value->secondaryAction == nullptr) ? std::function<void()>([]() -> void {})
+        : ([secondaryActionCallBack = value->secondaryAction, id = value->secondaryActionId]() -> void {
+            secondaryActionCallBack(id);
+        });
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+    popupParam->SetIsShow(value->isShow);
+    popupParam->SetMessage(value->message);
+    popupParam->SetPlacement(static_cast<Placement>(value->placement));
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    std::string primaryString = value->primaryString;
+    if (!primaryString.empty()) {
+        ButtonProperties propertiesPrimary;
+        propertiesPrimary.value = primaryString;
+        auto touchPrimaryCallback = [primaryActionFunc](TouchEventInfo&) {primaryActionFunc();};
+        auto onNewClick = [primaryActionFunc](const GestureEvent& info) {primaryActionFunc();};
+        propertiesPrimary.touchFunc = touchPrimaryCallback;
+        propertiesPrimary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesPrimary.showButton = true;
+        popupParam->SetPrimaryButtonProperties(propertiesPrimary);
+    }
+
+    std::string secondaryString = value->secondaryString;
+    if (!secondaryString.empty()) {
+        ButtonProperties propertiesSecondary;
+        propertiesSecondary.value = secondaryString;
+        auto touchSecondaryCallback = [secondaryActionFunc](TouchEventInfo&) {secondaryActionFunc();};
+        auto onNewClick = [secondaryActionFunc](const GestureEvent& info) {secondaryActionFunc();};
+        propertiesSecondary.touchFunc = touchSecondaryCallback;
+        propertiesSecondary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesSecondary.showButton = true;
+        popupParam->SetSecondaryButtonProperties(propertiesSecondary);
+    }
+    ViewAbstract::BindPopup(popupParam, AceType::Claim(frameNode), nullptr);
+}
+
+void SetBindPopup(ArkUINodeHandle node, ArkUIPopupParam* value, ArkUINodeHandle customNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (customNode != nullptr) {
+        BindCustomPopup(frameNode, value, reinterpret_cast<UINode*>(customNode));
+    } else {
+        BindBasePopup(frameNode, value);
+    }
+}
+
+void ResetBindPopup(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(false);
+    ViewAbstract::BindPopup(popupParam, AceType::Claim(frameNode), nullptr);
+}
+
 ArkUI_Float32 GetOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5828,7 +5931,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
         ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth,
-        SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion,
+        SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup, GetFocusable,
+        GetDefaultFocus, GetResponseRegion,
         GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
         SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderWidthDimension,
         GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform,
@@ -6012,6 +6116,20 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_CLICK;
 
+        auto target = info.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        event.touchEvent.target.area = {
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
+        };
+        event.touchEvent.target.origin = {
+            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
+        };
+
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
@@ -6119,6 +6237,19 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        event.touchEvent.target.area = {
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
+        };
+        event.touchEvent.target.origin = {
+            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
+        };
         const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
