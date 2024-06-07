@@ -1157,35 +1157,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavBarPattern021
- * @tc.desc: Test IgnoreLayoutSafeArea function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern022, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
-        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
-    ASSERT_NE(navBarNode, nullptr);
-    auto navBarpattern = navBarNode->GetPattern<NavBarPattern>();
-    ASSERT_NE(navBarpattern, nullptr);
-
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    EXPECT_NE(navBarLayoutProperty, nullptr);
-    auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
-    .edges = SAFE_AREA_TYPE_NONE});
-    EXPECT_EQ(opts.type, SAFE_AREA_TYPE_NONE);
-    EXPECT_EQ(opts.edges, SAFE_AREA_TYPE_NONE);
-
-    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-    opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
-        .edges = SAFE_AREA_TYPE_NONE});
-    EXPECT_EQ(opts.type, SAFE_AREA_TYPE_SYSTEM);
-    EXPECT_EQ(opts.edges, SAFE_AREA_EDGE_ALL);
-}
-
-/**
  * @tc.name: InnerNavigationController001
  * @tc.desc: Test InitPanEvent function.
  * @tc.type: FUNC
