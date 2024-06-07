@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -349,7 +350,13 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
 
 void MutableSpanString::RemoveString(int32_t start, int32_t length)
 {
-    ReplaceString(start, length, "");
+    // process emoji
+    auto text = GetWideString();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+        start, length, text, true);
+    int startIndex = range.startIndex;
+    int endIndex = range.endIndex;
+    ReplaceString(startIndex, endIndex - startIndex, "");
     NotifySpanWatcher();
 }
 
