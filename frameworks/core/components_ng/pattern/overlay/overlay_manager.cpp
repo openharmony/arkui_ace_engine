@@ -3290,10 +3290,7 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
 {
-    auto pattern = node->GetPattern<FocusView>();
-    if (pattern) {
-        pattern->LostViewFocus();
-    }
+    InputMethodManager::GetInstance()->ProcessModalPageScene();
 }
 
 void OverlayManager::FireModalPageHide() {}

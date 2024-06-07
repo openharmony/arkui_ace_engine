@@ -817,6 +817,7 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void ProcessFocusStyle();
     void SetFocusStyle();
     void ClearFocusStyle();
     void AddIsFocusActiveUpdateEvent();
@@ -1074,9 +1075,9 @@ public:
         return isCustomFont_;
     }
 
-    void SetISCounterIdealHeight(bool IsIdealHeight)
+    void SetIsCounterIdealHeight(bool isIdealHeight)
     {
-        isCounterIdealheight_ = IsIdealHeight;
+        isCounterIdealheight_ = isIdealHeight;
     }
 
     bool GetIsCounterIdealHeight() const

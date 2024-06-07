@@ -519,6 +519,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
   ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
