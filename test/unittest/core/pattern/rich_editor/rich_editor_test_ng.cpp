@@ -6606,7 +6606,7 @@ HWTEST_F(RichEditorTestNg, FinishTextPreview002, TestSize.Level1)
     /**
      * @tc.steps: step2.  test insertValue when previewTextInputting
      */
-    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1), true);
+    richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1, true);
     EXPECT_EQ(richEditorPattern->spans_.size(), 1);
     auto it = richEditorPattern->spans_.begin();
     EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
