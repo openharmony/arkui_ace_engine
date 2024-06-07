@@ -298,6 +298,7 @@ void RichEditorTestNg::AddSpan(const std::string& content)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
+    richEditorPattern->childNodes_.push_back(spanNode);
     int32_t spanTextLength = 0;
     for (auto& span : richEditorPattern->spans_) {
         spanTextLength += StringUtils::ToWstring(span->content).length();
@@ -6327,6 +6328,8 @@ HWTEST_F(RichEditorTestNg, SingleHandle003, TestSize.Level1)
      * @tc.steps: step3. touch down caret position
      */
     auto touchOffset = Offset(0, 0);
+    AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)
+        ->SetCaretOffsetAndHeight(OffsetF(0, 0), 50.0f);
     richEditorPattern->HandleTouchDown(touchOffset);
     EXPECT_TRUE(richEditorPattern->isTouchCaret_);
     /**

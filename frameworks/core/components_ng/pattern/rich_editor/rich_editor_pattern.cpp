@@ -7944,4 +7944,12 @@ float RichEditorPattern::GetSelectedMaxWidth()
         return std::max(selectedWidth, tempWidth);
     }
 }
+
+const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
+{
+    childNodes_.clear();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, childNodes_);
+    return host->GetChildren();
+}
 } // namespace OHOS::Ace::NG
