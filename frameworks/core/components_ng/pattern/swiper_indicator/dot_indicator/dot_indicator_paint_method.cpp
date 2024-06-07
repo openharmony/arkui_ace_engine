@@ -184,7 +184,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
-   PaintHoverIndicator(itemHalfSizes, paddingSide);
+    PaintHoverIndicator(itemHalfSizes, paddingSide);
 }
 void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
 {
