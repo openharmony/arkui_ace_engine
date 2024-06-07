@@ -286,12 +286,23 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    SetRotation(pipeline->GetTransformHint());
+
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+
+    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "OnAttach to frame node, set transform:%{public}u", transform);
+            pattern->SetRotation(transform);
+        }
+    });
+    UpdateTransformHintChangedCallbackId(callbackId);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -307,6 +318,20 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
+
+    if (HasTransformHintChangedCallbackId()) {
+        pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
+    }
+}
+
+void WebPattern::SetRotation(uint32_t rotation)
+{
+    if (renderMode_ == RenderMode::SYNC_RENDER || rotation_ == rotation) {
+        return;
+    }
+    rotation_ = rotation;
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(rotation);
 }
 
 void WebPattern::OnAttachToMainTree()
@@ -2164,6 +2189,19 @@ void WebPattern::InitEnhanceSurfaceFlag()
     }
 }
 
+void WebPattern::UpdateBackgroundColorForSurface()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (renderContext->GetBackgroundColor().has_value() &&
+        renderContext->GetBackgroundColor().value() != Color::TRANSPARENT) {
+        renderContextForSurface_->UpdateBackgroundColor(Color::WHITE);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2203,10 +2241,10 @@ void WebPattern::OnModifyDone()
             CHECK_NULL_VOID(renderSurface_);
             renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                "RosenWeb" };
-            renderContextForSurface_->InitContext(false, param);
-            renderContextForSurface_->UpdateBackgroundColor(renderContext->GetBackgroundColor().value_or(Color::WHITE));
+            if (renderMode_ == RenderMode::ASYNC_RENDER) {
+                static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
+                renderContextForSurface_->InitContext(false, param);
+            }
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2214,12 +2252,15 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
+                UpdateBackgroundColorForSurface();
                 renderSurface_->SetIsTexture(false);
                 renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
                 renderSurface_->SetRenderContext(renderContextForSurface_);
+                renderContext->AddChild(renderContextForSurface_, 0);
             }
-            renderContext->AddChild(renderContextForSurface_, 0);
             renderSurface_->InitSurface();
+            renderSurface_->SetTransformHint(rotation_);
+            TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
             if (renderMode_ == RenderMode::ASYNC_RENDER) {
