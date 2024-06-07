@@ -2338,6 +2338,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
+    } else {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        container->SetApiTargetVersion(apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
