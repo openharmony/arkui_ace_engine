@@ -1159,6 +1159,8 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     if (item->object == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    //save direction value in node;
+    node->linearGradientDirection = item->value[NUM_1].i32;
     auto* fullImpl = GetFullImpl();
     const ArkUI_ColorStop* colorStop = reinterpret_cast<ArkUI_ColorStop*>(item->object);
     int size = colorStop->size;
@@ -1195,7 +1197,7 @@ const ArkUI_AttributeItem* GetLinearGradient(ArkUI_NodeHandle node)
     //angle
     g_numberValues[0].f32 = values[0];
     //direction
-    g_numberValues[1].i32 = values[1];
+    g_numberValues[1].i32 = node->linearGradientDirection > -1 ? node->linearGradientDirection : values[1];
     //repeated
     g_numberValues[2].i32 = values[2];
     //size
