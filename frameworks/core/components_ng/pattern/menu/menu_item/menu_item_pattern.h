@@ -216,7 +216,7 @@ public:
         return isStackSubmenuHeader_;
     }
 
-    void HandleSubMenu();
+    bool HandleSubMenu();
 
 protected:
     void RegisterOnKeyEvent();

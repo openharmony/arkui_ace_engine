@@ -668,7 +668,7 @@ void MenuItemPattern::CloseMenu()
     menuWrapperPattern->HideMenu();
 }
 
-void MenuItemPattern::HandleSubMenu()
+bool MenuItemPattern::HandleSubMenu()
 {
     auto expandingMode = GetExpandingMode();
     auto menuWrapper = GetMenuWrapper();
@@ -677,13 +677,14 @@ void MenuItemPattern::HandleSubMenu()
     if (GetSubBuilder() != nullptr && (expandingMode != SubMenuExpandingMode::STACK ||
         (expandingMode == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu))) {
         ShowSubMenu();
-        return;
+        return true;
     }
     if (expandingMode == SubMenuExpandingMode::STACK &&
         ((!IsSubMenu() && hasSubMenu) || IsStackSubmenuHeader())) {
         menuWrapperPattern->HideSubMenu();
-        return;
+        return true;
     }
+    return false;
 }
 
 void MenuItemPattern::RegisterOnClick()
@@ -723,7 +724,7 @@ void MenuItemPattern::RegisterOnClick()
             pattern->SetChange();
         }
         menuPattern->SetLastSelectedItem(host);
-        pattern->HandleSubMenu();
+        if (pattern->HandleSubMenu()) return;
         // hide menu when menu item is clicked
         pattern->CloseMenu();
     };
