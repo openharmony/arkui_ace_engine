@@ -919,7 +919,8 @@ void ParsePopupCommonParam(
     auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
     if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;
-        std::strtod(arrowPointPosition->ToString().c_str(), &pEnd);
+        auto arrowString = arrowPointPosition->ToString();
+        std::strtod(arrowString.c_str(), &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
                 offset = ARROW_ZERO_PERCENT_VALUE;
