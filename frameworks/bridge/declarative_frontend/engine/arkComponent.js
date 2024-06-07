@@ -27037,7 +27037,7 @@ class ArkSymbolSpanComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.SymbolSpan !== undefined) {
   globalThis.SymbolSpan.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkSymbolSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SymbolSpanModifier(undefined, nativePtr, classType);

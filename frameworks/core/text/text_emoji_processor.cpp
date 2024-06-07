@@ -216,30 +216,43 @@ bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::string&
     return false;
 }
 
-std::wstring TextEmojiProcessor::SubWstring(int32_t index, int32_t length, const std::wstring& content)
+std::wstring TextEmojiProcessor::SubWstring(
+    int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
+{
+    TextEmojiSubStringRange range = CalSubWstringRange(index, length, content, includeHalf);
+    return content.substr(range.startIndex, range.endIndex - range.startIndex);
+}
+
+TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
+    int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
 {
     int32_t startIndex = index;
-    int32_t endIndex = index + length - 1;
-    int32_t emojiStartIndex = index;
+    int32_t endIndex = index + length;
+    int32_t emojiStartIndex = index;   // [emojiStartIndex, emojiEndIndex)
     int32_t emojiEndIndex = index;
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     std::string curStr = StringUtils::ToString(content);
     // clamp left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, curStr, emojiStartIndex, emojiEndIndex)) {
-        // [emojiStartIndex, emojiEndIndex)
-        if (startIndex != emojiStartIndex) {
-            startIndex = emojiEndIndex;
+        if (startIndex != emojiStartIndex && !includeHalf) {
+            startIndex = emojiEndIndex; // exclude current emoji
+        }
+        if (startIndex != emojiStartIndex && includeHalf) {
+            startIndex = emojiStartIndex; // include current emoji
         }
     }
     // clamp right emoji
     if (IsIndexAfterOrInEmoji(endIndex, curStr, emojiStartIndex, emojiEndIndex)) {
-        // [emojiStartIndex, emojiEndIndex)
-        if (endIndex != emojiEndIndex - 1) {
-            endIndex = emojiStartIndex - 1;
+        if (endIndex != emojiEndIndex && !includeHalf) {
+            endIndex = emojiStartIndex; // exclude current emoji
+        }
+        if (endIndex != emojiEndIndex && includeHalf) {
+            endIndex = emojiEndIndex; // include current emoji
         }
     }
-    return content.substr(startIndex, endIndex - startIndex + 1);
+    TextEmojiSubStringRange result = { startIndex, endIndex };
+    return result;
 }
 
 std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
