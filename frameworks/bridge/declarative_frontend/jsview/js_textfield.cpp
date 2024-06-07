@@ -351,13 +351,9 @@ void JSTextField::SetInputStyle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString()) {
-        auto styleString = info[0]->ToString();
-        if (styleString == "Inline") {
-            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
-        } else {
-            TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
-        }
+    auto styleString = info[0]->ToString();
+    if (styleString == "Inline") {
+        TextFieldModel::GetInstance()->SetInputStyle(InputStyle::INLINE);
     } else {
         TextFieldModel::GetInstance()->SetInputStyle(InputStyle::DEFAULT);
     }
