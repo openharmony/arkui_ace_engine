@@ -860,6 +860,7 @@ public:
     void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
+    std::string GetCancelButton();
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1412,6 +1413,7 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+    void SetAccessibilityDeleteAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

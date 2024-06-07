@@ -87,7 +87,8 @@ static const std::set<std::string> stringAttrs = {
     "dialog_font_primary",
     "menu_has_filter",
     "calendar_picker_dialog_button_transparent",
-    "calendar_picker_dialog_divider_transparent"
+    "calendar_picker_dialog_divider_transparent",
+    "textfield_accessibility_property_delete"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

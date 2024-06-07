@@ -525,7 +525,27 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
+    SetAccessibilityDeleteAction();
     return true;
+}
+
+void TextFieldPattern::SetAccessibilityDeleteAction()
+{
+    if (IsShowCancelButtonMode()) {
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            auto stackNode = cleanNodeResponseArea->GetFrameNode();
+            CHECK_NULL_VOID(stackNode);
+            auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(textAccessibilityProperty);
+            auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+            auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                              (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelButton() : "");
+        }
+    }
 }
 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
@@ -1426,6 +1446,15 @@ bool TextFieldPattern::IsShowHandle()
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, false);
     return !theme->IsTextFieldShowHandle();
+}
+
+std::string TextFieldPattern::GetCancelButton()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return theme->GetCancelButton();
 }
 
 void TextFieldPattern::HandleOnPaste()
