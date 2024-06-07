@@ -1151,7 +1151,7 @@ HWTEST_F(RichEditorEditTestNg, SetTypingStyle, TestSize.Level1)
     options1.style = richEditorPattern->typingTextStyle_;
     AddSpan(INIT_VALUE_1);
     auto info1 = richEditorController->GetSpansInfo(1, 5);
-    ASSERT_NE(info1.selection_.resultObjects.size(), 0);    
+    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle2.letterSpacing, LETTER_SPACING.ConvertToVp());
