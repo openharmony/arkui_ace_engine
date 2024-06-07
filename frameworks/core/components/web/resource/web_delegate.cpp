@@ -6719,6 +6719,7 @@ void WebDelegate::OnInterceptKeyboardAttach(
     CHECK_NULL_VOID(onInterceptKeyboardAttachV2_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
+    keyboardHandler_ = keyboardHandler;
     WebKeyboardOption keyboardOpt;
     std::function<void()> buildFunc = nullptr;
     context->GetTaskExecutor()->PostSyncTask(

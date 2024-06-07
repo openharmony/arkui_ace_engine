@@ -983,6 +983,13 @@ public:
     void SetSurfaceId(const std::string& surfaceId);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+
+    void CloseCustomKeyboard()
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1181,6 +1188,7 @@ private:
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
 #endif
 };
 

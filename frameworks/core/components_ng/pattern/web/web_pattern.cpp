@@ -3861,6 +3861,8 @@ bool WebPattern::OnBackPressed()
         CHECK_NULL_RETURN(inputMethod, false);
         inputMethod->HideTextInput();
         inputMethod->Close();
+        CHECK_NULL_RETURN(delegate_, true);
+        delegate_->CloseCustomKeyboard();
         return true;
     }
     return false;
