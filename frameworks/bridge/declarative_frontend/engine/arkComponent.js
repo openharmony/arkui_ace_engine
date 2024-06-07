@@ -23747,6 +23747,24 @@ class ListFadingEdgeModifier extends ModifierWithKey {
 }
 ListFadingEdgeModifier.identity = Symbol('fadingEdge');
 
+class ListChildrenMainSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListChildrenMainSize(node);
+    }
+    else {
+      getUINativeModule().list.setListChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListChildrenMainSizeModifier.identity = Symbol('listChildrenMainSize');
+
 class ListSpaceModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23946,6 +23964,10 @@ class ArkListComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
     return this;
   }
+  childrenMainSize(value) {
+    modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.List !== undefined) {
@@ -24047,12 +24069,33 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
   }
 }
 ListItemGroupDividerModifier.identity = Symbol('listItemGroupDivider');
+class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupChildrenMainSize(node);
+    }
+    else {
+      getUINativeModule().listItemGroup.setListItemGroupChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListItemGroupChildrenMainSizeModifier.identity = Symbol('listItemGroupChildrenMainSize');
 class ArkListItemGroupComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
+    return this;
+  }
+  childrenMainSize(value) {
+    modifierWithKey(this._modifiersWithKeys, ListItemGroupChildrenMainSizeModifier.identity, ListItemGroupChildrenMainSizeModifier, value);
     return this;
   }
 }

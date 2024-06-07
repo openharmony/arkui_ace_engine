@@ -233,7 +233,11 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
     if (args.Length() != 1 || !(args[0]->IsObject())) {
         return;
     }
-    JSRef<JSObject> childrenSizeObj = JSRef<JSObject>::Cast(args[0]);
+    SetChildrenMainSize(JSRef<JSObject>::Cast(args[0]));
+}
+
+void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
+{
     double defaultSize = 0.0f;
     if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
         LOGW("JSList input parameter defaultSize check failed.");
