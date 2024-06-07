@@ -2499,7 +2499,6 @@ bool PipelineContext::IsSkipShortcutAndFocusMove()
 
 bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
 {
-    CHECK_NULL_RETURN(curFocusView, false);
     auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
     auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
