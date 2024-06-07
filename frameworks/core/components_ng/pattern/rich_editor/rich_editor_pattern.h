@@ -774,6 +774,8 @@ private:
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    std::string GetPlaceHolderInJson() const;
+    std::string GetTextColorInJson(const std::optional<Color>& value) const;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
