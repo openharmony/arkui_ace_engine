@@ -1652,9 +1652,21 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
 
 void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentConstraint = layoutProperty->GetContentLayoutConstraint();
+    auto frameSize = OptionalSizeF(geometryNode->GetPaddingSize());
+    auto childConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, frameSize, false);
     for (auto index : indexSet) {
         auto tabContent = GetCurrentFrameNode(index);
         if (!tabContent) {
+            continue;
+        }
+        if (!tabContent->GetChildren().empty()) {
             continue;
         }
         auto tabContentPattern = tabContent->GetPattern<TabContentPattern>();
@@ -1665,6 +1677,10 @@ void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 
         for (const auto& child : tabContent->GetChildren()) {
             child->Build(nullptr);
+        }
+        if (contentConstraint.has_value() && tabContent->GetGeometryNode()) {
+            tabContent->GetGeometryNode()->SetParentLayoutConstraint(childConstraint);
+            FrameNode::ProcessOffscreenNode(tabContent);
         }
     }
 }
