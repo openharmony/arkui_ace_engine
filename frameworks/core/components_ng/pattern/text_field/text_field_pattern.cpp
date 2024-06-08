@@ -3767,6 +3767,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
         hasInsertValue = contentController_->ReplaceSelectedValue(start, end, insertValue);
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
         if (isIME && isDelete) {
+            selectController_->UpdateCaretIndex(start);
             AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         }
     } else {
@@ -3776,8 +3777,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     }
     if (layoutProperty->HasMaxLength()) {
         int32_t sum = originLength + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
-        showCountBorderStyle_ = sum >
-            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        showCountBorderStyle_ = sum > static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
         HandleCountStyle();
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
