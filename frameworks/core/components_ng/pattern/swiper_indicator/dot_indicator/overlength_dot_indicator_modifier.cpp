@@ -101,12 +101,6 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     rightCenter += (centerDilateDistance - centerDistance) * FIRST_FADING_RATIO;
     PaintSelectedIndicator(
         canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - NUM_1);
-    bool isRightTouchBottom = (currentIndex_ == NUM_0);
-    bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
-    if (!isTouchBottom || totalCount == NUM_0 || !isTouchBottomLoop_) {
-        return;
-    }
 }
 
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
@@ -128,8 +122,7 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-            float centerX = vecPointInfo[i];
-            center = { centerX, centerY_ };
+            center = { vecPointInfo[i], centerY_ };
         }
         if (currentIndex_ > maxDisplayCount_ - NUM_3) {
             if (i == NUM_0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +26,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t NUM_0 = 0;
-constexpr uint32_t NUM_1 = 1;
-constexpr uint32_t NUM_2 = 2;
-constexpr uint32_t NUM_3 = 3;
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
@@ -41,7 +37,10 @@ constexpr Dimension INDICATOR_OFFSET_UNIT = 18.0_vp;
 constexpr Dimension INDICATOR_ITEM_SPECIFIC_SPACE = 10.0_vp;
 constexpr float FIRST_FADING_RATIO = 0.5f;
 constexpr float SECOND_FADING_RATIO = 0.75f;
-
+constexpr uint32_t NUM_0 = 0;
+constexpr uint32_t NUM_1 = 1;
+constexpr uint32_t NUM_2 = 2;
+constexpr uint32_t NUM_3 = 3;
 } // namespace
 
 void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

@@ -26,7 +26,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 namespace OHOS::Ace::NG {
 constexpr int32_t ITEM_SIZE = 4;
-constexpr int32_t INIT_SIZE_RATE = 1.0f;
+constexpr float INIT_SIZE_RATE = 1.0f;
 
 enum class TouchBottomType {
     NONE = 0,
