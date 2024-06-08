@@ -163,16 +163,16 @@ export const defaultTheme: ChipTheme = {
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
     localizedNormalMargin: {
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4)
+      start: LengthMetrics.vp(6),
+      end: LengthMetrics.vp(6),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0)
     },
     localizedSmallMargin: {
       start: LengthMetrics.vp(4),
       end: LengthMetrics.vp(4),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0),
     }
   },
   suffixIcon: {

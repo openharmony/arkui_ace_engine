@@ -1453,13 +1453,32 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     return ret;
 }
 
+void WebPattern::ClearKeyEventByKeyCode(int32_t keyCode)
+{
+    auto keyEvent = webKeyEvent_.begin();
+    for (; keyEvent != webKeyEvent_.end();) {
+        if (static_cast<int32_t>(keyEvent->code) == keyCode) {
+            keyEvent = webKeyEvent_.erase(keyEvent);
+        } else {
+            ++keyEvent;
+        }
+    }
+
+    if (webKeyEvent_.size() >= KEYEVENT_MAX_NUM) {
+        webKeyEvent_.clear();
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebPattern::ClearKeyEventByKeyCode clear all keyevent.");
+    } else {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebPattern::ClearKeyEventByKeyCode clear all tab keyevent.");
+    }
+}
+
 bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
 {
     CHECK_NULL_RETURN(delegate_, false);
     if (webKeyEvent_.size() >= KEYEVENT_MAX_NUM) {
-        webKeyEvent_.clear();
-        TAG_LOGW(AceLogTag::ACE_WEB,
-            "WebPattern::WebOnKeyEvent keyevent list num overflow.");
+        ClearKeyEventByKeyCode(static_cast<int32_t>(KeyCode::KEY_TAB));
     }
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebPattern::WebOnKeyEvent keyEvent:%{public}s", keyEvent.ToString().c_str());
@@ -1472,28 +1491,10 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
         static_cast<int32_t>(keyEvent.action), pressedCodes);
 }
 
-void WebPattern::ClearKeyEventBeforeUp(
-    const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
-{
-    auto keyEvent = webKeyEvent_.begin();
-    for (; keyEvent != webKeyEvent_.end();) {
-        if (static_cast<int32_t>(keyEvent->code) == event->GetKeyCode() &&
-            static_cast<int32_t>(keyEvent->action) == static_cast<int32_t>(KeyAction::DOWN)) {
-            keyEvent = webKeyEvent_.erase(keyEvent);
-        } else {
-            ++keyEvent;
-        }
-    }
-}
-
 void WebPattern::KeyboardReDispatch(
     const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
 {
     CHECK_NULL_VOID(event);
-    if (event->GetAction() == static_cast<int32_t>(KeyAction::UP)) {
-        // When the up event is reported, delete the corresponding down event.
-        ClearKeyEventBeforeUp(event);
-    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto host = GetHost();
@@ -1525,6 +1526,8 @@ void WebPattern::KeyboardReDispatch(
             },
             TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
     }
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::KeyboardReDispatch erase key:%{public}s", keyEvent->ToString().c_str());
     webKeyEvent_.erase((++keyEvent).base());
 }
 
@@ -3858,6 +3861,8 @@ bool WebPattern::OnBackPressed()
         CHECK_NULL_RETURN(inputMethod, false);
         inputMethod->HideTextInput();
         inputMethod->Close();
+        CHECK_NULL_RETURN(delegate_, true);
+        delegate_->CloseCustomKeyboard();
         return true;
     }
     return false;

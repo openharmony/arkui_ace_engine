@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
-constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr int32_t REQUEST_SELECT_ALL = 1 << 1;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -67,7 +67,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
+    auto isRequestSelectAll = (request.requestCode & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
     selectController->CalculateHandleOffset();
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -477,7 +477,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& request)
 {
     OverlayRequest newRequest = request;
-    newRequest.requestCode = static_cast<uint32_t>(newRequest.requestCode) | REQUEST_SELECT_ALL;
+    newRequest.requestCode = newRequest.requestCode | REQUEST_SELECT_ALL;
     ProcessOverlay(newRequest);
 }
 } // namespace OHOS::Ace::NG

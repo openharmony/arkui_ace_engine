@@ -45,6 +45,8 @@ public:
     void AddTaskObserver(Task&& callback) override {}
 
     void RemoveTaskObserver() override {}
+
+    void RemoveTask(TaskType type, const std::string &name) override {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_TASK_EXECUTOR_H

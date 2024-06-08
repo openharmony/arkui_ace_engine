@@ -1657,6 +1657,9 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
     if (focusDepend_ == FocusDependence::SELF) {
         return true;
     }
+    if (AcceptFocusOfPriorityChild()) {
+        return true;
+    }
     std::list<RefPtr<FocusHub>> focusNodes;
     GetChildrenFocusHub(focusNodes);
     bool canChildBeFocused = false;

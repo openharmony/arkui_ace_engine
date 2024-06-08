@@ -113,14 +113,19 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(selectTheme);
     auto calcLength = CalcLength(selectTheme->GetIconContentPadding());
     MarginProperty margin;
-    isRtl ? margin.left = calcLength : margin.right = calcLength;
+    if (isRtl) {
+        margin.left = calcLength;
+        margin.right = CalcLength();
+    } else {
+        margin.left = CalcLength();
+        margin.right = calcLength;
+    }
     Alignment align = isRtl ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
     for (auto iconChild : child->GetAllChildrenWithBuild()) {
         if (iconChild->GetHostTag() != V2::IMAGE_ETS_TAG) continue;
         auto iconProps = iconChild->GetLayoutProperty();
         iconProps->UpdateAlignment(align);
         iconProps->UpdateMargin(margin);
-        iconChild->Layout();
     }
 
     float horInterval = horInterval_;

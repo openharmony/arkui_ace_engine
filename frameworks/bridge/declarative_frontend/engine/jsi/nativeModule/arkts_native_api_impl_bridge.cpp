@@ -4299,6 +4299,10 @@ void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetSelectable));
     listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetSelectable));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwipeAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetSwipeAction));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwipeAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetSwipeAction));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItem"), listItem);
 }
 
@@ -4397,6 +4401,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetFadingEdge));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFadingEdge"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetFadingEdge));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListChildrenMainSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListChildrenMainSize));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListChildrenMainSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListChildrenMainSize));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSpace));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
@@ -4415,6 +4423,10 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::SetDivider));
     listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetDivider));
+    listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListItemGroupChildrenMainSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::SetChildrenMainSize));
+    listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemGroupChildrenMainSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetChildrenMainSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 

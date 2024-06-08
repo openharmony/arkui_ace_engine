@@ -1652,9 +1652,21 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
 
 void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentConstraint = layoutProperty->GetContentLayoutConstraint();
+    auto frameSize = OptionalSizeF(geometryNode->GetPaddingSize());
+    auto childConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, frameSize, false);
     for (auto index : indexSet) {
         auto tabContent = GetCurrentFrameNode(index);
         if (!tabContent) {
+            continue;
+        }
+        if (!tabContent->GetChildren().empty()) {
             continue;
         }
         auto tabContentPattern = tabContent->GetPattern<TabContentPattern>();
@@ -1665,6 +1677,10 @@ void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 
         for (const auto& child : tabContent->GetChildren()) {
             child->Build(nullptr);
+        }
+        if (contentConstraint.has_value() && tabContent->GetGeometryNode()) {
+            tabContent->GetGeometryNode()->SetParentLayoutConstraint(childConstraint);
+            FrameNode::ProcessOffscreenNode(tabContent);
         }
     }
 }
@@ -2862,7 +2878,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     AnimationOption option;
     option.SetDuration(GetDuration());
     auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
-    if (iter  != frameRateRange_.end()) {
+    if (iter != frameRateRange_.end()) {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Property translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}",
+            iter->second->min_, iter->second->max_, iter->second->preferred_);
         option.SetFrameRateRange(iter->second);
     }
     motionVelocity_ = velocity / translate;
@@ -3198,6 +3217,9 @@ void SwiperPattern::PlayTranslateAnimation(
     option.SetDuration(GetDuration());
     auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
     if (iter != frameRateRange_.end()) {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}",
+            iter->second->min_, iter->second->max_, iter->second->preferred_);
         option.SetFrameRateRange(iter->second);
     }
 
@@ -5500,8 +5522,9 @@ void SwiperPattern::UpdateNodeRate()
     CHECK_NULL_VOID(frameRateManager);
     auto nodeId = host->GetId();
     auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::GESTURE);
-    if (iter != frameRateRange_.end()) {
+    if (iter != frameRateRange_.end() && iter->second->IsValid()) {
         auto expectedRate = iter->second->preferred_;
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Expected gesture frame rate is: %{public}d", expectedRate);
         frameRateManager->UpdateNodeRate(nodeId, expectedRate);
     }
 }

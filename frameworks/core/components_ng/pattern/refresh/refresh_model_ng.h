@@ -71,6 +71,7 @@ public:
     static float GetPullDownRatio(FrameNode* frameNode);
     static Dimension GetRefreshOffset(FrameNode* frameNode);
     static bool GetPullToRefresh(FrameNode* frameNode);
+    static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 

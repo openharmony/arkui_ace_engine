@@ -134,6 +134,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void UpdateGeometryTransition() override;
+
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
@@ -470,13 +472,17 @@ public:
         destroyCallbacks_.emplace_back(callback);
     }
 
+    std::list<std::function<void()>> GetDestroyCallback() const
+    {
+        return destroyCallbacks_;
+    }
+
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
     }
 
-    void ApplyGeometryTransition() override;
-    bool MarkRemoving(bool applyGeometryTransition = true) override;
+    bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
@@ -868,6 +874,8 @@ public:
         }
     }
 
+    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
@@ -1026,8 +1034,6 @@ private:
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
-
-    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

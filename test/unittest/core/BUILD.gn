@@ -132,6 +132,7 @@ group("linux_core_unittest") {
     "pattern/text_drag:text_drag_test_ng",
 
     # "pattern/text_input:TextInputTest",
+
     # "pattern/text_picker:text_picker_test_ng",
     "pattern/text_timer:text_timer_test_ng",
     "pattern/time_picker:time_picker_test_ng",

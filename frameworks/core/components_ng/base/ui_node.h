@@ -119,6 +119,7 @@ public:
     }
 
     int32_t TotalChildCount() const;
+    virtual void UpdateGeometryTransition();
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -347,8 +348,7 @@ public:
     virtual void OnRecycle();
     virtual void OnReuse();
 
-    virtual void ApplyGeometryTransition() {}
-    virtual bool MarkRemoving(bool applyGeometryTransition = true);
+    virtual bool MarkRemoving();
 
     bool IsOnMainTree() const
     {

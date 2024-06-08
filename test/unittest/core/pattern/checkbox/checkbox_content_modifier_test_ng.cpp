@@ -1977,4 +1977,581 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest039, TestSize
      */
     EXPECT_EQ(isSelected, true);
 }
+
+/**
+ * @tc.name: CheckBoxContentModifierTest040
+ * @tc.desc: Test SetCheckBoxSelect and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(-1);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, SELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest041
+ * @tc.desc: Test SetCheckBoxSelect and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(BIG_INT);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, SELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest042
+ * @tc.desc: Test SetCheckBoxSelect and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, SELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest043
+ * @tc.desc: Test SetCheckBoxSelect and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(0);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, UNSELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest044
+ * @tc.desc: Test SetCheckBoxSelect and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern checkBoxSelect
+     */
+    pattern->SetCheckBoxSelect(1);
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: Check the CheckBox property value
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    EXPECT_EQ(isSelected, SELECTED);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest045
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(true);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest046
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(false);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, false);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest047
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(0);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, false);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest048
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(1);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest049
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(BIG_INT);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: CheckBoxContentModifierTest050
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set checkBoxConfiguration
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetName(NAME);
+    eventHub->SetEnabled(SELECTED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.name_);
+                EXPECT_EQ(SELECTED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test GetContentModifierNode
+     */
+    auto buildNode = pattern->GetContentModifierNode();
+    /**
+     * @tc.expected: Check the CheckBox child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
+    /**
+     * @tc.steps: step7. Get isSelected
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    bool isSelected = false;
+    if (checkBoxPaintProperty->HasCheckBoxSelect()) {
+        isSelected = checkBoxPaintProperty->GetCheckBoxSelectValue();
+    } else {
+        isSelected = false;
+    }
+    /**
+     * @tc.expected: Check the CheckBox isSelected
+     */
+    EXPECT_EQ(isSelected, true);
+}
 } // namespace OHOS::Ace::NG

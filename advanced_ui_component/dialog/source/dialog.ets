@@ -245,6 +245,7 @@ export struct TipsDialog {
       }
       .margin({ right: $r('sys.float.padding_level8') })
     }
+    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
     .margin({ right: `${this.marginOffset}vp` })
   }
 
@@ -430,6 +431,7 @@ export struct SelectDialog {
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
+    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
     .onDidScroll((xOffset: number, yOffset: number) => {
       let scrollHeight: number = (this.itemHeight - this.radioHeight) / 2
       if (this.isFocus) {
@@ -576,6 +578,7 @@ export struct ConfirmDialog {
               })
               .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
           }
+          .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
           .width('100%')
         }
         .padding({ bottom: 8 })
@@ -732,6 +735,7 @@ export struct AlertDialog {
             }
           })
       }
+      .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
       .width('100%')
     }
     .margin({ right: `${this.getMargin()}vp`, })
@@ -858,6 +862,8 @@ struct CustomDialogContentComponent {
   @State needResponseScale: boolean = true;
   screenSize: Size = { width: 0, height: 0 };
   initCustomStyle: boolean = false;
+  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
+  @State buttonMinFontSize: Length = 9;
 
   build() {
     WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
@@ -883,11 +889,11 @@ struct CustomDialogContentComponent {
           ButtonComponent({
             buttons: this.buttons,
             windowSize: this.windowSize,
-            fontSizeScale: this.fontSizeScale,
-            needResponseScale: this.needResponseScale,
             buttonHeight: this.buttonHeight,
             controller: this.controller,
-            theme: this.theme
+            theme: this.theme,
+            buttonMaxFontSize: this.buttonMaxFontSize,
+            buttonMinFontSize: this.buttonMinFontSize
           })
         }
         .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
@@ -900,12 +906,12 @@ struct CustomDialogContentComponent {
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
       .backgroundColor(this.themeColorMode === ThemeColorMode.SYSTEM || undefined ?
-        Color.Transparent : $r('sys.color.comp_background_primary'))
+      Color.Transparent : $r('sys.color.comp_background_primary'))
     }
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
@@ -913,7 +919,7 @@ struct CustomDialogContentComponent {
     this.updateFontScale();
     this.updateNeedResponseScale();
     this.updateCustomStyle(Number(constraint.maxWidth), Number(constraint.maxHeight));
-
+    this.updateFontSize();
     children.forEach((child) => {
       let measureResult: MeasureResult = child.measure(constraint);
       if (this.updateButtonHeight) {
@@ -929,8 +935,8 @@ struct CustomDialogContentComponent {
       }
       measureResult = child.measure(constraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     return sizeResult;
   }
 
@@ -941,11 +947,10 @@ struct CustomDialogContentComponent {
     if (this.targetSdk >= VERSION_TWELVE) {
       return;
     }
-    let marginStart: number = getNumberByResource('ohos_id_dialog_margin_start');
-    let marginEnd: number = getNumberByResource('ohos_id_dialog_margin_end');
-    if (Math.abs(dialogWidth - this.screenSize.width) < marginStart + marginEnd ||
-      Math.abs(dialogHeight - this.screenSize.height) < 1) {
-      this.customStyle = true;
+    if (this.screenSize.width > MAX_DIALOG_WIDTH) {
+      this.customStyle = dialogWidth > MAX_DIALOG_WIDTH;
+    } else {
+      this.customStyle = dialogWidth >= this.screenSize.width;
     }
     this.initCustomStyle = true;
   }
@@ -963,11 +968,25 @@ struct CustomDialogContentComponent {
     this.initEnvInfo();
   }
 
+  private updateFontSize(): void {
+    if (this.needResponseScale) {
+      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
+        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+      } else {
+        this.buttonMaxFontSize = BODY_L + 'fp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
+      }
+    } else {
+      this.buttonMaxFontSize = BODY_L + 'vp';
+      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
+    }
+  }
+
   private initEnvInfo(): void {
     try {
       let screenSize: display.Display = display.getDefaultDisplaySync();
-      this.windowSize = { width: px2vp(screenSize.width), height: px2vp(screenSize.height) };
-      this.screenSize = { width: this.windowSize.width, height: this.windowSize.height };
+      this.screenSize = { width: px2vp(screenSize.width), height: px2vp(screenSize.height) };
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
@@ -1109,14 +1128,20 @@ struct TitleComponent {
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     this.updateFontSize();
+    let titleConstraint: ConstraintSizeOptions = {
+      minWidth: constraint.minWidth,
+      minHeight: this.getTitleAreaMinHeight(),
+      maxWidth: constraint.maxWidth,
+      maxHeight: constraint.maxHeight
+    }
     children.forEach((child) => {
-      let measureResult: MeasureResult = child.measure(constraint);
+      let measureResult: MeasureResult = child.measure(titleConstraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     this.titleHeight = sizeResult.height;
     return sizeResult;
   }
@@ -1204,16 +1229,14 @@ struct TitleComponent {
 struct ButtonComponent {
   controller?: CustomDialogController;
   buttons?: ButtonOptions[];
-  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
-  @State buttonMinFontSize: Length = 9;
+  @Link buttonMaxFontSize: Length;
+  @Link buttonMinFontSize: Length;
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
   @State isButtonVertical: boolean = false;
-  @Link fontSizeScale: number;
   @Link windowSize: Size;
   @Link buttonHeight: Length;
-  @Link needResponseScale: boolean;
 
   build() {
     Column() {
@@ -1230,22 +1253,19 @@ struct ButtonComponent {
   }
 
   aboutToAppear(): void {
-    this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Math.min(this.windowSize.width - BUTTON_HORIZONTAL_MARGIN * 2,
       MAX_DIALOG_WIDTH));
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
+    constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(Number(constraint.maxWidth));
-
     children.forEach((child) => {
       let measureResult: MeasureResult = child.measure(constraint);
       sizeResult.height = measureResult.height;
+      sizeResult.width = measureResult.width;
     });
-    sizeResult.width = Number(constraint.maxWidth);
     this.buttonHeight = Number(sizeResult.height);
     return sizeResult;
   }
@@ -1354,20 +1374,6 @@ struct ButtonComponent {
     return Color.Transparent;
   }
 
-  private updateFontSize(): void {
-    if (this.needResponseScale) {
-      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
-      } else {
-        this.buttonMaxFontSize = BODY_L + 'fp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
-      }
-    } else {
-      this.buttonMaxFontSize = BODY_L + 'vp';
-      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
-    }
-  }
 
   /**
    * is button buttonStyle and role properties high priority

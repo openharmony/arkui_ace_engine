@@ -16,6 +16,7 @@ import curves from '@ohos.curves'
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import util from '@ohos.util';
 import { LengthMetrics } from '@ohos.arkui.node'
+import I18n from '@ohos.i18n';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -280,7 +281,7 @@ export class SegmentButtonOptions {
     this.textPadding = options.textPadding
     this.type = options.type
     this.backgroundBlurStyle = options.backgroundBlurStyle ?? segmentButtonTheme.BACKGROUND_BLUR_STYLE
-    this.localizedTextPadding = options.localizedButtonPadding
+    this.localizedTextPadding = options.localizedTextPadding
     this.localizedButtonPadding = options.localizedButtonPadding
     this.direction = options.direction ?? Direction.Auto
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
@@ -695,9 +696,9 @@ struct SegmentButtonItemArrayComponent {
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index]
     if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
       borderRadius.topStart = LengthMetrics.vp(borderRadius.topStart.value + 4)
-      borderRadius.topEnd = LengthMetrics.vp(borderRadius.topStart.value + 4)
-      borderRadius.bottomStart = LengthMetrics.vp(borderRadius.topStart.value + 4)
-      borderRadius.bottomEnd = LengthMetrics.vp(borderRadius.topStart.value + 4)
+      borderRadius.topEnd = LengthMetrics.vp(borderRadius.topEnd.value + 4)
+      borderRadius.bottomStart = LengthMetrics.vp(borderRadius.bottomStart.value + 4)
+      borderRadius.bottomEnd = LengthMetrics.vp(borderRadius.bottomEnd.value + 4)
     }
     return borderRadius
   }
@@ -924,6 +925,7 @@ export struct SegmentButton {
   private isCurrentPositionSelected: boolean = false
   private panGestureStartPoint: Point = { x: 0, y: 0 }
   private isPanGestureMoved: boolean = false
+  @State shouldMirror: boolean = false
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -978,6 +980,7 @@ export struct SegmentButton {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
     }
+    this.shouldMirror = this.isShouldMirror()
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
@@ -1007,6 +1010,7 @@ export struct SegmentButton {
         this.selectedIndexes = []
       }
     }
+    this.shouldMirror = this.isShouldMirror()
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
@@ -1018,6 +1022,22 @@ export struct SegmentButton {
 
   private isMovedFromPanGestureStartPoint(x: number, y: number) {
     return!nearEqual(x, this.panGestureStartPoint.x) || !nearEqual(y, this.panGestureStartPoint.y)
+  }
+
+  private isShouldMirror(): boolean {
+    if (this.options.direction == Direction.Rtl) {
+      return true
+    }
+    // 获取系统语言
+    try {
+      let systemLanguage: string = I18n.System.getSystemLanguage();
+      if (systemLanguage === 'ug' && this.options.direction != Direction.Ltr) { // 维吾尔语 非ltr模式
+        return true
+      }
+    } catch (error) {
+      console.error(`Ace SegmentButton getSystemLanguage, error: ${error.toString()}`);
+    }
+    return false
   }
 
   build() {
@@ -1104,7 +1124,9 @@ export struct SegmentButton {
               return
             }
             let selectedInfo = fingerInfo.localX
-            for (let i = 0; i < Math.min(this.options.buttons.length, this.buttonItemsSize.length); i++) {
+
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length)
+            for (let i = 0; i < buttonLength; i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
               if (selectedInfo >= 0) {
                 continue
@@ -1112,14 +1134,17 @@ export struct SegmentButton {
               this.doSelectedChangeAnimate =
                 this.selectedIndexes[0] > Math.min(this.options.buttons.length,
                   this.buttonItemsSize.length) ? false : true
+
+              let realClickIndex: number = this.shouldMirror ? buttonLength - 1 - i : i
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-                if (this.selectedIndexes.indexOf(i) === -1) {
-                  this.selectedIndexes.push(i)
+                let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
+                if (selectedIndex === -1) {
+                  this.selectedIndexes.push(realClickIndex)
                 } else {
-                  this.selectedIndexes.splice(this.selectedIndexes.indexOf(i), 1)
+                  this.selectedIndexes.splice(selectedIndex, 1)
                 }
               } else {
-                this.selectedIndexes[0] = i
+                this.selectedIndexes[0] = realClickIndex
               }
               this.doSelectedChangeAnimate = false
               break
@@ -1260,8 +1285,9 @@ export struct SegmentButton {
 
   updateAnimatedProperty(curve: ICurve | null) {
     let setAnimatedPropertyFunc = () => {
+      let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length)
       this.selectedItemPosition = this.selectedIndexes.length === 0 ? {
-      } : this.buttonItemsPosition[this.selectedIndexes[0]]
+      } : this.buttonItemsPosition[this.shouldMirror ? (buttonLength - 1 - this.selectedIndexes[0]) : this.selectedIndexes[0]]
       this.buttonItemsSelected.forEach((selected, index) => {
         this.buttonItemProperty[index].fontColor = selected ?
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?

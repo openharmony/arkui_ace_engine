@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CanvasRenderingContext2DModelNG : public OHOS::Ace::CanvasRenderingContext2DModel {
+class ACE_FORCE_EXPORT CanvasRenderingContext2DModelNG : public OHOS::Ace::CanvasRenderingContext2DModel {
     DECLARE_ACE_TYPE(CanvasRenderingContext2DModelNG, CanvasRenderingContext2DModel)
 
 public:

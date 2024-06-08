@@ -105,9 +105,9 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
+    density_ = PipelineBase::GetCurrentDensity();
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
-        density_ = pipeline->GetDensity();
         densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
             auto canvasRender = self.Upgrade();
             CHECK_NULL_VOID(canvasRender);

@@ -310,6 +310,11 @@ public:
         currentOffset_ = currentOffset;
     }
 
+    void SetIsDirectionUp(bool isDirectionUp)
+    {
+        isDirectionUp_ = isDirectionUp;
+    }
+
     void SetCurrentHeight(float currentHeight)
     {
         if (height_ != currentHeight) {
@@ -404,6 +409,7 @@ public:
     }
 
     SheetType GetSheetType();
+    ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
 
@@ -634,6 +640,8 @@ private:
     bool isDismissProcess_ = false;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     bool windowChanged_ = false;
+    bool isDirectionUp_ = true;
+    ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
 
     //record sheet sored detent index
     int32_t detentsIndex_ = 0;

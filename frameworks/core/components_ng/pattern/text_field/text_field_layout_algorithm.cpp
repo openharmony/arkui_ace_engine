@@ -280,7 +280,8 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
 
     // Adapts to auto width.
     if (autoWidth_) {
-        paragraph_->Layout(std::max(0.0f, std::ceil(paragraph_->GetLongestLine())));
+        auto minWidth = static_cast<float>(INLINE_MIN_WITH.ConvertToPx());
+        paragraph_->Layout(std::max(minWidth, std::ceil(paragraph_->GetLongestLine())));
     }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
@@ -309,6 +310,8 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
 
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
+        auto minWidth = INLINE_MIN_WITH.ConvertToPx();
+        contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
         paragraph_->Layout(std::ceil(contentWidth));
     }
 
@@ -345,6 +348,8 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
     CounterNodeMeasure(contentWidth, layoutWrapper);
     if (autoWidth_) {
+        auto minWidth = INLINE_MIN_WITH.ConvertToPx();
+        contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
         contentWidth = std::min(contentWidth, longestLine);
     }
 

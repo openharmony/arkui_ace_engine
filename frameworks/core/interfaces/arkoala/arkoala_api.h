@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 108
+#define ARKUI_FULL_API_VERSION 109
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 108
+#define ARKUI_NODE_API_VERSION 109
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -130,6 +130,18 @@ struct ArkUITouchPoint {
     ArkUI_Int32 toolType;
 };
 
+struct ArkUIOffsetType {
+    ArkUI_Float32 xComponent;
+    ArkUI_Float32 yComponent;
+};
+
+struct ArkUIEventTarget {
+    ArkUI_CharPtr id;
+    ArkUI_CharPtr type;
+    ArkUIRect area;
+    ArkUIOffsetType origin;
+};
+
 /**
  * @brief 定义手势事件类型。
  *
@@ -168,6 +180,7 @@ struct ArkUITouchEvent {
     ArkUIHistoryTouchEvent* historyEvents;
     ArkUI_Uint32 historySize;
     ArkUI_Int32 sourceType;
+    ArkUIEventTarget target;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -442,11 +455,6 @@ struct ArkUIMoveTransitionType {
     ArkUIAnimationOptionType animation;
 };
 
-struct ArkUIOffsetType {
-    ArkUI_Float32 xComponent;
-    ArkUI_Float32 yComponent;
-};
-
 struct ArkUIAnchorType {
     ArkUI_Float32 xCoordinate;
     ArkUI_Float32 yCoordinate;
@@ -485,8 +493,8 @@ struct ArkUIBlurStyleOptionType {
     ArkUI_Int32 colorMode;
     ArkUI_Int32 adaptiveColor;
     ArkUI_Float32 scale;
-    ArkUI_Float32 greyScaleStart;
-    ArkUI_Float32 greyScaleEnd;
+    ArkUI_Float32 grayScaleStart;
+    ArkUI_Float32 grayScaleEnd;
 };
 
 struct ArkUITextDecorationType {
@@ -544,6 +552,25 @@ struct ArkUIScrollerAnimationType {
 struct ArkUISwiperMarginOptions {
     ArkUI_Float32 margin;
     ArkUI_Bool ignoreBlank;
+};
+
+struct ArkUIPopupParam {
+    ArkUI_Bool isShow;
+    ArkUI_Bool useCustomComponent;
+    ArkUI_Int32 placement;
+    ArkUI_Uint32 maskColor;
+    ArkUI_Uint32 backgroundColor;
+    ArkUI_Bool enableArrow;
+    ArkUI_Bool autoCancel;
+    ArkUI_CharPtr message;
+    void (*onStateChange)(ArkUI_Int64, ArkUI_Bool);
+    ArkUI_Int64 onStateChangeId;
+    ArkUI_CharPtr primaryString;
+    void (*primaryAction)(ArkUI_Int64);
+    ArkUI_Int64 primaryActionId;
+    ArkUI_CharPtr secondaryString;
+    void (*secondaryAction)(ArkUI_Int64);
+    ArkUI_Int64 secondaryActionId;
 };
 
 enum ArkUINodeType {
@@ -649,6 +676,8 @@ enum ArkUIEventSubKind {
     ON_LIST_REACH_START,
     ON_LIST_REACH_END,
 
+    ON_LIST_ITEM_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_LIST_ITEM,
+
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
     ON_CHECKBOX_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CHECKBOX,
@@ -716,6 +745,7 @@ enum ArkUIEventSubKind {
     ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
     ON_REFRESH_REFRESHING,
     ON_REFRESH_ON_OFFSET_CHANGE,
+    ON_REFRESH_CHANGE_EVENT,
     
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
@@ -1396,6 +1426,8 @@ struct ArkUICommonModifier {
     void (*setOutline)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
     void (*resetOutline)(ArkUINodeHandle node);
+    void (*setBindPopup)(ArkUINodeHandle node, ArkUIPopupParam* param, ArkUINodeHandle customNode);
+    void (*resetBindPopup)(ArkUINodeHandle node);
     ArkUI_Bool (*getFocusable)(ArkUINodeHandle node);
     ArkUI_Bool (*getDefaultFocus)(ArkUINodeHandle node);
     ArkUI_Int32 (*getResponseRegion)(ArkUINodeHandle node, ArkUI_Float32 (*values)[32]);
@@ -1831,6 +1863,7 @@ struct ArkUIImageModifier {
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
     void (*resetImageSrc)(ArkUINodeHandle node);
+    void (*setInitialPixelMap)(ArkUINodeHandle node, ArkUI_Int64 pixelMap);
 };
 
 struct ArkUIColumnModifier {
@@ -2235,6 +2268,7 @@ struct ArkUIScrollModifier {
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y);
     ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
     void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
+    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 smooth, ArkUI_Int32 align);
 };
 
 struct ArkUIListItemModifier {

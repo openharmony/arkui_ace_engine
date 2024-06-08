@@ -1266,13 +1266,13 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     /**
      * @tc.expected: call CheckPreviewTextValidate and check return true
      */
-    EXPECT_TRUE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_THR.text, PREVIEW_THR.range), 0);
 
     /**
      * @tc.steps:call invalid CheckPreviewTextValidate
      * @tc.expected: check return false
      */
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_BAD_DATA.text, PREVIEW_BAD_DATA.range), -1);
 
     /**
      * @tc.steps:Set select and call CheckPreviewTextValidate
@@ -1282,7 +1282,7 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     controller->UpdateCaretIndex(5);
     pattern_->HandleSelectionLeftWord();
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_THR.text, PREVIEW_THR.range), -1);
 }
 
 /**

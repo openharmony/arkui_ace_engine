@@ -449,7 +449,7 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
     colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
         MAX_COLOR_FILTER_SIZE;
-    for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
+    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
 }
@@ -760,6 +760,16 @@ void ResetImageSrc(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::ResetImageSrc(frameNode);
 }
+
+void SetInitialPixelMap(ArkUINodeHandle node, ArkUI_Int64 pixelMap)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    void* rawPtr = reinterpret_cast<void*>(pixelMap);
+    CHECK_NULL_VOID(rawPtr);
+    RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(rawPtr);
+    ImageModelNG::SetInitialPixelMap(frameNode, pixelMapRef);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -778,7 +788,8 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc };
+        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
+        SetInitialPixelMap };
     return &modifier;
 }
 

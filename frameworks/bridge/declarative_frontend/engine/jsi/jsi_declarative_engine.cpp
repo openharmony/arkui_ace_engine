@@ -19,6 +19,7 @@
 #include <optional>
 #include <regex>
 #include <shared_mutex>
+#include <string>
 #include <unistd.h>
 
 #include "dfx_jsnapi.h"
@@ -171,8 +172,9 @@ shared_ptr<JsValue> RequireNativeModule(const shared_ptr<JsRuntime>& runtime, co
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
+    std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
 }
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
@@ -180,21 +182,24 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 #ifdef STATE_MGMT_USE_AOT
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/stateMgmt.abc");
 #else
+    std::string str("arkui_binary_stateMgmt_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
 #endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
+    std::string str("arkui_binary_arkComponent_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
 }
 
 inline bool PreloadArkTheme(const shared_ptr<JsRuntime>& runtime)
 {
+    std::string str("arkui_binary_arkTheme_abc_loadFile");
     return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start);
+        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start, str);
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)

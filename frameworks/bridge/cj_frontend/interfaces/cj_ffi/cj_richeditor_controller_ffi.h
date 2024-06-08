@@ -136,7 +136,7 @@ struct NativeRichEditorSpanResult {
 struct NativeRichEditorSpanResultList {
     NativeRichEditorSpanResult* array;
     int64_t size;
-    void (*free)(NativeRichEditorSpanResult*);
+    void (*free)(int64_t, NativeRichEditorSpanResult*);
 };
 
 struct NativeRichEditorSelection {

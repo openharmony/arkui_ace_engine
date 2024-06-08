@@ -2738,11 +2738,16 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         },
         partitionPoints);
     if (ret != Rosen::StatusCode::SUCCESS) {
-        TAG_LOGI(AceLogTag::ACE_WEB,
+        TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
             ", ret: %{public}" PRIu32 "",
             surfaceNodeId_, ret);
+        return;
     }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+            "RegisterSurfaceOcclusionChangeCallback succeed, surfacenode id:%{public}" PRIu64 ""
+            ", ret: %{public}" PRIu32 "",
+            surfaceNodeId_, ret);
 }
 
 void WebDelegate::RegisterAvoidAreaChangeListener()
@@ -4493,8 +4498,7 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            uint32_t accessId = request->ResourceAcessId();
-            if (accessId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+            if (request->ResourceAcessId() & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
                 auto clipboardCallback = webPattern->GetPermissionClipboardCallback();
@@ -5865,7 +5869,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode_);
-    surfaceNodeId_ = rsNode_->GetId() + 1;
+    surfaceNodeId_ = webPattern->GetWebSurfaceNodeId();
 }
 #endif
 
@@ -6715,6 +6719,7 @@ void WebDelegate::OnInterceptKeyboardAttach(
     CHECK_NULL_VOID(onInterceptKeyboardAttachV2_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
+    keyboardHandler_ = keyboardHandler;
     WebKeyboardOption keyboardOpt;
     std::function<void()> buildFunc = nullptr;
     context->GetTaskExecutor()->PostSyncTask(

@@ -2384,6 +2384,16 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
     dialogMap_.erase(node->GetId());
 }
 
+void OverlayManager::RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove mask from map enter");
+    CHECK_NULL_VOID(dialogNode);
+    if (maskNodeIdMap_.find(dialogNode->GetId()) == maskNodeIdMap_.end()) {
+        return;
+    }
+    maskNodeIdMap_.erase(dialogNode->GetId());
+}
+
 bool OverlayManager::DialogInMapHoldingFocus()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "dialog in map holding focus enter");
@@ -2497,6 +2507,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         CloseDialogAnimation(dialogNode);
     }
     dialogCount_--;
+    overlayManager->RemoveMaskFromMap(dialogNode);
     // set close button enable
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
@@ -2739,6 +2750,7 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
+        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
         return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
@@ -3290,10 +3302,7 @@ void OverlayManager::FireModalPageShow()
 
 void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
 {
-    auto pattern = node->GetPattern<FocusView>();
-    if (pattern) {
-        pattern->LostViewFocus();
-    }
+    InputMethodManager::GetInstance()->ProcessModalPageScene();
 }
 
 void OverlayManager::FireModalPageHide() {}
@@ -3673,6 +3682,7 @@ void OverlayManager::InitSheetMask(
                 if (sheetPattern->IsDragging()) {
                     return;
                 }
+                sheetPattern->SetIsDirectionUp(false);
                 sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);

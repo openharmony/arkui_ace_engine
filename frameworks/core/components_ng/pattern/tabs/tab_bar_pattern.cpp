@@ -1577,7 +1577,11 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     if (pos == tabItemOffsets_.end()) {
         return -1;
     }
-    if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, -1);
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, -1);
+    if (tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         return tabItemOffsets_.size() - std::distance(tabItemOffsets_.begin(), pos) - 1;
     }
     return isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
@@ -2024,9 +2028,12 @@ void TabBarPattern::TriggerTranslateAnimation(
     CHECK_NULL_VOID(host);
     auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
-    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(targetPaintRect);
+    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
+        static_cast<int32_t>(tabBarStyles_.size())) {
+        auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateIndicator(targetPaintRect);
+    }
     float targetOffset = 0.0f;
     if (host->GetGeometryNode()->GetPaddingSize().Width() < childrenMainSize_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -2228,9 +2235,7 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     GetIndicatorStyle(indicatorStyle, indicatorOffset);
     indicatorStyle.marginTop = Dimension(TAB_BAR_UNDER_LINE_DISTANCE);
     indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
-    auto hasIndicator = std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
-        static_cast<int32_t>(tabBarStyles_.size()) &&
-        std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
+    auto hasIndicator = std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
         static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height());
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         indicatorOffset, hasIndicator);

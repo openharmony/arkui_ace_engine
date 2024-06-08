@@ -859,7 +859,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        GenerateMousePixelMap(info);
+        if (!GetTextDraggable()) {
+            GenerateMousePixelMap(info);
+        }
         if (pixelMap_) {
             pixelMap = pixelMap_;
         }
@@ -1583,6 +1585,9 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
         dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
     }
     dragEvent->SetPressedKeyCodes(info.GetPressedKeyCodes());
+    if (GetTextDraggable() && info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        GenerateMousePixelMap(info);
+    }
     dragDropInfo = onDragStart(dragEvent, extraParams);
 
     auto frameTag = frameNode->GetTag();

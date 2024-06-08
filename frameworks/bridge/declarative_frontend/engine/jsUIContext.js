@@ -526,7 +526,7 @@ class UIContext {
             return SwiperDynamicSyncScene.Create(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
-        return []
+        return [];
     }
 }
 

@@ -1182,8 +1182,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
     auto keyInfo = target.url;
-    if (keyInfo.empty()) {
-        keyInfo = manifestParser_->GetRouter()->GetEntry("");
+    if (keyInfo.empty() && manifestParser_) {
+        auto router = manifestParser_->GetRouter();
+        if (router) {
+            keyInfo = router->GetEntry("");
+        }
     }
 #if !defined(PREVIEW)
     if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {

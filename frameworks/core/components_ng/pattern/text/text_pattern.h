@@ -663,8 +663,9 @@ protected:
     void HandleSelectionUp(int32_t start, int32_t end);
     void HandleSelectionDown(int32_t start, int32_t end);
     void HandleSelection(int32_t start, int32_t end);
-    float GetTextHeight();
+    double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
+    bool IsSelectableAndCopy();
 
     virtual bool CanStartAITask()
     {
@@ -810,7 +811,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
+    SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;

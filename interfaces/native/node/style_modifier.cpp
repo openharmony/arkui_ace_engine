@@ -111,6 +111,7 @@ constexpr int32_t ADAPTIVE_COLOR_INDEX = 2;
 constexpr int32_t SCALE_INDEX = 3;
 constexpr int32_t GRAY_SCALE_START = 4;
 constexpr int32_t GRAY_SCALE_END = 5;
+constexpr float MAX_GRAYSCALE = 127.0f;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
@@ -8281,6 +8282,16 @@ bool CheckBackgroundBlurStyleInput(const ArkUI_AttributeItem* item, int32_t size
         (LessNotEqual(item->value[SCALE_INDEX].f32, 0.0f) || GreatNotEqual(item->value[SCALE_INDEX].f32, 1.0f))) {
         return false;
     }
+    if (GRAY_SCALE_START < size &&
+        (LessNotEqual(item->value[GRAY_SCALE_START].f32, 0.0f) ||
+        GreatNotEqual(item->value[GRAY_SCALE_START].f32, MAX_GRAYSCALE))) {
+        return false;
+    }
+    if (GRAY_SCALE_END < size &&
+        (LessNotEqual(item->value[GRAY_SCALE_END].f32, 0.0f) ||
+        GreatNotEqual(item->value[GRAY_SCALE_END].f32, MAX_GRAYSCALE))) {
+        return false;
+    }
     return true;
 }
 
@@ -8344,11 +8355,7 @@ int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
 {
     auto* fullImpl = GetFullImpl();
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto isInputValid = CheckBackgroundBlurStyleInput(item, actualSize);
-    if (!isInputValid) {
+    if (actualSize < 0 || !CheckBackgroundBlurStyleInput(item, actualSize)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     int32_t blurStyle = ARKUI_BLUR_STYLE_THIN;
@@ -8367,11 +8374,20 @@ int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     if (SCALE_INDEX < actualSize) {
         scale = item->value[SCALE_INDEX].f32;
     }
-    BlurOption blurOption;
+    float grayScaleStart = 0;
+    if (GRAY_SCALE_START < actualSize) {
+        grayScaleStart = item->value[GRAY_SCALE_START].f32;
+    }
+    float grayScaleEnd = 0;
+    if (GRAY_SCALE_END < actualSize) {
+        grayScaleEnd = item->value[GRAY_SCALE_END].f32;
+    }
     int32_t intArray[NUM_3];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
+    BlurOption blurOption = {{grayScaleStart, grayScaleEnd}};
+    
     fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
         node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
     return ERROR_CODE_NO_ERROR;
@@ -8392,7 +8408,9 @@ const ArkUI_AttributeItem* GetForegroundBlurStyle(ArkUI_NodeHandle node)
     g_numberValues[COLOR_MODE_INDEX].i32 = foregroundBlurStyle.colorMode;
     g_numberValues[ADAPTIVE_COLOR_INDEX].i32 = foregroundBlurStyle.adaptiveColor;
     g_numberValues[SCALE_INDEX].f32 = foregroundBlurStyle.scale;
-    g_attributeItem.size = NUM_4;
+    g_numberValues[GRAY_SCALE_START].f32 = foregroundBlurStyle.grayScaleStart;
+    g_numberValues[GRAY_SCALE_END].f32 = foregroundBlurStyle.grayScaleEnd;
+    g_attributeItem.size = NUM_6;
     return &g_attributeItem;
 }
 
@@ -10120,8 +10138,8 @@ const ArkUI_AttributeItem* GetBackgroundBlurStyle(ArkUI_NodeHandle node)
     g_numberValues[COLOR_MODE_INDEX].i32 = backGroundBlurStyle.colorMode;
     g_numberValues[ADAPTIVE_COLOR_INDEX].i32 = backGroundBlurStyle.adaptiveColor;
     g_numberValues[SCALE_INDEX].f32 = backGroundBlurStyle.scale;
-    g_numberValues[GRAY_SCALE_START].f32 = backGroundBlurStyle.greyScaleStart;
-    g_numberValues[GRAY_SCALE_END].f32 = backGroundBlurStyle.greyScaleEnd;
+    g_numberValues[GRAY_SCALE_START].f32 = backGroundBlurStyle.grayScaleStart;
+    g_numberValues[GRAY_SCALE_END].f32 = backGroundBlurStyle.grayScaleEnd;
     g_attributeItem.size = NUM_6;
     return &g_attributeItem;
 }

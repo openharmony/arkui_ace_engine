@@ -35,6 +35,7 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->AddChild(newNode, 0);
+    newNode->UpdateGeometryTransition();
     OnAddBaseNode();
     host->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }

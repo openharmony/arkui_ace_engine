@@ -39,6 +39,7 @@ public:
     {}
     virtual bool RunsTasksOnCurrentThread() = 0;
     virtual void Initialize(bool useCurrentEventRunner = false, const std::string& name = "") {}
+    virtual void RemoveTask(const std::string &name) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_RUNNER_ADAPTER_H

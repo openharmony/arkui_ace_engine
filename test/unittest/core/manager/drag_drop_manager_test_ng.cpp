@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1579,6 +1580,10 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
      */
     dragDropManager->draggedGridFrameNode_ = gridNode;
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    gridNode->renderContext_ = mockRenderContext;
+    mockRenderContext->rect_ = { 0.0f, 0.0f, 1.0f, 1.0f };
     bool retFlag = gridEvent->CheckPostionInGrid(0, 0);
     EXPECT_TRUE(retFlag);
 }

@@ -1028,6 +1028,7 @@ void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositi
     auto childrens = host->GetChildren();
     auto it = childrens.begin();
     std::advance(it, info.spanIndex_);
+    CHECK_NULL_VOID(it != childrens.end());
     if (start == info.spanStart_ && end == info.spanEnd_) {
         ClearContent(*it);
         host->RemoveChild(*it);
@@ -1051,9 +1052,7 @@ void RichEditorPattern::DeleteSpansByRange(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrens = host->GetChildren();
-    if (childrens.empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!childrens.empty());
 
     auto itStart = childrens.begin();
     if (startInfo.spanIndex_ >= static_cast<int32_t>(childrens.size())) {
@@ -1062,6 +1061,7 @@ void RichEditorPattern::DeleteSpansByRange(
     } else {
         std::advance(itStart, startInfo.spanIndex_);
     }
+    CHECK_NULL_VOID(itStart != childrens.end());
     auto saveStartSpan = (start == startInfo.spanStart_) ? 0 : 1;
     if (saveStartSpan) {
         auto spanNodeStart = DynamicCast<SpanNode>(*itStart);
@@ -2124,7 +2124,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectOverlay_->ShowMenu();
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
         return;
     }
 
@@ -3208,7 +3208,6 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     }
 #endif
     inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
-    UpdateKeyboardOffset(textconfig.positionY, textconfig.height);
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
     }
@@ -3484,6 +3483,20 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     auto spanItem = spanNode->GetSpanItem();
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
+    } else {
+        auto beforeSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index - 1));
+        bool isParagraphHead = !beforeSpanNode; // is first span
+        if (beforeSpanNode) {
+            auto& beforeNodeContent = beforeSpanNode->GetSpanItem()->content;
+            bool isAfterNewLine = !beforeNodeContent.empty() && beforeNodeContent.back() == L'\n';
+            isParagraphHead |= isAfterNewLine; // after \n
+        }
+        auto afterSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index + 1));
+        if (isParagraphHead && afterSpanNode) {
+            CopyTextSpanStyle(afterSpanNode, spanNode, true);
+        } else if (beforeSpanNode) {
+            CopyTextSpanStyle(beforeSpanNode, spanNode, true);
+        }
     }
     spanItem->SetTextStyle(typingTextStyle_);
     previewTextRecord_.previewTextSpan = spanItem;
@@ -5367,6 +5380,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
+    HandleOnlyImageSelected(info.GetLocalLocation(), false);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -7146,6 +7160,40 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
     json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+}
+
+std::string RichEditorPattern::GetPlaceHolderInJson() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    bool hasPlaceHolder = layoutProperty && layoutProperty->HasPlaceholder()
+        && !layoutProperty->GetPlaceholder().value().empty();
+    CHECK_NULL_RETURN(hasPlaceHolder, "");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("value", layoutProperty->GetPlaceholderValue("").c_str());
+    auto jsonFont = JsonUtil::Create(true);
+    jsonFont->Put("size", GetFontSizeInJson(layoutProperty->GetPlaceholderFontSize()).c_str());
+    jsonFont->Put("weight", GetFontWeightInJson(layoutProperty->GetPlaceholderFontWeight()).c_str());
+    jsonFont->Put("family", GetFontFamilyInJson(layoutProperty->GetPlaceholderFontFamily()).c_str());
+    jsonFont->Put("style", GetFontStyleInJson(layoutProperty->GetPlaceholderItalicFontStyle()).c_str());
+    auto jsonStyle = JsonUtil::Create(true);
+    jsonStyle->Put("font", jsonFont->ToString().c_str());
+    jsonStyle->Put("fontColor", GetTextColorInJson(layoutProperty->GetPlaceholderTextColor()).c_str());
+    jsonValue->Put("style", jsonStyle->ToString().c_str());
+    return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+std::string RichEditorPattern::GetTextColorInJson(const std::optional<Color>& value) const
+{
+    CHECK_NULL_RETURN(!value, value->ColorToString());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, "");
+    Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
+    return textColor.ColorToString();
 }
 
 void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
@@ -7633,7 +7681,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto it = textTemp.find(lineSeparator);
-    bool containNextLine = it != std::wstring::npos && it != textTemp.length() - 1;
+    bool containNextLine = it != std::wstring::npos && it != static_cast<int32_t>(textTemp.length()) - 1;
     auto content = StringUtils::ToString(textTemp);
 
     if (textStyle || containNextLine) { // SpanNode Fission
@@ -7671,7 +7719,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
         if (offsetInSpan != static_cast<int32_t>(textBefore.length())) {
             CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, textBefore.length(),
                 StringUtils::ToString(textBefore), textStyle, paraStyle);
-            innerPosition += static_cast<int32_t>(textBefore.length()) - offsetInSpan;
+            innerPosition += textBefore.length() - offsetInSpan;
         }
         wContent = textAfter;
         index = wContent.find(lineSeparator);

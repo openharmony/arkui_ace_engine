@@ -1520,7 +1520,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
-    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    if (!isCJFrontend) {
+        container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    }
     container->SetNavigationRoute(AceType::MakeRefPtr<NavigationRouteOhos>(context->GetBundleName()));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1529,6 +1531,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
+    } else if (isCJFrontend) {
+        container->GetSettings().SetUsingSharedRuntime(true);
     } else {
         container->GetSettings().SetUsingSharedRuntime(false);
     }
@@ -1872,6 +1876,10 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, color);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -2330,6 +2338,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
+    } else {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        container->SetApiTargetVersion(apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2520,8 +2531,12 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
     if (!Color::ParseColorString(color, bgColor)) {
         return;
     }
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

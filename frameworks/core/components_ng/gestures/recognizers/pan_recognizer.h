@@ -74,6 +74,8 @@ public:
     bool AboutToAddCurrentFingers(int32_t touchId) override;
 
     bool AboutToMinusCurrentFingers(int32_t touchId) override;
+    
+    void UpdateFingerListInfo() override;
 
     double GetDistance() const
     {
@@ -130,6 +132,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
@@ -144,15 +147,28 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
-    AxisEvent lastAxisEvent_;
-    Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
-    Offset delta_;
-    double mainDelta_ = 0.0;
-    PanVelocity panVelocity_;
-    TimeStamp time_;
 
+    struct PanRecognizerInfo {
+        Offset delta_;
+        double mainDelta_ = 0.0;
+        PanVelocity panVelocity_;
+        Offset averageDistance_;
+
+        void ResetInfo()
+        {
+            delta_.Reset();
+            panVelocity_.ResetAll();
+            averageDistance_.Reset();
+        }
+    };
+
+    TimeStamp time_;
     Point globalPoint_;
+    PanRecognizerInfo touchInfoForPan;
+    PanRecognizerInfo axisInfoForPan;
+    InputEventType lastInputEventType_ = InputEventType::TOUCH_SCREEN;
+    AxisEvent lastAxisEvent_;
     TouchEvent lastTouchEvent_;
     RefPtr<PanGestureOption> panGestureOption_;
     OnPanFingersFunc onChangeFingers_;

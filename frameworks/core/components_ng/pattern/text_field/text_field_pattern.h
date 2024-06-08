@@ -817,6 +817,7 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void ProcessFocusStyle();
     void SetFocusStyle();
     void ClearFocusStyle();
     void AddIsFocusActiveUpdateEvent();
@@ -859,6 +860,7 @@ public:
     void HandleOnCameraInput();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
+    std::string GetCancelButton();
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1074,9 +1076,9 @@ public:
         return isCustomFont_;
     }
 
-    void SetISCounterIdealHeight(bool IsIdealHeight)
+    void SetIsCounterIdealHeight(bool isIdealHeight)
     {
-        isCounterIdealheight_ = IsIdealHeight;
+        isCounterIdealheight_ = isIdealHeight;
     }
 
     bool GetIsCounterIdealHeight() const
@@ -1411,6 +1413,7 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+    void SetAccessibilityDeleteAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

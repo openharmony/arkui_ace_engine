@@ -2831,7 +2831,7 @@ class ObservedMap {
   set(key, value) {
       const _a = this.changeCallback;
       this.map_.set(key, value);
-      _a === null || _a === void 0 ? void 0 : _a(key, value);
+      _a === null || _a === void 0 ? void 0 : _a(this, key, value);
       return this;
   }
   get size() {
@@ -2853,9 +2853,7 @@ class ObservedMap {
       return 'ObservedMapTag';
   }
   setOnChange(callback) {
-      if (this.changeCallback === undefined) {
-          this.changeCallback = callback;
-      }
+      this.changeCallback = callback;
   }
 }
 
@@ -23749,6 +23747,24 @@ class ListFadingEdgeModifier extends ModifierWithKey {
 }
 ListFadingEdgeModifier.identity = Symbol('fadingEdge');
 
+class ListChildrenMainSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetListChildrenMainSize(node);
+    }
+    else {
+      getUINativeModule().list.setListChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListChildrenMainSizeModifier.identity = Symbol('listChildrenMainSize');
+
 class ListSpaceModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -23948,6 +23964,10 @@ class ArkListComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
     return this;
   }
+  childrenMainSize(value) {
+    modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.List !== undefined) {
@@ -23983,6 +24003,22 @@ class ListItemSelectableModifier extends ModifierWithKey {
   }
 }
 ListItemSelectableModifier.identity = Symbol('listItemSelectable');
+class ListItemSwipeActionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetSwipeAction(node);
+    } else {
+      getUINativeModule().listItem.setSwipeAction(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListItemSwipeActionModifier.identity = Symbol('listItemSwipeAction');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24005,7 +24041,8 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
   swipeAction(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListItemSwipeActionModifier.identity, ListItemSwipeActionModifier, value);
+    return this;
   }
   onSelect(event) {
     throw new Error('Method not implemented.');
@@ -24049,12 +24086,33 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
   }
 }
 ListItemGroupDividerModifier.identity = Symbol('listItemGroupDivider');
+class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupChildrenMainSize(node);
+    }
+    else {
+      getUINativeModule().listItemGroup.setListItemGroupChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListItemGroupChildrenMainSizeModifier.identity = Symbol('listItemGroupChildrenMainSize');
 class ArkListItemGroupComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
+    return this;
+  }
+  childrenMainSize(value) {
+    modifierWithKey(this._modifiersWithKeys, ListItemGroupChildrenMainSizeModifier.identity, ListItemGroupChildrenMainSizeModifier, value);
     return this;
   }
 }
@@ -26979,7 +27037,7 @@ class ArkSymbolSpanComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.SymbolSpan !== undefined) {
   globalThis.SymbolSpan.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkSymbolSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SymbolSpanModifier(undefined, nativePtr, classType);

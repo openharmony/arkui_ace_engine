@@ -317,19 +317,19 @@ void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
     Size size(frameRect_.Width(), inlineMeasureItem_.inlineSizeHeight);
     auto positionMode_ = scrollBar->GetPositionMode();
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    auto barRegionSize_ = mainSize;
+    auto barRegionSize = mainSize;
     double estimatedHeight = inlineMeasureItem_.inlineContentRectHeight;
-    double activeSize = barRegionSize_ * mainSize / estimatedHeight - scrollBar->GetOutBoundary();
-    auto offsetScale_ = 0.0f;
+    double activeSize = barRegionSize * mainSize / estimatedHeight - scrollBar->GetOutBoundary();
+    auto offsetScale = 0.0f;
     if (NearEqual(mainSize, estimatedHeight)) {
-        offsetScale_ = 0.0;
+        offsetScale = 0.0;
     } else {
-        offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
+        offsetScale = (barRegionSize - activeSize) / (estimatedHeight - mainSize);
     }
     double lastMainOffset = std::max(
         static_cast<double>(std::max(inlineMeasureItem_.inlineLastOffsetY, contentRect_.GetY() - textRect_.GetY())),
         0.0);
-    double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize);
+    double activeMainOffset = std::min(offsetScale * lastMainOffset, barRegionSize - activeSize);
     inlineScrollRect.SetLeft(inlineScrollRect.GetOffset().GetX() - inlineMeasureItem_.inlineScrollRectOffsetX);
     inlineScrollRect.SetTop(activeMainOffset);
     inlineScrollRect.SetHeight(activeSize);
@@ -525,7 +525,27 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
+    SetAccessibilityDeleteAction();
     return true;
+}
+
+void TextFieldPattern::SetAccessibilityDeleteAction()
+{
+    if (IsShowCancelButtonMode()) {
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            auto stackNode = cleanNodeResponseArea->GetFrameNode();
+            CHECK_NULL_VOID(stackNode);
+            auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(textAccessibilityProperty);
+            auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+            auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                              (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelButton() : "");
+        }
+    }
 }
 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
@@ -847,11 +867,38 @@ void TextFieldPattern::HandleFocusEvent()
     if (isSelectAll && !contentController_->IsEmpty()) {
         needSelectAll_ = true;
     }
+    ProcessFocusStyle();
     SetFocusStyle();
     AddIsFocusActiveUpdateEvent();
     RequestKeyboardOnFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::ProcessFocusStyle()
+{
+    bool needTwinkling = true;
+    if (IsNormalInlineState()) {
+        ApplyInlineTheme();
+        inlineFocusState_ = true;
+        if (!contentController_->IsEmpty()) {
+            inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
+            if (inlineSelectAllFlag_) {
+                needTwinkling = false;
+            }
+        }
+        ProcessResponseArea();
+    }
+    if (needTwinkling) {
+        StartTwinkling();
+    }
+    ChangeEditState();
+    if (!IsShowError() && IsUnderlineMode()) {
+        auto textFieldTheme = GetTheme();
+        CHECK_NULL_VOID(textFieldTheme);
+        underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
+        underlineWidth_ = TYPING_UNDERLINE_WIDTH;
+    }
 }
 
 void TextFieldPattern::ChangeEditState()
@@ -873,28 +920,6 @@ void TextFieldPattern::SetFocusStyle()
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
-
-    bool needTwinkling = true;
-    if (IsNormalInlineState()) {
-        ApplyInlineTheme();
-        inlineFocusState_ = true;
-        if (!contentController_->IsEmpty()) {
-            inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
-            if (inlineSelectAllFlag_) {
-                needTwinkling = false;
-            }
-        }
-        ProcessResponseArea();
-    }
-    if (needTwinkling) {
-        StartTwinkling();
-    }
-    ChangeEditState();
-
-    if (!IsShowError() && IsUnderlineMode()) {
-        underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
-        underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-    }
 
     if (!paintProperty->HasBackgroundColor()) {
         auto defaultBGColor = textFieldTheme->GetBgColor();
@@ -1376,7 +1401,6 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
-    CaretAvoidSoftKeyboard();
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -1421,6 +1445,15 @@ bool TextFieldPattern::IsShowHandle()
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, false);
     return !theme->IsTextFieldShowHandle();
+}
+
+std::string TextFieldPattern::GetCancelButton()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return theme->GetCancelButton();
 }
 
 void TextFieldPattern::HandleOnPaste()
@@ -2955,7 +2988,6 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
     selectOverlay_->ProcessOverlay(request);
-    CaretAvoidSoftKeyboard();
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -3448,7 +3480,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         CloseCustomKeyboard();
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-    UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
     if (!fillContentMap_.empty()) {
         inputMethod->SendPrivateCommand(fillContentMap_);
         fillContentMap_.clear();
@@ -4507,7 +4538,6 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    RequestKeyboardOnFocus();
 }
 
 void TextFieldPattern::OnHandleAreaChanged()
@@ -7107,7 +7137,7 @@ void TextFieldPattern::ResetContextAttr()
 
 void TextFieldPattern::SetThemeBorderAttr()
 {
-    auto host= GetHost();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -7147,7 +7177,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
 void TextFieldPattern::SetThemeAttr()
 {
-    auto host= GetHost();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

@@ -36,6 +36,7 @@ constexpr Dimension LINE_HEIGHT_DESKTOP = 21.0_vp;
 constexpr int32_t LINE_NUMBER_DESKTOP = 3;
 constexpr int32_t DP_PER_LINE_PHONE = 64;
 constexpr int32_t LINE_NUMBER_PHONE = 1;
+constexpr int32_t AXIS_BASE_ID = 400;
 
 enum class AxisDirection : int32_t {
     NONE = 0,

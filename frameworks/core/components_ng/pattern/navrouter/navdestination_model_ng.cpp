@@ -230,7 +230,6 @@ void CreateSymbolBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNo
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    symbolProperty->UpdateFontSize(theme->GetIconWidth());
     symbolNode->MountToParent(backButtonNode);
     auto iconColor = theme->GetIconColor();
     symbolProperty->UpdateSymbolColorList({ iconColor });

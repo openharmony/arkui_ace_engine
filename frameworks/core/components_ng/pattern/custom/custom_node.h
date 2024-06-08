@@ -70,7 +70,7 @@ public:
     {
         completeReloadFunc_ = std::move(func);
     }
-    void FlushReload();
+    ACE_FORCE_EXPORT void FlushReload();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {

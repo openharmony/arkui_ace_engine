@@ -81,11 +81,18 @@ public:
         isNewAvoid_ = value;
     }
 
+    void SetIsReverse(bool isReverse)
+    {
+        isReverse_ = isReverse;
+    }
+
 private:
     void SetDefaultCircleAndLineEndOffset();
 
     void DrawbBackArrow(DrawingContext& context);
     void DrawbCircles(DrawingContext& context);
+    void LineEndOffsetWithAnimation(bool isMore);
+    void BackArrowTransitionAnimation();
 
     RefPtr<PropertyBool> firstHandleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;
@@ -100,6 +107,7 @@ private:
     Color iconColor_ = Color::BLACK;
     bool hasExtensionMenu_ = false;
     bool isNewAvoid_ = false;
+    bool isReverse_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayModifier);
 };
