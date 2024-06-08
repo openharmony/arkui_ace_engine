@@ -537,14 +537,14 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type == TouchType::DOWN) {
-        if (touchEventFindResult == downFingerIds_.end()) {
-            downFingerIds_.insert(touchEvent.id);
-        } else {
+        if (touchEventFindResult != downFingerIds_.end()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
             refereeNG_->ForceCleanGestureReferee();
             touchTestResults_.clear();
+            downFingerIds_.clear();
         }
+        downFingerIds_.insert(touchEvent.id);
     }
 }
 
@@ -556,6 +556,7 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
             refereeNG_->ForceCleanGestureReferee();
+            downFingerIds_.clear();
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
