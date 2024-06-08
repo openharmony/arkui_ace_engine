@@ -358,6 +358,11 @@ void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
     styledString_->RemoveString(changeStart, length);
     if (!caretVisible_) {
         StartTwinkling();
+        if (previewLongPress_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+            RequestKeyboard(false, true, true);
+            previewLongPress_ = false;
+        }
     }
     isTextChange_ = true;
     SetCaretPosition(caretPosition_ - length);
@@ -2187,6 +2192,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         if (focusHub->RequestFocusImmediately()) {
             StartTwinkling();
             RequestKeyboard(false, true, true);
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "focusHub: set HandleOnEditChanged to 1");
             HandleOnEditChanged(true);
         }
     }
@@ -2498,6 +2504,10 @@ void RichEditorPattern::HandleFocusEvent()
     }
     dataDetectorAdapter_->CancelAITask();
     UseHostToUpdateTextFieldManager();
+    if (previewLongPress_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress, lock then unlock: need keep preview state");
+        return;
+    }
     if (textSelector_.SelectNothing()) {
         StartTwinkling();
     }
@@ -2729,24 +2739,8 @@ Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
-void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
+void RichEditorPattern::HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd)
 {
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    isLongPress_ = true;
-    auto localOffset = info.GetLocalLocation();
-    if (selectOverlay_->HasRenderTransform()) {
-        localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
-    }
-    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
-    if ((caretUpdateType_ == CaretUpdateType::LONG_PRESSED) && isEditing_) {
-        ShowCaretNoTwinkling(textOffset);
-        return;
-    }
-    InitSelection(textOffset);
-    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     initSelectStart_ = selectStart;
     if (IsSelected()) {
         showSelect_ = true;
@@ -2759,18 +2753,57 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
+}
+
+void RichEditorPattern::SwitchState()
+{
+    if (previewLongPress_ && !IsSelected()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "long press at the line end, shall enter edit state.set 1");
+        HandleOnEditChanged(true);
+        RequestKeyboard(false, true, true);
+    } else if (caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "double click. shall enter edit state.set 1");
+        HandleOnEditChanged(true);
+        RequestKeyboard(false, true, true);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "exception state");
+    }
+}
+
+void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
+{
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    isLongPress_ = true;
+    auto localOffset = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        if (IsEditing()) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "LONG_PRESSED and editing, so ShowCaretNoTwinkling");
+            ShowCaretNoTwinkling(textOffset);
+            return;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "LONG_PRESSED and preview, so set previewLongPress_=1");
+            previewLongPress_ = true;
+        }
+    }
+    InitSelection(textOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    HandleSelect(info, selectStart, selectEnd);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     focusHub->RequestFocusImmediately();
-    if (overlayMod_ && (IsEditing() == IsSelected())) {
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
+    if (overlayMod_) {
+        SwitchState();
     }
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
         int32_t requestCode = (selectOverlay_->SelectOverlayIsOn() && caretUpdateType_ == CaretUpdateType::LONG_PRESSED)
             ? REQUEST_RECREATE : 0;
-        // preview + longpress shall hide menu; edit + longpress shall show menu.
-        selectOverlay_->ProcessOverlay({.menuIsShow = IsEditing(), .animation = IsEditing(),
-                .requestCode = requestCode});
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = requestCode});
         FireOnSelectionChange(selectStart, selectEnd);
         if (selectOverlay_->IsSingleHandle()) {
             StartTwinkling();
@@ -4265,6 +4298,11 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     }
     if (!caretVisible_) {
         StartTwinkling();
+        if (previewLongPress_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, so RequestKeyboard");
+            RequestKeyboard(false, true, true);
+            previewLongPress_ = false;
+        }
     }
     return deleteText;
 }
@@ -5316,6 +5354,10 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void RichEditorPattern::HandleTouchDown(const Offset& offset)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "will reset:previewLongPress_=%{public}d,isMoveCaretAnywhere_=%{public}d",
+        previewLongPress_, isMoveCaretAnywhere_);
+    isMoveCaretAnywhere_ = false;
+    previewLongPress_ = false;
     CHECK_NULL_VOID(HasFocus());
     CHECK_NULL_VOID(overlayMod_);
     float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
@@ -5326,11 +5368,11 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
 
 void RichEditorPattern::HandleTouchUp()
 {
-    if ((isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) || IsSelected()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show menu, IsSelected()=%{public}d", IsSelected());
+    if ((isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) || previewLongPress_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "show menu, previewLongPress_=%{public}d", previewLongPress_);
         selectOverlay_->ShowMenu();
     }
-    if (isLongPress_ && IsEditing() && !IsSelectAll()) {
+    if (isMoveCaretAnywhere_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after move caret anywhere, restore caret to twinkling");
         StartTwinkling();
     }
@@ -5349,10 +5391,12 @@ void RichEditorPattern::HandleTouchUp()
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
 {
     if (isLongPress_) {
-        if (!IsEditing()) {
+        if (previewLongPress_) {
             UpdateSelectionByTouchMove(offset);
-        } else {
+        } else if (isMoveCaretAnywhere_) {
             MoveCaretAnywhere(offset);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "exception state");
         }
         return;
     }
@@ -5732,6 +5776,11 @@ void RichEditorPattern::ResetAfterPaste()
     auto pasteStr = GetPasteStr();
     SetCaretSpanIndex(-1);
     StartTwinkling();
+    if (previewLongPress_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+        RequestKeyboard(false, true, true);
+        previewLongPress_ = false;
+    }
     CloseSelectOverlay();
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
@@ -5760,6 +5809,11 @@ void RichEditorPattern::HandleOnPaste()
         CloseSelectOverlay();
         ResetSelection();
         StartTwinkling();
+        if (previewLongPress_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+            RequestKeyboard(false, true, true);
+            previewLongPress_ = false;
+        }
         return;
     }
     CHECK_NULL_VOID(clipboard_);
@@ -5771,6 +5825,11 @@ void RichEditorPattern::HandleOnPaste()
             richEditor->ResetSelection();
             richEditor->StartTwinkling();
             richEditor->CloseSelectOverlay();
+            if (richEditor->previewLongPress_) {
+                TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+                richEditor->RequestKeyboard(false, true, true);
+                richEditor->previewLongPress_ = false;
+            }
             return;
         }
         richEditor->AddPasteStr(data);
@@ -5804,6 +5863,11 @@ void RichEditorPattern::HandleOnCut()
         CloseSelectOverlay();
         ResetSelection();
         StartTwinkling();
+        if (previewLongPress_) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+            RequestKeyboard(false, true, true);
+            previewLongPress_ = false;
+        }
         return;
     }
 
@@ -7582,6 +7646,10 @@ void RichEditorPattern::HandleOnEditChanged(bool isEditing)
     CHECK_NULL_VOID(eventHub);
     isEditing_ = isEditing;
     eventHub->FireOnEditingChange(isEditing);
+    if (isEditing) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enter edit state, reset previewLongPress_");
+        previewLongPress_ = false;
+    }
 }
 
 void RichEditorPattern::ResetKeyboardIfNeed()
