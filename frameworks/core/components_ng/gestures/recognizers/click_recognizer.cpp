@@ -210,7 +210,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    if (!IsInAttachedNode(event)) {
+    if (!IsInAttachedNode(event, false)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }

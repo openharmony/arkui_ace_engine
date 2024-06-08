@@ -1010,12 +1010,18 @@ void EventManager::MouseTest(
             testResult = touchTestResults_[event.id];
         } else {
             TouchTestResult responseLinkResult;
+            if (event.action != MouseAction::MOVE) {
+                touchRestrict.touchEvent.isMouseTouchTest = true;
+            }
             frameNode->TouchTest(
                 point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
             SetResponseLinkRecognizers(testResult, responseLinkResult);
         }
     } else {
         TouchTestResult responseLinkResult;
+        if (event.action != MouseAction::MOVE) {
+            touchRestrict.touchEvent.isMouseTouchTest = true;
+        }
         frameNode->TouchTest(
             point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
         SetResponseLinkRecognizers(testResult, responseLinkResult);
