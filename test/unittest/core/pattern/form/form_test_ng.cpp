@@ -1072,7 +1072,10 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.
      */
-    pattern->LoadFormSkeleton();
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto info = property->GetRequestFormInfo().value_or(RequestFormInfo());
+    pattern->LoadFormSkeleton(false, info);
     ASSERT_NE(host->GetLastChild(), nullptr);
 
     /**

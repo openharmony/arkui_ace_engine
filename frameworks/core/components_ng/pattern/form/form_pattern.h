@@ -164,7 +164,8 @@ private:
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
 
-    void LoadFormSkeleton();
+    void LoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info);
+    bool ShouldLoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info);
     void LoadDisableFormStyle();
     void RemoveDisableFormStyle();
     int32_t GetFormDimensionHeight(int32_t dimension);
