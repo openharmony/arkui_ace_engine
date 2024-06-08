@@ -2396,10 +2396,10 @@ void RosenRenderContext::SetDashGap(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerDashGap;
-    cornerDashGap.SetValues(static_cast<float>((value.leftDimen.value()).ConvertToPx()),
-        static_cast<float>((value.topDimen.value()).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value()).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value()).ConvertToPx()));
+    cornerDashGap.SetValues(static_cast<float>((value.leftDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(0.0_vp)).ConvertToPx()));
     rsNode_->SetBorderDashGap(cornerDashGap);
     RequestNextFrame();
 }
@@ -2413,10 +2413,10 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerDashWidth;
-    cornerDashWidth.SetValues(static_cast<float>((value.leftDimen.value()).ConvertToPx()),
-        static_cast<float>((value.topDimen.value()).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value()).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value()).ConvertToPx()));
+    cornerDashWidth.SetValues(static_cast<float>((value.leftDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(0.0_vp)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(0.0_vp)).ConvertToPx()));
     rsNode_->SetBorderDashWidth(cornerDashWidth);
     RequestNextFrame();
 }
