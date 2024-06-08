@@ -2748,6 +2748,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
                 }
                 break;
+            case PropertyInfo::FONTFEATURE:
+                if (textLayoutProp->HasFontFeature()) {
+                    child->UpdateFontFeatureWithoutFlushDirty(textLayoutProp->GetFontFeature().value());
+                }
+                break;
             case PropertyInfo::TEXTDECORATION:
                 if (textLayoutProp->HasTextDecoration()) {
                     child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
