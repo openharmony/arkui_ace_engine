@@ -3654,22 +3654,15 @@ void RichEditorPattern::FinishTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
     auto& record = previewTextRecord_;
-    auto previewSpanItem = record.previewTextSpan;
+    record.previewTextSpan->content.clear();
     auto beforeSpanItem = record.beforeSpanNode ? record.beforeSpanNode->GetSpanItem() : nullptr;
     auto afterSpanItem = record.afterSpanNode ? record.afterSpanNode->GetSpanItem() : nullptr;
-    if (record.isSplitSpan) {
-        if (beforeSpanItem && afterSpanItem) {
-            MergeSameStyleSpan(previewSpanItem, afterSpanItem, true);
-            MergeSameStyleSpan(beforeSpanItem, previewSpanItem, true);
-        }
-    } else {
-        if (beforeSpanItem) {
-            MergeSameStyleSpan(beforeSpanItem, previewSpanItem, true);
-        } else {
-            MergeSameStyleSpan(afterSpanItem, previewSpanItem, false);
-        }
+    bool needMerge = record.isSplitSpan && beforeSpanItem && afterSpanItem;
+    if (needMerge) {
+        MergeSameStyleSpan(beforeSpanItem, afterSpanItem, true);
     }
     RemoveEmptySpans();
+    UpdateSpanPosition();
     previewTextRecord_.Reset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4945,11 +4938,10 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info)
     }
     auto it = std::find_if(
         spans_.begin(), spans_.end(), [caretPosition = caretPosition_ + moveLength_](const RefPtr<SpanItem>& spanItem) {
-            auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
-            if (spanLength == 0) {
+            if (spanItem->content.empty()) {
                 return spanItem->position == caretPosition;
             }
-            return (spanItem->position - spanLength <= caretPosition) && (caretPosition < spanItem->position);
+            return spanItem->rangeStart <= caretPosition && caretPosition < spanItem->position;
         });
     if (it != spans_.end() && (*it)->unicode != 0 && (*it)->position - caretPosition_ + moveLength_ == 1) {
         it++;
