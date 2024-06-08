@@ -63,7 +63,6 @@ ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
     g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
         g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
-        LOGI("kkk get %{public}d", pickerTextStyle.fontWeight.value_or(FontWeight::W100));
     g_strValue = g_strValue + families + ";";
     g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
@@ -90,7 +89,6 @@ void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t c
     }
     textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
     textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
-    LOGI("kkk %{public}d", StringUtils::StringToFontWeight(res[POS_1]));
     textStyle.textColor = Color(color);
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
