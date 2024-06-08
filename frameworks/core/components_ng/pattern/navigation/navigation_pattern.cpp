@@ -543,7 +543,6 @@ void NavigationPattern::UpdateNavPathList()
     auto pathNames = navigationStack_->GetAllPathName();
     auto indexes = navigationStack_->GetAllPathIndex();
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
-    navigationStack_->SetPreNavPathList(navigationStack_->GetAllNavDestinationNodes());
     NavPathList navPathList;
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
@@ -1628,7 +1627,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition value is invalid, do default animation");
         return false;
     }
-    ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy);
+    ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
@@ -2316,9 +2315,9 @@ void NavigationPattern::RecoveryToLastStack()
 
 bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination,
-    bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
+    bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
+    NavigationTransition navigationTransition)
 {
-    auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
     // custom animation return undefined,finish this transition
     if (!navigationTransition.isValid) {
         proxy->SetIsSuccess(false);
