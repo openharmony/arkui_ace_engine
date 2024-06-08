@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 
 #include <cinttypes>
+#include <memory>
 
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
@@ -67,7 +68,7 @@ void NativeCanvasRenderer::SetFillStyle(const Color& color)
 
 void NativeCanvasRenderer::SetFillStyle(const sptr<NativeCanvasGradient>& nativeCanvasGradient)
 {
-    Gradient gradient = nativeCanvasGradient->GetGradient();
+    auto gradient = std::make_shared<Gradient>(nativeCanvasGradient->GetGradient());
     renderingContext2DModel_->SetFillGradient(gradient);
 }
 
@@ -83,7 +84,7 @@ void NativeCanvasRenderer::SetStrokeStyle(const Color& color)
 
 void NativeCanvasRenderer::SetStrokeStyle(const sptr<NativeCanvasGradient>& nativeCanvasGradient)
 {
-    Gradient gradient = nativeCanvasGradient->GetGradient();
+    auto gradient = std::make_shared<Gradient>(nativeCanvasGradient->GetGradient());
     renderingContext2DModel_->SetStrokeGradient(gradient);
 }
 
