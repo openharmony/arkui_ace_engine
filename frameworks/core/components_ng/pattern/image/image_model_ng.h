@@ -121,7 +121,7 @@ public:
     static void ResetImageSrc(FrameNode* frameNode);
     static void ResetImageAlt(FrameNode* frameNode);
 private:
-    RefPtr<ImagePattern> GetImagePattern();
+    ImagePattern* GetImagePattern();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
