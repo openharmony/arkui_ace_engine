@@ -222,7 +222,9 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
         return;
     }
     FireBuilder();
-    RequestUpdateForNextSecond();
+    if (!isForm_) {
+        RequestUpdateForNextSecond();
+    }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
         return;
