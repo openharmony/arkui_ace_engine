@@ -451,7 +451,8 @@ private:
         bool isPopPage, bool isNeedInVisible = false);
     bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
-        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
+        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
+        NavigationTransition navigationTransition);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
