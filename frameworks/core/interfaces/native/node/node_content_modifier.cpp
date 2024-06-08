@@ -58,12 +58,12 @@ ArkUI_Int32 RegisterEvent(
 {
     CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(receiver, ERROR_CODE_PARAM_INVALID);
-    auto onAttach = [receiver, userData]() {
-        ArkUINodeContentEvent event { 0, userData };
+    auto onAttach = [receiver, userData, content]() {
+        ArkUINodeContentEvent event { 0, userData, content };
         receiver(&event);
     };
-    auto onDetach = [receiver, userData]() {
-        ArkUINodeContentEvent event { 1, userData };
+    auto onDetach = [receiver, userData, content]() {
+        ArkUINodeContentEvent event { 1, userData, content };
         receiver(&event);
     };
     auto* nodeContent = reinterpret_cast<NodeContent*>(content);
@@ -72,12 +72,27 @@ ArkUI_Int32 RegisterEvent(
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 SetUserData(ArkUINodeContentHandle content, void* userData)
+{
+    CHECK_NULL_RETURN(content, ERROR_CODE_PARAM_INVALID);
+    auto* nodeContent = reinterpret_cast<NodeContent*>(content);
+    nodeContent->SetUserData(userData);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void* GetUserData(ArkUINodeContentHandle content)
+{
+    CHECK_NULL_RETURN(content, nullptr);
+    auto* nodeContent = reinterpret_cast<NodeContent*>(content);
+    return nodeContent->GetUserData();
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUINodeContentModifier* GetNodeContentModifier()
 {
-    static const ArkUINodeContentModifier modifier = { AddChild, InsertChild, RemoveChild, RegisterEvent };
+    static const ArkUINodeContentModifier modifier = { AddChild, InsertChild, RemoveChild, RegisterEvent, SetUserData,
+        GetUserData };
     return &modifier;
 }
 } // namespace NodeModifier
