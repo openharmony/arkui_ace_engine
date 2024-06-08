@@ -2339,8 +2339,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
     auto dialogNode = CalendarDialogView::Show(dialogProps, settingData,
-        buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent), calendarDialogDirection_);
-    calendarDialogDirection_ = TextDirection::AUTO;
+        buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);

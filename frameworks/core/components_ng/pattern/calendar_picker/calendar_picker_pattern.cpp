@@ -436,13 +436,9 @@ void CalendarPickerPattern::ShowDialog()
     dialogCancelEvent["cancelId"] = cancelId;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
     DialogProperties properties;
     InitDialogProperties(properties);
-    overlayManager->SetCalendarDialogDirection(textDirection);
     overlayManager->ShowCalendarDialog(properties, calendarData_, dialogEvent, dialogCancelEvent);
     SetDialogShow(true);
 }

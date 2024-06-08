@@ -538,11 +538,6 @@ public:
     void DeleteUIExtensionNode(int32_t sessionId);
     void SetCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
-
-    void SetCalendarDialogDirection(TextDirection textDirection)
-    {
-        calendarDialogDirection_ = textDirection;
-    }
     void OnUIExtensionWindowSizeChange();
 
 private:
@@ -725,7 +720,6 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     int32_t curSessionId_ = -1;
-    TextDirection calendarDialogDirection_ = TextDirection::AUTO;
 };
 } // namespace OHOS::Ace::NG
 
