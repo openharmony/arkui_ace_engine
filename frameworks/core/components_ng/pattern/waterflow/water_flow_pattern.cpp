@@ -270,6 +270,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
+
+    GetHost()->ChildrenUpdatedFrom(-1);
+
     return NeedRender();
 }
 
