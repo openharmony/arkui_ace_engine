@@ -253,6 +253,16 @@ public:
         return content_ ? content_->rect_.GetOffset() : OffsetF();
     }
 
+    const OffsetF& GetPixelRoundResult() const
+    {
+        return pixelRoundResult_;
+    }
+
+    void SetPixelRoundResult(const OffsetF& pixelRoundResult)
+    {
+        pixelRoundResult_ = pixelRoundResult;
+    }
+
     const std::unique_ptr<GeometryProperty>& GetContent() const
     {
         return content_;
@@ -408,6 +418,7 @@ private:
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;
     OffsetF pixelGridRoundOffset_;
+    OffsetF pixelRoundResult_;
     SizeF pixelGridRoundSize_;
 };
 } // namespace OHOS::Ace::NG

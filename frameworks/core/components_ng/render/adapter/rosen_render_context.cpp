@@ -3171,6 +3171,21 @@ void RosenRenderContext::OnePixelRounding()
     float nodeTopI = OnePixelValueRounding(relativeTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
+
+    OffsetF roundResult;
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    if (parentNode) {
+        auto parentGeometryNode = parentNode->GetGeometryNode();
+        roundResult = parentGeometryNode->GetPixelRoundResult();
+        if (nodeLeftI == roundResult.GetX() - 1.0f) {
+            nodeLeftI += 1.0f;
+            roundToPixelErrorX += 1.0f;
+        }
+        if (nodeTopI == roundResult.GetY() - 1.0f) {
+            nodeTopI += 1.0f;
+            roundToPixelErrorY += 1.0f;
+        }
+    }
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
     float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
@@ -3205,6 +3220,10 @@ void RosenRenderContext::OnePixelRounding()
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    if (parentNode) {
+        auto parentGeometryNode = parentNode->GetGeometryNode();
+        parentGeometryNode->SetPixelRoundResult(OffsetF(nodeLeftI + nodeWidthI, nodeTopI + nodeHeightI));
+    }
 }
 
 void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
@@ -3233,6 +3252,21 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
     float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
+
+    OffsetF roundResult;
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    if (parentNode) {
+        auto parentGeometryNode = parentNode->GetGeometryNode();
+        roundResult = parentGeometryNode->GetPixelRoundResult();
+        if (nodeLeftI == roundResult.GetX() - 1.0f) {
+            nodeLeftI += 1.0f;
+            roundToPixelErrorX += 1.0f;
+        }
+        if (nodeTopI == roundResult.GetY() - 1.0f) {
+            nodeTopI += 1.0f;
+            roundToPixelErrorY += 1.0f;
+        }
+    }
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
     float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
@@ -3267,6 +3301,10 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         nodeHeightI = nodeHeightTemp;
     }
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    if (parentNode) {
+        auto parentGeometryNode = parentNode->GetGeometryNode();
+        parentGeometryNode->SetPixelRoundResult(OffsetF(nodeLeftI + nodeWidthI, nodeTopI + nodeHeightI));
+    }
 }
 
 
