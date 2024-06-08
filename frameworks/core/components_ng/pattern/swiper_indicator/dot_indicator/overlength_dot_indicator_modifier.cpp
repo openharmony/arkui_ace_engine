@@ -90,7 +90,6 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
 {
     PaintBlackPoint(context, contentProperty);
     RSCanvas& canvas = context.canvas;
-    auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
 
     OffsetF leftCenter = { leftCenterX, centerY_ };
