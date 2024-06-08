@@ -180,11 +180,16 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(textfield);
         textfield->RestoreDefaultMouseState();
     };
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        info.SetStopPropagation(true);
+    };
+
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
 }
 
 void PasswordResponseArea::Refresh()
