@@ -220,6 +220,10 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (destroyed_) {
+        LOGI("cannot add dirty layout node as the pipeline context is destroyed.");
+        return;
+    }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
             dirty->GetTag().c_str(),
@@ -2985,6 +2989,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
+    destroyed_ = true;
     rootNode_->DetachFromMainTree();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
