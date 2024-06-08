@@ -157,7 +157,7 @@ frameworks/core/components_ng/pattern/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components_ng/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/pattern/symbol/  @liyujie43 @tzcurtain
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
-frameworks/core/components_ng/pattern/tabs/  @xuzhidan
+frameworks/core/components_ng/pattern/tabs/  @yangcan18
 frameworks/core/components_ng/pattern/text/  @lijuan124
 frameworks/core/components_ng/pattern/text_area/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @Zhang-Dong-hui
@@ -266,7 +266,7 @@ frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/svg/  @wu-yinxiao
 frameworks/core/components/swiper/  @xuzhidan
-frameworks/core/components/tab_bar/  @xuzhidan
+frameworks/core/components/tab_bar/  @yangcan18
 frameworks/core/components/text/  @lijuan124
 frameworks/core/components/text_clock/  @Zhang-Dong-hui
 frameworks/core/components/text_field/  @jyj_0306  @luckclover
