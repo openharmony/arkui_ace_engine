@@ -1687,8 +1687,6 @@ void NavigationModelNG::SetHideNavBarInner(
         pattern->SetNavBarVisibilityChange(true);
     }
     auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-    auto layoutProperty = navBarNode->GetLayoutProperty();
-    layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
     navBarNode->SetJSViewActive(!hideNavBar);
     if (pattern->GetNavBarVisibilityChange()) {
         navBarNode->MarkDirtyNode();
