@@ -332,6 +332,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
       let mask;
       let color;
       let selectedColor;
+      let maxDisplayCount;
       let fontColor;
       let selectedFontColor;
       let digitFontSize;
@@ -352,6 +353,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         mask = (this.value as ArkDotIndicator).maskValue;
         color = (this.value as ArkDotIndicator).colorValue;
         selectedColor = (this.value as ArkDotIndicator).selectedColorValue;
+        maxDisplayCount = (this.value as ArkDotIndicator).maxDisplayCountValue;
         getUINativeModule().swiper.setSwiperIndicator(
           node,
           'ArkDotIndicator',
@@ -362,6 +364,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           mask,
           color,
           selectedColor,
+          maxDisplayCount,
           left,
           top,
           right,
@@ -442,6 +445,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         !isBaseOrResourceEqual(
           (this.stageValue as ArkDotIndicator).selectedColorValue,
           (this.value as ArkDotIndicator).selectedColorValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).maxDisplayCountValue,
+          (this.value as ArkDotIndicator).maxDisplayCountValue
         )
       );
     } else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {

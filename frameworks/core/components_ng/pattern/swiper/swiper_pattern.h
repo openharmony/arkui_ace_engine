@@ -154,6 +154,8 @@ public:
         jsonValue->Put(
             "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
         jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
+        jsonValue->Put("maxDisplayCount",
+            (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
         return jsonValue->ToString();
     }
 
@@ -665,7 +667,13 @@ public:
         frameRateRange_[type] = rateRange;
     }
     void UpdateNodeRate();
-
+    int32_t GetMaxDisplayCount() const
+    {
+        if ((swiperParameters_ != nullptr) && (swiperParameters_->maxDisplayCountVal.has_value())) {
+            return swiperParameters_->maxDisplayCountVal.value();
+        }
+        return 0;
+    }
 protected:
     void MarkDirtyNodeSelf();
 
