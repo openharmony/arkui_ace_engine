@@ -1519,6 +1519,18 @@ class SubscribaleAbstract extends SubscribableAbstract {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * file version
+ *
+ * To indicate the file formate
+ *
+ */
+var ObjectVersion;
+(function (ObjectVersion) {
+    ObjectVersion[ObjectVersion["NewVersion"] = 0] = "NewVersion";
+    ObjectVersion[ObjectVersion["CompatibleVersion"] = 1] = "CompatibleVersion";
+    ObjectVersion[ObjectVersion["Default"] = 2] = "Default";
+})(ObjectVersion || (ObjectVersion = {}));
 class MapInfo {
     constructor(mapReplacer, keyToValue) {
         this.mapReplacer = mapReplacer;
@@ -1528,9 +1540,12 @@ class MapInfo {
     static isObject(obj) {
         const typedObject = obj;
         if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
-            return true;
+            return ObjectVersion.NewVersion;
         }
-        return false;
+        if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacerCompatible) {
+            return ObjectVersion.CompatibleVersion;
+        }
+        return ObjectVersion.Default;
     }
     // Convert Map to Object
     static toObject(map) {
@@ -1544,8 +1559,12 @@ class MapInfo {
     static toMap(obj) {
         return new Map(obj.keyToValue.map((item) => [item.key, item.value]));
     }
+    static toMapCompatible(obj) {
+        return new Map(obj.keys.map((key, i) => [key, obj.values[i]]));
+    }
 }
 MapInfo.replacer = '_____map_replacer__';
+MapInfo.replacerCompatible = 'ace_engine_state_mgmt_map_replacer';
 /**
  * SetInfo
  *
@@ -1560,7 +1579,8 @@ class SetInfo {
     // Check if the given object is of type SetInfo
     static isObject(obj) {
         const typedObject = obj;
-        if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+        if ('setReplacer' in typedObject &&
+            (typedObject.setReplacer === SetInfo.replacer || typedObject.setReplacer === SetInfo.replacerCompatible)) {
             return true;
         }
         return false;
@@ -1576,6 +1596,7 @@ class SetInfo {
     }
 }
 SetInfo.replacer = '_____set_replacer__';
+SetInfo.replacerCompatible = "ace_engine_state_mgmt_set_replacer";
 /**
  * DateInfo
  *
@@ -1590,7 +1611,8 @@ class DateInfo {
     // Check if the given object is of type DateInfo
     static isObject(obj) {
         const typedObject = obj;
-        if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+        if ('dateReplacer' in typedObject &&
+            (typedObject.dateReplacer === DateInfo.replacer || typedObject.dateReplacer === DateInfo.replacerCompatible)) {
             return true;
         }
         return false;
@@ -1605,6 +1627,7 @@ class DateInfo {
     }
 }
 DateInfo.replacer = '_____date_replacer__';
+DateInfo.replacerCompatible = "ace_engine_state_mgmt_date_replacer";
 /**
  * PersistentStorage
  *
@@ -1847,8 +1870,11 @@ class PersistentStorage {
     readFromPersistentStorage(propName) {
         let newValue = PersistentStorage.storage_.get(propName);
         if (newValue instanceof Object) {
-            if (MapInfo.isObject(newValue)) {
+            if (MapInfo.isObject(newValue) === ObjectVersion.NewVersion) {
                 newValue = MapInfo.toMap(newValue);
+            }
+            else if (MapInfo.isObject(newValue) === ObjectVersion.CompatibleVersion) {
+                newValue = MapInfo.toMapCompatible(newValue);
             }
             else if (SetInfo.isObject(newValue)) {
                 newValue = SetInfo.toSet(newValue);
