@@ -3493,6 +3493,7 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
