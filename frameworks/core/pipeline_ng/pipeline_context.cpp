@@ -998,6 +998,16 @@ RefPtr<AccessibilityManagerNG> PipelineContext::GetAccessibilityManagerNG()
     return accessibilityManagerNG_;
 }
 
+void PipelineContext::SendEventToAccessibilityWithNode(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    if (!accessibilityManager || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
+    accessibilityManager->SendEventToAccessibilityWithNode(accessibilityEvent, node, Claim(this));
+}
+
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;

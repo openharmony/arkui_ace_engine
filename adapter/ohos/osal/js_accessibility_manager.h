@@ -156,6 +156,8 @@ public:
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
+    void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
@@ -348,6 +350,12 @@ private:
     void UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info);
 
     void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
+
+    void FillEventInfoWithNode(
+        const RefPtr<NG::FrameNode>& node,
+        Accessibility::AccessibilityEventInfo& eventInfo,
+        const RefPtr<NG::PipelineContext>& context,
+        int64_t elementId);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

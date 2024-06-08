@@ -308,6 +308,9 @@ public:
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
 
+    void SendEventToAccessibilityWithNode(
+        const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node);
+
     const RefPtr<StageManager>& GetStageManager();
 
     const RefPtr<OverlayManager>& GetOverlayManager();
