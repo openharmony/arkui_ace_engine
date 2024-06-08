@@ -274,7 +274,7 @@ public:
         if (inUse_) {
             LOGF("[%{public}d:%{public}s] reset children while in use",
                 hostNode_->GetId(), hostNode_->GetTag().c_str());
-            if (SystemProperties::GetDebugEnabled()) {
+            if (SystemProperties::GetLayoutDetectEnabled()) {
                 abort();
             } else {
                 LogBacktrace();
