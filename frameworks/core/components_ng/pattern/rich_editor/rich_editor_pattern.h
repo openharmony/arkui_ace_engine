@@ -116,6 +116,9 @@ public:
         bool isPreviewTextInputting = false;
         std::string deltaStr;
         RefPtr<SpanItem> previewTextSpan;
+        RefPtr<SpanNode> beforeSpanNode = nullptr;
+        RefPtr<SpanNode> afterSpanNode = nullptr;
+        bool isSplitSpan = false;
 
         std::string ToString() const
         {
@@ -141,6 +144,9 @@ public:
             isPreviewTextInputting = false;
             deltaStr.clear();
             previewTextSpan = nullptr;
+            beforeSpanNode = nullptr;
+            afterSpanNode = nullptr;
+            isSplitSpan = false;
         }
 
         bool IsValid() const
@@ -154,6 +160,9 @@ public:
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
 
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    void HandlePreviewTextStyle(RefPtr<SpanNode>& spanNode,
+        RefPtr<SpanNode>& beforeSpanNode, RefPtr<SpanNode>& afterSpanNode);
 
     bool CallbackBeforeSetPreviewText(
         int32_t& delta, const std::string& previewTextValue, const PreviewRange& range, bool isReplaceAll);
@@ -447,6 +456,10 @@ public:
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     void RemoveEmptySpanItems();
+    void RemoveEmptySpanNodes();
+    void RemoveEmptySpans();
+    void MergeSpanContent(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst);
+    void MergeSameStyleSpan(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst);
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
     void AfterAddImage(RichEditorChangeValue& changeValue);

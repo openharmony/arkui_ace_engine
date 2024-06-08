@@ -1021,6 +1021,31 @@ void RichEditorPattern::RemoveEmptySpanItems()
     }
 }
 
+void RichEditorPattern::RemoveEmptySpanNodes()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto& spanNodes = host->GetChildren();
+    for (auto it = spanNodes.begin(); it != spanNodes.end();) {
+        auto spanNode = AceType::DynamicCast<SpanNode>(*it);
+        if (!spanNode) {
+            ++it;
+            continue;
+        }
+        if (spanNode->GetSpanItem()->content.empty()) {
+            it = host->RemoveChild(spanNode);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void RichEditorPattern::RemoveEmptySpans()
+{
+    RemoveEmptySpanItems();
+    RemoveEmptySpanNodes();
+}
+
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
 {
     auto host = GetHost();
@@ -3455,6 +3480,26 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     return NO_ERRORS;
 }
 
+void RichEditorPattern::HandlePreviewTextStyle(
+    RefPtr<SpanNode>& spanNode, RefPtr<SpanNode>& beforeSpanNode, RefPtr<SpanNode>& afterSpanNode)
+{
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
+    } else {
+        bool isParagraphHead = !beforeSpanNode; // is first span
+        if (beforeSpanNode) {
+            auto& beforeNodeContent = beforeSpanNode->GetSpanItem()->content;
+            bool isAfterNewLine = !beforeNodeContent.empty() && beforeNodeContent.back() == L'\n';
+            isParagraphHead |= isAfterNewLine; // after \n
+        }
+        if (isParagraphHead && afterSpanNode) {
+            CopyTextSpanStyle(afterSpanNode, spanNode, true);
+        } else if (beforeSpanNode) {
+            CopyTextSpanStyle(beforeSpanNode, spanNode, true);
+        }
+    }
+}
+
 bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
     if (range.start != -1 || range.end != -1) {
@@ -3471,36 +3516,24 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     previewTextRecord_.startOffset = caretPosition_;
     previewTextRecord_.deltaStr = previewTextValue;
     BeforeIMEInsertValue("");
+    auto spanCountBefore = spans_.size();
     auto index = AddTextSpan(options);
+    previewTextRecord_.isSplitSpan = spans_.size() - spanCountBefore > 1;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index));
     CHECK_NULL_RETURN(spanNode, false);
+    CHECK_NULL_RETURN(spanNode->GetSpanItem(), false);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length()), false);
-    if (!spanNode || !spanNode->GetSpanItem()) {
-        return false;
-    }
-    auto spanItem = spanNode->GetSpanItem();
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
-    } else {
-        auto beforeSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index - 1));
-        bool isParagraphHead = !beforeSpanNode; // is first span
-        if (beforeSpanNode) {
-            auto& beforeNodeContent = beforeSpanNode->GetSpanItem()->content;
-            bool isAfterNewLine = !beforeNodeContent.empty() && beforeNodeContent.back() == L'\n';
-            isParagraphHead |= isAfterNewLine; // after \n
-        }
-        auto afterSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index + 1));
-        if (isParagraphHead && afterSpanNode) {
-            CopyTextSpanStyle(afterSpanNode, spanNode, true);
-        } else if (beforeSpanNode) {
-            CopyTextSpanStyle(beforeSpanNode, spanNode, true);
-        }
-    }
-    spanItem->SetTextStyle(typingTextStyle_);
-    previewTextRecord_.previewTextSpan = spanItem;
+
+    auto beforeSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index - 1));
+    auto afterSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(index + 1));
+    HandlePreviewTextStyle(spanNode, beforeSpanNode, afterSpanNode);
+
+    previewTextRecord_.previewTextSpan = spanNode->GetSpanItem();
     previewTextRecord_.spanIndex = index;
+    previewTextRecord_.beforeSpanNode = beforeSpanNode;
+    previewTextRecord_.afterSpanNode = afterSpanNode;
     auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
     previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     return true;
@@ -3596,20 +3629,46 @@ bool RichEditorPattern::CallbackAfterSetPreviewText(int32_t& delta)
     return true;
 }
 
+void RichEditorPattern::MergeSpanContent(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst)
+{
+    CHECK_NULL_VOID(target);
+    CHECK_NULL_VOID(source);
+    if (isTargetFirst) {
+        target->content += source->content;
+    } else {
+        target->content = source->content + target->content;
+    }
+    source->content.clear();
+}
+
+void RichEditorPattern::MergeSameStyleSpan(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst)
+{
+    CHECK_NULL_VOID(target);
+    CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(target->GetTextStyle() == source->GetTextStyle());
+    MergeSpanContent(target, source, isTargetFirst);
+}
+
 void RichEditorPattern::FinishTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
-    if (previewTextRecord_.previewTextSpan && previewTextRecord_.previewTextSpan->content.empty()) {
-        auto iter = std::find(spans_.begin(), spans_.end(), previewTextRecord_.previewTextSpan);
-        if (iter != spans_.end()) {
-            auto spanIndex = std::distance(spans_.begin(), iter);
-            spans_.erase(iter);
-            UpdateSpanPosition();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->RemoveChildAtIndex(spanIndex);
+    auto& record = previewTextRecord_;
+    auto previewSpanItem = record.previewTextSpan;
+    auto beforeSpanItem = record.beforeSpanNode ? record.beforeSpanNode->GetSpanItem() : nullptr;
+    auto afterSpanItem = record.afterSpanNode ? record.afterSpanNode->GetSpanItem() : nullptr;
+    if (record.isSplitSpan) {
+        if (beforeSpanItem && afterSpanItem) {
+            MergeSameStyleSpan(previewSpanItem, afterSpanItem, true);
+            MergeSameStyleSpan(beforeSpanItem, previewSpanItem, true);
+        }
+    } else {
+        if (beforeSpanItem) {
+            MergeSameStyleSpan(beforeSpanItem, previewSpanItem, true);
+        } else {
+            MergeSameStyleSpan(afterSpanItem, previewSpanItem, false);
         }
     }
+    RemoveEmptySpans();
     previewTextRecord_.Reset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
