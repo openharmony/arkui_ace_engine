@@ -922,6 +922,9 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         }
     }
 
+    if (isPropertyDiffMarked_) {
+        context->AddDirtyPropertyNode(Claim(this));
+    }
     if (!hasPendingRequest_) {
         return;
     }
