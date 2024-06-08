@@ -366,6 +366,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 

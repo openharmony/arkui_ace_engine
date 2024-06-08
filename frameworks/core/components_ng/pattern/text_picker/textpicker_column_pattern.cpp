@@ -593,16 +593,16 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(iconPattern);
         auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconLayoutProperty);
+        auto iconLayoutDirection = iconLayoutProperty->GetNonAutoLayoutDirection();
         CalcSize idealSize = { CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;
         iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
         MarginProperty margin;
+        margin.right = CalcLength(ICON_TEXT_SPACE);
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (isRtl) {
+        if (isRtl || iconLayoutDirection == TextDirection::RTL) {
             margin.left = CalcLength(ICON_TEXT_SPACE);
-        } else {
-            margin.right = CalcLength(ICON_TEXT_SPACE);
         }
         iconLayoutProperty->UpdateMargin(margin);
 
