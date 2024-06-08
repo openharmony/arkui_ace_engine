@@ -235,6 +235,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    framenode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
@@ -367,8 +368,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     frameNode->SetDraggable(true);
     NG::DragDropInfo dragPreviewInfo;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
     dragPreviewInfo.pixelMap = pixelMap;
     frameNode->SetDragPreview(dragPreviewInfo);
 
@@ -424,6 +424,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.expected: longPressRecognizer is not nullptr and longPressRecognizer's callback is not nullptr.
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    frameNode->GetOrCreateFocusHub();
     EXPECT_NE(getEventTargetImpl, nullptr);
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -481,6 +482,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg003, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), false);
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), true);
@@ -547,6 +549,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg004, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT_MOUSE, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_FALSE(finalResult.empty());
@@ -592,6 +595,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->previewLongPressRecognizer_->onAction_, nullptr);
@@ -667,9 +671,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
      * @tc.expected: dragEventActuator's userCallback_ is not null.
      */
     double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
-        unknownPropertyValue = info.GetScale();
-    };
+    auto actionStart = [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
     GestureEventFunc actionUpdate = [](GestureEvent& info) {};
     GestureEventFunc actionEnd = [](GestureEvent& info) {};
     GestureEventNoParameter actionCancel = []() {};
@@ -686,6 +688,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
@@ -764,6 +767,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
