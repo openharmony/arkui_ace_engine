@@ -14470,6 +14470,30 @@ class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value.length >= 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
+    }
+    if (value.length === 1) {
+      if (isObject(value[0])) {
+        modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[0]);
+      } else if (isResource(value[0]) || isString(value[0])) {
+        modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, undefined);
+        modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, undefined);
+      }
+    } else if (value.length === 2) {
+      modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[1]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, undefined);
+    }
+    return this;
+  }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
     return this;
@@ -14938,6 +14962,53 @@ class ButtonSizeModifier extends ModifierWithKey {
   }
 }
 ButtonSizeModifier.identity = Symbol('buttonSize');
+class ButtonLabelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetLabel(node);
+    } else {
+      getUINativeModule().button.setLabel(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonLabelModifier.identity = Symbol('buttonLabel');
+class ButtonOptionsModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetOptions(node);
+    } else {
+      getUINativeModule().button.setOptions(node, this.value.type, this.value.stateEffect,
+        this.value.buttonStyle, this.value.controlSize, this.value.role);
+    }
+  }
+  checkObjectDiff() {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.stateEffect, this.value.stateEffect) ||
+      !isBaseOrResourceEqual(this.stageValue.buttonStyle, this.value.buttonStyle) ||
+      !isBaseOrResourceEqual(this.stageValue.controlSize, this.value.controlSize) ||
+      !isBaseOrResourceEqual(this.stageValue.role, this.value.role)
+    );
+  }
+}
+ButtonOptionsModifier.identity = Symbol('buttonOptions');
+class ButtonCreateTypeModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (!reset) {
+      getUINativeModule().button.setCreateWithLabel(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonCreateTypeModifier.identity = Symbol('buttonCreateType');
 // @ts-ignore
 if (globalThis.Button !== undefined) {
   globalThis.Button.attributeModifier = function (modifier) {

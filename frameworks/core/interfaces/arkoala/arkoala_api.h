@@ -1783,6 +1783,11 @@ struct ArkUIButtonModifier {
     void (*setButtonControlSize)(ArkUINodeHandle node, ArkUI_Uint32 controlSize);
     void (*resetButtonControlSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getButtonType)(ArkUINodeHandle node);
+    void (*setButtonLabelWithCheck)(ArkUINodeHandle node, ArkUI_CharPtr label);
+    void (*resetButtonLabelWithCheck)(ArkUINodeHandle node);
+    void (*setButtonOptions)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle, ArkUI_Uint32 buttonRole);
+    void (*resetButtonOptions)(ArkUINodeHandle node);
+    void (*setCreateWithLabel)(ArkUINodeHandle node, bool createWithLabel);
 };
 
 struct ArkUIImageModifier {
