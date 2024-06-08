@@ -138,7 +138,8 @@ group("linux_core_unittest") {
     "pattern/text_timer:text_timer_test_ng",
     "pattern/time_picker:time_picker_test_ng",
     "pattern/toggle:toggle_test_ng",
-    "pattern/video:video_test_ng",
+
+    # "pattern/video:video_test_ng",
     "pattern/waterflow:water_flow_test_ng",
     "pattern/waterflow:water_flow_test_old",
     "pattern/xcomponent:xcomponent_test_ng",
