@@ -612,6 +612,11 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -854,6 +859,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool useTotalOffset_ = true;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
