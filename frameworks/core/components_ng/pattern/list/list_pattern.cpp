@@ -1674,6 +1674,7 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     }
     auto extraOffset = GetExtraOffset();
     if (extraOffset.has_value()) {
+        SetUseTotalOffset(false);
         targetPos += extraOffset.value();
         ResetExtraOffset();
     }
