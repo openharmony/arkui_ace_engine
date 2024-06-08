@@ -209,6 +209,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsLayoutDetectEnabled()
+{
+    return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
+}
+
 bool IsNavigationBlurEnabled()
 {
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
@@ -385,6 +390,7 @@ bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled()
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
@@ -527,6 +533,7 @@ void SystemProperties::InitDeviceInfo(
     paramDeviceType_ = ::GetDeviceType();
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
+    layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
@@ -595,6 +602,11 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
+{
+    return layoutDetectEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()
