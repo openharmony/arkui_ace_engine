@@ -1125,6 +1125,7 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
+    bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     std::optional<bool> isSwipeByGroup_;

@@ -226,8 +226,8 @@ void SwiperPattern::OnLoopChange()
         return;
     }
 
-    if (!layoutProperty->GetLoop().value_or(true)) {
-        UpdateCurrentIndex(GetLoopIndex(currentIndex_));
+    if (preLoop_.value() && !layoutProperty->GetLoop().value_or(true)) {
+        needResetCurrentIndex_ = true;
     }
 
     if (preLoop_.value() != layoutProperty->GetLoop().value_or(true) &&
@@ -476,6 +476,12 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (oldIndex_ != currentIndex_ && !isInit_ && !IsUseCustomAnimation()) {
         FireWillShowEvent(currentIndex_);
         FireWillHideEvent(oldIndex_);
+    }
+
+    if (needResetCurrentIndex_) {
+        needResetCurrentIndex_ = false;
+        currentIndex_ = GetLoopIndex(currentIndex_);
+        layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     }
 }
 
