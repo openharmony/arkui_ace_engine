@@ -156,6 +156,7 @@ private:
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
     void HandleEnableFormCallback(const bool enable);
+    void SetGestureInnerFlag();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
