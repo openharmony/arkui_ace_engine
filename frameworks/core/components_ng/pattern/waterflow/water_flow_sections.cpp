@@ -21,7 +21,7 @@ void WaterFlowSections::ChangeData(
 {
     if (deleteCount == 1 && newSections.size() == 1) {
         // prepare for checking special case
-        prevSection_ = {sections_[start], start};
+        prevSection_ = { sections_[start], start };
     } else {
         prevSection_ = std::nullopt;
     }
@@ -83,8 +83,7 @@ bool WaterFlowSections::IsSpecialUpdate() const
     }
     const auto& cur = sections_[start];
     const auto& prev = prevSection_->first;
-    return cur.itemsCount != prev.itemsCount && cur.crossCount == prev.crossCount &&
-           cur.columnsGap == prev.columnsGap && cur.rowsGap == prev.rowsGap && cur.margin == prev.margin;
+    return cur.OnlyCountDiff(prev);
 }
 
 bool WaterFlowSections::IsSpecialUpdateCAPI(int32_t updateIndex) const
@@ -96,7 +95,7 @@ bool WaterFlowSections::IsSpecialUpdateCAPI(int32_t updateIndex) const
         return false;
     }
     for (size_t i = 0; i < sections_.size(); ++i) {
-        if (!sections_[i].OnlyCountChange(prevSections_[i])) {
+        if (!sections_[i].OnlyCountDiff(prevSections_[i])) {
             return false;
         }
     }
