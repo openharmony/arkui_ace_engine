@@ -352,13 +352,17 @@ int32_t WaterFlowLayoutInfoSW::GetCrossIndex(int32_t itemIndex) const
     return -1;
 }
 
-void WaterFlowLayoutInfoSW::ResetBeforeJump(float laneBasePos)
+void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos)
 {
     for (auto& section : sections_) {
         std::for_each(section.begin(), section.end(), [&laneBasePos](auto& lane) {
             lane.items_.clear();
-            lane.startPos = laneBasePos;
-            lane.endPos = laneBasePos;
+            if (laneBasePos) {
+                lane.startPos = *laneBasePos;
+                lane.endPos = *laneBasePos;
+            } else {
+                lane.endPos = lane.startPos;
+            }
         });
     }
     totalOffset_ = 0.0f;
@@ -458,7 +462,10 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
     if (start < sections_.size()) {
         sections_.erase(sections_.begin() + start, sections_.end());
     }
-    sections_.resize(n, {});
+    sections_.resize(n);
+    for (size_t i = 0; i < n; ++i) {
+        sections_[i].resize(sections[i].crossCount.value_or(1));
+    }
 
     int32_t endIdx = EndIndex();
     for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {

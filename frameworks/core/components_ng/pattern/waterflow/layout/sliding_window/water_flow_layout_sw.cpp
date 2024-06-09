@@ -42,6 +42,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     if (info_->segmentTails_.empty() || info_->segmentTails_.back() != itemCnt_ - 1) {
         return;
     }
+    CheckReset();
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
@@ -110,8 +111,6 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     } else {
         SingleInit(frameSize);
     }
-    CheckReset();
-    InitLanes();
 }
 
 void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
@@ -150,6 +149,7 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     if (itemsCrossSize_.empty()) {
         itemsCrossSize_[0].push_back(crossSize);
     }
+    info_->sections_[0].resize(itemsCrossSize_[0].size());
 }
 
 void WaterFlowLayoutSW::CheckReset()
@@ -157,7 +157,8 @@ void WaterFlowLayoutSW::CheckReset()
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx > -1) {
         if (updateIdx <= info_->startIndex_) {
-            info_->Reset();
+            info_->ResetWithLaneOffset(std::nullopt);
+            FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         } else {
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
@@ -166,13 +167,14 @@ void WaterFlowLayoutSW::CheckReset()
     }
 
     if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        info_->Reset();
+        info_->ResetWithLaneOffset(std::nullopt);
+        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         return;
     }
 
     if (!wrapper_->IsConstraintNoChanged()) {
-        info_->Reset();
-        return;
+        info_->ResetWithLaneOffset(std::nullopt);
+        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
     }
 }
 
@@ -180,7 +182,7 @@ void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 {
     // handle initial layout
     if (NearZero(delta) && info_->startIndex_ > info_->endIndex_) {
-        info_->ResetBeforeJump(info_->TopMargin());
+        info_->ResetWithLaneOffset(info_->TopMargin());
     }
 
     ApplyDelta(delta);
@@ -499,7 +501,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
             if (noSkip) {
                 ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
-                info_->ResetBeforeJump(0.0f);
+                info_->ResetWithLaneOffset(0.0f);
                 FillBack(mainLen_, jumpIdx, itemCnt_ - 1);
             }
             break;
@@ -511,7 +513,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
                 ApplyDelta(
                     -info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]) + (mainLen_ - itemH) / 2.0f);
             } else {
-                info_->ResetBeforeJump(mainLen_ / 2.0f);
+                info_->ResetWithLaneOffset(mainLen_ / 2.0f);
                 info_->idxToLane_ = { { jumpIdx, 0 } };
                 auto& lane = info_->sections_[info_->GetSegment(jumpIdx)][0];
                 float itemH = MeasureChild(props, jumpIdx, 0);
@@ -528,7 +530,7 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
             if (noSkip) {
                 ApplyDelta(info_->DistanceToBottom(jumpIdx, mainLen_, mainGaps_[info_->GetSegment(jumpIdx)]));
             } else {
-                info_->ResetBeforeJump(mainLen_);
+                info_->ResetWithLaneOffset(mainLen_);
                 FillFront(0.0f, jumpIdx, 0);
             }
             break;
@@ -651,14 +653,5 @@ void WaterFlowLayoutSW::PostMeasureSelf(float selfCrossLen)
 inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 {
     return idx + info_->footerIndex_ + 1;
-}
-
-void WaterFlowLayoutSW::InitLanes()
-{
-    for (size_t i = 0; i < itemsCrossSize_.size(); ++i) {
-        if (info_->sections_[i].empty()) {
-            info_->sections_[i].resize(itemsCrossSize_[i].size());
-        }
-    }
 }
 } // namespace OHOS::Ace::NG

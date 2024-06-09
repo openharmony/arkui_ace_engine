@@ -96,11 +96,12 @@ public:
     void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
 
     /**
-     * @brief reset layout data before performing a jump.
+     * @brief reset layout data and setting up a base position for each lane.
      *
      * @param laneBasePos base value for lane's start&end position.
+     * When not provided, lane positions are not modified.
      */
-    void ResetBeforeJump(float laneBasePos);
+    void ResetWithLaneOffset(std::optional<float> laneBasePos);
 
     void BeginUpdate()
     {

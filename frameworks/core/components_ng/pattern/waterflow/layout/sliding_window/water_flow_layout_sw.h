@@ -41,8 +41,6 @@ private:
     void Init(const SizeF& frameSize);
     void SingleInit(const SizeF& frameSize);
     void CheckReset();
-    // do it after CheckReset because reset would clear lanes.
-    void InitLanes();
 
     void MeasureOnOffset(float delta);
 
@@ -59,6 +57,8 @@ private:
      * @param mainSize of the viewport
      */
     void MeasureOnJump(int32_t jumpIdx, ScrollAlign align);
+
+    void MeasureOnReset();
 
     /**
      * @brief Helper to perform jumping to an item.
