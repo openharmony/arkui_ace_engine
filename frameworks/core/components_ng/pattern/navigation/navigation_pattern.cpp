@@ -2083,7 +2083,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(preDestinationPattern);
         auto navDestinationName = preDestinationPattern->GetName();
         fromPathInfo += ", navDesitinationName: " + navDestinationName;
-        preDestination->SetIsAnimated(isAnimated);
+        if (isPopPage && !isAnimated) {
+            // only pop page without animation need to post afterLayoutTask to delay old top's onDisappear
+            preDestination->SetIsAnimated(false);
+        }
     } else {
         fromPathInfo = hostNode->GetNavigationPathInfo();
     }
@@ -2093,7 +2096,6 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(topDestinationPattern);
         auto navDestinationName = topDestinationPattern->GetName();
         toPathInfo += ", navDesitinationName: " + navDestinationName;
-        topDestination->SetIsAnimated(isAnimated);
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
     }
