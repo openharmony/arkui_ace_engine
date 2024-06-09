@@ -547,16 +547,6 @@ void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
         [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
-void RosenRenderContext::SyncGeometryPropertiesWithoutAnimation(
-    GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
-{
-    CHECK_NULL_VOID(rsNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_, true);
-    host->OnPixelRoundFinish(paintRect_.GetSize());
-}
-
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -593,7 +583,7 @@ void RosenRenderContext::SetChildBounds(const RectF& paintRect) const
     }
 }
 
-void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition)
+void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
     if (isDisappearing_ && !paintRect.IsValid()) {
@@ -604,11 +594,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isS
         ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
             host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
     }
-    if (isSkipFrameTransition) {
-        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
-    } else {
-        SyncGeometryFrame(paintRect);
-    }
+    SyncGeometryFrame(paintRect);
     if (!isSynced_) {
         isSynced_ = true;
         auto borderRadius = GetBorderRadius();
