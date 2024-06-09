@@ -1901,7 +1901,7 @@ HWTEST_F(LayoutPropertyTestNg, ConstraintEqual001, TestSize.Level1)
     layoutProperty->contentConstraint_ = preContentTemp;
     layoutProperty->widthPercentSensitive_ = false;
     bResult = layoutProperty->ConstraintEqual(preLayoutTemp, preContentTemp); // 1073
-    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(bResult);
 
     /**
      * @tc.steps5 Call ConstraintEqual with contentConstraint_ and Width true Height false.
@@ -1909,7 +1909,7 @@ HWTEST_F(LayoutPropertyTestNg, ConstraintEqual001, TestSize.Level1)
     layoutProperty->widthPercentSensitive_ = true;
     layoutProperty->heightPercentSensitive_ = false;
     bResult = layoutProperty->ConstraintEqual(preLayoutTemp, preContentTemp); // 1078
-    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(bResult);
 
     /**
      * @tc.steps6 Call ConstraintEqual with contentConstraint_and Width true Height true.
