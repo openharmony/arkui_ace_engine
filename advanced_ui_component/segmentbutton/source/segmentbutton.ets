@@ -382,7 +382,7 @@ struct SelectItem {
   @ObjectLink options: SegmentButtonOptions
   @Link selectedIndexes: number[]
   @Consume buttonItemsSize: SizeOptions[]
-  @Consume selectedItemPosition: Position
+  @Consume selectedItemPosition: LocalizedEdges
   @Consume zoomScaleArray: number[]
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
 
@@ -580,7 +580,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume componentSize: SizeOptions
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
-  @Consume buttonItemsPosition: Position[]
+  @Consume buttonItemsPosition: LocalizedEdges[]
   @Consume focusIndex: number
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
@@ -806,9 +806,9 @@ struct SegmentButtonItemArrayComponent {
               //measure position
               if (newValue.width) {
                 this.buttonItemsPosition[index] = {
-                  x: Number.parseFloat(this.options.componentPadding.toString()) +
-                    (Number.parseFloat(newValue.width.toString()) + 1) * index,
-                  y: Number.parseFloat(this.options.componentPadding.toString())
+                  start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
+                    (Number.parseFloat(newValue.width.toString()) + 1) * index),
+                  top: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()))
                 }
               }
             })
@@ -909,9 +909,9 @@ export struct SegmentButton {
   @Provide buttonItemsSize: SizeOptions[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index): SizeOptions => {
     return {}
   })
-  @Provide @Watch('onItemsPositionChange') buttonItemsPosition: Position[] = Array.from({
+  @Provide @Watch('onItemsPositionChange') buttonItemsPosition: LocalizedEdges[] = Array.from({
     length: MAX_ITEM_COUNT
-  }, (_: Object, index): Position => {
+  }, (_: Object, index): LocalizedEdges => {
     return {}
   })
   @Provide buttonItemsSelected: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
@@ -919,7 +919,7 @@ export struct SegmentButton {
     length: MAX_ITEM_COUNT
   }, (_: Object, index) => new ItemProperty())
   @Provide focusIndex: number = -1
-  @Provide selectedItemPosition: Position = {}
+  @Provide selectedItemPosition: LocalizedEdges = {}
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 1.0)
   private doSelectedChangeAnimate: boolean = false
   private isCurrentPositionSelected: boolean = false
@@ -1135,7 +1135,7 @@ export struct SegmentButton {
                 this.selectedIndexes[0] > Math.min(this.options.buttons.length,
                   this.buttonItemsSize.length) ? false : true
 
-              let realClickIndex: number = this.shouldMirror ? buttonLength - 1 - i : i
+              let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
                 if (selectedIndex === -1) {
@@ -1285,9 +1285,8 @@ export struct SegmentButton {
 
   updateAnimatedProperty(curve: ICurve | null) {
     let setAnimatedPropertyFunc = () => {
-      let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length)
       this.selectedItemPosition = this.selectedIndexes.length === 0 ? {
-      } : this.buttonItemsPosition[this.shouldMirror ? (buttonLength - 1 - this.selectedIndexes[0]) : this.selectedIndexes[0]]
+      } : this.buttonItemsPosition[this.selectedIndexes[0]]
       this.buttonItemsSelected.forEach((selected, index) => {
         this.buttonItemProperty[index].fontColor = selected ?
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?
