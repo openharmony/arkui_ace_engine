@@ -2034,6 +2034,9 @@ void ScrollablePattern::Fling(double flingVelocity)
     } else {
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
