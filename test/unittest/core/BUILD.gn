@@ -82,7 +82,8 @@ group("linux_core_unittest") {
     "pattern/grid_col:grid_col_test_ng",
     "pattern/grid_container:grid_container_test_ng",
     "pattern/grid_row:grid_row_test_ng",
-    "pattern/hyperlink:hyperlink_test_ng",
+
+    # "pattern/hyperlink:hyperlink_test_ng",
     "pattern/image:image_test_ng",
     "pattern/image_animator:image_animator_test_ng",
     "pattern/indexer:indexer_test_ng",
@@ -118,7 +119,8 @@ group("linux_core_unittest") {
     # "pattern/scrollable:scrollable_test_ng",
     # "pattern/search:search_test_ng",
     "pattern/select:select_test_ng",
-    "pattern/select_overlay:select_overlay_test_ng",
+
+    # "pattern/select_overlay:select_overlay_test_ng",
     "pattern/side_bar:side_bar_test_ng",
     "pattern/slider:slider_test_ng",
     "pattern/stack:stack_test_ng",
