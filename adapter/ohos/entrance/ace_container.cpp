@@ -361,11 +361,7 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(aceView_);
-    auto aceView = static_cast<AceViewOhos*>(aceView_);
-    if (aceView) {
-        aceView->DecRefCount();
-    }
+    std::lock_guard<std::mutex> lock(viewMutex_);
     aceView_ = nullptr;
 }
 
@@ -1052,7 +1048,7 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     }
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
+void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
     sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback)
 {
     CHECK_NULL_VOID(view);
@@ -1072,7 +1068,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 }
 
 UIContentErrorCode AceContainer::SetViewNew(
-    AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
+    const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
@@ -1694,14 +1690,14 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
     auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
     if (!isSubContainer_) {
-        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        auto aceView = AceType::DynamicCast<AceViewOhos>(aceView_);
         ACE_DCHECK(aceView != nullptr);
         taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     }

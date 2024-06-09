@@ -158,14 +158,14 @@ public:
         return true;
     }
 
-    AceViewPreview* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -320,7 +320,7 @@ private:
         UIEnvCallback callback);
 #endif
 
-    AceViewPreview* aceView_ = nullptr;
+    RefPtr<AceViewPreview> aceView_ = nullptr;
     int32_t instanceId_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

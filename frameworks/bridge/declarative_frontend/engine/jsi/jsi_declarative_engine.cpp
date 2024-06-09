@@ -1943,7 +1943,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     if (!container) {
         return;
     }
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     if (!nativeView) {
         return;
     }

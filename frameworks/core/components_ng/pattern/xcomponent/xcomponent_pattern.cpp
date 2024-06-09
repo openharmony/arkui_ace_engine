@@ -302,7 +302,7 @@ void* XComponentPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, nullptr);
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     CHECK_NULL_RETURN(nativeView, nullptr);
     return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
 }

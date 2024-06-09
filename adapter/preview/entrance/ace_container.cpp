@@ -159,7 +159,6 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     if (aceView_ != nullptr) {
-        delete aceView_;
         aceView_ = nullptr;
     }
 }
