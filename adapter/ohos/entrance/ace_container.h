@@ -620,6 +620,11 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    void RecordResAdapter(const std::string& key)
+    {
+        resAdapterRecord_.emplace(key);
+    }
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(
