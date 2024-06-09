@@ -50,10 +50,6 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             gridLayoutInfo_.currentOffset_ = postJumpOffset_;
             MeasureOnOffset(mainSize);
         }
-        if (gridLayoutInfo_.extraOffset_.has_value()) {
-            gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
-            gridLayoutInfo_.extraOffset_.reset();
-        }
     } else {
         MeasureOnOffset(mainSize);
     }
@@ -119,6 +115,10 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 
     info.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset();
+
+    if (info.extraOffset_) {
+        postJumpOffset_ += *info.extraOffset_;
+    }
 }
 
 namespace {

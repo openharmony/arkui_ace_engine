@@ -411,6 +411,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     ProcessEvent(indexChanged, gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_);
     gridLayoutInfo_.prevHeight_ = gridLayoutInfo_.currentHeight_;
+    gridLayoutInfo_.extraOffset_.reset();
     SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
