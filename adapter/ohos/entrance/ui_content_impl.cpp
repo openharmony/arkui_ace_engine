@@ -428,7 +428,8 @@ public:
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
+        auto aceView =
+            AceType::DynamicCast<Platform::AceViewOhos>(Platform::AceContainer::GetContainer(instanceId)->GetAceView());
         CHECK_NULL_VOID(aceView);
         DragEventAction action;
         switch (event) {
@@ -1102,7 +1103,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
 
     // create ace_view
-    Platform::AceViewOhos* aceView = nullptr;
+    RefPtr<Platform::AceViewOhos> aceView = nullptr;
     if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
@@ -1962,7 +1963,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
 }
@@ -1980,7 +1981,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
     return true;
 }
@@ -1994,7 +1995,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent, isPreIme);
 }
 
@@ -2092,7 +2093,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                 pipelineContext->StartWindowAnimation();
             }
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
@@ -2509,7 +2510,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::ChangeViewSize(aceView, width, height);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);

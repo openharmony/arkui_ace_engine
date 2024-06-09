@@ -29,7 +29,9 @@
 namespace OHOS::Ace::Platform {
 using ReleaseCallback = std::function<void()>;
 
-class AceViewPreview : public AceView, public Referenced {
+class AceViewPreview : public AceView {
+    DECLARE_ACE_TYPE(AceViewPreview, AceView);
+
 public:
     AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl);
     ~AceViewPreview() override = default;

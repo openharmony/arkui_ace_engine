@@ -14,6 +14,7 @@
  */
 
 #include "adapter/preview/entrance/ace_ability.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
 
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
@@ -486,7 +487,7 @@ void AceAbility::SurfaceChanged(
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
-    auto viewPtr = container->GetAceView();
+    auto viewPtr = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     CHECK_NULL_VOID(viewPtr);
     // Need to change the window resolution and then change the rendering resolution. Otherwise, the image may not adapt
     // to the new window after the window is modified.

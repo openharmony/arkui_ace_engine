@@ -128,6 +128,8 @@ public:
         return false;
     }
 
+    virtual RefPtr<AceView> GetAceView() const = 0;
+
     virtual void* GetView() const = 0;
 
     // Trigger garbage collection

@@ -527,7 +527,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(context);
     context->SetDisplayWindowRectInfo(
         Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-    auto viewPtr = container->GetAceView();
+    auto viewPtr = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     CHECK_NULL_VOID(viewPtr);
     SystemProperties::InitDeviceInfo(
         config.Width(), config.Height(), config.Height() >= config.Width() ? 0 : 1, config.Density(), false);

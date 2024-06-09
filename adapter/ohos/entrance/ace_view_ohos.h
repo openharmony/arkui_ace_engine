@@ -23,6 +23,7 @@
 #include "key_event.h"
 #include "wm/window.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/noncopyable.h"
@@ -36,27 +37,28 @@ namespace OHOS::Ace::Platform {
 
 using ReleaseCallback = std::function<void()>;
 
-class ACE_FORCE_EXPORT AceViewOhos : public AceView, public Referenced {
+class ACE_FORCE_EXPORT AceViewOhos : public AceView {
+    DECLARE_ACE_TYPE(AceViewOhos, AceView);
 public:
     explicit AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl);
     ~AceViewOhos() override = default;
-    static AceViewOhos* CreateView(
+    static RefPtr<AceViewOhos> CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
-    static void SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window);
-    static void ChangeViewSize(AceViewOhos* view, int32_t width, int32_t height);
-    static void SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
+    static void SurfaceCreated(const RefPtr<AceViewOhos>& view, OHOS::sptr<OHOS::Rosen::Window> window);
+    static void ChangeViewSize(const RefPtr<AceViewOhos>& view, int32_t width, int32_t height);
+    static void SurfaceChanged(const RefPtr<AceViewOhos>& view, int32_t width, int32_t height, int32_t orientation,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
-    static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
-    static void TransformHintChanged(AceViewOhos* view, uint32_t transform);
+    static void SurfacePositionChanged(const RefPtr<AceViewOhos>& view, int32_t posX, int32_t posY);
+    static void SetViewportMetrics(const RefPtr<AceViewOhos>& view, const ViewportConfig& config);
+    static void TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t transform);
 
-    static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
-        bool isInjected = false);
+    static void DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr,
+        const std::function<void()>& callback = nullptr, bool isInjected = false);
     static bool DispatchKeyEvent(
-        AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
-    static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
+        const RefPtr<AceViewOhos>& view, const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme = false);
+    static bool DispatchRotationEvent(const RefPtr<AceViewOhos>& view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
