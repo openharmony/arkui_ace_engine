@@ -485,7 +485,7 @@ class ContentItemStruct extends ViewPU {
                 LengthMetrics.vp(0) : LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH)
             });
             Flex.constraintSize({ minWidth: this.leftWidth });
-            Flex.flexShrink(1);
+            Flex.flexShrink(this.parentDirection === FlexDirection.Column ? 0 : 1);
         }, Flex);
         this.createIcon.bind(this)(this);
         this.createText.bind(this)(this);
@@ -913,6 +913,7 @@ class OperateItemStruct extends ViewPU {
                 this.isParentCanTouch = true;
             });
             Button.onClick(t7.icon?.action);
+            Button.flexShrink(0);
         }, Button);
         this.observeComponentCreation2((x7, y7) => {
             Image.create(t7.icon?.value);
@@ -1225,7 +1226,7 @@ class OperateItemStruct extends ViewPU {
                                     Flex.flexShrink(0);
                                 }, Flex);
                                 this.createText.bind(this)(this);
-                                this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__arrow"] ? this["__arrow"] : this["arrow"]) }), this);
+                                this.createArrow.bind(this)(this);
                                 Flex.pop();
                             });
                         }
@@ -1663,7 +1664,7 @@ export class ComposeListItem extends ViewPU {
         return FlexDirection.Row;
     }
     decideContainerDirection() {
-        if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1) {
+        if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1 || !this.contentItem) {
             return FlexDirection.Row;
         }
         if (this.operateItem?.button) {
@@ -1833,7 +1834,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 914, col: 11 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 915, col: 11 });
                                 ViewPU.create(n1);
                                 let o1 = () => {
                                     return {};
@@ -1876,7 +1877,7 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 917, col: 11 });
+                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 918, col: 11 });
                                 ViewPU.create(c1);
                                 let d1 = () => {
                                     return {
@@ -1934,6 +1935,7 @@ export class ComposeListItem extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((r, s) => {
                         __Common__.create();
+                        __Common__.flexShrink(this.containerDirection === FlexDirection.Column ? 0 : 1);
                         __Common__.align(Alignment.End);
                         __Common__.onFocus(() => {
                             this.canFocus = false;
@@ -1965,7 +1967,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth(),
                                     isParentCanTouch: this.__isCanTouch,
                                     parentDirection: this.containerDirection,
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 936, col: 11 });
+                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/mainpage/composelistitem.ets", line: 937, col: 11 });
                                 ViewPU.create(n);
                                 let o = () => {
                                     return {
