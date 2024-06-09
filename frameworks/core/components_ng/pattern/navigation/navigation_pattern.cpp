@@ -502,8 +502,8 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
-    preTopNavPath_ = navigationStack_->GetPreTopNavPath();
-    preStackSize_ = navigationStack_->PreSize();
+    preTopNavPath_ = navigationStack_->GetTopNavPath();
+    preStackSize_ = navigationStack_->Size();
     preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -2300,10 +2300,9 @@ void NavigationPattern::RecoveryToLastStack()
         }
         // update pre cache node to cache node list
         auto cacheNode = navigationStack_->GetFromCacheNode(childNode.first);
-        if (cacheNode == childNode.second) {
-            continue;
+        if (cacheNode && cacheNode == childNode.second) {
+            navigationStack_->AddCacheNode(childNode.first, childNode.second);
         }
-        navigationStack_->AddCacheNode(childNode.first, childNode.second);
     }
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(nullptr, navigationModeChange_);
 
