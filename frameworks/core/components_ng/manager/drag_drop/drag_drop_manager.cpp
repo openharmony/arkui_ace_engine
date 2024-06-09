@@ -301,8 +301,13 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
     //other case, check drag behavior
     switch (dragBehavior) {
         case DragBehavior::UNKNOWN: {
-            // the application does not config the drag behavior, use copy as default
-            UpdateDragStyle(DragCursorStyleCore::COPY);
+            // the application does not config the drag behavior, use move when moving within draggedFrameNode,
+            // otherwise use copy
+            if (draggedFrameNode_ == dragFrameNode) {
+                UpdateDragStyle(DragCursorStyleCore::MOVE);
+            } else {
+                UpdateDragStyle(DragCursorStyleCore::COPY);
+            }
             break;
         }
         case DragBehavior::MOVE: {

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -655,6 +656,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    frameNode->SetAllowDrop(allowDropSet);
     
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textValue = pattern->GetTextValue();
@@ -680,11 +683,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto renderContext = frameNode->GetRenderContext();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
-    PaddingProperty padding;
-    padding.left = CalcLength(0.0);
-    padding.right = CalcLength(0.0);
-    padding.bottom = CalcLength(0.0);
-    padding.top = CalcLength(0.0);
+    PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0) });
     textFieldLayoutProperty->UpdatePadding(padding);
     pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
