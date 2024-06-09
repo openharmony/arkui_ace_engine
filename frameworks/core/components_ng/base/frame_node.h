@@ -881,8 +881,19 @@ public:
 
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
     static std::pair<float, float> ContextPositionConvertToPX(
@@ -1117,7 +1128,7 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
-
+    bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;

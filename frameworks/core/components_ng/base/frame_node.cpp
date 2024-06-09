@@ -3415,9 +3415,12 @@ void FrameNode::Layout()
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        if (!IsRootMeasureNode() && geometryTransition->IsNodeInAndActive(Claim(this))) {
-            SetGeometryTransitionInRecursive(true);
-            SetSkipSyncGeometryNode();
+        if (geometryTransition->IsNodeInAndActive(Claim(this))) {
+            if (IsRootMeasureNode()) {
+                UINode::SetGeometryTransitionInRecursive(true);
+            } else {
+                SetSkipSyncGeometryNode();
+            }
         }
     }
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
@@ -3462,8 +3465,12 @@ void FrameNode::Layout()
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
     needSyncRsNode |= AvoidKeyboard(isFocusOnPage);
+    if (GetIsGeometryTransitionIn()) {
+        renderContext_->SetFrameWithoutAnimation(renderContext_->GetPaintRectWithoutTransform());
+        SetIsGeometryTransitionIn(false);
+    }
     // skip wrapping task if node will not sync
-    CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties || GetIsGeometryTransitionIn());
+    CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties);
     auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -3553,7 +3560,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     layoutProperty_->CleanDirty();
     needSyncRsNode = frameSizeChange || frameOffsetChange ||
                      (pattern_->GetContextParam().has_value() && contentSizeChange) || HasPositionProp() ||
-                     SelfOrParentExpansive() || GetIsGeometryTransitionIn();
+                     SelfOrParentExpansive();
     if (hasTransition) {
         geometryTransition->DidLayout(Claim(this));
         if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
@@ -3629,13 +3636,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     }
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
-        if (GetIsGeometryTransitionIn()) {
-            renderContext_->SyncGeometryPropertiesWithoutAnimation(
-                RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
-            SetIsGeometryTransitionIn(false);
-        } else {
-            renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
-        }
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
         TriggerOnSizeChangeCallback();
     }
 
