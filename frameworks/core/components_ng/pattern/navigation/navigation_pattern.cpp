@@ -1521,6 +1521,11 @@ RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
     return dividerFrameNode;
 }
 
+void NavigationPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+{
+    AddDividerHotZoneRect();
+}
+
 void NavigationPattern::AddDividerHotZoneRect()
 {
     if (realDividerWidth_ <= 0.0f) {
@@ -1541,10 +1546,12 @@ void NavigationPattern::AddDividerHotZoneRect()
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(geometryNode->GetFrameSize().Height());
     DimensionRect hotZoneRegion;
+    auto paintHeight = GetPaintRectHeight(navBarNode);
     if (navigationMode_ == NavigationMode::STACK) {
         hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
     } else {
-        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+        hotZoneRegion.SetSize(DimensionSize(
+            Dimension(hotZoneSize.Width()), Dimension(NearZero(paintHeight) ? hotZoneSize.Height() : paintHeight)));
     }
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
 
@@ -1564,7 +1571,7 @@ void NavigationPattern::AddDividerHotZoneRect()
         dragRect_.SetSize(SizeF(0.0f, 0.0f));
     } else {
         dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
-            geometryNode->GetFrameSize().Height()));
+            NearZero(paintHeight) ? geometryNode->GetFrameSize().Height() : paintHeight));
     }
 
     std::vector<DimensionRect> responseRegion;
