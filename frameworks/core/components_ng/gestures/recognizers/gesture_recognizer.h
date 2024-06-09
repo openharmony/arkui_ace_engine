@@ -344,7 +344,7 @@ public:
         return true;
     }
 
-    bool IsInAttachedNode(const TouchEvent& event);
+    bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
     
     void SetUserData(void* userData)

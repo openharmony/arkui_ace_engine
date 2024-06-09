@@ -2239,7 +2239,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
-    localMat_ = localMat;
+    if (!touchRestrict.touchEvent.isMouseTouchTest) {
+        localMat_ = localMat;
+    }
     if (param.empty()) {
         translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {

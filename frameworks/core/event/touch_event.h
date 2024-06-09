@@ -96,6 +96,7 @@ struct TouchEvent final : public UIInputEvent {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     bool isInterpolated = false;
+    bool isMouseTouchTest = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;

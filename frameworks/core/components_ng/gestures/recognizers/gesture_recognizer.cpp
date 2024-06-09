@@ -457,7 +457,7 @@ void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureReco
     eventImportGestureGroup_ = gestureGroup;
 }
 
-bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
+bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealTime)
 {
     bool isChildTouchTestResult = false;
     auto frameNode = GetAttachedNode();
@@ -476,8 +476,13 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
     }
 
     PointF localPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
-        isPostEventResult_, event.postEventNodeId);
+    if (isRealTime) {
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
+            isPostEventResult_, event.postEventNodeId);
+    } else {
+        NGGestureRecognizer::Transform(localPoint, frameNode, false,
+            isPostEventResult_, event.postEventNodeId);
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
