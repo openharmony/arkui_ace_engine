@@ -1705,6 +1705,7 @@ private:
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
+    bool previewLongPress_ = false;
 };
 } // namespace OHOS::Ace::NG
 
