@@ -532,4 +532,29 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0016, TestSize.Level1)
      */
     EXPECT_EQ(animatedDrawable->GetIterations(), 1);
 }
+
+/**
+ * @tc.name: DrawableDescTest0017
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawable
+     */
+    auto drawable = Napi::LayeredDrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set param to layeredDrawable
+     */
+    std::shared_ptr<Media::PixelMap> layeredPixelMap;
+    std::shared_ptr<Media::PixelMap> badgedPixelMap;
+    std::shared_ptr<Media::PixelMap> compositePixelMap;
+    bool ret = drawable.GetCompositePixelMapWithBadge(layeredPixelMap, badgedPixelMap, compositePixelMap);
+    /**
+     * @tc.steps: step3. check layeredDrawable result
+     */
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace
