@@ -1463,14 +1463,7 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     auto nodeOffset = info.imageNode->GetTransformRelativeOffset();
     auto renderContext = info.imageNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, 0.0);
-    if (IsNeedScaleDragPreview()) {
-        auto width = renderContext->GetPaintRectWithTransform().Width();
-        nodeOffset.SetX(nodeOffset.GetX() + width / 2.0f);
-        nodeOffset.SetY(nodeOffset.GetY() + preserverHeight.ConvertToPx());
-    } else {
-        nodeOffset.SetX(nodeOffset.GetX() - pixelMapOffset_.GetX());
-        nodeOffset.SetY(nodeOffset.GetY() - pixelMapOffset_.GetY());
-    }
+    nodeOffset -= pixelMapOffset_;
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowScale = GetWindowScale();
     if (pipeline && NearEqual(windowScale, 1.0f)) {
@@ -1486,13 +1479,8 @@ Offset DragDropManager::CalcDragMoveOffset(
 {
     CHECK_NULL_RETURN(info.imageNode, Offset(0.0f, 0.0f));
     auto originPoint = info.imageNode->GetOffsetRelativeToWindow();
-    if (IsNeedScaleDragPreview()) {
-        originPoint.SetX(originPoint.GetX() + 0.5 * (1 - info.scale) * info.width + info.maxWidth / 2);
-        originPoint.SetY(originPoint.GetY() + 0.5 * (1 - info.scale) * info.height + preserverHeight.ConvertToPx());
-    } else {
-        originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
-        originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
-    }
+    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
+    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
     Offset newOffset { x - originPoint.GetX(), y - originPoint.GetY() };
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowScale = GetWindowScale();
