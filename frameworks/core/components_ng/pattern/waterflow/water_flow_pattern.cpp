@@ -500,6 +500,9 @@ void WaterFlowPattern::OnSectionChangedNow(int32_t start)
 
 void WaterFlowPattern::ResetSections()
 {
+    if (!sections_) {
+        return;
+    }
     sections_.Reset();
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;
