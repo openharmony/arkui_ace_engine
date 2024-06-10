@@ -1088,10 +1088,10 @@ void JsiCanvasBridge::ParseDomImage(const shared_ptr<JsRuntime>& runtime, const 
     height = StringToDouble(cHeight);
 
     if (NearZero(width)) {
-        width = StringToDouble(cWidth.substr(0, cWidth.size() - 2)); // remove px units
+        width = StringToDouble(cWidth.substr(0, cWidth.size() - 2)); // 2: remove px units
     }
     if (NearZero(height)) {
-        height = StringToDouble(cHeight.substr(0, cHeight.size() - 2));
+        height = StringToDouble(cHeight.substr(0, cHeight.size() - 2)); // 2: remove px units
     }
 }
 
@@ -1144,7 +1144,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
             image.dHeight = GetJsDoubleVal(runtime, argv[4]);
             break;
         case 9:
-            image.flag = 2;
+            image.flag = 2; // 2: image with scale
             image.sx = GetJsDoubleVal(runtime, argv[1]);
             image.sy = GetJsDoubleVal(runtime, argv[2]);
             image.sWidth = GetJsDoubleVal(runtime, argv[3]);
