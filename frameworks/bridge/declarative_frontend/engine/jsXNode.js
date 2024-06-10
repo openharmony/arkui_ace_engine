@@ -2150,7 +2150,7 @@ class ComponentContent extends Content {
         if (nodeType === "BuilderProxyNode") {
             const result = getUINativeModule().frameNode.getFirstUINode(node);
             this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
-            getUINativeModule().frameNode.clearChildren(node);
+            getUINativeModule().frameNode.removeChild(node, result);
             return result;
         }
         return node;

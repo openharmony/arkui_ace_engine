@@ -101,9 +101,9 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto* childNode = reinterpret_cast<UINode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
