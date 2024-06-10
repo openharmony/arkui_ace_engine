@@ -5152,6 +5152,8 @@ std::string TextFieldPattern::TextInputTypeToString() const
             return IsTextArea() ? "TextAreaType.EMAIL" : "InputType.Email";
         case TextInputType::PHONE:
             return IsTextArea() ? "TextAreaType.PHONE_NUMBER" : "InputType.PhoneNumber";
+        case TextInputType::URL:
+            return IsTextArea() ? "TextAreaType.URL" : "InputType.URL";
         case TextInputType::VISIBLE_PASSWORD:
             return "InputType.Password";
         case TextInputType::USER_NAME:

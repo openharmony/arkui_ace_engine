@@ -1249,6 +1249,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.EMAIL";
         case TextInputType::PHONE:
             return "SearchType.PHONE_NUMBER";
+        case TextInputType::URL:
+            return "SearchType.URL";
         default:
             return "SearchType.NORMAL";
     }
