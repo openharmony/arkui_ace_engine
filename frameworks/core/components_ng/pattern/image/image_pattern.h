@@ -304,6 +304,14 @@ public:
     void OnActive() override
     {
         if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            if (!animator_->HasScheduler()) {
+                auto context = PipelineContext::GetCurrentContext();
+                if (context) {
+                    animator_->AttachScheduler(context);
+                } else {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+                }
+            }
             animator_->Forward();
         }
     }

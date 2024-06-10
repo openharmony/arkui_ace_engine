@@ -719,6 +719,14 @@ void ImagePattern::OnAnimatedModifyDone()
 
 void ImagePattern::ControlAnimation(int32_t index)
 {
+    if (!animator_->HasScheduler()) {
+        auto context = PipelineContext::GetCurrentContext();
+        if (context) {
+            animator_->AttachScheduler(context);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+        }
+    }
     switch (status_) {
         case Animator::Status::IDLE:
             animator_->Cancel();
@@ -1585,7 +1593,7 @@ bool ImagePattern::hasSceneChanged()
 
 void ImagePattern::ImageAnimatorPattern()
 {
-    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    animator_ = CREATE_ANIMATOR();
     animator_->SetFillMode(FillMode::BACKWARDS);
     animator_->SetDuration(DEFAULT_DURATION);
     ResetFormAnimationFlag();
