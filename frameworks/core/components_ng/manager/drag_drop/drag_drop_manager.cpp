@@ -1405,7 +1405,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (!isSubwindowOverlay && !overlayManager->GetHasPixelMap()) {
         return false;
     }
-    auto imageNode = overlayManager->GetPixelMapContentNode(isSubwindowOverlay);
+    auto imageNode = overlayManager->GetPixelMapContentNode(false);
     CHECK_NULL_RETURN(imageNode, false);
     auto badgeNode = overlayManager->GetPixelMapBadgeNode();
     if (badgeNode) {
