@@ -1226,6 +1226,9 @@ int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
         if (InstanceOf<FrameNode>(child)) {
             if (child == node) {
                 return index;
+            } else {
+                index++;
+                continue;
             }
         }
         int32_t childIndex = child->GetFrameNodeIndex(node, isExpanded);
