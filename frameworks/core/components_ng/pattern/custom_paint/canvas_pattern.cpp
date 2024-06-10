@@ -711,15 +711,15 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
 #endif
 }
 
-void CanvasPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
+void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
 #ifndef USE_FAST_TASKPOOL
-    auto task = [grad](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetStrokeGradient(grad);
+    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetStrokeGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
 #else
-    paintMethod_->PushTask<SetStrokeGradientOp>(grad);
+    paintMethod_->PushTask<SetStrokeGradientOp>(gradient);
 #endif
 }
 
@@ -783,11 +783,11 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 #endif
 }
 
-void CanvasPattern::UpdateFillGradient(const Ace::Gradient& gradient)
+void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
 #ifndef USE_FAST_TASKPOOL
-    auto task = [gradient](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillGradient(gradient);
+    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetFillGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
 #else
