@@ -171,7 +171,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
-constexpr Dimension TOOLTIP_FONT_SIZE = 10.0_vp;
+constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_MARGIN = 10.0f;
@@ -748,7 +748,10 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
-    OnTooltip("");
+    auto localLocation = info.GetLocalLocation();
+    if ((mouseHoveredX_ != localLocation.GetX()) || (mouseHoveredY_ != localLocation.GetY())) {
+        OnTooltip("");
+    }
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
@@ -769,7 +772,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
 
-    auto localLocation = info.GetLocalLocation();
     if (!HandleDoubleClickEvent(info)) {
         delegate_->OnMouseEvent(
             localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
@@ -3244,6 +3246,7 @@ void WebPattern::OnTooltip(const std::string& tooltip)
 
     if (tooltipId_ != -1) {
         overlayManager->RemoveIndexerPopupById(tooltipId_);
+        tooltipId_ = -1;
     }
 
     if (tooltip == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
@@ -3281,7 +3284,7 @@ void WebPattern::CloseCustomKeyboard()
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
 {
-    if (tooltipTimestamp_ != tooltipTimestamp) {
+    if ((tooltipTimestamp_ != tooltipTimestamp) || (tooltip == "")) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
