@@ -25,6 +25,16 @@
 
 namespace OHOS::Ace::NG {
 
+struct AvoidStrategyMember {
+    float menuHeight = 0.f;
+    double menuSpacingBetweenText = 0.0;
+    double menuSpacingBetweenHandle = 0.0;
+    double safeSpacing = 0.0;
+    double bottomLimitOffsetY = 0.0;
+    double menuSpacing = 0.0;
+    bool hasKeyboard = false;
+};
+
 class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SelectOverlayLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -82,6 +92,7 @@ private:
     OffsetF NewMenuAvoidStrategy(float menuWidth, float menuHeight);
     void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void CheckHideBackOrMoreButton(const RefPtr<LayoutWrapper>& extensionMenu, const RefPtr<LayoutWrapper>& button);
+    void NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember, float& offsetY);
     bool IsTextAreaSelectAll();
     bool IsReverseLayout(LayoutWrapper* layoutWrapper) const;
 
