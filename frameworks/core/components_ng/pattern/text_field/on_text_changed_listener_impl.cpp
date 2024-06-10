@@ -299,14 +299,17 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
     MiscServices::PanelType panelType = info.panelInfo.panelType;
     bool panelVisible = info.visible;
     MiscServices::Trigger triggerFrom = info.trigger;
-    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible &&
-        triggerFrom == MiscServices::Trigger::IME_APP) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user.");
-        auto task = [textField = pattern_] {
+    if (!isHardKeyboardConnected && panelType == MiscServices::PanelType::SOFT_KEYBOARD && !panelVisible) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo soft keyboard is closed by user, trigger=%{public}d",
+            triggerFrom);
+        auto task = [textField = pattern_, triggerFrom] {
             auto client = textField.Upgrade();
             CHECK_NULL_VOID(client);
             ContainerScope scope(client->GetInstanceId());
-            client->NotifyKeyboardClosedByUser();
+            if (triggerFrom == MiscServices::Trigger::IME_APP) {
+                client->NotifyKeyboardClosedByUser();
+            }
+            client->NotifyKeyboardClosed();
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }

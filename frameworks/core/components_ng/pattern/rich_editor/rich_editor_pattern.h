@@ -341,6 +341,12 @@ public:
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     void NotifyKeyboardClosedByUser() override
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosedByUser");
+        FocusHub::LostFocusToViewRoot();
+    }
+    void NotifyKeyboardClosed() override
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         FocusHub::LostFocusToViewRoot();
     }
     void ClearOperationRecords();
