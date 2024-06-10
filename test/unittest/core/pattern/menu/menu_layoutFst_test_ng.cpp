@@ -1294,6 +1294,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg032, TestSize.Level1)
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
 {
     // create parent menu item
+    MockPipelineContextGetTheme();
     auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
     auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
     // set parent item size
@@ -1321,13 +1322,13 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), TARGET_SIZE_WIDTH);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
