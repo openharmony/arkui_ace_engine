@@ -1062,7 +1062,7 @@ void MenuItemPattern::PlayBgColorAnimation(bool isHoverChange)
     });
 }
 
-void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_)
+void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1072,16 +1072,16 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
         Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         // iamge -> symbol
-        row->RemoveChild(selectIcon_);
-        selectIcon_ = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        row->RemoveChild(selectIcon);
+        selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
-        auto props = selectIcon_->GetLayoutProperty<TextLayoutProperty>();
+        auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
         props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
-        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon_)));
+        symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon)));
     } else {
         // image -> image
         auto iconTheme = pipeline->GetTheme<IconTheme>();
@@ -1092,19 +1092,19 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         CHECK_NULL_VOID(selectTheme);
         ImageSourceInfo imageSourceInfo;
         imageSourceInfo.SetSrc(iconPath);
-        auto props = selectIcon_->GetLayoutProperty<ImageLayoutProperty>();
+        auto props = selectIcon->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        UpdateIconSrc(selectIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        UpdateIconSrc(selectIcon, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
             selectTheme->GetMenuIconColor(), userIcon.empty());
     }
 }
 
-void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_)
+void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto props = selectIcon_->GetLayoutProperty<TextLayoutProperty>();
+    auto props = selectIcon->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
@@ -1116,7 +1116,7 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         props->UpdateFontSize(selectTheme->GetEndIconWidth());
         props->UpdateSymbolColorList({ selectTheme->GetMenuIconColor() });
         if (symbol) {
-            symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon_)));
+            symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(selectIcon)));
         } else {
             auto menuTheme = pipeline->GetTheme<MenuTheme>();
             CHECK_NULL_VOID(menuTheme);
@@ -1125,16 +1125,16 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
         }
     } else {
         // symbol -> image
-        row->RemoveChild(selectIcon_);
-        selectIcon_ = FrameNode::CreateFrameNode(
+        row->RemoveChild(selectIcon);
+        selectIcon = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         ImageSourceInfo imageSourceInfo;
         auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
         imageSourceInfo.SetSrc(userIcon);
-        auto props = selectIcon_->GetLayoutProperty<ImageLayoutProperty>();
+        auto props = selectIcon->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        UpdateIconSrc(selectIcon_, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        UpdateIconSrc(selectIcon, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
             selectTheme->GetMenuIconColor(), userIcon.empty());
     }
 }
