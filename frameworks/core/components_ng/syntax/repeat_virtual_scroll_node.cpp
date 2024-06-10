@@ -57,7 +57,7 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
-          caches_(/* FIXME hard coded L2 size */ 3, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range)
+          caches_(templateCacheCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range)
     {
         // no precut task scheduled
         postUpdateTaskHasBeenScheduled_ = false;
@@ -68,11 +68,16 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end)
     // FIXME lijunfeng  , yeyinglong:  can you advise how to enable LOGD output ? We are not using DevEco but use hilog directly?
     LOGE("DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d", (int)GetId(), (int)start,
         (int)end);
+
+    // memorize active range
+    caches_.setLastActiveRange((uint32_t)start, (uint32_t)end);
+
     caches_.forEachL1IndexUINode([&](int32_t index, RefPtr<UINode> node) -> void {
         if (node == nullptr) {
             return;
         }
         // leads to infinite loop GetFrameChildByIndex(0, true, false, false ));
+        // TBD: from  @yeyinglong: (node->GetFirstChild() obtains the child node of ListItem, not LisItem
         auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFirstChild());
         if (frameNode) {
             // DoSetActiveChildRange uses int32_t , while other functions use uint32_t

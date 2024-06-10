@@ -28,16 +28,19 @@ bool KeySorterClass::operator()(const std::string& a, const std::string& b) cons
     return thiz_->cmpKeyByIndexDistance(a, b);
 }
 
-RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const uint32_t l2_cacheCount,
+RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
+    const std::map<std::string, uint32_t>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
-    : // request TS to create new sub-tree for given index or update existing
+    : // each ttype incl default has own L2 cache size
+      cacheCountL24ttype_(cacheCountL24ttype),
+      // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // FIXME API might need to change to tell which old item to update
-      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode), onGetTypes4Range_(onGetTypes4Range),
-      onGetKeys4Range_(onGetKeys4Range)
+      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode),
+      onGetTypes4Range_(onGetTypes4Range),onGetKeys4Range_(onGetKeys4Range)
 {}
 
 std::pair<bool, std::string> RepeatVirtualScrollCaches::getKey4Index(uint32_t index)
@@ -136,7 +139,7 @@ void RepeatVirtualScrollCaches::invalidateKeyAndTTypeCaches()
     // should be packed. If key is not in the reverse map then
     // its UINode is subject to update.
     //
-    FetchMoreKeysTTypes(lastActiveRange_.first, lastActiveRange_.second);
+    FetchMoreKeysTTypes(lastActiveRanges_[0].first, lastActiveRanges_[0].second);
 }
 
 /**
@@ -283,6 +286,13 @@ void RepeatVirtualScrollCaches::rebuildL1(std::function<bool(std::string key, Re
     }
 }
 
+/**/
+void RepeatVirtualScrollCaches::setLastActiveRange(uint32_t from, uint32_t to)
+{
+    lastActiveRanges_[1] = lastActiveRanges_[0];
+    lastActiveRanges_[0] = { from, to };
+}
+
 /**
          * intended scenario: scroll
          * servicing GetFrameChild, search for key that can be updated.
@@ -414,8 +424,9 @@ bool RepeatVirtualScrollCaches::purge()
         // will drop those keys and their UINodes with largest distance
         // improvement idea: in addition to distance from range use the
         // scroll direction for selecting these keys
-        std::set<std::string>::iterator itL2Key = l2_keys.begin();
-        std::advance(itL2Key, cacheCount);
+        auto safeDist = std::min(cacheCount, static_cast<uint32_t>(l2_keys.size()));
+        auto itL2Key = std::next(l2_keys.begin(), safeDist);
+
         while (itL2Key != l2_keys.end()) {
             // delete remaining keys
             uiNode4Key.erase(*itL2Key);
@@ -463,9 +474,37 @@ uint32_t RepeatVirtualScrollCaches::getIndex4Key2(const std::string& key) const
          */
 int32_t RepeatVirtualScrollCaches::distFromRange(uint32_t index) const
 {
-    return index < lastActiveRange_.first     ? lastActiveRange_.first - index
-           : index <= lastActiveRange_.second ? 0
-                                              : index - lastActiveRange_.second;
+    int32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
+    int32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
+
+    // this is experimental optimization, based on scrolling detection
+    // here we assume this is a scrolling, if previous range and last range has
+    // not empty intersection
+
+    // if scrolling up, return 0 for any lower index
+    if (last[0] < prev[0] && prev[0] < last[1]) {
+        if (index < last[0]) {
+            return 0;
+        }
+    }
+
+    // if scrolling down, return 0 for any greater index
+    if (last[0] < prev[1] && prev[1] < last[1]) {
+        if (index > last[1]) {
+            return 0;
+        }
+    }
+
+    // this is not scrolling
+    if (index < last[0]) {
+        return last[0] - index;
+    }
+
+    if (index > last[1]) {
+        return index - last[1];
+    }
+
+    return 0;
 }
 
 /**

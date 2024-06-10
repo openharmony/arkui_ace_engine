@@ -56,7 +56,9 @@ public:
     std::pair<bool, std::string> getKey4Index(uint32_t index);
 
 public:
-    RepeatVirtualScrollCaches(const uint32_t l2_cacheCount, const std::function<void(uint32_t)>& onCreateNode,
+    RepeatVirtualScrollCaches(
+        const std::map<std::string, uint32_t>& cacheCountL24ttype,
+        const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
@@ -167,10 +169,10 @@ public:
         l1_activeNodeKeys_.emplace(key);
     }
 
-     void MemorizeActiveRange(uint32_t from, uint32_t to) {
-          lastActiveRange_.first = from; 
-          lastActiveRange_.second = to;
-     }
+    /**
+     * memorize last active range(s)
+     */
+    void setLastActiveRange(uint32_t from, uint32_t to);
 
 private:
     /**
@@ -227,8 +229,8 @@ public:
     const std::string dumpUINode(const RefPtr<UINode>& node) const;
 
 private:
-    // FIXME each ttype incl default has own L2 size
-    // uint32_t l2CacheCount_;
+    // Map ttype -> cacheSize. Each ttype incl default has own L2 size
+    std::map<std::string, uint32_t> cacheCountL24ttype_;
 
     // request TS to create new sub-tree for given index or update existing
     // update subtree cached for (old) index
@@ -244,9 +246,9 @@ private:
     // resulting list starts with 'from' but might end before 'to' if Array shorter
     std::function<std::list<std::string>(uint32_t, uint32_t)> onGetKeys4Range_;
 
-     // TODO Denis: memorize active ranges of past 2 
-     // SetActiveRange calls and use to calc scroll direction
-    std::pair<uint32_t, uint32_t> lastActiveRange_;
+    // memorize active ranges of past 2 (last, prev)
+    // SetActiveRange calls and use to calc scroll direction
+    std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { {0, 0}, {0, 0} };
 
     // keys of active nodes, UINodes must be on the render tree, 
     // this list is also known as L1
@@ -263,9 +265,6 @@ private:
     // lazy request from TS side can be invalidated
     std::map<uint32_t, std::string> ttype4index_;
     std::map<std::string, uint32_t> index4ttype_;
-
-    // Map ttype -> cacheSize
-    std::map<std::string, uint32_t> cacheCountL24ttype_;
 
     // Map ttype -> Map key -> UINode
     std::map<std::string, std::map<std::string, RefPtr<UINode>>> node4key4ttype_;

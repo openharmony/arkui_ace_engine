@@ -49,6 +49,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+
     ~RepeatVirtualScrollNode() override = default;
 
     void UpdateTotalCount(int32_t totalCount)
