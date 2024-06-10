@@ -169,6 +169,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
         //console.log('__RepeatV2.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
+        this.config.templateOptions[''] = { ...this.defaultTemplateOptions() };
         return this;
     }
 
@@ -200,12 +201,12 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     {
         //console.log('__RepeatV2.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = options ?? {};
-        this.config.templateOptions[type].cacheCount ??= 0;
+        this.config.templateOptions[type] = { ...this.defaultTemplateOptions(), ...options };
         return this;
     }
 
     public updateArr(arr: Array<T>): RepeatAPI<T> {
+        //console.log('__RepeatV2.updateArr()')
         this.config.arr = arr ?? [];
         return this;
     }
@@ -229,6 +230,11 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     public onMove(handler: OnMoveHandler): RepeatAPI<T> {
         this.config.onMoveHandler = handler;
         return this;
+    }
+
+    private defaultTemplateOptions (): RepeatTemplateOptions {
+        // TBD
+        return { cacheCount: 3 };
     }
 
     protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
