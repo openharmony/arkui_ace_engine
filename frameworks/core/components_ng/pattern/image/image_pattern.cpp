@@ -576,7 +576,10 @@ void ImagePattern::CreateObscuredImage()
 
 void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
 {
-    ContainerScope scope(GetHostInstanceId());
+    auto instanceId = GetHostInstanceId();
+    if (instanceId) {
+        ContainerScope scope(instanceId);
+    }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
