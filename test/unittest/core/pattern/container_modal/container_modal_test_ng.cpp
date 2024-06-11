@@ -75,8 +75,9 @@ void ContainerModelTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_CONTAINER_MODAL);
+    auto containerModalTheme = ContainerModalTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(containerModalTheme));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 

@@ -98,8 +98,12 @@ void PatternLockTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+    auto patternLockThemeConstants = CreateThemeConstants(THEME_PATTERN_PATTERN_LOCK);
+    auto patternLockTheme = V2::PatternLockTheme::Builder().Build(patternLockThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(V2::PatternLockTheme::TypeId())).WillRepeatedly(Return(patternLockTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
@@ -415,8 +419,9 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest005, TestSize.Level1)
     EXPECT_EQ(pattern_->choosePoint_.size(), 1);
     EXPECT_TRUE(result4);
 
-    offsetX = 150.0f;
-    offsetY = 150.0f;
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(400.f, 400.f));
+    offsetX = 200.f;
+    offsetY = 200.f;
     offset.SetX(offsetX);
     offset.SetY(offsetY);
     EXPECT_FALSE(pattern_->CheckChoosePoint(2, 2));

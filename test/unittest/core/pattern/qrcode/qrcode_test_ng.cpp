@@ -30,6 +30,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_bitmap.h"
 #include "test/mock/core/rosen/testing_canvas.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -65,7 +66,7 @@ constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
 
-class QRCodeTestNg : public testing::Test {
+class QRCodeTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -73,15 +74,17 @@ public:
 
 void QRCodeTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<QrcodeTheme>()));
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_QRCODE);
+    auto qrcodeTheme = QrcodeTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(qrcodeTheme));
 }
 
 void QRCodeTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 /**

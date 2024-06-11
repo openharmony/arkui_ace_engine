@@ -20,13 +20,13 @@ namespace {
 constexpr float BAR_WIDTH = 10.f;
 } // namespace
 
-class ScrolleBarTestNg : public ScrollTestNg {
+class ScrollBarTestNg : public ScrollTestNg {
 public:
     void CreateWithBar();
     void ClickBar(Offset point);
 };
 
-void ScrolleBarTestNg::CreateWithBar()
+void ScrollBarTestNg::CreateWithBar()
 {
     CreateWithContent([](ScrollModelNG model) {
         model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
@@ -35,7 +35,7 @@ void ScrolleBarTestNg::CreateWithBar()
     scrollBar_ = pattern_->GetScrollBar();
 }
 
-void ScrolleBarTestNg::ClickBar(Offset point)
+void ScrollBarTestNg::ClickBar(Offset point)
 {
     GestureEvent info;
     info.SetLocalLocation(point);
@@ -47,7 +47,7 @@ void ScrolleBarTestNg::ClickBar(Offset point)
  * @tc.desc: Test CheckBarDirection by HandleClickEvent, component will scroll by click bar
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ClickBar001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ClickBar001, TestSize.Level1)
 {
     CreateWithBar();
     EXPECT_TRUE(IsEqual(scrollBar_->GetTouchRegion(), Rect(470.f, 0.f, 10.f, 640.f)));
@@ -89,7 +89,7 @@ HWTEST_F(ScrolleBarTestNg, ClickBar001, TestSize.Level1)
  * @tc.desc: Test handleDrag
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, HandleDrag001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, HandleDrag001, TestSize.Level1)
 {
     CreateWithBar();
     auto HandleDragStart = *(scrollBar_->panRecognizer_->onActionStart_);
@@ -150,7 +150,7 @@ HWTEST_F(ScrolleBarTestNg, HandleDrag001, TestSize.Level1)
  * @tc.desc: Test OnCollectTouchTarget
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
 {
     CreateWithBar();
     OffsetF coordinateOffset;
@@ -167,7 +167,7 @@ HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
  * @tc.desc: Test HandleDragUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, HandleDragUpdate001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
 {
     CreateWithBar();
     GestureEvent info;
@@ -185,7 +185,7 @@ HWTEST_F(ScrolleBarTestNg, HandleDragUpdate001, TestSize.Level1)
  * @tc.desc: Test ScrollBar Hover Animation
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
@@ -257,7 +257,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation001, TestSize.Level1)
  * @tc.desc: Test ScrollBar Opacity Animation
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBarAnimation002, TestSize.Level1)
 {
     Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -315,7 +315,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
  * @tc.desc: Test ScrollBar Adapt Animation
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation003, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBarAnimation003, TestSize.Level1)
 {
     Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -346,7 +346,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation003, TestSize.Level1)
  * @tc.desc: Test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation004, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBarAnimation004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. BarWidth is 0
@@ -381,7 +381,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation004, TestSize.Level1)
  * @tc.desc: Test UpdateScrollBarRegion function in ScrollBar under different conditions.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. When the ShapeMode is RECT and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
@@ -464,7 +464,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar001, TestSize.Level1)
  * @tc.desc: Test SetGestureEvent() / SetMouseEvent() / SetHoverEvent()
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar002, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Touch in bar
@@ -627,7 +627,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar002, TestSize.Level1)
  * @tc.desc: Test bar rect
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar003, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Test Bar in VERTICAL
@@ -672,7 +672,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar003, TestSize.Level1)
  * @tc.desc: Test ScrollBar
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar004, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar004, TestSize.Level1)
 {
     const float barWidth = 10.f;
     CreateWithContent([barWidth](ScrollModelNG model) { model.SetScrollBarWidth(Dimension(barWidth)); });
@@ -712,7 +712,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar004, TestSize.Level1)
  * @tc.desc: Test CalcReservedHeight()
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar005, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar005, TestSize.Level1)
 {
     CreateWithContent();
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -753,7 +753,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar005, TestSize.Level1)
  * @tc.desc: Test scrollbar width
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar006, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Not set bar width
@@ -799,7 +799,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar006, TestSize.Level1)
  * @tc.desc: when IsPressed is true, can not trigger scrollstart event
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar007, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar007, TestSize.Level1)
 {
     bool isTrigger = false;
     CreateWithContent([&isTrigger](ScrollModelNG model) {
@@ -832,7 +832,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar007, TestSize.Level1)
  * @tc.desc: when IsPressed is false, can trigger scrollstart event
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar008, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar008, TestSize.Level1)
 {
     bool isTrigger = false;
     CreateWithContent([&isTrigger](ScrollModelNG model) {
@@ -865,7 +865,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar008, TestSize.Level1)
  * @tc.desc: Test scrollbar width.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, ScrollBar009, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, ScrollBar009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create scroll model and set the width, height
@@ -927,7 +927,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBar009, TestSize.Level1)
  * @tc.desc: Test attribute about scrollBar,
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, AttrScrollBar001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, AttrScrollBar001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Text default value: AUTO
@@ -953,7 +953,7 @@ HWTEST_F(ScrolleBarTestNg, AttrScrollBar001, TestSize.Level1)
  * @tc.desc: Test attribute about scrollBarColor/scrollBarWidth,
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Text default value: [color:foregroundColor_, width: 4]
