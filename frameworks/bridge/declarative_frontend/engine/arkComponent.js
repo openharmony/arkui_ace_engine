@@ -6424,6 +6424,20 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('analyzerConfig');
 
+class ImageOnCompleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetOnComplete(node);
+    } else {
+      getUINativeModule().image.setOnComplete(node, this.value);
+    }
+  }
+}
+ImageOnCompleteModifier.identity = Symbol('imageOnComplete');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6508,7 +6522,8 @@ class ArkImageComponent extends ArkComponent {
     return this;
   }
   onComplete(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, callback);
+    return this;
   }
   onError(callback) {
     throw new Error('Method not implemented.');

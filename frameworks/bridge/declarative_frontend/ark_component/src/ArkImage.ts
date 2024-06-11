@@ -585,7 +585,39 @@ class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
     !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
-
+class ImageOnCompleteModifier extends ModifierWithKey<(event?: {
+  width: number;
+  height: number;
+  componentWidth: number;
+  componentHeight: number;
+  loadingStatus: number;
+  contentWidth: number;
+  contentHeight: number;
+  contentOffsetX: number;
+  contentOffsetY: number;
+}) => void> {
+  constructor(value: (event?: {
+    width: number;
+    height: number;
+    componentWidth: number;
+    componentHeight: number;
+    loadingStatus: number;
+    contentWidth: number;
+    contentHeight: number;
+    contentOffsetX: number;
+    contentOffsetY: number;
+  }) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageOnComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnComplete(node);
+    } else {
+      getUINativeModule().image.setOnComplete(node, this.value);
+    }
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -689,7 +721,8 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       contentOffsetY: number;
     }) => void,
   ): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, value);
+    return this;
   }
 
   onError(callback: (event: {

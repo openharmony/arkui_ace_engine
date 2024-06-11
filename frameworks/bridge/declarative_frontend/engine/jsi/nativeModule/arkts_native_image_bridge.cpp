@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
 
@@ -837,6 +838,57 @@ ArkUINativeModuleValue ImageBridge::AnalyzerConfig(ArkUIRuntimeCallInfo* runtime
     Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     GetArkUINodeModifiers()->getImageModifier()->analyzerConfig(nativeNode, nativeValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue ImageBridge::SetOnComplete(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+        GetArkUINodeModifiers()->getImageModifier()->setOnComplete(nativeNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(LoadImageSuccessEvent&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](LoadImageSuccessEvent& event) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const char* keys[] = { "width", "height", "componentWidth", "componentHeight", "loadingStatus", "contentWidth",
+            "contentHeight", "contentOffsetX", "contentOffsetY" };
+        Local<JSValueRef> values[] = {
+            panda::NumberRef::New(vm, event.GetWidth()),
+            panda::NumberRef::New(vm, event.GetHeight()),
+            panda::NumberRef::New(vm, event.GetComponentWidth()),
+            panda::NumberRef::New(vm, event.GetComponentHeight()),
+            panda::NumberRef::New(vm, event.GetLoadingStatus()),
+            panda::NumberRef::New(vm, event.GetContentWidth()),
+            panda::NumberRef::New(vm, event.GetContentHeight()),
+            panda::NumberRef::New(vm, event.GetContentOffsetX()),
+            panda::NumberRef::New(vm, event.GetContentOffsetY())
+        };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        eventObject->SetNativePointerFieldCount(vm, 1);
+        eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
+        panda::Local<panda::JSValueRef> params[1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getImageModifier()->setOnComplete(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetOnComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageModifier()->setOnComplete(nativeNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
