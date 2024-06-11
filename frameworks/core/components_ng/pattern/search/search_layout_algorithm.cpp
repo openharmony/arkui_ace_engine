@@ -645,6 +645,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
 {
     auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
     auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto borderWidth = params.searchTheme->GetBorderWidth().ConvertToPx();
 
     auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_VOID(cancelButtonWrapper);
@@ -678,7 +679,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
         } else {
-            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth;
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - borderWidth;
         }
     }
     auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
