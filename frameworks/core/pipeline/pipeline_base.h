@@ -104,6 +104,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContextSafely();
 
+    static RefPtr<PipelineBase> GetCurrentContextSafelyWithCheck();
+
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
     static RefPtr<ThemeManager> CurrentThemeManager();
