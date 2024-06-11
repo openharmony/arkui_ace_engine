@@ -115,12 +115,6 @@ void CalendarPattern::OnModifyDone()
             initialize_ = false;
         }
         InitSwiperChangeDoneEvent();
-        for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
-            auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
-            CHECK_NULL_VOID(calenderMonthFrameNode);
-            calenderMonthFrameNode->MarkModifyDone();
-            calenderMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
         return;
     }
 
@@ -219,6 +213,15 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
         }
     };
     swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
+    for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
+        auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
+        CHECK_NULL_VOID(calenderMonthFrameNode);
+        auto monthLayoutProperty = calenderMonthFrameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(monthLayoutProperty);
+        monthLayoutProperty->UpdateLayoutDirection(textDirection);
+        calenderMonthFrameNode->MarkModifyDone();
+        calenderMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void CalendarPattern::FireFirstRequestData()
