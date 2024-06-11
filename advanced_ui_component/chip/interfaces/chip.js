@@ -1069,9 +1069,6 @@ export class ChipComponent extends ViewPU {
         else {
             l3 = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor;
         }
-        if (!this.isShowPressedBackGroundColor) {
-            return l3;
-        }
         let m3;
         try {
             m3 = ColorMetrics.resourceColor(l3);
@@ -1084,6 +1081,9 @@ export class ChipComponent extends ViewPU {
             else {
                 m3 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
             }
+        }
+        if (!this.isShowPressedBackGroundColor) {
+            return m3.color;
         }
         return m3.blendColor(ColorMetrics.resourceColor("#19000000"))
             .color;

@@ -625,7 +625,7 @@ export struct ChipComponent {
       }
     }
     if (!this.isShowPressedBackGroundColor) {
-      return sourceColor
+      return sourceColor.color
     }
 
     return sourceColor
