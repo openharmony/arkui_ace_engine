@@ -61,6 +61,7 @@ public:
         bool needLineHighest));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
+    MOCK_METHOD1(SetParagraphBuild, void(bool firstBuild));
 #ifndef USE_ROSEN_DRAWING
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
 #endif

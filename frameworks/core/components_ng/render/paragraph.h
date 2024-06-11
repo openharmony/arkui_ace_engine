@@ -124,6 +124,8 @@ struct ParagraphStyle {
     Dimension lineHeight;
     Dimension indent;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+    bool isSymbolGlyphActive = false;
+    bool firstBuild = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -248,6 +250,7 @@ public:
     virtual void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) = 0;
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
+    virtual void SetParagraphBuild(bool firstBuild) = 0;
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif

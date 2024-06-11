@@ -311,6 +311,8 @@ bool TextLayoutAlgorithm::CreateParagraph(
 
     // SymbolGlyph
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        paraStyle.firstBuild = true;
+        paraStyle.isSymbolGlyphActive = textStyle.GetSymbolEffectOptions()->GetIsTxtActive();
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
     if (spans_.empty() || useExternalParagraph) {
