@@ -96,6 +96,7 @@ private:
     static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
         const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary = false);
     static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool IsSwitchByTitle = false);
+    static void HideContentChildrenButton(const RefPtr<FrameNode>& contentRow);
     static void SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary = false);
     static void ShowContentRowButton(const RefPtr<FrameNode>& contentRow, bool isFirstPage = true);
     static void CreateAndAddTitleClickEvent(
@@ -113,6 +114,7 @@ private:
         const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(
         const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateNextButtonMargin(const RefPtr<ButtonLayoutProperty>& buttonNextLayoutProperty);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
