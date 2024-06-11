@@ -1255,15 +1255,17 @@ inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
     return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
 }
 
-void Scrollable::OnCollectTouchTarget(
-    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     if (panRecognizerNG_) {
         panRecognizerNG_->SetNodeId(frameNode->GetId());
         panRecognizerNG_->AttachFrameNode(frameNode);
         panRecognizerNG_->SetTargetComponent(targetComponent);
         panRecognizerNG_->SetIsSystemGesture(true);
+        panRecognizerNG_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_back(panRecognizerNG_);
+        responseLinkResult.emplace_back(panRecognizerNG_);
     }
 }
 } // namespace OHOS::Ace::NG

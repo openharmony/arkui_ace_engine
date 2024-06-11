@@ -52,6 +52,8 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 
@@ -913,6 +915,23 @@ void ResetTextSelection(ArkUINodeHandle node)
     TextModelNG::SetTextSelection(frameNode, DEFAULT_SELECTION, DEFAULT_SELECTION);
 }
 
+void SetTextSelectableMode(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textSelectableMode < 0 || textSelectableMode >= TEXT_SELECTABLE_MODE.size()) {
+        textSelectableMode = 0;
+    }
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[textSelectableMode]);
+}
+
+void ResetTextSelectableMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[0]);
+}
+
 void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1071,6 +1090,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextContentWithStyledString,
         SetTextSelection,
         ResetTextSelection,
+        SetTextSelectableMode,
+        ResetTextSelectableMode,
         SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent,
         SetTextOnCopy,

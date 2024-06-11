@@ -117,6 +117,12 @@ void UINode::DetachContext(bool recursive)
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(child);
+    if (isProhibitedAddChildNode_) {
+        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d)",
+            GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         return;
@@ -277,6 +283,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         }
         ++index;
     }
+
     if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
         children_.clear();
     }
@@ -640,6 +647,14 @@ void UINode::OnAttachToMainTree(bool)
     useOffscreenProcess_ = false;
 }
 
+void UINode::UpdateGeometryTransition()
+{
+    auto children = GetChildren();
+    for (const auto& child: children) {
+        child->UpdateGeometryTransition();
+    }
+}
+
 bool UINode::IsAutoFillContainerNode()
 {
     return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
@@ -763,6 +778,33 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
     }
 }
 
+void UINode::GenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    if (disappearingChildren_.empty()) {
+        // normal child
+        for (const auto& child : GetChildren()) {
+            child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+        }
+        return;
+    }
+    // generate the merged list of children_ and disappearingChildren_
+    auto allChildren = GetChildren();
+    for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
+        auto& [disappearingChild, index] = *iter;
+        if (index >= allChildren.size()) {
+            allChildren.emplace_back(disappearingChild);
+        } else {
+            auto insertIter = allChildren.begin();
+            std::advance(insertIter, index);
+            allChildren.insert(insertIter, disappearingChild);
+        }
+    }
+    for (const auto& child : allChildren) {
+        child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+    }
+}
+
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
     for (const auto& child : GetChildren()) {
@@ -786,14 +828,14 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr()
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    bool isDispatch)
+    TouchTestResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult =
-            child->TouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId);
+        auto hitResult = child->TouchTest(
+            globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId, responseLinkResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -849,6 +891,15 @@ int32_t UINode::TotalChildCount() const
     int32_t count = 0;
     for (const auto& child : GetChildren()) {
         count += child->FrameCount();
+    }
+    return count;
+}
+
+int32_t UINode::CurrentFrameCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->CurrentFrameCount();
     }
     return count;
 }
@@ -1076,6 +1127,12 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     GenerateOneDepthVisibleFrameWithTransition(visibleList);
 }
 
+void UINode::OnGenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+}
+
 bool UINode::RemoveImmediately() const
 {
     auto children = GetChildren();
@@ -1150,7 +1207,19 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
+{
+    for (const auto& child : GetChildren()) {
+        uint32_t count = static_cast<uint32_t>(child->CurrentFrameCount());
+        if (count > index) {
+            return child->GetFrameChildByIndexWithoutExpanded(index);
+        }
+        index -= count;
+    }
+    return nullptr;
+}
+
+int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {
@@ -1158,14 +1227,15 @@ int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
             if (child == node) {
                 return index;
             } else {
-                return -1;
+                index++;
+                continue;
             }
         }
-        int32_t childIndex = child->GetFrameNodeIndex(node);
+        int32_t childIndex = child->GetFrameNodeIndex(node, isExpanded);
         if (childIndex >= 0) {
             return index + childIndex;
         }
-        index += child->FrameCount();
+        index += isExpanded ? child->FrameCount() : child->CurrentFrameCount();
     }
     return -1;
 }

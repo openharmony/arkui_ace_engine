@@ -132,4 +132,13 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
     return nullptr;
 }
 
+void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
+{
+    mode_ = mode;
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    context->SetMode(mode);
+}
 } // namespace OHOS::Ace::NG

@@ -57,12 +57,25 @@ void TitleBarLayoutAlgorithm::BackButtonLayout(const RefPtr<FrameNode>& backButt
 {
     auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(backIconWidth_),
-        CalcLength(backIconHeight_)));
+    auto menuPadding = MENU_BUTTON_PADDING;
+    if (backButtonImageNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(backIconWidth_), CalcLength(backIconHeight_)));
+    } else if (backButtonImageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = backButtonImageNode->GetLayoutProperty<TextLayoutProperty>();
+        auto symbolSourceInfo = symbolProperty->GetSymbolSourceInfo();
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        if (symbolSourceInfo.has_value() && symbolSourceInfo.value().GetUnicode() == theme->GetBackSymbolId()) {
+            menuPadding = BACK_BUTTON_SYMBOL_PADDING;
+        }
+    }
+
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+    padding.SetEdges(CalcLength(menuPadding), CalcLength(menuPadding), CalcLength(MENU_BUTTON_PADDING),
+        CalcLength(MENU_BUTTON_PADDING));
     buttonLayoutProperty->UpdatePadding(padding);
 }
 
@@ -887,6 +900,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto isCustomMenu = false;
     if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) != TitleBarParentType::NAV_DESTINATION) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
         isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
     } else {
         isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);

@@ -31,6 +31,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
+} // namespace
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -56,12 +59,18 @@ void CalendarPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto hostNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto hostLayoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto textDirection = hostLayoutProperty->GetNonAutoLayoutDirection();
     auto swiperNode = host->GetChildren().front();
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(swiperEventHub);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateLayoutDirection(textDirection);
     auto calendarEventHub = host->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(calendarEventHub);
     if (swiperFrameNode->GetChildren().size() < 3) {
@@ -105,31 +114,11 @@ void CalendarPattern::OnModifyDone()
         } else {
             initialize_ = false;
         }
-        auto requestDataCallBack = [weak = WeakClaim(this),
-                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto swiperEventHub = swiperEventHubWeak.Upgrade();
-            CHECK_NULL_VOID(swiperEventHub);
-            auto direction = swiperEventHub->GetDirection();
-            if (direction == NG::Direction::NEXT) {
-                pattern->FireRequestData(MonthState::NEXT_MONTH);
-                pattern->SetMoveDirection(NG::Direction::NEXT);
-            } else {
-                pattern->FireRequestData(MonthState::PRE_MONTH);
-                pattern->SetMoveDirection(NG::Direction::PRE);
-            }
-        };
-        swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
-        for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
-            auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
-            CHECK_NULL_VOID(calenderMonthFrameNode);
-            calenderMonthFrameNode->MarkModifyDone();
-            calenderMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
+        InitSwiperChangeDoneEvent();
         return;
     }
 
+    InitSwiperChangeDoneEvent();
     // Check JumpTo and BackToToday function.
     if (backToToday_ || goTo_) {
         JumpTo(preFrameNode, currentFrameNode, nextFrameNode, swiperFrameNode);
@@ -181,6 +170,57 @@ void CalendarPattern::OnModifyDone()
         }
         default:
             return;
+    }
+}
+
+void CalendarPattern::InitSwiperChangeDoneEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto hostLayoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto textDirection = hostLayoutProperty->GetNonAutoLayoutDirection();
+
+    auto swiperNode = host->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
+    CHECK_NULL_VOID(swiperFrameNode);
+    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    auto requestDataCallBack = [weak = WeakClaim(this), textDirection,
+                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto swiperEventHub = swiperEventHubWeak.Upgrade();
+        CHECK_NULL_VOID(swiperEventHub);
+        auto direction = swiperEventHub->GetDirection();
+        if (textDirection == TextDirection::RTL && !pattern->isClickEvent_) {
+            if (direction == NG::Direction::NEXT) {
+                direction = NG::Direction::PRE;
+            } else {
+                direction = NG::Direction::NEXT;
+            }
+        }
+        pattern->isClickEvent_ = false;
+        if (direction == NG::Direction::NEXT) {
+            pattern->FireRequestData(MonthState::NEXT_MONTH);
+            pattern->SetMoveDirection(NG::Direction::NEXT);
+        } else {
+            pattern->FireRequestData(MonthState::PRE_MONTH);
+            pattern->SetMoveDirection(NG::Direction::PRE);
+        }
+    };
+    swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
+    for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
+        auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
+        CHECK_NULL_VOID(calenderMonthFrameNode);
+        auto monthLayoutProperty = calenderMonthFrameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(monthLayoutProperty);
+        monthLayoutProperty->UpdateLayoutDirection(textDirection);
+        calenderMonthFrameNode->MarkModifyDone();
+        calenderMonthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -375,6 +415,24 @@ void CalendarPattern::UpdateTitleNode()
     date.year = currentMonth_.year;
     date.month = currentMonth_.month - 1; // W3C's month start from 0 to 11
     textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
+
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSizeScale = pipelineContext->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    } else {
+        textLayoutProperty->UpdateMaxLines(2);
+        if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
+            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargerFontSize());
+        } else {
+            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargeFontSize());
+        }
+    }
+
     textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     textTitleNode->MarkModifyDone();
 }

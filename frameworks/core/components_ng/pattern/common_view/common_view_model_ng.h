@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CommonViewModelNG : public OHOS::Ace::CommonViewModel {
 public:
-    void Create() override;
+    void Create(bool isLayoutNode) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG

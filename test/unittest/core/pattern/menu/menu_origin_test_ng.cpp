@@ -106,6 +106,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
     void InitMenuTestNg();
     void InitMenuItemTestNg();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
@@ -141,6 +142,23 @@ void MenuTestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+}
+
+void MenuTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 void MenuTestNg::InitMenuTestNg()
@@ -646,6 +664,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -712,6 +731,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg012, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgCreate001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -748,6 +768,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgCreate002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
@@ -833,6 +854,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate004, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -858,6 +880,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -882,6 +905,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize002, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -904,6 +928,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontSize003, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -929,6 +954,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -951,6 +977,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor002, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -978,6 +1005,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontColor003, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -1003,6 +1031,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight001, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuViewTestNgSetFontWeight002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuModelNG MneuModelInstance;
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
@@ -1029,6 +1058,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement001, TestSize.Level1)
      * @tc.steps: step1. create menuWrapperNode with menuItems and set MenuPlacement to Placement::TOP
      * @tc.expected: step1. Get menuPlacement is Placement::TOP
      */
+    MockPipelineContextGetTheme();
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
@@ -1411,9 +1441,6 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
     EXPECT_FALSE(previewPattern->isFirstShow_);
     auto gestureHub = previewNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    auto panEventActuator = gestureHub->panEventActuator_;
-    ASSERT_NE(panEventActuator, nullptr);
-    EXPECT_FALSE(panEventActuator->panEvents_.empty());
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
@@ -1424,8 +1451,6 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
      * @tc.steps: step3. call pan task
      * @tc.expected: menuWrapperPattern's IsHide() is false
      */
-    auto endTask = panEventActuator->panEvents_.front()->GetActionEndEventFunc();
-    endTask(info);
     EXPECT_FALSE(menuWrapperPattern->IsHide());
 
     /**
@@ -1708,7 +1733,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH - TARGET_SIZE_HEIGHT));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, -TARGET_SIZE_WIDTH));
 }
 /**
  * @tc.name: MenuLayoutAlgorithmAdjustMenuTest

@@ -40,7 +40,7 @@ public:
             return !(*this == other);
         }
 
-        bool OnlyCountChange(const Section& other) const
+        bool OnlyCountDiff(const Section& other) const
         {
             return crossCount == other.crossCount && columnsGap == other.columnsGap && rowsGap == other.rowsGap &&
                    margin == other.margin;

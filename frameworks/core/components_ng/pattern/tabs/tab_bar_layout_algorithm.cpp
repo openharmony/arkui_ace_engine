@@ -30,6 +30,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -673,9 +675,13 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto frameSize = geometryNode->GetPaddingSize();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode()->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    isRTL_ = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    isRTL_ = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED &&
         tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && axis_ == Axis::VERTICAL) {

@@ -57,8 +57,8 @@ public:
 
     void SetNavPathList(const NavPathList& navPathList)
     {
-        navPathList_ = navPathList;
         preNavPathList_ = navPathList;
+        navPathList_ = navPathList;
     }
 
     bool Empty() const
@@ -179,6 +179,22 @@ public:
     }
 
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
+    virtual void RecoveryNavigationStack() {}
+
+    void UpdateRecoveryList()
+    {
+        recoveryList_ = navPathList_;
+    }
+
+    void ClearRecoveryList()
+    {
+        recoveryList_.clear();
+    }
+
+    NavPathList GetRecoveryList()
+    {
+        return recoveryList_;
+    }
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
@@ -190,6 +206,8 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+    // recovery NavPathList
+    NavPathList recoveryList_;
     NavPathList cacheNodes_;
     bool animated_ = true;
     WeakPtr<UINode> navigationNode_;

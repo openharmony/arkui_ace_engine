@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,10 @@
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -51,6 +53,11 @@ public:
         } else {
             return MakeRefPtr<PaintProperty>();
         }
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SwiperIndicatorAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -79,7 +86,23 @@ public:
     {
         auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+        int32_t maxDisplayCounter = swiperPattern->GetMaxDisplayCount();
+        if (maxDisplayCounter >= DISPLAY_COUNT_MIN && maxDisplayCounter <= DISPLAY_COUNT_MAX) {
+            auto paintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(
+                DynamicCast<OverlengthDotIndicatorModifier>(dotIndicatorModifier_));
+            auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(paintMethod);
+            SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethodTemp, swiperLayoutProperty);
+            paintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
+            return paintMethod;
+        }
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
+        SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethod, swiperLayoutProperty);
+        return paintMethod;
+    }
+    void SetDotIndicatorPaintMethodInfo(const RefPtr<SwiperPattern>& swiperPattern,
+        RefPtr<DotIndicatorPaintMethod>& paintMethod,
+        RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
+    {
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
@@ -101,7 +124,6 @@ public:
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
         mouseClickIndex_ = std::nullopt;
-        return paintMethod;
     }
 
     RefPtr<CircleDotIndicatorPaintMethod> CreateCircleDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern)
@@ -134,7 +156,12 @@ public:
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (!dotIndicatorModifier_) {
-                dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+                int32_t maxDisplayCounter = swiperPattern->GetMaxDisplayCount();
+                if (maxDisplayCounter >= DISPLAY_COUNT_MIN && maxDisplayCounter <= DISPLAY_COUNT_MAX) {
+                    dotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+                } else {
+                    dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+                }
             }
             dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
             dotIndicatorModifier_->SetLongPointHeadCurve(
@@ -163,18 +190,15 @@ public:
             }
             RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
             dotIndicatorModifier_->SetBoundsRect(boundsRect);
-
             return paintMethod;
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             if (!circleDotIndicatorModifier_) {
                 circleDotIndicatorModifier_ = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
             }
-
             auto paintMethod = CreateCircleDotIndicatorPaintMethod(swiperPattern);
             return paintMethod;
-        } else {
-            return nullptr;
         }
+        return nullptr;
     }
 
     RefPtr<FrameNode> GetSwiperNode() const

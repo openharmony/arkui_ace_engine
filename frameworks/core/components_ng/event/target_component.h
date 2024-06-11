@@ -34,6 +34,9 @@ class NGGestureRecognizer;
 using GestureJudgeFunc = std::function<GestureJudgeResult(
     const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info)>;
 
+using GestureRecognizerJudgeFunc = std::function<GestureJudgeResult(const std::shared_ptr<BaseGestureEvent>& info,
+    const RefPtr<NGGestureRecognizer>& current, const std::list<RefPtr<NGGestureRecognizer>>& others)>;
+
 class ACE_EXPORT TargetComponent : public virtual AceType {
     DECLARE_ACE_TYPE(TargetComponent, AceType);
 
@@ -69,6 +72,10 @@ public:
         return onGestureJudgeNativeBegin_;
     }
 
+    void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+
+    GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
+
 private:
     WeakPtr<UINode> node_;
     RefPtr<NGGestureRecognizer> nodeLinkGesture_;
@@ -76,6 +83,7 @@ private:
     std::list<RefPtr<TargetComponent>> targetComponentChildren_;
     GestureJudgeFunc onGestureJudgeBegin_;
     GestureJudgeFunc onGestureJudgeNativeBegin_;
+    GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
     std::set<int32_t> path_;
     SourceType sourceType_ = SourceType::TOUCH;
 };

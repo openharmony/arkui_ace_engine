@@ -2368,7 +2368,9 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern14, TestSize.Level1)
 
     auto maxSize = SizeF(10.0f, 10.0f);
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
-    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(topSheetNode, topSheetNode->GetGeometryNode(),
+        topSheetNode->GetLayoutProperty());
+    auto widthVal = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
     auto onWidthDidChangeFunc = [&widthVal](float width) { widthVal = width; };
     topSheetPattern->UpdateOnWidthDidChange(onWidthDidChangeFunc);
     topSheetPattern->FireOnWidthDidChange(topSheetNode);
@@ -2606,10 +2608,12 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     auto maxSize = SizeF(10.0f, 10.0f);
-    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(sheetNode, sheetNode->GetGeometryNode(),
+        sheetNode->GetLayoutProperty());
+    auto width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
     EXPECT_EQ(width, SHEET_LANDSCAPE_WIDTH.ConvertToPx());
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize);
+    width = sheetLayoutAlgorithm->GetWidthByScreenSizeType(maxSize, layoutWrapper.GetRawPtr());
     EXPECT_EQ(width, SHEET_POPUP_WIDTH.ConvertToPx());
 }
 
@@ -2669,5 +2673,89 @@ HWTEST_F(OverlayManagerTestNg, GetSheetType001, TestSize.Level1)
     style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_TRUE(style->sheetType.has_value());
     EXPECT_EQ(style->sheetType.value(), SheetType::SHEET_BOTTOM);
+}
+
+/**
+ * @tc.name: TestSuitAgingScale
+ * @tc.desc: Test SheetPresentationPattern::UpdateFontScaleStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSuitAgingScale, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test when fontcale changed.
+     * @tc.expected: sheetPattern->scale_ = pipeline->GetFontScale().
+     */
+    sheetPattern->scale_ = 1.75f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->fontScale_ = 1.0f;
+    sheetPattern->UpdateFontScaleStatus();
+    EXPECT_EQ(sheetPattern->scale_, pipeline->GetFontScale());
+}
+
+/**
+ * @tc.name: TestSheetPage005
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetPage005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page with title and subtitle, get sheet pattern.
+     */
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, nullptr, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get main title node, save title positionY.
+     */
+    auto titleNode =
+        AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(sheetPattern->GetTitleId()));
+    ASSERT_NE(titleNode, nullptr);
+    auto offsetY = titleNode->GetPositionToScreen().GetY();
+
+    /**
+     * @tc.steps: step3. create sheet page only with title, get sheet pattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = MESSAGE;
+    auto topSheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), sheetStyle);
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get main title node, save title positionY, compare two positionY.
+     * @tc.expected: two positionY equal.
+     */
+    auto topTitleNode =
+        AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(topSheetPattern->GetTitleId()));
+    ASSERT_NE(topTitleNode, nullptr);
+    auto topOffsetY = topTitleNode->GetPositionToScreen().GetY();
+    EXPECT_EQ(topOffsetY, offsetY);
 }
 }

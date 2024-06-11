@@ -36,6 +36,8 @@ public:
 
     void ChangeIndex(int32_t index);
 
+    void PreloadItems(const JSCallbackInfo& args);
+
     const RefPtr<TabController>& GetController() const
     {
         return controller_;

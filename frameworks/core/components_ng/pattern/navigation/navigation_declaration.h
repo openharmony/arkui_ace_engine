@@ -95,6 +95,7 @@ constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
 constexpr Dimension MENU_ITEM_SIZE = 48.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension MENU_BUTTON_PADDING = 8.0_vp;
+constexpr Dimension BACK_BUTTON_SYMBOL_PADDING = 14.0_vp;
 constexpr Dimension BUTTON_RADIUS_SIZE = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
@@ -110,6 +111,10 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 // maximum number of toolbar items
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
+
+// navigation page info
+constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
+constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,
@@ -207,12 +212,6 @@ enum NavDestinationLifecycle {
     ON_HIDE,
     ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
-};
-
-struct NavContentInfo {
-    std::string name;
-    int32_t index = 0;
-    NavDestinationMode mode;
 };
 
 struct NavSafeArea {

@@ -101,8 +101,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     TimeStamp time)
 {
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
-    auto durationSigned = std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count();
-    size_t duration = static_cast<size_t>(durationSigned);
+    size_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count();
     if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
         return;
     }
@@ -159,7 +158,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
             sourceType, AccessibilityHoverEventType::EXIT, time);
     }
     if (currentHoveringId != INVALID_NODE_ID) {
-        if (currentHoveringId != lastHoveringId) {
+        if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
             currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
         }
         NotifyHoverEventToNodeSession(currentHovering, root, point,
@@ -170,6 +169,13 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     hoverState_.time = time;
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
+}
+
+bool AccessibilityManagerNG::IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node)
+{
+    auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
+    CHECK_NULL_RETURN(sessionAdapter, false);
+    return sessionAdapter->IgnoreHostNode();
 }
 
 void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNode>& node,

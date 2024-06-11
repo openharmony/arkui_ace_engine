@@ -235,21 +235,32 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
 
 TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
 {
-    TextLineMetrics lineMetrics;
-    if (lineNumber > GetLineCount()) {
+    if (lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_TEXT,
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
     }
+    size_t endIndex = 0;
+    double paragraphsHeight = 0.0;
+    size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
-        if (lineNumber > lineCount) {
+        if (lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
+            paragraphsHeight += info.paragraph->GetHeight();
+            auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);
+            endIndex += lastLineMetrics.endIndex + 1;
             continue;
         }
-        lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+        auto lineMetrics = info.paragraph->GetLineMetrics(lineNumber);
+        lineMetrics.startIndex += endIndex;
+        lineMetrics.endIndex += endIndex;
+        lineMetrics.lineNumber = lineNumberParam;
+        lineMetrics.y += paragraphsHeight;
+        lineMetrics.baseline += paragraphsHeight;
+        return lineMetrics;
     }
-    return lineMetrics;
+    return TextLineMetrics();
 }
 
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const

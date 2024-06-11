@@ -29,7 +29,7 @@
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SliderModel {
+class ACE_FORCE_EXPORT SliderModel {
 public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin

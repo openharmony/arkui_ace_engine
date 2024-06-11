@@ -52,34 +52,30 @@ bool IsMMIMouseScrollBegin(const AxisEvent& event)
 }
 } // namespace
 
-AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
+RefPtr<AceViewOhos> AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    auto* aceView =
-        new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-            !SystemProperties::GetRosenBackendEnabled()));
-    if (aceView != nullptr) {
-        aceView->IncRefCount();
-    }
-    return aceView;
+    return AceType::MakeRefPtr<AceViewOhos>(
+        instanceId, ThreadModelImpl::CreateThreadModel(
+                        useCurrentEventRunner, !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
 }
 
 AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl)
     : instanceId_(id), threadModelImpl_(std::move(threadModelImpl))
 {}
 
-void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
+void AceViewOhos::SurfaceCreated(const RefPtr<AceViewOhos>& view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
     CHECK_NULL_VOID(window);
     CHECK_NULL_VOID(view);
 }
 
-void AceViewOhos::ChangeViewSize(AceViewOhos* view, int32_t width, int32_t height)
+void AceViewOhos::ChangeViewSize(const RefPtr<AceViewOhos>& view, int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(view);
     view->ChangeSize(width, height);
 }
 
-void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
+void AceViewOhos::SurfaceChanged(const RefPtr<AceViewOhos>& view, int32_t width, int32_t height, int32_t orientation,
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_NULL_VOID(view);
@@ -96,26 +92,27 @@ void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t heigh
     }
 }
 
-void AceViewOhos::SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY)
+void AceViewOhos::SurfacePositionChanged(const RefPtr<AceViewOhos>& view, int32_t posX, int32_t posY)
 {
     CHECK_NULL_VOID(view);
     view->NotifySurfacePositionChanged(posX, posY);
 }
 
-void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config)
+void AceViewOhos::SetViewportMetrics(const RefPtr<AceViewOhos>& view, const ViewportConfig& config)
 {
     CHECK_NULL_VOID(view);
     view->NotifyDensityChanged(config.Density());
 }
 
-void AceViewOhos::TransformHintChanged(AceViewOhos* view, uint32_t transform)
+void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t transform)
 {
     CHECK_NULL_VOID(view);
     view->NotifyTransformHintChanged(transform);
 }
 
-void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
+void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+    const std::function<void()>& callback, bool isInjected)
 {
     if (!pointerEvent) {
         TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchTouchEvent pointerEvent is null return.");
@@ -229,7 +226,7 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
     pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }
 
-bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view,
+bool AceViewOhos::DispatchKeyEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(view, false);
@@ -237,7 +234,7 @@ bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view,
     return view->ProcessKeyEvent(keyEvent, isPreIme);
 }
 
-bool AceViewOhos::DispatchRotationEvent(AceViewOhos* view, float rotationValue)
+bool AceViewOhos::DispatchRotationEvent(const RefPtr<AceViewOhos>& view, float rotationValue)
 {
     CHECK_NULL_RETURN(view, false);
     return view->ProcessRotationEvent(rotationValue);
@@ -327,29 +324,21 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            event.x = event.windowX;
-            event.y = event.windowY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
             action = DragEventAction::DRAG_EVENT_END;
-            event.x = event.windowX;
-            event.y = event.windowY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {
             action = DragEventAction::DRAG_EVENT_START;
-            event.x = event.displayX;
-            event.y = event.displayY;
             dragEventCallback_(event, action);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
             action = DragEventAction::DRAG_EVENT_OUT;
-            event.x = event.displayX;
-            event.y = event.displayY;
             dragEventCallback_(event, action);
             break;
         }

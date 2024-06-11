@@ -166,9 +166,10 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorOnCollectTouchTargetTest003, TestSi
      * @tc.expected: TouchTestResult size has been increased one.
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     touchEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, Touch_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, Touch_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
 
     EXPECT_EQ(touchEventActuator->coordinateOffset_, Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), TOUCH_TEST_RESULT_SIZE_1);
@@ -469,4 +470,18 @@ HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
     touchEventActuator->ClearTouchAfterEvent();
     EXPECT_EQ(touchEventActuator->touchAfterEvents_, nullptr);
 }
+
+/**
+ * @tc.name: SetPressedKeyCodesTest001
+ * @tc.desc: SetPressedKeyCodest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, SetPressedKeyCodesTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.SetPressedKeyCodes({KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT});
+    EXPECT_EQ(touchEvent.pressedKeyCodes_.size(), 2);
+    EXPECT_EQ(touchEvent.pressedKeyCodes_[0], KeyCode::KEY_DPAD_LEFT);
+}
+
 } // namespace OHOS::Ace::NG

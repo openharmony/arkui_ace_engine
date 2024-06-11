@@ -119,29 +119,29 @@ void ScrollBarPattern::OnModifyDone()
     );
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& responseLinkResult) {
             auto scrollBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(scrollBarPattern);
             if (!scrollBarPattern->HasChild()
                 && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 auto scrollBar = scrollBarPattern->scrollBar_;
                 CHECK_NULL_VOID(scrollBar);
-                scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl,
-                    result, frameNode, targetComponent);
+                scrollBar->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             } else {
-                scrollBarPattern->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl,
-                    result, frameNode, targetComponent);
+                scrollBarPattern->OnCollectTouchTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             }
         });
     scrollableEvent_->SetBarCollectLongPressTargetCallback(
         [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+            TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetInBarRectRegionCallback(
         [weak = AceType::WeakClaim(this)](const PointF& point, SourceType source) {
@@ -247,9 +247,6 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ScrollBarPattern::RegisterScrollBarEventTask()
@@ -298,7 +295,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateScrollBarOffset();
         updateFlag = true;
     } else {
         auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -348,10 +344,7 @@ bool ScrollBarPattern::IsInScrollBar()
     auto scrollBarSize = scrollBar->GetGeometryNode()->GetFrameSize();
     const bool isInVerticalScrollBar = (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Width()) &&
                                        (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Height());
-
-    const bool isInHorizontalScrollBar = (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Width()) &&
-                                         (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Height());
-    return (axis_ == Axis::VERTICAL) ? isInVerticalScrollBar : isInHorizontalScrollBar;
+    return isInVerticalScrollBar;
 }
 
 bool ScrollBarPattern::IsAtTop() const
@@ -514,7 +507,7 @@ void ScrollBarPattern::StartDisappearAnimator()
     if (disapplearDelayTask_) {
         disapplearDelayTask_.Cancel();
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -734,7 +727,7 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -743,13 +736,15 @@ void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
         panRecognizer_->AttachFrameNode(frameNode);
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
+        panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
         result.emplace_front(panRecognizer_);
+        responseLinkResult.emplace_back(panRecognizer_);
     }
 }
 
 void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent)
+    const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult)
 {
     if (longPressRecognizer_) {
         longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -758,7 +753,9 @@ void ScrollBarPattern::OnCollectLongPressTarget(const OffsetF& coordinateOffset,
         longPressRecognizer_->AttachFrameNode(frameNode);
         longPressRecognizer_->SetTargetComponent(targetComponent);
         longPressRecognizer_->SetIsSystemGesture(true);
+        longPressRecognizer_->SetRecognizerType(GestureTypeName::LONG_PRESS_GESTURE);
         result.emplace_front(longPressRecognizer_);
+        responseLinkResult.emplace_back(longPressRecognizer_);
     }
 }
 

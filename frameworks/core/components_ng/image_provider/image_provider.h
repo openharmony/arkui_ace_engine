@@ -52,6 +52,7 @@ struct ImageDecoderOptions {
     bool loadInVipChannel = false;
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality = AIImageQuality::NONE;
+    bool isHdrDecoderNeed = false;
 };
 
 class ImageObject;

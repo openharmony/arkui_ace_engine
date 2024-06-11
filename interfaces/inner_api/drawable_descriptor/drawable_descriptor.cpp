@@ -48,7 +48,23 @@ namespace {
 const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
+#ifdef USE_ROSEN_DRAWING
+constexpr float BADGED_SIDE_X = 21.0f;
+constexpr float BADGED_SIDE_Y = 7.0f;
 constexpr float SIDE = 192.0f;
+constexpr float NOT_ADAPTIVE_SIZE = 288.0f;
+
+inline bool NearEqual(const double left, const double right, const double epsilon)
+{
+    return (std::abs(left - right) <= epsilon);
+}
+
+inline bool NearEqual(const double left, const double right)
+{
+    constexpr double epsilon = 0.001f;
+    return NearEqual(left, right, epsilon);
+}
+#endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
 
@@ -398,122 +414,122 @@ void LayeredDrawableDescriptor::DrawOntoCanvas(
 {
     auto x = static_cast<float>((bitMap->GetWidth() - static_cast<float>(width)) / 2);
     auto y = static_cast<float>((bitMap->GetHeight() - static_cast<float>(height)) / 2);
-    Rosen::Drawing::Rect rect1(x, y, static_cast<float>(width) + x, static_cast<float>(width) + y);
-    Rosen::Drawing::Rect rect2(0, 0, static_cast<float>(width), static_cast<float>(width));
+    Rosen::Drawing::Rect srcRect(x, y, static_cast<float>(width) + x, static_cast<float>(width) + y);
+    Rosen::Drawing::Rect dstRect(0, 0, static_cast<float>(width), static_cast<float>(width));
     Rosen::Drawing::Image image;
     image.BuildFromBitmap(*bitMap);
-    canvas.DrawImageRect(image, rect1, rect2, Rosen::Drawing::SamplingOptions(),
+    canvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
         Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
 }
-#endif
-
-#ifndef USE_ROSEN_DRAWING
-bool LayeredDrawableDescriptor::CreatePixelMap()
+bool LayeredDrawableDescriptor::GetLayeredIconParm(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+    std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
 {
-    std::shared_ptr<SkBitmap> foreground;
-    if (foreground_.has_value()) {
-        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
-    } else if (GetPixelMapFromJsonBuf(false) && foreground_.has_value()) {
-        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
-    } else {
-        HILOGI("Get pixelMap of foreground failed.");
-        return false;
-    }
-
-    std::shared_ptr<SkBitmap> background;
-    if (background_.has_value()) {
-        background = ImageConverter::PixelMapToBitmap(background_.value());
-    } else if (GetPixelMapFromJsonBuf(true) && background_.has_value()) {
-        background = ImageConverter::PixelMapToBitmap(background_.value());
-    } else {
-        HILOGE("Get pixelMap of background failed.");
-        return false;
-    }
-
-    std::shared_ptr<SkBitmap> mask;
-    if (mask_.has_value()) {
-        mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else if (GetMaskByPath() && mask_.has_value()) {
-        mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else if (GetDefaultMask() && mask_.has_value()) {
-        mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else {
-        HILOGE("Get pixelMap of mask failed.");
-        return false;
-    }
-
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    auto colorType = ImageConverter::PixelFormatToSkColorType(background_.value()->GetPixelFormat());
-    auto alphaType = ImageConverter::AlphaTypeToSkAlphaType(background_.value()->GetAlphaType());
-    auto imageInfo = SkImageInfo::Make(SIDE, SIDE, colorType, alphaType);
-    SkBitmap tempCache;
-    tempCache.allocPixels(imageInfo);
-    SkCanvas bitmapCanvas(tempCache);
-
-    paint.setBlendMode(SkBlendMode::kSrc);
-    DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas, paint);
-    paint.setBlendMode(SkBlendMode::kDstATop);
-    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas, paint);
-    paint.setBlendMode(SkBlendMode::kSrcATop);
-    DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas, paint);
-    bitmapCanvas.readPixels(tempCache, 0, 0);
-
-    // convert bitmap back to pixelMap
-    Media::InitializationOptions opts;
-    opts.alphaType = background_.value()->GetAlphaType();
-    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), opts);
-    return true;
-}
-#else
-bool LayeredDrawableDescriptor::CreatePixelMap()
-{
-    // if customizedParam_.HasParamCustomized() true,
-    // meaning this descriptor is not created by resource manager,
-    // therefore some params might not be valid.
-    // Otherwise if HasParamCustomized() false,
-    // meaning this descriptor is created by resource manager or 
-    // napi directly but has no param passed in, then we should return if any param is missing
-    std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
     if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else if (!customized_) {
         HILOGI("Get pixelMap of foreground failed.");
         return false;
     }
-
-    std::shared_ptr<Rosen::Drawing::Bitmap> background;
     if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else if (!customized_) {
         HILOGE("Get pixelMap of background failed.");
         return false;
     }
-
-    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
     if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else if (!customized_) {
         HILOGE("Get pixelMap of mask failed.");
         return false;
     }
+    return true;
+}
 
+void LayeredDrawableDescriptor::TransformToPixelMap(
+    const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo)
+{
+    Media::InitializationOptions opts;
+    if (background_.has_value()) {
+        opts.alphaType = background_.value()->GetAlphaType();
+    } else {
+        opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    }
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(bitmap), opts);
+}
+
+Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
+    OptionalPixelMap pixelmap, int32_t width, int32_t height)
+{
+    Rosen::Drawing::ColorType colorType =
+        pixelmap.has_value() ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
+                             : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
+    Rosen::Drawing::AlphaType alphaType =
+        pixelmap.has_value()
+            ? alphaType = ImageConverter::AlphaTypeToAlphaType(pixelmap.value()->GetAlphaType())
+            : alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
+    return Rosen::Drawing::ImageInfo(width, height, colorType, alphaType);
+}
+
+void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+    std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
+{
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
-    Rosen::Drawing::ColorType colorType;
-    if (background_.has_value()) {
-        colorType = ImageConverter::PixelFormatToColorType(background_.value()->GetPixelFormat());
-    } else {
-        colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
+    Rosen::Drawing::ImageInfo imageInfo =
+        CreateRSImageInfo(background_, background->GetWidth(), background->GetHeight());
+    Rosen::Drawing::Bitmap tempCache;
+    tempCache.Build(imageInfo);
+    Rosen::Drawing::Canvas bitmapCanvas;
+    bitmapCanvas.Bind(tempCache);
+
+    if (background) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+        bitmapCanvas.AttachBrush(brush);
+        DrawOntoCanvas(background, background->GetWidth(), background->GetHeight(), bitmapCanvas);
+        bitmapCanvas.DetachBrush();
     }
-    Rosen::Drawing::AlphaType alphaType;
-    if (background_.has_value()) {
-        alphaType = ImageConverter::AlphaTypeToAlphaType(background_.value()->GetAlphaType());
-    } else {
-        alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
+
+    Rosen::Drawing::Rect srcRect(0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
+    Rosen::Drawing::Rect dstRect(
+        0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
+    Rosen::Drawing::Image image;
+    if (mask) {
+        image.BuildFromBitmap(*mask);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        bitmapCanvas.AttachBrush(brush);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
+            Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
     }
-    Rosen::Drawing::ImageInfo imageInfo(SIDE, SIDE, colorType, alphaType);
+    if (foreground) {
+        srcRect = Rosen::Drawing::Rect(
+            0.0, 0.0, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight()));
+        auto x = static_cast<float>((background->GetWidth() - foreground->GetWidth()) / 2);
+        auto y = static_cast<float>((background->GetHeight() - foreground->GetHeight()) / 2);
+        dstRect = Rosen::Drawing::Rect(
+            x, y, static_cast<float>(foreground->GetWidth()), static_cast<float>(foreground->GetHeight())
+        );
+
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+        bitmapCanvas.AttachBrush(brush);
+        image.BuildFromBitmap(*foreground);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
+            Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
+    }
+
+    // convert bitmap back to pixelMap
+    bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
+    TransformToPixelMap(tempCache, imageInfo);
+}
+
+void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+    std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
+{
+    Rosen::Drawing::Brush brush;
+    brush.SetAntiAlias(true);
+    Rosen::Drawing::ImageInfo imageInfo = CreateRSImageInfo(background_, SIDE, SIDE);
     Rosen::Drawing::Bitmap tempCache;
     tempCache.Build(imageInfo);
     Rosen::Drawing::Canvas bitmapCanvas;
@@ -547,7 +563,101 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
         opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     }
     opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache), opts);
+    TransformToPixelMap(tempCache, imageInfo);
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
+bool LayeredDrawableDescriptor::CreatePixelMap()
+{
+    HILOGE("not support");
+    return true;
+}
+
+bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
+    const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+    const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+    std::shared_ptr<Media::PixelMap> &compositePixelMap)
+{
+    HILOGE("not support");
+    return false;
+}
+#else
+bool LayeredDrawableDescriptor::CreatePixelMap()
+{
+    // if customizedParam_.HasParamCustomized() true,
+    // meaning this descriptor is not created by resource manager,
+    // therefore some params might not be valid.
+    // Otherwise if HasParamCustomized() false,
+    // meaning this descriptor is created by resource manager or 
+    // napi directly but has no param passed in, then we should return if any param is missing
+    std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
+    std::shared_ptr<Rosen::Drawing::Bitmap> background;
+    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
+    if (!GetLayeredIconParm(foreground, background, mask)) {
+        return false;
+    }
+    // when the foreground'size is 288 x 288, we don't scale.
+    if (foreground && NearEqual(NOT_ADAPTIVE_SIZE, foreground->GetWidth()) &&
+        NearEqual(NOT_ADAPTIVE_SIZE, foreground->GetHeight())) {
+        HILOGD("foreground size is 288 x 288, we don't scale the foreground.");
+        CompositeIconNotAdaptive(foreground, background, mask);
+    } else {
+        HILOGD("foreground size is not 288 x 288, we'll scale the foreground.");
+        CompositeIconAdaptive(foreground, background, mask);
+    }
+    return true;
+}
+
+bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
+    const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+    const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+    std::shared_ptr<Media::PixelMap> &compositePixelMap)
+{
+    if ((layeredPixelMap == nullptr) || (badgedPixelMap == nullptr)) {
+        HILOGE("failed due to nullptr");
+        return false;
+    }
+    Rosen::Drawing::Brush brush;
+    brush.SetAntiAlias(true);
+    Rosen::Drawing::ColorType colorType = ImageConverter::PixelFormatToColorType(layeredPixelMap->GetPixelFormat());
+    Rosen::Drawing::AlphaType alphaType = ImageConverter::AlphaTypeToAlphaType(layeredPixelMap->GetAlphaType());
+    Rosen::Drawing::ImageInfo imageInfo(SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y, colorType, alphaType);
+    Rosen::Drawing::Bitmap tempCache;
+    tempCache.Build(imageInfo);
+    Rosen::Drawing::Canvas bitmapCanvas;
+    bitmapCanvas.Bind(tempCache);
+    std::shared_ptr<Rosen::Drawing::Bitmap> layeredBitmap = ImageConverter::PixelMapToBitmap(layeredPixelMap);
+    if (layeredBitmap) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+        bitmapCanvas.AttachBrush(brush);
+        Rosen::Drawing::Rect srcRect(0, 0, layeredBitmap->GetWidth(), layeredBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(0, 0, SIDE, SIDE);
+        Rosen::Drawing::Image image;
+        image.BuildFromBitmap(*layeredBitmap);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
+    }
+    std::shared_ptr<Rosen::Drawing::Bitmap> badgedBitmap = ImageConverter::PixelMapToBitmap(badgedPixelMap);
+    if (badgedBitmap) {
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_OVER);
+        bitmapCanvas.AttachBrush(brush);
+        Rosen::Drawing::Rect srcRect(0, 0, badgedBitmap->GetWidth(), badgedBitmap->GetHeight());
+        Rosen::Drawing::Rect dstRect(SIDE + BADGED_SIDE_X - badgedBitmap->GetWidth(),
+            SIDE + BADGED_SIDE_Y - badgedBitmap->GetHeight(), SIDE + BADGED_SIDE_X, SIDE + BADGED_SIDE_Y);
+        Rosen::Drawing::Image image;
+        image.BuildFromBitmap(*badgedBitmap);
+        bitmapCanvas.DrawImageRect(image, srcRect, dstRect,
+            Rosen::Drawing::SamplingOptions(), Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+        bitmapCanvas.DetachBrush();
+    }
+    bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
+    Media::InitializationOptions initializationOptions;
+    initializationOptions.alphaType = layeredPixelMap->GetAlphaType();
+    initializationOptions.pixelFormat = Media::PixelFormat::BGRA_8888;
+    compositePixelMap = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache),
+        initializationOptions);
     return true;
 }
 #endif

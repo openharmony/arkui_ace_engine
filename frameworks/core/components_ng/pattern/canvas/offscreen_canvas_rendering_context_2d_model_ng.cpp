@@ -84,10 +84,10 @@ std::vector<double> OffscreenCanvasRenderingContext2DModelNG::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetFillGradient(const Ace::Gradient& gradient)
+void OffscreenCanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->SetFillGradient(gradient);
+    pattern_->SetFillGradient(*gradient);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -102,10 +102,10 @@ void OffscreenCanvasRenderingContext2DModelNG::SetFillColor(const Color& color, 
     pattern_->SetFillColor(color);
 }
 
-void OffscreenCanvasRenderingContext2DModelNG::SetStrokeGradient(const Ace::Gradient& gradient)
+void OffscreenCanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->SetStrokeGradient(gradient);
+    pattern_->SetStrokeGradient(*gradient);
 }
 
 void OffscreenCanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)

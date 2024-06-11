@@ -40,7 +40,7 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(listItemGroupTheme);
@@ -168,6 +168,12 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
 {
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return 0.0f;
+    }
     if (layoutedItemInfo_.has_value()) {
         auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
         auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;

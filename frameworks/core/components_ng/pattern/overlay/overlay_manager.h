@@ -77,7 +77,7 @@ struct GatherNodeChildInfo {
 };
 
 // StageManager is the base class for root render node to perform page switch.
-class ACE_EXPORT OverlayManager : public virtual AceType {
+class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
@@ -261,7 +261,7 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
-    RefPtr<FrameNode> GetPixelMapContentNode() const;
+    RefPtr<FrameNode> GetPixelMapContentNode(bool isSubwindowOverlay = false) const;
 
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
@@ -305,11 +305,12 @@ public:
     void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
-    void RemovePixelMapAnimation(bool startDrag, double x, double y);
+    void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
+    void UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
@@ -433,7 +434,7 @@ public:
 
     // ui extension
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isProhibitBack, bool isAsyncModalBinding = false);
+        bool isProhibitBack, bool isAsyncModalBinding = false, bool isAllowedBeCovered = true);
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
@@ -441,7 +442,7 @@ public:
     SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
     bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
         const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId);
+    void CloseUIExtensionMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -449,14 +450,16 @@ public:
 
     void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
 
-    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
-        bool isModeChangeToAuto = false);
+    void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+
+    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
+        uint32_t& statusBarHeight);
 
     void SetSheetHeight(float height)
     {
@@ -483,9 +486,9 @@ public:
     void DismissPopup();
 
     void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     void MountGatherNodeToWindowScene(const RefPtr<FrameNode>& frameNode,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo,
         const RefPtr<UINode>& windowScene);
     void RemoveGatherNode();
     void RemoveGatherNodeWithAnimation();
@@ -532,6 +535,13 @@ public:
     {
         isMenuShow_ = isMenuShow;
     }
+
+    void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
+    bool IsProhibitedAddToRootNode();
+    void DeleteUIExtensionNode(int32_t sessionId);
+    void SetCurSessionId(int32_t curSessionId);
+    void ResetRootNode(int32_t sessionId);
+    void OnUIExtensionWindowSizeChange();
 
 private:
     void PopToast(int32_t targetId);
@@ -593,6 +603,7 @@ private:
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
+    void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(const RefPtr<FrameNode>& customKeyboard, bool isTransitionIn);
     void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
@@ -706,6 +717,12 @@ private:
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
+
+    // Only used when CreateModalUIExtension
+    // No thread safety issue due to they are all run in UI thread
+    bool isAllowedBeCovered_ = true;
+    // Only hasValue when isAllowedBeCovered is false
+    int32_t curSessionId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

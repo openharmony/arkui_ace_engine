@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -52,12 +53,13 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "current focus node info : (%{public}s/%{public}d).",
         curFocusNode->GetTag().c_str(), curFocusNode->GetId());
 
-    if (curFocusNode_ && curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (curFocusNode_ && curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG &&
+        curFocusNode_ != curFocusNode) {
         curFocusNode_ = curFocusNode;
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
         auto pattern = curFocusNode->GetPattern();
-        if (pattern) {
+        if (!pattern->NeedSoftKeyboard()) {
             HideKeyboardAcrossProcesses();
-            return;
         }
     }
 
@@ -115,7 +117,9 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto isUIExtension = container->IsUIExtensionWindow();
-    if (isUIExtension) {
+    auto pattern = curFocusNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (isUIExtension && !pattern->NeedSoftKeyboard()) {
         HideKeyboardAcrossProcesses();
     } else {
         CloseKeyboard(curFocusNode);
@@ -129,12 +133,24 @@ void InputMethodManager::SetWindowFocus(bool windowFocus)
 
 bool InputMethodManager::NeedSoftKeyboard() const
 {
+    if (curFocusNode_ && (curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+                             curFocusNode_->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
+        return true;
+    }
     auto pattern = curFocusNode_->GetPattern();
     return pattern->NeedSoftKeyboard();
 }
 
 void InputMethodManager::CloseKeyboard()
 {
+    CHECK_NULL_VOID(curFocusNode_);
+    auto pipeline = curFocusNode_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = pipeline->GetTextFieldManager();
+    CHECK_NULL_VOID(textFieldManager);
+    if (!textFieldManager->GetImeShow()) {
+        return;
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");

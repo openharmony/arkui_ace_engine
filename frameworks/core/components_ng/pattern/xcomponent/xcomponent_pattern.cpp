@@ -302,7 +302,7 @@ void* XComponentPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, nullptr);
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     CHECK_NULL_RETURN(nativeView, nullptr);
     return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
 }
@@ -377,6 +377,7 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    SetRotation(pipeline->GetTransformHint());
     auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -612,9 +613,10 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
 
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
-    if (type_ != XComponentType::SURFACE || isSurfaceLock_) {
+    if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
         return;
     }
+    rotation_ = rotation;
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetTransformHint(rotation);
 }
@@ -1106,7 +1108,7 @@ void XComponentPattern::ReportSlideToRss()
         CHECK_NULL_VOID(self);
         self->slideCount_ ++;
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        }, DELAY_TIME, "xcomponent_pattern_slide_on");
+    }, DELAY_TIME, "ArkUIXComponentSlideOn");
     uiTaskExecutor.PostDelayedTask([weakThis = WeakClaim(this)] {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
@@ -1114,8 +1116,7 @@ void XComponentPattern::ReportSlideToRss()
         if (self->slideCount_.load() == 0) {
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
-        }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME,
-        "xcomponent_pattern_slide_off");
+    }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME, "ArkUIXComponentSlideOff");
 }
 
 float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo,
@@ -1650,6 +1651,15 @@ void XComponentPattern::EnableAnalyzer(bool enable)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
+}
+
+void XComponentPattern::SetImageAIOptions(void *options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
 void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)

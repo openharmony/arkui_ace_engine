@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT StepperItemModel {
+class ACE_FORCE_EXPORT StepperItemModel {
 public:
     static StepperItemModel* GetInstance();
     virtual ~StepperItemModel() = default;

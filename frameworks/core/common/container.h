@@ -128,6 +128,8 @@ public:
         return false;
     }
 
+    virtual RefPtr<AceView> GetAceView() const = 0;
+
     virtual void* GetView() const = 0;
 
     // Trigger garbage collection
@@ -238,6 +240,13 @@ public:
     {
         return false;
     }
+
+    virtual bool IsFormRender() const
+    {
+        return false;
+    }
+    
+    virtual void SetIsFormRender(bool isFormRender) {};
 
     const std::string& GetCardHapPath() const
     {
@@ -459,7 +468,8 @@ public:
     }
 
     virtual bool GetCurPointerEventInfo(
-        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -470,7 +480,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr)
     {
         return false;
     }

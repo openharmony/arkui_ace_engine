@@ -194,8 +194,14 @@ public:
         return syncLoad_;
     }
 
+    void SetNeedBorderRadius(bool needBorderRadius)
+    {
+        needBorderRadius_ = needBorderRadius;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -298,6 +304,14 @@ public:
     void OnActive() override
     {
         if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            if (!animator_->HasScheduler()) {
+                auto context = PipelineContext::GetCurrentContext();
+                if (context) {
+                    animator_->AttachScheduler(context);
+                } else {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+                }
+            }
             animator_->Forward();
         }
     }
@@ -335,10 +349,21 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
+    bool GetDefaultAutoResize()
+    {
+        InitDefaultValue();
+        return autoResizeDefault_;
+    }
+    ImageInterpolation GetDefaultInterpolation()
+    {
+        InitDefaultValue();
+        return interpolationDefault_;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
 
@@ -395,6 +420,8 @@ private:
     void OpenSelectOverlay();
     void CloseSelectOverlay();
 
+    void TriggerFirstVisibleAreaChange();
+
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
@@ -416,7 +443,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -474,6 +501,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;

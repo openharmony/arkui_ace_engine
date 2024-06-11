@@ -222,7 +222,7 @@ void SwitchPattern::UpdateSwitchPaintProperty()
 
 void SwitchPattern::UpdateSwitchLayoutProperty()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);

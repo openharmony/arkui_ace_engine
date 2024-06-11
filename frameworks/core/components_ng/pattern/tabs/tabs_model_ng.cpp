@@ -57,11 +57,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TABS_ETS_TAG, nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto hasTabBarNode = tabsNode->HasTabBarNode();
     InitTabsNode(tabsNode, swiperController);
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
-    if (!tabsNode->HasTabBarNode()) {
+    if (!hasTabBarNode) {
         auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
         CHECK_NULL_VOID(tabsFrameNode);
         auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
@@ -980,5 +981,24 @@ void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&&
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetInterceptStatus(true);
     tabPattern->SetOnContentWillChange(std::move(callback));
+}
+
+void TabsModelNG::SetAnimateMode(TabAnimateMode mode)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
+}
+
+void TabsModelNG::SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimateMode(mode);
 }
 } // namespace OHOS::Ace::NG

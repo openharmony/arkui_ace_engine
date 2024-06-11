@@ -109,6 +109,7 @@ bool LoadNativeViewNG(NativeView* view)
         view->FireOnTransition();
         NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
     });
+    pageRouterManager->AddView(view->GetID());
     LOGI("OHOSAceFrameworkNGLoadCJView end.");
     return true;
 }
@@ -266,15 +267,18 @@ void CJPageRouterNG::StartClean()
 bool CJPageRouterNG::StartPop()
 {
     ProcessGuard guard(this);
-    if (pageRouterStack_.size() <= 1) {
+    if (pageRouterStack_.size() <= 1 || viewStack_.size() <= 1) {
         // the last page.
         return false;
     }
     auto topNode = pageRouterStack_.back();
+    auto topView = viewStack_.back();
     pageRouterStack_.pop_back();
+    viewStack_.pop_back();
     if (!OnPopPage(true, true)) {
         LOGE("fail to pop page.");
         pageRouterStack_.emplace_back(topNode);
+        viewStack_.emplace_back(topView);
         return false;
     }
     return true;
@@ -546,7 +550,7 @@ void CJPageRouterNG::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pag
 
 void CJPageRouterNG::PopPage(const std::string& params, bool needShowNext, bool needTransition)
 {
-    if (pageRouterStack_.empty()) {
+    if (pageRouterStack_.empty() || viewStack_.empty()) {
         LOGE("page router stack size is illegal.");
         return;
     }
@@ -555,11 +559,14 @@ void CJPageRouterNG::PopPage(const std::string& params, bool needShowNext, bool 
         return;
     }
     auto topNode = pageRouterStack_.back();
+    auto topView = viewStack_.back();
     pageRouterStack_.pop_back();
+    viewStack_.pop_back();
     if (params.empty()) {
         if (!OnPopPage(needShowNext, needTransition)) {
             LOGE("fail to pop page.");
             pageRouterStack_.emplace_back(topNode);
+            viewStack_.emplace_back(topView);
         }
         return;
     }
@@ -579,6 +586,7 @@ void CJPageRouterNG::PopPage(const std::string& params, bool needShowNext, bool 
     LOGE("fail to pop page");
     // restore stack and pageParam.
     pageRouterStack_.emplace_back(topNode);
+    viewStack_.emplace_back(topView);
     pageInfo->ReplacePageParams(temp);
 }
 
@@ -696,4 +704,11 @@ bool CJPageRouterNG::OnCleanPageStack()
     return false;
 }
 
+void CJPageRouterNG::FlushReload()
+{
+    for (const auto& viewId : viewStack_) {
+        auto view = FFI::FFIData::GetData<NativeView>(viewId);
+        view->FlushReload();
+    }
+}
 } // namespace OHOS::Ace::Framework

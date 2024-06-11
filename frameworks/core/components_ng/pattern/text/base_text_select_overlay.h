@@ -142,14 +142,10 @@ public:
 
     // common virtual methods.
     virtual RectF GetVisibleContentRect();
-    virtual RectF GetVisibleFrameRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
     virtual void OnResetTextSelection() {}
 
-    virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType)
-    {
-        return (sourceType == SourceType::MOUSE || sourceType == SourceType::TOUCH) && touchType == TouchType::DOWN;
-    }
+    virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType);
 
     bool HasRenderTransform()
     {
@@ -176,6 +172,7 @@ public:
     bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon);
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
+    void OnTouchTestHit(SourceType hitTestType);
 
     void SetScrollableParentCallback();
     void ResetScrollableParentCallback();
@@ -202,6 +199,7 @@ protected:
 
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
+    std::optional<RectF> GetAncestorNodeViewPort();
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
 
@@ -218,6 +216,9 @@ private:
     WeakPtr<TextBase> hostTextBase_;
     bool hasScrollableParent_ = true;
     std::vector<int32_t> scrollableParentIds_;
+    bool hasTouchTestHit_ = false;
+    bool resetSelectionHitTest_ = false;
+    bool accepResetSelectionHitTest_ = false;
 };
 
 } // namespace OHOS::Ace::NG

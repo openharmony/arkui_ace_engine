@@ -239,6 +239,7 @@ build_component_ng("pattern_ng") {
     "navigation/nav_bar_node.cpp",
     "navigation/nav_bar_pattern.cpp",
     "navigation/navigation_content_layout_algorithm.cpp",
+    "navigation/navigation_event_hub.cpp",
     "navigation/navigation_group_node.cpp",
     "navigation/navigation_layout_algorithm.cpp",
     "navigation/navigation_model_ng.cpp",
@@ -264,6 +265,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_pattern.cpp",
     "node_container/node_container_layout_algorithm.cpp",
     "node_container/node_container_model_ng.cpp",
+    "node_container/node_container_node.cpp",
     "node_container/node_container_pattern.cpp",
     "option/option_accessibility_property.cpp",
     "option/option_layout_algorithm.cpp",
@@ -424,6 +426,7 @@ build_component_ng("pattern_ng") {
     "stepper/stepper_model_ng.cpp",
     "stepper/stepper_node.cpp",
     "stepper/stepper_pattern.cpp",
+    "swiper/arc_swiper_pattern.cpp",
     "swiper/swiper_accessibility_property.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_model_ng.cpp",
@@ -437,8 +440,11 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
+    "swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.cpp",
+    "swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
+    "swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "symbol/symbol_effect_options.cpp",
@@ -561,10 +567,9 @@ build_component_ng("pattern_ng") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
-    if (product_name != "ohos-sdk") {
-      external_deps += [ "miscdevice:vibrator_interface_native" ]
-      sources += [ "indexer/indexer_support_vibration.cpp" ]
-      defines = [ "INDEXER_SUPPORT_VIBRATOR" ]
+    if (product_name == "ohos-sdk") {
+      sources +=
+          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
     }
   } else if (is_arkui_x) {
     deps += [

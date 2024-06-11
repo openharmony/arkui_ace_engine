@@ -40,8 +40,8 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
-    void SetTransform(const TransformParam& param) override;
     TransformParam GetTransform() const override;
+    LineDashParam GetLineDash() const override;
     void UpdateSize(int32_t width, int32_t height);
     void Reset();
     int32_t GetWidth()
@@ -64,20 +64,8 @@ private:
     void InitBitmap();
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
-        bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void Path2DRect(const PathArgs& args) override;
-    RSCanvas* GetRawPtrOfRSCanvas() override
-    {
-        return rsCanvas_.get();
-    }
 
     RSBitmap bitmap_;
 

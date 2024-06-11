@@ -190,6 +190,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(buttonFrameNode);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateVisibility(searchButton.has_value() ? VisibleType::VISIBLE : VisibleType::GONE);
     buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
@@ -1528,20 +1529,17 @@ void SearchPattern::InitIconColorSize()
 void SearchPattern::CreateSearchIcon(const std::string& src)
 {
     CHECK_NULL_VOID(GetSearchNode());
-    if (!GetSearchNode()->HasSearchIconNodeCreated()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-            src.empty()) {
-            CreateOrUpdateSymbol(IMAGE_INDEX, true);
-        } else {
-            CreateOrUpdateImage(IMAGE_INDEX, src, true, "", "");
-        }
-        GetSearchNode()->UpdateHasSearchIconNodeCreated(true);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        src.empty()) {
+        CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
     } else {
-        if (src.empty()) {
-            return;
-        }
-        UpdateIconNode(IMAGE_INDEX, src, "", "");
+        CreateOrUpdateImage(IMAGE_INDEX, src, !GetSearchNode()->HasSearchIconNodeCreated(), "", "");
     }
+    GetSearchNode()->UpdateHasSearchIconNodeCreated(true);
+    if (src.empty()) {
+        return;
+    }
+    UpdateIconNode(IMAGE_INDEX, src, "", "");
 }
 
 void SearchPattern::CreateCancelIcon()
@@ -1569,9 +1567,8 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                                 : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
-    layoutProperty->UpdateFontSize(Dimension(index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconSize().ConvertToFp()
-                                                                  : GetSearchNode()->GetCancelIconSize().ConvertToFp(),
-        DimensionUnit::FP));
+    layoutProperty->UpdateFontSize(
+        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconSize() : GetSearchNode()->GetCancelIconSize());
     layoutProperty->UpdateSymbolColorList(
         { index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor() });
 
@@ -1817,7 +1814,7 @@ void SearchPattern::UpdateIconSize(int32_t index, const Dimension& value)
     if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
-        symbolLayoutProperty->UpdateFontSize(Dimension(value.ConvertToFp(), DimensionUnit::FP));
+        symbolLayoutProperty->UpdateFontSize(value);
     } else {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);

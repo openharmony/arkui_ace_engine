@@ -241,6 +241,15 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemTextNode(const std::string& 
     return textNode;
 }
 
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barItem, const bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
@@ -263,13 +272,14 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(symbolProperty, nullptr);
-        symbolProperty->UpdateFontSize(iconWidth);
         if (isButtonEnabled) {
             symbolProperty->UpdateSymbolColorList({ iconColor });
         } else {
             symbolProperty->UpdateSymbolColorList({ iconColor.BlendOpacity(iconOpacity) });
         }
         barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+        UpdateSymbolEffect(symbolProperty, false);
+        symbolProperty->UpdateFontSize(iconWidth);
         iconNode->MarkModifyDone();
         return iconNode;
     }
@@ -540,10 +550,26 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
     } else {
         message = accessibilityProperty->GetAccessibilityText();
     }
+    if (menuItem.iconSymbol.has_value() && menuItem.iconSymbol.value() != nullptr) {
+        return CreateSymbolDialog(message, targetNode);
+    }
     if (menuItem.icon.has_value() && !menuItem.icon.value().empty()) {
         imageSourceInfo = ImageSourceInfo(menuItem.icon.value());
     }
     dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
     return dialogNode;
+}
+
+RefPtr<FrameNode> NavigationTitleUtil::CreateSymbolDialog(
+    const std::string& message, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(targetNode->GetFirstChild());
+    CHECK_NULL_RETURN(barItemNode, nullptr);
+    auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    CHECK_NULL_RETURN(iconNode, nullptr);
+    auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(symbolProperty, nullptr);
+    return AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
 }
 } // namespace OHOS::Ace::NG

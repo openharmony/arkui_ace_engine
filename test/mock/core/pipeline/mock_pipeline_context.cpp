@@ -39,6 +39,7 @@ void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
@@ -140,6 +141,9 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
+void PipelineContext::SendEventToAccessibilityWithNode(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node) {}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
@@ -190,7 +194,7 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
@@ -290,7 +294,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange) {}
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
@@ -379,6 +383,8 @@ UITaskScheduler::UITaskScheduler() {}
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -606,6 +612,9 @@ void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, Mou
 void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
 void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

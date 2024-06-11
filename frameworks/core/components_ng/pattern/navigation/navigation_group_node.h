@@ -112,6 +112,16 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    bool IsOnModeSwitchAnimation()
+    {
+        return isOnModeSwitchAnimation_;
+    }
+
+    void SetDoingModeSwitchAnimationFlag(bool isOnAnimation)
+    {
+        isOnModeSwitchAnimation_ = isOnAnimation;
+    }
+
     std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
     {
         return pushAnimations_;
@@ -176,14 +186,31 @@ public:
 
     void RemoveDialogDestination();
 
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavigationPathInfo() const
+    {
+        return navigationPathInfo_;
+    }
+
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
+        const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
     bool FindNavigationParent(const std::string& parentName);
     bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
@@ -200,9 +227,12 @@ private:
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

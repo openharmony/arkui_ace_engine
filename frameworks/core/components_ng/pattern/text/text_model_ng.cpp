@@ -192,6 +192,16 @@ void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
 }
 
+void TextModelNG::SetTextSelectableMode(Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
@@ -526,6 +536,14 @@ void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
+}
+
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
@@ -944,6 +962,13 @@ LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
     return value;
 }
 
+TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
+{
+    TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextSelectableMode, value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
@@ -1034,5 +1059,12 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
 }
 } // namespace OHOS::Ace::NG

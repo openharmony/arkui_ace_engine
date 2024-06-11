@@ -26,9 +26,32 @@
 
 
 extern "C" {
+struct NativeFontInfo {
+    const char* path = "";
+    const char* postScriptName = "";
+    const char* fullName = "" ;
+    const char* family = "";
+    const char* subfamily = "";
+    uint32_t weight = 0;
+    uint32_t width = 0;
+    bool italic = false;
+    bool monoSpace = false;
+    bool symbolic = false;
+};
+
+struct NativeOptionFontInfo {
+    bool hasValue;
+    NativeFontInfo* info;
+};
+
 struct NativeLength {
     double value;
     int32_t unitType;
+};
+
+struct NativeOffset {
+    NativeLength dx;
+    NativeLength dy;
 };
 
 struct NativeOptionLength {
@@ -271,14 +294,7 @@ struct AtCPackage {
 
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
 
-CJ_EXPORT void* FfiOHOSAceFrameworkGetAbilityPointer();
-
-CJ_EXPORT bool FfiOHOSAceFrameworkIsStageModel();
-
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
-
-// CStruct 'RetDataXXX' is used for cj-ffi to pass different result
-CJ_EXPORT bool FfiOHOSAceFrameworkIsPartialUpdate();
 }
 
 namespace OHOS::Ace {

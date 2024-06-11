@@ -841,8 +841,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -902,8 +902,8 @@ HWTEST_F(OverlayTestNg, MenuTest004, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindowWithAnimation();
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
 }
 
 /**
@@ -1445,7 +1445,6 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
     toastPattern->UpdateTextSizeConstraint(textNode);
-    EXPECT_EQ(textLayoutProperty->GetAdaptMaxFontSize().value().value_, fontSize.value_);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
@@ -1475,8 +1474,6 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
-    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 

@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -185,11 +186,13 @@ public:
 void TimePickerPatternTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void TimePickerPatternTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void TimePickerPatternTestNg::SetUp()
@@ -322,6 +325,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
 }
 
 /**
+ * @tc.name: TimePickerModelNGSetDisappearTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(10);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
+}
+
+/**
  * @tc.name: TimePickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TimePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
@@ -383,6 +401,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetNormalTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**
@@ -451,6 +484,22 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetSelectedTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**
@@ -961,10 +1010,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     ZeroPrefixType showType = ZeroPrefixType::SHOW;
     ZeroPrefixType hideType = ZeroPrefixType::HIDE;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
     TimePickerModelNG::GetInstance()->SetHour24(true);
@@ -1000,7 +1049,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, Test
         std::to_string(CURRENT_VALUE1) + COLON +
         ZERO + std::to_string(CURRENT_VALUE1) + COLON +
         std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -1011,10 +1060,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, Test
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     ZeroPrefixType showType = ZeroPrefixType::SHOW;
     ZeroPrefixType hideType = ZeroPrefixType::HIDE;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, false);
     TimePickerModelNG::GetInstance()->SetHour24(false);
@@ -1052,7 +1101,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, Test
     amPmPickerColumnPattern->SetCurrentIndex(1);
     EXPECT_EQ(accessibilityProperty->GetText(),
         PM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -2883,8 +2932,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus00
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow004, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -2917,7 +2966,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow004, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -2928,8 +2977,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow004, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow005, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -2962,7 +3011,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow005, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -2973,8 +3022,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow005, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow006, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3007,7 +3056,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow006, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3018,8 +3067,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow006, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow007, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3052,7 +3101,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow007, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3063,8 +3112,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow007, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow008, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3097,7 +3146,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow008, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3108,8 +3157,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow008, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow009, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3142,7 +3191,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow009, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3153,8 +3202,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow009, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow010, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3187,7 +3236,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow010, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3198,8 +3247,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow010, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow011, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3232,7 +3281,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow011, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3243,8 +3292,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow011, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow012, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3277,7 +3326,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow012, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3288,8 +3337,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow012, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow013, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3322,7 +3371,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow013, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3333,8 +3382,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow013, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow014, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3367,7 +3416,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow014, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3378,8 +3427,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow014, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow015, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3412,7 +3461,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow015, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3423,8 +3472,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow015, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow016, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3457,7 +3506,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow016, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3468,8 +3517,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow016, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow017, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3502,7 +3551,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow017, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3513,8 +3562,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow017, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow018, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3547,7 +3596,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow018, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3558,8 +3607,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow018, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow019, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3592,7 +3641,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow019, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3603,8 +3652,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow019, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow020, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3637,7 +3686,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow020, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3648,8 +3697,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow020, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow021, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3682,7 +3731,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow021, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3693,8 +3742,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow021, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow022, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3727,7 +3776,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow022, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3738,8 +3787,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow022, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow023, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3772,7 +3821,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow023, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3783,8 +3832,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow023, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow024, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3817,7 +3866,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow024, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3828,8 +3877,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow024, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow025, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3862,7 +3911,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow025, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3873,8 +3922,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow025, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow026, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3907,7 +3956,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow026, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3918,8 +3967,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow026, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow027, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3952,7 +4001,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow027, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE3));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -3963,8 +4012,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow027, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow028, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -3997,7 +4046,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow028, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4008,8 +4057,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow028, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow029, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4042,7 +4091,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow029, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4053,8 +4102,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow029, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow030, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4087,7 +4136,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow030, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4098,8 +4147,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow030, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow031, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4132,7 +4181,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow031, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4143,8 +4192,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow031, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow032, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4177,7 +4226,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow032, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4188,8 +4237,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow032, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow033, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4222,7 +4271,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow033, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4233,8 +4282,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow033, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow034, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4267,7 +4316,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow034, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4278,8 +4327,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow034, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow035, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4312,7 +4361,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow035, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4323,8 +4372,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow035, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow036, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4357,7 +4406,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow036, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4368,8 +4417,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow036, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow037, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4402,7 +4451,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow037, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4413,8 +4462,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow037, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow038, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4447,7 +4496,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow038, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4458,8 +4507,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow038, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow039, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4492,7 +4541,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow039, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE4));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4503,8 +4552,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow039, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow040, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4537,7 +4586,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow040, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4548,8 +4597,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow040, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow041, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4582,7 +4631,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow041, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + ZERO + std::to_string(CURRENT_VALUE5) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4593,8 +4642,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow041, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow042, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4627,7 +4676,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow042, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE5) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -4638,8 +4687,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow042, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow043, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     /**
      * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
      */
@@ -4672,6 +4721,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow043, TestSize.Level1)
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(),
         AM + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

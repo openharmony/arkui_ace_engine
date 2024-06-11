@@ -77,8 +77,17 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
         if (gesture == recognizer) {
             continue;
         }
-        if (gesture) {
-            gesture->OnRejected();
+        if (!gesture || gesture->IsBridgeMode()) {
+            continue;
+        }
+        gesture->OnRejected();
+        auto bridgeObjList = gesture->GetBridgeObj();
+        for (const auto& item : bridgeObjList) {
+            auto bridgeObj = item.Upgrade();
+            if (bridgeObj) {
+                bridgeObj->OnRejected();
+                bridgeObj->OnRejectBridgeObj();
+            }
         }
     }
     if (queryStateFunc_) {
@@ -204,7 +213,7 @@ bool GestureScope::IsReady()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer && recognizer->GetRefereeState() != RefereeState::READY) {
+        if (recognizer && !recognizer->IsReady()) {
             return false;
         }
     }
@@ -223,6 +232,17 @@ bool GestureScope::HasFailRecognizer()
 }
 
 void GestureScope::ForceCleanGestureScope()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->ForceCleanRecognizer();
+        }
+    }
+    recognizers_.clear();
+}
+
+void GestureScope::ForceCleanGestureScopeState()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
@@ -295,6 +315,15 @@ bool GestureReferee::QueryAllDone()
     return true;
 }
 
+bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
+{
+    bool ret = false;
+    if (!isAxis && lastIsAxis_ && type == SourceType::TOUCH) {
+        ret = true;
+    }
+    return ret;
+}
+
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
 {
     bool ret = false;
@@ -356,6 +385,13 @@ void GestureReferee::ForceCleanGestureReferee()
         iter->second->ForceCleanGestureScope();
     }
     gestureScopes_.clear();
+}
+
+void GestureReferee::ForceCleanGestureRefereeState()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->ForceCleanGestureScopeState();
+    }
 }
 
 void GestureReferee::CleanGestureRefereeState(int32_t touchId)

@@ -53,6 +53,11 @@ public:
         buttonRow_ = value;
     }
 
+    void SetDatePickerButtonHide(bool value)
+    {
+        isDatePickerButtonHade_ = value;
+    }
+
     void Play(bool isIn);
 
 private:
@@ -101,6 +106,7 @@ private:
     bool created_ = false;
     bool isInAnimationPlaying_ = false;
     bool isOutAnimationPlaying_ = false;
+    bool isDatePickerButtonHade_ = false;
 };
 } // namespace OHOS::Ace
 

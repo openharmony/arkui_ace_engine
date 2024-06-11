@@ -593,12 +593,17 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(iconPattern);
         auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconLayoutProperty);
+        auto iconLayoutDirection = iconLayoutProperty->GetNonAutoLayoutDirection();
         CalcSize idealSize = { CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;
         iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
         MarginProperty margin;
         margin.right = CalcLength(ICON_TEXT_SPACE);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRtl || iconLayoutDirection == TextDirection::RTL) {
+            margin.left = CalcLength(ICON_TEXT_SPACE);
+        }
         iconLayoutProperty->UpdateMargin(margin);
 
         auto textNode = DynamicCast<FrameNode>(linearLayoutNode->GetLastChild());
@@ -953,6 +958,9 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+            return;
+        }
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -1246,26 +1254,40 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
 
 double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
+    double distance = 0.0;
     double val = 0.0;
-    val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
-          optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-    val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-    if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-        val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+    if (columnkind_ == TEXT) {
+        if (GreatOrEqual(optionProperties_[nextIndex].fontheight, optionProperties_[nextIndex].height)) {
+            distance = (dir == ScrollDirection::UP) ?
+                - optionProperties_[nextIndex].height : optionProperties_[index].height;
+        } else {
+            val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
+                  optionProperties_[nextIndex].fontheight / HALF_NUMBER;
+            val = std::round(val);
+            distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+        }
+    } else {
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
-    return std::round(val);
+    return distance;
 }
 
 double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
     double distance = 0.0;
     double val = 0.0;
-    if (dir == ScrollDirection::UP) {
-        distance = -optionProperties_[nextIndex].height;
+    if (columnkind_ == TEXT) {
+        if (dir == ScrollDirection::UP) {
+            distance = -optionProperties_[nextIndex].height;
+        } else {
+            val = optionProperties_[index].height +
+                  (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+            distance = std::round(val);
+        }
     } else {
-        val = optionProperties_[index].height +
-              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-        distance = std::round(val);
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
     return distance;
 }
@@ -1274,15 +1296,20 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 {
     double distance = 0.0;
     double val = 0.0;
-    if (dir == ScrollDirection::DOWN) {
-        distance = optionProperties_[index].height;
-    } else {
-        val = optionProperties_[index].height +
-              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-        if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-            val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+    if (columnkind_ == TEXT) {
+        if (dir == ScrollDirection::DOWN) {
+            distance = optionProperties_[index].height;
+        } else {
+            val = optionProperties_[index].height +
+                  (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+            if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+                val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+            }
+            distance = - std::round(val);
         }
-        distance = - std::round(val);
+    } else {
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
     return distance;
 }
@@ -1297,39 +1324,17 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
     auto isDown = dir == ScrollDirection::DOWN;
     nextIndex = isDown ? (optionCounts + index + 1) % optionCounts : (optionCounts + index - 1) % optionCounts;
     double distance = 0.0;
-    double val = 0.0;
     switch (static_cast<OptionIndex>(index)) {
         case OptionIndex::COLUMN_INDEX_0:
-            if (dir == ScrollDirection::UP) {
-                distance = 0.0 - optionProperties_[index].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = std::round(val);
-            }
+            distance = GetUpCandidateDistance(index, nextIndex, dir);
             break;
 
         case OptionIndex::COLUMN_INDEX_1:
-            val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-            val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-            if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-                val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
-            }
-            distance = std::round(val);
+            distance = GetSelectedDistance(index, nextIndex, dir);
             break;
 
         case OptionIndex::COLUMN_INDEX_2:
-            if (dir == ScrollDirection::DOWN) {
-                distance = optionProperties_[index].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-                    val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
-                }
-                distance = - std::round(val);
-            }
+            distance = GetDownCandidateDistance(index, nextIndex, dir);
             break;
         default:
             break;

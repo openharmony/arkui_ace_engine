@@ -40,6 +40,7 @@ public:
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
     bool IsOverlayCreated();
     void UpdatePressOverlay(

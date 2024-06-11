@@ -28,6 +28,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/image/image_cache.h"
 #ifndef ACE_UNITTEST
+#include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #endif
@@ -38,15 +39,15 @@ namespace {
 constexpr float LUMR = 0.2126f;
 constexpr float LUMG = 0.7152f;
 constexpr float LUMB = 0.0722f;
-
+constexpr double HALF = 0.5;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
 constexpr double MAX_GRAYSCALE = 255.0;
 constexpr int32_t DEFAULT_SAVE_COUNT = 1;
-#ifndef ACE_UNITTEST
 constexpr double HANGING_PERCENT = 0.8;
+#ifndef ACE_UNITTEST
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 #endif
 
@@ -160,12 +161,10 @@ bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<Filter
 
 void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
-    rsRecordingCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
-    rsCanvas_ = std::static_pointer_cast<RSCanvas>(rsRecordingCanvas_);
-    contentModifier_->UpdateCanvas(rsRecordingCanvas_);
-    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
-    CHECK_NULL_VOID(rsCanvas);
-    rsCanvas->Save();
+    rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
+    contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
+    CHECK_NULL_VOID(rsCanvas_);
+    rsCanvas_->Save();
     if (canvasCallback_) {
         canvasCallback_(rsCanvas_.get(), width, height);
     }
@@ -273,10 +272,8 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
 RSMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& pattern)
 {
     RSMatrix matrix;
-    double viewScale = 1.0;
-    matrix.SetMatrix(pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale,
-        pattern.GetTranslateX() * viewScale, pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale,
-        pattern.GetTranslateY() * viewScale, 0.0f, 0.0f, 1.0f);
+    matrix.SetMatrix(pattern.GetScaleX(), pattern.GetSkewX(), pattern.GetTranslateX(), pattern.GetSkewY(),
+        pattern.GetScaleY(), pattern.GetTranslateY(), 0.0f, 0.0f, 1.0f);
     return matrix;
 }
 
@@ -490,13 +487,13 @@ void CustomPaintPaintMethod::DrawSvgImage(const Ace::CanvasImage& canvasImage)
     OffsetF startPoint =
         OffsetF(dstRect.GetLeft(), dstRect.GetTop()) - OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
 
-    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
-    rsCanvas->Save();
-    if (rsCanvas->GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
+    CHECK_NULL_VOID(rsCanvas_);
+    rsCanvas_->Save();
+    if (rsCanvas_->GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
         RSBitmap bitmap;
         RSBrush brush;
         RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-        bitmap.Build(rsCanvas->GetWidth(), rsCanvas->GetHeight(), bitmapFormat);
+        bitmap.Build(rsCanvas_->GetWidth(), rsCanvas_->GetHeight(), bitmapFormat);
         bitmap.ClearWithColor(RSColor::COLOR_TRANSPARENT);
         auto rs_OffscreenCanvas = std::make_unique<RSCanvas>();
         rs_OffscreenCanvas->Bind(bitmap);
@@ -504,16 +501,16 @@ void CustomPaintPaintMethod::DrawSvgImage(const Ace::CanvasImage& canvasImage)
         rs_OffscreenCanvas->Translate(startPoint.GetX(), startPoint.GetY());
         rs_OffscreenCanvas->Scale(scaleX, scaleY);
         rs_OffscreenCanvas->DrawSVGDOM(skiaDom_);
-        rsCanvas->AttachBrush(brush);
-        rsCanvas->DrawBitmap(bitmap, 0, 0);
-        rsCanvas->DetachBrush();
+        rsCanvas_->AttachBrush(brush);
+        rsCanvas_->DrawBitmap(bitmap, 0, 0);
+        rsCanvas_->DetachBrush();
     } else {
-        rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
-        rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
-        rsCanvas->Scale(scaleX, scaleY);
-        rsCanvas->DrawSVGDOM(skiaDom_);
+        rsCanvas_->ClipRect(dstRect, RSClipOp::INTERSECT);
+        rsCanvas_->Translate(startPoint.GetX(), startPoint.GetY());
+        rsCanvas_->Scale(scaleX, scaleY);
+        rsCanvas_->DrawSVGDOM(skiaDom_);
     }
-    rsCanvas->Restore();
+    rsCanvas_->Restore();
 #endif
 }
 
@@ -550,20 +547,18 @@ void CustomPaintPaintMethod::DrawSvgImage(
     OffsetF startPoint =
         OffsetF(dstRect.GetLeft(), dstRect.GetTop()) - OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
 
-    RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
-    CHECK_NULL_VOID(rsCanvas);
-    rsCanvas->Save();
-    rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
-    rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
-    rsCanvas->Scale(scaleX, scaleY);
-    svgDom->DrawImage(*rsCanvas, imageFit, Size(srcRect.GetWidth(), srcRect.GetHeight()));
-    rsCanvas->Restore();
+    CHECK_NULL_VOID(rsCanvas_);
+    rsCanvas_->Save();
+    rsCanvas_->ClipRect(dstRect, RSClipOp::INTERSECT);
+    rsCanvas_->Translate(startPoint.GetX(), startPoint.GetY());
+    rsCanvas_->Scale(scaleX, scaleY);
+    svgDom->DrawImage(*rsCanvas_, imageFit, Size(srcRect.GetWidth(), srcRect.GetHeight()));
+    rsCanvas_->Restore();
 }
 
 void CustomPaintPaintMethod::DrawImageInternal(
     const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
-    const auto rsCanvas = rsCanvas_.get();
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
@@ -580,18 +575,18 @@ void CustomPaintPaintMethod::DrawImageInternal(
             canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
-        PaintImageShadow(path, state_.shadow, rsCanvas, &imageBrush_, nullptr,
+        PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
             (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) ? &slo : nullptr);
     }
-    rsCanvas->AttachBrush(imageBrush_);
+    rsCanvas_->AttachBrush(imageBrush_);
     switch (canvasImage.flag) {
         case DrawImageType::THREE_PARAMS:
-            rsCanvas->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
+            rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
             break;
         case DrawImageType::FIVE_PARAMS: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
                 canvasImage.dHeight + canvasImage.dy);
-            rsCanvas->DrawImageRect(*image, rect, sampleOptions_);
+            rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
             break;
         }
         case DrawImageType::NINE_PARAMS: {
@@ -599,14 +594,14 @@ void CustomPaintPaintMethod::DrawImageInternal(
                 canvasImage.dHeight + canvasImage.dy);
             RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
                 canvasImage.sHeight + canvasImage.sy);
-            rsCanvas->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
+            rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
                 RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
             break;
         }
         default:
             break;
     }
-    rsCanvas->DetachBrush();
+    rsCanvas_->DetachBrush();
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->Restore();
     }
@@ -623,8 +618,21 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 
     ContainerScope scope(canvasImage.instanceId);
     auto context = PipelineBase::GetCurrentContext();
-    auto image = Ace::ImageProvider::GetDrawingImage(
-        canvasImage.src, context, Size(std::max(width, 0.0), std::max(height, 0.0)));
+    auto image = std::make_shared<RSImage>();
+    if (canvasImage.imageData != nullptr) {
+        auto imageData = *(canvasImage.imageData);
+        if (imageData.data.empty()) {
+            return;
+        }
+        RSBitmap bitmap;
+        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+        bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
+        bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
+        image->BuildFromBitmap(bitmap);
+    } else {
+        image = Ace::ImageProvider::GetDrawingImage(
+            canvasImage.src, context, Size(std::max(width, 0.0), std::max(height, 0.0)));
+    }
     CHECK_NULL_VOID(image);
     DrawImageInternal(canvasImage, image);
 #endif
@@ -635,22 +643,15 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
     if (imageData.data.empty()) {
         return;
     }
-    uint32_t* data = new (std::nothrow) uint32_t[imageData.data.size()];
-    CHECK_NULL_VOID(data);
-
-    for (uint32_t i = 0; i < imageData.data.size(); ++i) {
-        data[i] = imageData.data[i].GetValue();
-    }
     RSBitmap bitmap;
     RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
-    bitmap.SetPixels(data);
+    bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;
     brush.SetBlendMode(RSBlendMode::SRC);
     rsCanvas_->AttachBrush(brush);
     rsCanvas_->DrawBitmap(bitmap, imageData.x, imageData.y);
     rsCanvas_->DetachBrush();
-    delete[] data;
 }
 
 void CustomPaintPaintMethod::FillRect(const Rect& rect)
@@ -680,7 +681,7 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, state_.shadow, rsCanvas_.get(), &brush, nullptr);
+            PaintShadow(path, state_.shadow, &brush, nullptr);
         }
         rsCanvas_->AttachBrush(brush);
         rsCanvas_->DrawRect(rsRect);
@@ -693,7 +694,7 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, state_.shadow, rsCanvas_.get(), &brush, nullptr, &slo);
+            PaintShadow(path, state_.shadow, &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -722,7 +723,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, state_.shadow, rsCanvas_.get(), nullptr, &pen);
+            PaintShadow(path, state_.shadow, nullptr, &pen);
         }
         rsCanvas_->AttachPen(pen);
         rsCanvas_->DrawRect(rsRect);
@@ -735,7 +736,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
         if (HasShadow()) {
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, state_.shadow, rsCanvas_.get(), nullptr, &pen, &slo);
+            PaintShadow(path, state_.shadow, nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
@@ -801,7 +802,7 @@ void CustomPaintPaintMethod::Fill()
     }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
-            PaintShadow(rsPath_, state_.shadow, rsCanvas_.get(), &brush, nullptr);
+            PaintShadow(rsPath_, state_.shadow, &brush, nullptr);
         }
         rsCanvas_->AttachBrush(brush);
         rsCanvas_->DrawPath(rsPath_);
@@ -812,7 +813,7 @@ void CustomPaintPaintMethod::Fill()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            PaintShadow(rsPath_, state_.shadow, rsCanvas_.get(), &brush, nullptr, &slo);
+            PaintShadow(rsPath_, state_.shadow, &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -855,7 +856,7 @@ void CustomPaintPaintMethod::Path2DFill()
     }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
-            PaintShadow(rsPath2d_, state_.shadow, rsCanvas_.get(), &brush, nullptr);
+            PaintShadow(rsPath2d_, state_.shadow, &brush, nullptr);
         }
         rsCanvas_->AttachBrush(brush);
         rsCanvas_->DrawPath(rsPath2d_);
@@ -866,7 +867,7 @@ void CustomPaintPaintMethod::Path2DFill()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            PaintShadow(rsPath2d_, state_.shadow, rsCanvas_.get(), &brush, nullptr, &slo);
+            PaintShadow(rsPath2d_, state_.shadow, &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -891,7 +892,7 @@ void CustomPaintPaintMethod::Stroke()
     }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
-            PaintShadow(rsPath_, state_.shadow, rsCanvas_.get(), nullptr, &pen);
+            PaintShadow(rsPath_, state_.shadow, nullptr, &pen);
         }
         rsCanvas_->AttachPen(pen);
         rsCanvas_->DrawPath(rsPath_);
@@ -902,7 +903,7 @@ void CustomPaintPaintMethod::Stroke()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            PaintShadow(rsPath_, state_.shadow, rsCanvas_.get(), nullptr, &pen, &slo);
+            PaintShadow(rsPath_, state_.shadow, nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
@@ -935,7 +936,7 @@ void CustomPaintPaintMethod::Path2DStroke()
     }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
-            PaintShadow(rsPath2d_, state_.shadow, rsCanvas_.get(), nullptr, &pen);
+            PaintShadow(rsPath2d_, state_.shadow, nullptr, &pen);
         }
         rsCanvas_->AttachPen(pen);
         rsCanvas_->DrawPath(rsPath2d_);
@@ -946,7 +947,7 @@ void CustomPaintPaintMethod::Path2DStroke()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            PaintShadow(rsPath2d_, state_.shadow, rsCanvas_.get(), nullptr, &pen, &slo);
+            PaintShadow(rsPath2d_, state_.shadow, nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
@@ -1315,7 +1316,58 @@ void CustomPaintPaintMethod::Translate(double x, double y)
     rsCanvas_->Translate(x, y);
 }
 
-double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<RSParagraph>& paragraph)
+void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
+    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        paragraph_->Layout(FLT_MAX);
+    } else {
+        paragraph_->Layout(width);
+    }
+    if (width > paragraph_->GetMaxIntrinsicWidth()) {
+        paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
+    }
+    auto align = isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign();
+    double dx = 0.0;
+    if (maxWidth.has_value() && (maxWidth.value() < paragraph_->GetMaxIntrinsicWidth())) {
+        dx = x + GetAlignOffset(align, maxWidth.value());
+    } else {
+        dx = x + GetAlignOffset(align, paragraph_->GetMaxIntrinsicWidth());
+    }
+    auto baseline = isStroke ? state_.strokeState.GetTextStyle().GetTextBaseline()
+                             : state_.fillState.GetTextStyle().GetTextBaseline();
+    double dy = y + GetBaselineOffset(baseline, paragraph_);
+
+    std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
+    if (hasShadow) {
+        rsCanvas_->Save();
+        auto shadowOffsetX = state_.shadow.GetOffset().GetX();
+        auto shadowOffsetY = state_.shadow.GetOffset().GetY();
+        if (scale.has_value()) {
+            if (!NearZero(scale.value())) {
+                dx /= scale.value();
+                shadowOffsetX /= scale.value();
+            }
+            rsCanvas_->Scale(scale.value(), 1.0);
+        }
+        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
+        rsCanvas_->Restore();
+        return;
+    }
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            dx /= scale.value();
+        }
+        rsCanvas_->Save();
+        rsCanvas_->Scale(scale.value(), 1.0);
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
+        rsCanvas_->Restore();
+    } else {
+        paragraph_->Paint(rsCanvas_.get(), dx, dy);
+    }
+}
+
+double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, double width)
 {
     double x = 0.0;
     TextDirection textDirection = state_.fillState.GetOffTextDirection();
@@ -1324,22 +1376,51 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<R
             x = 0.0;
             break;
         case TextAlign::START:
-            x = (textDirection == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
+            x = (textDirection == TextDirection::LTR) ? 0.0 : -width;
             break;
         case TextAlign::RIGHT:
-            x = -paragraph->GetMaxIntrinsicWidth();
+            x = -width;
             break;
         case TextAlign::END:
-            x = (textDirection == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
+            x = (textDirection == TextDirection::LTR) ? -width : 0.0;
             break;
         case TextAlign::CENTER:
-            x = -paragraph->GetMaxIntrinsicWidth() / 2.0;
+            x = -width * HALF;
             break;
         default:
             x = 0.0;
             break;
     }
     return x;
+}
+
+double CustomPaintPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph)
+{
+    double y = 0.0;
+    switch (baseline) {
+        case TextBaseline::ALPHABETIC:
+            y = -paragraph->GetAlphabeticBaseline();
+            break;
+        case TextBaseline::IDEOGRAPHIC:
+            y = -paragraph->GetIdeographicBaseline();
+            break;
+        case TextBaseline::BOTTOM:
+            y = -paragraph->GetHeight();
+            break;
+        case TextBaseline::TOP:
+            y = 0.0;
+            break;
+        case TextBaseline::MIDDLE:
+            y = -paragraph->GetHeight() * HALF;
+            break;
+        case TextBaseline::HANGING:
+            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
+            break;
+        default:
+            y = -paragraph->GetAlphabeticBaseline();
+            break;
+    }
+    return y;
 }
 
 #ifndef ACE_UNITTEST
@@ -1899,9 +1980,8 @@ void CustomPaintPaintMethod::ScaleMatrix(double sx, double sy)
 
 void CustomPaintPaintMethod::SetTransformMatrix(const TransformParam& param)
 {
-    double viewScale = 1.0;
-    matrix_.SetMatrix(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
-        param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    matrix_.SetMatrix(
+        param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
 }
 
 void CustomPaintPaintMethod::TransformMatrix(const TransformParam& param)
@@ -1947,5 +2027,46 @@ void CustomPaintPaintMethod::ResetStates()
     rsPath2d_.Reset();
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<RSMatrix>().swap(matrixStates_);
+}
+
+void CustomPaintPaintMethod::PaintShadow(
+    const RSPath& path, const Shadow& shadow, const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(rsCanvas_);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        rsCanvas_->SaveLayer(*slo);
+        RosenDecorationPainter::PaintShadow(path, shadow, rsCanvas_.get(), brush, pen);
+        rsCanvas_->Restore();
+    } else {
+        RosenDecorationPainter::PaintShadow(path, shadow, rsCanvas_.get(), brush, pen);
+    }
+#endif
+}
+
+void CustomPaintPaintMethod::PaintImageShadow(
+    const RSPath& path, const Shadow& shadow, const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(rsCanvas_);
+    RosenDecorationPainter::PaintShadow(path, shadow, rsCanvas_.get(), brush, pen);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        rsCanvas_->Restore();
+        rsCanvas_->SaveLayer(*slo);
+    }
+#endif
+}
+
+void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
+{
+    rsPath2d_.AddRect(RSRect(args.para1, args.para2, args.para3 + args.para1, args.para4 + args.para2));
+}
+
+void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
+{
+    RSMatrix rsMatrix;
+    rsMatrix.SetMatrix(
+        param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
+    rsCanvas_->SetMatrix(rsMatrix);
 }
 } // namespace OHOS::Ace::NG

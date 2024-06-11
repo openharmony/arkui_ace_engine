@@ -80,6 +80,14 @@ private:
         const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline);
     static void UpdateOptionLayoutProps(
         const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext);
+    static void SetCalendarIdealSize(
+        const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty);
+    static void SetTitleIdealSize(const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps);
+    static void OperationsToPattern(const RefPtr<FrameNode>& frameNode, const CalendarSettingData& settingData,
+        const DialogProperties& dialogProperties, const std::vector<ButtonInfo>& buttonInfos);
+    static void CreateChildNode(const RefPtr<FrameNode>& contentColumn,
+        const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties);
+    static void InitCalendarProperty(const RefPtr<FrameNode>& calendarNode);
 };
 } // namespace OHOS::Ace::NG
 

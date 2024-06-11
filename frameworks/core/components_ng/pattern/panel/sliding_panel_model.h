@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace {
 
-class SlidingPanelModel {
+class ACE_FORCE_EXPORT SlidingPanelModel {
 public:
     static SlidingPanelModel* GetInstance();
     virtual ~SlidingPanelModel() = default;

@@ -59,6 +59,7 @@ void CalendarPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
+    UpdateEntryButtonBorderWidth();
 }
 
 void CalendarPickerPattern::InitDateIndex()
@@ -123,6 +124,70 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             imageNode->MarkModifyDone();
         }
     }
+}
+
+void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFlexNode = host->GetLastChild();
+    CHECK_NULL_VOID(buttonFlexNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto addButtonNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(ADD_BUTTON_INDEX));
+    CHECK_NULL_VOID(addButtonNode);
+    auto subButtonNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(SUB_BUTTON_INDEX));
+    CHECK_NULL_VOID(subButtonNode);
+    
+    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    BorderWidthProperty addBorderWidth;
+    BorderWidthProperty subBorderWidth;
+    if (textDirection == TextDirection::RTL) {
+        addBorderWidth.rightDimen = theme->GetEntryBorderWidth();
+        subBorderWidth.rightDimen = theme->GetEntryBorderWidth();
+        addBorderWidth.leftDimen = 0.0_vp;
+        subBorderWidth.leftDimen = 0.0_vp;
+    } else {
+        addBorderWidth.rightDimen = 0.0_vp;
+        subBorderWidth.rightDimen = 0.0_vp;
+        addBorderWidth.leftDimen = theme->GetEntryBorderWidth();
+        subBorderWidth.leftDimen = theme->GetEntryBorderWidth();
+    }
+    addButtonNode->GetLayoutProperty()->UpdateBorderWidth(addBorderWidth);
+    subButtonNode->GetLayoutProperty()->UpdateBorderWidth(subBorderWidth);
+    addButtonNode->MarkModifyDone();
+    subButtonNode->MarkModifyDone();
+}
+
+void CalendarPickerPattern::UpdateEdgeAlign()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+
+    auto rtlAlignType = align_;
+    auto rtlX = offset_.GetX().Value();
+    if (textDirection == TextDirection::RTL) {
+        switch (align_) {
+            case CalendarEdgeAlign::EDGE_ALIGN_START:
+                rtlAlignType = CalendarEdgeAlign::EDGE_ALIGN_END;
+                break;
+            case CalendarEdgeAlign::EDGE_ALIGN_END:
+                rtlAlignType = CalendarEdgeAlign::EDGE_ALIGN_START;
+                break;
+            default:
+                break;
+        }
+        rtlX = -offset_.GetX().Value();
+    }
+
+    layoutProperty->UpdateDialogAlignType(rtlAlignType);
+    layoutProperty->UpdateDialogOffset(DimensionOffset(Dimension(rtlX), offset_.GetY()));
 }
 
 bool CalendarPickerPattern::OnDirtyLayoutWrapperSwap(
@@ -525,7 +590,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearPrefixZeroCount_ > 0 && yearPrefixZeroCount_ < YEAR_LENTH - 1 && number == 0 &&
         yearEnterCount_ == yearPrefixZeroCount_ + 1) {
         yearPrefixZeroCount_++;
-        PostTaskToUI(std::move(zeroStartTask), "ArkUICalendarPickerYearZeroStart");
+        PostTaskToUI(std::move(zeroStartTask), "ArkUICalendarPickerYearKeyWaitingZeroStart");
         return true;
     } else if (yearPrefixZeroCount_ >= YEAR_LENTH - 1 && number == 0) {
         yearPrefixZeroCount_ = 0;
@@ -542,7 +607,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearEnterCount_ < YEAR_LENTH) {
         json->Replace("year", static_cast<int32_t>(newYear));
         SetDate(json->ToString());
-        PostTaskToUI(std::move(task), "ArkUICalendarPickerYearChange");
+        PostTaskToUI(std::move(task), "ArkUICalendarPickerYearKeyWaitingChange");
         return true;
     }
     newYear = std::max(newYear, MIN_YEAR);
@@ -966,6 +1031,7 @@ void CalendarPickerPattern::HandleSubButtonClick()
 
 OffsetF CalendarPickerPattern::CalculateDialogOffset()
 {
+    UpdateEdgeAlign();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();

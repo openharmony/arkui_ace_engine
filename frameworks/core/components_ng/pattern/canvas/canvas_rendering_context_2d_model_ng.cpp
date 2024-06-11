@@ -80,10 +80,10 @@ std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void CanvasRenderingContext2DModelNG::SetFillGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillGradient(gradient);
+    pattern_->SetFillGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -98,10 +98,10 @@ void CanvasRenderingContext2DModelNG::SetFillColor(const Color& color, bool colo
     pattern_->UpdateFillColor(color);
 }
 
-void CanvasRenderingContext2DModelNG::SetStrokeGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeGradient(gradient);
+    pattern_->SetStrokeGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -590,7 +590,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 }
 #else
 void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData)
+    RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData)
 {
     auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);

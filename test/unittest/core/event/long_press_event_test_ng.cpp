@@ -119,8 +119,9 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
      * @tc. OnCollectTouchTarget return directly
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     longPressEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_, nullptr);
     /**
@@ -161,13 +162,13 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_, nullptr);
     longPressEventActuator->longPressRecognizer_ = nullptr;
     longPressEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_1);
 
     // coverage longPressRecognizer_ is true
     longPressEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, responseLinkResult);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_2);
 

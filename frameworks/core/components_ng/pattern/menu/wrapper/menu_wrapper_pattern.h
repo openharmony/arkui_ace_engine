@@ -187,6 +187,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetIsShowHoverImagePreviewStartDrag(bool isStart)
+    {
+        isShowHoverImagePreviewStartDrag_ = isStart;
+    }
+
+    bool GetIsShowHoverImagePreviewStartDrag()
+    {
+        return isShowHoverImagePreviewStartDrag_;
+    }
+
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -350,6 +360,7 @@ public:
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool HasStackSubMenu();
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -393,6 +404,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool isShowHoverImagePreviewStartDrag_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

@@ -106,7 +106,7 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -122,7 +122,7 @@ bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(TextStyle& textStyle, double& ma
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptFontSizeStep(TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -162,5 +162,23 @@ bool TextAdaptFontSizer::IsAdaptExceedLimit(const SizeF& maxSize)
     CHECK_NULL_RETURN(paragraph, false);
     return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const double& maxFontSize, const double& minFontSize)
+{
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        return false;
+    }
+    return true;
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
+    return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
 } // namespace OHOS::Ace::NG

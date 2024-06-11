@@ -238,8 +238,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleSingle(float scale);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleX(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleY(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam3(bool isShow, void (*builder)(), CJSheetOptions option);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam2(bool isShow, void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
 
 struct CJSetRotate {
     float dx;

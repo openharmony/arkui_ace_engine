@@ -115,6 +115,8 @@ public:
         return rsUIDirector_->GetAnimateExpectedRate();
     }
 
+    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

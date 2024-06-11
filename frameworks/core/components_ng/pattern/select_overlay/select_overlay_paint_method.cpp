@@ -33,20 +33,21 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textOverlayTheme);
 
     const auto& padding = textOverlayTheme->GetMenuPadding();
+    auto left = padding.Left().ConvertToPx();
     auto right = padding.Right().ConvertToPx();
     auto top = padding.Top().ConvertToPx();
     auto sideWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - padding.Top().ConvertToPx() -
                      padding.Bottom().ConvertToPx();
     auto buttonRadius = sideWidth / 2.0;
-
-    auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
+    auto offset = isReversePaint_ ? defaultMenuStartOffset_ + OffsetF(buttonRadius + left, buttonRadius + top) :
+                                    defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, selectMenuHeight_ / 2.0f);
     }
 
     CheckCirclesAndBackArrowIsShown();
     CheckHasExtensionMenu();
-
+    selectOverlayModifier_->SetIsReverse(isReversePaint_);
     selectOverlayModifier_->SetMenuOptionOffset(offset);
     selectOverlayModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
     selectOverlayModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
@@ -63,13 +64,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
     auto viewPort = paintWrapper->GetGeometryNode()->GetFrameRect() - offset;
-    auto frameNode = info_.callerFrameNode.Upgrade();
-    if (frameNode) {
-        auto viewPortOption = frameNode->GetViewPort();
-        if (viewPortOption.has_value()) {
-            viewPort = viewPortOption.value();
-        }
-    }
+    info_.GetCallerNodeAncestorViewPort(viewPort);
+
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);

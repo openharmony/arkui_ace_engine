@@ -243,6 +243,12 @@ enum class TextOverflow {
     DEFAULT,
 };
 
+enum class TextSelectableMode {
+    SELECTABLE_UNFOCUSABLE = 0,
+    SELECTABLE_FOCUSABLE,
+    UNSELECTABLE,
+};
+
 namespace StringUtils {
 inline std::string ToString(const TextOverflow& textOverflow)
 {
@@ -565,6 +571,13 @@ enum class TabBarMode {
     FIXED_START,
 };
 
+enum class TabAnimateMode {
+    CONTENT_FIRST = 0,
+    ACTION_FIRST,
+    NO_ANIMATION,
+    MAX_VALUE,
+};
+
 enum class ShowInNavigationBar {
     SHOW = 0,
     POPUP,
@@ -582,6 +595,11 @@ enum class VerticalAlign {
     BOTTOM,
     BASELINE,
     NONE,
+};
+
+enum class SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATE,
 };
 
 namespace StringUtils {

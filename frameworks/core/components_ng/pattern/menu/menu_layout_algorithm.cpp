@@ -322,9 +322,12 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(layoutWrapper);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (menuTheme->GetNormalPlacement()) {
         ModifyNormalPreviewMenuPlacement(layoutWrapper);
     } else {
         if (!hasPlacement) {
@@ -1230,7 +1233,11 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(false);
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetNormalLayout()) {
         LayoutNormalPreviewMenu(layoutWrapper);
     } else {
         LayoutOtherDevicePreviewMenu(layoutWrapper);
@@ -1312,6 +1319,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
         if (menuPattern->IsSelectOverlayRightClickMenu()) {
@@ -1589,6 +1600,7 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
     const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize)
 {
     auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
+    auto direction = menuProp->GetNonAutoLayoutDirection();
     auto targetSize = menuProp->GetTargetSizeValue(SizeF());
     switch (alignType) {
         case MenuAlignType::CENTER: {
@@ -1596,6 +1608,16 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
             break;
         }
         case MenuAlignType::END: {
+            if (direction == TextDirection::RTL) {
+                return;
+            }
+            position_.AddX(targetSize.Width() - menuSize.Width());
+            break;
+        }
+        case MenuAlignType::START: {
+            if (direction != TextDirection::RTL) {
+                return;
+            }
             position_.AddX(targetSize.Width() - menuSize.Width());
             break;
         }
@@ -1914,7 +1936,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
     } else {
         targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetPaintRectOffset();
+        targetOffset_ = targetNode->GetParentGlobalOffsetDuringLayout() + geometryNode->GetFrameOffset();
     }
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;
@@ -2417,26 +2439,39 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperNode = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto containerId = Container::CurrentIdSafely();
     if (expandDisplay && !isShowInSubWindow) {
-        hierarchicalParameters_ = false;
+        if (containerId >= MIN_SUBCONTAINER_ID && menuWrapperPattern->IsSelectMenu()) {
+            hierarchicalParameters_ = true;
+        } else {
+            hierarchicalParameters_ = false;
+        }
         return;
     }
 
     hierarchicalParameters_ = expandDisplay;
 
     RefPtr<Container> container = Container::Current();
-    auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
+    CHECK_NULL_VOID(container);
+    auto wrapperPipline = menuWrapperNode->GetContext();
+    auto wrapperRect = wrapperPipline ? wrapperPipline->GetDisplayWindowRectInfo() : Rect();
+    auto mainPipline = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto mainRect = mainPipline ? mainPipline->GetDisplayWindowRectInfo() : Rect();
+    if (wrapperRect.IsValid() && mainRect.IsValid() && wrapperRect != mainRect) {
+        hierarchicalParameters_ = true;
+    }
 
-    if (container && container->IsUIExtensionWindow()) {
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWrapperNode = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapperNode);
-        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+    if (container->IsUIExtensionWindow()) {
+        if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;
         }
     }

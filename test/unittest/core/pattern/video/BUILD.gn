@@ -19,5 +19,6 @@ ace_unittest("video_test_ng") {
     "video_property_test_ng.cpp",
     "video_test_ng.cpp",
     "video_test_ng_add.cpp",
+    "video_test_ng_extra_add.cpp",
   ]
 }

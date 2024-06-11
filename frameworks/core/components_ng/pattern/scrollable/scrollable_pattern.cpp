@@ -584,7 +584,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     }
     animateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && (isAtTop || isAtBottom);
     isAnimateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && animateCanOverScroll_ &&
-                            ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)));
+                           ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)) || IsOutOfBoundary());
     return true;
 }
 
@@ -666,19 +666,20 @@ void ScrollablePattern::InitScrollBarGestureEvent()
     scrollableEvent_->SetBarCollectTouchTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+            scrollBar->OnCollectTouchTarget(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetBarCollectLongPressTargetCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
             const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-            const RefPtr<TargetComponent>& targetComponent) {
+            const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectLongPressTarget(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
         });
     scrollableEvent_->SetInBarRectRegionCallback(
         [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const PointF& point, SourceType source) {
@@ -767,7 +768,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
         } else {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = GetContext();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
             CHECK_NULL_VOID(theme);
@@ -977,9 +978,6 @@ void ScrollablePattern::AnimateTo(
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
     finalPosition_ = position;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1000,6 +998,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
+        CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
@@ -1022,6 +1021,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
+            pattern->useTotalOffset_ = true;
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -1040,6 +1040,7 @@ void ScrollablePattern::PlayCurveAnimation(
     InitOption(option, duration, curve);
     if (!curveOffsetProperty_) {
         InitCurveOffsetProperty();
+        CHECK_NULL_VOID(curveOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto pattern = weakScroll.Upgrade();
@@ -1064,9 +1065,6 @@ void ScrollablePattern::PlayCurveAnimation(
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
-#ifdef OHOS_PLATFORM
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -1096,9 +1094,10 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (stopAnimation) {
             offset = pattern->finalPosition_;
         }
+        auto delta = pattern->useTotalOffset_ ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
+        if (!pattern->UpdateCurrentOffset(delta,
             SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
@@ -2035,6 +2034,9 @@ void ScrollablePattern::Fling(double flingVelocity)
     } else {
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)

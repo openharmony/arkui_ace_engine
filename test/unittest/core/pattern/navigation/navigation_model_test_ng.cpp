@@ -1296,7 +1296,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility001, TestSize.Leve
     EXPECT_FALSE(index == static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1323,7 +1324,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility002, TestSize.Leve
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_TRUE(ret);
 }
 
@@ -1356,7 +1358,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility003, TestSize.Leve
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1396,7 +1399,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility004, TestSize.Leve
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_TRUE(ret);
 }
 
@@ -1430,7 +1434,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility005, TestSize.Leve
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1475,7 +1480,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility006, TestSize.Leve
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
     EXPECT_FALSE(navDestinationPattern->GetIsOnShow());
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1520,7 +1526,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility007, TestSize.Leve
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
     EXPECT_TRUE(navDestinationPattern->GetIsOnShow());
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1561,7 +1568,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility008, TestSize.Leve
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1602,7 +1610,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility009, TestSize.Leve
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 

@@ -348,7 +348,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1) {
         return;
     }
     auto styleString = info[0]->ToString();
@@ -905,7 +905,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject() || !info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto jsValue = info[0];
@@ -1704,5 +1704,14 @@ void JSTextField::OnDidDelete(const JSCallbackInfo& info)
         func->ExecuteWithValue(deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
+}
+
+void JSTextField::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
 }
 } // namespace OHOS::Ace::Framework

@@ -17,11 +17,68 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
 
 namespace OHOS::Ace::NG {
+void UpdateToastAlign(int32_t& alignment)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == static_cast<int32_t>(ToastAlignment::TOP_START)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::TOP_END);
+        }
+    } else if (alignment == static_cast<int32_t>(ToastAlignment::TOP_END)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::TOP_START);
+        }
+    } else if (alignment == static_cast<int32_t>(ToastAlignment::CENTER_START)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::CENTER_END);
+        }
+    } else if (alignment == static_cast<int32_t>(ToastAlignment::CENTER_END)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::CENTER_START);
+        }
+    } else if (alignment == static_cast<int32_t>(ToastAlignment::BOTTOM_START)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_END);
+        }
+    } else if (alignment == static_cast<int32_t>(ToastAlignment::BOTTOM_END)) {
+        if (isRtl) {
+            alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_START);
+        }
+    }
+}
+
 void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(toastPattern);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    CHECK_NULL_VOID(toastProperty);
+    auto alignment = toastPattern->GetToastInfo().alignment;
+    UpdateToastAlign(alignment);
+    auto align = Alignment::ParseAlignment(alignment);
+    if (align.has_value()) {
+        toastProperty->UpdateToastAlignment(align.value());
+    } else {
+        toastProperty->ResetToastAlignment();
+    }
+    auto offset = toastPattern->GetToastInfo().offset;
+    if (offset.has_value()) {
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        double xValue = isRtl ? offset->GetX().Value() * (-1) : offset->GetX().Value();
+        Dimension offsetX = Dimension(xValue);
+        offset->SetX(offsetX);
+        toastProperty->UpdateToastOffset(offset.value());
+    } else {
+        toastProperty->ResetToastOffset();
+    }
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     text->Layout();
 }

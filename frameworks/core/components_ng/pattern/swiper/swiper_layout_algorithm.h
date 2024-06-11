@@ -189,16 +189,6 @@ public:
         return currentIndex_;
     }
 
-    void SetIsNeedResetPrevMarginAndNextMargin()
-    {
-        isNeedResetPrevMarginAndNextMargin_ = false;
-    }
-
-    bool GetIsNeedResetPrevMarginAndNextMargin() const
-    {
-        return isNeedResetPrevMarginAndNextMargin_;
-    }
-
     bool IsCrossMatchChild() const
     {
         return crossMatchChild_;
@@ -360,7 +350,6 @@ private:
     std::optional<int32_t> removeFromRSTreeIndex_;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
-    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool useCustomAnimation_ = false;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;

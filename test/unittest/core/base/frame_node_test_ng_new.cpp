@@ -13,11 +13,31 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
+#include "base/memory/referenced.h"
+#include "base/memory/ace_type.h"
+#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
+constexpr int32_t FINGERS_NUMBER = 2;
+constexpr float DISTANCE = 10.5f;
+constexpr float DEFAULT_OPACITY = 0.95f;
+constexpr float PARA_OPACITY_VALUE_1 = 0.1f;
+constexpr float PARA_OPACITY_VALUE_2 = 0.2f;
+constexpr float PARA_OPACITY_VALUE_3 = 0.3f;
+constexpr float PARA_OPACITY_VALUE_4 = 0.4f;
+constexpr float PARA_OPACITY_VALUE_5 = 0.5f;
+constexpr float PARA_OPACITY_VALUE_6 = 0.6f;
+constexpr float PARA_OPACITY_VALUE_7 = 0.7f;
+constexpr float PARA_OPACITY_VALUE_8 = 1.0f;
+constexpr float MIN_OPACITY { 0.0f };
+constexpr float MAX_OPACITY { 1.0f };
+} // namespace
+
 /**
  * @tc.name: FrameNodeTestNg_TouchTest041
  * @tc.desc: Test frameNode TouchTest
@@ -32,6 +52,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     /**
      * @tc.steps: step2. set isActive_ and debugEnabled_ is true and FRAME_NODE2 eventHub is HTMBLOCK.
      * @tc.expected: expect The function return value is STOP_BUBBLING.
@@ -41,8 +62,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
     SystemProperties::debugEnabled_ = true;
     auto eventHub = FRAME_NODE2->GetOrCreateGestureEventHub();
     eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
-    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    auto test = FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -59,6 +81,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
 
     /**
      * @tc.steps: step2. set debugEnabled_ is true.
@@ -66,7 +89,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     FRAME_NODE2->isActive_ = true;
     FRAME_NODE2->eventHub_->SetEnabled(true);
     SystemProperties::debugEnabled_ = true;
-    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+    auto test = FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
 
     /**
      * @tc.steps: step3. create childnode.
@@ -90,8 +114,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     std::list<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     FRAME_NODE2->frameChildren_ = { children.begin(), children.end() };
-    test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    test = FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -108,6 +133,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     /**
      * @tc.steps:    step2. eventHub_->GetGestureEventHub() != nullptr and callback != null.
      * @tc.expected: expect The function return value is STOP_BUBBLING.
@@ -120,8 +146,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
     };
     auto gestureEventHub = FRAME_NODE2->eventHub_->GetOrCreateGestureEventHub();
     gestureEventHub->SetOnGestureJudgeBegin(gestureJudgeFunc);
-    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    auto test = FRAME_NODE2->TouchTest(
+        globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -1063,6 +1090,7 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
     PointF parentLocalPoint;
     TouchRestrict touchRestrict;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
 
     /**
      * @tc.steps: step2. create node and set callback.
@@ -1088,24 +1116,28 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
      */
     HitTestMode hitTestModeofChilds[] = { HitTestMode::HTMDEFAULT, HitTestMode::HTMBLOCK, HitTestMode::HTMTRANSPARENT,
         HitTestMode::HTMNONE, HitTestMode::HTMTRANSPARENT_SELF };
+    int32_t i = 0;
     for (auto hitTestModeofChild : hitTestModeofChilds) {
         childEventHub->SetHitTestMode(hitTestModeofChild);
-        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        childNode->TouchTest(
+            globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
         auto mode = childEventHub->GetHitTestMode();
-        EXPECT_EQ(mode, HitTestMode::HTMNONE);
+        EXPECT_EQ(mode, hitTestModeofChilds[i++]);
     }
 
     /**
      * @tc.steps: step4. modify callback and trigger touch test.
      * @tc.expected: expect the touch test mode is correct.
      */
+    i = 0;
     auto blockCallback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMBLOCK; };
     childEventHub->SetOnTouchIntercept(blockCallback);
     for (auto hitTestModeofChild : hitTestModeofChilds) {
         childEventHub->SetHitTestMode(hitTestModeofChild);
-        childNode->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
+        childNode->TouchTest(
+            globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
         auto mode = childEventHub->GetHitTestMode();
-        EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
+        EXPECT_EQ(mode, hitTestModeofChilds[i++]);
     }
 }
 
@@ -1194,5 +1226,579 @@ HWTEST_F(FrameNodeTestNg, GetPositionToWindowWithTransform001, TestSize.Level1)
     FRAME_NODE2->SetParent(FRAME_NODE3);
     auto windowOffsetWithTransform = FRAME_NODE2->GetPositionToWindowWithTransform();
     EXPECT_EQ(windowOffsetWithTransform, Offset);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier001
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= -50.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier002
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_1 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_1 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_1);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.1f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.1f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier003
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_2 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_2 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_2);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.2f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.2f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier004
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= 0.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier005
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_3 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_3 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_3);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.3f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.3f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier006
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_4 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_4 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_4);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.4f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.4f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier007
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_5 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_5 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_5);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.5f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.5f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier008
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_6 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_6 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_6);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.6f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.6f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier009
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_7 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_7 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_7);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.7f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.7f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier010
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        if ((PARA_OPACITY_VALUE_8 <= MAX_OPACITY) && (PARA_OPACITY_VALUE_8 > MIN_OPACITY)) {
+            node->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_8);
+        } else {
+            node->GetRenderContext()->UpdateOpacity(DEFAULT_OPACITY);
+        }
+    };
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    frameNode->SetDragPreviewOptions(previewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 1.0f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 1.0f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier011
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= 2.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier012
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= 50.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier013
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= 60.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
+}
+
+/**
+ * @tc.name: GetPreviewOptionFromModifier014
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set opacity.
+     */
+    dragPreviewOption.options.opacity= -60.0f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: opacity in DragPreviewOption is equal to 0.95f.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.opacity, 0.95f);
 }
 } // namespace OHOS::Ace::NG

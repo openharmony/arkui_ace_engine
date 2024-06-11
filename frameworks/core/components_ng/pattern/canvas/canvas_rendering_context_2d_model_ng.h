@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CanvasRenderingContext2DModelNG : public OHOS::Ace::CanvasRenderingContext2DModel {
+class ACE_FORCE_EXPORT CanvasRenderingContext2DModelNG : public OHOS::Ace::CanvasRenderingContext2DModel {
     DECLARE_ACE_TYPE(CanvasRenderingContext2DModelNG, CanvasRenderingContext2DModel)
 
 public:
@@ -38,10 +38,10 @@ public:
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;
-    void SetFillGradient(const Ace::Gradient& gradient) override;
+    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetFillColor(const Color& color, bool colorFlag) override;
-    void SetStrokeGradient(const Ace::Gradient& gradient) override;
+    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;
@@ -115,7 +115,7 @@ public:
     void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;
 #else
     void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData) override;
+        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) override;
 #endif
 
 private:

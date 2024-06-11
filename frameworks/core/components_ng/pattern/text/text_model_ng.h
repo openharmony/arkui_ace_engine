@@ -50,6 +50,7 @@ public:
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
+    void SetTextSelectableMode(TextSelectableMode value) override;
     void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -79,6 +80,7 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
+    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
@@ -150,9 +152,11 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
+    static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
+    static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
         std::function<void(const std::string&)>&& onResult);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);

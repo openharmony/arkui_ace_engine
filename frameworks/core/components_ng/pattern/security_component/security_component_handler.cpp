@@ -531,7 +531,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    auto data = event.GetPointerEvent()->GetEnhanceData();
+    auto pointerEvent = event.GetPointerEvent();
+    if (pointerEvent == nullptr) {
+        LOGE("Receive a NULL pointerEvent");
+        return -1;
+    }
+    auto data = pointerEvent->GetEnhanceData();
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();

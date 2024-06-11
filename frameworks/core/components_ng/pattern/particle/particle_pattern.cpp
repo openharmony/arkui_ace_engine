@@ -48,6 +48,33 @@ void ParticlePattern::OnAttachToMainTree()
     }
 }
 
+void ParticlePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto array = JsonUtil::CreateArray(true);
+    auto props = GetEmitterProperty();
+    for (auto i = 0; i < props.size(); i++) {
+        auto object = JsonUtil::Create(true);
+        object->Put("index", std::to_string(props[i].index).c_str());
+        if (props[i].emitRate.has_value()) {
+            object->Put("emitRate", std::to_string(*props[i].emitRate).c_str());
+        }
+        if (props[i].position.has_value()) {
+            auto positionObj = JsonUtil::Create(true);
+            positionObj->Put("x", std::to_string(props[i].position->x).c_str());
+            positionObj->Put("y", std::to_string(props[i].position->y).c_str());
+            object->Put("position", positionObj);
+        }
+        if (props[i].size.has_value()) {
+            auto sizeObj = JsonUtil::Create(true);
+            sizeObj->Put("x", std::to_string(props[i].size->x).c_str());
+            sizeObj->Put("y", std::to_string(props[i].size->y).c_str());
+            object->Put("size", sizeObj);
+        }
+        array->Put(std::to_string(i).c_str(), object);
+    }
+    json->Put("emitter", array);
+}
+
 void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbanceArray)
 {
     if (disturbanceArray.size() == 0) {
@@ -83,6 +110,7 @@ void ParticlePattern::updateEmitterPosition(std::vector<EmitterProperty>& props)
     for (EmitterProperty& prop : props) {
         prop.index = prop.index >= GetEmitterCount() ? 0 : prop.index;
     }
+    SetEmitterProperty(props);
     RosenRenderParticle::updateEmitterPosition(frameNode, props);
 }
 } // namespace OHOS::Ace::NG

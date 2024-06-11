@@ -93,4 +93,9 @@ void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn))
     };
     ToggleModel::GetInstance()->OnChange(std::move(onChange));
 }
+
+void FfiOHOSAceFrameworkTogglePop()
+{
+    ToggleModel::GetInstance()->Pop();
+}
 }

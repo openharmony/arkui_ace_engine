@@ -426,7 +426,24 @@ public:
         return ScrollAlign::START;
     }
 
-    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) {}
+    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt)
+    {}
+
+    void SetExtraOffset(std::optional<float> extraOffset)
+    {
+        extraOffset_ = extraOffset;
+    }
+
+    std::optional<float> GetExtraOffset() const
+    {
+        return extraOffset_;
+    }
+
+    void ResetExtraOffset()
+    {
+        extraOffset_.reset();
+    }
 
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
 
@@ -593,6 +610,11 @@ public:
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
+    }
+
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
     }
 
 protected:
@@ -820,6 +842,7 @@ private:
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    std::optional<float> extraOffset_;
 
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
@@ -836,6 +859,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool useTotalOffset_ = true;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

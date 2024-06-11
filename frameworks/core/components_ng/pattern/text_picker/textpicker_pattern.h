@@ -238,6 +238,16 @@ public:
         weakButtonCancel_ = buttonCancelNode;
     }
 
+    void SetForwardNode(WeakPtr<FrameNode> buttonForwardNode)
+    {
+        weakButtonForward_ = buttonForwardNode;
+    }
+
+    void SetBackwardNode(WeakPtr<FrameNode> buttonBackwardNode)
+    {
+        weakButtonBackward_ = buttonBackwardNode;
+    }
+
     void OnLanguageConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
@@ -354,8 +364,14 @@ public:
 
     void SetCanLoop(bool isLoop);
 
+    bool GetCanLoop()
+    {
+        return canloop_;
+    }
+
 private:
     void OnModifyDone() override;
+    void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -399,11 +415,14 @@ private:
     bool isHasSelectAttr_ = false;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> weakButtonForward_;
+    WeakPtr<FrameNode> weakButtonBackward_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool canloop_ = true;
 
     // inner focus switch
     bool operationOn_ = false;

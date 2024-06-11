@@ -45,41 +45,41 @@ void SetImageSourceInfoFillColor(ImageSourceInfo& imageSourceInfo)
     }
 }
 
-void HandlePlatformVersionAboveTen(const RefPtr<FrameNode>& backButtonNode,
+void SetBackButtonImgAboveVersionTen(const RefPtr<FrameNode>& backButtonNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
     RefPtr<ImageLayoutProperty>& backButtonImageLayoutProperty)
 {
     // API >= 10
-    if (titleBarLayoutProperty->HasImageSource() && titleBarLayoutProperty->HasIsValidImage() &&
-        titleBarLayoutProperty->GetIsValidImageValue()) {
-        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-        SetImageSourceInfoFillColor(imageSourceInfo);
-        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonNode->MarkModifyDone();
+    if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
         return;
     }
-
     if (titleBarLayoutProperty->HasPixelMap() && titleBarLayoutProperty->GetPixelMapValue() != nullptr) {
         auto pixelMap = titleBarLayoutProperty->GetPixelMapValue();
         ImageSourceInfo imageSourceInfo = ImageSourceInfo(pixelMap);
         SetImageSourceInfoFillColor(imageSourceInfo);
         backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         backButtonNode->MarkModifyDone();
+        return;
     }
+
+    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    SetImageSourceInfoFillColor(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonNode->MarkModifyDone();
 }
 
-void HandlePlatformVersionBelowTen(const RefPtr<FrameNode>& backButtonNode,
+void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
     RefPtr<ImageLayoutProperty>& backButtonImageLayoutProperty)
 {
     // API < 10
-    if (titleBarLayoutProperty->HasImageSource() && titleBarLayoutProperty->HasIsValidImage() &&
-        titleBarLayoutProperty->GetIsValidImageValue()) {
-        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-        SetImageSourceInfoFillColor(imageSourceInfo);
-        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonNode->MarkModifyDone();
+    if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
+        return;
     }
+    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    SetImageSourceInfoFillColor(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonNode->MarkModifyDone();
 }
 
 void HandleDefaultIconForNavDestination(
@@ -104,22 +104,9 @@ void HandleDefaultIconForNavDestination(
 
 bool IsImageBackIcon(const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    auto hasImageSource = titleBarLayoutProperty->HasImageSource();
-
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (hasImageSource && titleBarLayoutProperty->HasIsValidImage() &&
-            titleBarLayoutProperty->GetIsValidImageValue()) {
-            return true;
-        }
-    } else {
-        if (hasImageSource && titleBarLayoutProperty->HasIsValidImage() &&
-            titleBarLayoutProperty->GetIsValidImageValue()) {
-            return true;
-        }
-
-        if (titleBarLayoutProperty->HasPixelMap() && titleBarLayoutProperty->GetPixelMapValue() != nullptr) {
-            return true;
-        }
+    CHECK_NULL_RETURN(titleBarLayoutProperty, false);
+    if (titleBarLayoutProperty->HasIsValidImage() && titleBarLayoutProperty->GetIsValidImageValue()) {
+        return true;
     }
 
     return false;
@@ -130,10 +117,28 @@ void ApplyImageSourceInfo(const RefPtr<FrameNode>& backButtonNode,
     RefPtr<ImageLayoutProperty>& backButtonImageLayoutProperty)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        HandlePlatformVersionBelowTen(backButtonNode, titleBarLayoutProperty, backButtonImageLayoutProperty);
+        SetBackButtonImgBelowVersionTen(backButtonNode, titleBarLayoutProperty, backButtonImageLayoutProperty);
     } else {
-        HandlePlatformVersionAboveTen(backButtonNode, titleBarLayoutProperty, backButtonImageLayoutProperty);
+        SetBackButtonImgAboveVersionTen(backButtonNode, titleBarLayoutProperty, backButtonImageLayoutProperty);
     }
+}
+
+void ApplyThemeIconSize(RefPtr<TextLayoutProperty>& symbolProperty)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto theme = NavigationGetTheme();
+    if (theme) {
+        symbolProperty->UpdateFontSize(theme->GetIconWidth());
+    }
+}
+
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
 }
 
 void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr<FrameNode>& backButtonIconNode,
@@ -146,12 +151,13 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
         if (theme) {
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         // User-defined color overrides the default color of the theme
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (IsImageBackIcon(titleBarLayoutProperty)) {
         // symbol -> image
@@ -171,7 +177,9 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
         symbolProperty->UpdateSymbolColorList({ theme->GetBackButtonIconColor() });
-        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
+        if (theme) {
+            symbolProperty->UpdateFontSize(theme->GetIconWidth());
+        }
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
@@ -191,7 +199,7 @@ void CreateDefaultBackButton(const RefPtr<FrameNode>& backButtonNode, const RefP
         auto iconColor = theme->GetIconColor();
         symbolProperty->UpdateSymbolColorList({ iconColor });
         symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
+        symbolProperty->UpdateFontSize(theme->GetIconWidth());
         symbolNode->MountToParent(backButtonNode);
         symbolNode->MarkDirtyNode();
         symbolNode->MarkModifyDone();
@@ -225,11 +233,12 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        symbolProperty->UpdateFontSize(BACK_BUTTON_ICON_SIZE);
         if (theme) {
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         symbolNode->MountToParent(backButtonNode);
         symbolNode->MarkDirtyNode();
         symbolNode->MarkModifyDone();

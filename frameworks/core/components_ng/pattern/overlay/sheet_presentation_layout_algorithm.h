@@ -48,9 +48,11 @@ public:
         getOffsetFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottom;
         getOffsetFunc_[Placement::BOTTOM_LEFT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft;
         getOffsetFunc_[Placement::BOTTOM_RIGHT] = &SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight;
+        InitParameter();
     }
     ~SheetPresentationLayoutAlgorithm() override = default;
 
+    void InitParameter();
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -98,7 +100,7 @@ private:
     OffsetF GetOffsetWithBottomLeft(const SizeF&, const OffsetF&);
     OffsetF GetOffsetWithBottomRight(const SizeF&, const OffsetF&);
 
-    float GetWidthByScreenSizeType(const SizeF& maxSize) const;
+    float GetWidthByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const SizeF& maxSize) const;
     float GetHeightBySheetStyle() const;
     bool SheetInSplitWindow() const;
@@ -110,8 +112,10 @@ private:
     float sheetMaxWidth_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
+    float sheetRadius_ = 0.0f;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
     SheetStyle sheetStyle_;
+    bool isRightAngleArrow_ = false;
     using DirectionCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;
     using PlacementCheckFunc = bool (SheetPresentationLayoutAlgorithm::*)(const SizeF&, const OffsetF&);

@@ -21,9 +21,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "bindings_defines.h"
+
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
-#include "bindings_defines.h"
 #include "frameworks/bridge/common/utils/function_traits.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -300,15 +301,14 @@ public:
     static void CustomMethod(const char* name, JSMemberFunctionCallback<T> callback);
 
     template<typename T>
-    static void CustomProperty(const char* name, MemberFunctionGetCallback<T> getter,
-        MemberFunctionSetCallback<T> setter);
+    static void CustomProperty(
+        const char* name, MemberFunctionGetCallback<T> getter, MemberFunctionSetCallback<T> setter);
 
-    static void CustomProperty(const char* name, FunctionGetCallback getter,
-        FunctionSetCallback setter);
+    static void CustomProperty(const char* name, FunctionGetCallback getter, FunctionSetCallback setter);
 
     template<typename T>
-    static void CustomProperty(const char* name, JSMemberFunctionCallback<T> getter,
-        JSMemberFunctionCallback<T> setter);
+    static void CustomProperty(
+        const char* name, JSMemberFunctionCallback<T> getter, JSMemberFunctionCallback<T> setter);
     /**
      *  Register a static method with an engine-specific callback signature
      *
@@ -379,13 +379,8 @@ public:
      *  \tparam Base A base class of C
      */
     template<typename Base>
-    static void InheritAndBind(
-        BindingTarget bindTarget, JSFunctionCallback ctor = nullptr,
+    static void InheritAndBind(BindingTarget bindTarget, JSFunctionCallback ctor = nullptr,
         JSDestructorCallback<C> dtor = nullptr, JSGCMarkCallback<C> gcMark = nullptr);
-
-    static IFunctionBinding* GetFunctionBinding(int id);
-    static IFunctionBinding* GetGetFunctionBinding(int id);
-    static IFunctionBinding* GetSetFunctionBinding(int id);
 
     /**
      *  Get the Javascript name of class C
@@ -401,18 +396,6 @@ public:
 
 private:
     static thread_local std::string jsName;
-    /*  OPTIMIZE(cvetan): Functions can be stored at compile-time with an additional index as a template parameter, for
-        example:
-
-        template<int N, typename RetType, typename... Args>
-        static RetType(C::*function_)(Args...);
-
-        But only if current approach proves to be a bottleneck.
-    */
-    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> functions_;
-    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> getFunctions_;
-    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> setFunctions_;
-    static thread_local int nextFreeId_;
 };
 
 }; // namespace OHOS::Ace::Framework

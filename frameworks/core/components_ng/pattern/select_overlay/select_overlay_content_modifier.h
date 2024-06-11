@@ -179,6 +179,9 @@ private:
     void PaintDoubleHandle(RSCanvas& canvas);
 
     void ClipViewPort(RSCanvas& canvas);
+    RectF ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const;
+    RectF GetFirstPaintRect() const;
+    RectF GetSecondPaintRect() const;
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;

@@ -35,9 +35,10 @@ enum UIContentErrorCode : uint16_t {
 };
 
 enum class ContentInfoType : int32_t {
-    NONE = 0,           // invalid contentInfo
-    CONTINUATION = 1,   // distribute
-    APP_RECOVERY = 2,   // app recovery
+    NONE = 0,                        // invalid contentInfo
+    CONTINUATION = 1,                // distribute
+    APP_RECOVERY = 2,                // app recovery
+    RESOURCESCHEDULE_RECOVERY = 3,   // app is killed due to resource schedule
 };
 } // namespace OHOS::Ace
 

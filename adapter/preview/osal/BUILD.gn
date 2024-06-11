@@ -81,6 +81,7 @@ ohos_source_set("preview_osal_source") {
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
+      "system_bar_style_ohos.cpp",
       "system_properties.cpp",
       "task/task_runner_adapter_impl.cpp",
       "time_event_proxy_preview.cpp",
@@ -103,21 +104,19 @@ ohos_source_set("preview_osal_source") {
       "//foundation/graphic/graphic_2d/rosen/modules/platform:image_native",
     ]
 
-    if (ace_use_rosen_drawing) {
-      deps += [
-        "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-      ]
-    }
-
     external_deps = [
       "curl:curl_shared",
       "hilog:libhilog",
     ]
 
-    configs = [ "$ace_root:ace_config" ]
+    if (ace_use_rosen_drawing) {
+      external_deps += [
+        "graphic_2d:2d_graphics",
+        "graphic_2d:drawing_napi_impl",
+      ]
+    }
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    configs = [ "$ace_root:ace_config" ]
 
     if (is_ohos_standard_system) {
       sources += [

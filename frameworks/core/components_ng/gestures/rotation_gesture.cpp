@@ -22,7 +22,7 @@ namespace {
 constexpr double MAX_ANGLE = 360.0;
 } // namespace
 
-RotationGesture::RotationGesture(int32_t fingers, double angle): Gesture(fingers)
+RotationGesture::RotationGesture(int32_t fingers, double angle) : Gesture(fingers)
 {
     if (angle > MAX_ANGLE || angle <= 0) {
         angle_ = 1.0;
@@ -31,8 +31,10 @@ RotationGesture::RotationGesture(int32_t fingers, double angle): Gesture(fingers
     }
     if (gestureInfo_) {
         gestureInfo_->SetType(GestureTypeName::ROTATION_GESTURE);
+        gestureInfo_->SetRecognizerType(GestureTypeName::ROTATION_GESTURE);
     } else {
-        gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE);
+        gestureInfo_ =
+            MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE, GestureTypeName::ROTATION_GESTURE, false);
     }
 }
 RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()

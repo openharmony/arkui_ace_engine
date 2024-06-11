@@ -1935,6 +1935,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
+    JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2362,6 +2363,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
             WebModel::GetInstance()->SetCustomScheme(cmdLine);
+        }
+
+        auto updateInstanceIdFunction = controller->GetProperty("updateInstanceId");
+        if (updateInstanceIdFunction->IsFunction()) {
+            std::function<void(int32_t)> updateInstanceIdCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(updateInstanceIdFunction)](int32_t newId) {
+                auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
+                auto result = func->Call(webviewController, 1, &newIdVal);
+            };
+            NG::WebModelNG::GetInstance()->SetUpdateInstanceIdCallback(std::move(updateInstanceIdCallback));
         }
 
         auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
@@ -4715,7 +4726,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
 
 void JSWeb::CopyOption(int32_t copyOption)
 {
-    auto mode = CopyOptions::Distributed;
+    auto mode = CopyOptions::Local;
     switch (copyOption) {
         case static_cast<int32_t>(CopyOptions::None):
             mode = CopyOptions::None;
@@ -4730,7 +4741,7 @@ void JSWeb::CopyOption(int32_t copyOption)
             mode = CopyOptions::Distributed;
             break;
         default:
-            mode = CopyOptions::Distributed;
+            mode = CopyOptions::Local;
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
@@ -5031,4 +5042,12 @@ void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
+void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
 } // namespace OHOS::Ace::Framework

@@ -181,6 +181,7 @@ public:
     }
 
     Dimension GetCustomTitleHeight();
+    Dimension GetStackNodeRadius();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
@@ -205,6 +206,8 @@ protected:
     }
 
     bool CanShowFloatingTitle();
+    bool CanShowCustomTitle();
+    void TrimFloatingWindowLayout();
 
     WindowMode windowMode_;
     bool customTitleSettedShow_ = true;

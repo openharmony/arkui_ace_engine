@@ -25,7 +25,6 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
@@ -95,10 +94,6 @@ bool ImageFileCache::WriteFile(const std::string& url, const void* const data, s
     const std::string& fileCacheKey, const std::string& suffix)
 {
     std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
-    char realPath[PATH_MAX] = { 0x00 };
-    if (!RealPath(writeFilePath.c_str(), realPath)) {
-        return false;
-    }
 #ifdef WINDOWS_PLATFORM
     std::ofstream outFile(writeFilePath, std::ios::binary);
 #else

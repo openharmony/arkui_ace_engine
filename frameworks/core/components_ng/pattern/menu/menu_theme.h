@@ -29,7 +29,7 @@ constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
 constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
 constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
 constexpr int32_t HOVER_IMAGE_OPACITY_CHANGE_DURATION = 150;
-constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 800;
+constexpr int32_t HOVER_IMAGE_DELAY_DURATION = 600;
 constexpr int32_t HOVER_IMAGE_CUSTOM_PREVIEW_SCALE_DURATION = 650;
 constexpr int32_t HOVER_IMAGE_PREVIEW_DISAPPEAR_DURATION = 450;
 constexpr int32_t HOVER_IMAGE_DISAPPEAR_DURATION = 650;
@@ -117,6 +117,9 @@ public:
             theme->largeFontSizeScale_ = MENU_LARGE_FONT_SIZE_SCALE_;
             theme->maxFontSizeScale_ = MENU_MAX_FONT_SIZE_SCALE;
             theme->textMaxLines_ = MENU_TEXT_MAX_LINES;
+            theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
+            theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
+            theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
         }
     };
 
@@ -327,6 +330,21 @@ public:
         return textMaxLines_;
     }
 
+    bool GetNormalLayout() const
+    {
+        return normalLayout_;
+    }
+
+    bool GetNormalPlacement() const
+    {
+        return normalPlacement_;
+    }
+
+    bool GetHasBackBlur() const
+    {
+        return hasBackBlur_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -372,6 +390,9 @@ private:
     float largeFontSizeScale_ = 2.0f;
     float maxFontSizeScale_ = 3.2f;
     int32_t textMaxLines_ = std::numeric_limits<int32_t>::max();
+    bool normalLayout_ = true;
+    bool normalPlacement_ = true;
+    bool hasBackBlur_ = true;
 };
 
 } // namespace OHOS::Ace::NG

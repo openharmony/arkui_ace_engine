@@ -22,8 +22,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/calc_length.h"
@@ -148,6 +148,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
+        if (info_->segmentTails_.empty()) {
+            info_->InitSegments(sections, 0);
+        }
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
@@ -155,9 +158,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentInit(sections, frameSize);
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
     } else {
         RegularInit(frameSize);
         if (info_->footerIndex_ >= 0) {
@@ -177,6 +177,10 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 
     if (!wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
+    }
+
+    if (info_->extraOffset_) {
+        postJumpOffset_ += *info_->extraOffset_;
     }
 }
 
@@ -225,7 +229,7 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     if (axis_ == Axis::VERTICAL) {
         cross = ParseTemplateArgs(
             WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], info_->childrenCount_);
@@ -237,9 +241,7 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
     }
-    if (cross.second) {
-        crossGaps_ = { 0 };
-    }
+    crossGaps_ = { cross.second };
 
     itemsCrossSize_ = { {} };
 

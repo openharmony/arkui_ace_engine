@@ -124,7 +124,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 
     mainLen_ = frameSize.MainSize(axis_);
     float crossSize = frameSize.CrossSize(axis_);
-    std::pair<std::vector<double>, bool> cross;
+    std::pair<std::vector<double>, double> cross;
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
     if (axis_ == Axis::VERTICAL) {
@@ -135,9 +135,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     if (cross.first.empty()) {
         cross.first = { crossSize };
     }
-    if (cross.second) {
-        crossGap_ = 0.0f;
-    }
+    crossGap_ = cross.second;
 
     for (const auto& len : cross.first) {
         itemCrossSize_.push_back(static_cast<float>(len));
@@ -222,8 +220,8 @@ void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxCh
     }
     std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float endPos = info_->lanes_[i].endPos;
-        if (LessNotEqual(endPos + mainGap_, viewportBound)) {
+        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, i });
         }
     }
@@ -261,8 +259,8 @@ void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minC
     }
     std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos;
-        if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
+        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, i });
         }
     }
@@ -307,7 +305,8 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
 {
     std::unordered_set<size_t> lanes;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        if (LessNotEqual(info_->lanes_[i].endPos + mainGap_, viewportBound)) {
+        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (LessNotEqual(endPos, viewportBound)) {
             lanes.insert(i);
         }
     }
@@ -326,8 +325,8 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
 {
     std::unordered_set<size_t> lanes;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos;
-        if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
+        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (GreatNotEqual(startPos, viewportBound)) {
             lanes.insert(i);
         }
     }
@@ -353,6 +352,9 @@ void WaterFlowLayoutSW::ClearBack(float bound)
         }
         lane.items_.pop_back();
         lane.endPos = itemStartPos - mainGap_;
+        if (lane.items_.empty()) {
+            lane.endPos += mainGap_;
+        }
     }
 }
 
@@ -368,6 +370,9 @@ void WaterFlowLayoutSW::ClearFront()
         }
         lane.items_.pop_front();
         lane.startPos = itemEndPos + mainGap_;
+        if (lane.items_.empty()) {
+            lane.startPos -= mainGap_;
+        }
     }
 }
 

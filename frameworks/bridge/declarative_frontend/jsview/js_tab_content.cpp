@@ -24,6 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
@@ -384,6 +386,20 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     return true;
 }
 
+bool ParseTabsIsRtl()
+{
+    auto tabContentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(tabContentNode, false);
+    auto swiperNode = tabContentNode->GetParent();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto tabsNode = AceType::DynamicCast<NG::TabsNode>(swiperNode->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto layoutProperty = tabsNode->GetLayoutProperty<NG::TabsLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    return isRTL;
+}
+
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
@@ -436,13 +452,14 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     }
     if (info->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
+        bool isRTL = ParseTabsIsRtl();
         CalcDimension start;
         CalcDimension end;
         CalcDimension top;
         CalcDimension bottom;
         if (paddingObj->GetProperty("start")->IsObject()) {
             JSRef<JSObject> startObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("start"));
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            if (isRTL) {
                 ParseJsLengthMetrics(startObj, start);
                 padding.right = NG::CalcLength(start);
             } else {
@@ -452,7 +469,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         }
         if (paddingObj->GetProperty("end")->IsObject()) {
             JSRef<JSObject> endObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("end"));
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            if (isRTL) {
                 ParseJsLengthMetrics(endObj, end);
                 padding.left = NG::CalcLength(end);
             } else {
@@ -462,13 +479,15 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         }
         if (paddingObj->GetProperty("top")->IsObject()) {
             JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
-            ParseJsLengthMetrics(topObj, top);
-            padding.top = NG::CalcLength(top);
+            if (ParseJsLengthMetrics(topObj, top)) {
+                padding.top = NG::CalcLength(top);
+            }
         }
         if (paddingObj->GetProperty("bottom")->IsObject()) {
             JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
-            ParseJsLengthMetrics(bottomObj, bottom);
-            padding.bottom = NG::CalcLength(bottom);
+            if (ParseJsLengthMetrics(bottomObj, bottom)) {
+                padding.bottom = NG::CalcLength(bottom);
+            }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);

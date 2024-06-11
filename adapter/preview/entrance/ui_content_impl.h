@@ -145,6 +145,10 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override {};
 
+    void PreLayout() override {};
+    
+    void SetStatusBarItemColor(uint32_t color) override;
+
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);

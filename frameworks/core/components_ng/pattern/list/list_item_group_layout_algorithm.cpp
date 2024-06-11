@@ -274,7 +274,12 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
             return false;
         }
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-            return false;
+            if (totalItemCount_ > 0 &&
+                (!layoutedItemInfo_ || layoutedItemInfo_.value().endIndex < totalItemCount_ - 1)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     } else {
         if (childrenSize_ && needAdjustRefPos_) {

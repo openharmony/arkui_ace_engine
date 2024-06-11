@@ -15,7 +15,7 @@
 var __decorate = (this && this.__decorate) || function (f27, g27, h27, i27) {
     var j27 = arguments.length,
         k27 = j27 < 3 ? g27 : i27 === null ? i27 = Object.getOwnPropertyDescriptor(g27, h27) : i27, l27;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
         k27 = Reflect.decorate(f27, g27, h27, i27);
     else
         for (var m27 = f27.length - 1; m27 >= 0; m27--)
@@ -23,8 +23,8 @@ var __decorate = (this && this.__decorate) || function (f27, g27, h27, i27) {
                 k27 = (j27 < 3 ? l27(k27) : j27 > 3 ? l27(g27, h27, k27) : l27(g27, h27)) || k27;
     return j27 > 3 && k27 && Object.defineProperty(g27, h27, k27), k27;
 };
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
@@ -48,8 +48,6 @@ const X_OFF_SET = '0vp';
 const Y_OFF_SET = '2.75vp';
 const Y_BOTTOM_OFF_SET = '-1.25vp';
 const Y_BASE_PLATE_OFF_SET = '1.5vp';
-const COLOR_SELECT = '#1A0A59F7';
-const COLOR_IMAGE_ROW = '#00000000';
 const COLOR_IMAGE_EDIT = '#FFFFFF';
 const SHADOW_COLOR = '#00001E';
 const GRAG_POP_UP_HEIGHT = '48';
@@ -60,32 +58,25 @@ const TEXT_MAX_WIDTH = '160vp';
 const MIN_WIDTH = '112vp';
 const MAX_WIDTH = '192vp';
 const TRANS_COLOR = '#00FFFFFF';
-const ARROW_DOWN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA+' +
-    'gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzA' +
-    'AAOxAAADsQBlSsOGwAAAq9JREFUeNrt2j9rFEEYx/FJziIECwsLCwsJIVhYiISgaIhiioiIlpaCjZ1/qhNUIkHE0negpZggEnwHFgoWFiJic' +
-    'VyRQsQXIHKIvyGzIJKbmTW7M7P6/cCvyR3c7fPsPLO7F2MAAAAAAAAAAAAAAAAAAAAAAAAAAF01keAz9ihrymVln/JEua18L7w2V5TrykHlt' +
-    'XJTGTb9Ib0EB/JYueWKP6Ucd3mh/Ci0+Hfc9z6gTCuHlUvK06ZPnMkEB3Nth78tK89dQ0os/toOfz+kHG36w1I0YNwZs6JsFtaEccVvTYoGr' +
-    'HteW3ajaKoDxbfz/10X94BXyoIyO+b1Wbcn2JE0ylT8VeW+5/UtZUn52sUG/FQ23PycG/OeGWXevW+U4cwPFf+MMmjjw3uJDnLkRo2vCTlWQ' +
-    'l954Hn9i3Je+djWF+glPNNimlCthJcJLlH7buZPemb+ovKpzS/RS7zcqybMB/aEhZZXwmqg+NXMH7ZdkNQNqJrwLLAxz7Q4jkIzf5iq+LkaU' +
-    'GdjbroJoUvNb674g1SFyNWAOntCU48tYq7zzyqfUxYhZwPqNOHYLi9RQ8XfylH8EhpQZ2P+23EUU/zFlGOntAbU2Zjr3qyF7nCrsTPIdeClN' +
-    'CB2Y66zEvoRG26WsVNqA+rerPlWwg3lYeAmayl38UtsQBOPLezMfxRxkzUo4WBLbEDsxmxXwinlrRsn+5W7yr1SbrJiTJiy2d+T7Y82K4H32' +
-    'QbsNf7fFeyDtRMlFb/kFVBnY7amXbN8l5oXTYtPNf/VBsTuCSZQfPs8/0OJB9eFBuymCXbsnCxlw+1yA2I35j+Lf860/Dz/f2rA73fMdhUc8' +
-    'bzvjXKhxJnftasgH3sJelU5bbb/Z8ee8e/N9j9PrZt8P/ADAAAAAAAAAAAAAAAAAAAAAAAgpV9KuZwVm6MIDQAAAABJRU5ErkJggg==';
+const ARROW_DOWN = {
+    'id': -1,
+    'type': 20000,
+    params: ['sys.media.ohos_ic_public_arrow_down'],
+    'bundleName': '__harDefaultBundleName__',
+    'moduleName': '__harDefaultModuleName__',
+};
 const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
     'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
     'wSFlzAAAOxAAADsQBlSsOGwAAAKVJREFUeNpjYBgFo2AU0Bww4pL4////diC1hZGRcSo+A4DqWIDUZCB+AVTbiC7PhEfvByCeAjQgn4Dhy4E' +
     '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
     'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg==';
-const ARROW_RIGHT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA' +
-    '+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlz' +
-    'AAAOxAAADsQBlSsOGwAAAjVJREFUeNrtnCtvG1EQRq+9BlVUEBAYYFBgYGBYaBBoFUVVfkCtyqDAIL8jtI8EBruVIgU4UvMD0iKDPmirtlJg' +
-    'lJZUyqzsSFXlxwZsPPPtOdJHbDKac+/cXXvtlAAAAAAAAAAAAAAAAAAAAAAUyZzW1bMMLbuWv5YvqgJqTps/sjT+eW1geckOuB+OLdtzpHy3' +
-    'fFQTUHdY06MFr7+xPGMHlE93iYQnajvBo4APlj3LRhUkeBRwaRnProDkJXi9DP1ZFQmZ49oqISFzXl9RCb8sFwhYn4Sw9wlZkDplx1EWqFZJ' +
-    'CVmwHSsnIZoAuYM5ogCpgzmqAJlxFFmAxDiKLiD8OFIQEHocqQgIK0FJwF0kfLZMELA+CTuWI8s1AtYj4YHlt+UcAeVK+JqmX2/OY9Pyat1F' +
-    '1pM2J2n6Fec8mh4KVBdwO27m8RAB5dNb0uhPCCiXTpo+zLWItwgoj/bsKmhrwft/PBzAOQ3RlT9a0vycF5ZvHoqtCTZ/vKL5fcuhl4KVRlA7' +
-    'WvOVBOQP875f0fyBt+arnAH52DmNtvJVzoBwM19pBBVp/r7n5kceQa0CYyfE78pqoiu/733lRxUg1fxoZ0BbrfmRzoAiHy+Ea36UEdRRXPlR' +
-    'RlCR5g+iNt/7CGoqr3zvAuRXvucR1CrQ/GES+fMOjzvgQH3seN8B3ao036uASVWan+Pxybgflqf/LY78wH2dBPF6I/bY8txyZXlnOUsAAAAA' +
-    'AAAAAAAAAAAAAAAAEIgb8WKMjSFbuAQAAAAASUVORK5CYII=';
+const ARROW_RIGHT = {
+    'id': -1,
+    'type': 20000,
+    params: ['sys.media.ohos_ic_public_arrow_right'],
+    'bundleName': '__harDefaultBundleName__',
+    'moduleName': '__harDefaultModuleName__',
+};
 const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
     'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
     'lwSFlzAAAOxAAADsQBlSsOGwAAAKFJREFUeNpjYBgFowAE/v//bwHEPOToZSJS3XIg3k6OJcRaUALEFuRYwkyMosbGxusNDQ3XgMwCIHYAsl' +
@@ -93,54 +84,54 @@ const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAA
     'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC';
 var Event;
 (function (d27) {
-    d27[d27["TOUCH_DOWN"] = 0] = "TOUCH_DOWN";
-    d27[d27["TOUCH_UP"] = 1] = "TOUCH_UP";
-    d27[d27["HOVER"] = 3] = "HOVER";
-    d27[d27["HOVER_OVER"] = 4] = "HOVER_OVER";
-    d27[d27["FOCUS"] = 5] = "FOCUS";
-    d27[d27["BLUR"] = 6] = "BLUR";
-    d27[d27["MOUSE_BUTTON_RIGHT"] = 7] = "MOUSE_BUTTON_RIGHT";
-    d27[d27["DRAG"] = 8] = "DRAG";
+    d27[d27['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
+    d27[d27['TOUCH_UP'] = 1] = 'TOUCH_UP';
+    d27[d27['HOVER'] = 3] = 'HOVER';
+    d27[d27['HOVER_OVER'] = 4] = 'HOVER_OVER';
+    d27[d27['FOCUS'] = 5] = 'FOCUS';
+    d27[d27['BLUR'] = 6] = 'BLUR';
+    d27[d27['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
+    d27[d27['DRAG'] = 8] = 'DRAG';
 })(Event || (Event = {}));
 var MenuOperation;
 (function (c27) {
-    c27[c27["ADD_NODE"] = 0] = "ADD_NODE";
-    c27[c27["REMOVE_NODE"] = 1] = "REMOVE_NODE";
-    c27[c27["MODIFY_NODE"] = 2] = "MODIFY_NODE";
-    c27[c27["COMMIT_NODE"] = 3] = "COMMIT_NODE";
+    c27[c27['ADD_NODE'] = 0] = 'ADD_NODE';
+    c27[c27['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
+    c27[c27['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
+    c27[c27['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
 })(MenuOperation || (MenuOperation = {}));
 var PopUpType;
 (function (b27) {
-    b27[b27["HINTS"] = 0] = "HINTS";
-    b27[b27["WARNINGS"] = 1] = "WARNINGS";
+    b27[b27['HINTS'] = 0] = 'HINTS';
+    b27[b27['WARNINGS'] = 1] = 'WARNINGS';
 })(PopUpType || (PopUpType = {}));
 var InputError;
 (function (a27) {
-    a27[a27["INVALID_ERROR"] = 0] = "INVALID_ERROR";
-    a27[a27["LENGTH_ERROR"] = 1] = "LENGTH_ERROR";
-    a27[a27["NONE"] = 2] = "NONE";
+    a27[a27['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
+    a27[a27['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
+    a27[a27['NONE'] = 2] = 'NONE';
 })(InputError || (InputError = {}));
 var Flag;
 (function (z26) {
-    z26[z26["DOWN_FLAG"] = 0] = "DOWN_FLAG";
-    z26[z26["UP_FLAG"] = 1] = "UP_FLAG";
-    z26[z26["NONE"] = 2] = "NONE";
+    z26[z26['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
+    z26[z26['UP_FLAG'] = 1] = 'UP_FLAG';
+    z26[z26['NONE'] = 2] = 'NONE';
 })(Flag || (Flag = {}));
 
 export var NodeStatus;
 (function (y26) {
-    y26[y26["Expand"] = 0] = "Expand";
-    y26[y26["Collapse"] = 1] = "Collapse";
+    y26[y26['Expand'] = 0] = 'Expand';
+    y26[y26['Collapse'] = 1] = 'Collapse';
 })(NodeStatus || (NodeStatus = {}));
 
 export var InteractionStatus;
 (function (x26) {
-    x26[x26["Normal"] = 0] = "Normal";
-    x26[x26["Selected"] = 1] = "Selected";
-    x26[x26["Edit"] = 2] = "Edit";
-    x26[x26["FinishEdit"] = 3] = "FinishEdit";
-    x26[x26["DragInsert"] = 4] = "DragInsert";
-    x26[x26["FinishDragInsert"] = 5] = "FinishDragInsert";
+    x26[x26['Normal'] = 0] = 'Normal';
+    x26[x26['Selected'] = 1] = 'Selected';
+    x26[x26['Edit'] = 2] = 'Edit';
+    x26[x26['FinishEdit'] = 3] = 'FinishEdit';
+    x26[x26['DragInsert'] = 4] = 'DragInsert';
+    x26[x26['FinishDragInsert'] = 5] = 'FinishDragInsert';
 })(InteractionStatus || (InteractionStatus = {}));
 let emptyNodeInfo = {
     isFolder: true,
@@ -159,67 +150,67 @@ class TreeViewTheme {
     constructor() {
         this.itemSelectedBgColor = '#1A0A59F7';
         this.primaryTitleFontColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_primary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.secondaryTitleFontColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.primaryTitleActiveFontColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_text_primary_activated'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.itemPressedBgColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_click_effect'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.itemHoverBgColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_hover'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.borderFocusedColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_focused_outline'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.leftIconColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.icon_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.leftIconActiveColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.icon_secondary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.arrowIconColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.icon_tertiary'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
     }
 }
@@ -259,11 +250,11 @@ let NodeInfo = class NodeInfo {
         this.nodeLevel = w26.nodeLevel;
         this.nodeLeftPadding = w26.nodeLevel * 12 + 8;
         this.nodeColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.nodeIsShow = (this.nodeLevel > 0) ? false : true;
         this.listItemHeight = (this.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
@@ -272,32 +263,32 @@ let NodeInfo = class NodeInfo {
         this.isSelected = false;
         this.status = {
             normal: {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_background_transparent'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             hover: this.treeViewTheme.itemHoverBgColor,
             press: this.treeViewTheme.itemPressedBgColor,
             selected: this.treeViewTheme.itemSelectedBgColor,
             highLight: {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_activated'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }
         };
         this.nodeBorder = {
             borderWidth: BORDER_WIDTH_NONE,
             borderColor: this.treeViewTheme.borderFocusedColor,
             borderRadius: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_corner_radius_clicked'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }
         };
         this.flagLineLeftMargin = w26.nodeLevel * 12 + 8;
@@ -359,18 +350,18 @@ let NodeInfo = class NodeInfo {
     handleImageCollapseAfterAddNode(o26) {
         if (o26) {
             this.nodeItem.imageCollapse = new ImageNode(ARROW_DOWN, {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_tertiary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, undefined, undefined);
             this.nodeItem.imageCollapse.itemRightMargin = ({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
         }
         else {
@@ -532,11 +523,11 @@ export { NodeInfo };
 
 export var TreeListenType;
 (function (c26) {
-    c26["NODE_CLICK"] = "NodeClick";
-    c26["NODE_ADD"] = "NodeAdd";
-    c26["NODE_DELETE"] = "NodeDelete";
-    c26["NODE_MODIFY"] = "NodeModify";
-    c26["NODE_MOVE"] = "NodeMove";
+    c26['NODE_CLICK'] = 'NodeClick';
+    c26['NODE_ADD'] = 'NodeAdd';
+    c26['NODE_DELETE'] = 'NodeDelete';
+    c26['NODE_MODIFY'] = 'NodeModify';
+    c26['NODE_MOVE'] = 'NodeMove';
 })(TreeListenType || (TreeListenType = {}));
 
 export class TreeListener {
@@ -643,25 +634,25 @@ TreeListenerManager.APP_KEY_EVENT_BUS = 'app_key_event_bus';
 export class TreeView extends ViewPU {
     constructor(z24, a25, b25, c25 = -1, d25 = undefined, e25) {
         super(z24, b25, c25, e25);
-        if (typeof d25 === "function") {
+        if (typeof d25 === 'function') {
             this.paramsGenerator_ = d25;
         }
         this.treeController = new TreeController();
-        this.__nodeList = new ObservedPropertyObjectPU([], this, "nodeList");
+        this.__nodeList = new ObservedPropertyObjectPU([], this, 'nodeList');
         this.listNodeDataSource = new ListNodeDataSource();
-        this.__item = new ObservedPropertyObjectPU(null, this, "item");
-        this.__touchCount = new ObservedPropertySimplePU(0, this, "touchCount");
-        this.__dropSelectedIndex = new ObservedPropertySimplePU(0, this, "dropSelectedIndex");
-        this.__viewLastIndex = new ObservedPropertySimplePU(-1, this, "viewLastIndex");
+        this.__item = new ObservedPropertyObjectPU(null, this, 'item');
+        this.__touchCount = new ObservedPropertySimplePU(0, this, 'touchCount');
+        this.__dropSelectedIndex = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
+        this.__viewLastIndex = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
         this.__listItemBgColor = new ObservedPropertyObjectPU({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
-        }, this, "listItemBgColor");
-        this.__treeViewTheme = new ObservedPropertyObjectPU(new TreeViewTheme(), this, "treeViewTheme");
-        this.addProvidedVar("treeViewTheme", this.__treeViewTheme, false);
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, this, 'listItemBgColor');
+        this.__treeViewTheme = new ObservedPropertyObjectPU(new TreeViewTheme(), this, 'treeViewTheme');
+        this.addProvidedVar('treeViewTheme', this.__treeViewTheme, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -672,62 +663,62 @@ export class TreeView extends ViewPU {
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
         this.itemPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_card_margin_start'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_card_margin_end'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_margin_vertical'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_margin_vertical'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
         };
         this.textInputPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }
         };
         this.setInitiallyProvidedValue(a25);
@@ -888,7 +879,7 @@ export class TreeView extends ViewPU {
         this.treeViewTheme.borderFocusedColor = n24.colors.interactiveFocus;
         this.treeViewTheme.leftIconColor = n24.colors.iconSecondary;
         this.treeViewTheme.leftIconActiveColor = n24.colors.interactiveActive;
-        this.treeViewTheme.arrowIconColor = n24.colors.iconTertiary;
+        this.treeViewTheme.arrowIconColor = n24.colors.iconPrimary;
         this.treeController.treeViewTheme = this.treeViewTheme;
     }
 
@@ -906,52 +897,52 @@ export class TreeView extends ViewPU {
             Row.backgroundColor(e24);
             Row.border({
                 radius: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 }
             });
             Row.padding({
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_card_margin_middle'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_card_margin_middle'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
             });
         }, Row);
         this.observeComponentCreation2((j24, k24) => {
             Text.create(d24);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body2'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
             Text.fontColor(f24);
@@ -979,11 +970,11 @@ export class TreeView extends ViewPU {
             });
             Row.shadow({
                 radius: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_corner_radius_default_m'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 color: SHADOW_COLOR,
                 offsetY: 0,
@@ -996,7 +987,7 @@ export class TreeView extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((y23, z23) => {
                         Row.create();
-                        Row.backgroundColor(COLOR_IMAGE_ROW);
+                        Row.backgroundColor(this.treeViewTheme.arrowIconColor);
                         Row.margin({
                             end: getLengthMetricsByResourceOrNumber(b23.getNodeItem().imageNode?.itemRightMargin)
                         });
@@ -1009,6 +1000,8 @@ export class TreeView extends ViewPU {
                         Image.height(b23.getNodeItem().imageNode?.itemHeight);
                         Image.width(b23.getNodeItem().imageNode?.itemWidth);
                         Image.opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity);
+                        Image.matchTextDirection((b23.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || b23.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                     }, Image);
                     Row.pop();
                 });
@@ -1061,19 +1054,19 @@ export class TreeView extends ViewPU {
         }
         this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
         this.nodeList[this.viewLastIndex].setNodeColor({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         });
         this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
         this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor({
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         });
         this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
         this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
@@ -1249,11 +1242,11 @@ export class TreeView extends ViewPU {
                 }
                 if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
                     this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor({
-                        "id": -1,
-                        "type": 10001,
+                        'id': -1,
+                        'type': 10001,
                         params: ['sys.color.ohos_id_color_background_transparent'],
-                        "bundleName": "__harDefaultBundleName__",
-                        "moduleName": "__harDefaultModuleName__"
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__',
                     });
                 }
                 this.listNodeDataSource.lastIndex = g22;
@@ -1348,7 +1341,7 @@ export class TreeView extends ViewPU {
                                         listTreeViewMenu: this.listTreeViewMenu,
                                     }, undefined, r20, () => {
                                     }, {
-                                        page: "library/src/main/ets/components/mainpage/MainPage.ets",
+                                        page: 'library/src/main/ets/components/mainpage/MainPage.ets',
                                         line: 1044,
                                         col: 13
                                     });
@@ -1368,7 +1361,7 @@ export class TreeView extends ViewPU {
                                         item: k20
                                     });
                                 }
-                            }, { name: "TreeViewInner" });
+                            }, { name: 'TreeViewInner' });
                         }
                         Row.pop();
                         ListItem.pop();
@@ -1377,7 +1370,7 @@ export class TreeView extends ViewPU {
                 }
             };
             const f20 = (i20) => JSON.stringify(i20);
-            LazyForEach.create("1", this, this.listNodeDataSource, e20, f20);
+            LazyForEach.create('1', this, this.listNodeDataSource, e20, f20);
             LazyForEach.pop();
         }
         List.pop();
@@ -1619,11 +1612,11 @@ class ListNodeDataSource extends BasicDataSource {
         this.FLAG_LINE = {
             flagLineHeight: FLAG_LINE_HEIGHT,
             flagLineColor: {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_emphasize'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             xOffset: X_OFF_SET,
             yTopOffset: Y_OFF_SET,
@@ -1640,89 +1633,89 @@ class ListNodeDataSource extends BasicDataSource {
             },
             padding: {
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level4'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level4'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 }
             },
             backgroundColor: COLOR_IMAGE_EDIT,
             height: GRAG_POP_UP_HEIGHT,
             shadow: {
                 radius: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_corner_radius_default_m'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 color: SHADOW_COLOR,
                 offsetX: 0,
                 offsetY: SHADOW_OFFSETY,
             },
             borderRadius: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_corner_radius_clicked'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontColor: this.treeViewTheme.primaryTitleFontColor,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body1'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontWeight: FontWeight.Regular,
             imageOpacity: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_fourth'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }
         };
         this.subTitle = {
             normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
             highLightFontColor: {
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_primary_contrary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body2'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontWeight: FontWeight.Regular,
             margin: {
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level2'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.padding_level12'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 }
             }
         };
@@ -2123,20 +2116,20 @@ class ListNodeDataSource extends BasicDataSource {
             if (l15.getNodeItem().inputText) {
                 if (l15.getNodeItem().imageCollapse !== null) {
                     l15.getNodeItem().inputText.rightMargin = {
-                        "id": -1,
-                        "type": 10002,
+                        'id': -1,
+                        'type': 10002,
                         params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                        "bundleName": "__harDefaultBundleName__",
-                        "moduleName": "__harDefaultModuleName__"
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__',
                     };
                 }
                 else {
                     l15.getNodeItem().inputText.rightMargin = {
-                        "id": -1,
-                        "type": 10002,
+                        'id': -1,
+                        'type': 10002,
                         params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
-                        "bundleName": "__harDefaultBundleName__",
-                        "moduleName": "__harDefaultModuleName__"
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__',
                     };
                 }
             }
@@ -2172,18 +2165,18 @@ class ListNodeDataSource extends BasicDataSource {
             }
             f15.setPopUpEnableArrow(false);
             f15.setPopUpColor({
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_background'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
             f15.setPopUpTextColor({
-                "id": -1,
-                "type": 10001,
+                'id': -1,
+                'type': 10001,
                 params: ['sys.color.ohos_id_color_text_secondary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
         }
         else if (b15 === PopUpType.WARNINGS) {
@@ -2196,18 +2189,18 @@ class ListNodeDataSource extends BasicDataSource {
                 }
                 f15.setPopUpEnableArrow(true);
                 f15.setPopUpColor({
-                    "id": -1,
-                    "type": 10001,
+                    'id': -1,
+                    'type': 10001,
                     params: ['sys.color.ohos_id_color_help_tip_bg'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 });
                 f15.setPopUpTextColor({
-                    "id": -1,
-                    "type": 10001,
+                    'id': -1,
+                    'type': 10001,
                     params: ['sys.color.ohos_id_color_text_hint_contrary'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 });
             }
         }
@@ -2862,17 +2855,17 @@ class ListNodeDataSource extends BasicDataSource {
 export class TreeViewInner extends ViewPU {
     constructor(q9, r9, s9, t9 = -1, u9 = undefined, v9) {
         super(q9, s9, t9, v9);
-        if (typeof u9 === "function") {
+        if (typeof u9 === 'function') {
             this.paramsGenerator_ = u9;
         }
-        this.__item = new SynchedPropertyNesedObjectPU(r9.item, this, "item");
+        this.__item = new SynchedPropertyNesedObjectPU(r9.item, this, 'item');
         this.listNodeDataSource = new ListNodeDataSource();
-        this.__columnWidth = new ObservedPropertySimplePU(0, this, "columnWidth");
-        this.__isFocused = new ObservedPropertySimplePU(false, this, "isFocused");
-        this.__index = new ObservedPropertySimplePU(-1, this, "index");
-        this.__lastIndex = new ObservedPropertySimplePU(-1, this, "lastIndex");
-        this.__count = new ObservedPropertySimplePU(0, this, "count");
-        this.__treeViewTheme = this.initializeConsume("treeViewTheme", "treeViewTheme");
+        this.__columnWidth = new ObservedPropertySimplePU(0, this, 'columnWidth');
+        this.__isFocused = new ObservedPropertySimplePU(false, this, 'isFocused');
+        this.__index = new ObservedPropertySimplePU(-1, this, 'index');
+        this.__lastIndex = new ObservedPropertySimplePU(-1, this, 'lastIndex');
+        this.__count = new ObservedPropertySimplePU(0, this, 'count');
+        this.__treeViewTheme = this.initializeConsume('treeViewTheme', 'treeViewTheme');
         this.listTreeViewMenu = undefined;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -2883,62 +2876,62 @@ export class TreeViewInner extends ViewPU {
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
         this.itemPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_card_margin_start'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_card_margin_end'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_margin_vertical'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
         };
         this.textInputPadding = {
             left: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             right: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             top: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             bottom: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.padding_level0'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }
         };
         this.setInitiallyProvidedValue(r9);
@@ -3095,52 +3088,52 @@ export class TreeViewInner extends ViewPU {
             Row.backgroundColor(w8);
             Row.border({
                 radius: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 }
             });
             Row.padding({
                 left: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 right: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 top: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_card_margin_middle'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 bottom: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_card_margin_middle'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
             });
         }, Row);
         this.observeComponentCreation2((b9, c9) => {
             Text.create(v8);
             Text.fontSize({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body2'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
             Text.fontColor(x8);
@@ -3172,27 +3165,27 @@ export class TreeViewInner extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((n8, o8) => {
                         Stack.create();
-                        ViewStackProcessor.visualState("focused");
+                        ViewStackProcessor.visualState('focused');
                         Stack.border({
                             radius: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.ohos_id_corner_radius_clicked'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
                             },
                             width: FLAG_NUMBER,
                             color: this.treeViewTheme.borderFocusedColor,
                             style: BorderStyle.Solid
                         });
-                        ViewStackProcessor.visualState("normal");
+                        ViewStackProcessor.visualState('normal');
                         Stack.border({
                             radius: {
-                                "id": -1,
-                                "type": 10002,
+                                'id': -1,
+                                'type': 10002,
                                 params: ['sys.float.ohos_id_corner_radius_clicked'],
-                                "bundleName": "__harDefaultBundleName__",
-                                "moduleName": "__harDefaultModuleName__"
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
                             },
                             width: 0
                         });
@@ -3207,11 +3200,11 @@ export class TreeViewInner extends ViewPU {
                             }
                             else {
                                 this.item.setNodeColor({
-                                    "id": -1,
-                                    "type": 10001,
+                                    'id': -1,
+                                    'type': 10001,
                                     params: ['sys.color.ohos_id_color_background_transparent'],
-                                    "bundleName": "__harDefaultBundleName__",
-                                    "moduleName": "__harDefaultModuleName__"
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__',
                                 });
                             }
                         });
@@ -3228,7 +3221,7 @@ export class TreeViewInner extends ViewPU {
                                 this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
                             }
                             else if (i8.type === TouchType.Up) {
-                                this.item.setNodeColor(COLOR_SELECT);
+                                this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
                                 if (this.item.getNodeItem().imageNode !== null) {
                                     this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
                                     this.item.imageSource = this.item.getNodeItem().imageNode?.source;
@@ -3314,7 +3307,7 @@ export class TreeViewInner extends ViewPU {
                                 this.observeComponentCreation2((n7, o7) => {
                                     Row.create();
                                     Row.focusable(true);
-                                    Row.backgroundColor(COLOR_IMAGE_ROW);
+                                    Row.backgroundColor(this.treeViewTheme.arrowIconColor);
                                     Row.margin({
                                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                                     });
@@ -3331,6 +3324,9 @@ export class TreeViewInner extends ViewPU {
                                     Image.focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true);
                                     Image.fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                                     this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor);
+                                    Image.matchTextDirection((this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
@@ -3465,11 +3461,11 @@ export class TreeViewInner extends ViewPU {
                                         start: LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.left),
                                         end: this.item.getNodeItem().imageCollapse ?
                                         LengthMetrics.resource({
-                                            "id": -1,
-                                            "type": 10002,
+                                            'id': -1,
+                                            'type': 10002,
                                             params: ['sys.float.padding_level0'],
-                                            "bundleName": "__harDefaultBundleName__",
-                                            "moduleName": "__harDefaultModuleName__"
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
                                         }) : LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.right)
                                     });
                                 }, Row);
@@ -3477,11 +3473,11 @@ export class TreeViewInner extends ViewPU {
                                     Text.create(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()));
                                     Text.fontSize(this.listNodeDataSource.getSubTitlePara().fontSize);
                                     Text.fontColor(this.item.getIsHighLight() || this.item.getIsModify() ? {
-                                        "id": -1,
-                                        "type": 10001,
+                                        'id': -1,
+                                        'type': 10001,
                                         params: ['sys.color.ohos_id_color_primary_contrary'],
-                                        "bundleName": "__harDefaultBundleName__",
-                                        "moduleName": "__harDefaultModuleName__"
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
                                     } : this.treeViewTheme.secondaryTitleFontColor);
                                     Text.fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight);
                                 }, Text);
@@ -3507,7 +3503,8 @@ export class TreeViewInner extends ViewPU {
                                 }, Row);
                                 this.observeComponentCreation2((k5, l5) => {
                                     Image.create(this.item.getNodeItem().imageCollapse?.collapseSource);
-                                    Image.fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? COLOR_IMAGE_ROW : COLOR_IMAGE_EDIT);
+                                    Image.fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ?
+                                    this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT);
                                     Image.align(Alignment.End);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.height(this.item.getNodeItem().imageCollapse?.itemHeight);
@@ -3516,12 +3513,16 @@ export class TreeViewInner extends ViewPU {
                                         this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity);
                                     Image.onTouch((n5) => {
                                         if (n5.type === TouchType.Down) {
-                                            this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
+                                            this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource,
+                                                this.item.getNodeCurrentNodeId()));
                                             this.listNodeDataSource.setCurrentFocusNodeId(this.item.getCurrentNodeId());
                                         }
                                         n5.stopPropagation();
                                     });
                                     Image.focusable(true);
+                                    Image.matchTextDirection((this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
@@ -3568,11 +3569,11 @@ export class NodeItem {
         this.container = m4.container;
         if (m4.icon) {
             this.nodeItem.imageNode = new ImageNode(m4.icon, {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_fourth'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, m4.selectedIcon, m4.editIcon);
         }
         if (m4.primaryTitle) {
@@ -3584,18 +3585,18 @@ export class NodeItem {
     addImageCollapse(l4) {
         if (l4) {
             this.nodeItem.imageCollapse = new ImageNode(ARROW_RIGHT, {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_tertiary'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, undefined, undefined);
             this.nodeItem.imageCollapse.itemRightMargin = ({
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             });
         }
         else {
@@ -3660,11 +3661,11 @@ export class ImageNode extends NodeBaseInfo {
     constructor(c4, d4, e4, f4, g4, h4) {
         super();
         this.rightMargin = {
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.imageSource = c4;
         this.imageNormalSource = c4;
@@ -3789,20 +3790,20 @@ class MainTitleNode extends NodeBaseInfo {
         this.itemWidth = ITEM_WIDTH;
         this.itemHeight = ITEM_HEIGHT;
         this.rightMargin = {
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.mainTitleSetting = {
             fontColor: this.treeViewTheme.primaryTitleFontColor,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body1'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontWeight: FontWeight.Normal,
         };
@@ -3814,11 +3815,11 @@ class MainTitleNode extends NodeBaseInfo {
             this.mainTitleSetting = {
                 fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
                 fontSize: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_text_size_body1'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 fontWeight: FontWeight.Regular,
             };
@@ -3827,11 +3828,11 @@ class MainTitleNode extends NodeBaseInfo {
             this.mainTitleSetting = {
                 fontColor: this.treeViewTheme.primaryTitleFontColor,
                 fontSize: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_text_size_body1'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 fontWeight: FontWeight.Normal,
             };
@@ -3871,11 +3872,11 @@ class MainTitleNode extends NodeBaseInfo {
             this.mainTitleSetting = {
                 fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
                 fontSize: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_text_size_body1'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 fontWeight: FontWeight.Regular,
             };
@@ -3884,11 +3885,11 @@ class MainTitleNode extends NodeBaseInfo {
             this.mainTitleSetting = {
                 fontColor: this.treeViewTheme.primaryTitleFontColor,
                 fontSize: {
-                    "id": -1,
-                    "type": 10002,
+                    'id': -1,
+                    'type': 10002,
                     params: ['sys.float.ohos_id_text_size_body1'],
-                    "bundleName": "__harDefaultBundleName__",
-                    "moduleName": "__harDefaultModuleName__"
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
                 },
                 fontWeight: FontWeight.Normal,
             };
@@ -3901,44 +3902,44 @@ export class InputText extends NodeBaseInfo {
         super();
         this.status = undefined;
         this.statusColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_background'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.editItemColor = {
-            "id": -1,
-            "type": 10001,
+            'id': -1,
+            'type': 10001,
             params: ['sys.color.ohos_id_color_emphasize'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.radius = {
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_corner_radius_default_xs'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.treeViewTheme = new TreeViewTheme();
         this.itemWidth = ITEM_WIDTH;
         this.itemHeight = ITEM_HEIGHT_INPUT;
         this.rightMargin = {
-            "id": -1,
-            "type": 10002,
+            'id': -1,
+            'type': 10002,
             params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-            "bundleName": "__harDefaultBundleName__",
-            "moduleName": "__harDefaultModuleName__"
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
         };
         this.inputTextSetting = {
             fontColor: this.treeViewTheme.primaryTitleFontColor,
             fontSize: {
-                "id": -1,
-                "type": 10002,
+                'id': -1,
+                'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body1'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
             },
             fontWeight: FontWeight.Normal,
         };

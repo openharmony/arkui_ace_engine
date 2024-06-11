@@ -33,6 +33,9 @@ public:
         : tag_(std::move(tag)), type_(type), isSystemGesture_(isSystemGesture)
     {}
     GestureInfo(GestureTypeName type, bool isSystemGesture) : type_(type), isSystemGesture_(isSystemGesture) {}
+    GestureInfo(GestureTypeName type, GestureTypeName trueType, bool isSystemGesture)
+        : type_(type), recognizerType_(trueType), isSystemGesture_(isSystemGesture)
+    {}
     explicit GestureInfo(std::string tag) : tag_(std::move(tag)) {}
     explicit GestureInfo(GestureTypeName type) : type_(type) {}
     explicit GestureInfo(bool isSystemGesture) : isSystemGesture_(isSystemGesture) {}
@@ -68,6 +71,16 @@ public:
         type_ = type;
     }
 
+    void SetRecognizerType(GestureTypeName trueType)
+    {
+        recognizerType_ = trueType;
+    }
+
+    GestureTypeName GetRecognizerType() const
+    {
+        return recognizerType_;
+    }
+
     void SetInputEventType(InputEventType type)
     {
         inputEventType_ = type;
@@ -88,12 +101,25 @@ public:
         return userData_;
     }
 
+    void SetDisposeTag(bool tag)
+    {
+        disposeTag_ = tag;
+    }
+
+    bool GetDisposeTag()
+    {
+        return disposeTag_;
+    }
+
 private:
     std::optional<std::string> tag_;
     GestureTypeName type_ = GestureTypeName::UNKNOWN;
+    // used in onGestureRecognizerJudgeBegin
+    GestureTypeName recognizerType_ = GestureTypeName::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
     void* userData_ = nullptr;
+    bool disposeTag_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -527,7 +527,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(context);
     context->SetDisplayWindowRectInfo(
         Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-    auto viewPtr = container->GetAceView();
+    auto viewPtr = AceType::DynamicCast<AceViewPreview>(container->GetAceView());
     CHECK_NULL_VOID(viewPtr);
     SystemProperties::InitDeviceInfo(
         config.Width(), config.Height(), config.Height() >= config.Width() ? 0 : 1, config.Density(), false);
@@ -575,4 +575,14 @@ int32_t UIContentImpl::CreateModalUIExtension(
 }
 
 void UIContentImpl::CloseModalUIExtension(int32_t sessionId) {}
+
+void UIContentImpl::SetStatusBarItemColor(uint32_t color)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->SetStatusBarItemColor(IsDarkColor(color));
+}
 } // namespace OHOS::Ace

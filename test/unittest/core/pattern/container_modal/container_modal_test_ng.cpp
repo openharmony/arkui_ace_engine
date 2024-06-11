@@ -566,7 +566,7 @@ HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
 
     pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     pattern_->SetContainerModalTitleVisible(true, true);
-    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), std::nullopt);
     pattern_->SetContainerModalTitleVisible(false, false);
     EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::GONE);
 

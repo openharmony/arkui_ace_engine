@@ -154,6 +154,8 @@ public:
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
     virtual void DeregisterInteractionOperationAsChildTree() {};
+    virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
     bool IsRegister()
     {
         return isReg_;

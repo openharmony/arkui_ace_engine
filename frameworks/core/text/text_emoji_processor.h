@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace {
 enum class EmojiRelation { NO_EMOJI, IN_EMOJI, BEFORE_EMOJI, AFTER_EMOJI, MIDDLE_EMOJI };
+
+struct TextEmojiSubStringRange {
+    int startIndex;
+    int endIndex;
+};
+
 class TextEmojiProcessor {
 public:
     // static functions
@@ -49,6 +55,14 @@ public:
         const std::string& content, int32_t& startIndex, int32_t& endIndex);
     static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content);
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content);
+    static bool IsIndexBeforeOrInEmoji(int32_t index, const std::string& content,
+        int32_t& startIndex, int32_t& endIndex);
+    static bool IsIndexAfterOrInEmoji(int32_t index, const std::string& content,
+        int32_t& startIndex, int32_t& endIndex);
+    static std::wstring SubWstring(int32_t index, int32_t length,
+        const std::wstring& content, bool includeHalf = false);
+    static TextEmojiSubStringRange CalSubWstringRange(int32_t index, int32_t length,
+        const std::wstring& content, bool includeHalf);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);

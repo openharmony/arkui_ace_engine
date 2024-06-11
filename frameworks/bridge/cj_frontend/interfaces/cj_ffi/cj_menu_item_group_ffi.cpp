@@ -25,45 +25,39 @@ using namespace OHOS::Ace::Framework;
 extern "C" {
 void FfiOHOSAceFrameworkMenuItemGroupCreateByString(const char* header, const char* footer)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuItemGroupView::Create();
-        std::string headerStr = header;
-        std::string footerStr = footer;
-        if (!headerStr.empty()) {
-            NG::MenuItemGroupView::SetHeader(headerStr);
-        }
-        if (!footerStr.empty()) {
-            NG::MenuItemGroupView::SetFooter(footerStr);
-        }
+    NG::MenuItemGroupView::Create();
+    std::string headerStr = header;
+    std::string footerStr = footer;
+    if (!headerStr.empty()) {
+        NG::MenuItemGroupView::SetHeader(headerStr);
     }
-    return;
+    if (!footerStr.empty()) {
+        NG::MenuItemGroupView::SetFooter(footerStr);
+    }
 }
 
 void FfiOHOSAceFrameworkMenuItemGroupCreateByBuilder(void(*header)(), void(*footer)())
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::MenuItemGroupView::Create();
-        RefPtr<NG::UINode> rheader;
-        {
-            auto headerBuilderFunc = CJLambda::Create(header);
-            CHECK_NULL_VOID(headerBuilderFunc);
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            headerBuilderFunc();
-            rheader = NG::ViewStackProcessor::GetInstance()->Finish();
-            CHECK_NULL_VOID(rheader);
-        }
-        NG::MenuItemGroupView::SetHeader(rheader);
-        RefPtr<NG::UINode> rfooter;
-        {
-            auto footerBuilderFunc = CJLambda::Create(footer);
-            CHECK_NULL_VOID(footerBuilderFunc);
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            footerBuilderFunc();
-            rfooter = NG::ViewStackProcessor::GetInstance()->Finish();
-            CHECK_NULL_VOID(rfooter);
-        }
-        NG::MenuItemGroupView::SetFooter(rfooter);
+    NG::MenuItemGroupView::Create();
+    RefPtr<NG::UINode> rheader;
+    {
+        auto headerBuilderFunc = CJLambda::Create(header);
+        CHECK_NULL_VOID(headerBuilderFunc);
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        headerBuilderFunc();
+        rheader = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(rheader);
     }
-    return;
+    NG::MenuItemGroupView::SetHeader(rheader);
+    RefPtr<NG::UINode> rfooter;
+    {
+        auto footerBuilderFunc = CJLambda::Create(footer);
+        CHECK_NULL_VOID(footerBuilderFunc);
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footerBuilderFunc();
+        rfooter = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(rfooter);
+    }
+    NG::MenuItemGroupView::SetFooter(rfooter);
 }
 }

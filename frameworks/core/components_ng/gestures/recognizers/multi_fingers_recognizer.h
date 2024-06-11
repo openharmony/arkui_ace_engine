@@ -33,7 +33,7 @@ public:
 
     ~MultiFingersRecognizer() override = default;
 
-    void UpdateFingerListInfo();
+    virtual void UpdateFingerListInfo();
 
     bool CheckTouchId(int32_t touchId) override
     {
@@ -65,6 +65,11 @@ public:
     {
         return std::count_if(touchPoints_.begin(), touchPoints_.end(),
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
+    }
+
+    int32_t GetTouchPointsSize() const
+    {
+        return static_cast<int32_t>(touchPoints_.size());
     }
 
 protected:

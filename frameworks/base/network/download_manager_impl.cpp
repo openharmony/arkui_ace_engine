@@ -135,21 +135,21 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
-        task->OnSuccess([successCallback = downloadCallback.successCallback,
-                            failCallback = downloadCallback.failCallback,
-                            instanceId](const NetStackRequest& request, const NetStackResponse& response) {
-            if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
-                LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.", request.GetURL().c_str(),
+        task->OnSuccess(
+            [successCallback = downloadCallback.successCallback, failCallback = downloadCallback.failCallback,
+                instanceId](const NetStackRequest& request, const NetStackResponse& response) {
+                if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
+                    LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.",
+                        request.GetURL().c_str(), response.GetResponseCode());
+                    std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
+                                           std::to_string(response.GetResponseCode());
+                    failCallback(errorMsg, true, instanceId);
+                    return;
+                }
+                LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
                     response.GetResponseCode());
-                std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
-                                       std::to_string(response.GetResponseCode());
-                failCallback(errorMsg, true, instanceId);
-                return;
-            }
-            LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
-                response.GetResponseCode());
-            successCallback(std::move(response.GetResult()), true, instanceId);
-        });
+                successCallback(std::move(response.GetResult()), true, instanceId);
+            });
         task->OnCancel([cancelCallback = downloadCallback.cancelCallback, instanceId](
                            const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
@@ -168,11 +168,10 @@ public:
         });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                const NetStackRequest& request,
-                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                onProgressCallback(dlTotal, dlNow, true, instanceId);
-            });
+                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, true, instanceId); });
         }
+        std::scoped_lock lock(httpTaskMutex_);
         httpTaskMap_.emplace(url, task);
         auto result = task->Start();
         LOGI("download src [%{private}s] [%{public}s]", url.c_str(),
@@ -230,11 +229,10 @@ public:
         });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                const NetStackRequest& request,
-                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                onProgressCallback(dlTotal, dlNow, false, instanceId);
-            });
+                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
         }
+        std::scoped_lock lock(httpTaskMutex_);
         httpTaskMap_.emplace(url, task);
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
@@ -242,6 +240,7 @@ public:
 
     bool RemoveDownloadTask(const std::string& url) override
     {
+        std::scoped_lock lock(httpTaskMutex_);
         auto iter = httpTaskMap_.find(url);
         if (iter != httpTaskMap_.end()) {
             auto task = iter->second;
@@ -261,6 +260,7 @@ private:
         int32_t port = 0;
         std::string exclusions;
     };
+    std::mutex httpTaskMutex_;
     std::unordered_map<std::string, std::shared_ptr<NetStackTask>> httpTaskMap_;
 
     bool HandleDownloadResult(bool result, DownloadCallback&& downloadCallback,

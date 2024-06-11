@@ -20,7 +20,6 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 // StagePattern is the base class for root render node to perform page switch.

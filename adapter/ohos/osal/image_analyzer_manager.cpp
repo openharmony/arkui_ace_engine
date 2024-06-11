@@ -130,6 +130,10 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
     CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
     (analyzerUIConfig_.onAnalyzed.value())(ImageAnalyzerState::STOPPED);
     analyzerUIConfig_.onAnalyzed = std::nullopt;
+
+    napi_value nullValue = nullptr;
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(nullValue);
 }
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
@@ -238,11 +242,19 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
 void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
-    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    bool hasConfig = imageAnalyzerAdapter_->HasImageAnalyzerConfig();
+    if ((holder_ != ImageAnalyzerHolder::XCOMPONENT && holder_ != ImageAnalyzerHolder::VIDEO_CUSTOM) || !hasConfig) {
+        imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    }
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
     }
+}
+
+void ImageAnalyzerManager::SetImageAIOptions(void* options)
+{
+    SetImageAnalyzerConfig(options);
 }
 
 void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)

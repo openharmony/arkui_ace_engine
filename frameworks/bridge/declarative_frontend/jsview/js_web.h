@@ -160,6 +160,7 @@ public:
     static void OnViewportFitChanged(const JSCallbackInfo& args);
     static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
     static void OnAdsBlocked(const JSCallbackInfo& args);
+    static void ForceDisplayScrollBar(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

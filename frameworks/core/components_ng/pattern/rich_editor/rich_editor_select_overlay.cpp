@@ -257,6 +257,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.pattern = AceType::WeakClaim(AceType::RawPtr(pattern));
     selectInfo.handlerColor = pattern->GetCaretColor();
     selectInfo.handleReverse = IsHandleReverse();
+    selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
     bool usingMouse = pattern->IsUsingMouse();
     auto responseType = pattern->textResponseType_.value_or(TextResponseType::NONE);
     auto& firstHandle = pattern->textSelector_.firstHandle;
@@ -359,7 +360,10 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
-        pattern->StartTwinkling();
+        if (pattern->IsEditing()) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
+            pattern->StartTwinkling();
+        }
     }
 }
 

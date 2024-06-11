@@ -87,6 +87,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
+        refereeNG_->CleanAll(true);
+        touchTestResults_.clear();
+        axisTouchTestResults_.clear();
+    }
     refereeNG_->CheckSourceTypeChange(touchPoint.sourceType);
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
@@ -107,8 +112,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
+    TouchTestResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : hitTestResult) {
@@ -186,14 +193,14 @@ void EventManager::RecordHitEmptyMessage(
     auto hitEmptyMessage = JsonUtil::Create(true);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    int32_t windowId = 0;
+    auto windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
     windowId = NG::WindowSceneHelper::GetWindowIdForWindowScene(frameNode);
 #endif
     if (windowId == 0) {
-        windowId = static_cast<int32_t>(container->GetWindowId());
+        windowId = container->GetWindowId();
     }
-    hitEmptyMessage->Put("windowId", windowId);
+    hitEmptyMessage->Put("windowId", static_cast<int32_t>(windowId));
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
         auto window = pipelineContext->GetWindow();
@@ -277,13 +284,20 @@ bool EventManager::PostEventTouchTest(
             postEventRefereeNG_->CleanAll();
         }
     }
+    TouchTestResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
-    uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
+    uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     for (const auto& item : hitTestResult) {
         item->SetIsPostEventResult(true);
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
         if (group) {
             group->SetIsPostEventResultRecursively(true);
+            group->SetResponseLinkRecognizersRecursively(responseLinkResult);
+            continue;
+        }
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+        if (recognizer) {
+            recognizer->SetResponseLinkRecognizers(responseLinkResult);
         }
     }
     auto result = !hitTestResult.empty();
@@ -298,6 +312,8 @@ void EventManager::TouchTest(
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         refereeNG_->CleanAll(true);
+        touchTestResults_.clear();
+        axisTouchTestResults_.clear();
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
@@ -312,7 +328,9 @@ void EventManager::TouchTest(
     }
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
-    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
+    TouchTestResult responseLinkResult;
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id, responseLinkResult);
+    SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
     LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
 }
@@ -515,22 +533,30 @@ void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
     }
 }
 
-void EventManager::CheckTouchEvent(TouchEvent touchEvent)
+void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type == TouchType::DOWN) {
-        if (touchEventFindResult == downFingerIds_.end()) {
-            downFingerIds_.insert(touchEvent.id);
-        } else {
+        if (touchEventFindResult != downFingerIds_.end()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
             refereeNG_->ForceCleanGestureReferee();
+            touchTestResults_.clear();
+            downFingerIds_.clear();
         }
-    } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
+        downFingerIds_.insert(touchEvent.id);
+    }
+}
+
+void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
+{
+    auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
+    if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
             refereeNG_->ForceCleanGestureReferee();
+            downFingerIds_.clear();
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
@@ -539,7 +565,6 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
-    CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
@@ -555,11 +580,14 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
+        CheckUpEvent(event);
         return false;
     }
 
     if (point.type == TouchType::DOWN) {
+        // first collect gesture into gesture referee.
         refereeNG_->CleanGestureRefereeState(event.id);
+        refereeNG_->AddGestureToScope(point.id, iter->second);
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
         int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
@@ -571,11 +599,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
                 TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
             eventTree_.eventTreeList.clear();
-            refereeNG_->ForceCleanGestureReferee();
-        }
-        // first collect gesture into gesture referee.
-        if (Container::IsCurrentUseNewPipeline()) {
-            refereeNG_->AddGestureToScope(point.id, iter->second);
+            refereeNG_->ForceCleanGestureRefereeState();
         }
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
@@ -625,6 +649,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         }
     }
 
+    CheckUpEvent(event);
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {
@@ -984,10 +1009,22 @@ void EventManager::MouseTest(
         if (event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) {
             testResult = touchTestResults_[event.id];
         } else {
-            frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
+            TouchTestResult responseLinkResult;
+            if (event.action != MouseAction::MOVE) {
+                touchRestrict.touchEvent.isMouseTouchTest = true;
+            }
+            frameNode->TouchTest(
+                point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
+            SetResponseLinkRecognizers(testResult, responseLinkResult);
         }
     } else {
-        frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
+        TouchTestResult responseLinkResult;
+        if (event.action != MouseAction::MOVE) {
+            touchRestrict.touchEvent.isMouseTouchTest = true;
+        }
+        frameNode->TouchTest(
+            point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
+        SetResponseLinkRecognizers(testResult, responseLinkResult);
     }
     UpdateHoverNode(event, testResult);
     LogPrintMouseTest();
@@ -1222,6 +1259,13 @@ bool EventManager::DispatchRotationEvent(
     }
 }
 
+bool EventManager::IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    auto curFrameName = focusNode ? focusNode->GetTag() : "NULL";
+    return curFrameName == V2::WEB_ETS_TAG;
+}
+
 void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
 {
     auto frameNode = node.Upgrade();
@@ -1284,7 +1328,7 @@ bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t ke
     }
 
     const std::set<char> forbidValue{'X', 'Y', 'Z', 'A', 'C', 'V'};
-    char c = static_cast<char>(std::toupper(value.front()));
+    char c = std::toupper(value.front());
     if (forbidValue.count(c) == 0) {
         return false;
     }
@@ -1817,6 +1861,22 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
         lastLogTimeStamp = currentTime;
     }
     lastConsumedEvent_ = { eventId, lastLogTimeStamp };
+}
+
+void EventManager::SetResponseLinkRecognizers(
+    const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers)
+{
+    for (const auto& item : result) {
+        auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
+        if (group) {
+            group->SetResponseLinkRecognizersRecursively(responseLinkRecognizers);
+            continue;
+        }
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+        if (recognizer) {
+            recognizer->SetResponseLinkRecognizers(responseLinkRecognizers);
+        }
+    }
 }
 
 } // namespace OHOS::Ace

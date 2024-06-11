@@ -25,7 +25,7 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
-class MarqueeModel {
+class ACE_FORCE_EXPORT MarqueeModel {
 public:
     static MarqueeModel* GetInstance();
     virtual ~MarqueeModel() = default;

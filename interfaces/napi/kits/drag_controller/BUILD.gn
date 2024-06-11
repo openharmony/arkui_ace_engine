@@ -23,11 +23,6 @@ template("napi_dragcontroller_static") {
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-    include_dirs = [
-      "$ark_ets_path",
-      "$ark_runtime_path",
-    ]
-
     sources = [ "js_drag_controller.cpp" ]
     deps = [ "../utils:napi_utils_static_${platform}" ]
     external_deps = []
@@ -71,7 +66,7 @@ template("napi_dragcontroller_static") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
-        external_deps += [ "napi:ace_container_scope" ]
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
       external_deps += [ "kv_store:distributeddata_inner" ]
     }

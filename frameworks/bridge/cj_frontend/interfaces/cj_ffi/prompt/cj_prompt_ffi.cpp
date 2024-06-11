@@ -18,7 +18,7 @@
 #include <malloc.h>
 
 #include "cj_lambda.h"
-#include "bridge/common/utils/engine_helper.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
 using namespace OHOS::Ace;
@@ -34,7 +34,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 
 RefPtr<OHOS::Ace::CJFrontendAbstract> CheckFrontendLegality(int32_t size, CButtonInfo* buttonsInfo)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("Can not get frontend.");
         return nullptr;
@@ -79,7 +79,7 @@ void* FfiPromptMallocButtons(int64_t size)
 
 void FfiPromptShowToast(const char* message, int32_t duration, const char* bottom, int32_t mode)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("Can not get frontend.");
         return;
@@ -119,7 +119,7 @@ void FfiPromptShowActionMenu(
 
 void FfiPromptOpenCustomDialog(void(*builder)(), NativeBaseOption options, void(*callback)(int32_t))
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("Can not get frontend.");
         return;
@@ -170,7 +170,7 @@ void FfiPromptOpenCustomDialog(void(*builder)(), NativeBaseOption options, void(
 
 void FfiPromptCloseCustomDialog(int32_t id)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(EngineHelper::GetCurrentFrontend());
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     if (!frontend) {
         LOGE("Can not get frontend.");
         return;

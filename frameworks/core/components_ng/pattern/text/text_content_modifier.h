@@ -29,6 +29,16 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+struct FadeoutInfo {
+    bool isLeftFadeout = false;
+    bool isRightFadeout = false;
+    double fadeoutPercent = 0;
+    bool IsFadeount()
+    {
+        return isLeftFadeout || isRightFadeout;
+    }
+};
+
 class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
@@ -141,12 +151,15 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
-    void UpdateFadeout(const DrawingContext& drawingContext);
+    void DrawNormal(DrawingContext& drawingContext);
+    void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
+    FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;

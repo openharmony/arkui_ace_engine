@@ -45,7 +45,11 @@ CommonViewModel* CommonViewModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSCommonView::Create(const JSCallbackInfo& info)
 {
-    CommonViewModel::GetInstance()->Create();
+    bool isLayoutNode = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], isLayoutNode);
+    }
+    CommonViewModel::GetInstance()->Create(isLayoutNode);
 }
 
 void JSCommonView::JSBind(BindingTarget globalObj)

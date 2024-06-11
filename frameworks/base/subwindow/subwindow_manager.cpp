@@ -285,6 +285,14 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     }
 }
 
+void SubwindowManager::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->UpdatePreviewPosition(offset, rect);
+    }
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
@@ -923,5 +931,30 @@ void SubwindowManager::HideSystemTopMostWindow()
 {
     CHECK_NULL_VOID(systemToastWindow_);
     systemToastWindow_->HideSubWindowNG();
+}
+
+void SubwindowManager::ClearToastInSystemSubwindow()
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in system subwindow enter");
+    auto subwindow = GetSystemToastWindow();
+    if (subwindow) {
+        subwindow->ClearToast();
+    }
+}
+void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    if (!container->IsUIExtensionWindow() || uiExtensionWindowRect_ == windowRect) {
+        return;
+    }
+    auto subContainer = Container::GetContainer(GetSubContainerId(instanceId));
+    CHECK_NULL_VOID(subContainer);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->OnUIExtensionWindowSizeChange();
+    uiExtensionWindowRect_ = windowRect;
 }
 } // namespace OHOS::Ace

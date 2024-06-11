@@ -93,6 +93,7 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
+    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -206,6 +207,7 @@ private:
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
+    bool ShouldCallSystem(const AAFwk::Want& want);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

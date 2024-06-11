@@ -112,6 +112,18 @@ void FfiOHOSAceFrameworkTextFieldSetPaddings(CJEdge params)
     FfiOHOSAceFrameworkViewAbstractSetPaddings(params);
 }
 
+void FfiOHOSAceFrameworkTextFieldSetMargin(double value, int32_t unit)
+{
+    FfiOHOSAceFrameworkViewAbstractSetMargin(value, unit);
+    TextFieldModel::GetInstance()->SetMargin();
+}
+
+void FfiOHOSAceFrameworkTextFieldSetMargins(CJEdge params)
+{
+    FfiOHOSAceFrameworkViewAbstractSetMargins(params);
+    TextFieldModel::GetInstance()->SetMargin();
+}
+
 void FfiOHOSAceFrameworkTextFieldSetPlaceholderColor(uint32_t value)
 {
     TextFieldModel::GetInstance()->SetPlaceholderColor(Color(value));

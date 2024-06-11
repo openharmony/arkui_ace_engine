@@ -229,7 +229,7 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
 #else
     auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
     CHECK_NULL_VOID(imageData);
-    jsImage->SetImageData(imageData);
+    jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
 #endif
     jsImage->SetUnit(GetUnit());
     jsImage->SetWidth(GetWidth());

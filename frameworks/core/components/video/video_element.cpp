@@ -1335,7 +1335,7 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
                 LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
                 video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, startTime, true);
             }
-        }, "ArkUIVideoPrepared");
+        }, "ArkUIVideoPlaybackPrepared");
     } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }

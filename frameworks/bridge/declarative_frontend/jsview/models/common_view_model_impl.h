@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 class CommonViewModelImpl : public OHOS::Ace::CommonViewModel {
 public:
-    void Create();
+    void Create(bool isLayoutNode);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_COMMON_VIEW_MODEL_IMPL_H

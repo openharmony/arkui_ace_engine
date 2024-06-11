@@ -56,7 +56,7 @@ private:
     int32_t offsetInSpan_ = 0;
 };
 
-class RichEditorInsertValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
@@ -64,16 +64,19 @@ public:
     void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
     void SetInsertValue(const std::string& insertValue);
+    void SetPreviewText(const std::string& previewText);
     const std::string& GetInsertValue() const;
+    const std::string& GetPreviewText() const;
 
 private:
     int32_t insertOffset_;
     std::string insertValue_;
+    std::string previewText_;
 };
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
 
-class RichEditorAbstractSpanResult {
+class ACE_FORCE_EXPORT RichEditorAbstractSpanResult {
 public:
     RichEditorAbstractSpanResult() = default;
     ~RichEditorAbstractSpanResult() = default;
@@ -91,6 +94,8 @@ public:
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
     const std::string& GetValue() const;
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
     void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
@@ -167,6 +172,7 @@ private:
     int32_t offsetInSpan_ = 0;
     int32_t eraseLength_ = 0;
     std::string value_;
+    std::string previewText_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
@@ -190,7 +196,7 @@ private:
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
 
-class RichEditorDeleteValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}

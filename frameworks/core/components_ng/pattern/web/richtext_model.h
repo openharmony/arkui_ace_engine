@@ -22,7 +22,7 @@
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace {
-class RichTextModel {
+class ACE_FORCE_EXPORT RichTextModel {
 public:
     static RichTextModel* GetInstance();
     virtual ~RichTextModel() = default;

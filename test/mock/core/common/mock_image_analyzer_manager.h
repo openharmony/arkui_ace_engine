@@ -32,6 +32,7 @@ public:
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
     void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
+    void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
 };
 } // namespace OHOS::Ace

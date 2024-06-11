@@ -258,7 +258,7 @@ void PluginElement::RunPluginContainer()
     CHECK_NULL_VOID(pluginNode);
     pluginNode->SetPluginSubContainer(pluginSubContainer_);
 
-    uiTaskExecutor.PostTask([this, weak, plugin] { RunPluginTask(weak, plugin); }, "ArkUIPluginRun");
+    uiTaskExecutor.PostTask([this, weak, plugin] { RunPluginTask(weak, plugin); }, "ArkUIPluginContainerRun");
 }
 
 RefPtr<RenderNode> PluginElement::CreateRenderNode()

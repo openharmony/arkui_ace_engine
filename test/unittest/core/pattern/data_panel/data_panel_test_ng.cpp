@@ -30,6 +30,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,10 +38,16 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<double> VALUES = { 1.0, 2.0, 3.0, 4.0 };
 constexpr double MAX = 200.0;
+constexpr double MAX_DEFAULT = 100.0;
+constexpr double MAX_ZERO_VALUE = 0.0;
+constexpr double MAX_INFINITE_VALUE = 1000000.0;
+const std::vector<double> SINGLE_VALUES = { 1.0 };
+const std::vector<double> FULL_VALUES = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
 const std::vector<double> LONG_VALUES = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
 constexpr size_t TYPE_CYCLE = 0;
 constexpr size_t TYPE_LINE = 1;
 constexpr bool CLOSE_EFFECT = true;
+constexpr bool CLOSE_EFFECT_OFF = false;
 constexpr Dimension WIDTH = 50.0_vp;
 constexpr Dimension HEIGHT = 50.0_vp;
 constexpr float MAX_WIDTH = 400.0f;
@@ -105,12 +112,14 @@ private:
 
 void DataPanelTestNg::SetUpTestCase()
 {
+    MockContainer::SetUp();
     MockPipelineContext::SetUp();
 }
 
 void DataPanelTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void DataPanelTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const int& length)
@@ -802,6 +811,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
 
     Gradient gradient;
     GradientColor gradientColorStart;
@@ -838,6 +851,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintBackgroundTest001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT, SEGMENTWIDTH);
     dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT * 4, SEGMENTWIDTH);
 }
@@ -858,6 +872,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
 
@@ -888,6 +905,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
     LinearData linerData;
@@ -931,6 +951,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintTrackBackgroundTest001, TestSize.Level1)
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     dataPanelModifier.PaintTrackBackground(rsCanvas, arcData, START_COLOR);
 }
 
@@ -954,6 +975,9 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
@@ -981,6 +1005,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.SetMax(100.0f);
@@ -1014,6 +1043,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
     dataPanelModifier.SetMax(100.0f);
     std::vector<double> VALUES = { 0.001f, 20.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1042,22 +1076,16 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      */
     dataPanelModifier.SetEffect(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case2: effect = false.
      */
     dataPanelModifier.SetEffect(false);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case3: isHasShadowValue = true.
      */
     dataPanelModifier.SetIsHasShadowValue(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**
@@ -1084,6 +1112,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1137,6 +1169,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
     dataPanelModifier.SetMax(-20.0f);
     std::vector<double> VALUES = { -5.0f, 0.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1167,6 +1200,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintLinearProgressTest003, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1195,6 +1232,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentFilterMaskTest001, TestSize.
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Translate(_, _)).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Scale(_, _)).WillOnce(Return());
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
     dataPanelModifier.SetMax(20.0f);
     std::vector<double> VALUES = { 0.0001f, 5.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1286,6 +1327,10 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
 
     dataPanelModifier.onDraw(context);
@@ -1377,8 +1422,8 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
@@ -1401,27 +1446,19 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest001, TestSize.Level1)
         defaultDimension };
     auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
 
-    if (getRadius.radiusTopLeft.has_value()) {
-        EXPECT_EQ(getRadius.radiusTopLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusTopLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusTopRight.has_value()) {
-        EXPECT_EQ(getRadius.radiusTopRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusTopRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusBottomLeft.has_value()) {
-        EXPECT_EQ(getRadius.radiusBottomLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusBottomLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    if (getRadius.radiusBottomRight.has_value()) {
-        EXPECT_EQ(getRadius.radiusBottomRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
-        EXPECT_EQ(getRadius.radiusBottomRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
-    }
-
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    EXPECT_TRUE(getRadius.radiusTopLeft.has_value());
+    EXPECT_EQ(getRadius.radiusTopLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusTopLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusTopRight.has_value());
+    EXPECT_EQ(getRadius.radiusTopRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusTopRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusBottomLeft.has_value());
+    EXPECT_EQ(getRadius.radiusBottomLeft.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusBottomLeft.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    EXPECT_TRUE(getRadius.radiusBottomRight.has_value());
+    EXPECT_EQ(getRadius.radiusBottomRight.value().Value(), dataPanelTheme->GetDefaultBorderRadius().Value());
+    EXPECT_EQ(getRadius.radiusBottomRight.value().Unit(), dataPanelTheme->GetDefaultBorderRadius().Unit());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1436,8 +1473,8 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
      * @tc.expected: Objects are created successfully.
      */
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dataPanelTheme = AceType::MakeRefPtr<OHOS::Ace::DataPanelTheme>();
@@ -1455,7 +1492,6 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
      * @tc.steps: step2. get border radius.
      * @tc.expected: the border radius is the same as the customized setting.
      */
-
     Dimension setRadiusDimension = Dimension(10.0, DimensionUnit::VP);
     ViewAbstract::SetBorderRadius(setRadiusDimension);
     ViewAbstract::SetClipEdge(true);
@@ -1465,30 +1501,571 @@ HWTEST_F(DataPanelTestNg, DataPanelLineTypeBorderRadiusTest002, TestSize.Level1)
         defaultDimension };
     auto getRadius = renderContext->GetBorderRadiusValue(borderRadiusDefault);
 
-    if (getRadius.radiusTopLeft.has_value()) {
-        auto tlRadius = getRadius.radiusTopLeft.value();
-        EXPECT_EQ(tlRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(tlRadius.Unit(), setRadiusDimension.Unit());
-    }
+    EXPECT_TRUE(getRadius.radiusTopLeft.has_value());
+    auto tlRadius = getRadius.radiusTopLeft.value();
+    EXPECT_EQ(tlRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(tlRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusTopRight.has_value());
+    auto trRadius = getRadius.radiusTopRight.value();
+    EXPECT_EQ(trRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(trRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusBottomLeft.has_value());
+    auto blRadius = getRadius.radiusBottomLeft.value();
+    EXPECT_EQ(blRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(blRadius.Unit(), setRadiusDimension.Unit());
+    EXPECT_TRUE(getRadius.radiusBottomRight.has_value());
+    auto brRadius = getRadius.radiusBottomRight.value();
+    EXPECT_EQ(brRadius.Value(), setRadiusDimension.Value());
+    EXPECT_EQ(brRadius.Unit(), setRadiusDimension.Unit());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
 
-    if (getRadius.radiusTopRight.has_value()) {
-        auto trRadius = getRadius.radiusTopRight.value();
-        EXPECT_EQ(trRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(trRadius.Unit(), setRadiusDimension.Unit());
-    }
+/**
+ * @tc.name: DataPanelPatternTest003
+ * @tc.desc: Test DataPanel SetEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and set effct.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanel.SetEffect(!CLOSE_EFFECT);
 
-    if (getRadius.radiusBottomLeft.has_value()) {
-        auto blRadius = getRadius.radiusBottomLeft.value();
-        EXPECT_EQ(blRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(blRadius.Unit(), setRadiusDimension.Unit());
-    }
+    /**
+     * @tc.steps: step2. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetEffectValue(), CLOSE_EFFECT);
+}
 
-    if (getRadius.radiusBottomRight.has_value()) {
-        auto brRadius = getRadius.radiusBottomRight.value();
-        EXPECT_EQ(brRadius.Value(), setRadiusDimension.Value());
-        EXPECT_EQ(brRadius.Unit(), setRadiusDimension.Unit());
-    }
+/**
+ * @tc.name: DataPanelPatternTest004
+ * @tc.desc: Test DataPanel Create when type is line
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_LINE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest005
+ * @tc.desc: Test DataPanel Create when values is longer than max length
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(LONG_VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), LONG_VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest006
+ * @tc.desc: Test DataPanel Create when values has a single value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(SINGLE_VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), SINGLE_VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest007
+ * @tc.desc: Test DataPanel Create when values length is the maximum supported display length
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(FULL_VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), FULL_VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest008
+ * @tc.desc: Test DataPanel Create when values length is 9
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(FULL_VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), FULL_VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest009
+ * @tc.desc: Test DataPanel Create when max is default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX_DEFAULT, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX_DEFAULT);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest010
+ * @tc.desc: Test DataPanel Create when max is a infinite value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX_INFINITE_VALUE, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX_INFINITE_VALUE);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest010
+ * @tc.desc: Test DataPanel Create when max is a infinite value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX_ZERO_VALUE, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties and paint properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX_ZERO_VALUE);
+    EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
+    EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest011
+ * @tc.desc: Test DataPanel SetEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and set effct.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanel.SetEffect(CLOSE_EFFECT_OFF);
+
+    /**
+     * @tc.steps: step2. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetEffectValue(), !CLOSE_EFFECT_OFF);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest013
+ * @tc.desc: Test DataPanel SetEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and set effct when type is line.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    dataPanel.SetEffect(CLOSE_EFFECT);
+
+    /**
+     * @tc.steps: step2. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetEffectValue(), !CLOSE_EFFECT);
+}
+
+/**
+ * @tc.name: DataPanelPatternTest014
+ * @tc.desc: Test DataPanel SetEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelLayoutPropertyTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and set effct when type is line.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    dataPanel.SetEffect(CLOSE_EFFECT_OFF);
+
+    /**
+     * @tc.steps: step2. get value from dataPanelPaintProperty.
+     * @tc.expected: step3. the value is the same with setting.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetEffectValue(), !CLOSE_EFFECT_OFF);
+}
+
+/**
+ * @tc.name: DataPanelMeasureTest005
+ * @tc.desc: Test DataPanel Measure when type is line.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelMeasureTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get framenode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    dataPanel.SetEffect(!CLOSE_EFFECT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set dataPanelLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_NE(dataPanelPattern, nullptr);
+    auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(dataPanelLayoutAlgorithm, nullptr);
+    dataPanelLayoutAlgorithm->Reset();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dataPanelLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. compare dataPanelSize with expected value.
+     * @tc.expected: step3. dataPanelSize is the same with expected value.
+     */
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_SIZE;
+    auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelDefaultSize, MAX_SIZE);
+
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(50).height(50)
+     */
+    LayoutConstraintF layoutConstraintVaildSize;
+    layoutConstraintVaildSize.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_SIZE;
+    layoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    auto dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintVaildSize, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+
+    LayoutConstraintF layoutConstraintHeight;
+    layoutConstraintHeight.maxSize = MAX_SIZE;
+    layoutConstraintHeight.percentReference = MAX_SIZE;
+    layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeight, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, HEIGHT.ConvertToPx()));
+
+    LayoutConstraintF layoutConstraintWidth;
+    layoutConstraintWidth.maxSize = MAX_SIZE;
+    layoutConstraintWidth.percentReference = MAX_SIZE;
+    layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidth, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), MAX_HEIGHT));
+
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).height(-100)
+     */
+    LayoutConstraintF layoutConstraintHeightUnvalid;
+    layoutConstraintHeightUnvalid.percentReference = MAX_SIZE;
+    layoutConstraintHeightUnvalid.selfIdealSize.SetHeight(NEGATIVE_NUMBER);
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeightUnvalid, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
+
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(-100)
+     */
+    LayoutConstraintF layoutConstraintWidthUnvalid;
+    layoutConstraintWidthUnvalid.percentReference = MAX_SIZE;
+    layoutConstraintWidthUnvalid.selfIdealSize.SetWidth(NEGATIVE_NUMBER);
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeightUnvalid, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
+}
+
+/**
+ * @tc.name: DataPanelMeasureTest006
+ * @tc.desc: Test DataPanel Measure by percentReference instead of maxSize when type is line.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelMeasureTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapanel and get framenode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_LINE);
+    dataPanel.SetEffect(!CLOSE_EFFECT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set dataPanelLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_NE(dataPanelPattern, nullptr);
+    auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(dataPanelLayoutAlgorithm, nullptr);
+    dataPanelLayoutAlgorithm->Reset();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dataPanelLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. compare dataPanelSize with expected value.
+     * @tc.expected: step3. dataPanelSize is the same with expected value.
+     */
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_PERCENT_SIZE;
+    auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelDefaultSize, MAX_PERCENT_SIZE);
+
+    /**
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(50).height(50)
+     */
+    LayoutConstraintF layoutConstraintVaildSize;
+    layoutConstraintVaildSize.maxSize = MAX_SIZE;
+    layoutConstraint.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    auto dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintVaildSize, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+
+    /**
+     * @tc.steps: step4. compare dataPanelSize with expected value.
+     * @tc.expected: step4. dataPanelSize is the same with expected value.
+     */
+    LayoutConstraintF layoutConstraintHeight;
+    layoutConstraintHeight.maxSize = MAX_SIZE;
+    layoutConstraintHeight.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintHeight, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_PERCENT_WIDTH, HEIGHT.ConvertToPx()));
+
+    /**
+     * @tc.steps: step5. compare dataPanelSize with expected value.
+     * @tc.expected: step5. dataPanelSize is the same with expected value.
+     */
+    LayoutConstraintF layoutConstraintWidth;
+    layoutConstraintWidth.maxSize = MAX_SIZE;
+    layoutConstraintWidth.percentReference = MAX_PERCENT_SIZE;
+    layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidth, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), MAX_PERCENT_HEIGHT));
+
+    /**
+     * @tc.steps: step6. compare dataPanelSize with expected value by infinite.
+     * @tc.expected: step6. dataPanelSize is the same with expected value as root width and height.
+     */
+    MockPipelineContext::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
+    LayoutConstraintF layoutConstraintInfinite;
+    layoutConstraintInfinite.percentReference = MAX_INFINITE_SIZE;
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(ROOT_WIDTH, ROOT_HEIGHT));
+
+    /**
+     * @tc.steps: step7. compare dataPanelSize with expected value by infinite width.
+     * @tc.expected: step7. dataPanelSize is the same with expected value as min width and height.
+     */
+    LayoutConstraintF layoutConstraintWidthInfinite;
+    layoutConstraintWidthInfinite.percentReference = SizeF(MAX_INFINITE, MAX_HEIGHT);
+    dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidthInfinite, &layoutWrapper).value();
+    EXPECT_EQ(dataPanelSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

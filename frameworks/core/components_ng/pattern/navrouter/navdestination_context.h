@@ -115,11 +115,22 @@ public:
         return isEmpty_;
     }
 
+    void SetMode(NavDestinationMode mode)
+    {
+        mode_ = mode;
+    }
+
+    NavDestinationMode GetMode() const
+    {
+        return mode_;
+    }
+
 protected:
     int32_t index_ = -1;
     int32_t preIndex_ = -1;
     uint64_t navDestinationId_ = 0;
     bool isEmpty_ = false;
+    NavDestinationMode mode_;
     RefPtr<NavPathInfo> pathInfo_;
     WeakPtr<NavigationStack> navigationStack_;
 };

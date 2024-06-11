@@ -39,7 +39,6 @@ constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
-const std::string DEFAULT_FORMAT_24HOUR = "HH:mm:ss";
 const std::string FORM_FORMAT = "hh:mm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
@@ -230,7 +229,9 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
         return;
     }
     FireBuilder();
-    RequestUpdateForNextSecond();
+    if (!isForm_) {
+        RequestUpdateForNextSecond();
+    }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
         return;
@@ -296,8 +297,6 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
-    CHECK_NULL_RETURN(textClockLayoutProperty, "");
     time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* timeZoneTime = std::localtime(&current);
     if (!std::isnan(hourWest_)) {
@@ -312,8 +311,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.hour = timeZoneTime->tm_hour;
     dateTime.minute = timeZoneTime->tm_min;
     dateTime.second = timeZoneTime->tm_sec;
-    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            textClockLayoutProperty->GetIsDefaultFormatValue(false)) && !isForm_) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && !isForm_) {
         return Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     }
     dateTime.week = timeZoneTime->tm_wday; // 0-6
@@ -696,8 +694,6 @@ std::string TextClockPattern::GetFormat() const
             return FORM_FORMAT;
         }
         return result;
-    } else if (textClockLayoutProperty->GetIsDefaultFormatValue(false)) {
-        return is24H_ ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
     }
     CHECK_NULL_RETURN(textClockLayoutProperty, DEFAULT_FORMAT);
     return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
@@ -773,6 +769,12 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
     return (makeFunc_.value())(textClockConfiguration);
+}
+
+void TextClockPattern::OnLanguageConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language is changed and clock updates");
+    UpdateTimeText(true);
 }
 
 void TextClockPattern::DumpInfo()

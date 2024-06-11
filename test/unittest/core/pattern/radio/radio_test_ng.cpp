@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -86,12 +88,14 @@ void RadioTestNg::SetUpTestSuite()
         return radioTheme;
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockContainer::SetUp();
 }
 
 void RadioTestNg::TearDownTestSuite()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -208,8 +212,8 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetRadioIndicator(INDICATOR_TYPE_TICK.value());
@@ -218,7 +222,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioIndicator(), INDICATOR_TYPE_TICK);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -409,8 +413,10 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
     ASSERT_EQ(pageNode, nullptr);
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
-    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
+    EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
 }
 
 /**
@@ -462,7 +468,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     ASSERT_NE(radioPaintProperty0, nullptr);
     EXPECT_NE(radioPaintProperty0->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
-    pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    auto groupManager = pageEventHub->GetGroupManager();
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
     auto radioPaintProperty1 = frameNode1->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty1, nullptr);
     EXPECT_EQ(radioPaintProperty1->GetRadioCheckValue(), CHECKED);
@@ -938,8 +946,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest007, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
@@ -959,7 +967,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
     radioPaintMethod.radioModifier_->PaintIndicator(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -970,8 +978,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest008, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
@@ -991,7 +999,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
     radioPaintMethod.radioModifier_->PaintIndicator(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1002,8 +1010,8 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
     radioModifier->isOnAnimationFlag_->Set(true);
     radioModifier->UpdateIndicatorAnimation(true);
@@ -1013,7 +1021,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest010, TestSize.Level1)
     radioModifier->UpdateIndicatorAnimation(false);
     EXPECT_EQ(radioModifier->opacityScale_->Get(), 0);
     EXPECT_EQ(radioModifier->borderOpacityScale_->Get(), 1);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1552,8 +1560,8 @@ RadioBuilderFunc RadioTestNg::RadioBuilder()
 HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto radioFunc = RadioBuilder();
@@ -1564,7 +1572,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->builder_, nullptr);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1574,8 +1582,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
 HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     radioModelNG.SetChecked(false);
@@ -1585,9 +1593,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto host = pattern->GetHost();
     pattern->OnModifyDone();
-    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    ASSERT_NE(childNode, nullptr);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

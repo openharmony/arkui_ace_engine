@@ -189,6 +189,7 @@ public:
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index);
     void UpdateSelectByOffset(const Offset& localOffset);
+    void AddSelectByOffset(const Offset& localOffset);
     void UpdateSelectPragraphByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectRangeByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectParagraphByOffset(const Offset& localOffset);
@@ -200,8 +201,10 @@ public:
     void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
     void MoveCaretToContentRect(
         int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
+    void MoveCaretAnywhere(const Offset& touchOffset);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;
+    void AdjustHandleOffset(RectF& handleRect) const;
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
@@ -215,6 +218,7 @@ private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
 
     void FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics);
+    void FitCaretMetricsToTouchPoint(CaretMetricsF& caretMetrics, const Offset& touchOffset);
     void CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity);
     void CalcCaretMetricsByPositionNearTouchOffset(
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);

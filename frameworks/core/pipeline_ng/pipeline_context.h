@@ -51,6 +51,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -138,6 +139,9 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
+
+    // ReDispatch KeyEvent from Web process.
+    void ReDispatch(KeyEvent& keyEvent);
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -243,6 +247,8 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
+
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
     void AddPredictTask(PredictTask&& task);
@@ -301,6 +307,9 @@ public:
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
+
+    void SendEventToAccessibilityWithNode(
+        const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node);
 
     const RefPtr<StageManager>& GetStageManager();
 
@@ -389,7 +398,7 @@ public:
         return isTabJustTriggerOnKeyEvent_;
     }
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }
@@ -429,7 +438,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -621,6 +630,11 @@ public:
 
     void OnTransformHintChanged(uint32_t transform) override;
 
+    uint32_t GetTransformHint() const
+    {
+        return transform_;
+    }
+
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -706,7 +720,7 @@ public:
 
     bool CheckNeedDisableUpdateBackgroundImage();
 
-    void ChangeDarkModeBrightness(bool isFocus) override;
+    void ChangeDarkModeBrightness() override;
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -754,6 +768,9 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
+
     void SetPredictNode(const RefPtr<FrameNode>& node)
     {
         predictNode_ = node;
@@ -763,6 +780,14 @@ public:
     {
         predictNode_.Reset();
     }
+
+    void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
+
+    bool IsDensityChanged() const override
+    {
+        return isDensityChanged_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -817,6 +842,10 @@ private:
     void InspectDrew();
 
     bool TriggerKeyEventDispatch(const KeyEvent& event);
+
+    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
+
+    bool IsSkipShortcutAndFocusMove();
 
     void FlushBuildFinishCallbacks();
 
@@ -951,6 +980,7 @@ private:
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
     bool isFreezeFlushMessage_ = false;
+    bool destroyed_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -991,12 +1021,14 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    uint32_t transform_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

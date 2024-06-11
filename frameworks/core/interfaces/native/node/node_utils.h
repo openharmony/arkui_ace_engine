@@ -36,7 +36,7 @@ namespace NodeModifier {
 
 template<typename T> OHOS::Ace::RefPtr<T> GetTheme()
 {
-    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContext();
+    auto pipelineContext = OHOS::Ace::PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);

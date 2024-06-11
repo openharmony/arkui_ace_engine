@@ -37,7 +37,6 @@
 #define ARKUI_NATIVE_TYPE_H
 
 #include <cstdint>
-#include <stdint.h>
 
 #include "drawable_descriptor.h"
 
@@ -1869,40 +1868,44 @@ typedef enum {
 } ArkUI_AnimationStatus;
 
 /**
- * @brief 定义帧动画组件在动画开始前和结束后的状态。
+ * @brief Enumerates the states before and after execution of the frame-by-frame animation.
  *
  * @since 12
 */
 typedef enum {
-    /** 动画未执行时不会将任何样式应用于目标，动画播放完成之后恢复初始默认状态。*/
+    /** Before execution, the animation does not apply any styles to the target component. After execution, the
+     *  animation restores the target component to its default state. */
     ARKUI_ANIMATION_FILL_MODE_NONE,
-    /** 目标将保留动画执行期间最后一个关键帧的状态。*/
+    /** The target component retains the state set by the last keyframe encountered during execution of the
+     *  animation. */
     ARKUI_ANIMATION_FILL_MODE_FORWARDS,
-    /** 动画将在应用于目标时立即应用第一个关键帧中定义的值，并在delay期间保留此值。*/
+    /** The animation applies the values defined in the first relevant keyframe once it is applied to the target
+     *  component, and retains the values during the period set by <b>delay</b>. */
     ARKUI_ANIMATION_FILL_MODE_BACKWARDS,
-    /** 动画将遵循Forwards和Backwards的规则，从而在两个方向上扩展动画属性。*/
+    /** The animation follows the rules for both <b><b>Forwards</b></b> and <b><b>Backwards</b></b>, extending the
+     *  animation attributes in both directions. */
     ARKUI_ANIMATION_FILL_MODE_BOTH,
 } ArkUI_AnimationFillMode;
 
 /**
- * @brief 定义错误码枚举值。
+ * @brief Enumerates the error codes.
  *
  * @since 12
 */
 typedef enum {
-    /** 无错误。*/
+    /** No error. */
     ARKUI_ERROR_CODE_NO_ERROR = 0,
-    /** 参数错误。*/
+    /** Invalid parameters. */
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
-    /** 组件不支持特点的属性或者事件。*/
+    /** The component does not support specific attributes or events. */
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
-    /** 对应的操作不支持ArkTS创建的节点。*/
+    /** The specific operation is not allowed on the node created by ArkTS. */
     ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE = 106103,
-    /** 懒加载适配器未绑定到组件上。*/
+    /** The adapter for lazy loading is not bound to the component. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_NONE_HOST = 106104,
-    /** 适配器已存在。*/
+    /** The adapter already exists. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_EXIST_IN_HOST = 106105,
-    /** 对应节点已存在子节点，无法添加适配器。*/
+    /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
 } ArkUI_ErrorCode;
 
@@ -1911,7 +1914,7 @@ typedef enum {
 *
 * @since 12
 */
-ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create();
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create(void);
 
 /**
 * @brief Creates a deep copy of a size constraint.
@@ -2063,7 +2066,7 @@ ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
 * @return Returns the water flow section configuration.
 * @since 12
 */
-ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create();
+ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create(void);
 
 /**
 * @brief Destroys the pointer to a water flow section configuration.
@@ -2418,7 +2421,7 @@ int32_t OH_ArkUI_BarrierOption_GetReferencedIdSize(ArkUI_BarrierOption* barrierS
  * @return Alignment rule information.
  * @since 12
  */
-ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create();
+ArkUI_AlignmentRuleOption* OH_ArkUI_AlignmentRuleOption_Create(void);
 
 /**
  * @brief Destroys the alignment rule information of subcomponents in relative containers.

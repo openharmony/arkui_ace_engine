@@ -24,7 +24,7 @@
 #include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
-class TextTimerModel {
+class ACE_FORCE_EXPORT TextTimerModel {
 public:
     static TextTimerModel* GetInstance();
     virtual ~TextTimerModel() = default;

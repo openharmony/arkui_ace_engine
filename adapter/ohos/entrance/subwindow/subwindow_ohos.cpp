@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
@@ -93,10 +94,10 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
-        if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-        } else if (IsSystemTopMost()) {
+        if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+        } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (GetAboveApps()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
@@ -151,7 +152,7 @@ void SubwindowOhos::InitContainer()
     container->InitializeSubContainer(parentContainerId_);
     ViewportConfig config;
     // create ace_view
-    auto* aceView =
+    auto aceView =
         Platform::AceViewOhos::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::AceViewOhos::SurfaceCreated(aceView, window_);
 
@@ -165,6 +166,10 @@ void SubwindowOhos::InitContainer()
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
+
+    auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
+    CHECK_NULL_VOID(uiContentImpl);
+    uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
@@ -221,6 +226,7 @@ void SubwindowOhos::ResizeWindow()
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     CHECK_NULL_VOID(defaultDisplay);
+    CHECK_NULL_VOID(window_);
     auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
@@ -286,6 +292,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     ShowWindow(popupInfo.focusable);
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
@@ -419,18 +426,6 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            auto it = hotAreasMap_.find(rootNode->GetLastChild()->GetId());
-            if (it != hotAreasMap_.end()) {
-                auto hotAreaRect = it->second;
-                OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
-                if (ret != OHOS::Rosen::WMError::WM_OK) {
-                    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Set hot areas failed with errCode: %{public}d",
-                        static_cast<int32_t>(ret));
-                }
-            }
-            return;
-        }
-        if (!rootNode->GetChildren().empty()) {
             return;
         }
         auto focusHub = rootNode->GetFocusHub();
@@ -566,6 +561,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
     }
     ShowWindow();
     ResizeWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
 }
@@ -583,6 +579,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
@@ -640,6 +637,19 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HidePixelMap(false, 0, 0, false);
     HideFilter(false);
     HideFilter(true);
+}
+
+void SubwindowOhos::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+{
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetHasPixelMap()) {
+        return;
+    }
+    overlay->UpdatePixelMapPosition(Point(offset.GetX(), offset.GetY()), rect, true);
 }
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
@@ -749,6 +759,7 @@ void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
         hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
     }
+    CHECK_NULL_VOID(window_);
     window_->SetTouchHotAreas(hotAreas);
 }
 
@@ -811,6 +822,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -845,6 +857,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -893,6 +906,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
+    CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ResizeWindow();
@@ -1011,7 +1025,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(container, false);
     // create ace_view
-    auto* aceView = Platform::AceViewOhos::CreateView(childContainerId_, true, true);
+    auto aceView = Platform::AceViewOhos::CreateView(childContainerId_, true, true);
     Platform::AceViewOhos::SurfaceCreated(aceView, dialogWindow_);
     // set view
     Platform::DialogContainer::SetView(aceView, density, width, height, dialogWindow_);
@@ -1106,6 +1120,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
         showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ShowWindow(false);
         ResizeWindow();
+        CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }
     delegate->ShowToast(message, duration, bottom, showMode, alignment, offset);
@@ -1463,7 +1478,7 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
 {
     auto container = Platform::DialogContainer::GetContainer(containerId);
     CHECK_NULL_VOID(container);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_VOID(aceView);
     if (aceView->GetWidth() != width || aceView->GetHeight() != height) {
         ViewportConfig config(width, height, density);
@@ -1502,6 +1517,7 @@ Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
 
 void SubwindowOhos::RequestFocus()
 {
+    CHECK_NULL_VOID(window_);
     if (window_->IsFocused()) {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u already focused", window_->GetWindowId());
         // already focused, no need to focus
@@ -1518,6 +1534,7 @@ void SubwindowOhos::RequestFocus()
 
 bool SubwindowOhos::IsFocused()
 {
+    CHECK_NULL_RETURN(window_, false);
     return window_->IsFocused();
 }
 
@@ -1555,7 +1572,7 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAn
         manager->RemoveGatherNodeWithAnimation();
     }
     if (showAnimation) {
-        manager->RemovePixelMapAnimation(startDrag, x, y);
+        manager->RemovePixelMapAnimation(startDrag, x, y, true);
     } else {
         manager->RemovePixelMap();
     }
@@ -1594,7 +1611,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         auto container = Platform::DialogContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         // get ace_view
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SurfaceChanged(aceView, defaultDisplay->GetWidth(), defaultDisplay->GetHeight(), 0);
     };
@@ -1611,6 +1628,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus()
 {
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
     CHECK_NULL_VOID(defaultDisplay);
+    CHECK_NULL_VOID(window_);
     auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",

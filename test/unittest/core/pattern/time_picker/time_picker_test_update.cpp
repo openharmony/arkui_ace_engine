@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -100,11 +101,13 @@ public:
 void TimePickerPatternTestUpdate::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void TimePickerPatternTestUpdate::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void TimePickerPatternTestUpdate::SetUp()
@@ -786,6 +789,501 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView015, TestSize.Level1)
     TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
     auto testval2 = layoutProperty->GetFontSizeValue();
     EXPECT_EQ(testval2, Dimension(10));
+}
+/**
+ * @tc.name: TimePickerDialogView016
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView016, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100);
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+}
+/**
+ * @tc.name: TimePickerDialogView017
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView017, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+}
+/**
+ * @tc.name: TimePickerDialogView018
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView018, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+}
+/**
+ * @tc.name: TimePickerDialogView019
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView019, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(0);
+    info2.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(1));
+}
+/**
+ * @tc.name: TimePickerDialogView020
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView020, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(100);
+    info2.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+}
+/**
+ * @tc.name: TimePickerDialogView021
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView021, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(0);
+    info2.fontSize = Dimension(1);
+    info3.fontSize = Dimension(100);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(1));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(100));
+}
+/**
+ * @tc.name: TimePickerDialogView022
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView022, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    auto testval3 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval3, Color::BLACK);
+}
+/**
+ * @tc.name: TimePickerDialogView023
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView023, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    info1.fontColor = Color::GREEN;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+    
+    auto testval3 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval3, Color::GREEN);
+}
+/**
+ * @tc.name: TimePickerDialogView024
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView024, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::FOREGROUND;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+    
+    auto testval3 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval3, Color::FOREGROUND);
+}
+/**
+ * @tc.name: TimePickerDialogView025
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView025, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(100);
+    info2.fontSize = Dimension(0);
+    info3.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+
+    sizet--;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(100));
+}
+/**
+ * @tc.name: TimePickerDialogView026
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView026, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::GREEN;
+    info2.fontSize = Dimension(0);
+    info2.fontColor = Color::FOREGROUND;
+    info3.fontSize = Dimension(1);
+    info3.fontColor = Color::GRAY;
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto renderContext = buttonNode->GetRenderContext();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+
+    sizet++;
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(1));
 }
 
 /**

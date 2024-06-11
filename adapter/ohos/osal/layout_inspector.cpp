@@ -122,7 +122,9 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
+std::function<void(bool)> LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 const char PNG_TAG[] = "png";
 
 void LayoutInspector::SupportInspector()
@@ -156,11 +158,32 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
-void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
+void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    context->SetStateProfilerStatus(status);
+    if (jsStateProfilerStatusCallback_) {
+        jsStateProfilerStatusCallback_(status);
+    }
+}
+
+void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback)
+{
+    jsStateProfilerStatusCallback_ = callback;
+}
+
+bool LayoutInspector::GetStateProfilerStatus()
+{
+    return stateProfilerStatus_;
+}
+
+void LayoutInspector::SendStateProfilerMessage(const std::string& message)
+{
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+}
+
+void LayoutInspector::SetStateProfilerStatus(bool status)
+{
+    stateProfilerStatus_ = status;
+    TriggerJsStateProfilerStatusCallback(status);
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
@@ -178,7 +201,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     }
 
     OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetArkUIStateProfilerStatus(status); });
+        [](bool status) { return SetStateProfilerStatus(status); });
 }
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)

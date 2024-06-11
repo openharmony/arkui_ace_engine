@@ -58,7 +58,7 @@ ExtSurface::~ExtSurface()
                 CHECK_NULL_VOID(resRegister);
                 resRegister->UnregisterEvent(eventHash);
             },
-            "ArkUIVideoUnregisterEvent");
+            "ArkUIVideoExtSurfaceUnregisterEvent");
     }
 }
 
