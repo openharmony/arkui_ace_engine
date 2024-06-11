@@ -150,6 +150,7 @@ constexpr int32_t FULL_ROTATION = 360;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr int32_t DELAY_TIME = 300;
+constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -2382,10 +2383,10 @@ void RosenRenderContext::SetDashGap(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerDashGap;
-    cornerDashGap.SetValues(static_cast<float>((value.leftDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.topDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value_or(0.0_vp)).ConvertToPx()));
+    cornerDashGap.SetValues(static_cast<float>((value.leftDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()));
     rsNode_->SetBorderDashGap(cornerDashGap);
     RequestNextFrame();
 }
@@ -2399,10 +2400,10 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerDashWidth;
-    cornerDashWidth.SetValues(static_cast<float>((value.leftDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.topDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value_or(0.0_vp)).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value_or(0.0_vp)).ConvertToPx()));
+    cornerDashWidth.SetValues(static_cast<float>((value.leftDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()));
     rsNode_->SetBorderDashWidth(cornerDashWidth);
     RequestNextFrame();
 }
