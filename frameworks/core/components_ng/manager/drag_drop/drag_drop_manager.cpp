@@ -1557,6 +1557,17 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         option.GetOnFinishEvent());
 }
 
+void DragDropManager::UpdateDragPreviewScale()
+{
+    CHECK_NULL_VOID(info_.imageNode);
+    if (IsNeedDisplayInSubwindow()) {
+        return;
+    }
+    auto renderContext = info_.imageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformScale({ info_.scale, info_.scale });
+}
+
 void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
@@ -1564,6 +1575,7 @@ void DragDropManager::DoDragStartAnimation(
     if (!(GetDragPreviewInfo(overlayManager, info_, isSubwindowOverlay))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay)) {
         if (isDragWithContextMenu_) {
+            UpdateDragPreviewScale();
             isDragFwkShow_ = false;
         }
         return;
