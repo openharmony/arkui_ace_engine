@@ -693,7 +693,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
-    info.SetInputEventType(lastInputEventType_);
+    info.SetInputEventType(inputEventType_);
     info.SetForce(lastTouchEvent_.force);
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
