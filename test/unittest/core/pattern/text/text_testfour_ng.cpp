@@ -852,4 +852,44 @@ HWTEST_F(TextTestFourNg, SetClip001, TestSize.Level1)
     textContentModifier->SetClip(true);
     EXPECT_TRUE(textContentModifier->clip_);
 }
+
+/**
+ * @tc.name: TypedText001
+ * @tc.desc: test typed_text.h static functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFourNg, TypedText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TypedText and create value.
+     */
+    TypedText typedText;
+    const char* test = nullptr;
+
+    /**
+     * @tc.steps: step2. test GetUTF8OneCharacterSize and GetUTF8Next.
+     */
+    uint32_t nextIndex = 2;
+    EXPECT_EQ(typedText.GetUTF8OneCharacterSize(test), 0);
+    EXPECT_EQ(typedText.GetUTF8Next(test, 1, nextIndex), 0);
+
+    /**
+     * @tc.steps: step3. change value and test again.
+     */
+    const char* test1 = TEXT_CONTENT1;
+    EXPECT_EQ(typedText.GetUTF8OneCharacterSize(test1), 1);
+    EXPECT_EQ(typedText.GetUTF8Next(test1, 1, nextIndex), 105);
+
+    const char* test2 = TEXT_CONTENT2;
+    EXPECT_EQ(typedText.GetUTF8OneCharacterSize(test2), 1);
+    EXPECT_EQ(typedText.GetUTF8Next(test2, 1, nextIndex), 101);
+
+    /**
+     * @tc.steps: step4. test IsEmoji.
+     */
+    EXPECT_EQ(typedText.IsEmoji(CODE1), false);
+    EXPECT_EQ(typedText.IsEmoji(CODE2), true);
+    EXPECT_EQ(typedText.IsEmoji(CODE3), true);
+}
+
 } // namespace OHOS::Ace::NG
