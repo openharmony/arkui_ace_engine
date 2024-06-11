@@ -2140,7 +2140,17 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     CHECK_NULL_RETURN(context, nullptr);
     if (!isFormRender_ && !bundle.empty() && !module.empty()) {
         std::string encode = EncodeBundleAndModule(bundle, module);
-        resAdapterRecord_.emplace(encode);
+        if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            RecordResAdapter(encode);
+        } else {
+            taskExecutor_->PostTask(
+                [encode, instanceId = instanceId_]() -> void {
+                    auto container = AceContainer::GetContainer(instanceId);
+                    CHECK_NULL_VOID(container);
+                    container->RecordResAdapter(encode);
+                },
+                TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
+        }
     }
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
