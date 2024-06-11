@@ -1881,7 +1881,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 #endif
     if (declarativeFrontend) {
         auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(declarativeFrontend->GetJsEngine());
-        if (jsEngine) {
+        if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
         }
