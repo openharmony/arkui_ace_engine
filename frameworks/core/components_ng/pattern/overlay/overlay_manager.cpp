@@ -5402,17 +5402,22 @@ RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode(bool isSubwindowOverlay
     return imageNode;
 }
 
-void OverlayManager::UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay)
+void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)
 {
     if (!isSubwindowOverlay && !hasPixelMap_) {
         return;
     }
+    if (IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
+        return;
+    }
+    auto moveVector = GetUpdateDragMoveVector();
     RefPtr<FrameNode> imageNode = GetPixelMapContentNode(isSubwindowOverlay);
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    auto offset = rect.GetOffset() + Offset(point.GetX(), point.GetY());
-    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+    auto rect = imageContext->GetPaintRectWithTranslate();
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(moveVector.GetX() + rect.first.GetX()),
+        Dimension(moveVector.GetY() + rect.first.GetY())));
     imageContext->OnModifyDone();
 }
 

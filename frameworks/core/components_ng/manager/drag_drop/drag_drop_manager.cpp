@@ -1400,12 +1400,12 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
-    DragPreviewInfo& dragPreviewInfo, bool isSubwindowOverlay)
+    DragPreviewInfo& dragPreviewInfo)
 {
-    if (!isSubwindowOverlay && !overlayManager->GetHasPixelMap()) {
+    if (!overlayManager->GetHasPixelMap()) {
         return false;
     }
-    auto imageNode = overlayManager->GetPixelMapContentNode(false);
+    auto imageNode = overlayManager->GetPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
     auto badgeNode = overlayManager->GetPixelMapBadgeNode();
     if (badgeNode) {
@@ -1561,7 +1561,7 @@ void DragDropManager::DoDragStartAnimation(
     const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
 {
     CHECK_NULL_VOID(overlayManager);
-    if (!(GetDragPreviewInfo(overlayManager, info_, isSubwindowOverlay))
+    if (!(GetDragPreviewInfo(overlayManager, info_))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay)) {
         if (isDragWithContextMenu_) {
             isDragFwkShow_ = false;

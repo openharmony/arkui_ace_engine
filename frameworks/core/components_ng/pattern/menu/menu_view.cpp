@@ -242,9 +242,10 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
     return false;
 }
 
-OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap = nullptr)
+OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap,
+    const MenuPreviewMode& previewMode)
 {
-    if (pixelMap) {
+    if (previewMode == MenuPreviewMode::NONE) {
         CHECK_NULL_RETURN(frameNode, OffsetF());
         auto centerPosition = frameNode->GetPaintRectCenter(true);
         float width = 0.0f;
@@ -475,7 +476,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
         } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
+            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId());
         }
     };
     auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -542,7 +543,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     SetHoverImageCustomPreviewInfo(previewNode, menuParam, width, height);
-    auto imageOffset = GetFloatImageOffset(target, pixelMap);
+    auto imageOffset = GetFloatImageOffset(target, pixelMap, menuParam.previewMode);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
