@@ -307,6 +307,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
+    void Updatebackgroundcolor();
 
 private:
     void OnModifyDone() override;
