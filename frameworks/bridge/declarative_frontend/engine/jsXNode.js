@@ -1293,6 +1293,11 @@ const __creatorMap__ = new Map([
                 return new ArkSearchComponent(node, type);
             });
         }],
+    ["Button", (context) => {
+            return new TypedFrameNode(context, "Button", (node, type) => {
+                return new ArkButtonComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {
