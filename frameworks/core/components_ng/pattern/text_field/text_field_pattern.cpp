@@ -892,19 +892,12 @@ void TextFieldPattern::ProcessFocusStyle()
     if (needTwinkling) {
         StartTwinkling();
     }
-    ChangeEditState();
+    NotifyOnEditChanged(true);
     if (!IsShowError() && IsUnderlineMode()) {
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
-    }
-}
-
-void TextFieldPattern::ChangeEditState()
-{
-    if (!isLongPress_) {
-        NotifyOnEditChanged(true);
     }
 }
 
@@ -1277,6 +1270,7 @@ void TextFieldPattern::HandleBlurEvent()
     ProcNormalInlineStateInBlurEvent();
     needToRequestKeyboardInner_ = false;
     isLongPress_ = false;
+    isMoveCaretAnywhere_ = false;
     isFocusedBeforeClick_ = false;
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
@@ -1506,11 +1500,6 @@ void TextFieldPattern::HandleOnPaste()
         textfield->CloseSelectOverlay(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "previewLongPress_: [%{public}d]", textfield->previewLongPress_);
-        if (textfield->previewLongPress_) {
-            textfield->RequestKeyboard(false, true, true);
-            textfield->previewLongPress_ = false;
-        }
     };
     CHECK_NULL_VOID(clipboard_);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste");
@@ -1598,10 +1587,6 @@ void TextFieldPattern::HandleOnCut()
     UpdateSelection(start);
     CloseSelectOverlay(true);
     StartTwinkling();
-    if (previewLongPress_) {
-        RequestKeyboard(false, true, true);
-        previewLongPress_ = false;
-    }
     HandleDeleteOnCounterScene();
 
     auto host = GetHost();
@@ -1660,14 +1645,15 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         OnCaretMoveDone(info);
-        if (!previewLongPress_) {
-            RequestKeyboardAfterLongPress();
-        }
+        RequestKeyboardAfterLongPress();
         isLongPress_ = false;
+        isMoveCaretAnywhere_ = false;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        if (isLongPress_) {
-            HandleTouchMoveAfterLongPress(info);
+        if (isMoveCaretAnywhere_) {
+            // edit + longpress + move, show caret anywhere on fonts.
+            selectController_->MoveCaretAnywhere(info.GetTouches().front().GetLocalLocation());
+            return;
         }
         if (SelectOverlayIsOn() && !isTouchCaret_) {
             return;
@@ -1716,31 +1702,6 @@ void TextFieldPattern::HandleTouchUp()
     if (magnifierController_->GetShowMagnifier() && !GetIsPreviewText()) {
         magnifierController_->UpdateShowMagnifier();
     }
-}
-
-void TextFieldPattern::HandleTouchMoveAfterLongPress(const TouchEventInfo& info)
-{
-    auto touchOffset = info.GetTouches().front().GetLocalLocation();
-    if (!isEdit_) {
-        // preview + longpress + move, selecting and no caret
-        selectController_->AddSelectByOffset(touchOffset);
-        if (IsSelected()) {
-            StopTwinkling();
-        }
-
-        // show two handles, not show menu.
-        SetIsSingleHandle(!IsSelected());
-        ProcessOverlay({ .animation = true });
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    } else {
-        // edit + longpress + move, NOT select, show caret anywhere on fonts.
-        selectController_->MoveCaretAnywhere(touchOffset);
-        ShowCaretAndStopTwinkling();
-    }
-    selectOverlay_->HideMenu();
-    selectOverlay_->SetIsSingleHandle(false);
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
@@ -2934,9 +2895,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
-    if (!isEdit_) {
-        previewLongPress_ = true;
-    }
     UpdateParam(info, shouldProcessOverlayAfterLayout);
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
@@ -2951,11 +2909,9 @@ void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlay
         selectController_->UpdateCaretInfoByOffset(localOffset);
         NotifyOnEditChanged(true);
     }
-    if (!isEdit_) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "preview, so selecting");
-        selectController_->UpdateSelectByOffset(localOffset);
-    } else {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "edit, so NOT selecting, and show fixed caret");
+    if (isEdit_) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress:edit+longpress, show fixed caret");
+        isMoveCaretAnywhere_ = true;
         selectController_->MoveCaretAnywhere(localOffset);
         CloseSelectOverlay();
         ShowCaretAndStopTwinkling();
@@ -7501,11 +7457,8 @@ void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
 
 void TextFieldPattern::OnCaretMoveDone(const TouchEventInfo& info)
 {
-    if (previewLongPress_) {
-        // shall show menu, keep handles.
-        SetIsSingleHandle(!IsSelected());
-        ProcessOverlay({ .menuIsShow = true, .animation = false});
-    } else if (isLongPress_) {
+    if (isMoveCaretAnywhere_) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "isMoveCaretAnywhere_=1, so restore caret");
         selectController_->UpdateCaretInfoByOffset(info.GetTouches().front().GetLocalLocation());
         StartTwinkling();
     }

@@ -1314,7 +1314,6 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
     void HandleTouchMove(const TouchEventInfo& info);
-    void HandleTouchMoveAfterLongPress(const TouchEventInfo& info);
     void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
@@ -1514,7 +1513,6 @@ private:
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
     void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
-    void ChangeEditState();
 
     void TwinklingByFocus();
 
@@ -1705,7 +1703,7 @@ private:
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
-    bool previewLongPress_ = false;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

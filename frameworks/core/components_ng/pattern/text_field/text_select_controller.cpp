@@ -215,25 +215,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     }
 }
 
-// Add more select content with new offset
-void TextSelectController::AddSelectByOffset(const Offset& localOffset)
-{
-    CHECK_NULL_VOID(paragraph_ && !contentController_->IsEmpty());
-    auto range = GetSelectRangeByOffset(localOffset);
-    int32_t start = GetFirstHandleIndex();
-    int32_t end = range.second;
-    if (range.first < start) {
-        end = range.first;
-    }
-    UpdateHandleIndex(start, end);
-    if (IsSelected()) {
-        MoveFirstHandleToContentRect(GetFirstHandleIndex());
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
-}
-
 void TextSelectController::UpdateSelectPragraphByOffset(const Offset& localOffset)
 {
     CHECK_NULL_VOID(paragraph_ && !contentController_->IsEmpty());
