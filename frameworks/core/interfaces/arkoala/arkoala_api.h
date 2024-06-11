@@ -1877,6 +1877,7 @@ struct ArkUIImageModifier {
     void (*resetImageSrc)(ArkUINodeHandle node);
     void (*setInitialPixelMap)(ArkUINodeHandle node, ArkUI_Int64 pixelMap);
     void (*setAltSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
+    void (*setOnComplete)(ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIColumnModifier {

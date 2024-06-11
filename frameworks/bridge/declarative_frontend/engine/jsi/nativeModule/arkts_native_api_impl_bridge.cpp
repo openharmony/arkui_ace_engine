@@ -3090,6 +3090,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::EnableAnalyzer));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "analyzerConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::AnalyzerConfig));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::SetOnComplete));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetOnComplete));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

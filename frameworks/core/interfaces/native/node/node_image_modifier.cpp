@@ -792,6 +792,18 @@ void SetInitialPixelMap(ArkUINodeHandle node, ArkUI_Int64 pixelMap)
     RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(rawPtr);
     ImageModelNG::SetInitialPixelMap(frameNode, pixelMapRef);
 }
+
+void SetOnComplete(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onComplete = reinterpret_cast<std::function<void(const LoadImageSuccessEvent&)>*>(callback);
+        ImageModelNG::SetOnComplete(frameNode, std::move(*onComplete));
+    } else {
+        ImageModelNG::SetOnComplete(frameNode, nullptr);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -811,7 +823,7 @@ const ArkUIImageModifier* GetImageModifier()
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
         EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
-        SetInitialPixelMap, SetAltSourceInfo };
+        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete };
     return &modifier;
 }
 

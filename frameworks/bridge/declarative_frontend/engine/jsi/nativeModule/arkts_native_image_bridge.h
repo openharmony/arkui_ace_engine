@@ -68,6 +68,8 @@ public:
     static ArkUINativeModuleValue ResetEnhancedImageQuality(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue EnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AnalyzerConfig(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnComplete(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnComplete(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 
