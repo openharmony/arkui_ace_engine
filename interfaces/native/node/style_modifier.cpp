@@ -69,6 +69,7 @@ constexpr int NUM_13 = 13;
 constexpr int NUM_16 = 16;
 constexpr int NUM_23 = 23;
 constexpr int NUM_29 = 29;
+constexpr int NUM_31 = 31;
 constexpr int NUM_59 = 59;
 constexpr int NUM_100 = 100;
 constexpr int NUM_400 = 400;
@@ -203,6 +204,7 @@ constexpr int32_t SELECTED_YEAR_INDEX = 0;
 constexpr int32_t SELECTED_MONTH_INDEX = 1;
 constexpr int32_t SELECTED_DAY_INDEX = 2;
 constexpr int32_t DATEPICKER_START_TIME = 1970;
+constexpr int32_t DATEPICKER_END_TIME = 2100;
 constexpr int32_t CALENDAR_PICKER_FONT_COLOR_INDEX = 0;
 constexpr int32_t CALENDAR_PICKER_FONT_SIZE_INDEX = 1;
 constexpr int32_t CALENDAR_PICKER_FONT_WEIGHT_INDEX = 2;
@@ -7406,9 +7408,9 @@ int32_t SetDatePickerEnd(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    auto year = StringToInt(date[NUM_0].c_str());
-    auto month = StringToInt(date[NUM_1].c_str());
-    auto day = StringToInt(date[NUM_2].c_str());
+    auto year = StringToInt(date[NUM_0].c_str(), DATEPICKER_END_TIME);
+    auto month = StringToInt(date[NUM_1].c_str(), NUM_12);
+    auto day = StringToInt(date[NUM_2].c_str(), NUM_31);
     fullImpl->getNodeModifiers()->getDatePickerModifier()->setEndDate(node->uiNodeHandle, year, month, day);
 
     return ERROR_CODE_NO_ERROR;
@@ -7644,26 +7646,6 @@ void ResetTimePickerUseMilitaryTime(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerUseMilitaryTime(node->uiNodeHandle);
 }
 
-int32_t SetTimePickerLoop(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerLoop(
-        node->uiNodeHandle, item->value[NUM_0].i32);
-
-    return ERROR_CODE_NO_ERROR;
-}
-
-void ResetTimePickerLoop(ArkUI_NodeHandle node)
-{
-    auto fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerLoop(node->uiNodeHandle);
-}
-
 const ArkUI_AttributeItem* GetTimePickerDisappearTextStyle(ArkUI_NodeHandle node)
 {
     auto value =
@@ -7726,7 +7708,6 @@ int32_t SetTimePickerTextStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
-
     ArkUI_Uint32 color = StringToColorInt(params[NUM_0].c_str(), ERROR_CODE);
     int size = StringToInt(params[NUM_1].c_str(), ERROR_CODE);
     if (color == ERROR_CODE || size == ERROR_CODE) {
@@ -7776,7 +7757,6 @@ int32_t SetTimePickerSelectedTextStyle(ArkUI_NodeHandle node, const ArkUI_Attrib
     }
     auto style = StringToEnumInt(params[NUM_4].c_str(), FONT_STYLES, NUM_0);
     std::string fontInfo = params[NUM_1] + '|' + params[NUM_2] + '|' + params[NUM_3];
-
     fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerSelectedTextStyle(
         node->uiNodeHandle, color, fontInfo.c_str(), style);
 
@@ -8068,8 +8048,35 @@ const ArkUI_AttributeItem* GetTextPickerCanLoop(ArkUI_NodeHandle node)
 void ResetTextPickerCanLoop(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerCanLoop(
-        node->uiNodeHandle, true);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerCanLoop(node->uiNodeHandle);
+}
+
+int32_t SetTextPickerDefaultPickerItemHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || LessNotEqual(item->value[0].f32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerDefaultPickerItemHeight(
+        node->uiNodeHandle, item->value[0].f32, unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextPickerDefaultPickerItemHeight(ArkUI_NodeHandle node)
+{
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    float result = GetFullImpl()->getNodeModifiers()->getTextPickerModifier()->getTextPickerDefaultPickerItemHeight(
+        node->uiNodeHandle, unit);
+    g_numberValues[0].f32 = result;
+    return &g_attributeItem;
+}
+
+void ResetTextPickerDefaultPickerItemHeight(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->resetTextPickerDefaultPickerItemHeight(node->uiNodeHandle);
 }
 
 // Row&Column
@@ -13059,7 +13066,7 @@ void ResetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetTimePickerSelected, SetTimePickerUseMilitaryTime, SetTimePickerLoop,
+    static Setter* setters[] = { SetTimePickerSelected, SetTimePickerUseMilitaryTime,
         SetTimePickerDisappearTextStyle, SetTimePickerTextStyle, SetTimePickerSelectedTextStyle };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13081,7 +13088,7 @@ const ArkUI_AttributeItem* GetTimePickerAttribute(ArkUI_NodeHandle node, int32_t
 
 void ResetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetTimePickerSelected, ResetTimePickerUseMilitaryTime, ResetTimePickerLoop,
+    static Resetter* resetters[] = { ResetTimePickerSelected, ResetTimePickerUseMilitaryTime,
         ResetTimePickerDisappearTextStyle, ResetTimePickerTextStyle, ResetTimePickerSelectedTextStyle };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13094,7 +13101,7 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 {
     static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelected, SetTextPickerValue,
         SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
-        SetTextPickerSelectedIndex, SetTextPickerCanLoop };
+        SetTextPickerSelectedIndex, SetTextPickerCanLoop, SetTextPickerDefaultPickerItemHeight };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textpicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13106,7 +13113,7 @@ const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t
 {
     static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelected, GetTextPickerValue,
         GetTextPickerDisappearTextStyle, GetTextPickerTextStyle, GetTextPickerSelectedTextStyle,
-        GetTextPickerSelectedIndex, GetTextPickerCanLoop };
+        GetTextPickerSelectedIndex, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -13118,7 +13125,7 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTextPickerRange, ResetTextPickerSelectedIndex, ResetTextPickerValue,
         ResetTextPickerDisappearTextStyle, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
-        ResetTextPickerSelectedIndex, ResetTextPickerCanLoop };
+        ResetTextPickerSelectedIndex, ResetTextPickerCanLoop, ResetTextPickerDefaultPickerItemHeight };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
