@@ -45,6 +45,7 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
 constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
+constexpr Dimension BUTTON_BOTTOM_LEFTRIGHT_MARGIN = 0.0_vp;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
@@ -289,8 +290,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
         margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
         buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     } else {
-        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+        if (!NeedadaptForAging()) {
+            buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+                CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+        }
     }
     textTitleNode->MountToParent(titleButtonRow);
     titleButtonRow->MountToParent(buttonTitleNode);
@@ -815,10 +818,12 @@ void DatePickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
         margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
     } else {
         margin.right = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
+        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -831,10 +836,12 @@ void DatePickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
         margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
     } else {
         margin.left = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
+        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }
@@ -1453,8 +1460,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
         margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
         layoutProps->UpdateMargin(margin);
-        layoutProps->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
+        if (!NeedadaptForAging()) {
+            layoutProps->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_HEIGHT)));
+        }
     }
 
     buttonTitleNode->MountToParent(contentColumn);
@@ -1842,6 +1851,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(eventNextPrevmHub, nullptr);
     CHECK_NULL_RETURN(dateNode, nullptr);
     auto onClickCallback = [textWeak = WeakPtr<FrameNode>(textNextPrevNode),
+                            nextPrevButtonNodeWeak = WeakPtr<FrameNode>(nextPrevButtonNode),
+                            dialogThemeWeak = WeakPtr<DialogTheme>(dialogTheme),
                                dateWeak = WeakPtr<FrameNode>(dateNode),
                                func = std::move(switchEvent),
                                contentWeak = WeakPtr<FrameNode>(contentRow)](const GestureEvent& /* info */) {
@@ -1853,6 +1864,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         CHECK_NULL_VOID(textLayoutProperty);
         auto contentRow = contentWeak.Upgrade();
         CHECK_NULL_VOID(contentRow);
+        auto nextPrevButtonNode = nextPrevButtonNodeWeak.Upgrade();
+        CHECK_NULL_VOID(nextPrevButtonNode);
+        auto dialogTheme = dialogThemeWeak.Upgrade();
+        CHECK_NULL_VOID(dialogTheme);
+        auto buttonNextPrevLayoutProperty
+                                = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
 
         if (!switchFlag_ && isShowTime_) {
             func();
@@ -1863,11 +1880,13 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, false);
             }
+            UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
         } else {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, true);
             }
+            UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
         }
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
