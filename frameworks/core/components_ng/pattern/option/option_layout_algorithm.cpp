@@ -122,10 +122,11 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     Alignment align = isRtl ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
     for (auto iconChild : child->GetAllChildrenWithBuild()) {
-        if (iconChild->GetHostTag() != V2::IMAGE_ETS_TAG) continue;
-        auto iconProps = iconChild->GetLayoutProperty();
-        iconProps->UpdateAlignment(align);
-        iconProps->UpdateMargin(margin);
+        if ((iconChild->GetHostTag() == V2::IMAGE_ETS_TAG) || (iconChild->GetHostTag() == V2::SYMBOL_ETS_TAG)) {
+            auto iconProps = iconChild->GetLayoutProperty();
+            iconProps->UpdateAlignment(align);
+            iconProps->UpdateMargin(margin);
+        }
     }
 
     float horInterval = horInterval_;
