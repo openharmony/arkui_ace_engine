@@ -1114,13 +1114,11 @@ abstract class ViewPU extends PUV2ViewBase
     return retVaL;
   }
 
-
-
   /**
-    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * onDumpInspector is invoked by native side to create Inspector tree including state variables
     * @returns dump info
     */
-  protected onDumpInspetor(): string {
+  protected onDumpInspector(): string {
     let res: DumpInfo = new DumpInfo();
     res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
     Object.getOwnPropertyNames(this)
@@ -1129,21 +1127,30 @@ abstract class ViewPU extends PUV2ViewBase
         const prop: any = Reflect.get(this, varName);
         if ('debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let isCircleReference: boolean = false;
+          let errorMsg: string = '';
+          try {
+            JSON.stringify(observedProp.getRawObjectValue());
+          } catch (error) {
+            stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${(error as Error).message}`);
+            errorMsg = (error as Error).message;
+            isCircleReference = true;
+          }
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: observedProp.getRawObjectValue(),
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false, false),
-            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+            value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);
         }
       });
-      let resInfo: string = '';
-      try {
-        resInfo = JSON.stringify(res);
-      } catch (error) {
-        stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
-      }
+    let resInfo: string = '';
+    try {
+      resInfo = JSON.stringify(res);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+    }
     return resInfo;
   }
 
