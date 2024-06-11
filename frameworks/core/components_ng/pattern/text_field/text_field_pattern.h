@@ -1290,6 +1290,7 @@ public:
     }
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
+    void HiddenMenu();
 
 protected:
     virtual void InitDragEvent();
