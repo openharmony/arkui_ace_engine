@@ -1578,12 +1578,20 @@ export struct PopupDialog {
   @Link show: boolean;
   @Prop popup: PopupDialogOptions;
   @BuilderParam targetBuilder: Callback<void>;
+  @State dialogWidth: Dimension | undefined = this.popup.width;
 
   build() {
     Column() {
       this.targetBuilder();
     }
     .onClick(() => {
+      let screenSize: display.Display = display.getDefaultDisplaySync();
+      let screenWidth: number = px2vp(screenSize.width);
+      if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+        this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+      } else {
+        this.popup.width = this.dialogWidth;
+      }
       this.show = !this.show;
     })
     .bindPopup(this.show, {

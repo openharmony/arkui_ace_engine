@@ -3844,60 +3844,71 @@ export class LoadingDialog extends ViewPU {
 }
 
 export class PopupDialog extends ViewPU {
-    constructor(k, l, m, n = -1, o = undefined, p) {
-        super(k, m, n, p);
-        if (typeof o === 'function') {
-            this.paramsGenerator_ = o;
+    constructor(n, o, p, q = -1, r = undefined, s) {
+        super(n, p, q, s);
+        if (typeof r === 'function') {
+            this.paramsGenerator_ = r;
         }
-        this.__show = new SynchedPropertySimpleTwoWayPU(l.show, this, 'show');
-        this.__popup = new SynchedPropertyObjectOneWayPU(l.popup, this, 'popup');
+        this.__show = new SynchedPropertySimpleTwoWayPU(o.show, this, 'show');
+        this.__popup = new SynchedPropertyObjectOneWayPU(o.popup, this, 'popup');
         this.targetBuilder = undefined;
-        this.setInitiallyProvidedValue(l);
+        this.__dialogWidth = new ObservedPropertyObjectPU(this.popup.width, this, 'dialogWidth');
+        this.setInitiallyProvidedValue(o);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(j) {
-        if (j.targetBuilder !== undefined) {
-            this.targetBuilder = j.targetBuilder;
+    setInitiallyProvidedValue(m) {
+        if (m.targetBuilder !== undefined) {
+            this.targetBuilder = m.targetBuilder;
+        }
+        if (m.dialogWidth !== undefined) {
+            this.dialogWidth = m.dialogWidth;
         }
     }
-
-    updateStateVars(i) {
-        this.__popup.reset(i.popup);
+    updateStateVars(l) {
+        this.__popup.reset(l.popup);
     }
-
-    purgeVariableDependenciesOnElmtId(h) {
-        this.__show.purgeDependencyOnElmtId(h);
-        this.__popup.purgeDependencyOnElmtId(h);
+    purgeVariableDependenciesOnElmtId(k) {
+        this.__show.purgeDependencyOnElmtId(k);
+        this.__popup.purgeDependencyOnElmtId(k);
+        this.__dialogWidth.purgeDependencyOnElmtId(k);
     }
-
     aboutToBeDeleted() {
         this.__show.aboutToBeDeleted();
         this.__popup.aboutToBeDeleted();
+        this.__dialogWidth.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get show() {
         return this.__show.get();
     }
-
-    set show(g) {
-        this.__show.set(g);
+    set show(j) {
+        this.__show.set(j);
     }
-
     get popup() {
         return this.__popup.get();
     }
-
-    set popup(f) {
-        this.__popup.set(f);
+    set popup(i) {
+        this.__popup.set(i);
     }
-
+    get dialogWidth() {
+        return this.__dialogWidth.get();
+    }
+    set dialogWidth(h) {
+        this.__dialogWidth.set(h);
+    }
     initialRender() {
         this.observeComponentCreation2((b, c) => {
             Column.create();
             Column.onClick(() => {
+                let f = display.getDefaultDisplaySync();
+                let g = px2vp(f.width);
+                if (g - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                    this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+                }
+                else {
+                    this.popup.width = this.dialogWidth;
+                }
                 this.show = !this.show;
             });
             Column.bindPopup(this.show, {
@@ -3920,13 +3931,13 @@ export class PopupDialog extends ViewPU {
                 arrowPointPosition: this.popup?.arrowPointPosition,
                 arrowWidth: this.popup?.arrowWidth,
                 arrowHeight: this.popup?.arrowHeight,
-                radius: this.popup?.radius ?? {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.corner_radius_level16'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
+                radius: this.popup?.radius ?? { 
+				    'id': -1, 
+				    'type': 10002, 
+				    params: ['sys.float.corner_radius_level16'], 
+				    'bundleName': '__harDefaultBundleName__', 
+				    'moduleName': '__harDefaultModuleName__' 
+				},
                 shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
                 backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
                 focusable: this.popup?.focusable,
@@ -3937,7 +3948,6 @@ export class PopupDialog extends ViewPU {
         this.targetBuilder.bind(this)(this);
         Column.pop();
     }
-
     rerender() {
         this.updateDirtyElements();
     }
