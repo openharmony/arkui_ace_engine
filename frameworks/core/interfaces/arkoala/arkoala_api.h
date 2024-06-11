@@ -1416,7 +1416,7 @@ struct ArkUICommonModifier {
     void (*setMaskShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
         ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setMaskPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-        ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands, ArkUI_Int32 unit);
+        ArkUI_Float32 strokeWidth, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands, ArkUI_Int32 unit);
     void (*setProgressMask)(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI_Uint32 color);
     void (*setBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode, ArkUI_Int32 blendApplyTypeValue);
     void (*resetBlendMode)(ArkUINodeHandle node);
@@ -1543,8 +1543,8 @@ struct ArkUICommonModifier {
     void (*resetVisibleAreaChange)(ArkUINodeHandle node);
     void (*resetAreaChange)(ArkUINodeHandle node);
     void (*setBackgroundImagePixelMap)(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex);
-    void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
-    void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[4]);
+    void (*getLayoutRect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[4]);
     void (*resetLayoutRect)(ArkUINodeHandle node);
     ArkUI_Bool (*getFocusOnTouch)(ArkUINodeHandle node);
     void (*setSystemBarEffect)(ArkUINodeHandle node, ArkUI_Bool enable);
@@ -2673,7 +2673,7 @@ struct ArkUITextAreaModifier {
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
     void (*setTextAreaCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
-    void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextAreaOnWillInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetTextAreaOnWillInsert)(ArkUINodeHandle node);
     void (*setTextAreaOnDidInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
@@ -2873,7 +2873,7 @@ struct ArkUITextInputModifier {
     void (*resetTextInputMargin)(ArkUINodeHandle node);
     void (*setTextInputCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     ArkUINodeHandle (*getTextInputController)(ArkUINodeHandle node);
-    void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
 };

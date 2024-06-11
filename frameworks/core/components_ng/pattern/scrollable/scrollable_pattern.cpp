@@ -2653,7 +2653,7 @@ void ScrollablePattern::AddScrollableFrameInfo(int32_t scrollSource)
     if (scrollableFrameInfos_.size() >= SCROLLABLE_FRAME_INFO_COUNT) {
         scrollableFrameInfos_.pop_front();
     }
-    int32_t canOverScrollInfo = IsScrollableSpringEffect();
+    uint32_t canOverScrollInfo = IsScrollableSpringEffect();
     canOverScrollInfo = (canOverScrollInfo << 1) | IsScrollable();
     canOverScrollInfo = (canOverScrollInfo << 1) | ScrollableIdle();
     canOverScrollInfo = (canOverScrollInfo << 1) | animateOverScroll_;

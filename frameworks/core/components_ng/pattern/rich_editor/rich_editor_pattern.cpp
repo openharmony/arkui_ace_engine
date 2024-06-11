@@ -271,7 +271,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     }
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ += StringUtils::ToWstring(insertValue).length();
+    moveLength_ += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -6761,7 +6761,7 @@ size_t RichEditorPattern::GetLineCount() const
 
 TextLineMetrics RichEditorPattern::GetLineMetrics(int32_t lineNumber)
 {
-    if (lineNumber < 0 || lineNumber > GetLineCount() - 1) {
+    if (lineNumber < 0 || static_cast<uint32_t>(lineNumber) > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
                 "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d", lineNumber);
         return TextLineMetrics();
@@ -7150,7 +7150,7 @@ void RichEditorPattern::UpdateChildrenOffset()
         if (isSpanStringMode_) {
             auto imageSpanNode = AceType::DynamicCast<ImageSpanNode>(child);
             if (imageSpanNode && imageSpanNode->GetSpanItem()) {
-                index = imageSpanNode->GetSpanItem()->placeholderIndex;
+                index = static_cast<uint32_t>(imageSpanNode->GetSpanItem()->placeholderIndex);
             }
         }
         if (index >= rectsForPlaceholders.size()) {
