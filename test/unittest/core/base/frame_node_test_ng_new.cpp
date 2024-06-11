@@ -64,7 +64,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest041, TestSize.Level1)
     eventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -116,7 +116,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest042, TestSize.Level1)
     FRAME_NODE2->frameChildren_ = { children.begin(), children.end() };
     test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -148,7 +148,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest043, TestSize.Level1)
     gestureEventHub->SetOnGestureJudgeBegin(gestureJudgeFunc);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
-    EXPECT_EQ(test, HitTestResult::STOP_BUBBLING);
+    EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
 /**
@@ -1116,18 +1116,20 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
      */
     HitTestMode hitTestModeofChilds[] = { HitTestMode::HTMDEFAULT, HitTestMode::HTMBLOCK, HitTestMode::HTMTRANSPARENT,
         HitTestMode::HTMNONE, HitTestMode::HTMTRANSPARENT_SELF };
+    int32_t i = 0;
     for (auto hitTestModeofChild : hitTestModeofChilds) {
         childEventHub->SetHitTestMode(hitTestModeofChild);
         childNode->TouchTest(
             globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
         auto mode = childEventHub->GetHitTestMode();
-        EXPECT_EQ(mode, HitTestMode::HTMNONE);
+        EXPECT_EQ(mode, hitTestModeofChilds[i++]);
     }
 
     /**
      * @tc.steps: step4. modify callback and trigger touch test.
      * @tc.expected: expect the touch test mode is correct.
      */
+    i = 0;
     auto blockCallback = [](TouchEventInfo& event) -> HitTestMode { return HitTestMode::HTMBLOCK; };
     childEventHub->SetOnTouchIntercept(blockCallback);
     for (auto hitTestModeofChild : hitTestModeofChilds) {
@@ -1135,7 +1137,7 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
         childNode->TouchTest(
             globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
         auto mode = childEventHub->GetHitTestMode();
-        EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
+        EXPECT_EQ(mode, hitTestModeofChilds[i++]);
     }
 }
 
