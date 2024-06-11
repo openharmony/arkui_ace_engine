@@ -2831,7 +2831,7 @@ class ObservedMap {
   set(key, value) {
       const _a = this.changeCallback;
       this.map_.set(key, value);
-      _a === null || _a === void 0 ? void 0 : _a(this, key, value);
+      _a === null || _a === void 0 ? void 0 : _a(key, value);
       return this;
   }
   get size() {
