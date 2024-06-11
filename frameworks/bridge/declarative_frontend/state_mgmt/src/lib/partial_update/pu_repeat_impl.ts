@@ -27,18 +27,18 @@ class __RepeatImpl<T>  {
     private key2Item_ = new Map<string, __RepeatItemInfo<T>>();
 
     /**/
-    constructor(config: __RepeatAPIConfig<T>) {
-        //console.log('__RepeatImpl ctor')
+    constructor() {
+    }
+
+    /**/
+    public render(config: __RepeatAPIConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.typeGenFunc_ = config.typeGenFunc;
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
-    }
 
-    /**/
-    public render(isInitialRender: boolean): void {
         isInitialRender ? this.initialRender() : this.reRender();
     }
 

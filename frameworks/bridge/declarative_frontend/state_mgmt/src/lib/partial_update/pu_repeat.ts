@@ -216,12 +216,12 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         }
         if (!this.isVirtualScroll) {
           // Repeat
-          this.impl ??= new __RepeatImpl<T>(this.config);
-          this.impl.render(isInitialRender);
+          this.impl ??= new __RepeatImpl<T>();
+          this.impl.render(this.config, isInitialRender);
         } else {
           // RepeatVirtualScroll
-          this.impl ??= new __RepeatVirtualScrollImpl<T>(this.config);
-          this.impl.render(isInitialRender);
+          this.impl ??= new __RepeatVirtualScrollImpl<T>();
+          this.impl.render(this.config, isInitialRender);
         }
     }
 

@@ -31,7 +31,10 @@ class __RepeatVirtualScrollImpl<T> {
     private onMoveHandler_?: OnMoveHandler;
 
     /**/
-    constructor(config: __RepeatAPIConfig<T>) {
+    constructor() {
+    }
+
+    public render(config: __RepeatAPIConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
@@ -42,9 +45,7 @@ class __RepeatVirtualScrollImpl<T> {
 
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
-    }
 
-    public render(isInitialRender: boolean): void {
         if (isInitialRender) {
             this.initialRender(ObserveV2.getCurrentRecordedId());
         } else {
