@@ -15,49 +15,38 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
 #include "base/utils/utils.h"
-#include "core/animation/spring_curve.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr uint32_t ITEM_HALF_WIDTH = 0;
-constexpr uint32_t ITEM_HALF_HEIGHT = 1;
-constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
-constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
-constexpr Dimension INDICATOR_OFFSET_UNIT = 18.0_vp;
+constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 0.2f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
-constexpr float OPACITY_CENTER_BEZIER_CURVE_VELOCITY = 0.33f;
-constexpr float OPACITY_CENTER_BEZIER_CURVE_MASS = 0.0f;
-constexpr float OPACITY_CENTER_BEZIER_CURVE_STIFFNESS = 0.67f;
-constexpr float OPACITY_CENTER_BEZIER_CURVE_DAMPING = 1.0f;
-constexpr float FIRST_FADING_RATIO = 0.5f;
-constexpr float SECOND_FADING_RATIO = 0.75f;
+constexpr float SMALLEST_POINT_RATIO = 1.0f / 3.0f;
+constexpr float SECOND_SMALLEST_POINT_RATIO = 2.0f / 3.0f;
 constexpr float NORMAL_FADING_RATIO = 1.0f;
+constexpr double FULL_ALPHA = 255.0;
 constexpr int32_t BLACK_POINT_DURATION = 400;
-constexpr int32_t BLACK_POINT_RATIO_DURATION = 500;
-constexpr int32_t POINT_OPACITY_DURATION = 1000;
-constexpr int32_t NUM_0 = 0;
-constexpr int32_t NUM_1 = 1;
-constexpr int32_t NUM_2 = 2;
-constexpr int32_t NUM_3 = 3;
-constexpr int32_t NUM_4 = 4;
-constexpr int32_t NUM_5 = 5;
 constexpr int32_t NUM_6 = 6;
-constexpr int32_t NUM_7 = 7;
-constexpr int32_t NUM_8 = 8;
-constexpr int32_t NUM_9 = 9;
-constexpr int32_t NUM_10 = 10;
+constexpr int32_t LEFT_FIRST_POINT_INDEX = 0;
+constexpr int32_t SECOND_POINT_INDEX = 1;
+constexpr int32_t THIRD_POINT_INDEX = 2;
+constexpr uint32_t ITEM_HALF_WIDTH = 0;
+constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
+constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
+    contentProperty.unselectedIndicatorWidth = unselectedIndicatorWidth_->Get();
+    contentProperty.unselectedIndicatorHeight = unselectedIndicatorHeight_->Get();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
@@ -67,21 +56,10 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
     contentProperty.itemHalfSizes = itemHalfSizes_->Get();
-    contentProperty.theFirstPointMove = theFirstPointMove_->Get();
-    contentProperty.leftSecondPointSizeRate = leftSecondPointSizeRate_->Get();
-    contentProperty.theSecondPointMove = theSecondPointMove_->Get();
-    contentProperty.leftThirdPointSizeRate = leftThirdPointSizeRate_->Get();
-    contentProperty.theThirdPointMove = theThirdPointMove_->Get();
-    contentProperty.fourthPointMove = fourthPointMove_->Get();
-    contentProperty.fifthPointMove = fifthPointMove_->Get();
-    contentProperty.sixthPointMove = sixthPointMove_->Get();
-    contentProperty.seventhPointMove = seventhPointMove_->Get();
-    contentProperty.rightFirstPointSizeRate = rightFirstPointSizeRate_->Get();
-    contentProperty.eighthPointMove = eighthPointMove_->Get();
-    contentProperty.rightSecondPointSizeRate = rightSecondPointSizeRate_->Get();
-    contentProperty.ninthPointMove = ninthPointMove_->Get();
-    contentProperty.newPointMove = newPointMove_->Get();
+    contentProperty.firstPointOpacity = firstPointOpacity_->Get();
+    contentProperty.newPointOpacity = newPointOpacity_->Get();
 
+    SetFocusedAndSelectedColor(contentProperty);
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
@@ -96,8 +74,8 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     OffsetF rightCenter = { rightCenterX, centerY_ };
     OffsetF centerDistance = rightCenter - leftCenter;
     OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
-    leftCenter -= (centerDilateDistance - centerDistance) * FIRST_FADING_RATIO;
-    rightCenter += (centerDilateDistance - centerDistance) * FIRST_FADING_RATIO;
+    leftCenter -= (centerDilateDistance - centerDistance) * HALF_FLOAT;
+    rightCenter += (centerDilateDistance - centerDistance) * HALF_FLOAT;
     PaintSelectedIndicator(
         canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 }
@@ -106,317 +84,706 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
 {
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
-    std::vector<float> vecPointInfo;
-    vecPointInfo.push_back(contentProperty.theFirstPointMove);
-    vecPointInfo.push_back(contentProperty.theSecondPointMove);
-    vecPointInfo.push_back(contentProperty.theThirdPointMove);
-    vecPointInfo.push_back(contentProperty.fourthPointMove);
-    vecPointInfo.push_back(contentProperty.fifthPointMove);
-    vecPointInfo.push_back(contentProperty.sixthPointMove);
-    vecPointInfo.push_back(contentProperty.seventhPointMove);
-    vecPointInfo.push_back(contentProperty.eighthPointMove);
-    vecPointInfo.push_back(contentProperty.ninthPointMove);
-    vecPointInfo.push_back(contentProperty.newPointMove);
     for (size_t i = 0; i < totalCount; ++i) {
-        LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
-        if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-            center = { vecPointInfo[i], centerY_ };
+        float width = contentProperty.unselectedIndicatorWidth[i];
+        float height = contentProperty.unselectedIndicatorHeight[i];
+
+        auto paintColor = unselectedColor_->Get();
+        bool isFirstPoint = (i == 0 && moveDirection_ == OverlongIndicatorMove::MOVE_BACKWARD) ||
+                            (i == totalCount - 2 && moveDirection_ == OverlongIndicatorMove::MOVE_FORWARD);
+        if (isFirstPoint) {
+            // first point color
+            paintColor = paintColor.BlendOpacity(contentProperty.firstPointOpacity / FULL_ALPHA);
+        } else if (i == totalCount - 1 && moveDirection_ != OverlongIndicatorMove::NONE) {
+            // new point color
+            paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
         }
-        if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-            if (i == NUM_0) {
-                PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(firstPointColor_->Get()));
-            } else if (i == maxDisplayCount_) {
-                PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(newPointColor_->Get()));
-            } else {
-                PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
-            }
-        } else {
-            if (i == maxDisplayCount_) {
-                PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(newPointColor_->Get()));
-            } else {
-                PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
-            }
-        }
+
+        PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
     }
 }
 
-LinearVector<float> OverlengthDotIndicatorModifier::GetItemHalfSizes(size_t index, ContentProperty& contentProperty)
-{
-    if (normalToHoverIndex_.has_value() && normalToHoverIndex_ == index) {
-        return contentProperty.itemHalfSizes * contentProperty.normalToHoverPointDilateRatio;
-    }
-    if (hoverToNormalIndex_.has_value() && hoverToNormalIndex_ == index) {
-        return contentProperty.itemHalfSizes * contentProperty.hoverToNormalPointDilateRatio;
-    }
-    // The fade effect is triggered after the third navigation point
-    bool specificPoint = NUM_2 <= currentIndex_ && index == NUM_0;
-    if (specificPoint) {
-        return contentProperty.itemHalfSizes * contentProperty.leftSecondPointSizeRate;
-    }
-    // Navigation points The last three points have a special action effect
-    specificPoint = NUM_2 <= currentIndex_ && currentIndex_ < realItemCount_ - NUM_3;
-    if (specificPoint) {
-        if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-            specificPoint = index == contentProperty.vectorBlackPointCenterX.size() - NUM_2 || index == NUM_2;
-            if (specificPoint) {
-                return contentProperty.itemHalfSizes * contentProperty.leftThirdPointSizeRate;
-            }
-            specificPoint = index == contentProperty.vectorBlackPointCenterX.size() - NUM_1 || index == NUM_1;
-            if (specificPoint) {
-                return contentProperty.itemHalfSizes * contentProperty.leftSecondPointSizeRate;
-            }
-        } else {
-            specificPoint = index == contentProperty.vectorBlackPointCenterX.size() - NUM_3 || index == NUM_1;
-            if (specificPoint) {
-                return contentProperty.itemHalfSizes * contentProperty.leftThirdPointSizeRate;
-            }
-            if (index == contentProperty.vectorBlackPointCenterX.size() - NUM_2 || index == NUM_0) {
-                return contentProperty.itemHalfSizes * contentProperty.leftSecondPointSizeRate;
-            }
-        }
-    }
-    // The first two navigation points fade to the right
-    if (currentIndex_ < NUM_2) {
-        if (index == contentProperty.vectorBlackPointCenterX.size() - NUM_3) {
-            return contentProperty.itemHalfSizes * SECOND_FADING_RATIO;
-        }
-        if (index == contentProperty.vectorBlackPointCenterX.size() - NUM_2) {
-            return contentProperty.itemHalfSizes * FIRST_FADING_RATIO;
-        }
-    }
-    // The last two pages
-    if (currentIndex_ >= realItemCount_ - NUM_3) {
-        if (index == NUM_1) {
-            return contentProperty.itemHalfSizes * contentProperty.leftSecondPointSizeRate;
-        }
-        if (index == NUM_2) {
-            return contentProperty.itemHalfSizes * contentProperty.leftThirdPointSizeRate;
-        }
-    }
-    return contentProperty.itemHalfSizes;
-}
-
-void OverlengthDotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
-    const LinearVector<float>& itemHalfSizes, bool currentIndexFlag, const LinearColor& indicatorColor)
+void OverlengthDotIndicatorModifier::PaintUnselectedIndicator(
+    RSCanvas& canvas, const OffsetF& center, float width, float height, const LinearColor& indicatorColor)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(indicatorColor));
     canvas.AttachBrush(brush);
-    bool bFlag = !NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[ITEM_HALF_HEIGHT]) || currentIndexFlag ||
-        !isCustomSize_;
-    if (bFlag) {
-        float rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * NUM_2;
-        float rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * NUM_2;
-        if (currentIndexFlag) {
-            rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * NUM_2;
-            rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * NUM_2;
-        }
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() - rectItemWidth * FIRST_FADING_RATIO
-                                                    : center.GetY() - rectItemHeight * FIRST_FADING_RATIO);
-        float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() - rectItemHeight * FIRST_FADING_RATIO
-                                                   : center.GetX() - rectItemWidth * FIRST_FADING_RATIO);
-        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() + rectItemWidth * FIRST_FADING_RATIO
-                                                     : center.GetY() + rectItemHeight * FIRST_FADING_RATIO);
-        float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() + rectItemHeight * FIRST_FADING_RATIO
-                                                      : center.GetX() + rectItemWidth * FIRST_FADING_RATIO);
+    if (!NearEqual(width, height) || !isCustomSize_) {
+        float rectLeft =
+            (axis_ == Axis::HORIZONTAL ? center.GetX() - width * HALF_FLOAT : center.GetY() - height * HALF_FLOAT);
+        float rectTop =
+            (axis_ == Axis::HORIZONTAL ? center.GetY() - height * HALF_FLOAT : center.GetX() - width * HALF_FLOAT);
+        float rectRight =
+            (axis_ == Axis::HORIZONTAL ? center.GetX() + width * HALF_FLOAT : center.GetY() + height * HALF_FLOAT);
+        float rectBottom =
+            (axis_ == Axis::HORIZONTAL ? center.GetY() + height * HALF_FLOAT : center.GetX() + width * HALF_FLOAT);
 
-        if (rectItemHeight > rectItemWidth || !isCustomSize_) {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectItemWidth, rectItemWidth });
-        } else if (rectItemHeight < rectItemWidth) {
-            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectItemHeight, rectItemHeight });
+        if (height > width || !isCustomSize_) {
+            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, width, width });
+        } else if (height < width) {
+            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, height, height });
         } else {
             float customPointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
             float customPointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-            canvas.DrawCircle({ customPointX, customPointY }, rectItemHeight * FIRST_FADING_RATIO);
+            canvas.DrawCircle({ customPointX, customPointY }, height * HALF_FLOAT);
         }
     } else {
         float pointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
-        bool bSpecificBeg = currentIndex_ > maxDisplayCount_ - NUM_3;
-        bool bmidPoint = currentIndex_ < realItemCount_ - NUM_2;
-        bool blastPoint = currentIndex_ == realItemCount_ - NUM_2 || currentIndex_ == realItemCount_ - NUM_1;
-        if (bSpecificBeg) {
-            if (bmidPoint) {
-                pointX = pointX +
-                         (currentIndex_ - (maxDisplayCount_ - NUM_3) - NUM_1) * (INDICATOR_OFFSET_UNIT.ConvertToPx());
-            } else if (blastPoint) {
-                pointX = pointX + (realItemCount_ - maxDisplayCount_ - NUM_1) * (INDICATOR_OFFSET_UNIT.ConvertToPx());
-            }
-        }
         float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-        canvas.DrawCircle({ pointX, pointY }, itemHalfSizes[ITEM_HALF_HEIGHT]);
+        canvas.DrawCircle({ pointX, pointY }, width * HALF_FLOAT);
     }
     canvas.DetachBrush();
 }
-void OverlengthDotIndicatorModifier::UpdateShrinkPaintProperty(
-    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+
+void OverlengthDotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin,
+    const LinearVector<float>& normalItemHalfSizes, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
 
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
-        vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+        vectorBlackPointCenterX_->Set(animationEndCenterX_);
         longPointLeftCenterX_->Set(longPointCenterX.first);
         longPointRightCenterX_->Set(longPointCenterX.second);
     }
-    UpdateMaxDisplayProperty(vectorBlackPointCenterX);
+    unselectedIndicatorWidth_->Set(animationEndIndicatorWidth_);
+    unselectedIndicatorHeight_->Set(animationEndIndicatorHeight_);
     itemHalfSizes_->Set(normalItemHalfSizes);
     normalToHoverPointDilateRatio_->Set(NORMAL_FADING_RATIO);
     hoverToNormalPointDilateRatio_->Set(NORMAL_FADING_RATIO);
     longPointDilateRatio_->Set(NORMAL_FADING_RATIO);
     backgroundWidthDilateRatio_->Set(NORMAL_FADING_RATIO);
     backgroundHeightDilateRatio_->Set(NORMAL_FADING_RATIO);
+    longPointWithAnimation_ = true;
 }
-void OverlengthDotIndicatorModifier::UpdateMaxDisplayProperty(const LinearVector<float>& vectorBlackPointCenterX)
-{
-    if (vectorBlackPointCenterX.size() <= NUM_6) {
-        return;
-    }
-    float fixedOffset = (realItemCount_ - maxDisplayCount_) * (INDICATOR_OFFSET_UNIT.ConvertToPx());
-    float variableOffset = (currentIndex_ - (maxDisplayCount_ - NUM_3)) * (INDICATOR_OFFSET_UNIT.ConvertToPx());
-    if (currentIndex_ >= maxDisplayCount_ - NUM_3) {
-        if (currentIndex_ < realItemCount_ - NUM_2) {
-            UpdateDisplayProperty(vectorBlackPointCenterX, variableOffset);
-        } else {
-            UpdateDisplayProperty(vectorBlackPointCenterX, fixedOffset);
-        }
-        if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-            newPointColor_->Set(LinearColor(unselectedColor_->Get()));
-        }
-    }
-}
-void OverlengthDotIndicatorModifier::UpdateDisplayProperty(const LinearVector<float>& vectorBlackPointCenterX,
-    const float variableOffset)
-{
-    auto vectorSize = vectorBlackPointCenterX.size();
-    if (vectorSize <= NUM_6) {
-        return;
-    }
-    theFirstPointMove_->Set(vectorBlackPointCenterX[NUM_0] - variableOffset);
-    theSecondPointMove_->Set(vectorBlackPointCenterX[NUM_1] - variableOffset);
-    theThirdPointMove_->Set(vectorBlackPointCenterX[NUM_2] - variableOffset);
-    fourthPointMove_->Set(vectorBlackPointCenterX[NUM_3] - variableOffset);
-    fifthPointMove_->Set(vectorBlackPointCenterX[NUM_4] - variableOffset);
-    sixthPointMove_->Set(vectorBlackPointCenterX[NUM_5] - variableOffset);
 
-    if (vectorSize == NUM_7) {
-        seventhPointMove_->Set(vectorBlackPointCenterX[NUM_6] - variableOffset);
-    } else if (vectorSize == NUM_8) {
-        seventhPointMove_->Set(vectorBlackPointCenterX[NUM_6] - variableOffset);
-        eighthPointMove_->Set(vectorBlackPointCenterX[NUM_7] - variableOffset);
-    } else if (vectorSize == NUM_9) {
-        seventhPointMove_->Set(vectorBlackPointCenterX[NUM_6] - variableOffset);
-        eighthPointMove_->Set(vectorBlackPointCenterX[NUM_7] - variableOffset);
-        ninthPointMove_->Set(vectorBlackPointCenterX[NUM_8] - variableOffset);
-    } else if (vectorSize == NUM_10) {
-        seventhPointMove_->Set(vectorBlackPointCenterX[NUM_6] - variableOffset);
-        eighthPointMove_->Set(vectorBlackPointCenterX[NUM_7] - variableOffset);
-        ninthPointMove_->Set(vectorBlackPointCenterX[NUM_8] - variableOffset);
-        newPointMove_->Set(vectorBlackPointCenterX[NUM_9] - variableOffset);
-    }
-}
-void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(
-    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin,
+    const LinearVector<float>& normalItemHalfSizes, const std::pair<float, float>& longPointCenterX)
 {
+    normalMargin_ = margin;
+    CalcAnimationEndCenterX(normalItemHalfSizes);
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     auto backgroundColor =
         indicatorMask_ ? swiperTheme->GetPressedColor() : swiperTheme->GetHoverColor().ChangeOpacity(0);
-    UpdateShrinkPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    UpdateShrinkPaintProperty(margin, normalItemHalfSizes, overlongSelectedEndCenterX_);
     UpdateBackgroundColor(backgroundColor);
 }
 
-void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX)
+void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes)
 {
     if (maxDisplayCount_ < NUM_6) {
         return;
     }
-    if (currentIndex_ > maxDisplayCount_ - NUM_3) {
-        auto newPointColorCurve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
-        AnimationOption newPointColoroption;
-        newPointColoroption.SetCurve(newPointColorCurve);
-        newPointColoroption.SetDuration(BLACK_POINT_RATIO_DURATION);
-        auto pointColor = LinearColor::TRANSPARENT;
-        if (currentIndex_ >= realItemCount_ - NUM_3) {
-            pointColor = LinearColor(unselectedColor_->Get());
-        }
-        newPointColor_->Set(pointColor);
-        AnimationUtils::StartAnimation(
-            newPointColoroption, [&]() { newPointColor_->Set(LinearColor(unselectedColor_->Get())); });
-    }
+
     AnimationOption blackPointOption;
     auto pointMoveCurve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
     blackPointOption.SetCurve(pointMoveCurve);
     blackPointOption.SetDuration(BLACK_POINT_DURATION);
-    AnimationUtils::StartAnimation(blackPointOption, [&]() {
-        theFirstPointMove_->Set(vectorBlackPointCenterX[NUM_0]);
-        theSecondPointMove_->Set(vectorBlackPointCenterX[NUM_1]);
-        theThirdPointMove_->Set(vectorBlackPointCenterX[NUM_2]);
-        fourthPointMove_->Set(vectorBlackPointCenterX[NUM_3]);
-        fifthPointMove_->Set(vectorBlackPointCenterX[NUM_4]);
-        sixthPointMove_->Set(vectorBlackPointCenterX[NUM_5]);
-        seventhPointMove_->Set(vectorBlackPointCenterX[NUM_6]);
-        eighthPointMove_->Set(vectorBlackPointCenterX[NUM_7]);
-        ninthPointMove_->Set(vectorBlackPointCenterX[NUM_8]);
-        newPointMove_->Set(vectorBlackPointCenterX[NUM_9]);
-        PlayPointOpacityAnimation();
-    });
-
-    auto sizeRateCurve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
-    AnimationOption sizeRateOption;
-    sizeRateOption.SetCurve(sizeRateCurve);
-    sizeRateOption.SetDuration(BLACK_POINT_RATIO_DURATION);
-    AnimationUtils::StartAnimation(sizeRateOption, [&]() {
-        leftSecondPointSizeRate_->Set(FIRST_FADING_RATIO);
-        leftThirdPointSizeRate_->Set(SECOND_FADING_RATIO);
-        rightFirstPointSizeRate_->Set(FIRST_FADING_RATIO);
-        rightSecondPointSizeRate_->Set(NORMAL_FADING_RATIO);
-    });
-}
-void OverlengthDotIndicatorModifier::PlayPointOpacityAnimation()
-{
-    AnimationOption optionOpacity;
-    // x0:0.33, y0:0, x1:0.67, y1:1
-    optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(OPACITY_CENTER_BEZIER_CURVE_VELOCITY,
-        OPACITY_CENTER_BEZIER_CURVE_MASS, OPACITY_CENTER_BEZIER_CURVE_STIFFNESS, OPACITY_CENTER_BEZIER_CURVE_DAMPING));
-    optionOpacity.SetDuration(POINT_OPACITY_DURATION);
+    
+    vectorBlackPointCenterX_->Set(animationStartCenterX_);
+    unselectedIndicatorWidth_->Set(animationStartIndicatorWidth_);
+    unselectedIndicatorHeight_->Set(animationStartIndicatorHeight_);
+    firstPointOpacity_->Set(UINT8_MAX);
+    newPointOpacity_->Set(0);
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
-    firstPointColor_->Set(LinearColor(unselectedColor_->Get()));
-    auto weak = WeakClaim(this);
-    AnimationUtils::StartAnimation(optionOpacity, [weak]() {
+    AnimationUtils::StartAnimation(blackPointOption, [&]() {
+        vectorBlackPointCenterX_->Set(animationEndCenterX_);
+        unselectedIndicatorWidth_->Set(animationEndIndicatorWidth_);
+        unselectedIndicatorHeight_->Set(animationEndIndicatorHeight_);
+
+        if (moveDirection_ != OverlongIndicatorMove::NONE) {
+            firstPointOpacity_->Set(0);
+            newPointOpacity_->Set(UINT8_MAX);
+        }
+    }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->firstPointColor_->Set(LinearColor::TRANSPARENT);
+        modifier->SetMoveDirection(OverlongIndicatorMove::NONE);
+        modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
+        modifier->currentOverlongType_ = modifier->targetOverlongType_;
     });
 }
 
-void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
-    const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
-    TouchBottomTypeLoop touchBottomTypeLoop)
+LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(const LinearVector<float>& itemHalfSizes,
+    int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex, bool isWidth)
+{
+    auto unselectedIndicatorRadius = isWidth ? itemHalfSizes[0] : itemHalfSizes[1];
+    LinearVector<float> indicatorSize(maxDisplayCount_ + 1);
+
+    auto secondSmallestRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
+    auto smallestRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
+
+    for (int32_t i = 0; i < maxDisplayCount_; i++) {
+        if (i == LEFT_FIRST_POINT_INDEX) {
+            if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+                indicatorSize[i] = unselectedIndicatorRadius * 2;
+            } else {
+                indicatorSize[i] = smallestRadius * 2;
+            }
+            continue;
+        }
+
+        if (i == SECOND_POINT_INDEX) {
+            if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+                indicatorSize[i] = unselectedIndicatorRadius * 2;
+            } else {
+                indicatorSize[i] = secondSmallestRadius * 2;
+            }
+            continue;
+        }
+
+        if (i >= THIRD_POINT_INDEX && i <= maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+            indicatorSize[i] = unselectedIndicatorRadius * 2;
+            continue;
+        }
+
+        if (i == maxDisplayCount_ - 1 - SECOND_POINT_INDEX) {
+            if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+                indicatorSize[i] = unselectedIndicatorRadius * 2;
+            } else {
+                indicatorSize[i] = secondSmallestRadius * 2;
+            }
+            continue;
+        }
+
+        if (i == maxDisplayCount_ - 1) {
+            if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+                indicatorSize[i] = unselectedIndicatorRadius * 2;
+            } else {
+                indicatorSize[i] = smallestRadius * 2;
+            }
+            continue;
+        }
+    }
+
+    return indicatorSize;
+}
+
+void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag()
+{
+    if (gestureState_ != GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        gestureState_ != GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        return;
+    }
+    
+    animationEndCenterX_[currentSelectedIndex_] =
+        animationStartCenterX_[currentSelectedIndex_] +
+        (animationEndCenterX_[currentSelectedIndex_] - animationStartCenterX_[currentSelectedIndex_]) *
+            blackPointCenterMoveRate_;
+
+    animationEndCenterX_[targetSelectedIndex_] =
+        animationStartCenterX_[targetSelectedIndex_] +
+        (animationEndCenterX_[targetSelectedIndex_] - animationStartCenterX_[targetSelectedIndex_]) *
+            blackPointCenterMoveRate_;
+
+    overlongSelectedEndCenterX_.first =
+        overlongSelectedStartCenterX_.first +
+        (overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first) * longPointLeftCenterMoveRate_;
+
+    overlongSelectedEndCenterX_.second =
+        overlongSelectedStartCenterX_.second +
+        (overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second) * longPointRightCenterMoveRate_;
+
+    targetSelectedIndex_ = currentSelectedIndex_;
+    targetOverlongType_ = currentOverlongType_;
+}
+
+void OverlengthDotIndicatorModifier::UpdateUnselectedCenterXOnDrag()
+{
+    if (gestureState_ != GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        gestureState_ != GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        return;
+    }
+
+    for (size_t i = 0; i < animationEndCenterX_.size(); i++) {
+        animationEndCenterX_[i] = animationStartCenterX_[i] +
+                                  (animationEndCenterX_[i] - animationStartCenterX_[i]) * blackPointCenterMoveRate_;
+    }
+
+    targetSelectedIndex_ = currentSelectedIndex_;
+    targetOverlongType_ = currentOverlongType_;
+}
+
+int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
+{
+    if (NearEqual(turnPageRate_, 0.0f)) {
+        return animationEndIndex_;
+    }
+
+    if (animationStartIndex_ == animationEndIndex_) {
+        return animationStartIndex_ + 1;
+    }
+
+    return animationEndIndex_;
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const LinearVector<float>& itemHalfSizes)
+{
+    auto endCenterX =
+        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    animationEndCenterX_ = endCenterX.first;
+    overlongSelectedEndCenterX_ = endCenterX.second;
+    animationStartIndicatorWidth_ =
+        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorHeight_ =
+        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+
+    animationEndIndicatorWidth_ =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
+    animationEndIndicatorHeight_ =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+
+    animationStartCenterX_.resize(maxDisplayCount_);
+    animationEndCenterX_.resize(maxDisplayCount_);
+    animationStartIndicatorWidth_.resize(maxDisplayCount_);
+    animationStartIndicatorHeight_.resize(maxDisplayCount_);
+    animationEndIndicatorWidth_.resize(maxDisplayCount_);
+    animationEndIndicatorHeight_.resize(maxDisplayCount_);
+
+    UpdateSelectedCenterXOnDrag();
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes)
+{
+    auto targetCenterX =
+        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    overlongSelectedEndCenterX_ = targetCenterX.second;
+    auto targetIndicatorWidth =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+
+    if (currentOverlongType_ != targetOverlongType_) {
+        longPointWithAnimation_ = false;
+    }
+
+    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    // calc new point current position
+    animationStartCenterX_[maxDisplayCount_] =
+        animationStartCenterX_[0] - animationStartIndicatorWidth_[0] - itemSpacePx;
+    animationStartIndicatorWidth_[maxDisplayCount_] = animationStartIndicatorWidth_[0];
+    animationStartIndicatorHeight_[maxDisplayCount_] = animationStartIndicatorHeight_[0];
+
+    // calc new point target position
+    animationEndCenterX_[maxDisplayCount_] = targetCenterX.first[0];
+    animationEndIndicatorWidth_[maxDisplayCount_] = targetIndicatorWidth[0];
+    animationEndIndicatorHeight_[maxDisplayCount_] = targetIndicatorHeight[0];
+
+    for (int32_t i = 0; i < maxDisplayCount_ - 1; i++) {
+        animationEndCenterX_[i] = targetCenterX.first[i + 1];
+        animationEndIndicatorWidth_[i] = targetIndicatorWidth[i + 1];
+        animationEndIndicatorHeight_[i] = targetIndicatorHeight[i + 1];
+    }
+
+    animationEndCenterX_[maxDisplayCount_ - 1] =
+        targetCenterX.first[maxDisplayCount_ - 1] + targetIndicatorWidth[maxDisplayCount_ - 1] + itemSpacePx;
+    animationEndIndicatorWidth_[maxDisplayCount_ - 1] = targetIndicatorWidth[maxDisplayCount_ - 1];
+    animationEndIndicatorHeight_[maxDisplayCount_ - 1] = targetIndicatorHeight[maxDisplayCount_ - 1];
+
+    UpdateUnselectedCenterXOnDrag();
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes)
+{
+    auto targetCenterX =
+        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    overlongSelectedEndCenterX_ = targetCenterX.second;
+    auto targetIndicatorWidth =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight =
+        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+
+    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    // calc new point current position
+    animationStartCenterX_[maxDisplayCount_] = animationStartCenterX_[maxDisplayCount_ - 1] +
+                                               animationStartIndicatorWidth_[maxDisplayCount_ - 1] + itemSpacePx;
+    animationStartIndicatorWidth_[maxDisplayCount_] = animationStartIndicatorWidth_[maxDisplayCount_ - 1];
+    animationStartIndicatorHeight_[maxDisplayCount_] = animationStartIndicatorHeight_[maxDisplayCount_ - 1];
+
+    // calc first point target position
+    auto distance = std::abs(targetCenterX.first[1] - targetCenterX.first[0]);
+    animationEndCenterX_[0] = targetCenterX.first[0] - distance;
+    animationEndIndicatorWidth_[0] = targetIndicatorWidth[0];
+    animationEndIndicatorHeight_[0] = targetIndicatorHeight[0];
+
+    for (int32_t i = 1; i <= maxDisplayCount_; i++) {
+        animationEndCenterX_[i] = targetCenterX.first[i - 1];
+        animationEndIndicatorWidth_[i] = targetIndicatorWidth[i - 1];
+        animationEndIndicatorHeight_[i] = targetIndicatorHeight[i - 1];
+    }
+
+    UpdateUnselectedCenterXOnDrag();
+}
+
+void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes)
+{
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        animationEndIndex_ = CalcTargetIndexOnDrag();
+    }
+
+    CalcTargetOverlongStatus(animationStartIndex_, animationEndIndex_);
+
+    auto startCenterX =
+        CalcIndicatorCenterX(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_);
+    animationStartCenterX_ = startCenterX.first;
+    overlongSelectedStartCenterX_ = startCenterX.second;
+
+    // long point move or no move
+    if (currentSelectedIndex_ != targetSelectedIndex_ || animationStartIndex_ == animationEndIndex_) {
+        moveDirection_ = OverlongIndicatorMove::NONE;
+        CalcTargetStatusOnLongPointMove(itemHalfSizes);
+        return;
+    }
+
+    animationStartIndicatorWidth_ =
+        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorHeight_ =
+        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+    animationEndCenterX_.resize(maxDisplayCount_ + 1);
+    animationEndIndicatorWidth_.resize(maxDisplayCount_ + 1);
+    animationEndIndicatorHeight_.resize(maxDisplayCount_ + 1);
+
+    if (animationStartIndex_ < animationEndIndex_) {
+        moveDirection_ = OverlongIndicatorMove::MOVE_BACKWARD;
+        CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+        return;
+    }
+
+    moveDirection_ = OverlongIndicatorMove::MOVE_FORWARD;
+    CalcTargetStatusOnAllPointMoveForward(itemHalfSizes);
+}
+
+void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margin,
+    const LinearVector<float>& itemHalfSizes, GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop)
 {
     StopAnimation(false);
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
-    PlayBlackPointsAnimation(vectorBlackPointCenterX);
-    PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
+    normalMargin_ = margin;
+    CalcAnimationEndCenterX(itemHalfSizes);
+    PlayBlackPointsAnimation(itemHalfSizes);
+
+    std::vector<std::pair<float, float>> pointCenterX;
+    if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
+        (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+        pointCenterX.emplace_back(overlongSelectedStartCenterX_);
+        pointCenterX.emplace_back(overlongSelectedEndCenterX_);
+    } else {
+        pointCenterX.emplace_back(overlongSelectedEndCenterX_);
+    }
+
+    if (longPointWithAnimation_) {
+        PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_);
+    }
+    longPointWithAnimation_ = true;
 }
 void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
 {
-    DotIndicatorModifier::StopAnimation(ifImmediately);
+    if (ifImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
+            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
+        });
+    }
+
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointCenterX_->Set(modifier->vectorBlackPointCenterX_->Get());
+        modifier->firstPointOpacity_->Set(modifier->firstPointOpacity_->Get());
+        modifier->newPointOpacity_->Set(modifier->newPointOpacity_->Get());
+    });
+
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
-    newPointColor_->Set(LinearColor::TRANSPARENT);
-    leftSecondPointSizeRate_->Set(FIRST_FADING_RATIO);
-    leftThirdPointSizeRate_->Set(SECOND_FADING_RATIO);
-    rightSecondPointSizeRate_->Set(SECOND_FADING_RATIO);
-    rightFirstPointSizeRate_->Set(FIRST_FADING_RATIO);
+    currentSelectedIndex_ = targetSelectedIndex_;
+    currentOverlongType_ = targetOverlongType_;
 }
+
+void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)
+{
+    if (pageIndex < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+        currentSelectedIndex_ = pageIndex;
+        currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+
+        targetSelectedIndex_ = currentSelectedIndex_;
+        targetOverlongType_ = currentOverlongType_;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        currentSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+
+        targetSelectedIndex_ = currentSelectedIndex_;
+        targetOverlongType_ = currentOverlongType_;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        currentSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+
+        targetSelectedIndex_ = currentSelectedIndex_;
+        targetOverlongType_ = currentOverlongType_;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - SECOND_POINT_INDEX) {
+        currentSelectedIndex_ = maxDisplayCount_ - 1 - SECOND_POINT_INDEX;
+        currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+
+        targetSelectedIndex_ = currentSelectedIndex_;
+        targetOverlongType_ = currentOverlongType_;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1) {
+        currentSelectedIndex_ = maxDisplayCount_ - 1;
+        currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+
+        targetSelectedIndex_ = currentSelectedIndex_;
+        targetOverlongType_ = currentOverlongType_;
+        return;
+    }
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex)
+{
+    if (currentPageIndex == targetPageIndex) {
+        return;
+    }
+
+    auto step = std::abs(targetPageIndex - currentPageIndex);
+    if (currentPageIndex < targetPageIndex) {
+        if (currentSelectedIndex_ == maxDisplayCount_ - 1 - THIRD_POINT_INDEX &&
+            targetPageIndex < realItemCount_ - 1 - SECOND_POINT_INDEX) {
+            step = 0;
+        }
+
+        targetSelectedIndex_ = currentSelectedIndex_ + step;
+        return;
+    }
+
+    if (currentSelectedIndex_ == THIRD_POINT_INDEX && targetPageIndex >= THIRD_POINT_INDEX) {
+        step = 0;
+    }
+
+    targetSelectedIndex_ = currentSelectedIndex_ - step;
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex)
+{
+    if (currentPageIndex == targetPageIndex || currentOverlongType_ == OverlongType::NONE) {
+        return;
+    }
+
+    if (currentPageIndex == realItemCount_ - 1 && targetPageIndex == 0) {
+        targetSelectedIndex_ = 0;
+        targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+        return;
+    }
+
+    if (currentPageIndex == 0 && targetPageIndex == realItemCount_ - 1) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    CalcTargetSelectedIndex(currentPageIndex, targetPageIndex);
+
+    if (currentPageIndex < targetPageIndex) {
+        if (currentOverlongType_ == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+            if (targetSelectedIndex_ < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+                targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+            } else if (targetSelectedIndex_ == maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+                targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+            }
+        } else if (currentOverlongType_ == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+            targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        } else {
+            if (targetSelectedIndex_ < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+                targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+            } else if (targetSelectedIndex_ == maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+                if (targetPageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX) {
+                    targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+                } else {
+                    targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+                }
+            } else {
+                targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+            }
+        }
+
+        return;
+    }
+
+    if (currentOverlongType_ == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+        targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    } else if (currentOverlongType_ == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+        if (targetSelectedIndex_ > THIRD_POINT_INDEX) {
+            targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        } else if (targetSelectedIndex_ == THIRD_POINT_INDEX) {
+            targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+        }
+    } else {
+        if (targetSelectedIndex_ > THIRD_POINT_INDEX) {
+            targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+        } else if (targetSelectedIndex_ == THIRD_POINT_INDEX) {
+            if (targetPageIndex > THIRD_POINT_INDEX) {
+                targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+            } else {
+                targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+            }
+        } else {
+            targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+        }
+    }
+}
+
+std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorModifier::CalcIndicatorCenterX(
+    const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex)
+{
+    auto unselectedIndicatorRadius = itemHalfSizes[ITEM_HALF_WIDTH];
+    auto selectedIndicatorRadius = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    if (!isCustomSizeValue_) {
+        selectedIndicatorRadius *= 2.0f;
+    }
+
+    LinearVector<float> indicatorCenterX(maxDisplayCount_ + 1);
+    std::pair<float, float> longPointCenterX;
+    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    auto leftFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
+    auto leftSecondRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
+    auto rightFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
+    auto rightSecondRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
+
+    auto startIndicatorCenterX = normalMargin_.GetX() + static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    for (int32_t i = 0; i < maxDisplayCount_; i++) {
+        if (i == LEFT_FIRST_POINT_INDEX) {
+            if (i == selectedIndex) {
+                startIndicatorCenterX += selectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += selectedIndicatorRadius;
+
+                longPointCenterX.first =
+                    indicatorCenterX[i] - (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+                longPointCenterX.second =
+                    indicatorCenterX[i] + (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+            } else if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+                startIndicatorCenterX += unselectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += unselectedIndicatorRadius;
+            } else {
+                startIndicatorCenterX += leftFirstRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += leftFirstRadius;
+            }
+            continue;
+        }
+
+        if (i == SECOND_POINT_INDEX) {
+            if (i == selectedIndex) {
+                startIndicatorCenterX += itemSpacePx + selectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += selectedIndicatorRadius;
+
+                longPointCenterX.first =
+                    indicatorCenterX[i] - (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+                longPointCenterX.second =
+                    indicatorCenterX[i] + (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+            } else if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+                startIndicatorCenterX += itemSpacePx + unselectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += unselectedIndicatorRadius;
+            } else {
+                startIndicatorCenterX += itemSpacePx + leftSecondRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += leftSecondRadius;
+            }
+            continue;
+        }
+
+        if (i >= THIRD_POINT_INDEX && i <= maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+            if (i == selectedIndex) {
+                startIndicatorCenterX += itemSpacePx + selectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += selectedIndicatorRadius;
+
+                longPointCenterX.first =
+                    indicatorCenterX[i] - (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+                longPointCenterX.second =
+                    indicatorCenterX[i] + (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+            } else {
+                startIndicatorCenterX += itemSpacePx + unselectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += unselectedIndicatorRadius;
+            }
+            continue;
+        }
+
+        if (i == maxDisplayCount_ - 1 - SECOND_POINT_INDEX) {
+            if (i == selectedIndex) {
+                startIndicatorCenterX += itemSpacePx + selectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += selectedIndicatorRadius;
+
+                longPointCenterX.first =
+                    indicatorCenterX[i] - (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+                longPointCenterX.second =
+                    indicatorCenterX[i] + (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+            } else if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+                startIndicatorCenterX += itemSpacePx + unselectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += unselectedIndicatorRadius;
+            } else {
+                startIndicatorCenterX += itemSpacePx + rightSecondRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += rightSecondRadius;
+            }
+            continue;
+        }
+
+        if (i == maxDisplayCount_ - 1) {
+            if (i == selectedIndex) {
+                startIndicatorCenterX += itemSpacePx + selectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += selectedIndicatorRadius;
+
+                longPointCenterX.first =
+                    indicatorCenterX[i] - (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+                longPointCenterX.second =
+                    indicatorCenterX[i] + (isCustomSizeValue_ ? 0.0f : selectedIndicatorRadius * 0.5f);
+            } else if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+                startIndicatorCenterX += itemSpacePx + unselectedIndicatorRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += unselectedIndicatorRadius;
+            } else {
+                startIndicatorCenterX += itemSpacePx + rightFirstRadius;
+                indicatorCenterX[i] = startIndicatorCenterX;
+                startIndicatorCenterX += rightFirstRadius;
+            }
+            continue;
+        }
+    }
+
+    return std::make_pair(indicatorCenterX, longPointCenterX);
+}
+
 } // namespace OHOS::Ace::NG

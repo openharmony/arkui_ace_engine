@@ -87,18 +87,23 @@ public:
         auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
         int32_t maxDisplayCounter = swiperPattern->GetMaxDisplayCount();
-        if (maxDisplayCounter >= DISPLAY_COUNT_MIN && maxDisplayCounter <= DISPLAY_COUNT_MAX) {
-            auto paintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(
+        if (maxDisplayCounter > 0) {
+            auto overlongPaintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(
                 DynamicCast<OverlengthDotIndicatorModifier>(dotIndicatorModifier_));
-            auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(paintMethod);
+            auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
             SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethodTemp, swiperLayoutProperty);
-            paintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
-            return paintMethod;
+            overlongPaintMethod->SetMaxDisplayCount(maxDisplayCounter);
+            auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+            auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+            overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
+            overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+            return overlongPaintMethod;
         }
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
         SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethod, swiperLayoutProperty);
         return paintMethod;
     }
+
     void SetDotIndicatorPaintMethodInfo(const RefPtr<SwiperPattern>& swiperPattern,
         RefPtr<DotIndicatorPaintMethod>& paintMethod,
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
@@ -157,7 +162,7 @@ public:
         if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (!dotIndicatorModifier_) {
                 int32_t maxDisplayCounter = swiperPattern->GetMaxDisplayCount();
-                if (maxDisplayCounter >= DISPLAY_COUNT_MIN && maxDisplayCounter <= DISPLAY_COUNT_MAX) {
+                if (maxDisplayCounter > 0) {
                     dotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
                 } else {
                     dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
