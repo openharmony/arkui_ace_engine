@@ -581,6 +581,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     FlushMessages();
     InspectDrew();
+    FlushNodeChangeFlag();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
@@ -3896,5 +3897,49 @@ void PipelineContext::RegisterFocusCallback()
         CHECK_NULL_VOID(node);
         InputMethodManager::GetInstance()->OnFocusNodeChange(node);
     });
+}
+
+void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+{
+    if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {
+        changeInfoListeners_.push_back(node);
+    }
+}
+
+void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+{
+    changeInfoListeners_.remove(node);
+}
+
+void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node)
+{
+    if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
+        changedNodes_.push_back(node);
+    }
+}
+
+void PipelineContext::FlushNodeChangeFlag()
+{
+    ACE_FUNCTION_TRACE();
+    if (!changeInfoListeners_.empty()) {
+        for (const auto& it : changeInfoListeners_) {
+            if (it) {
+                it->ProcessFrameNodeChangeFlag();
+            }
+        }
+    }
+    CleanNodeChangeFlag();
+}
+
+void PipelineContext::CleanNodeChangeFlag()
+{
+    auto cleanNodes = std::move(changedNodes_);
+    changedNodes_.clear();
+    for (const auto& it : cleanNodes) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(it);
+        if (frameNode) {
+            frameNode->ClearChangeInfoFlag();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

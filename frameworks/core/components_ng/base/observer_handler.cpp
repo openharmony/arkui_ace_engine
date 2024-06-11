@@ -61,6 +61,11 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    if (eventType == ScrollEventType::SCROLL_START) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
+    } else if (eventType == ScrollEventType::SCROLL_STOP) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
+    }
     std::string id = host->GetInspectorId().value_or("");
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();

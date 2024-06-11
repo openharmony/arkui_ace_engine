@@ -587,16 +587,18 @@ RefPtr<UINode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& 
     return customNode;
 }
 
-RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
+RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(
+    const std::shared_ptr<SelectOverlayInfo>& info, SelectOverlayMode mode)
 {
-    if (info->isUsingMouse && !info->menuInfo.menuBuilder) {
+    auto isShowHandleOnly = (mode == SelectOverlayMode::HANDLE_ONLY);
+    if (info->isUsingMouse && !info->menuInfo.menuBuilder && !isShowHandleOnly) {
         return CreateMenuNode(info);
     }
     RefPtr<Pattern> selectOverlayPattern;
     if (info->isUseOverlayNG) {
-        selectOverlayPattern = AceType::MakeRefPtr<SelectContentOverlayPattern>(info);
+        selectOverlayPattern = AceType::MakeRefPtr<SelectContentOverlayPattern>(info, mode);
     } else {
-        selectOverlayPattern = AceType::MakeRefPtr<SelectOverlayPattern>(info);
+        selectOverlayPattern = AceType::MakeRefPtr<SelectOverlayPattern>(info, mode);
     }
     auto selectOverlayNode = AceType::MakeRefPtr<SelectOverlayNode>(selectOverlayPattern);
     selectOverlayNode->InitializePatternAndContext();
@@ -992,7 +994,12 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::shared_ptr<SelectOver
 
 void SelectOverlayNode::CreateToolBar()
 {
-    auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->CheckIfNeedMenu()) {
+        return;
+    }
+    auto info = pattern->GetSelectOverlayInfo();
     if (info->menuInfo.menuBuilder) {
         CreateCustomSelectOverlay(info);
         return;
@@ -1241,7 +1248,14 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
 
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
 {
-    auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->CheckIfNeedMenu()) {
+        NotifyUpdateToolBar(menuItemChanged);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        return;
+    }
+    auto info = pattern->GetSelectOverlayInfo();
     if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         UpdateMenuInner(info);
     }
@@ -1582,4 +1596,25 @@ void SelectOverlayNode::SetBackButtonOpacity(float value)
     backButton_->GetRenderContext()->UpdateOpacity(value);
 }
 
+void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto newOverlayManager = overlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(newOverlayManager);
+    newOverlayManager->NotifyUpdateToolBar(itemChanged);
+}
+
+void SelectOverlayNode::SwitchToOverlayMode()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto newOverlayManager = overlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(newOverlayManager);
+    newOverlayManager->SwitchToHandleMode(HandleLevelMode::OVERLAY, false);
+}
 } // namespace OHOS::Ace::NG

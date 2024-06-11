@@ -83,6 +83,9 @@ public:
         return hideMoreOrBack_;
     }
 
+    void MeasureChild(LayoutWrapper* layoutWrapper);
+    void LayoutChild(LayoutWrapper* layoutWrapper);
+
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);

@@ -802,6 +802,10 @@ public:
     {
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
+
+    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -914,6 +918,9 @@ private:
         const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+
+    void FlushNodeChangeFlag();
+    void CleanNodeChangeFlag();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1043,6 +1050,8 @@ private:
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
+    std::list<RefPtr<FrameNode>> changeInfoListeners_;
+    std::list<RefPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 
