@@ -6773,6 +6773,15 @@ typedef struct {
      * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 从父组件上卸载所有子节点。
+     *
+     * @param parent 目标节点对象。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*removeAllChildren)(ArkUI_NodeHandle parent);
 } ArkUI_NativeNodeAPI_1;
 
 /**

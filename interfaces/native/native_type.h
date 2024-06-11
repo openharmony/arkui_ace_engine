@@ -1833,6 +1833,14 @@ typedef enum {
     ARKUI_SWIPER_INDICATOR_TYPE_DIGIT,
 } ArkUI_SwiperIndicatorType;
 
+
+typedef enum {
+    ARKUI_ANIMATION_DIRECTION_NORMAL = 0,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE,
+    ARKUI_ANIMATION_DIRECTION_REVERSE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
+} ArkUI_AnimationDirection;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/
