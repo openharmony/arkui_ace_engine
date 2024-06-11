@@ -1011,6 +1011,8 @@ private:
     void MoveCaretAnywhere(const Offset& touchOffset);
     void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
+    void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
+    void SwitchState();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1112,6 +1114,7 @@ private:
     int32_t initSelectStart_ = 0;
     bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
+    bool previewLongPress_ = false;
 };
 } // namespace OHOS::Ace::NG
 
