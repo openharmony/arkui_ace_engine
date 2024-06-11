@@ -302,9 +302,9 @@ void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::
     auto jsRotateX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
     auto jsRotateY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
     auto jsRotateZ = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z));
-    if (!jsRotateX->IsUndefined()
-        && !jsRotateY->IsUndefined()
-        && !jsRotateZ->IsUndefined()) {
+    if (jsRotateX->IsUndefined()
+        && jsRotateY->IsUndefined()
+        && jsRotateZ->IsUndefined()) {
         GetDefaultRotateVector(dxVal, dyVal, dzVal);
     } else {
         JSViewAbstract::ParseJsDouble(jsRotateX, dxVal);
