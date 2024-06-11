@@ -46,6 +46,12 @@ template("declarative_frontend") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (is_arkui_x) {
+      deps += [
+        "//arkcompiler/ets_runtime:libark_jsruntime_static",
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
     external_deps = [
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",
@@ -871,6 +877,11 @@ template("declarative_js_engine_ng") {
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
+
+    if (is_arkui_x) {
+      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+      include_dirs = ["//commonlibrary/c_utils/base/include",]
+    }
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
