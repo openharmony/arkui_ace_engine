@@ -1655,7 +1655,8 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         auto bottomArea = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto topArea = NearZero(GetCoordinatePoint()->GetY()) ? safeAreaManager->GetSystemSafeArea().top_.Length()
+                                                              : GetCoordinatePoint()->GetY();
         double newHeight = height - keyboard - bottomArea - topArea;
         if (GreatOrEqual(newHeight, oldWebHeight)) {
             newHeight = oldWebHeight;
