@@ -25,7 +25,6 @@ class __RepeatVirtualScrollImpl<T> {
     private typeGenFunc_: RepeatTypeGenFunc<T>;
     //
     private totalCount_: number;
-    private onLazyLoading_ : RepeatOnLazyLoadingFunc;
     private templateOptions_: { [type: string]: RepeatTemplateOptions };
     //
     private mkRepeatItem_: (item: T, index?: number) =>__RepeatItemFactoryReturn<T>;
@@ -39,7 +38,6 @@ class __RepeatVirtualScrollImpl<T> {
         this.typeGenFunc_ = config.typeGenFunc;
 
         this.totalCount_ = config.totalCount;
-        this.onLazyLoading_ = config.onLazyLoading;
         this.templateOptions_ = config.templateOptions;
 
         this.mkRepeatItem_ = config.mkRepeatItem;
@@ -113,11 +111,6 @@ class __RepeatVirtualScrollImpl<T> {
 
         const onGetKeys4Range = (from: number, to: number): Array<string> => {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onGetKeys4Range from ${from} to ${to} - start`);
-
-            // when c++ requests not yet existing item(s), invoke onLazyLoading_()
-            for (let i = this.arr_.length; i <= to && i < this.totalCount_; i++) {
-                this.onLazyLoading_(i, "Down");
-            }
 
             const result = new Array<string>();
             for (let i = from; i <= to && i < this.arr_.length; i++) {

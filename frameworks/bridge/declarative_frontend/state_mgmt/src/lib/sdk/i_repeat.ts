@@ -26,7 +26,6 @@ type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
 type RepeatTemplateOptions =  { cacheCount?: number };
-type RepeatOnLazyLoadingFunc = (index: number, direction: "Up" | "Down") => void;
 type OnMoveHandler = (from: number, to: number) => void;
 
 /*
@@ -55,9 +54,7 @@ interface RepeatAPI<T> {
     // when call virtualScroll, framework will use virtual scroll
     // totalCount: number of logical items, can be larger than number of loaded
     // data items of lazy loading array source, can be larger than that array.length
-    // onLazyLoading: framework will call this function when showing last
-    // index >= items.length && index < totalCount
-    virtualScroll: (options?: { totalCount: number, onLazyLoading?: RepeatOnLazyLoadingFunc }) => RepeatAPI<T>;
+    virtualScroll: (options?: { totalCount?: number }) => RepeatAPI<T>;
 
     // function to decide which template to use, each template has an id
     templateId: (typeFunc: RepeatTypeGenFunc<T>) => RepeatAPI<T>;

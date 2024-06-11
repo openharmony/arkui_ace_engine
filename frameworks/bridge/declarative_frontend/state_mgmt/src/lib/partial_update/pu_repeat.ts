@@ -142,7 +142,6 @@ interface __RepeatAPIConfig<T> {
     typeGenFunc?: RepeatTypeGenFunc<T>;
     //
     totalCount?: number;
-    onLazyLoading?: RepeatOnLazyLoadingFunc;
     templateOptions?: { [type: string]: RepeatTemplateOptions };
     //
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
@@ -154,6 +153,7 @@ interface __RepeatAPIConfig<T> {
 class __RepeatV2<T> implements RepeatAPI<T> {
     private config: __RepeatAPIConfig<T> = {};
     private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T>;
+    private isVirtualScroll = false;
 
     constructor(arr: Array<T>) {
         //console.log('__RepeatV2 ctor')
@@ -179,12 +179,10 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         return this;
     }
 
-    public virtualScroll(options? : {
-        totalCount: number, onLazyLoading?: RepeatOnLazyLoadingFunc
-    }): RepeatAPI<T> {
+    public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
         //console.log('__RepeatV2.virtualScroll()')
         this.config.totalCount = options?.totalCount ?? this.config.arr.length;
-        this.config.onLazyLoading = options?.onLazyLoading ?? (() => {});
+        this.isVirtualScroll = true;
         return this;
     }
 
@@ -216,7 +214,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         if (!this.config.itemGenFuncs?.['']) {
             throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
         }
-        if (!this.config.onLazyLoading) {
+        if (!this.isVirtualScroll) {
           // Repeat
           this.impl ??= new __RepeatImpl<T>(this.config);
           this.impl.render(isInitialRender);
