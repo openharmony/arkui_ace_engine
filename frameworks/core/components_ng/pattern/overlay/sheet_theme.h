@@ -94,6 +94,7 @@ public:
             theme->sheetBackgoundColor_ = sheetPattern->GetAttr<Color>("sheet_background_color", Color(0xfff1f3f5));
             theme->dragBarColor_ = sheetPattern->GetAttr<Color>("drag_bar_color", Color(0x33182431));
             theme->sheetType_ = sheetPattern->GetAttr<std::string>("sheet_type", "auto");
+            theme->sheetBottom_ = sheetPattern->GetAttr<std::string>("sheet_bottom", "auto");
             theme->maskColor_ = sheetPattern->GetAttr<Color>("mask_color", Color(0x33182431));
             theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
             theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
@@ -162,6 +163,11 @@ public:
         return closeIconImageColor_;
     }
 
+    bool IsOnlyBottom() const
+    {
+        return sheetBottom_ == "bottom";
+    }
+
     const std::string& GetSheetType() const
     {
         return sheetType_;
@@ -189,6 +195,7 @@ private:
     Color closeIconColor_;
     Color closeIconImageColor_;
     std::string sheetType_;
+    std::string sheetBottom_;
     int sheetBackgroundBlurStyle_;
 };
 } // namespace OHOS::Ace::NG
