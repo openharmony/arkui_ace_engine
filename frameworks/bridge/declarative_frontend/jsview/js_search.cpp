@@ -588,7 +588,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     auto themeFontWeight = theme->GetFontWeight();
-    Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
+    Font font {.fontWeight = themeFontWeight, .fontSize = themeFontSize, .fontStyle = Ace::FontStyle::NORMAL};
     if (info.Length() < 1 || !info[0]->IsObject()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             SearchModel::GetInstance()->SetTextFont(font);

@@ -540,9 +540,9 @@ void SubwindowManager::UpdateCustomDialogNG(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialog ng enter");
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
