@@ -233,8 +233,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     }
 
     private defaultTemplateOptions (): RepeatTemplateOptions {
-        // TBD
-        return { cacheCount: 3 };
+        return { cacheCount: 1 };
     }
 
     protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
