@@ -1935,8 +1935,8 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
     } else {
-        targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetParentGlobalOffsetDuringLayout() + geometryNode->GetFrameOffset();
+        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
+        targetOffset_ = targetNode->GetPaintRectOffset();
     }
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;
