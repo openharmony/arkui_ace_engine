@@ -342,7 +342,7 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UnicodeString dateTimeStr;
     simpleDateFormat_->format(date, dateTimeStr, status);
     CHECK_RETURN(status, "");
-
+    
     std::string ret;
     UnicodeString2String(dateTimeStr, ret);
     return ret;
