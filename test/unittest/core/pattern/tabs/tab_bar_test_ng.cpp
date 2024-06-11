@@ -1904,4 +1904,36 @@ HWTEST_F(TabBarTestNg, TabBarPatternCloseDialog001, TestSize.Level1)
         EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
     }
 }
+
+/*
+ * @tc.name: TabBarPatternCalculateSelectedIndex002
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternCalculateSelectedIndex002, TestSize.Level1)
+{
+    Create([](TabsModelNG model) { CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0); });
+    auto info = MouseInfo();
+    Offset s1(0.1, 0.1);
+    Offset s2(0.4, 0.4);
+    OffsetF c0(0.0f, 0.0f);
+    OffsetF c1(0.1f, 0.1f);
+    OffsetF c2(0.2f, 0.2f);
+    OffsetF c3(0.3f, 0.3f);
+    OffsetF c4(0.4f, 0.4f);
+    int32_t barNumber = 4;
+    info.SetLocalLocation(s1);
+    /**
+     * @tc.steps: step2. Test function CalculateSelectedIndex.
+     * @tc.expected: beforeRtl and afterRtl - barNumber.
+     */
+    tabBarPattern_->hoverIndex_.emplace(1);
+    tabBarPattern_->tabItemOffsets_ = { c1, c2, c3, c4 };
+    tabBarPattern_->axis_ = Axis::HORIZONTAL;
+    auto beforeRtl = tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation());
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto afterRtl = tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation());
+    EXPECT_EQ(beforeRtl, afterRtl - barNumber);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
 } // namespace OHOS::Ace::NG

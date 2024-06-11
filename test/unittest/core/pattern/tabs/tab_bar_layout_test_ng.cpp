@@ -1457,4 +1457,45 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, Test
     tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarLayoutProperty_, ideaSize, childCount, axis);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarMode().value(), TabBarMode::FIXED_START);
 }
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmLayoutChildren002
+ * @tc.desc: Test the LayoutChildren function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Level1)
+{
+    CreateWithItem([](TabsModelNG model) {});
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: steps2. Create padding and assign initial values to it.
+     */
+    PaddingProperty padding;
+    padding.left = CalcLength(200.0_vp);
+    padding.right = CalcLength(200.0_vp);
+    padding.top = CalcLength(200.0_vp);
+    padding.bottom = CalcLength(200.0_vp);
+    tabBarLayoutProperty_->UpdatePadding(padding);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+    layoutWrapper.currentChildCount_ = 5;
+    auto frameSize = SizeF(0.0f, 0.0f);
+    auto axis = Axis::HORIZONTAL;
+    tabbarLayoutAlgorithm->childrenMainSize_ = 10000.0f;
+    OffsetF childOffset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: steps3. LayoutChildren.
+     * @tc.expected: steps3. Verify childrenMainSize under LayoutChildren in RTL and LTR.
+     */
+    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, axis, childOffset);
+    EXPECT_EQ(tabbarLayoutAlgorithm->tabItemOffset_[0].GetX(), childOffset.GetX());
+    tabbarLayoutAlgorithm->isRTL_ = true;
+    tabbarLayoutAlgorithm->axis_ = Axis::HORIZONTAL;
+    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, axis, childOffset);
+    EXPECT_NE(tabbarLayoutAlgorithm->tabItemOffset_[0].GetX(), childOffset.GetX());
+}
 } // namespace OHOS::Ace::NG
