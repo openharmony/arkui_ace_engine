@@ -563,6 +563,13 @@ void DeclarativeFrontendNG::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void DeclarativeFrontendNG::NotifyUIIdle()
+{
+    if (jsEngine_) {
+        jsEngine_->NotifyUIIdle();
+    }
+}
+
 std::pair<std::string, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
 {
     if (delegate_) {

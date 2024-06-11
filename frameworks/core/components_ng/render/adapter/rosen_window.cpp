@@ -72,6 +72,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 FrameReport::GetInstance().FlushEnd();
             }
             ArkUIPerfMonitor::GetInstance().FinishPerf();
+            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {

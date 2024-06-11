@@ -1081,6 +1081,13 @@ void DeclarativeFrontend::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void DeclarativeFrontend::NotifyUIIdle()
+{
+    if (jsEngine_) {
+        jsEngine_->NotifyUIIdle();
+    }
+}
+
 void DeclarativeFrontend::SetColorMode(ColorMode colorMode)
 {
     if (delegate_) {
