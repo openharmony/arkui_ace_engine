@@ -722,8 +722,10 @@ void ImagePattern::OnAnimatedModifyDone()
 
 void ImagePattern::ControlAnimation(int32_t index)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (!animator_->HasScheduler()) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = host->GetContextRefPtr();
         if (context) {
             animator_->AttachScheduler(context);
         } else {
@@ -750,8 +752,6 @@ void ImagePattern::ControlAnimation(int32_t index)
                 ResetFormAnimationFlag();
                 return;
             }
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             if (host->IsVisible()) {
                 animator_->Forward();
             } else {
