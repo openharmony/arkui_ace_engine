@@ -3766,8 +3766,14 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
         record.beforeCaretPosition = textSelector_.GetTextStart();
     }
     record.addText = insertValue;
+
     RichEditorChangeValue changeValue;
-    CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
+    bool allowContentChange = BeforeChangeText(changeValue, record, RecordType::INSERT);
+    bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d",
+        allowContentChange, allowImeInput);
+    CHECK_NULL_VOID(allowContentChange && allowImeInput);
+
     ClearRedoOperationRecords();
     InsertValueOperation(insertValue, &record, isIME);
     record.afterCaretPosition = caretPosition_;
@@ -3787,10 +3793,6 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     std::string insertValueTemp = insertValue;
     bool isLineSeparator = insertValueTemp == std::string("\n");
 
-    if (isIME) {
-        auto isInsert = BeforeIMEInsertValue(insertValueTemp);
-        CHECK_NULL_VOID(isInsert);
-    }
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     if (isSelector) {
