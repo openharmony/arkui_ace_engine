@@ -546,7 +546,6 @@ void TextPattern::HandleOnCopySpanString()
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
     clipboard_->SetData(pasteData, copyOption_);
 }
 
