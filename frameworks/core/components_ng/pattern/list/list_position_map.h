@@ -29,6 +29,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -162,28 +163,17 @@ public:
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
-                auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(child);
+            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
                 // Rules: only one type node(ListItem or ListItemGroup) can exist in LazyForEach.
-                CalculateLazyForEachNode(lazyForEach);
+                CalculateLazyForEachNode(child);
             } else {
                 CalculateUINode(child);
             }
         }
     }
 
-    RefPtr<FrameNode> GetListFrameNode(RefPtr<LazyForEachNode> node) const
-    {
-        auto parent = node->GetParent();
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        while (parent && (!frameNode)) {
-            parent = parent->GetParent();
-            frameNode = AceType::DynamicCast<FrameNode>(parent);
-        }
-        return frameNode;
-    }
-
-    std::optional<bool> GetLazyForEachChildIsGroup(RefPtr<LazyForEachNode> node)
+    std::optional<bool> GetLazyForEachChildIsGroup(RefPtr<UINode> node)
     {
         std::optional<bool> isGroup;
         auto children = node->GetChildren();
@@ -198,7 +188,7 @@ public:
             }
         }
         if (!(isGroup.has_value())) {
-            auto listNode = GetListFrameNode(node);
+            auto listNode = node->GetParentFrameNode();
             CHECK_NULL_RETURN(listNode, isGroup);
             auto wrapper = listNode->GetOrCreateChildByIndex(curIndex_);
             CHECK_NULL_RETURN(wrapper, isGroup);
@@ -207,7 +197,7 @@ public:
         return isGroup;
     }
 
-    void CalculateLazyForEachNode(RefPtr<LazyForEachNode> node)
+    void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
         int32_t count = node->FrameCount();
         if (count <= 0) {

@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -95,16 +96,16 @@ public:
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
-                auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(child);
-                CalculateLazyForEachNode(lazyForEach);
+            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
+                CalculateLazyForEachNode(child);
             } else {
                 CalculateUINode(child);
             }
         }
     }
 
-    float GetLazyForEachIndexAverageHeight(RefPtr<LazyForEachNode> node,
+    float GetLazyForEachIndexAverageHeight(RefPtr<UINode> node,
         int32_t startIndex, int32_t endIndex, bool &hasGroup)
     {
         auto itor = itemPosition_.find(startIndex);
@@ -143,7 +144,7 @@ public:
         return totalHeight / itemCount;
     }
 
-    float CalculateOffset(RefPtr<LazyForEachNode> node, float averageHeight)
+    float CalculateOffset(RefPtr<UINode> node, float averageHeight)
     {
         auto itor = itemPosition_.begin();
         float skipHeight = 0.0f;
@@ -163,7 +164,7 @@ public:
         return estimateOffset_ - targetPos_.first;
     }
 
-    void CalculateLazyForEachNode(RefPtr<LazyForEachNode> node)
+    void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
         int32_t count = node->FrameCount();
         if (count <= 0) {

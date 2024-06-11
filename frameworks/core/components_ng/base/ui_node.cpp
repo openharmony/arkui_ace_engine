@@ -1229,7 +1229,7 @@ RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
+int32_t UINode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {

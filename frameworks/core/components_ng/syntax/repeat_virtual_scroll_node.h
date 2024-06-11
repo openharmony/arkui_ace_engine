@@ -107,6 +107,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
 
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
+
     bool IsAtomicNode() const override
     {
         return false;

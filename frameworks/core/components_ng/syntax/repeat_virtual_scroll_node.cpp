@@ -263,6 +263,14 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     return childNode;
 }
 
+int32_t RepeatVirtualScrollNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
+{
+    if (!isExpanded) {
+        return UINode::GetFrameNodeIndex(node, isExpanded);
+    }
+    return caches_.GetFrameNodeIndex(node);
+}
+
 const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
 {
     if (!children_.empty()) {

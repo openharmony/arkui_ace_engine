@@ -420,7 +420,7 @@ public:
         bool addToRenderTree = false);
     virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
     // Get current frameNode index with or without expanded all LazyForEachNode;
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
+    virtual int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;

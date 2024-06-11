@@ -302,6 +302,30 @@ void RepeatVirtualScrollCaches::setLastActiveRange(uint32_t from, uint32_t to)
 }
 
 /**
+ * Get the Index of frameNode
+ * return -1 if not find the frameNode
+ */
+int32_t RepeatVirtualScrollCaches::GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const
+{
+    for (const auto& key : l1_activeNodeKeys_) {
+        const auto nodeIter = node4key_.find(key);
+        if (nodeIter == node4key_.end() || !nodeIter->second) {
+            continue;
+        }
+        auto node = nodeIter->second->GetFrameChildByIndex(0, true);
+        if (node != frameNode) {
+            continue;
+        }
+        const auto indexIter = index4Key_.find(key);
+        if (indexIter == index4Key_.end()) {
+            return -1;
+        }
+        return indexIter->second;
+    }
+    return -1;
+}
+
+/**
          * intended scenario: scroll
          * servicing GetFrameChild, search for key that can be updated.
          *

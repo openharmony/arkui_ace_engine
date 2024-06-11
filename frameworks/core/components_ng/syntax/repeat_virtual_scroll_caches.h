@@ -145,6 +145,7 @@ public:
     //void rebuildL1(std::function<bool(std::string key, RefPtr<UINode> node)> cbFunc);
     bool rebuildL1(std::function<bool(int32_t index, RefPtr<UINode> node)> cbFunc);
 
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
     /**
          * scenario: in idle process , following GetChildren()
          *

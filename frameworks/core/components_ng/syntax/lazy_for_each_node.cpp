@@ -503,7 +503,7 @@ RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
     return AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
 }
 
-int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
+int32_t LazyForEachNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
     if (!isExpanded) {
         return UINode::GetFrameNodeIndex(node, false);
