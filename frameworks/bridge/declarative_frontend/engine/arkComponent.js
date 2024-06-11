@@ -14471,10 +14471,10 @@ class ArkButtonComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   initialize(value) {
-    if (value.length >= 1 && isObject(value[0])) {
-      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
-    } else {
+    if (value.length >= 1 && (isResource(value[0]) || isString(value[0]))) {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
     }
     if (value.length === 1) {
       if (isObject(value[0])) {
