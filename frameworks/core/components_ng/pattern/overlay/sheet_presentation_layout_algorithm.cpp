@@ -103,12 +103,19 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(builderGeometryNode);
             sheetHeight_ =
                 operatorGeometryNode->GetFrameSize().Height() + builderGeometryNode->GetFrameSize().Height();
-            auto maxHeight = std::min(sheetMaxHeight_, sheetMaxWidth_) * POPUP_LARGE_SIZE;
+            float sheetMaxHeight = sheetHeight_;
+            if (SheetInSplitWindow()) {
+                auto pipelineContext = PipelineContext::GetCurrentContext();
+                auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+                sheetMaxHeight = windowGlobalRect.Height() - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
+                    SHEET_SPLIT_AI_BAR.ConvertToPx();
+            }
+            auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
             if (sheetHeight_ > maxHeight) {
                 sheetHeight_ = maxHeight;
             } else if (sheetHeight_ < 0.0f) {
                 sheetHeight_ = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-            } else if (sheetHeight_ < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) {
+            } else if (sheetHeight_ < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx() && !SheetInSplitWindow()) {
                 sheetHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
             }
             SizeF idealSize(sheetWidth_, sheetHeight_);
@@ -337,18 +344,30 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
 float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
 {
     float height = 0.0f;
-    if (sheetStyle_.height.has_value()) {
-        auto maxHeight = std::min(sheetMaxHeight_, sheetMaxWidth_) * POPUP_LARGE_SIZE;
+    bool isMediumOrLargeMode = false;
+    if (sheetStyle_.sheetMode == SheetMode::MEDIUM || sheetStyle_.sheetMode == SheetMode::LARGE) {
+        isMediumOrLargeMode =  true;
+    }
+    if (sheetStyle_.height.has_value() || isMediumOrLargeMode) {
+        float sheetMaxHeight = sheetMaxHeight_;
+        if (SheetInSplitWindow()) {
+            sheetMaxHeight = sheetMaxHeight_ - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
+                SHEET_SPLIT_AI_BAR.ConvertToPx();
+        }
+        auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
         if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
             height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
+        } else if (isMediumOrLargeMode) {
+            height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
         } else {
             height = sheetStyle_.height->ConvertToPx();
         }
+
         if (height > maxHeight) {
             height = maxHeight;
         } else if (height < 0.0f) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
-        } else if (height < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()) {
+        } else if (height < SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx() && !SheetInSplitWindow()) {
             height = SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx();
         }
     } else {
@@ -376,6 +395,21 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     childConstraint.parentIdealSize = OptionalSizeF(sheetWidth_, sheetHeight_);
     childConstraint.percentReference = SizeF(sheetWidth_, sheetHeight_);
     return childConstraint;
+}
+
+bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
+{
+    //whether window in up and down split mode
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+    if (sheetType_ == SheetType::SHEET_CENTER && windowManager && windowGlobalRect.Height() < deviceHeight &&
+        (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG
