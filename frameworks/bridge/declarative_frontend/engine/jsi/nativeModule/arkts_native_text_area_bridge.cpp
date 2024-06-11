@@ -1475,7 +1475,7 @@ ArkUINativeModuleValue TextAreaBridge::SetContentType(ArkUIRuntimeCallInfo *runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
+        uint32_t value = static_cast<uint32_t>(secondArg->Int32Value(vm));
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaContentType(nativeNode, value);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaContentType(nativeNode);
