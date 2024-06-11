@@ -2110,9 +2110,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     };
 
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-    if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-                                             reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
-        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
