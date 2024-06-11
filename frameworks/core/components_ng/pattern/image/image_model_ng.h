@@ -120,6 +120,8 @@ public:
     static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
     static void ResetImageSrc(FrameNode* frameNode);
     static void ResetImageAlt(FrameNode* frameNode);
+    static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
+    static void SetAltResource(FrameNode* frameNode, void* resource);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

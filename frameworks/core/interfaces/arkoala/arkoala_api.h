@@ -860,6 +860,13 @@ struct ArkUIAPIEventSinglePointer {
     ArkUI_Int32 state; // 0 - down, 1 - up, 2 - move
 };
 
+struct ArkUIImageSourceInfo {
+    ArkUI_CharPtr url;
+    void* resource;
+    void* pixelMap;
+    void* pixelMapArray;
+};
+
 #define ARKUI_MULTIPOINTER_ARGS_COUNT 10
 
 struct ArkUIAPIEventMultiPointer {
@@ -1869,6 +1876,7 @@ struct ArkUIImageModifier {
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
     void (*resetImageSrc)(ArkUINodeHandle node);
     void (*setInitialPixelMap)(ArkUINodeHandle node, ArkUI_Int64 pixelMap);
+    void (*setAltSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
 };
 
 struct ArkUIColumnModifier {
