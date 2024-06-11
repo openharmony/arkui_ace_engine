@@ -944,12 +944,12 @@ export class ChipComponent extends ViewPU {
     }
 
     getActualLabelMargin() {
-        let q3 = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) };
+        let q3 = this.getLocalizedLabelMargin();
+        if (this.label && this.label.localizedLabelMargin) {
+            return q3;
+        }
         if (this.label && this.label.labelMargin) {
             return this.getLabelMargin();
-        }
-        if (this.label && this.label.localizedLabelMargin) {
-            return this.getLocalizedLabelMargin();
         }
         return q3;
     }
