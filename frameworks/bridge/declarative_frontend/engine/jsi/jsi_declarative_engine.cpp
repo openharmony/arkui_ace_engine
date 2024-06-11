@@ -1336,8 +1336,7 @@ bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const 
         return false;
     }
 
-    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
-    [[maybe_unused]] napi_value result = engine->RunScriptForAbc(fileName.c_str(), entry);
+    engine->RunScriptForAbc(fileName.c_str(), const_cast<char*>(entryPoint.c_str()));
     if (trycatch.HasCaught()) {
         engine->lastException_ = trycatch.GetException();
         return false;
