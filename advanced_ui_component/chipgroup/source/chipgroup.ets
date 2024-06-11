@@ -268,35 +268,33 @@ export struct ChipGroup {
   }
 
   private getFontColor(): ResourceColor {
-    if (typeof this.itemStyle.fontColor == 'object') {
-      let temp: Resource = this.itemStyle.fontColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      if (typeof this.itemStyle.fontColor == 'object') {
+        let temp: Resource = this.itemStyle.fontColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.fontColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.fontColor
+        }
         return defaultTheme.itemStyle.fontColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.fontColor
-      }
-      return defaultTheme.itemStyle.fontColor;
-    }
-    if (this.itemStyle && this.itemStyle.fontColor) {
-      return this.itemStyle.fontColor;
     }
     return defaultTheme.itemStyle.fontColor;
   }
 
   private getSelectedFontColor(): ResourceColor {
-    if (typeof this.itemStyle.selectedFontColor == 'object') {
-      let temp: Resource = this.itemStyle.selectedFontColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      if (typeof this.itemStyle.selectedFontColor == 'object') {
+        let temp: Resource = this.itemStyle.selectedFontColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.selectedFontColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.selectedFontColor
+        }
         return defaultTheme.itemStyle.selectedFontColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.selectedFontColor
-      }
-      return defaultTheme.itemStyle.selectedFontColor;
-    }
-    if (this.itemStyle && this.itemStyle.selectedFontColor) {
-      return this.itemStyle.selectedFontColor;
     }
     return defaultTheme.itemStyle.selectedFontColor;
   }
@@ -316,35 +314,33 @@ export struct ChipGroup {
   }
 
   private getBackgroundColor(): ResourceColor {
-    if (typeof this.itemStyle.backgroundColor == 'object') {
-      let temp: Resource = this.itemStyle.backgroundColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.backgroundColor) {
+      if (typeof this.itemStyle.backgroundColor == 'object') {
+        let temp: Resource = this.itemStyle.backgroundColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.backgroundColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.backgroundColor
+        }
         return defaultTheme.itemStyle.backgroundColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.backgroundColor
-      }
-      return defaultTheme.itemStyle.backgroundColor;
-    }
-    if (this.itemStyle && this.itemStyle.backgroundColor) {
-      return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
 
   private getSelectedBackgroundColor(): ResourceColor {
-    if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
-      let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
+      if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+        let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.selectedBackgroundColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.selectedBackgroundColor
+        }
         return defaultTheme.itemStyle.selectedBackgroundColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.selectedBackgroundColor
-      }
-      return defaultTheme.itemStyle.selectedBackgroundColor;
-    }
-    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-      return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
   }
@@ -372,6 +368,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupItemSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.itemSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.itemSpace,
@@ -381,6 +380,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupStartSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.startSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.startSpace,
@@ -390,6 +392,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupEndSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.endSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.endSpace,
