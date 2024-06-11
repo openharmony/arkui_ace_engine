@@ -1781,6 +1781,8 @@ void EventManager::CleanGestureEventHub()
             auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
             if (gestureEventHub) {
                 gestureEventHub->CleanExternalRecognizers();
+                gestureEventHub->CleanInnerRecognizer();
+                gestureEventHub->CleanNodeRecognizer();
             }
         }
     }

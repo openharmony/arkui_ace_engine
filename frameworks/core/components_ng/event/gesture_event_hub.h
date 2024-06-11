@@ -629,6 +629,17 @@ public:
         externalExclusiveRecognizer_.clear();
     }
 
+    void CleanInnerRecognizer()
+    {
+        innerExclusiveRecognizer_ = nullptr;
+    }
+
+    void CleanNodeRecognizer()
+    {
+        nodeParallelRecognizer_ = nullptr;
+        nodeExclusiveRecognizer_ = nullptr;
+    }
+
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
