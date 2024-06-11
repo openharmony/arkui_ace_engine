@@ -1104,7 +1104,7 @@ export struct SegmentButton {
         })
       }
     }
-    .direction(this.options.direction)
+    .direction(this.options ? this.options.direction : undefined)
     .onBlur(() => {
       this.focusIndex = -1
     })

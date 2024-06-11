@@ -2027,7 +2027,7 @@ export class SegmentButton extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((m3, n3) => {
             Stack.create();
-            Stack.direction(this.options.direction);
+            Stack.direction(this.options ? this.options.direction : undefined);
             Stack.onBlur(() => {
                 this.focusIndex = -1;
             });
