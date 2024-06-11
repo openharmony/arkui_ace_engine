@@ -73,6 +73,8 @@ public:
             theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
             theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
+            theme->borderColor_ = pattern->GetAttr<Color>("search_border_color", Color());
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("search_border_width", 0.0_vp);
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color());
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
@@ -177,6 +179,16 @@ public:
         return borderRadius_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
     bool GetBlockRightShade() const
     {
         return blockRightShade_;
@@ -277,6 +289,8 @@ private:
     Dimension rightPadding_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
+    Color borderColor_;
+    Dimension borderWidth_;
     bool blockRightShade_ = false;
     Dimension dividerSideSpace_;
     Dimension searchDividerWidth_ = 1.0_px;
