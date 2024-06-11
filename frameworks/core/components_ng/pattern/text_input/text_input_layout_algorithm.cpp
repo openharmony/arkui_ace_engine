@@ -35,7 +35,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
-    direction_ = textFieldLayoutProperty->GetNonAutoLayoutDirection();
+    direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
@@ -205,7 +205,8 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .size = size,
         .contentSize = contentSize,
         .align = align,
-        .responseArea = responseArea
+        .responseArea = responseArea,
+        .cleanResponseArea = cleanNodeResponseArea
     };
     UpdateContentPosition(params, content);
 
@@ -217,6 +218,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .contentSize = contentSize,
         .isRTL = isRTL,
         .responseArea = responseArea,
+        .cleanResponseArea = cleanNodeResponseArea,
         .offsetBase = offsetBase
     };
     UpdateTextRect(updateTextRectParams);
@@ -236,6 +238,9 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
         if (params.responseArea) {
             RectF responseAreaRect = params.responseArea->GetAreaRect();
             content->SetOffset(OffsetF(params.offsetBase.GetX() + responseAreaRect.Width(), contentOffset.GetY()));
+        } else if (params.cleanResponseArea) {
+            RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
+            content->SetOffset(OffsetF(params.offsetBase.GetX() + cleanResponseAreaRect.Width(), contentOffset.GetY()));
         } else {
             content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
         }
@@ -258,23 +263,14 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
         if (!isEmptyTextEditValue && !isInlineStyle) {
             TextAlign textAlign = params.layoutProperty->GetTextAlignValue(TextAlign::START);
             params.pattern->CheckTextAlignByDirection(textAlign, direction_);
-            switch (textAlign) {
-                case TextAlign::START:
-                    break;
-                case TextAlign::CENTER:
-                    textRectOffsetX += (params.contentSize.Width() - textRect_.Width()) * 0.5f;
-                    break;
-                case TextAlign::END:
-                    textRectOffsetX += params.contentSize.Width() - textRect_.Width();
-                    break;
-                default:
-                    break;
-            }
         }
         if (params.isRTL) {
             if (params.responseArea) {
                 RectF responseAreaRect = params.responseArea->GetAreaRect();
                 textRect_.SetOffset(OffsetF(textRectOffsetX + responseAreaRect.Width(), params.offsetBase.GetY()));
+            } else if (params.cleanResponseArea) {
+                RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
+                textRect_.SetOffset(OffsetF(textRectOffsetX + cleanResponseAreaRect.Width(), params.offsetBase.GetY()));
             } else {
                 textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
             }
@@ -305,7 +301,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     CHECK_NULL_RETURN(pattern, false);
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isPasswordType = pattern->IsInPasswordMode();
-    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
+    auto disableTextAlign = false;
 
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), content,

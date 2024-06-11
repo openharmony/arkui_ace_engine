@@ -185,6 +185,7 @@ public:
     void Refresh() override;
 
 private:
+    bool IsShowClean();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
