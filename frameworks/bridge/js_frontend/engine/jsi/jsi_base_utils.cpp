@@ -590,7 +590,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
-    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
+    EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), errorInfo.name, summaryBody);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     ExceptionHandler::HandleJsException(summaryBody, errorInfo);
 #endif
