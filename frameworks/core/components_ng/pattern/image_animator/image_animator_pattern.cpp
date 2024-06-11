@@ -26,6 +26,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/image/image_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -299,6 +300,18 @@ void ImageAnimatorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Pattern::OnModifyDone();
+
+    auto imageTheme = PipelineBase::GetCurrentContext()->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderRadius()) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCardRadius()));
+    }
+    if (!renderContext->HasClipEdge()) {
+        renderContext->UpdateClipEdge(true);
+    }
+
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");

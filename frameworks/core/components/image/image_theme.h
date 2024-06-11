@@ -61,6 +61,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             theme->minEdgeAntialiasing_ = pattern->GetAttr<double>("min_edge_antialiasing", 0.0);
+            theme->cardRadius_ = pattern->GetAttr<Dimension>("image_animator_corner_radius", 0.0_vp);
         }
     };
 
@@ -81,6 +82,11 @@ public:
         return minEdgeAntialiasing_;
     }
 
+    Dimension GetCardRadius() const
+    {
+        return cardRadius_;
+    }
+
 protected:
     ImageTheme() = default;
 
@@ -88,6 +94,7 @@ private:
     Color fillColor_;
     bool draggable_ = false;
     float minEdgeAntialiasing_ = 0.0;
+    Dimension cardRadius_ ;
 };
 
 } // namespace OHOS::Ace
