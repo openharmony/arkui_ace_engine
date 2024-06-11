@@ -210,7 +210,7 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
     locale_ = std::make_unique<LocaleProxy>(language.c_str(), countryOrRegion.c_str(), "", keywordsAndValues.c_str());
 
     UErrorCode status = U_ZERO_ERROR;
-    simpleDateFormat_ = std::make_shared<SimpleDateFormat>(UnicodeString("mm:ss"), locale_->instance, status);
+    simpleDateFormat_ = std::make_shared<SimpleDateFormat>(UnicodeString("mm:ss"), locale->instance, status)
     calendar_.reset(Calendar::createInstance(locale->instance, status));
     patternGenerator_.reset(DateTimePatternGenerator::createInstance(locale->instance, status));
     timeZone_.reset(TimeZone::createInstance("GMT+0:00"));
