@@ -1296,55 +1296,48 @@ void RichEditorPattern::CopyTextSpanLineStyle(
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
 {
-    if (spans_.empty()) {
-        return -1;
-    }
+    CHECK_NULL_RETURN(!spans_.empty(), -1);
 
-    auto positionInfo = GetSpanPositionInfo(position);
+    SpanPositionInfo positionInfo = GetSpanPositionInfo(position);
     int32_t spanIndex = positionInfo.spanIndex_;
     int32_t spanStart = positionInfo.spanStart_;
+    int32_t spanEnd = positionInfo.spanEnd_;
     int32_t offsetInSpan = positionInfo.spanOffset_;
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-        "position=%{public}d, spanIndex=%{public}d, spanStart=%{public}d, offsetInSpan=%{public}d",
-        position, spanIndex, spanStart, offsetInSpan);
+        "position=%{public}d, spanIndex=%{public}d, spanRange=[%{public}d,%{public}d], offsetInSpan=%{public}d",
+        position, spanIndex, spanStart, spanEnd, offsetInSpan);
 
-    if (offsetInSpan <= 0) {
-        return spanIndex;
-    }
+    CHECK_NULL_RETURN((offsetInSpan > 0), spanIndex);
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
-    auto it = host->GetChildren().begin();
-    std::advance(it, spanIndex);
-
-    auto spanNode = DynamicCast<SpanNode>(*it);
+    auto spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(spanIndex));
     CHECK_NULL_RETURN(spanNode, -1);
+
     auto spanItem = spanNode->GetSpanItem();
     auto spanItemContent = StringUtils::ToWstring(spanItem->content);
-    if (offsetInSpan > static_cast<int32_t>(spanItemContent.length())) {
-        offsetInSpan = static_cast<int32_t>(spanItemContent.length());
-    }
-    auto newContent = spanItemContent.substr(offsetInSpan);
-    auto deleteContent = spanItemContent.substr(0, offsetInSpan);
+    offsetInSpan = std::min(offsetInSpan, static_cast<int32_t>(spanItemContent.length()));
 
-    auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_RETURN(stack, -1);
-    auto nodeId = stack->ClaimNodeId();
+    auto firstContent = spanItemContent.substr(0, offsetInSpan);
+    spanNode->UpdateContent(StringUtils::ToString(firstContent));
+    spanItem->position = offsetInSpan;
+
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     auto newSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     CHECK_NULL_RETURN(newSpanNode, -1);
 
-    auto newSpanItem = newSpanNode->GetSpanItem();
-    newSpanItem->rangeStart = spanStart;
-    newSpanItem->position = spanStart + offsetInSpan;
-    auto spanIter = spans_.begin();
-    std::advance(spanIter, spanIndex);
-    spans_.insert(spanIter, newSpanItem);
-
-    spanNode->UpdateContent(StringUtils::ToString(newContent));
-    newSpanNode->UpdateContent(StringUtils::ToString(deleteContent));
-
     CopyTextSpanStyle(spanNode, newSpanNode, needLeadingMargin);
-    newSpanNode->MountToParent(host, spanIndex);
+    auto secondContent = spanItemContent.substr(offsetInSpan);
+    newSpanNode->UpdateContent(StringUtils::ToString(secondContent));
+    newSpanNode->MountToParent(host, spanIndex + 1);
+
+    auto newSpanItem = newSpanNode->GetSpanItem();
+    newSpanItem->rangeStart = offsetInSpan;
+    newSpanItem->position = spanEnd;
+
+    auto spanIter = spans_.begin();
+    std::advance(spanIter, spanIndex + 1);
+    spans_.insert(spanIter, newSpanItem);
 
     return spanIndex + 1;
 }
