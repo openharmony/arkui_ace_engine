@@ -7511,6 +7511,11 @@ void TextFieldPattern::OnCaretMoveDone(const TouchEventInfo& info)
     }
 }
 
+void TextFieldPattern::HiddenMenu()
+{
+    selectOverlay_->HideMenu();
+}
+
 void TextFieldPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
 {
     menuOptionItems_ = std::move(menuOptionsItems);
@@ -7525,7 +7530,7 @@ void TextFieldPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOption
                 auto end = textFiledPattern->selectController_->GetEndIndex();
                 actionRange(start, end);
             }
-            textFiledPattern->CloseSelectOverlay();
+            textFiledPattern->HiddenMenu();
         };
     }
 }

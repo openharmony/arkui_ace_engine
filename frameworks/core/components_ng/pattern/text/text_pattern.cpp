@@ -3151,7 +3151,7 @@ void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsPara
                 auto end = textPattern->textSelector_.GetTextEnd();
                 actionRange(start, end);
             }
-            textPattern->CloseSelectOverlay();
+            textPattern->HiddenMenu();
         };
     }
 }
