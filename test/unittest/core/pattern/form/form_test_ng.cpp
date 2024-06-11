@@ -1020,7 +1020,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      */
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto columnNode = pattern->CreateColumnNode();
+    auto columnNode = pattern->CreateColumnNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), columnNode);
 
     /**
@@ -1038,7 +1038,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      * @tc.steps: step5. Remove form skeleton node form form.
      * @tc.expected: Remove node success.
      */
-    pattern->RemoveFormSkeleton();
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 

@@ -890,6 +890,11 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
     formRendererDispatcher_->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 
+bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void FormManagerDelegate::ResetForm()
 {

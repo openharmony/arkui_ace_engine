@@ -123,6 +123,7 @@ public:
     void OnAccessibilityChildTreeDeregister();
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     void OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable);
+    bool CheckFormBundleForbidden(const std::string& bundleName);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
