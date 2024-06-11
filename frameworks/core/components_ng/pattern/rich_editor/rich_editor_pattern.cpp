@@ -4179,7 +4179,9 @@ std::pair<bool, bool> RichEditorPattern::IsEmojiOnCaretPosition(int32_t& emojiLe
         ss << (*iter)->content;
     }
     auto content = ss.str();
-    emojiLength = TextEmojiProcessor::Delete(caretPosition_, length, content, isBackward);
+    std::u16string u16 = StringUtils::Str8ToStr16(content);
+    auto caretPos = std::clamp(caretPosition_, 0, static_cast<int32_t>(u16.length()));
+    emojiLength = TextEmojiProcessor::Delete(caretPos, length, content, isBackward);
     if (emojiLength > 0) {
         if (isBackward) {
             isEmojiOnCaretBackward = true;
