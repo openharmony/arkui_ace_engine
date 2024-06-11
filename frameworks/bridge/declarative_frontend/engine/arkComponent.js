@@ -128,10 +128,10 @@ class ModifierWithKey {
   constructor(value) {
     this.stageValue = value;
   }
-  applyStage(node) {
+  applyStage(node, component) {
     if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
-      this.applyPeer(node, true);
+      this.applyPeer(node, true, component);
       return true;
     }
     const stageTypeInfo = typeof this.stageValue;
@@ -148,11 +148,11 @@ class ModifierWithKey {
     }
     if (different) {
       this.value = this.stageValue;
-      this.applyPeer(node, false);
+      this.applyPeer(node, false, component);
     }
     return false;
   }
-  applyPeer(node, reset) { }
+  applyPeer(node, reset, component) { }
   checkObjectDiff() {
     return true;
   }
@@ -2868,7 +2868,7 @@ class ArkComponent {
         if (this.nativePtr === undefined) {
           return;
         }
-        value.applyStage(this.nativePtr);
+        value.applyStage(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
@@ -2910,7 +2910,7 @@ class ArkComponent {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -14543,7 +14543,7 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ButtonContentModifier.identity, ButtonContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -15009,6 +15009,16 @@ class ButtonCreateTypeModifier extends ModifierWithKey {
   }
 }
 ButtonCreateTypeModifier.identity = Symbol('buttonCreateType');
+class ButtonContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let buttonComponent = component;
+    buttonComponent.setContentModifier(this.value);
+  }
+}
+ButtonContentModifier.identity = Symbol('buttonContentModifier');
 // @ts-ignore
 if (globalThis.Button !== undefined) {
   globalThis.Button.attributeModifier = function (modifier) {
@@ -15054,7 +15064,7 @@ class ArkLoadingProgressComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressContentModifier.identity, LoadingProgressContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -15117,6 +15127,16 @@ class LoadingProgressForegroundColorModifier extends ModifierWithKey {
   }
 }
 LoadingProgressForegroundColorModifier.identity = Symbol('loadingProgressForegroundColor');
+class LoadingProgressContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let loadingProgressComponent = component;
+    loadingProgressComponent.setContentModifier(this.value);
+  }
+}
+LoadingProgressContentModifier.identity = Symbol('loadingProgressContentModifier');
 class LoadingProgressEnableLoadingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15622,7 +15642,7 @@ class ArkToggleComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ToggleContentModifier.identity, ToggleContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -15868,6 +15888,17 @@ class ToggleSwitchStyleModifier extends ModifierWithKey {
     }
 }
 ToggleSwitchStyleModifier.identity = Symbol('toggleSwitchStyle');
+class ToggleContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let toggleComponent = component;
+    toggleComponent.setNodePtr(node);
+    toggleComponent.setContentModifier(this.value);
+  }
+}
+ToggleContentModifier.identity = Symbol('toggleContentModifier');
 // @ts-ignore
 if (globalThis.Toggle !== undefined) {
   globalThis.Toggle.attributeModifier = function (modifier) {
@@ -16471,7 +16502,7 @@ class ArkRadioComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, RadioContentModifier.identity, RadioContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -16706,6 +16737,16 @@ class RadioResponseRegionModifier extends ModifierWithKey {
   }
 }
 RadioResponseRegionModifier.identity = Symbol('radioResponseRegion');
+class RadioContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let radioComponent = component;
+    radioComponent.setContentModifier(this.value); 
+  }
+}
+RadioContentModifier.identity = Symbol('radioContentModifier');
 // @ts-ignore
 if (globalThis.Radio !== undefined) {
   globalThis.Radio.attributeModifier = function (modifier) {
@@ -17297,7 +17338,7 @@ class ArkSliderComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, SliderContentModifier.identity, SliderContentModifier, value);
     return this;
   }
   slideRange(value) {
@@ -17625,6 +17666,16 @@ class MinResponsiveDistanceModifier extends ModifierWithKey {
   }
 }
 MinResponsiveDistanceModifier.identity = Symbol('sliderMinResponsiveDistance');
+class SliderContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(nodenode, reset, component) {
+    let sliderComponent = component;
+    sliderComponent.setContentModifier(this.value);
+  }
+}
+SliderContentModifier.identity = Symbol('sliderContentModifier');
 // @ts-ignore
 if (globalThis.Slider !== undefined) {
   globalThis.Slider.attributeModifier = function (modifier) {
@@ -17700,6 +17751,16 @@ class RatingStarStyleModifier extends ModifierWithKey {
   }
 }
 RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
+class RatingContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let ratingComponent = component;
+    ratingComponent.setContentModifier(this.value);
+  }
+}
+RatingStarStyleModifier.identity = Symbol('ratingContentModifier');
 class ArkRatingComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17729,7 +17790,7 @@ class ArkRatingComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -17841,7 +17902,7 @@ class ArkCheckboxComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, CheckBoxContentModifier.identity, CheckBoxContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -17930,6 +17991,16 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey {
   }
 }
 CheckBoxResponseRegionModifier.identity = Symbol('responseRegion');
+class CheckBoxContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let checkboxComponent = component;
+    checkboxComponent.setContentModifier(this.value);
+  }
+}
+CheckBoxContentModifier.identity = Symbol('checkBoxContentModifier');
 class CheckBoxShapeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20081,7 +20152,7 @@ class ArkDataPanelComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, DataPanelContentModifier.identity, DataPanelContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -20168,6 +20239,16 @@ class DataPanelTrackShadowModifier extends ModifierWithKey {
   }
 }
 DataPanelTrackShadowModifier.identity = Symbol('dataPanelTrackShadow');
+class DataPanelContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let dataPanelComponent = component;
+    dataPanelComponent.setContentModifier(this.value);
+  }
+}
+DataPanelContentModifier.identity = Symbol('dataPanelContentModifier');
 class DataPanelValueColorsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -20562,7 +20643,7 @@ class ArkGaugeComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, GaugeContentModifier.identity, GaugeContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -20615,6 +20696,16 @@ class GaugeIndicatorModifier extends ModifierWithKey {
   }
 }
 GaugeIndicatorModifier.identity = Symbol('gaugeIndicator');
+class GaugeContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let gaugeComponent = component;
+    gaugeComponent.setContentModifier(this.value);
+  }
+}
+GaugeContentModifier.identity = Symbol('gaugeContentModifier');
 class GaugeColorsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -21312,7 +21403,7 @@ class ArkProgressComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ProgressContentModifier.identity, ProgressContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -21439,6 +21530,16 @@ class ProgressBackgroundColorModifier extends ModifierWithKey {
   }
 }
 ProgressBackgroundColorModifier.identity = Symbol('progressBackgroundColor');
+class ProgressContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let progressComponent = component;
+    progressComponent.setContentModifier(this.value);
+  }
+}
+ProgressContentModifier.identity = Symbol('progressContentModifier');
 // @ts-ignore
 if (globalThis.Progress !== undefined) {
   globalThis.Progress.attributeModifier = function (modifier) {
@@ -21728,7 +21829,7 @@ class ArkTextClockComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -21867,6 +21968,16 @@ class TextClockFontFeatureModifier extends ModifierWithKey {
   }
 }
 TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
+class TextClockContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let textClockComponent = component;
+    textClockComponent.setContentModifier(this.value);
+  }
+}
+TextClockContentModifier.identity = Symbol('textClockContentModifier');
 class TextClockTextShadowModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -21965,7 +22076,7 @@ class ArkTextTimerComponent extends ArkComponent {
     return this;
   }
   contentModifier(value) {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, TextTimerContentModifier.identity, TextTimerContentModifier, value);
     return this;
   }
   setContentModifier(modifier) {
@@ -22114,6 +22225,16 @@ class TextTimerTextShadowModifier extends ModifierWithKey {
   }
 }
 TextTimerTextShadowModifier.identity = Symbol('textTimerTextShadow');
+class TextTimerContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset, component) {
+    let textTimerComponent = component;
+    textTimerComponent.setContentModifier(this.value);
+  }
+}
+TextTimerContentModifier.identity = Symbol('textTimerContentModifier');
 // @ts-ignore
 if (globalThis.TextTimer !== undefined) {
   globalThis.TextTimer.attributeModifier = function (modifier) {

@@ -58,7 +58,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<ToggleConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ToggleContentModifier.identity, ToggleContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<ToggleConfiguration>): this {
@@ -290,6 +290,18 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
     } else {
       return true;
     }
+  }
+}
+
+class ToggleContentModifier extends ModifierWithKey<ContentModifier<ToggleConfiguration>> {
+  constructor(value: ContentModifier<ToggleConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('toggleContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let toggleComponent = component as ArkToggleComponent;
+    toggleComponent.setNodePtr(node);
+    toggleComponent.setContentModifier(this.value);
   }
 }
 // @ts-ignore

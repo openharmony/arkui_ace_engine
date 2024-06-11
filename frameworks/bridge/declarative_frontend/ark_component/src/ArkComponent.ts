@@ -183,10 +183,10 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
     this.stageValue = value;
   }
 
-  applyStage(node: KNode): boolean {
+  applyStage(node: KNode, component?: ArkComponent): boolean {
     if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
-      this.applyPeer(node, true);
+      this.applyPeer(node, true, component);
       return true;
     }
     const stageTypeInfo: string = typeof this.stageValue;
@@ -201,12 +201,12 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
     }
     if (different) {
       this.value = this.stageValue;
-      this.applyPeer(node, false);
+      this.applyPeer(node, false, component);
     }
     return false;
   }
 
-  applyPeer(node: KNode, reset: boolean): void { }
+  applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void { }
 
   checkObjectDiff(): boolean {
     return true;
@@ -2941,7 +2941,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this.nativePtr === undefined) {
           return;
         }
-        value.applyStage(this.nativePtr);
+        value.applyStage(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
@@ -2988,7 +2988,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
