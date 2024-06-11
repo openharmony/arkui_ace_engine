@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 108
+#define ARKUI_FULL_API_VERSION 109
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 108
+#define ARKUI_NODE_API_VERSION 109
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2047,6 +2047,13 @@ struct ArkUIStackModifier {
     void (*setAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
     void (*resetAlignContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignContent)(ArkUINodeHandle node);
+};
+
+struct ArkUIFolderStackModifier {
+    void (*setEnableAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableAnimation)(ArkUINodeHandle node);
+    void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAutoHalfFold)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigatorModifier {
@@ -4123,6 +4130,7 @@ struct ArkUINodeModifiers {
     const ArkUISliderModifier* (*getSliderModifier)();
     const ArkUIDividerModifier* (*getDividerModifier)();
     const ArkUIStackModifier* (*getStackModifier)();
+    const ArkUIFolderStackModifier* (*getFolderStackModifier)();
     const ArkUINavDestinationModifier* (*getNavDestinationModifier)();
     const ArkUIGridModifier* (*getGridModifier)();
     const ArkUIGridColModifier* (*getGridColModifier)();
