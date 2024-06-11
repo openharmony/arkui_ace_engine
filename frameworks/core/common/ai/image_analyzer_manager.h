@@ -40,8 +40,8 @@ public:
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
-    void SetImageAIOptions(void* options);
     void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
+    void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
     void UpdatePressOverlay(
         const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
