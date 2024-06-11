@@ -1331,14 +1331,18 @@ bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const 
     panda::TryCatch trycatch(vm);
 
     panda::JSNApi::SetModuleInfo(const_cast<EcmaVM*>(vm), ASSET_PATH_PREFIX + fileName, entryPoint);
-    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
-    [[maybe_unused]] napi_value result = engine->RunScriptForAbc(fileName.c_str(), entry);
-    if (!trycatch.HasCaught()) {
-        return true;
-    } else {
+    if (trycatch.HasCaught()) {
         engine->lastException_ = trycatch.GetException();
         return false;
     }
+
+    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
+    [[maybe_unused]] napi_value result = engine->RunScriptForAbc(fileName.c_str(), entry);
+    if (trycatch.HasCaught()) {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
+    return true;
 }
 
 bool JsiDeclarativeEngine::UpdateRootComponent()
