@@ -90,6 +90,10 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
     if (source->textLineStyle->HasTextAlign()) {
         target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
     }
+
+    if (source->textLineStyle->HasLineHeight()) {
+        target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
+    }
 }
 
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
