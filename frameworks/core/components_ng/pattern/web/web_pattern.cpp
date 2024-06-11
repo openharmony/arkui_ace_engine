@@ -56,6 +56,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
+#include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/rect.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
@@ -1327,6 +1328,15 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             delegate_->dragData_->SetFragmentHtml(htmlContent);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
+        }
+        // spanstring
+        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringRecord(aceData);
+        if (!spanString.empty()) {
+            std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
+            delegate_->dragData_->SetFragmentHtml(htmlStr);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragDropId, spanstring to html success, html size:%{public}zu",
+                htmlStr.size());
         }
         // link
         HandleOnDragDropLink(aceData);
