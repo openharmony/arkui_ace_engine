@@ -1179,9 +1179,9 @@ void WebClientImpl::CreateOverlay(
     int pointX,
     int pointY)
 {
-    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
     delegate->CreateOverlay(
         data,
         len,
@@ -1201,9 +1201,9 @@ void WebClientImpl::OnOverlayStateChanged(
     int rectWidth,
     int rectHeight)
 {
-    ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
     delegate->OnOverlayStateChanged(
         offsetX,
         offsetY,
