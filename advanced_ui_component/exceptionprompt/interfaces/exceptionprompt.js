@@ -339,7 +339,13 @@ export class ExceptionPrompt extends ViewPU {
             Column.create();
             Column.width("100%");
             Column.borderRadius(12);
-            Column.backgroundColor("#fdd9d9");
+            Column.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.comp_background_warning_secondary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
             Column.zIndex(9)
         }), Column);
         this.TextBuilder.bind(this)();
