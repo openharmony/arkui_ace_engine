@@ -114,6 +114,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
+          "//third_party/bounds_checking_function/include",
         ]
         deps += [ "//third_party/skia:skia_canvaskit_static" ]
         defines += [ "CROSS_PLATFORM" ]
