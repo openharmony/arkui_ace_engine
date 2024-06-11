@@ -317,6 +317,7 @@ private:
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
+    int32_t lastDownFingerNumber_ = 0;
 };
 
 } // namespace OHOS::Ace

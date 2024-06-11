@@ -101,7 +101,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             refereeNG_->CleanAll();
         }
     }
-    if (downFingerIds_.empty() && refereeNG_->QueryAllDone()) {
+    if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         refereeNG_->ForceCleanGestureReferee();
         CleanGestureEventHub();
     }
@@ -581,6 +581,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         CheckUpEvent(event);
+        lastDownFingerNumber_ = downFingerIds_.size();
         return false;
     }
 
@@ -664,6 +665,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     lastEventTime_ = point.time;
+    lastDownFingerNumber_ = downFingerIds_.size();
     return true;
 }
 
