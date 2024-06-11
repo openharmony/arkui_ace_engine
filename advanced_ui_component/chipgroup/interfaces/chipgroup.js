@@ -378,34 +378,32 @@ export class ChipGroup extends ViewPU {
         return defaultTheme.itemStyle.size;
     }
     getFontColor() {
-        if (typeof this.itemStyle.fontColor == 'object') {
-            let e2 = this.itemStyle.fontColor;
-            if (e2 == undefined || e2 == null) {
+        if (this.itemStyle && this.itemStyle.fontColor) {
+            if (typeof this.itemStyle.fontColor == 'object') {
+                let e2 = this.itemStyle.fontColor;
+                if (e2 == undefined || e2 == null) {
+                    return defaultTheme.itemStyle.fontColor;
+                }
+                if (e2.type === 10001) {
+                    return this.itemStyle.fontColor;
+                }
                 return defaultTheme.itemStyle.fontColor;
             }
-            if (e2.type === 10001) {
-                return this.itemStyle.fontColor;
-            }
-            return defaultTheme.itemStyle.fontColor;
-        }
-        if (this.itemStyle && this.itemStyle.fontColor) {
-            return this.itemStyle.fontColor;
         }
         return defaultTheme.itemStyle.fontColor;
     }
     getSelectedFontColor() {
-        if (typeof this.itemStyle.selectedFontColor == 'object') {
-            let d2 = this.itemStyle.selectedFontColor;
-            if (d2 == undefined || d2 == null) {
+        if (this.itemStyle && this.itemStyle.selectedFontColor) {
+            if (typeof this.itemStyle.selectedFontColor == 'object') {
+                let d2 = this.itemStyle.selectedFontColor;
+                if (d2 == undefined || d2 == null) {
+                    return defaultTheme.itemStyle.selectedFontColor;
+                }
+                if (d2.type === 10001) {
+                    return this.itemStyle.selectedFontColor;
+                }
                 return defaultTheme.itemStyle.selectedFontColor;
             }
-            if (d2.type === 10001) {
-                return this.itemStyle.selectedFontColor;
-            }
-            return defaultTheme.itemStyle.selectedFontColor;
-        }
-        if (this.itemStyle && this.itemStyle.selectedFontColor) {
-            return this.itemStyle.selectedFontColor;
         }
         return defaultTheme.itemStyle.selectedFontColor;
     }
@@ -422,34 +420,32 @@ export class ChipGroup extends ViewPU {
         return defaultTheme.itemStyle.selectedFillColor;
     }
     getBackgroundColor() {
-        if (typeof this.itemStyle.backgroundColor == 'object') {
-            let c2 = this.itemStyle.backgroundColor;
-            if (c2 == undefined || c2 == null) {
+        if (this.itemStyle && this.itemStyle.backgroundColor) {
+            if (typeof this.itemStyle.backgroundColor == 'object') {
+                let c2 = this.itemStyle.backgroundColor;
+                if (c2 == undefined || c2 == null) {
+                    return defaultTheme.itemStyle.backgroundColor;
+                }
+                if (c2.type === 10001) {
+                    return this.itemStyle.backgroundColor;
+                }
                 return defaultTheme.itemStyle.backgroundColor;
             }
-            if (c2.type === 10001) {
-                return this.itemStyle.backgroundColor;
-            }
-            return defaultTheme.itemStyle.backgroundColor;
-        }
-        if (this.itemStyle && this.itemStyle.backgroundColor) {
-            return this.itemStyle.backgroundColor;
         }
         return defaultTheme.itemStyle.backgroundColor;
     }
     getSelectedBackgroundColor() {
-        if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
-            let b2 = this.itemStyle.selectedBackgroundColor;
-            if (b2 == undefined || b2 == null) {
+        if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
+            if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+                let b2 = this.itemStyle.selectedBackgroundColor;
+                if (b2 == undefined || b2 == null) {
+                    return defaultTheme.itemStyle.selectedBackgroundColor;
+                }
+                if (b2.type === 10001) {
+                    return this.itemStyle.selectedBackgroundColor;
+                }
                 return defaultTheme.itemStyle.selectedBackgroundColor;
             }
-            if (b2.type === 10001) {
-                return this.itemStyle.selectedBackgroundColor;
-            }
-            return defaultTheme.itemStyle.selectedBackgroundColor;
-        }
-        if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-            return this.itemStyle.selectedBackgroundColor;
         }
         return defaultTheme.itemStyle.selectedBackgroundColor;
     }
@@ -472,12 +468,21 @@ export class ChipGroup extends ViewPU {
         return this.multiple ?? false;
     }
     getChipGroupItemSpace() {
+        if (this.chipGroupSpace == undefined) {
+            return defaultTheme.chipGroupSpace.itemSpace;
+        }
         return parseDimension(this.getUIContext(), this.chipGroupSpace.itemSpace, isValidDimensionNoPercentageString, defaultTheme.chipGroupSpace.itemSpace);
     }
     getChipGroupStartSpace() {
+        if (this.chipGroupSpace == undefined) {
+            return defaultTheme.chipGroupSpace.startSpace;
+        }
         return parseDimension(this.getUIContext(), this.chipGroupSpace.startSpace, isValidDimensionNoPercentageString, defaultTheme.chipGroupSpace.startSpace);
     }
     getChipGroupEndSpace() {
+        if (this.chipGroupSpace == undefined) {
+            return defaultTheme.chipGroupSpace.endSpace;
+        }
         return parseDimension(this.getUIContext(), this.chipGroupSpace.endSpace, isValidDimensionNoPercentageString, defaultTheme.chipGroupSpace.endSpace);
     }
     getOnChange() {

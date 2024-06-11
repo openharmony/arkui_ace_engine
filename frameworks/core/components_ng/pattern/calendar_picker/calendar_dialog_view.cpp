@@ -369,6 +369,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
         auto monthFrameNode = CreateCalendarMonthNode(
             calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
+        auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
+        monthLayoutProperty->UpdateLayoutDirection(textDirection);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

@@ -22,9 +22,11 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/window/foldable_window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -85,7 +87,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         maxSize = layoutConstraint->maxSize;
         sheetMaxHeight_ = maxSize.Height();
         sheetMaxWidth_ = maxSize.Width();
-        sheetWidth_ = GetWidthByScreenSizeType(maxSize);
+        sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
         if (sheetStyle_.width.has_value()) {
             float width = 0.0f;
@@ -366,11 +368,20 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
     return height;
 }
 
-float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& maxSize) const
+float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& maxSize,
+    LayoutWrapper* layoutWrapper) const
 {
     float width = maxSize.Width();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, width);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, width);
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
+            if (sheetPattern->IsPhoneOrFold()) {
+                width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+                break;
+            }
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             width = maxSize.Width();
             break;
