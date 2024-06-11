@@ -1484,6 +1484,14 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         keyEventCallback(info);
     }
 
+    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
+    if (preKeyEventCallback) {
+        ret = preKeyEventCallback(info);
+        if (ret) {
+            return ret;
+        }
+    }
+
     ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
