@@ -117,7 +117,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerPrintDragFrameNodeTest001, Tes
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    Point point;
+    OHOS::Ace::PointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart
