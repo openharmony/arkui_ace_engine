@@ -45,7 +45,6 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
 constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
-constexpr Dimension BUTTON_BOTTOM_LEFTRIGHT_MARGIN = 0.0_vp;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
@@ -581,7 +580,7 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
         hasSwitchContentRow_ = true;
         nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         UpdateNextButtonMargin(nextButtonLayoutProperty);
-        textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+        textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         textNextPrevNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         auto cancelButton = AceType::DynamicCast<FrameNode>(contentRow->GetFirstChild());
@@ -602,7 +601,7 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
             confirmLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         } else {
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
             auto pipeline = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);
             auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -642,7 +641,7 @@ void DatePickerDialogView::ShowContentRowButton(const RefPtr<FrameNode>& content
         CHECK_NULL_VOID(textNextPrevNode);
         auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+        textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         textNextPrevNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         auto nextButton = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(NEXT_BUTTON_INDEX));
@@ -829,12 +828,12 @@ void DatePickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
         margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     } else {
         margin.right = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -847,12 +846,12 @@ void DatePickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
         margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
         margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }
@@ -1686,7 +1685,6 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
     }
 
     auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
-    CHECK_NULL_VOID(contentRow);
     SwitchContentRowButton(contentRow, useMilitary);
     auto titleRow = AceType::DynamicCast<FrameNode>(contentColumn->GetChildAtIndex(0));
     CHECK_NULL_VOID(titleRow);
@@ -1849,7 +1847,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
@@ -1909,18 +1907,18 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         } else {
             SwitchDatePickerPage(dateNode);
         }
-        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("stepper.next")) {
+        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("common.next")) {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, false);
             }
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
         } else {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, true);
             }
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         }
         if (switchFlag_ && isShowTime_) {
             UpdateNextButtonMargin(buttonNextPrevLayoutProperty);
