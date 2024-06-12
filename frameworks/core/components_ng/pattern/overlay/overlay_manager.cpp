@@ -2477,6 +2477,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
         if (sheetPattern->HasShouldDismiss() || sheetPattern->HasOnWillDismiss()) {
+            sheetPattern->SetIsDirectionUp(false);
             sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
             return true;
         }
@@ -3363,6 +3364,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
                 if (sheetPattern->IsDragging()) {
                     return;
                 }
+                sheetPattern->SetIsDirectionUp(false);
                 sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
