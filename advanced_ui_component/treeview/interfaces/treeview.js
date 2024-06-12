@@ -49,6 +49,7 @@ const Y_OFF_SET = '2.75vp';
 const Y_BOTTOM_OFF_SET = '-1.25vp';
 const Y_BASE_PLATE_OFF_SET = '1.5vp';
 const COLOR_IMAGE_EDIT = '#FFFFFF';
+const COLOR_IMAGE_ROW = '#00000000';
 const SHADOW_COLOR = '#00001E';
 const GRAG_POP_UP_HEIGHT = '48';
 const FLOOR_MIN_WIDTH = '128vp';
@@ -987,7 +988,7 @@ export class TreeView extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((y23, z23) => {
                         Row.create();
-                        Row.backgroundColor(this.treeViewTheme.arrowIconColor);
+                        Row.backgroundColor(COLOR_IMAGE_ROW);
                         Row.margin({
                             end: getLengthMetricsByResourceOrNumber(b23.getNodeItem().imageNode?.itemRightMargin)
                         });
@@ -3307,7 +3308,7 @@ export class TreeViewInner extends ViewPU {
                                 this.observeComponentCreation2((n7, o7) => {
                                     Row.create();
                                     Row.focusable(true);
-                                    Row.backgroundColor(this.treeViewTheme.arrowIconColor);
+                                    Row.backgroundColor(COLOR_IMAGE_ROW);
                                     Row.margin({
                                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                                     });
