@@ -859,6 +859,19 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetImage();
+    if (pattern->GetImageType() == ImagePattern::ImageType::ANIMATION) {
+        if (pattern->GetHasSizeChanged()) {
+            pattern->ResetPictureSize();
+        }
+        pattern->StopAnimation();
+        pattern->ResetImages();
+        if (!frameNode->GetChildren().empty()) {
+            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
+            frameNode->RemoveChild(imageFrameNode);
+        }
+        pattern->SetImageType(ImagePattern::ImageType::BASE);
+    }
 }
 
 void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
