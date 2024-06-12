@@ -236,7 +236,7 @@ export struct IconGroupSuffix {
 
 @Component
 export struct ChipGroup {
-  @Prop items: ChipGroupItemOptions[] = [];
+  @Prop @Watch('onItemsChange') items: ChipGroupItemOptions[] = [];
   @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
   @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
   @Prop selectedIndexes: Array<number> = [0];
@@ -247,6 +247,11 @@ export struct ChipGroup {
   private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
   @Prop chipGroupPadding: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
+  @State isRefresh: boolean = true;
+
+  onItemsChange() {
+    this.isRefresh = !this.isRefresh;
+  }
 
   onMultipleChange() {
     this.selectedIndexes = this.getSelectedIndexes();
@@ -513,6 +518,8 @@ export struct ChipGroup {
                   }
                 })
               }
+            }, () => {
+              return JSON.stringify(this.isRefresh);
             });
           }
           .padding({ left: this.getChipGroupStartSpace(),
