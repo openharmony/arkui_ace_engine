@@ -307,7 +307,7 @@ public:
             scrollableEvent_->SetAxis(axis_);
         }
     }
-    void Updatebackgroundcolor();
+    void Updatebackgroundcolor(RefPtr& renderContext);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
