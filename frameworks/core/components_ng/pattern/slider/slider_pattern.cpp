@@ -644,6 +644,13 @@ void SliderPattern::UpdateBubble()
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (UseContentModifier()) {
+        if (panEvent_) {
+            gestureHub->RemovePanEvent(panEvent_);
+            panEvent_ = nullptr;
+        }
+        return;
+    }
     if (direction_ == GetDirection() && panEvent_) return;
     direction_ = GetDirection();
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
