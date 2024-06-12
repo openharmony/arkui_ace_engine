@@ -894,7 +894,7 @@ void ScrollBarPattern::SetReverse(bool reverse)
 {
     isReverse_ = reverse;
 }
-void ScrollBarPattern::Updatebackgroundcolor(RefPtr& renderContext)
+void ScrollBarPattern::Updatebackgroundcolor(RefPtr<RenderContext>& renderContext)
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
