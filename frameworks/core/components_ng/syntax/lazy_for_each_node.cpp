@@ -117,6 +117,9 @@ void LazyForEachNode::OnDataReloaded()
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataReloaded();
+        if (FrameCount() == 0) {
+            PostIdleTask();
+        }
     }
     NotifyDataCountChanged(0);
     MarkNeedSyncRenderTree(true);
