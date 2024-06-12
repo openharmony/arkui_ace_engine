@@ -172,7 +172,7 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
     return UINode::GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
 }
 
-void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (start <= end) {
         if (start > 0 || end < 0) {

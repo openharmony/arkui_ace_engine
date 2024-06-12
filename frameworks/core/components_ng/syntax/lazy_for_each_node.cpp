@@ -408,7 +408,7 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     LOGE("Guido DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
 

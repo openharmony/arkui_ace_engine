@@ -325,7 +325,7 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end)
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
     {
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
@@ -338,7 +338,7 @@ public:
         }
         auto guard = GetGuard();
         for (const auto& child : children_) {
-            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex);
+            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd);
         }
     }
 
@@ -3728,9 +3728,9 @@ void FrameNode::RemoveAllChildInRenderTree()
     frameProxy_->RemoveAllChildInRenderTree();
 }
 
-void FrameNode::SetActiveChildRange(int32_t start, int32_t end)
+void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
-    frameProxy_->SetActiveChildRange(start, end);
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
 }
 
 void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)
@@ -3859,7 +3859,7 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     SetActive(false);
 }
 
-void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (start <= end) {
         if (start > 0 || end < 0) {

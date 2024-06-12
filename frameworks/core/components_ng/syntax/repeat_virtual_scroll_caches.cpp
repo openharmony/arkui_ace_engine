@@ -273,6 +273,7 @@ void RepeatVirtualScrollCaches::forEachL1IndexUINode(std::function<void(uint32_t
  * cbFunc return true, key
  * cbFunc returns false drop from L1
  */
+/*TBD pikalov
 void RepeatVirtualScrollCaches::rebuildL1(std::function<bool(std::string key, RefPtr<UINode> node)> cbFunc)
 {
     std::set<std::string> l1_copy;
@@ -284,6 +285,23 @@ void RepeatVirtualScrollCaches::rebuildL1(std::function<bool(std::string key, Re
             l1_activeNodeKeys_.emplace(it);
         }
     }
+}
+*/
+bool RepeatVirtualScrollCaches::rebuildL1(std::function<bool(int32_t index, RefPtr<UINode> node)> cbFunc)
+{
+    std::set<std::string> l1_copy;
+    std::swap(l1_copy, l1_activeNodeKeys_);
+    bool modified = false;
+    for (const auto& key : l1_copy) {
+        const RefPtr<UINode> node = node4key_[key];
+        int32_t index = index4Key_[key];
+        if (cbFunc(index, node)) {
+            l1_activeNodeKeys_.emplace(key);
+        } else {
+            modified = true;
+        }
+    }
+    return modified;
 }
 
 /**/

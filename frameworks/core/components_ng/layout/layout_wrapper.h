@@ -96,7 +96,7 @@ public:
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
-    virtual void SetActiveChildRange(int32_t start, int32_t end) = 0;
+    virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
     virtual void RecycleItemsByIndex(int32_t start, int32_t end) = 0;
 
     RefPtr<FrameNode> GetHostNode() const;

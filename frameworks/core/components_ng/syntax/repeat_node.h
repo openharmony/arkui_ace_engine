@@ -39,7 +39,7 @@ public:
     ~RepeatNode() override = default;
 
     // FIXME 
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache);
 
     bool IsAtomicNode() const override

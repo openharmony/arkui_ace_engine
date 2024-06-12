@@ -80,7 +80,7 @@ public:
      * those out of range marked inactive.
      * retests idle task
      */
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated

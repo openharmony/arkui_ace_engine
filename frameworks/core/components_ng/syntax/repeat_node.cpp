@@ -208,7 +208,7 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
 }
 
 // FIXME added
-void RepeatNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void RepeatNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     LOGE("Guido RepeatNode::DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
 }

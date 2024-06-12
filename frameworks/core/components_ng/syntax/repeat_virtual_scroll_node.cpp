@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
+#include <cstdint>
 #include <functional>
 #include <utility>
 
@@ -63,7 +64,7 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId,
         postUpdateTaskHasBeenScheduled_ = false;
     }
 
-void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     // FIXME lijunfeng  , yeyinglong:  can you advise how to enable LOGD output ? We are not using DevEco but use hilog directly?
     LOGE("DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d", (int)GetId(), (int)start,
@@ -72,45 +73,54 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end)
     // memorize active range
     caches_.setLastActiveRange((uint32_t)start, (uint32_t)end);
 
-    caches_.forEachL1IndexUINode([&](int32_t index, RefPtr<UINode> node) -> void {
+    //caches_.forEachL1IndexUINode([&](int32_t index, RefPtr<UINode> node) -> void {
+     bool needSync = caches_.rebuildL1([&](int32_t index, RefPtr<UINode> node) -> bool {
         if (node == nullptr) {
-            return;
+            return false;
         }
         // leads to infinite loop GetFrameChildByIndex(0, true, false, false ));
         // TBD: from  @yeyinglong: (node->GetFirstChild() obtains the child node of ListItem, not LisItem
         auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFirstChild());
-        if (frameNode) {
-            // DoSetActiveChildRange uses int32_t , while other functions use uint32_t
-            // need to convert
-            if ((start <= index) && (index <= end)) {
-                LOGE("  ... in range: index %{public}d -> nodeId  %{public}d: SetActive(True)", index,
-                    frameNode->GetId());
-                frameNode->SetActive(true);
-            } else {
-                LOGE("  ... out of range: index %{public}d -> nodeId  %{public}d: SetActive(false)", index,
-                    frameNode->GetId());
-                frameNode->SetActive(false);
-            }
+        if (!frameNode) {
+            return false;
         }
+        // DoSetActiveChildRange uses int32_t , while other functions use uint32_t
+        // need to convert
+        if ((start <= index) && (index <= end)) {
+            LOGE("  ... in range: index %{public}d -> nodeId  %{public}d: SetActive(True)", index,
+                frameNode->GetId());
+            frameNode->SetActive(true);
+        } else {
+            LOGE("  ... out of range: index %{public}d -> nodeId  %{public}d: SetActive(false)", index,
+                frameNode->GetId());
+            frameNode->SetActive(false);
+        }
+        if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
+            return true;
+        }
+        node->DetachFromMainTree();
+        return false;
     });
 
     // TODO see if loop leads to any changes to active states
     // only in that case do the re-sync , re-assembly of children
-    UINode::MarkNeedSyncRenderTree(false);
+    if (needSync) {
+        UINode::MarkNeedSyncRenderTree(false);
 
-    children_.clear();
-    // re-assemble children_
-    PostIdleTask();
+        children_.clear();
+        // re-assemble children_
+        PostIdleTask();
+    }
 }
 
-    void RepeatVirtualScrollNode::InvalidateKeyCache()
-    {
-        LOGE("InvalidateKeyCache triggered by Repeat rerender: nodeId: %{public}d .", (int)GetId());
+void RepeatVirtualScrollNode::InvalidateKeyCache()
+{
+    LOGE("InvalidateKeyCache triggered by Repeat rerender: nodeId: %{public}d .", (int)GetId());
 
-        // empty the cache index -> key
-        // C++ will need to ask all new keys from JS side
-        caches_.invalidateKeyAndTTypeCaches();
-        children_.clear();
+    // empty the cache index -> key
+    // C++ will need to ask all new keys from JS side
+    caches_.invalidateKeyAndTTypeCaches();
+    children_.clear();
 
    if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
@@ -164,47 +174,36 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     }
     const std::string key = pair.second;
 
-        LOGE("nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild:  %{public}d, "
-             "isCache: "
-             "%{public}d, "
-             "addToRenderTree: %{public}d) ...",
-            (int)GetId(), (int)index, key.c_str(), (int)needBuild, (int)isCache, (int)addToRenderTree);
+    LOGE("nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild:  %{public}d, "
+            "isCache: "
+            "%{public}d, "
+            "addToRenderTree: %{public}d) ...",
+        (int)GetId(), (int)index, key.c_str(), (int)needBuild, (int)isCache, (int)addToRenderTree);
 
-        // search if index -> key -> Node exist
-        // pair.first tells of key is in L1
-        auto nodePair = GetFromCaches(index);
-        RefPtr<UINode> frameNode4Index = nodePair.second;
-        if ((frameNode4Index == nullptr) && !needBuild) {
-            LOGE("index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
-            return nullptr;
-        }
+    // search if index -> key -> Node exist
+    // pair.first tells of key is in L1
+    auto nodePair = GetFromCaches(index);
+    RefPtr<UINode> frameNode4Index = nodePair.second;
+    if (frameNode4Index) {
+        auto childNode = frameNode4Index->GetFrameChildByIndex(0, needBuild);
+        return childNode;
+    }
 
-        if (frameNode4Index == nullptr) {
-            // TS to either make new or update existing nodes
-            frameNode4Index = CreateOrUpdateFrameChild4Index(index, key);
+    if (!needBuild) {
+        LOGE("index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
+        return nullptr;
+    }
 
-        if (frameNode4Index == nullptr) {
-            return nullptr;
-        }
+    // TS to either make new or update existing nodes
+    frameNode4Index = CreateOrUpdateFrameChild4Index(index, key);
 
-            if (isCache) {
-                // the item for index has been pre-build just to add it to L2 cache
-                frameNode4Index->SetParent(WeakClaim(this));
-                frameNode4Index->SetJSViewActive(false);
+    if (frameNode4Index == nullptr) {
+        return nullptr;
+    }
 
-                LOGE("index %{public}d item builder made or updated FrameNode %{public}d, isCache==true, adding the "
-                     "Node "
-                     "to L2 "
-                     "cache, no further processing, returning the node.",
-                    index, frameNode4Index->GetId());
-
-            return frameNode4Index->GetFrameChildByIndex(0, needBuild);
-        }
-
-        LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
-            frameNode4Index->GetId());
-    } // frameNode4Index needs to be created or updated on JS side
-
+    LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
+        frameNode4Index->GetId());
+    
     // if the item was in L2 cache, remove it from there
 
     if (isActive_) {
@@ -212,17 +211,17 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         frameNode4Index->SetJSViewActive(true);
     }
 
-        if (addToRenderTree) {
-            LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache",
-                index, frameNode4Index->GetId());
+    if (addToRenderTree && !isCache) {
+        LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache",
+            index, frameNode4Index->GetId());
+        frameNode4Index->SetActive(true);
+    } else {
+        LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
+                "add to L2 cache", index, frameNode4Index->GetId());
+        frameNode4Index->SetActive(false);
+    }
 
-            frameNode4Index->SetActive(true);
-            caches_.addKeyToL1(key);
-        } else {
-            LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
-                 "add to L2 cache",
-                index, frameNode4Index->GetId());
-        }
+    caches_.addKeyToL1(key);
 
     if (frameNode4Index->GetDepth() != GetDepth() + 1) {
         frameNode4Index->SetDepth(GetDepth() + 1);
@@ -265,28 +264,8 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
 
         // can not modify l1_cache while iterating
         // GetChildren is overloaded, can not change it to non-const
-        self->caches_.rebuildL1([self](std::string key, RefPtr<UINode> node) -> bool {
-            auto frameNode = AceType::DynamicCast<FrameNode>(
-                node->GetFirstChild()); // leads to infinite loop GetFrameChildByIndex(0, true, false, false ));
-            if (frameNode == nullptr) {
-                // FIXME lijunfeng  , yeyinglong: how to handle error?
-                return false;
-            }
-
-            if (frameNode->IsActive()) {
-                LOGE("L1 cache entry key %{public}s nodeId %{public}d  isActive==true, adding to children_",
-                 key.c_str(), node->GetId());
-                self->children_.emplace_back(node);
-                return true; // will keep in L1 cache
-            } else {
-                LOGE(
-                    "L1 cache entry key %{public}s nodeId %{public}d  isActive==false, moving to L2 cache, detaching "
-                    "from tree",
-                    key.c_str(), node->GetId());
-                // FIXME  lijunfeng , yeyinglong: add animated removal from tree
-                node->DetachFromMainTree();
-                return false; // will move to L2 cache
-            }
+        self->caches_.forEachL1IndexUINode([self](int32_t index, RefPtr<UINode> node) -> void {
+            self->children_.emplace_back(node);
         }); // rebuild Lambda
 
     LOGE("GetChildren() result: children_ count = %{public}d, includes:", children_.size());

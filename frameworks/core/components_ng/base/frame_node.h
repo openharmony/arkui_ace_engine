@@ -716,8 +716,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
