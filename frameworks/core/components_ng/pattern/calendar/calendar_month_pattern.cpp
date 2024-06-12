@@ -321,7 +321,8 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     int32_t x = offset.GetX() < (dayWidth + colSpace / 2)
                     ? 0
                     : (offset.GetX() - dayWidth - colSpace / 2) / (dayWidth + colSpace) + 1;
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (textDirection == TextDirection::RTL) {
         x = columnsOfData - x - 1;
     }
     return (y * columnsOfData + x);
