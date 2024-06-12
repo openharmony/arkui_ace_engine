@@ -2097,4 +2097,61 @@ HWTEST_F(TextTestTwoNg, TextOverlayModifierTest004, TestSize.Level1)
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
+/**
+ * @tc.name: TextPaintMethodTest004
+ * @tc.desc: test text_paint_method.cpp UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPaintMethodTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textLayoutProperty.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. create textPaintMethod and update textLayoutProperty.
+     */
+    auto pattern = textFrameNode->GetPattern<Pattern>();
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
+    textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+
+    /**
+     * @tc.steps: step3. update ClipEdge and create textTheme.
+     */
+    RefPtr<RenderContext> renderContext = RenderContext::Create();
+    renderContext->UpdateClipEdge(true);
+    auto paintProperty = textPattern->CreatePaintProperty();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    ASSERT_NE(textTheme, nullptr);
+
+    /**
+     * @tc.steps: step4. call UpdateContentModifier and GetOverlayModifier.
+     */
+    textPaintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    auto OverlayModifier = textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper));
+    ASSERT_NE(OverlayModifier, nullptr);
+    EXPECT_EQ(textOverlayModifier->isClip_->Get(), true);
+}
+
 } // namespace OHOS::Ace::NG
