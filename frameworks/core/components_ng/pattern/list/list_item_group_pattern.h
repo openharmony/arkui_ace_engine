@@ -212,6 +212,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
