@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
@@ -125,6 +126,7 @@ public:
     static std::string getTextPickerValues(FrameNode* frameNode);
     static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
     static int32_t GetCanLoop(FrameNode* frameNode);
+    static Dimension GetDefaultPickerItemHeight(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
