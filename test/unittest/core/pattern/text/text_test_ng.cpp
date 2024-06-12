@@ -1885,7 +1885,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
-    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
+    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
     EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
@@ -2120,7 +2120,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     MockPipelineContext::SetUp();
     Testing::MockCanvas canvas;
@@ -2181,7 +2181,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     MockPipelineContext::SetUp();
     // set textDecorationAnimatable_ true

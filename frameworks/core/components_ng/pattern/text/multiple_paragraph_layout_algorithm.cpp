@@ -78,7 +78,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (contentModifier) {
-        SetPropertyToModifier(textLayoutProperty, contentModifier);
+        SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
@@ -248,7 +248,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
-    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
+    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier, TextStyle& textStyle)
 {
     auto fontFamily = layoutProperty->GetFontFamily();
     if (fontFamily.has_value()) {
@@ -256,15 +256,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
     }
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
-        modifier->SetFontSize(fontSize.value());
+        modifier->SetFontSize(fontSize.value(), textStyle);
     }
     auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
     if (adaptMinFontSize.has_value()) {
-        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value(), textStyle);
     }
     auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
     if (adaptMaxFontSize.has_value()) {
-        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value(), textStyle);
     }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {
