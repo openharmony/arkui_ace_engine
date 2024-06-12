@@ -3165,7 +3165,7 @@ void RichEditorPattern::AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData
 
 RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t length)
 {
-    RefPtr<SpanString> spanString;
+    RefPtr<SpanString> spanString = MakeRefPtr<SpanString>("");
     SetSubSpans(spanString, start, length);
     SetSubMap(spanString);
     return spanString;
@@ -3173,6 +3173,7 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t leng
 
 void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t length)
 {
+    CHECK_NULL_VOID(spanString);
     std::list<RefPtr<SpanItem>> subSpans;
     auto end = start + length;
     std::string text;
@@ -3201,6 +3202,7 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
 
 void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
 {
+    CHECK_NULL_VOID(spanString);
     auto subSpans = spanString->GetSpanItems();
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
     for (auto& spanItem : subSpans) {
