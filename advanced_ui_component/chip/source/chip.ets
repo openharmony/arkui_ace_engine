@@ -495,12 +495,12 @@ export struct ChipComponent {
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
+    let localizedLabelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && this.label.localizedLabelMargin) {
+      return localizedLabelMargin
+    }
     if (this.label && this.label.labelMargin) {
       return this.getLabelMargin()
-    }
-    if (this.label && this.label.localizedLabelMargin) {
-      return this.getLocalizedLabelMargin()
     }
     return localizedLabelMargin
   }
@@ -746,9 +746,11 @@ export struct ChipComponent {
       this.chipOpacity = 0
       this.chipBlendColor = Color.Transparent
     })
-    animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-      this.deleteChip = true
-    } },
+    animateTo({
+      duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
+        this.deleteChip = true
+      }
+    },
       () => {
         this.chipScale = { x: 0.85, y: 0.85 }
       })
