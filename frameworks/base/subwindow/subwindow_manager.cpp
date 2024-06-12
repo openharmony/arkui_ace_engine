@@ -285,11 +285,11 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     }
 }
 
-void SubwindowManager::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+void SubwindowManager::UpdatePreviewPosition()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdatePreviewPosition(offset, rect);
+        subwindow->UpdatePreviewPosition();
     }
 }
 

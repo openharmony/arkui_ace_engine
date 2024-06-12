@@ -310,7 +310,7 @@ public:
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
-    void UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay = false);
+    void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);

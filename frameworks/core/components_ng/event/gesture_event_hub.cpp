@@ -906,7 +906,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
-        imageNode = overlayManager->GetPixelMapContentNode(hasContextMenu);
+        imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
@@ -1685,8 +1685,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow() const
     auto frameNode = GetFrameNode();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
-    if (IsPixelMapNeedScale() || hasContextMenu) {
+    if (IsPixelMapNeedScale()) {
         return true;
     }
     CHECK_NULL_RETURN(dragEventActuator_, false);

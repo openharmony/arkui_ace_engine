@@ -1102,6 +1102,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
     });
+    SetEndOffset(menuPosition);
     isFirstShow_ = false;
 }
 

@@ -662,7 +662,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             if (hasContextMenu) {
                 auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
                                    info.GetTouches().front().GetGlobalLocation().GetY());
-                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId(), true);
+                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
             }
             actuator->HandleTouchMoveEvent();
         }
@@ -680,47 +680,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     result.emplace_back(previewLongPressRecognizer_);
 }
 
-void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId, bool isSubwindowOverlay)
+void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    Rect rect = Rect(1, 1, 1, 1);
-    if (!isSubwindowOverlay) {
-        auto gestureHub = gestureEventHub_.Upgrade();
-        CHECK_NULL_VOID(gestureHub);
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto menuTheme = pipeline->GetTheme<MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        auto pixelMapScale = menuTheme->GetPreviewAfterAnimationScale();
-        RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
-        CHECK_NULL_VOID(pixelMap);
-        auto width = pixelMap->GetWidth();
-        auto height = pixelMap->GetHeight();
-        auto offset = GetFloatImageOffset(frameNode, pixelMap);
-        rect = Rect(offset.GetX() - point.GetX(), offset.GetY() - point.GetY(), width * pixelMapScale,
-            height * pixelMapScale);
-    } else {
-        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
-        CHECK_NULL_VOID(window);
-        auto overlayManager = window->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto imageNode = overlayManager->GetPixelMapContentNode(true);
-        CHECK_NULL_VOID(imageNode);
-        auto offset = imageNode->GetOffsetRelativeToWindow();
-        auto geometryNode = imageNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto size = geometryNode->GetFrameSize();
-        rect = Rect(offset.GetX() - point.GetX(), offset.GetY() - point.GetY(), size.Width(), size.Height());
-    }
-    dragDropManager->SetPreviewRect(rect);
     dragDropManager->SetDragDampStartPoint(point);
     dragDropManager->SetDraggingPointer(pointerId);
 }
 
-void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointerId, bool isSubwindowOverlay)
+void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointerId)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -728,7 +698,7 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     CHECK_NULL_VOID(dragDropManager);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    if ((!isSubwindowOverlay && !overlayManager->GetHasPixelMap()) || dragDropManager->IsAboutToPreview() ||
+    if (dragDropManager->IsAboutToPreview() ||
         dragDropManager->IsDragging() || !dragDropManager->IsSameDraggingPointer(pointerId)) {
         return;
     }
@@ -743,8 +713,8 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
-    SubwindowManager::GetInstance()->UpdatePreviewPosition(updateOffset, dragDropManager->GetPreviewRect());
     SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset);
+    SubwindowManager::GetInstance()->UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
