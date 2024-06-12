@@ -820,6 +820,14 @@ PipelineContext* UINode::GetContext()
     return PipelineContext::GetCurrentContextPtrSafely();
 }
 
+PipelineContext* UINode::GetContextWithCheck()
+{
+    if (context_) {
+        return context_;
+    }
+    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+}
+
 RefPtr<PipelineContext> UINode::GetContextRefPtr()
 {
     auto* context = GetContext();

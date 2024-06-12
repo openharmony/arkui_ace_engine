@@ -175,6 +175,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
