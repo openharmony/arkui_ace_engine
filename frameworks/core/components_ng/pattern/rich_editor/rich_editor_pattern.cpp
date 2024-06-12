@@ -3171,6 +3171,39 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t leng
     return spanString;
 }
 
+SelectionInfo RichEditorPattern::FromStyledString(const RefPtr<SpanString>& spanString)
+{
+    std::list<ResultObject> resultObjects;
+    int32_t start = 0;
+    int32_t end = 0;
+    if (spanString && !spanString->GetSpanItems().empty()) {
+        auto spans = spanString->GetSpanItems();
+        int32_t imageIndex = 0;
+        std::for_each(spans.begin(), spans.end(), [&imageIndex, &resultObjects](RefPtr<SpanItem>& item) {
+            CHECK_NULL_VOID(item);
+            auto obj = item->GetSpanResultObject(item->interval.first, item->interval.second);
+            if (obj.type == SelectSpanType::TYPEIMAGE) {
+                obj.spanPosition.spanIndex = imageIndex;
+                ++imageIndex;
+            }
+            if (obj.isInit) {
+                resultObjects.emplace_back(obj);
+            }
+        });
+        if (spans.back()) {
+            end = spans.back()->interval.second;
+        }
+        if (spans.front()) {
+            start = spans.front()->interval.first;
+        }
+    }
+    SelectionInfo selection;
+    selection.SetSelectionEnd(end);
+    selection.SetSelectionStart(start);
+    selection.SetResultObjectList(resultObjects);
+    return selection;
+}
+
 void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t length)
 {
     std::list<RefPtr<SpanItem>> subSpans;
