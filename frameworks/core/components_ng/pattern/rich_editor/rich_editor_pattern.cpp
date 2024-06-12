@@ -3358,11 +3358,9 @@ void RichEditorPattern::OnColorConfigurationUpdate()
 void RichEditorPattern::UpdateCaretInfoToController()
 {
     CHECK_NULL_VOID(HasFocus());
-    auto selectionResult = GetSpansInfo(0, GetTextContentLength(), GetSpansMethod::ONSELECT);
-    auto resultObjects = selectionResult.GetSelection().resultObjects;
     std::string text = "";
-    for (const auto& resultObj : resultObjects) {
-        text += resultObj.type == SelectSpanType::TYPESPAN ? resultObj.valueString : " ";
+    for (auto iter = spans_.begin(); iter != spans_.end(); iter++) {
+        text += (*iter)->content;
     }
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
