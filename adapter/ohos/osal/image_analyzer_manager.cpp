@@ -241,9 +241,10 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
     bool hasConfig = imageAnalyzerAdapter_->HasImageAnalyzerConfig();
-    if ((holder_ != ImageAnalyzerHolder::XCOMPONENT && holder_ != ImageAnalyzerHolder::VIDEO_CUSTOM) || !hasConfig) {
-        imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    if (hasConfig) {
+        return;
     }
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
@@ -252,7 +253,12 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 
 void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
-    SetImageAnalyzerConfig(options);
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(options);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    if (isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
+    }
 }
 
 void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
