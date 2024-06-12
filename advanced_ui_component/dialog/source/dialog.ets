@@ -864,6 +864,10 @@ struct CustomDialogContentComponent {
   initCustomStyle: boolean = false;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
+  @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
+  @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
+  @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
+  @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
 
   build() {
     WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
@@ -877,7 +881,11 @@ struct CustomDialogContentComponent {
             fontSizeScale: this.fontSizeScale,
             titleHeight: this.titleHeight,
             needResponseScale: this.needResponseScale,
-            theme: this.theme
+            theme: this.theme,
+            primaryTitleMaxFontSize: this.primaryTitleMaxFontSize,
+            primaryTitleMinFontSize: this.primaryTitleMinFontSize,
+            secondaryTitleMaxFontSize: this.secondaryTitleMaxFontSize,
+            secondaryTitleMinFontSize: this.secondaryTitleMinFontSize
           })
           // content area
           Column() {
@@ -973,13 +981,25 @@ struct CustomDialogContentComponent {
       if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
         this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
         this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+        this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
+        this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+        this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
+        this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
       } else {
         this.buttonMaxFontSize = BODY_L + 'fp';
         this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
+        this.primaryTitleMaxFontSize = TITLE_S + 'fp';
+        this.primaryTitleMinFontSize = BODY_L + 'fp';
+        this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
+        this.secondaryTitleMinFontSize = BODY_S + 'fp';
       }
     } else {
       this.buttonMaxFontSize = BODY_L + 'vp';
       this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
+      this.primaryTitleMaxFontSize = TITLE_S + 'vp';
+      this.primaryTitleMinFontSize = BODY_L + 'vp';
+      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'vp';
+      this.secondaryTitleMinFontSize = BODY_S + 'vp';
     }
   }
 
@@ -1065,10 +1085,10 @@ struct TitleComponent {
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
-  @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
-  @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
-  @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
-  @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
+  @Link primaryTitleMaxFontSize: Length;
+  @Link primaryTitleMinFontSize: Length;
+  @Link secondaryTitleMaxFontSize: Length;
+  @Link secondaryTitleMinFontSize: Length;
   @Link needResponseScale: boolean;
   @Link fontSizeScale: number;
   @Link windowSize: Size;
@@ -1124,13 +1144,11 @@ struct TitleComponent {
     this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
     this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
     this.initTitleTextAlign();
-    this.updateFontSize();
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
     constraint: ConstraintSizeOptions): SizeResult {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    this.updateFontSize();
     let titleConstraint: ConstraintSizeOptions = {
       minWidth: constraint.minWidth,
       minHeight: this.getTitleAreaMinHeight(),
@@ -1144,27 +1162,6 @@ struct TitleComponent {
     });
     this.titleHeight = sizeResult.height;
     return sizeResult;
-  }
-
-  updateFontSize(): void {
-    if (this.needResponseScale) {
-      if (this.fontSizeScale > MAX_FONT_SCALE) {
-        this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
-        this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-        this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
-        this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
-      } else {
-        this.primaryTitleMaxFontSize = TITLE_S + 'fp';
-        this.primaryTitleMinFontSize = BODY_L + 'fp';
-        this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
-        this.secondaryTitleMinFontSize = BODY_S + 'fp';
-      }
-    } else {
-      this.primaryTitleMaxFontSize = TITLE_S + 'vp';
-      this.primaryTitleMinFontSize = BODY_L + 'vp';
-      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'vp';
-      this.secondaryTitleMinFontSize = BODY_S + 'vp';
-    }
   }
 
   /**
