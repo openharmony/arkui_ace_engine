@@ -447,6 +447,11 @@ void MovingPhotoPattern::OnResolutionChange()
 void MovingPhotoPattern::OnStartRenderFrame()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartRenderFrame.");
+}
+
+void MovingPhotoPattern::OnStartedStatusCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartedStatusCallback.");
     ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -614,6 +619,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::STARTED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STARTED.");
+            OnStartedStatusCallback()
             FireMediaPlayerStart();
             break;
         case PlaybackStatus::PAUSED:
