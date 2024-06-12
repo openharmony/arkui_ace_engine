@@ -4522,9 +4522,9 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
     CHECK_NULL_VOID(customKeyboard);
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardSafeHeight(safeHeight);
     pattern->SetKeyboardAreaChange(keyboardAvoidance_);
     pattern->SetKeyboardOption(keyboardAvoidance_);
-    pattern->SetKeyboardSafeHeight(safeHeight);
 }
 
 // This function will be used in SceneBoard Thread only.
