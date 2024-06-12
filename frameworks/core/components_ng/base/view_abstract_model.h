@@ -114,6 +114,12 @@ public:
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
+    // visual
+    virtual void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {};
+    virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
+    virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
+    virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
+
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
     virtual void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,

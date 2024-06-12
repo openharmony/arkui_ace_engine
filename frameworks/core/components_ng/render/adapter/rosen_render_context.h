@@ -190,6 +190,11 @@ public:
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
 
+    void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override;
+    void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
+    void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
+    void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
