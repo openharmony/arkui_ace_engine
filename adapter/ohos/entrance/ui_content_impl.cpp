@@ -3290,6 +3290,19 @@ void UIContentImpl::PreLayout()
     ContainerScope scope(instanceId_);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
+
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto renderContext = stageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    if (LessOrEqual(static_cast<uint32_t>(paintRectf.Width()), 0) ||
+        LessOrEqual(static_cast<uint32_t>(paintRectf.Height()), 0)) {
+        return ;
+    }
+
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
