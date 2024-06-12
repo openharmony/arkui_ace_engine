@@ -363,12 +363,14 @@ public:
         isExtensionMenuShow_ = true;
     }
 
-    void SetHasDisappearAnimation(bool hasAnimation)
+    void SetDisappearAnimation(bool hasAnimation)
     {
+        // false：exit from BOTTOM to TOP
+        // true：exit from LEFT_BOTTOM to RIGHT_TOP
         hasAnimation_ = hasAnimation;
     }
 
-    bool HasDisappearAnimation() const
+    bool GetDisappearAnimation() const
     {
         return hasAnimation_;
     }

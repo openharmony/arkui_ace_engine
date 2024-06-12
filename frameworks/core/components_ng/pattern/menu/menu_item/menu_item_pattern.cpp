@@ -592,6 +592,11 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->IncreaseEmbeddedSubMenuCount();
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(rightRow);
     auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
@@ -630,6 +635,11 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->DecreaseEmbeddedSubMenuCount();
     auto expandableAreaContext = expandableNode->GetRenderContext();
     CHECK_NULL_VOID(expandableAreaContext);
 
@@ -664,15 +674,9 @@ void MenuItemPattern::CloseMenu()
     }
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
-    auto outterMenu = menuWrapper->GetFirstChild();
-    CHECK_NULL_VOID(outterMenu);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto outterMenuPattern = AceType::DynamicCast<MenuPattern>(
-        AceType::DynamicCast<FrameNode>(outterMenu)->GetPattern<MenuPattern>());
-    CHECK_NULL_VOID(outterMenuPattern);
-    outterMenuPattern->SetHasDisappearAnimation(false);
-
+    menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
     menuWrapperPattern->HideMenu();
 }
 

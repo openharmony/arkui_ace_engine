@@ -573,7 +573,7 @@ private:
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
+    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);

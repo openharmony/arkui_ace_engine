@@ -1003,22 +1003,22 @@ void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool show
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
 }
 
-void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
+void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
     bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu clear animation enter");
-    auto context = menu->GetRenderContext();
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menuWrapper clear animation enter");
+    auto context = menuWrapper->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
     auto outterMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(outterMenu);
     auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
-    bool isShow = outterMenuPattern->HasDisappearAnimation();
+    bool isShow = outterMenuPattern->GetDisappearAnimation();
     if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         if (!showPreviewAnimation) {
             CleanPreviewInSubWindow();
@@ -1809,6 +1809,9 @@ void OverlayManager::HideAllMenus()
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            auto wrapperPattern = node->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            wrapperPattern->UpdateMenuAnimation(node);
             PopMenuAnimation(node);
         }
     }
@@ -2580,6 +2583,7 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove menu enter");
     auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
+    menuWrapperPattern->UpdateMenuAnimation(overlay);
     menuWrapperPattern->HideMenu();
     return true;
 }
