@@ -711,6 +711,8 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
         }
         g_strValue = families;
         font->fontFamilies = g_strValue.c_str();
+    } else {
+        font->fontFamilies = "HarmonyOS Sans";
     }
     if (value.fontStyle.has_value()) {
         font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());

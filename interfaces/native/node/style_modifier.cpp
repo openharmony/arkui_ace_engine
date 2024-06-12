@@ -1070,7 +1070,7 @@ int32_t SetBrightness(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (LessNotEqual(item->value[0].f32, 0.0f) || GreatNotEqual(item->value[0].f32, 2.0f)) {
+    if (LessNotEqual(item->value[0].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -1232,7 +1232,7 @@ void ResetLinearGradient(ArkUI_NodeHandle node)
 int32_t SetAlign(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_8, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -1573,6 +1573,9 @@ const ArkUI_AttributeItem* GetClip(ArkUI_NodeHandle node)
 int32_t SetClipShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!InRegion(NUM_0, NUM_3, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -2318,7 +2321,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
 
 int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size < 4) {
+    if (item->size < NUM_3) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -4541,7 +4544,7 @@ int32_t SetScrollScrollSnap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     paginationParams[item->size - NUM_3 + NUM_0] = snapAlign;
     paginationParams[item->size - NUM_3 + NUM_1] = enableSnapToStart;
     paginationParams[item->size - NUM_3 + NUM_2] = enableSnapToEnd;
-    paginationParams[item->size] = (item->size - NUM_3 > 1) ? true : false;
+    paginationParams[item->size] = (item->size - NUM_3 >= 1) ? true : false;
 
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         node->uiNodeHandle, paginations, item->size - NUM_3, paginationParams, item->size + NUM_1);
@@ -5869,7 +5872,7 @@ int32_t SetTextFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     // family
     std::vector<std::string> familyArray;
-    if (item->string == nullptr) {
+    if (item->string != nullptr) {
         std::string value(item->string);
         StringUtils::StringSplitter(value, ',', familyArray);
     }
