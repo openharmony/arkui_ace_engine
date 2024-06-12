@@ -2159,6 +2159,13 @@ void JsiDeclarativeEngine::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void JsiDeclarativeEngine::NotifyUIIdle()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->NotifyUIIdle();
+    }
+}
+
 std::string JsiDeclarativeEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);

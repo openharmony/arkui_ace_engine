@@ -1243,6 +1243,8 @@ public:
 
     virtual bool GetOnShow() const = 0;
 
+    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

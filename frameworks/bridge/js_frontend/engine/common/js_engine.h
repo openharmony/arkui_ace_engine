@@ -265,6 +265,8 @@ public:
 
     virtual void ForceFullGC() {}
 
+    virtual void NotifyUIIdle() {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";

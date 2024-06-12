@@ -358,6 +358,8 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void NotifyUIIdle() override;
+
     std::string GetStacktraceMessage() override;
 
     void GetStackTrace(std::string& trace) override;

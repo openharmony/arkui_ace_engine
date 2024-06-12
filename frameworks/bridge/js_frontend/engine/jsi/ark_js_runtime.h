@@ -99,6 +99,7 @@ public:
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    void NotifyUIIdle() override;
     void DestroyHeapProfiler() override;
     bool IsExecuteModuleInAbcFile(
         const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl);

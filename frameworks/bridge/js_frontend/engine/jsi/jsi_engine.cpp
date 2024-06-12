@@ -3588,6 +3588,13 @@ void JsiEngine::ForceFullGC()
     }
 }
 
+void JsiEngine::NotifyUIIdle()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->NotifyUIIdle();
+    }
+}
+
 std::string JsiEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);

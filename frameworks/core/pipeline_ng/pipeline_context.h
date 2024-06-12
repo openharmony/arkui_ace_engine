@@ -790,6 +790,11 @@ public:
         return isDensityChanged_;
     }
 
+
+    void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) override
+    {
+        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -966,6 +971,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t lastVsyncEndTimestamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
