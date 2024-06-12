@@ -104,7 +104,8 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   onChange(event: (index: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, event);
+    return this;
   }
   indicatorStyle(value?: IndicatorStyle | undefined): this {
     throw new Error('Method not implemented.');
@@ -122,13 +123,16 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   onAnimationStart(event: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnAnimationStartModifier.identity, SwiperOnAnimationStartModifier, event);
+    return this;
   }
   onAnimationEnd(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnAnimationEndModifier.identity, SwiperOnAnimationEndModifier, event);
+    return this;
   }
   onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, event);
+    return this;
   }
   nestedScroll(value: SwiperNestedScrollMode): this {
     modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
@@ -512,6 +516,19 @@ class SwiperCurveModifier extends ModifierWithKey<string | Curve | ICurve> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SwiperOnChangeModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnChange(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnChange(node, this.value);
+    }
+  }
+}
 class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperDisableSwipe');
   applyPeer(node: KNode, reset: boolean): void {
@@ -687,7 +704,46 @@ class SwiperNestedScrollModifier extends ModifierWithKey<SwiperNestedScrollMode>
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-
+class SwiperOnAnimationStartModifier extends ModifierWithKey<(index: number, targetIndex: number,
+    extraInfo: SwiperAnimationEvent) => void> {
+  constructor(value: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnAnimationStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnAnimationStart(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnAnimationStart(node, this.value);
+    }
+  }
+}
+class SwiperOnAnimationEndModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
+  constructor(value: Callback<number, SwiperAnimationEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnAnimationEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnAnimationEnd(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnAnimationEnd(node, this.value);
+    }
+  }
+}
+class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
+  constructor(value: Callback<number, SwiperAnimationEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnGestureSwipe');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnGestureSwipe(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnGestureSwipe(node, this.value);
+    }
+  }
+}
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
