@@ -213,8 +213,7 @@ public:
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
     
-    RefPtr<FrameNode> FindTargetDropNode(const RefPtr<UINode> parentNode,
-        const std::map<int32_t, WeakPtr<FrameNode>>& frameNodes, PointF localPoint);
+    RefPtr<FrameNode> FindTargetDropNode(const RefPtr<UINode> parentNode, PointF localPoint);
 
     std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
 
@@ -426,7 +425,7 @@ private:
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
-    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
+    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent,
         DragEventType type, const std::string& extraInfo);
