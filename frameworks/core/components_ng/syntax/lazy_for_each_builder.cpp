@@ -38,7 +38,6 @@ namespace OHOS::Ace::NG {
         }
 
         if (needBuild) {
-            RecycleItemsOutOfBoundary();
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
