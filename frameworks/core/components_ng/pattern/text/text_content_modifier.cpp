@@ -449,18 +449,7 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     if (!textRacing_) {
-        auto paintOffsetY = paintOffset_.GetY();
-        auto paragraphs = pManager->GetParagraphs();
-        for (auto && info : paragraphs) {
-            auto paragraph = info.paragraph;
-            CHECK_NULL_VOID(paragraph);
-            if (paragraph->GetParagraphStyle().isSymbolGlyphActive && !paragraph->GetParagraphStyle().firstBuild) {
-                return;
-            }
-            paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
-            paintOffsetY += paragraph->GetHeight();
-            paragraph->SetParagraphBuild(false);
-        }
+        DrawNoneRacingParagraph(drawingContext, pManager);
         if (marqueeSet_) {
             PaintImage(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
         }
@@ -483,6 +472,24 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
         }
     }
     canvas.Restore();
+}
+
+void TextContentModifier::DrawNoneRacingParagraph(
+    DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager)
+{
+    auto& canvas = drawingContext.canvas;
+    auto paintOffsetY = paintOffset_.GetY();
+    auto paragraphs = pManager->GetParagraphs();
+    for (auto&& info : paragraphs) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_VOID(paragraph);
+        if (paragraph->GetParagraphStyle().isSymbolGlyphActive && !paragraph->GetParagraphStyle().firstBuild) {
+            return;
+        }
+        paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+        paintOffsetY += paragraph->GetHeight();
+        paragraph->SetParagraphBuild(false);
+    }
 }
 
 void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal)

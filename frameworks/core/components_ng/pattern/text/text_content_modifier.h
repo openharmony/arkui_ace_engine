@@ -152,6 +152,7 @@ private:
 
     void DrawObscuration(DrawingContext& drawingContext);
     void DrawNormal(DrawingContext& drawingContext);
+    void DrawNoneRacingParagraph(DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager);
     void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
     FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
