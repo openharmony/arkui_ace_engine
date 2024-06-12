@@ -24,6 +24,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
@@ -322,12 +324,22 @@ void CalendarPaintMethod::InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle&
 
     lunarTextStyle.fontSize_ = lunarDayFontSize_;
     lunarTextStyle.fontWeight_ = static_cast<RSFontWeight>(lunarDayFontWeight_);
+
+    if (!appFontFamilies_.empty()) {
+        dateTextStyle.fontFamilies_ = appFontFamilies_;
+        lunarTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     dateTextStyle.fontSize = dayFontSize_;
     dateTextStyle.fontWeight = static_cast<RSFontWeight>(dayFontWeight_);
 
     lunarTextStyle.fontSize = lunarDayFontSize_;
     lunarTextStyle.fontWeight = static_cast<RSFontWeight>(lunarDayFontWeight_);
+
+    if (!appFontFamilies_.empty()) {
+        dateTextStyle.fontFamilies = appFontFamilies_;
+        lunarTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
 }
 
@@ -399,9 +411,17 @@ void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, con
 #ifndef USE_GRAPHIC_TEXT_GINE
     offWorkTextStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
     offWorkTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        offWorkTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     offWorkTextStyle.fontWeight = static_cast<RSFontWeight>(workStateFontWeight_);
     offWorkTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        offWorkTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
     if (day.month.month == currentMonth_.month) {
         if (day.dayMark == "work") {
@@ -496,10 +516,18 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
     weekTextStyle.color_ = weekColor_;
     weekTextStyle.fontSize_ = weekFontSize_;
     weekTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        weekTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     weekTextStyle.color = weekColor_;
     weekTextStyle.fontSize = weekFontSize_;
     weekTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        weekTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
     static const int32_t daysOfWeek = 7;
 
@@ -531,6 +559,11 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
+
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty())) {
+        appFontFamilies_ = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    }
 
     weekColor_ = ToRSColor(paintProperty->GetWeekColor().value_or(theme->GetCalendarTheme().weekColor));
     dayColor_ = ToRSColor(paintProperty->GetDayColor().value_or(theme->GetCalendarTheme().dayColor));

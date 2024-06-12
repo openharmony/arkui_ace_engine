@@ -369,6 +369,36 @@ public:
         return canloop_;
     }
 
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedDisappearFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedDisappearFontFamily()
+    {
+        return hasUserDefinedDisappearFontFamily_;
+    }
+
+    void HasUserDefinedNormalFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedNormalFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedNormalFontFamily()
+    {
+        return hasUserDefinedNormalFontFamily_;
+    }
+
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedSelectedFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedSelectedFontFamily()
+    {
+        return hasUserDefinedSelectedFontFamily_;
+    }
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -426,6 +456,10 @@ private:
 
     // inner focus switch
     bool operationOn_ = false;
+
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
