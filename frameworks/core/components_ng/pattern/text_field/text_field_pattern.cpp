@@ -6318,11 +6318,16 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
     if (errCode == AUTO_FILL_CANCEL && !fillContent.empty() && IsAutoFillPasswordType(GetAutoFillType())) {
         auto jsonObject = JsonUtil::ParseJsonString(fillContent);
-        if (jsonObject == nullptr) {
-            return;
-        }
+        CHECK_NULL_VOID(jsonObject);
         fillContentMap_.clear();
         ParseFillContentJsonValue(jsonObject, fillContentMap_);
+        if (!fillContentMap_.empty() && HasFocus()) {
+            auto inputMethod = MiscServices::InputMethodController::GetInstance();
+            CHECK_NULL_VOID(inputMethod);
+            if (inputMethod->SendPrivateCommand(fillContentMap_) == 0) {
+                fillContentMap_.clear();
+            }
+        }
     }
 #endif
 }
