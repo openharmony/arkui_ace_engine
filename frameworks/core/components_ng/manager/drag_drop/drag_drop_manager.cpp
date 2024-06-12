@@ -158,6 +158,17 @@ void DragDropManager::HideDragPreviewOverlay()
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
+void DragDropManager::HideDragPreviewWindow(int32_t containerId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemovePixelMap();
+    overlayManager->RemoveGatherNode();
+    SubwindowManager::GetInstance()->HidePreviewNG();
+}
+
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     const RefPtr<UINode> parentNode, std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop)
 {
