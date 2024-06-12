@@ -76,7 +76,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -108,14 +108,13 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
-    bool IsProhibitedAddChildNode()
+    void UpdateModalUiextensionCount(bool addNode)
     {
-        return isProhibitedAddChildNode_;
-    }
-
-    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
-    {
-        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
     }
 
     int32_t TotalChildCount() const;
@@ -793,7 +792,10 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
-    bool isProhibitedAddChildNode_ = false;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

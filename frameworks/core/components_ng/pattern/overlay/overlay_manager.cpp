@@ -3132,13 +3132,6 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_VOID(rootNode);
     if (isShow) {
-        if (rootNode->IsProhibitedAddChildNode()) {
-            TAG_LOGE(AceLogTag::ACE_OVERLAY,
-                "Prohibited add to rootNode due to already has modal %{public}d.", sessionId);
-            DeleteUIExtensionNode(sessionId);
-            return;
-        }
-
         auto modalTransition = modalStyle.modalTransition;
         if (!modalTransition.has_value()) {
             modalTransition = ModalTransition::DEFAULT;
@@ -3208,13 +3201,14 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
     modalNode->MountToParent(rootNode);
-    modalNode->AddChild(builder);
+    modalNode->AddChild(builder, DEFAULT_NODE_SLOT, false, false, true);
     if (!isAllowedBeCovered_ && rootNode) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "RootNode %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
             rootNode->GetId(), targetId);
-        rootNode->SetIsProhibitedAddChildNode(true);
-        SetCurSessionId(targetId);
+        if (AddCurSessionId(targetId)) {
+            rootNode->UpdateModalUiextensionCount(true);
+        }
     }
 
     FireModalPageShow();
@@ -4802,24 +4796,17 @@ void OverlayManager::RemoveEventColumn()
     hasEvent_ = false;
 }
 
-bool OverlayManager::IsProhibitedAddToRootNode()
-{
-    auto rootNode = FindWindowScene(nullptr);
-    CHECK_NULL_RETURN(rootNode, false);
-    return rootNode->IsProhibitedAddChildNode();
-}
-
 void OverlayManager::ResetRootNode(int32_t sessionId)
 {
-    if (sessionId != curSessionId_) {
+    if (curSessionIds_.find(sessionId) == curSessionIds_.end()) {
         return;
     }
 
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "ResetRootNode %{public}d.", sessionId);
-    SetCurSessionId(-1);
+    curSessionIds_.erase(sessionId);
     auto rootNode = FindWindowScene(nullptr);
     CHECK_NULL_VOID(rootNode);
-    rootNode->SetIsProhibitedAddChildNode(false);
+    rootNode->UpdateModalUiextensionCount(false);
 }
 
 void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
@@ -4827,20 +4814,20 @@ void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
     isAllowedBeCovered_ = isAllowedBeCovered;
 }
 
-void OverlayManager::SetCurSessionId(int32_t sessionId)
+bool OverlayManager::AddCurSessionId(int32_t sessionId)
 {
-    curSessionId_ = sessionId;
+    if (curSessionIds_.find(sessionId) != curSessionIds_.end()) {
+        return false;
+    }
+
+    curSessionIds_.insert(sessionId);
+    return true;
 }
 
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
     bool isProhibitBack, bool isAsyncModalBinding, bool isAllowedBeCovered)
 {
-    if (IsProhibitedAddToRootNode()) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Prohibited add to rootNode due to already has modal.");
-        return 0;
-    }
-
     isProhibitBack_ = isProhibitBack;
     SetIsAllowedBeCovered(isAllowedBeCovered);
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);

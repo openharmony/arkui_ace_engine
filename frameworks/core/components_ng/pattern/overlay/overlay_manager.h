@@ -534,9 +534,8 @@ public:
     }
 
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
-    bool IsProhibitedAddToRootNode();
     void DeleteUIExtensionNode(int32_t sessionId);
-    void SetCurSessionId(int32_t curSessionId);
+    bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
 
@@ -719,7 +718,7 @@ private:
     // No thread safety issue due to they are all run in UI thread
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
-    int32_t curSessionId_ = -1;
+    std::set<int32_t> curSessionIds_;
 };
 } // namespace OHOS::Ace::NG
 
