@@ -550,8 +550,9 @@ void GestureEventHub::StartDragTaskForWeb()
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
+            CHECK_NULL_VOID(gestureHub->gestureInfoForWeb_);
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
-            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+            dragEventActuator->StartDragTaskForWeb(*gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
 }
@@ -665,7 +666,7 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        gestureInfoForWeb_ = info;
+        gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
         isReceivedDragGestureInfo_ = true;
     }
 }
@@ -1101,7 +1102,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
-    gestureInfoForWeb_ = info;
+    gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
     CHECK_NULL_VOID(dragDropProxy_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

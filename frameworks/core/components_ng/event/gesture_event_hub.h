@@ -733,7 +733,7 @@ private:
 
     OffsetF frameNodeOffset_;
     SizeF frameNodeSize_;
-    GestureEvent gestureInfoForWeb_;
+    std::shared_ptr<GestureEvent> gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
