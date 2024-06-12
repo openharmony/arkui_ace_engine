@@ -905,7 +905,7 @@ void ScrollBarPattern::Updatebackgroundcolor()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (!renderContext->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor((theme->GetBackgroundColor()));
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     }
 }
 } // namespace OHOS::Ace::NG

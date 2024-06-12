@@ -308,7 +308,6 @@ public:
         }
     }
     void Updatebackgroundcolor();
-
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
