@@ -16,6 +16,7 @@
 
 #include "jsnapi_expo.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/observer_handler.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
@@ -106,6 +107,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -169,6 +172,77 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCal
     }
     
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    auto pageInfo = panda::ObjectRef::New(vm);
+    CHECK_NULL_RETURN(nodePtr, pageInfo);
+
+    auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
+    if (routerPageResult) {
+        auto jsContext = Framework::JsConverter::ConvertNapiValueToJsVal(routerPageResult->context);
+        Local<JSValueRef> routerPageValues[] = { jsContext->GetLocalHandle(),
+            panda::NumberRef::New(vm, routerPageResult->index),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->name.c_str()),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->path.c_str()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(routerPageResult->state)),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->pageId.c_str()) };
+        const char* routerPageKeys[] = { "context", "index", "name", "path", "state", "pageId" };
+        auto routerPageObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(routerPageKeys), routerPageKeys,
+            routerPageValues);
+        pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "routerPageInfo"), routerPageObj);
+    }
+
+    auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
+    if (navDestinationResult) {
+        Local<JSValueRef> navDestinationValues[] = {
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navigationId.c_str()),
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->name.c_str()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->state)),
+            panda::NumberRef::New(vm, navDestinationResult->index),
+            Framework::JsConverter::ConvertNapiValueToJsVal(navDestinationResult->param)->GetLocalHandle(),
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()) };
+        const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId" };
+        auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
+            navDestinationKeys, navDestinationValues);
+        pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestinationInfo"), navDestinationObj);
+    }
+
+    return pageInfo;
+}
+
+ArkUINativeModuleValue ArkUINativeModule::GetNavigationInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    auto defaultResult = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(nodePtr, defaultResult);
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultResult);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationMgr, defaultResult);
+    auto result = navigationMgr->GetNavigationInfo(nodePtr);
+    CHECK_NULL_RETURN(result, defaultResult);
+    auto jsStack = AceType::DynamicCast<Framework::JSNavigationStack>(result->pathStack.Upgrade());
+    CHECK_NULL_RETURN(jsStack, defaultResult);
+    Framework::JSRef<Framework::JSObject> navPathStackObj = jsStack->GetDataSourceObj();
+    CHECK_NULL_RETURN(!navPathStackObj->IsEmpty(), defaultResult);
+    auto obj = panda::ObjectRef::New(vm);
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigationId"),
+        panda::StringRef::NewFromUtf8(vm, result->navigationId.c_str()));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pathStack"), navPathStackObj->GetLocalHandle());
+    
+    return obj;
 }
 
 ArkUINativeModuleValue ArkUINativeModule::GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -263,6 +337,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeById));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByUniqueId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByUniqueId));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPageInfoByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetPageInfoByUniqueId));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNavigationInfoByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetNavigationInfoByUniqueId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getUIState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportedUIState"),
