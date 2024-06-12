@@ -484,7 +484,7 @@ void TextContentModifier::DrawNoneRacingParagraph(
         auto paragraph = info.paragraph;
         CHECK_NULL_VOID(paragraph);
         if (paragraph->GetParagraphStyle().isSymbolGlyphActive && !paragraph->GetParagraphStyle().firstBuild) {
-            return;
+            continue;
         }
         paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
         paintOffsetY += paragraph->GetHeight();
