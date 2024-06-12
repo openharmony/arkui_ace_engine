@@ -249,7 +249,9 @@ void ComponentObserver::Destroy(napi_env env)
     for (auto& drawitem : cbDrawList_) {
         napi_delete_reference(env, drawitem);
     }
-    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+    cbLayoutList_.clear();
+    cbDrawList_.clear();
+    auto jsEngine = weakEngine_.Upgrade();
     if (!jsEngine) {
         return;
     }
@@ -304,6 +306,7 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
 
     jsEngine->RegisterLayoutInspectorCallback(observer->layoutEvent_, observer->componentId_);
     jsEngine->RegisterDrawInspectorCallback(observer->drawEvent_, observer->componentId_);
+    observer->SetEngine(jsEngine);
 #if defined(PREVIEW)
     layoutCallback();
     drawCallback();
