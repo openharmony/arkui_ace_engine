@@ -32,7 +32,9 @@ struct AvoidStrategyMember {
     double safeSpacing = 0.0;
     double bottomLimitOffsetY = 0.0;
     double menuSpacing = 0.0;
+    double keyboardInsertStart = 0.0;
     bool hasKeyboard = false;
+    bool downHandleIsReallyShow = true;
 };
 
 class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
