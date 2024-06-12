@@ -1259,6 +1259,7 @@ void ScrollablePattern::InitMouseEvent()
 
 void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     SuggestOpIncGroup(true);
@@ -1301,6 +1302,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
 
 void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
 {
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select end");
     mouseStartOffset_.Reset();
     lastMouseStart_.Reset();
     mouseEndOffset_.Reset();
