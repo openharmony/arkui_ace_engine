@@ -1021,8 +1021,8 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
-            pattern->useTotalOffset_ = true;
             CHECK_NULL_VOID(pattern);
+            pattern->useTotalOffset_ = true;
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
