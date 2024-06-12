@@ -253,13 +253,7 @@ public:
                 "calendar_picker_day_width_height", 0.0_vp);
             theme->calendarPickerDayLargeWidthOrHeight_ =
                 pattern->GetAttr<Dimension>("calendar_picker_day_large_width_height", 40.0_vp);
-            theme->calendarPickerDayLargerHeight_ =
-                pattern->GetAttr<Dimension>("calendar_picker_day_larger_height", 43.0_vp);
             theme->calendarDayFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_day_font_size", 0.0_vp);
-            theme->calendarDayLargeFontSize_ =
-                pattern->GetAttr<Dimension>("calendar_picker_day_large_font_size", 28.0_vp);
-            theme->calendarDayLargerFontSize_ =
-                pattern->GetAttr<Dimension>("calendar_picker_day_larger_font_size", 32.0_vp);
             theme->distanceBetweenContainterAndDate_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_distance_between_container_and_date", 0.0_vp);
             theme->distanceBetweenTitleAndDate_ = pattern->GetAttr<Dimension>(
@@ -270,10 +264,6 @@ public:
             theme->calendarLargerContainerHeight_ =
                 pattern->GetAttr<Dimension>("calendar_picker_larger_container_height", 337.0_vp);
             theme->calendarTitleFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_title_font_size", 0.0_vp);
-            theme->calendarTitleLargeFontSize_ =
-                pattern->GetAttr<Dimension>("calendar_picker_title_large_font_size", 35.0_vp);
-            theme->calendarTitleLargerFontSize_ =
-                pattern->GetAttr<Dimension>("calendar_picker_title_larger_font_size", 40.0_vp);
             theme->calendarTitleRowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_title_row_height", 0.0_vp);
             theme->calendarTitleLargeRowHeight_ =
                 pattern->GetAttr<Dimension>("calendar_picker_title_large_row_height", 94.0_vp);
@@ -497,24 +487,9 @@ public:
         return calendarPickerDayLargeWidthOrHeight_;
     }
 
-    const Dimension& GetCalendarPickerDayLargerHeight() const
-    {
-        return calendarPickerDayLargerHeight_;
-    }
-
     const Dimension& GetCalendarDayFontSize() const
     {
         return calendarDayFontSize_;
-    }
-
-    const Dimension& GetCalendarDayLargeFontSize() const
-    {
-        return calendarDayLargeFontSize_;
-    }
-
-    const Dimension& GetCalendarDayLargerFontSize() const
-    {
-        return calendarDayLargerFontSize_;
     }
 
     const Dimension& GetDistanceBetweenContainterAndDate() const
@@ -545,16 +520,6 @@ public:
     const Dimension& GetCalendarTitleFontSize() const
     {
         return calendarTitleFontSize_;
-    }
-
-    const Dimension& GetCalendarTitleLargeFontSize() const
-    {
-        return calendarTitleLargeFontSize_;
-    }
-
-    const Dimension& GetCalendarTitleLargerFontSize() const
-    {
-        return calendarTitleLargerFontSize_;
     }
 
     const Dimension& GetCalendarTitleRowHeight() const
@@ -765,18 +730,13 @@ private:
     Dimension dialogMargin_;
     Dimension calendarPickerDayWidthOrHeight_;
     Dimension calendarPickerDayLargeWidthOrHeight_;
-    Dimension calendarPickerDayLargerHeight_;
     Dimension calendarDayFontSize_;
-    Dimension calendarDayLargeFontSize_;
-    Dimension calendarDayLargerFontSize_;
     Dimension distanceBetweenContainterAndDate_;
     Dimension distanceBetweenTitleAndDate_;
     Dimension dalendarContainerHeight_;
     Dimension calendarLargeContainerHeight_;
     Dimension calendarLargerContainerHeight_;
     Dimension calendarTitleFontSize_;
-    Dimension calendarTitleLargeFontSize_;
-    Dimension calendarTitleLargerFontSize_;
     Dimension calendarTitleRowHeight_;
     Dimension calendarTitleLargeRowHeight_;
     Dimension calendarTitleLargerRowHeight_;

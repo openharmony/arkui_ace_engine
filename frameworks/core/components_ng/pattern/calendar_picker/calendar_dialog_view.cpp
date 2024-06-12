@@ -178,7 +178,7 @@ void CalendarDialogView::SetTitleIdealSize(
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleRowHeight())));
     } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
         layoutProps->UpdateUserDefinedIdealSize(
@@ -315,7 +315,7 @@ void CalendarDialogView::SetCalendarIdealSize(
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
             std::nullopt, CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
     } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
@@ -500,13 +500,15 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     
     auto fontSizeScale = pipeline->GetFontScale();
+    auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
-        textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    } else if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale()) {
-        textLayoutProperty->UpdateFontSize(calendarTheme->GetCalendarDayLargerFontSize());
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        textLayoutProperty->UpdateFontSize(fontSize);
     } else {
-        textLayoutProperty->UpdateFontSize(calendarTheme->GetCalendarDayLargeFontSize());
+        fontSizeScale = fontSizeScale > calendarTheme->GetCalendarPickerLargeScale()
+                            ? calendarTheme->GetCalendarPickerLargeScale()
+                            : fontSizeScale;
+        textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
     }
 
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
@@ -560,7 +562,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() >= DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() >= DEVICE_HEIGHT_LIMIT) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(width, CalcLength(calendarTheme->GetCalendarActionLargeRowHeight())));
     } else {
@@ -793,28 +795,26 @@ void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& s
 
     auto fontSizeScale = pipelineContext->GetFontScale();
     Dimension defaultDayRadius;
+    auto fontSize = theme->GetCalendarDayFontSize();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayWidthOrHeight());
-        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayFontSize());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, fontSize);
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayWidthOrHeight());
-        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayFontSize());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize);
         defaultDayRadius = theme->GetCalendarDayRadius();
     } else {
+        fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale() ? theme->GetCalendarPickerLargerScale()
+                                                                              : fontSizeScale;
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayLargeWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, fontSize * fontSizeScale);
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayLargeWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize * fontSizeScale);
         defaultDayRadius = theme->GetCalendarPickerDayLargeWidthOrHeight() / 2;
-        if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
-            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayLargerFontSize());
-            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayLargerFontSize());
-        } else {
-            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayLargeFontSize());
-            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayLargeFontSize());
-        }
     }
 
     if (settingData.dayRadius.has_value() && NonNegative(settingData.dayRadius.value().ConvertToPx()) &&
