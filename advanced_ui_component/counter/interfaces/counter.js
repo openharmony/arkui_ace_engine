@@ -1613,7 +1613,8 @@ export class CounterComponent extends ViewPU {
                         });
                         Text.alignRules({
                             center: { anchor: '__container__', align: VerticalAlign.Center },
-                            start: { anchor: '__container__', align: HorizontalAlign.Start }
+                            start: { anchor: '__container__', align: HorizontalAlign.Start },
+                            end: { anchor: 'Row1', align: HorizontalAlign.Start }
                         });
                         Text.id('Text');
                     }, Text);
