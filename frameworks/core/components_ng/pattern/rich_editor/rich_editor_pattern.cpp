@@ -3777,7 +3777,7 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     }
     previewTextRecord_.currentClickedPosition = caretPosition_;
     UpdateCaretInfoToController();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return NO_ERRORS;
 }
 
@@ -3973,7 +3973,7 @@ void RichEditorPattern::FinishTextPreview()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 std::vector<RectF> RichEditorPattern::GetPreviewTextRects()
