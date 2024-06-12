@@ -2336,6 +2336,7 @@ void SwiperPattern::UpdateNextValidIndex()
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
+    additionalOffset -= IgnoreBlankOffset(false);
     additionalOffset = IsHorizontalAndRightToLeft() ? -additionalOffset : additionalOffset;
     if (!indicatorId_.has_value()) {
         return;
