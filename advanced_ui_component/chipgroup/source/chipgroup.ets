@@ -427,7 +427,7 @@ export struct ChipGroup {
   }
 
   private getIconGroupSuffixHeight() {
-    if(typeof this.chipSize === 'string'){
+    if (typeof this.chipSize === 'string') {
       if (this.chipSize === ChipSize.SMALL) {
         return iconGroupSuffixTheme.smallBackgroundSize;
       } else {
