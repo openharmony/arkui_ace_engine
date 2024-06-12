@@ -1042,7 +1042,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align,
     Dimension offsetX(x, DimensionUnit::VP);
     Dimension offsetY(y, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetOverlay(
-        title, nullptr, ALIGNMENT_LIST[align], offsetX, offsetY, NG::OverlayType::TEXT);
+        title, nullptr, nullptr, ALIGNMENT_LIST[align], offsetX, offsetY, NG::OverlayType::TEXT);
 }
 
 void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bindPopupParams)

@@ -84,7 +84,8 @@ struct OptionParam {
 enum class OverlayType {
     BUILDER = 0,
     TEXT = 1,
-    RESET = 2,
+    COMPONENT_CONTENT = 2,
+    RESET = 3,
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -331,6 +332,9 @@ public:
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
     static void SetOverlayBuilder(std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
+    static void SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     // motionPath
@@ -691,6 +695,9 @@ public:
 
 private:
     static void AddDragFrameNodeToManager();
+    static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
 };
 } // namespace OHOS::Ace::NG
 

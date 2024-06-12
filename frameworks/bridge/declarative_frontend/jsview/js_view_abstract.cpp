@@ -2396,7 +2396,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
+            "", nullptr, nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
         return;
     }
 
@@ -2432,24 +2432,43 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         std::string text = info[0]->ToString();
-        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            text, nullptr, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
     } else if (info[0]->IsObject()) {
-        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
-        auto builder = menuObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
+        JSRef<JSObject> overlayObject = JSRef<JSObject>::Cast(info[0]);
+        auto builder = overlayObject->GetProperty("builder");
+        if (builder->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                              node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Overlay");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+            ViewAbstractModel::GetInstance()->SetOverlay(
+                "", std::move(buildFunc), nullptr, align, offsetX, offsetY, NG::OverlayType::BUILDER);
             return;
         }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        CHECK_NULL_VOID(builderFunc);
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Overlay");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX,
-            offsetY, NG::OverlayType::BUILDER);
+
+        JSRef<JSVal> builderNode = overlayObject->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            return;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            return;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, contentNode, align, offsetX, offsetY, NG::OverlayType::COMPONENT_CONTENT);
     }
 }
 

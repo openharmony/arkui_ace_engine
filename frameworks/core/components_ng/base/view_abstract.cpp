@@ -2366,8 +2366,6 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     if (buildFunc) {
         auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
             ScopedViewStackProcessor builderViewStackProcessor;
@@ -2377,25 +2375,48 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
         };
         auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
         CHECK_NULL_VOID(overlayNode);
-        frameNode->SetOverlayNode(overlayNode);
-        overlayNode->SetParent(AceType::WeakClaim(frameNode));
-        overlayNode->SetActive(true);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->SetIsOverlayNode(true);
-        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
-        layoutProperty->SetOverlayOffset(offsetX, offsetY);
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(INT32_MAX);
-        auto focusHub = overlayNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
+        AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
     } else {
-        frameNode->SetOverlayNode(nullptr);
+        AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);
     }
+}
+
+void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    AddOverlayToFrameNode(contentNode, align, offsetX, offsetY);
+}
+
+void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+    layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
 }
 
 void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)

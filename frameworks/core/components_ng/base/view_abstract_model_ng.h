@@ -590,11 +590,13 @@ public:
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) override
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) override
     {
         if (type == NG::OverlayType::BUILDER) {
             ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
+        } else if (type == NG::OverlayType::COMPONENT_CONTENT) {
+            ViewAbstract::SetOverlayComponentContent(contentNode, align, offsetX, offsetY);
         } else {
             NG::OverlayOptions overlay;
             overlay.content = text;
