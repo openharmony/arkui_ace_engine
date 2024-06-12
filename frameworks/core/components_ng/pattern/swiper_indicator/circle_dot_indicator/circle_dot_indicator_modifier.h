@@ -35,6 +35,7 @@ public:
     struct ContentProperty {
         Color backgroundColor = Color::TRANSPARENT;
         LinearVector<float> vectorBlackPointAngle;
+        LinearVector<float> vectorBlackPointRadius;
         float dotPaddingAngle = 0;
         float dotActiveAngle = 0;
         float dotActiveStartAngle = 0;
@@ -49,27 +50,45 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, float itemAngle, ContentProperty& contentProperty,
+    void PaintUnselectedIndicator(RSCanvas& canvas, float itemAngle, float itemRadius, ContentProperty& contentProperty,
         const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, ContentProperty& contentProperty);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
+    float GetAllPointArcAngle(int32_t itemSize, float dotPaddingAngle,
+                              float dotActivePaddingAngle, float dotActiveAngle);
     void PaintIndicatorMask(DrawingContext& context, const ContentProperty& contentProperty);
     // Update property
     void UpdateShrinkPaintProperty(const LinearVector<float>& normalItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                   const LinearVector<float>& vectorBlackPointAngle,
+                                   const LinearVector<float>& vectorBlackPointRadius,
+                                   const std::pair<float, float>& longPointAngle);
     void UpdateDilatePaintProperty(const LinearVector<float>& hoverItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                   const LinearVector<float>& vectorBlackPointAngle,
+                                   const LinearVector<float>& vectorBlackPointRadius,
+                                   const std::pair<float, float>& longPointAngle);
     void UpdateBackgroundColor(const Color& backgroundColor);
 
     void UpdateNormalPaintProperty(const LinearVector<float>& normalItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                   const LinearVector<float>& vectorBlackPointAngle,
+                                   const LinearVector<float>& vectorBlackPointRadius,
+                                   const std::pair<float, float>& longPointAngle);
     void UpdatePressPaintProperty(const LinearVector<float>& hoverItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                  const LinearVector<float>& vectorBlackPointAngle,
+                                  const LinearVector<float>& vectorBlackPointRadius,
+                                  const std::pair<float, float>& longPointAngle);
     // Update
     void UpdateNormalToPressPaintProperty(const LinearVector<float>& hoverItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                          const LinearVector<float>& vectorBlackPointAngle,
+                                          const LinearVector<float>& vectorBlackPointRadius,
+                                          const std::pair<float, float>& longPointAngle);
     void UpdatePressToNormalPaintProperty(const LinearVector<float>& normalItemSizes,
-        const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle);
+                                          const LinearVector<float>& vectorBlackPointAngle,
+                                          const LinearVector<float>& vectorBlackPointRadius,
+                                          const std::pair<float, float>& longPointAngle);
+    void UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
+                                    const LinearVector<float> &vectorBlackPointCenterX,
+                                    const std::pair<float, float> &longPointCenterX,
+                                    float backgroundOffset);
 
     void SetAxis(Axis axis)
     {
@@ -116,7 +135,8 @@ public:
     }
 
     void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointAngle,
-        const std::pair<float, float>& longPointAngle, GestureState gestureState);
+        const LinearVector<float>& vectorBlackPointRadius, const std::pair<float, float>& longPointAngle,
+        GestureState gestureState);
     void StopAnimation(bool ifImmediately = false);
 
     std::pair<float, float> GetLongPointAngle()
@@ -147,8 +167,29 @@ public:
         containerColor_ = backgroundColor;
     }
 
+    void SetLongPointHeadCurve(RefPtr<Curve> curve)
+    {
+        headCurve_ = curve;
+    }
+
+    void SetBackgroundOffset(float backgroundOffset)
+    {
+        backgroundOffset_ = backgroundOffset;
+    }
+
+    void SetIndicatorStartIndex(int32_t indicatorIndex)
+    {
+        indicatorStartIndex_ = indicatorIndex;
+    }
+
+    int32_t GetIndicatorStartIndex()
+    {
+        return indicatorStartIndex_;
+    }
+
 private:
-    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointAngle);
+    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointAngle,
+                                  const LinearVector<float>& vectorBlackPointRadius);
     void PlayLongPointAnimation(const std::pair<float, float>& longPointAngle,
         GestureState gestureState, const LinearVector<float>& vectorBlackPointAngle);
     std::vector<GradientColor> GetMaskColor() const;
@@ -156,6 +197,7 @@ private:
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointAngle_;
+    RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointRadius_;
     RefPtr<PropertyColor> unselectedColor_;
     RefPtr<PropertyColor> selectedColor_;
     RefPtr<AnimatablePropertyFloat> dotPaddingAngle_;
@@ -177,6 +219,7 @@ private:
     float centerX_ = 0.0;
     float centerY_ = 0.0;
     float circleRadius_ = 0.0;
+    int32_t indicatorStartIndex_ = 0;
 
     SwiperArcDirection arcDirection_ = SwiperArcDirection::SIX_CLOCK_DIRECTION;
 
@@ -187,6 +230,9 @@ private:
 
     int32_t currentIndex_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(CircleDotIndicatorModifier);
+    float backgroundOffset_ = 0.0;
+    RefPtr<Curve> headCurve_;
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_CIRCLE_DOT_INDICATOR_MODIFIER_H

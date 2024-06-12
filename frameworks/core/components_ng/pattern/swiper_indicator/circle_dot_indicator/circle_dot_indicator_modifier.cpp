@@ -28,11 +28,11 @@ constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
 
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
-constexpr float HEAD_POINT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
 constexpr float TAIL_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
+constexpr float MASK_END_RATIO = 0.25f;
 
 constexpr int32_t BLACK_POINT_DURATION = 400;
 constexpr int32_t LONG_POINT_DURATION = 400;
@@ -55,11 +55,14 @@ constexpr float DEFAULT_DOT_ACTIVE_ANGLE = 4.0f;
 constexpr Dimension DEFAULT_CONTAINER_BORDER_WIDTH = 16.0_vp;
 constexpr Dimension DEFAULT_ITEM_RADIUS = 2.5_vp;
 constexpr Dimension DEFAULT_ITEM_SELECT_WIDTH = 5.0_vp;
+constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
+constexpr int32_t HALF_DIVISOR = 2;
 } // namespace
 
 CircleDotIndicatorModifier::CircleDotIndicatorModifier()
     : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
       vectorBlackPointAngle_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
+      vectorBlackPointRadius_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
       unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
       selectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
       dotPaddingAngle_(AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_DOT_PADDING_ANGLE)),
@@ -74,6 +77,7 @@ CircleDotIndicatorModifier::CircleDotIndicatorModifier()
 {
     AttachProperty(backgroundColor_);
     AttachProperty(vectorBlackPointAngle_);
+    AttachProperty(vectorBlackPointRadius_);
     AttachProperty(unselectedColor_);
     AttachProperty(selectedColor_);
     AttachProperty(dotPaddingAngle_);
@@ -92,6 +96,7 @@ void CircleDotIndicatorModifier::onDraw(DrawingContext& context)
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointAngle = vectorBlackPointAngle_->Get();
+    contentProperty.vectorBlackPointRadius = vectorBlackPointRadius_->Get();
     contentProperty.dotPaddingAngle = dotPaddingAngle_->Get();
     contentProperty.dotActiveAngle = dotActiveAngle_->Get();
     contentProperty.dotActiveStartAngle = dotActiveStartAngle_->Get();
@@ -115,17 +120,10 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     float containerBorderWidth = contentProperty.containerBorderWidth;
     float dotActiveAngle = contentProperty.dotActiveAngle;
     auto itemSize = contentProperty.vectorBlackPointAngle.size();
-    float allPointArcAngle = 0;
-    // The number 2 represents multiplying by 2 times or dividing equally
-    if (currentIndex_ == 0 || currentIndex_ == itemSize - 1) {
-        if (itemSize >= ITEM_TWO_NUM) {
-            allPointArcAngle = (itemSize - ITEM_TWO_NUM) * dotPaddingAngle + dotActivePaddingAngle + dotActiveAngle / 2;
-        } else {
-            allPointArcAngle = dotActiveAngle;
-        }
-    } else {
-        allPointArcAngle = (itemSize - ITEM_THREE_NUM) * dotPaddingAngle + dotActivePaddingAngle * 2;
+    if (itemSize > MAX_INDICATOR_DOT_COUNT) {
+        itemSize = MAX_INDICATOR_DOT_COUNT;
     }
+    float allPointArcAngle = GetAllPointArcAngle(itemSize, dotPaddingAngle, dotActivePaddingAngle, dotActiveAngle);
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(containerBorderWidth);
@@ -136,28 +134,64 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     PointF endPoint;
     // The number 2 represents multiplying by 2 times or dividing equally
     if (axis_ == Axis::HORIZONTAL) {
-        startPoint.SetX(centerX_ - circleRadius_ + containerBorderWidth / 2);
-        startPoint.SetY(centerY_ - circleRadius_ + containerBorderWidth / 2);
-        endPoint.SetX(centerX_ + circleRadius_ - (containerBorderWidth / 2));
-        endPoint.SetY(centerY_ + circleRadius_ - (containerBorderWidth / 2));
+        startPoint.SetX(centerX_ - circleRadius_ + containerBorderWidth / HALF_DIVISOR);
+        startPoint.SetY(centerY_ - circleRadius_ + containerBorderWidth / HALF_DIVISOR);
+        endPoint.SetX(centerX_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
+        endPoint.SetY(centerY_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
     } else {
-        startPoint.SetX(centerY_ - circleRadius_ + containerBorderWidth / 2);
-        startPoint.SetY(centerX_ - circleRadius_ + containerBorderWidth / 2);
-        endPoint.SetX(centerY_ + circleRadius_ - (containerBorderWidth / 2));
-        endPoint.SetY(centerX_ + circleRadius_ - (containerBorderWidth / 2));
+        startPoint.SetX(centerY_ - circleRadius_ + containerBorderWidth / HALF_DIVISOR);
+        startPoint.SetY(centerX_ - circleRadius_ + containerBorderWidth / HALF_DIVISOR);
+        endPoint.SetX(centerY_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
+        endPoint.SetY(centerX_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
     }
     if (arcDirection_ == SwiperArcDirection::SIX_CLOCK_DIRECTION) {
-        startAngle = QUARTER_CIRCLE_ANGLE + (allPointArcAngle / 2);
+        startAngle = QUARTER_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR) + backgroundOffset_;
     } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
-        startAngle = allPointArcAngle / 2;
+        startAngle = allPointArcAngle / HALF_DIVISOR + backgroundOffset_;
     } else {
-        startAngle = HALF_CIRCLE_ANGLE + (allPointArcAngle / 2);
+        startAngle = HALF_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR) + backgroundOffset_;
     }
     canvas.AttachPen(pen);
     canvas.DrawArc(
         { startPoint.GetX(), startPoint.GetY(), endPoint.GetX(), endPoint.GetY() }, startAngle, -allPointArcAngle);
     canvas.DetachPen();
     canvas.Restore();
+}
+
+float CircleDotIndicatorModifier::GetAllPointArcAngle(int32_t itemSize, float dotPaddingAngle,
+    float dotActivePaddingAngle, float dotActiveAngle)
+{
+    float allPointArcAngle = 0;
+    if (currentIndex_ == 0 || currentIndex_ == itemSize - 1) {
+        if (itemSize >= ITEM_TWO_NUM) {
+            allPointArcAngle =
+                (itemSize - ITEM_TWO_NUM) * dotPaddingAngle + dotActivePaddingAngle + dotActiveAngle / HALF_DIVISOR;
+        } else {
+            allPointArcAngle = dotActiveAngle;
+        }
+    } else {
+        allPointArcAngle = (itemSize - ITEM_THREE_NUM) * dotPaddingAngle + dotActivePaddingAngle * HALF_DIVISOR;
+    }
+    return allPointArcAngle;
+}
+
+void CircleDotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
+                                                            const LinearVector<float>& vectorBlackPointCenterX,
+                                                            const std::pair<float, float>& longPointCenterX,
+                                                            float backgroundOffset)
+{
+    AnimationOption option;
+    option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    touchBottomType_ = touchBottomType;
+
+    AnimationUtils::Animate(option, [weak = WeakClaim(this),
+                                    vectorBlackPointCenterX, longPointCenterX, backgroundOffset]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->SetBackgroundOffset(backgroundOffset);
+        modifier->vectorBlackPointAngle_->Set(vectorBlackPointCenterX);
+    });
 }
 
 std::vector<GradientColor> CircleDotIndicatorModifier::GetMaskColor() const
@@ -215,19 +249,22 @@ void CircleDotIndicatorModifier::PaintIndicatorMask(DrawingContext& context, con
             centerX - circleRadius_, centerY + circleRadius_ - static_cast<float>(MASK_HEIGHT.ConvertToPx()));
         endPt = RSPoint(centerX + circleRadius_, centerY + circleRadius_);
         gradientStartPt = RSPoint(centerX, centerY + circleRadius_ - static_cast<float>(MASK_HEIGHT.ConvertToPx()));
-        gradientendPt = RSPoint(centerX, centerY + circleRadius_);
+        gradientendPt = RSPoint(centerX, centerY + circleRadius_ - static_cast<float>(MASK_HEIGHT.ConvertToPx()) *
+            MASK_END_RATIO);
     } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
         startPt = RSPoint(
             centerX + circleRadius_ - static_cast<float>(MASK_HEIGHT.ConvertToPx()), centerY - circleRadius_);
         endPt = RSPoint(centerX + circleRadius_, centerY + circleRadius_);
         gradientStartPt = RSPoint(centerX + circleRadius_ - static_cast<float>(MASK_HEIGHT.ConvertToPx()), centerY);
-        gradientendPt = RSPoint(centerX + circleRadius_, centerY);
+        gradientendPt = RSPoint(centerX + circleRadius_  - static_cast<float>(MASK_HEIGHT.ConvertToPx()) *
+            MASK_END_RATIO, centerY);
     } else {
         startPt = RSPoint(centerX - circleRadius_, centerY - circleRadius_);
         endPt = RSPoint(
             centerX - circleRadius_ + static_cast<float>(MASK_HEIGHT.ConvertToPx()), centerY + circleRadius_);
         gradientStartPt = RSPoint(centerX - circleRadius_ + static_cast<float>(MASK_HEIGHT.ConvertToPx()), centerY);
-        gradientendPt = RSPoint(centerX - circleRadius_, centerY);
+        gradientendPt = RSPoint(centerX - circleRadius_ + static_cast<float>(MASK_HEIGHT.ConvertToPx()) *
+            MASK_END_RATIO, centerY);
     }
 
     brush.SetShaderEffect(
@@ -244,21 +281,21 @@ void CircleDotIndicatorModifier::PaintContent(DrawingContext& context, ContentPr
     auto totalCount = contentProperty.vectorBlackPointAngle.size();
     for (size_t i = 0; i < totalCount; ++i) {
         float itemAngle = contentProperty.vectorBlackPointAngle[i];
-        PaintUnselectedIndicator(canvas, itemAngle, contentProperty, LinearColor(unselectedColor_->Get()));
+        float itemRadius = contentProperty.vectorBlackPointRadius[i];
+        PaintUnselectedIndicator(canvas, itemAngle, itemRadius, contentProperty, LinearColor(unselectedColor_->Get()));
     }
 
     PaintSelectedIndicator(canvas, contentProperty);
 }
 
-void CircleDotIndicatorModifier::PaintUnselectedIndicator(
-    RSCanvas& canvas, float itemAngle, ContentProperty& contentProperty, const LinearColor& indicatorColor)
+void CircleDotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, float itemAngle, float itemRadius,
+    ContentProperty& contentProperty, const LinearColor& indicatorColor)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(indicatorColor));
     canvas.AttachBrush(brush);
 
-    float itemRadius = contentProperty.itemRadius;
     float containerBorderWidth = contentProperty.containerBorderWidth;
 
     float itemCenterX = 0.0;
@@ -336,7 +373,8 @@ void CircleDotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, Conten
 }
 
 void CircleDotIndicatorModifier::UpdateShrinkPaintProperty(const LinearVector<float>& normalItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
     dotPaddingAngle_->Set(normalItemSizes[ITEM_PADDING]);
     dotActiveAngle_->Set(normalItemSizes[ACTIVE_ITEM_ANGLE]);
@@ -349,10 +387,12 @@ void CircleDotIndicatorModifier::UpdateShrinkPaintProperty(const LinearVector<fl
         dotActiveEndAngle_->Set(longPointAngle.second);
     }
     vectorBlackPointAngle_->Set(vectorBlackPointAngle);
+    vectorBlackPointRadius_->Set(vectorBlackPointRadius);
 }
 
 void CircleDotIndicatorModifier::UpdateDilatePaintProperty(const LinearVector<float>& hoverItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
     dotPaddingAngle_->Set(hoverItemSizes[ITEM_PADDING]);
     dotActiveAngle_->Set(hoverItemSizes[ACTIVE_ITEM_ANGLE]);
@@ -365,6 +405,7 @@ void CircleDotIndicatorModifier::UpdateDilatePaintProperty(const LinearVector<fl
         dotActiveEndAngle_->Set(longPointAngle.second);
     }
     vectorBlackPointAngle_->Set(vectorBlackPointAngle);
+    vectorBlackPointRadius_->Set(vectorBlackPointRadius);
 }
 
 void CircleDotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
@@ -373,70 +414,82 @@ void CircleDotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundCo
 }
 
 void CircleDotIndicatorModifier::UpdateNormalPaintProperty(const LinearVector<float>& normalItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
-    UpdateShrinkPaintProperty(normalItemSizes, vectorBlackPointAngle, longPointAngle);
+    UpdateShrinkPaintProperty(normalItemSizes, vectorBlackPointAngle, vectorBlackPointRadius, longPointAngle);
     UpdateBackgroundColor(containerColor_.ChangeOpacity(0));
 }
 
 void CircleDotIndicatorModifier::UpdatePressPaintProperty(const LinearVector<float>& hoverItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
-    UpdateDilatePaintProperty(hoverItemSizes, vectorBlackPointAngle, longPointAngle);
+    UpdateDilatePaintProperty(hoverItemSizes, vectorBlackPointAngle, vectorBlackPointRadius, longPointAngle);
     UpdateBackgroundColor(containerColor_);
 }
 
 void CircleDotIndicatorModifier::UpdateNormalToPressPaintProperty(const LinearVector<float>& hoverItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemSizes, vectorBlackPointAngle, longPointAngle]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemSizes, vectorBlackPointAngle,
+                                     vectorBlackPointRadius, longPointAngle]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->UpdatePressPaintProperty(hoverItemSizes, vectorBlackPointAngle, longPointAngle);
+        modifier->UpdatePressPaintProperty(hoverItemSizes, vectorBlackPointAngle, vectorBlackPointRadius,
+                                           longPointAngle);
     });
 }
 
 void CircleDotIndicatorModifier::UpdatePressToNormalPaintProperty(const LinearVector<float>& normalItemSizes,
-    const LinearVector<float>& vectorBlackPointAngle, const std::pair<float, float>& longPointAngle)
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius,
+    const std::pair<float, float>& longPointAngle)
 {
     StopAnimation(true);
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), normalItemSizes, vectorBlackPointAngle, longPointAngle]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), normalItemSizes, vectorBlackPointAngle,
+                                     vectorBlackPointRadius, longPointAngle]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->UpdateNormalPaintProperty(normalItemSizes, vectorBlackPointAngle, longPointAngle);
+        modifier->UpdateNormalPaintProperty(normalItemSizes, vectorBlackPointAngle, vectorBlackPointRadius,
+                                            longPointAngle);
     });
 }
 
-void CircleDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointAngle)
+void CircleDotIndicatorModifier::PlayBlackPointsAnimation(
+    const LinearVector<float>& vectorBlackPointAngle, const LinearVector<float>& vectorBlackPointRadius)
 {
     auto curve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(BLACK_POINT_DURATION);
-    blackPointsAnimation_ =
-        AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointAngle_->Set(vectorBlackPointAngle); });
+
+    blackPointsAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
+        vectorBlackPointAngle_->Set(vectorBlackPointAngle);
+        vectorBlackPointRadius_->Set(vectorBlackPointRadius);
+    });
 }
 
 void CircleDotIndicatorModifier::PlayLongPointAnimation(const std::pair<float, float>& longPointAngle,
     GestureState gestureState, const LinearVector<float>& vectorBlackPointAngle)
 {
+    RefPtr<Curve> curve = headCurve_;
     AnimationOption optionHead;
     optionHead.SetDuration(LONG_POINT_DURATION);
-    optionHead.SetCurve(AceType::MakeRefPtr<CubicCurve>(HEAD_POINT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
+    optionHead.SetCurve(curve);
 
     AnimationOption optionTail;
     optionTail.SetDuration(LONG_POINT_DURATION);
-    optionHead.SetCurve(AceType::MakeRefPtr<CubicCurve>(TAIL_POINT_CENTER_BEZIER_CURVE_VELOCITY,
+    optionTail.SetCurve(AceType::MakeRefPtr<CubicCurve>(TAIL_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
 
     AnimationOption optionLeft = optionTail;
@@ -474,10 +527,11 @@ void CircleDotIndicatorModifier::PlayLongPointAnimation(const std::pair<float, f
 }
 
 void CircleDotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointAngle,
-    const std::pair<float, float>& longPointAngle, GestureState gestureState)
+    const LinearVector<float>& vectorBlackPointRadius, const std::pair<float, float>& longPointAngle,
+    GestureState gestureState)
 {
     StopAnimation();
-    PlayBlackPointsAnimation(vectorBlackPointAngle);
+    PlayBlackPointsAnimation(vectorBlackPointAngle, vectorBlackPointRadius);
     PlayLongPointAnimation(longPointAngle, gestureState, vectorBlackPointAngle);
 }
 

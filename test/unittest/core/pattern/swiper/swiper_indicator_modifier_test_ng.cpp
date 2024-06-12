@@ -1646,12 +1646,15 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorModifier001, TestSize.
     circleDotIndicatorModifier.UpdateBackgroundColor(Color::RED);
     LinearVector<float> vectorBlackPointCenterX;
     vectorBlackPointCenterX.emplace_back(20.f);
+    LinearVector<float> vectorBlackPointRadius;
+    vectorBlackPointRadius.emplace_back(2.5f);
     LinearVector<float> itemHalfSizes;
     itemHalfSizes.emplace_back(20.f);
     itemHalfSizes.emplace_back(10.f);
     itemHalfSizes.emplace_back(30.f);
     itemHalfSizes.emplace_back(35.f);
-    circleDotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, { 0.f, 0.f });
+    circleDotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, vectorBlackPointRadius,
+                                                        {0.f, 0.f});
 
     /**
      * @tc.steps: step4. call onDraw.
@@ -1664,7 +1667,8 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorModifier001, TestSize.
      * @tc.steps: step5. set parameters.
      */
     circleDotIndicatorModifier.SetArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION);
-    circleDotIndicatorModifier.UpdateNormalToPressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, { 0.f, 0.f });
+    circleDotIndicatorModifier.UpdateNormalToPressPaintProperty(itemHalfSizes, vectorBlackPointCenterX,
+                                                                vectorBlackPointRadius, {0.f, 0.f});
 
     /**
      * @tc.steps: step6. call onDraw.
@@ -1692,15 +1696,18 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotPlayIndicatorAnimation001, Test
     LinearVector<float> vectorBlackPointAngle;
     vectorBlackPointAngle.push_back(20.0f);
     vectorBlackPointAngle.push_back(20.0f);
+    LinearVector<float> vectorBlackPointRadius;
+    vectorBlackPointRadius.emplace_back(2.5f);
+    vectorBlackPointRadius.emplace_back(2.5f);
     std::pair<float, float> longPointCenterX = { 0.0f, 0.0f };
     auto gestureState = GestureState::GESTURE_STATE_RELEASE_LEFT;
 
     /**
      * @tc.steps: step2. call PlayIndicatorAnimation.
      */
-    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, longPointCenterX, gestureState);
+    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, vectorBlackPointRadius, longPointCenterX, gestureState);
     longPointCenterX = { 1.0f, 1.0f };
-    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, longPointCenterX, gestureState);
+    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, vectorBlackPointRadius, longPointCenterX, gestureState);
     EXPECT_EQ(modifier->longPointLeftAnimEnd_, true);
 }
 
@@ -1816,6 +1823,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintUnselectedIndicat
 
     RSCanvas canvas;
     float itemAngle = -1.2f;
+    float itemRadius = 2.5f;
     CircleDotIndicatorModifier::ContentProperty contentProperty;
     LinearVector<float> vectorBlackPointAngle;
     vectorBlackPointAngle.push_back(20.0f);
@@ -1826,17 +1834,17 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintUnselectedIndicat
      */
     modifier->arcDirection_ = SwiperArcDirection::SIX_CLOCK_DIRECTION;
     modifier->PaintUnselectedIndicator(
-        canvas, itemAngle, contentProperty, LinearColor(Color::TRANSPARENT));
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
     EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::SIX_CLOCK_DIRECTION);
 
     modifier->arcDirection_ = SwiperArcDirection::THREE_CLOCK_DIRECTION;
     modifier->PaintUnselectedIndicator(
-        canvas, itemAngle, contentProperty, LinearColor(Color::TRANSPARENT));
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
     EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::THREE_CLOCK_DIRECTION);
 
     modifier->arcDirection_ = SwiperArcDirection::NINE_CLOCK_DIRECTION;
     modifier->PaintUnselectedIndicator(
-        canvas, itemAngle, contentProperty, LinearColor(Color::TRANSPARENT));
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
     EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::NINE_CLOCK_DIRECTION);
 }
 
@@ -1929,14 +1937,15 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetLongPointAngle001, 
     LinearVector<float> itemSizes;
     itemSizes.emplace_back(20.f);
     itemSizes.emplace_back(20.f);
+    int32_t indicatorStartIndex = 0;
 
     /**
      * @tc.steps: step2. Call GetLongPointAngle.
      */
-    paintMethod->GetLongPointAngle(itemSizes, 0);
+    paintMethod->GetLongPointAngle(itemSizes, 0, indicatorStartIndex);
     EXPECT_EQ(paintMethod->arcDirection_, SwiperArcDirection::THREE_CLOCK_DIRECTION);
     paintMethod->arcDirection_ = SwiperArcDirection::NINE_CLOCK_DIRECTION;
-    paintMethod->GetLongPointAngle(itemSizes, 0);
+    paintMethod->GetLongPointAngle(itemSizes, 0, indicatorStartIndex);
     EXPECT_EQ(paintMethod->arcDirection_, SwiperArcDirection::NINE_CLOCK_DIRECTION);
 }
 
@@ -1967,16 +1976,18 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetBlackPointAngle001,
     /**
      * @tc.steps: step2. Call GetBlackPointAngle.
      */
-    paintMethod->GetBlackPointAngle(itemSizes, 0, 0);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 0);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 1);
-    paintMethod->GetBlackPointAngle(itemSizes, 2, 1);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 2);
+    int32_t indicatorStartIndex = 0;
+    float offset = paintMethod->CalculateBlackPointRotateAngle(indicatorStartIndex);
+    paintMethod->GetBlackPointAngle(itemSizes, 0, 0, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 1, 0, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 1, 1, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 2, 1, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 1, 2, offset);
     EXPECT_EQ(paintMethod->GetHalfIndex(), 2);
     paintMethod->itemCount_ = 1;
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 1);
-    paintMethod->GetBlackPointAngle(itemSizes, 2, 1);
-    paintMethod->GetBlackPointAngle(itemSizes, 1, 2);
+    paintMethod->GetBlackPointAngle(itemSizes, 1, 1, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 2, 1, offset);
+    paintMethod->GetBlackPointAngle(itemSizes, 1, 2, offset);
     EXPECT_EQ(paintMethod->GetHalfIndex(), 0);
 }
 
