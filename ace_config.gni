@@ -263,6 +263,7 @@ foreach(item, ace_platforms) {
   }
 }
 
-if (defined(use_origin_scope) && use_origin_scope) {
+if ((defined(use_origin_scope) && use_origin_scope) ||
+    (defined(force_scope) && force_scope)) {
   ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
