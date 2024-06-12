@@ -88,7 +88,9 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string pagePath;
     if (info.Length() == 1) {
+        // input format: builder/pathInfo
         if (info[0]->IsFunction()) {
+            // first parameter = builder
             auto builderFunctionJS = info[0];
             auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
                 JAVASCRIPT_EXECUTION_SCOPE(context)
@@ -100,6 +102,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
             return;
         } else if (info[0]->IsObject()) {
+            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB}
             auto infoObj = JSRef<JSObject>::Cast(info[0]);
             if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
                 !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
@@ -116,6 +119,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             "current input info is neither buildFunction or navDestination usefulInfo");
         return;
     } else if (info.Length() == 2) {
+        // parameter = builder(maybe empty) + pathInfo
         if (!info[0]->IsFunction() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "buider or pageInfo is invalid");
             return;
@@ -140,7 +144,6 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
         NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
     }
-    return;
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)

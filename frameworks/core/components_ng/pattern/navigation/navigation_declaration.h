@@ -114,6 +114,7 @@ constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
 // navigation page info
 constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
 constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
+constexpr char IS_USER_CREATE_STACK[] = "isUserCreateStack";
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,

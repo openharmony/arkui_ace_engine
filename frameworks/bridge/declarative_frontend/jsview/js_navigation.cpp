@@ -264,12 +264,14 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string pagePath;
     if (info.Length() == 1) {
+        // input format: navPathStack/pathInfo
         if (!info[0]->IsObject()) {
             return;
         }
         // instance of NavPathStack
         JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
         if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             auto infoObj = JSRef<JSObject>::Cast(info[0]);
             if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
@@ -280,9 +282,11 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
             pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
         } else {
+            // first parameter = navPathStack
             newObj = JSRef<JSObject>::Cast(info[0]);
         }
     } else if (info.Length() == 2) {
+        // parameter = navPathStack(maybe empty) + pathInfo
         if (!info[0]->IsObject() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
             return;
@@ -293,8 +297,16 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
+        // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
         auto infoObj = JSRef<JSObject>::Cast(info[1]);
+        auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
+        bool isUserDefined = true;
+        if (isUserCreateStack->IsBoolean()) {
+            isUserDefined = isUserCreateStack->ToBoolean();
+        }
+        if (isUserDefined) {
+            newObj = JSRef<JSObject>::Cast(info[0]);
+        }
         if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
             !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
