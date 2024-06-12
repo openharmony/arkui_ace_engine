@@ -477,8 +477,8 @@ struct ArkUIBlurStyleOptionType {
     ArkUI_Int32 colorMode;
     ArkUI_Int32 adaptiveColor;
     ArkUI_Float32 scale;
-    ArkUI_Float32 greyScaleStart;
-    ArkUI_Float32 greyScaleEnd;
+    ArkUI_Float32 grayScaleStart;
+    ArkUI_Float32 grayScaleEnd;
 };
 
 struct ArkUITextDecorationType {
