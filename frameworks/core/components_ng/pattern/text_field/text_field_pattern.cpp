@@ -224,22 +224,6 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 
-void AddTextFireOnChange(RefPtr<PipelineContext>& context, TextFieldPattern* pattern)
-{
-    context->AddAfterLayoutTask([weak = AceType::WeakClaim(pattern)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
-        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
-    });
-}
-
 } // namespace
 
 void TextFieldPattern::OnAttachContext(PipelineContext* context)
@@ -870,7 +854,10 @@ void TextFieldPattern::HandleFocusEvent()
     ProcessFocusStyle();
     SetFocusStyle();
     AddIsFocusActiveUpdateEvent();
-    RequestKeyboardOnFocus();
+    if (!isTouchDownRequestFocus_) {
+        RequestKeyboardOnFocus();
+    }
+    isTouchDownRequestFocus_ = false;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1686,6 +1673,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     }
     if (!HasFocus()) {
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+            isTouchDownRequestFocus_ = true;
             return;
         }
     }
@@ -1838,7 +1826,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
+        if (pattern->SelectOverlayIsOn() || pattern->imeShown_ || pattern->showSelect_) {
             pattern->CloseHandleAndSelect();
             pattern->CloseKeyboard(true);
         }
@@ -2779,13 +2767,13 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    auto context = PipelineContext::GetCurrentContextSafely();
+    if (!GetIsPreviewText()) {
+        AddTextFireOnChange();
+    }
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    if (!GetIsPreviewText()) {
-        AddTextFireOnChange(context, this);
-    }
     taskExecutor->PostTask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
@@ -2800,6 +2788,26 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         },
         TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
     return true;
+}
+
+void TextFieldPattern::AddTextFireOnChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
+        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue());
+    });
 }
 
 void TextFieldPattern::FilterInitializeText()

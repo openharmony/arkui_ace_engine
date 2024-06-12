@@ -1377,6 +1377,7 @@ private:
     void FireEventHubOnChange(const std::string& text);
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
+    void AddTextFireOnChange();
 
     void FilterInitializeText();
 
@@ -1704,6 +1705,7 @@ private:
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
+    bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
     bool previewLongPress_ = false;
 };
