@@ -395,7 +395,9 @@ protected:
     void DrawSvgImage(const Ace::CanvasImage& canvasImage);
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-        const RSBrush* brush, const RSPen* pen) = 0;
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
+    virtual void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) = 0;
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;

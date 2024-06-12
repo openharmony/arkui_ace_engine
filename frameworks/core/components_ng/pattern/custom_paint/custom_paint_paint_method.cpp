@@ -565,11 +565,11 @@ void CustomPaintPaintMethod::DrawImageInternal(
     const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
     const auto rsCanvas = rsCanvas_.get();
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+    RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        RSBrush compositeOperationpBrush;
-        InitPaintBlend(compositeOperationpBrush);
-        auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         rsCanvas_->SaveLayer(slo);
     }
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
@@ -581,9 +581,9 @@ void CustomPaintPaintMethod::DrawImageInternal(
             canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
-        PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
+        PaintImageShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr,
+            (globalState_.GetType() != CompositeOperation::SOURCE_OVER) ? &slo : nullptr);
     }
-
     rsCanvas->AttachBrush(imageBrush_);
     switch (canvasImage.flag) {
         case DrawImageType::THREE_PARAMS:
@@ -696,11 +696,9 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, shadow_, rsCanvas_.get(), &brush, nullptr);
-            rsCanvas_->Restore();
+            PaintShadow(path, shadow_, rsCanvas_.get(), &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -739,11 +737,9 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
             RSRecordingPath path;
             path.AddRect(rsRect);
-            PaintShadow(path, shadow_, rsCanvas_.get(), nullptr, &pen);
-            rsCanvas_->Restore();
+            PaintShadow(path, shadow_, rsCanvas_.get(), nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
@@ -820,9 +816,7 @@ void CustomPaintPaintMethod::Fill()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
-            PaintShadow(rsPath_, shadow_, rsCanvas_.get(), &brush, nullptr);
-            rsCanvas_->Restore();
+            PaintShadow(rsPath_, shadow_, rsCanvas_.get(), &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -876,9 +870,7 @@ void CustomPaintPaintMethod::Path2DFill()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
-            PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), &brush, nullptr);
-            rsCanvas_->Restore();
+            PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), &brush, nullptr, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachBrush(brush);
@@ -913,9 +905,7 @@ void CustomPaintPaintMethod::Stroke()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
-            PaintShadow(rsPath_, shadow_, rsCanvas_.get(), nullptr, &pen);
-            rsCanvas_->Restore();
+            PaintShadow(rsPath_, shadow_, rsCanvas_.get(), nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
@@ -958,9 +948,7 @@ void CustomPaintPaintMethod::Path2DStroke()
         auto rect = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
         RSSaveLayerOps slo(&rect, &compositeOperationpBrush);
         if (HasShadow()) {
-            rsCanvas_->SaveLayer(slo);
-            PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), nullptr, &pen);
-            rsCanvas_->Restore();
+            PaintShadow(rsPath2d_, shadow_, rsCanvas_.get(), nullptr, &pen, &slo);
         }
         rsCanvas_->SaveLayer(slo);
         rsCanvas_->AttachPen(pen);
