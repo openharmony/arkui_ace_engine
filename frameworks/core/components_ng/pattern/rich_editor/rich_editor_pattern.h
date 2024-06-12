@@ -533,6 +533,7 @@ public:
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
+    void AddUdmfData(const RefPtr<Ace::DragEvent>& event) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     const std::string& GetPasteStr() const
@@ -1013,6 +1014,25 @@ private:
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
     void SwitchState();
+    RefPtr<SpanString> ToStyledString(int32_t start, int32_t length);
+    void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t length);
+    void SetSubMap(RefPtr<SpanString>& spanString);
+    RefPtr<SpanString> FromStyledString(int32_t start, int32_t length);
+    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<ImageSpan> ToImageSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<SpanItem>& spanItem);
+    RefPtr<FontSpan> ToFontSpan(const RefPtr<SpanItem>& spanItem);
+    void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
+    void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
+    TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
+    void HandleOnCopyStyledString();
+    void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
