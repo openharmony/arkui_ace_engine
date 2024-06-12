@@ -4113,15 +4113,21 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
-            for (const child of this.childrenWeakrefMap_.values()) {
-                const childView = child.deref();
-                if (childView) {
-                    childView.forceCompleteRerender(true);
+            this.childrenWeakrefMap_.forEach((weakRefChild) => {
+                const child = weakRefChild.deref();
+                if (child) {
+                    if (child instanceof ViewPU) {
+                        if (!child.hasBeenRecycled_) {
+                            child.forceCompleteRerender(true);
+                        } else {
+                            child.delayCompleteRerender(deep);
+                        }
+                    }
+                } else {
+                    throw new Error('forceCompleteRender not implemented for ViewV2, yet');
                 }
-            }
+            });
         }
-        
-        
     }
     /**
     * force a complete rerender / update on specific node by executing update function.
