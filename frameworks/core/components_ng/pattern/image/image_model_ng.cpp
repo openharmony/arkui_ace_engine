@@ -818,11 +818,11 @@ bool ImageModelNG::GetIsAnimation()
     return pattern->GetIsAnimation();
 }
 
-RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
+ImagePattern* ImageModelNG::GetImagePattern()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
+    return frameNode->GetPatternPtr<ImagePattern>();
 }
 
 ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)

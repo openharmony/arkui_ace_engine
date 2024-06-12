@@ -123,7 +123,7 @@ public:
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
 private:
-    RefPtr<ImagePattern> GetImagePattern();
+    ImagePattern* GetImagePattern();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
