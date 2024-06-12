@@ -236,7 +236,7 @@ T* JsiCallbackInfo::UnwrapArg(size_t index) const
     if (arg.IsEmpty() || !arg->IsObject()) {
         return nullptr;
     }
-    return static_cast<T*>(arg->ToObject(info_->GetVM())->GetNativePointerField(0));
+    return static_cast<T*>(arg->ToEcmaObject(info_->GetVM())->GetNativePointerField(0));
 }
 
 template<typename... Args>
