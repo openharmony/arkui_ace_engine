@@ -33,6 +33,23 @@ void ListItemGroupPattern::OnAttachToFrameNode()
     }
 }
 
+void ListItemGroupPattern::OnColorConfigurationUpdate()
+{
+    if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD) {
+        return;
+    }
+    auto itemGroupNode = GetHost();
+    CHECK_NULL_VOID(itemGroupNode);
+    auto renderContext = itemGroupNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = itemGroupNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+
+    renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+}
+
 void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
 {
     auto renderContext = itemGroupNode->GetRenderContext();
