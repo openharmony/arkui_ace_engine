@@ -4256,12 +4256,8 @@ void RichEditorPattern::SpanNodeFission(
             RefPtr<SpanNode> spanNodeAfter = SpanNode::GetOrCreateSpanNode(nodeId);
             spanNodeAfter->MountToParent(host, infoAfter.GetSpanIndex());
             spanNodeAfter->UpdateContent(StringUtils::ToString(textAfter));
-            auto targetIt = spans_.begin();
-            std::advance(targetIt, infoAfter.GetSpanIndex());
-            spans_.insert(targetIt, spanNodeAfter->GetSpanItem());
             CopyTextSpanStyle(spanNode, spanNodeAfter);
-            auto spanItemAfter = spanNodeAfter->GetSpanItem();
-            AddSpanItem(spanItemAfter, infoAfter.GetSpanIndex());
+            AddSpanItem(spanNodeAfter->GetSpanItem(), infoAfter.GetSpanIndex());
         }
     } else {
         text = StringUtils::ToString(textTemp);
