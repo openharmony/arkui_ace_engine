@@ -4933,6 +4933,14 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(menuWrapperNode, nullptr);
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, nullptr);
+        menuPattern->SetNeedHideAfterTouch(false);
+    }
     auto idealSize = CaculateMenuSize(menuNode, longestContent, menuSize);
     auto uiExtLayoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(uiExtLayoutProperty, nullptr);
@@ -5048,14 +5056,17 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
 
 void OverlayManager::CloseUIExtensionMenu(int32_t targetId)
 {
-    bool isShown = SubwindowManager::GetInstance()->GetShown();
-    if (isShown) {
-        CleanMenuInSubWindow(targetId);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay) {
+        SubwindowManager::GetInstance()->ClearMenu();
+        SubwindowManager::GetInstance()->ClearMenuNG(Container::CurrentId(), targetId);
     } else {
         auto menuNode = GetMenuNode(targetId);
         CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuPattern);
         HideMenu(menuNode, targetId);
     }
 }

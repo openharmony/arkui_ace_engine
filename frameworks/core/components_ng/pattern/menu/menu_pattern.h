@@ -289,6 +289,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
+    void SetNeedHideAfterTouch(bool needHideAfterTouch)
+    {
+        needHideAfterTouch_ = needHideAfterTouch;
+    }
+
     void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
@@ -566,6 +571,7 @@ private:
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
+    bool needHideAfterTouch_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;
