@@ -902,6 +902,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (isNotInit) {
             OnIndexChange();
         }
+        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
@@ -919,6 +920,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
+            ignoreBlankSpringOffset_ = IgnoreBlankOffset(false);
             float targetPos = iter->second.startPos + IgnoreBlankOffset(false);
             auto context = GetContext();
             auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
@@ -2336,7 +2338,7 @@ void SwiperPattern::UpdateNextValidIndex()
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
-    additionalOffset -= IgnoreBlankOffset(false);
+    additionalOffset += ignoreBlankSpringOffset_;
     additionalOffset = IsHorizontalAndRightToLeft() ? -additionalOffset : additionalOffset;
     if (!indicatorId_.has_value()) {
         return;
