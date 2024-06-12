@@ -132,6 +132,7 @@ public:
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void HideDragPreviewOverlay();
+    void HideDragPreviewWindow(int32_t containerId);
     bool IsMSDPDragging() const;
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     void UpdateNotifyDragEvent(
