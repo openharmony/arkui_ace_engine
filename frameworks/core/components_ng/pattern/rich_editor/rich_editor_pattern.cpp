@@ -3653,6 +3653,8 @@ void RichEditorPattern::FinishTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
     auto& record = previewTextRecord_;
+    auto previewContent = record.previewTextSpan->content;
+    auto previewStartPos = record.startOffset;
     record.previewTextSpan->content.clear();
     auto beforeSpanItem = record.beforeSpanNode ? record.beforeSpanNode->GetSpanItem() : nullptr;
     auto afterSpanItem = record.afterSpanNode ? record.afterSpanNode->GetSpanItem() : nullptr;
@@ -3663,6 +3665,11 @@ void RichEditorPattern::FinishTextPreview()
     RemoveEmptySpans();
     UpdateSpanPosition();
     previewTextRecord_.Reset();
+    if (!previewContent.empty()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert preview text pos = %{public}d", previewStartPos);
+        caretPosition_ = previewStartPos;
+        InsertValue(previewContent);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
