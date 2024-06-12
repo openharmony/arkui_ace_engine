@@ -413,6 +413,7 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     void RecoveryToLastStack();
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
