@@ -6438,6 +6438,35 @@ class ImageOnCompleteModifier extends ModifierWithKey {
 }
 ImageOnCompleteModifier.identity = Symbol('imageOnComplete');
 
+class ImageOnErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetOnError(node);
+    }
+    else {
+      getUINativeModule().image.setOnError(node, this.value);
+    }
+  }
+}
+ImageOnErrorModifier.identity = Symbol('imageOnError');
+
+class ImageOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetOnFinish(node);
+    } else {
+      getUINativeModule().image.setOnFinish(node, this.value);
+    }
+  }
+}
+ImageOnFinishModifier.identity = Symbol('imageOnFinish');
+
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6526,10 +6555,12 @@ class ArkImageComponent extends ArkComponent {
     return this;
   }
   onError(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnErrorModifier.identity, ImageOnErrorModifier, callback);
+    return this;
   }
   onFinish(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnFinishModifier.identity, ImageOnFinishModifier, event);
+    return this;
   }
   border(value) {
     modifierWithKey(this._modifiersWithKeys, ImageBorderModifier.identity, ImageBorderModifier, value);

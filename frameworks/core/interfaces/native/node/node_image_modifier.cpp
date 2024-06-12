@@ -804,6 +804,44 @@ void SetOnComplete(ArkUINodeHandle node, void* callback)
         ImageModelNG::SetOnComplete(frameNode, nullptr);
     }
 }
+
+void SetOnError(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const LoadImageFailEvent&)>*>(callback);
+        ImageModelNG::SetOnError(frameNode, std::move(*onError));
+    } else {
+        ImageModelNG::SetOnError(frameNode, nullptr);
+    }
+}
+
+void ResetOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnError(frameNode, nullptr);
+}
+
+void SetImageOnFinish(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFinish = reinterpret_cast<std::function<void()>*>(callback);
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(*onFinish));
+    } else {
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+    }
+}
+
+void ResetImageOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -823,7 +861,8 @@ const ArkUIImageModifier* GetImageModifier()
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
         EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
-        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete };
+        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
+        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 
