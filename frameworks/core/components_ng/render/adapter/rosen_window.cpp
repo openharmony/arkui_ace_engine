@@ -109,12 +109,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
+void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
+    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
 }
 
 void RosenWindow::RequestFrame()
