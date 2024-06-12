@@ -619,7 +619,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::STARTED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STARTED.");
-            OnStartedStatusCallback()
+            OnStartedStatusCallback();
             FireMediaPlayerStart();
             break;
         case PlaybackStatus::PAUSED:
