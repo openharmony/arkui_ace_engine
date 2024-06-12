@@ -6277,6 +6277,8 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         return;
     }
     contentController_->SetTextValue(nodeWrap->GetValue());
+    auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    selectController_->UpdateCaretIndex(textLength);
     NotifyOnEditChanged(true);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
