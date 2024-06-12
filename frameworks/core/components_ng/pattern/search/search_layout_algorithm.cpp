@@ -716,11 +716,6 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
 {
     auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
     auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
-    auto searchIconWrapper = params.layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
-    CHECK_NULL_VOID(searchIconWrapper);
-    auto searchIconGeometryNode = searchIconWrapper->GetGeometryNode();
-    auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize();
-    auto searchIconHorizontalOffset = searchIconGeometryNode->GetMarginFrameOffset().GetX();
     auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
     auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
 
@@ -763,6 +758,11 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
             }
         }
     } else {
+        auto searchIconWrapper = params.layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
+        CHECK_NULL_VOID(searchIconWrapper);
+        auto searchIconGeometryNode = searchIconWrapper->GetGeometryNode();
+        auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize();
+        auto searchIconHorizontalOffset = searchIconGeometryNode->GetMarginFrameOffset().GetX();
         textFieldHorizontalOffset = searchIconHorizontalOffset + searchIconFrameSize.Width() + searchIconRightSpace;
     }
 
