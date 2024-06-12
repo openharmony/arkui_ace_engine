@@ -981,13 +981,16 @@ struct CustomDialogContentComponent {
       if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
         this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
         this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+      } else {
+        this.buttonMaxFontSize = BODY_L + 'fp';
+        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
+      }
+      if (this.fontSizeScale > MAX_FONT_SCALE) {
         this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
         this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
         this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
         this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
       } else {
-        this.buttonMaxFontSize = BODY_L + 'fp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
         this.primaryTitleMaxFontSize = TITLE_S + 'fp';
         this.primaryTitleMinFontSize = BODY_L + 'fp';
         this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
