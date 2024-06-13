@@ -977,9 +977,13 @@ public:
         return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
 
-    static inline bool IsFocusStepForward(FocusStep step)
+    static inline bool IsFocusStepForward(FocusStep step, bool isRtl = false)
     {
-        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        bool isForward = (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        if (isRtl && (step == FocusStep::RIGHT || step == FocusStep::LEFT)) {
+            isForward = !isForward;
+        }
+        return isForward;
     }
 
     static inline bool IsFocusStepTab(FocusStep step)

@@ -1019,10 +1019,7 @@ bool FocusHub::GoToNextFocusLinear(FocusStep step, const RectF& rect)
     if (step == FocusStep::NONE) {
         return false;
     }
-    bool reverse = !IsFocusStepForward(step);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        reverse = !reverse;
-    }
+    bool reverse = !IsFocusStepForward(step, AceApplicationInfo::GetInstance().IsRightToLeft());
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = FlushChildrenFocusHub(focusNodes);
     if (focusNodes.empty()) {
