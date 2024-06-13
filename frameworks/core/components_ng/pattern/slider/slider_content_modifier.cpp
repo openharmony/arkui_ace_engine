@@ -66,6 +66,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isPress_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -95,6 +97,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(sliderInteractionMode_);
     AttachProperty(minResponse_);
     AttachProperty(blockType_);
+    AttachProperty(isHover_);
+    AttachProperty(isPress_);
 
     InitializeShapeProperty();
 }
@@ -161,6 +165,11 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto trackBorderRadius = trackBorderRadius_->Get();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    scaleValue_ = theme->GetScaleValue();
     std::vector<GradientColor> gradientColors = GetTrackBackgroundColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
@@ -193,7 +202,9 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 #endif
     }
     canvas.AttachBrush(brush);
-    RSRoundRect roundRect(trackRect, trackBorderRadius, trackBorderRadius);
+    isPressOrHover_ = isPress_->Get() || isHover_->Get();
+    RSRoundRect roundRect(trackRect, isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius,
+        isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.Save();
@@ -312,7 +323,8 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
         pen.SetColor(ToRSColor(blockBorderColor_->Get()));
         canvas.AttachPen(pen);
     }
-    canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
+    canvas.DrawCircle(
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isPressOrHover_ ? radius * scaleValue_ : radius);
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
@@ -338,7 +350,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     float diameter = std::min(blockSize.Width(), blockSize.Height());
     auto penRadius = (diameter + hotCircleShadowWidth_) * HALF;
     auto blockCenter = GetBlockCenter();
-    canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
+    canvas.DrawCircle(ToRSPoint(blockCenter), isPressOrHover_ ? penRadius * scaleValue_ : penRadius);
     canvas.DetachPen();
 }
 
@@ -514,8 +526,9 @@ RSRect SliderContentModifier::GetTrackRect()
             rect.SetLeft(backStart.GetX());
             rect.SetRight(backEnd.GetX());
         }
-        rect.SetTop(backStart.GetY() - trackThickness * HALF);
-        rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        rect.SetTop(backStart.GetY() - (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
+        rect.SetBottom(
+            backEnd.GetY() + (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
     } else {
         rect.SetLeft(backStart.GetX() - trackThickness * HALF);
         rect.SetRight(backEnd.GetX() + trackThickness * HALF);
