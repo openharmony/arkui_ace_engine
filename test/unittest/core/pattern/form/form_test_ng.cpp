@@ -1263,4 +1263,94 @@ HWTEST_F(FormTestNg, FormPatternTest006, TestSize.Level1)
     pattern->TakeSurfaceCaptureForUI();
     ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
 }
+
+/**
+ * @tc.name: FormPatternTest007
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, false);
+
+    pixelMap = std::make_shared<Media::PixelMap>();
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, true);
+}
+
+/**
+ * @tc.name: FormPatternTest008
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+
+    pattern->OnAccessibilityChildTreeDeregister();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest009
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest009, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest010
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest010, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto retNodeRef = pattern->CreateImageNode();
+    pattern->UpdateImageNode();
+    pattern->RemoveFrsNode();
+    ASSERT_NE(retNodeRef, nullptr);
+}
 } // namespace OHOS::Ace::NG
