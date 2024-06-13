@@ -195,8 +195,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch down event, begin to detect pan event",
-        event.touchEventId, event.id);
+        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch down event, begin to detect pan event, "
+        "state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -251,8 +252,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives axis start event, begin to detect pan event",
-        event.touchEventId);
+        "InputTracking id:%{public}d, pan recognizer receives axis start event, begin to detect pan event, state: "
+        "%{public}d",
+        event.touchEventId, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -284,8 +286,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives %{public}d touch up event",
-        event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch up event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -341,8 +344,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis end event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, pan recognizer receives axis end event, state: %{public}d", event.touchEventId,
+        refereeState_);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;

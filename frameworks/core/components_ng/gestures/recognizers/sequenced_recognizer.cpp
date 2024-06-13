@@ -112,6 +112,11 @@ void SequencedRecognizer::OnBlocked()
 
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "InputTracking id:%{public}d, sequenced recognizer receives %{public}d touch event, type: %{public}d",
+            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+    }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
