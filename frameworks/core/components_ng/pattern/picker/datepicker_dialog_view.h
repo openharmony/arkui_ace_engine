@@ -141,12 +141,10 @@ private:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(
         const RefPtr<FrameNode>& monthAndDayPickerNode, const RefPtr<FrameNode>& timePickerNode,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
+        const RefPtr<FrameNode>& contentRow);
     static void SwitchTimePickerPage(
         const RefPtr<FrameNode> &monthAndDayPickerNode, const RefPtr<FrameNode> &timePickerNode,
-        const RefPtr<FrameNode> &buttonCancelNode, const RefPtr<FrameNode> &buttonConfirmNode,
-        const RefPtr<FrameNode>& datePickerNode, const RefPtr<FrameNode>& contentRow);
+        const RefPtr<FrameNode> &contentRow);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
 
     static bool switchTimePickerFlag_;
