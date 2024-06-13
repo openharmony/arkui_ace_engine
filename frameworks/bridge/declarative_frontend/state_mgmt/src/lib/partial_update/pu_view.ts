@@ -286,21 +286,26 @@ abstract class ViewPU extends PUV2ViewBase
 
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+ * ArkUI engine will not recurse children nodes to inform the stateMgmt for the performance reason.
+ * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
+ * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
  */
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
-    if (!this.isCompFreezeAllowed()) {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ViewPU.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
-      stateMgmtProfiler.end();
-      return;
+    if (this.isCompFreezeAllowed()) {
+      this.isActive_ = active;
+      if (this.isActive_) {
+        this.onActiveInternal();
+      } else {
+        this.onInactiveInternal();
+      }
     }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: ViewPU.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
-    this.isActive_ = active;
-    if (this.isActive_) {
-      this.onActiveInternal();
-    } else {
-      this.onInactiveInternal();
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(active);
+      }
     }
     stateMgmtProfiler.end();
   }
@@ -314,12 +319,6 @@ abstract class ViewPU extends PUV2ViewBase
     this.performDelayedUpdate();
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView: IView | undefined = child.deref();
-      if (childView) {
-        childView.setActiveInternal(this.isActive_);
-      }
-    }
   }
 
 
@@ -334,13 +333,6 @@ abstract class ViewPU extends PUV2ViewBase
     }
     // Add the inactive Components to Map for Dfx listing
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView: IView | undefined = child.deref();
-      if (childView) {
-        childView.setActiveInternal(this.isActive_);
-      }
-    }
   }
 
 
