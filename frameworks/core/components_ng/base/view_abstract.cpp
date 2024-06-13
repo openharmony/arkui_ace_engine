@@ -4664,4 +4664,31 @@ uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
     }
     return value;
 }
+
+void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
 } // namespace OHOS::Ace::NG

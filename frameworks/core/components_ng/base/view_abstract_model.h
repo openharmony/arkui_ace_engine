@@ -386,6 +386,9 @@ public:
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
+    virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
+    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

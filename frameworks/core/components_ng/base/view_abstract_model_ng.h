@@ -1379,6 +1379,21 @@ private:
     {
         ViewAbstract::UpdateSafeAreaExpandOpts(opts);
     }
+
+    void SetPositionLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+    }
+
+    void SetLocalizedMarkAnchor(bool needLocalized) override
+    {
+        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+    }
+
+    void SetOffsetLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetOffsetLocalizedEdges(needLocalized);
+    }
 };
 } // namespace OHOS::Ace::NG
 

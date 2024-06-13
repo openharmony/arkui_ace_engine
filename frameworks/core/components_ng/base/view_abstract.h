@@ -694,6 +694,10 @@ public:
     static void SetPixelRound(FrameNode* frameNode, uint8_t value);
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
+    static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetLocalizedMarkAnchor(bool needLocalized);
+    static void SetOffsetLocalizedEdges(bool needLocalized);
+
 private:
     static void AddDragFrameNodeToManager();
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
