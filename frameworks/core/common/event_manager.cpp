@@ -1034,7 +1034,7 @@ void EventManager::MouseTest(
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) {
-            testResult = touchTestResults_[event.id];
+            testResult = mouseTestResults_[event.GetPointerId(event.id)];
         } else {
             TouchTestResult responseLinkResult;
             if (event.action != MouseAction::MOVE) {
@@ -1043,6 +1043,7 @@ void EventManager::MouseTest(
             frameNode->TouchTest(
                 point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
             SetResponseLinkRecognizers(testResult, responseLinkResult);
+            mouseTestResults_[event.GetPointerId(event.id)] = testResult;
         }
     } else {
         TouchTestResult responseLinkResult;
