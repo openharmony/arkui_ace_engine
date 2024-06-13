@@ -102,6 +102,14 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(textPickerNode);
     }
+    PaddingProperty defaultPadding;
+    float horizontalPadding = pickerTheme->GetPaddingHorizontal().ConvertToPx();
+    float verticalPadding = pickerTheme->GetPaddingVertical().ConvertToPx();
+    defaultPadding = { CalcLength(horizontalPadding), CalcLength(horizontalPadding),
+        CalcLength(verticalPadding), CalcLength(verticalPadding) };
+    auto layoutProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePadding(defaultPadding);
     stack->Push(textPickerNode);
     options_.clear();
 }
