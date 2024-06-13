@@ -67,20 +67,22 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId,
 void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     // FIXME lijunfeng  , yeyinglong:  can you advise how to enable LOGD output ? We are not using DevEco but use hilog directly?
-    LOGE("DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d", (int)GetId(), (int)start,
-        (int)end);
+    LOGE("DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d, cacheStart: %{public}d, cacheEnd: %{public}d",
+        (int)GetId(), (int)start, (int)end, (int)cacheStart, (int)cacheEnd);
 
     // memorize active range
     caches_.setLastActiveRange((uint32_t)start, (uint32_t)end);
 
     //caches_.forEachL1IndexUINode([&](int32_t index, RefPtr<UINode> node) -> void {
-     bool needSync = caches_.rebuildL1([&](int32_t index, RefPtr<UINode> node) -> bool {
+    bool needSync = caches_.rebuildL1(
+        [start, end, cacheStart, cacheEnd](int32_t index, RefPtr<UINode> node) -> bool
+    {
         if (node == nullptr) {
             return false;
         }
         // leads to infinite loop GetFrameChildByIndex(0, true, false, false ));
         // TBD: from  @yeyinglong: (node->GetFirstChild() obtains the child node of ListItem, not LisItem
-        auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFirstChild());
+        auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, true));
         if (!frameNode) {
             return false;
         }
@@ -167,6 +169,7 @@ void RepeatVirtualScrollNode::InvalidateKeyCache()
 RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+
     const auto pair = caches_.getKey4Index(index);
     if (!pair.first) {
         // FIXME error msg
@@ -174,36 +177,47 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     }
     const std::string key = pair.second;
 
-    LOGE("nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild:  %{public}d, "
-            "isCache: "
-            "%{public}d, "
-            "addToRenderTree: %{public}d) ...",
-        (int)GetId(), (int)index, key.c_str(), (int)needBuild, (int)isCache, (int)addToRenderTree);
+        LOGE("nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild:  %{public}d, "
+             "isCache: "
+             "%{public}d, "
+             "addToRenderTree: %{public}d) ...",
+            (int)GetId(), (int)index, key.c_str(), (int)needBuild, (int)isCache, (int)addToRenderTree);
 
-    // search if index -> key -> Node exist
-    // pair.first tells of key is in L1
-    auto nodePair = GetFromCaches(index);
-    RefPtr<UINode> frameNode4Index = nodePair.second;
-    if (frameNode4Index) {
-        auto childNode = frameNode4Index->GetFrameChildByIndex(0, needBuild);
-        return childNode;
-    }
+        // search if index -> key -> Node exist
+        // pair.first tells of key is in L1
+        auto nodePair = GetFromCaches(index);
+        RefPtr<UINode> frameNode4Index = nodePair.second;
+        if ((frameNode4Index == nullptr) && !needBuild) {
+            LOGE("index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
+            return nullptr;
+        }
 
-    if (!needBuild) {
-        LOGE("index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
-        return nullptr;
-    }
+        if (frameNode4Index == nullptr) {
+            // TS to either make new or update existing nodes
+            frameNode4Index = CreateOrUpdateFrameChild4Index(index, key);
 
-    // TS to either make new or update existing nodes
-    frameNode4Index = CreateOrUpdateFrameChild4Index(index, key);
+        if (frameNode4Index == nullptr) {
+            return nullptr;
+        }
 
-    if (frameNode4Index == nullptr) {
-        return nullptr;
-    }
+            if (isCache) {
+                // the item for index has been pre-build just to add it to L2 cache
+                frameNode4Index->SetParent(WeakClaim(this));
+                frameNode4Index->SetJSViewActive(false);
 
-    LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
-        frameNode4Index->GetId());
-    
+                LOGE("index %{public}d item builder made or updated FrameNode %{public}d, isCache==true, adding the "
+                     "Node "
+                     "to L2 "
+                     "cache, no further processing, returning the node.",
+                    index, frameNode4Index->GetId());
+
+            return frameNode4Index->GetFrameChildByIndex(0, needBuild);
+        }
+
+        LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
+            frameNode4Index->GetId());
+    } // frameNode4Index needs to be created or updated on JS side
+
     // if the item was in L2 cache, remove it from there
 
     if (isActive_) {
@@ -211,17 +225,17 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         frameNode4Index->SetJSViewActive(true);
     }
 
-    if (addToRenderTree && !isCache) {
-        LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache",
-            index, frameNode4Index->GetId());
-        frameNode4Index->SetActive(true);
-    } else {
-        LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
-                "add to L2 cache", index, frameNode4Index->GetId());
-        frameNode4Index->SetActive(false);
-    }
+        if (addToRenderTree) {
+            LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache",
+                index, frameNode4Index->GetId());
 
-    caches_.addKeyToL1(key);
+            frameNode4Index->SetActive(true);
+            caches_.addKeyToL1(key);
+        } else {
+            LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
+                 "add to L2 cache",
+                index, frameNode4Index->GetId());
+        }
 
     if (frameNode4Index->GetDepth() != GetDepth() + 1) {
         frameNode4Index->SetDepth(GetDepth() + 1);
