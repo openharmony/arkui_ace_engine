@@ -14,34 +14,36 @@
  */
 
 // @ts-ignore
-globalThis.ListItem.create = function (deepRenderFunction: (elmtId, isInitialRender) => {}, isLazy: boolean, options: any) {
-    // no need to add deep render theme scope when ListItem doesn`t use lazy mode
-    if (isLazy === false) {
-        // @ts-ignore
-        ListItem.createInternal(deepRenderFunction, isLazy, options);
-        return;
-    }
-
-    const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
-
-    // if ListItem isn`t in theme scope we shouldn`t use any theme scope for deep render
-    if (themeScope === undefined) {
-        // @ts-ignore
-        ListItem.createInternal(deepRenderFunction, isLazy, options);
-        return;
-    }
-
-    // create wrapper under original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
-    const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
-        const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-        deepRenderFunction(elmtId, isInitialRender);
-        if (result === true) {
-            ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+if(globalThis.WithTheme !== undefined){
+    globalThis.ListItem.create = function (deepRenderFunction: (elmtId, isInitialRender) => {}, isLazy: boolean, options: any) {
+        // no need to add deep render theme scope when ListItem doesn`t use lazy mode
+        if (isLazy === false) {
+            // @ts-ignore
+            ListItem.createInternal(deepRenderFunction, isLazy, options);
+            return;
         }
+    
+        const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
+    
+        // if ListItem isn`t in theme scope we shouldn`t use any theme scope for deep render
+        if (themeScope === undefined) {
+            // @ts-ignore
+            ListItem.createInternal(deepRenderFunction, isLazy, options);
+            return;
+        }
+    
+        // create wrapper under original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
+        const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            deepRenderFunction(elmtId, isInitialRender);
+            if (result === true) {
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+            }
+        }
+    
+        // pass deepRenderFunctionWrapper instead of original deepRenderFunction to ListItem
+        // @ts-ignore
+        ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
     }
-
-    // pass deepRenderFunctionWrapper instead of original deepRenderFunction to ListItem
-    // @ts-ignore
-    ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
 }
