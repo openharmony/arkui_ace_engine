@@ -24,6 +24,10 @@ int32_t callBack3 = 0;
 const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
+constexpr uint32_t DEFAULT_NODE_ID = 0;
+constexpr uint32_t UKNOWN_VALUE = 0;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
 void ConstructGestureStyle(GestureStyle& gestureInfo)
 {
     auto onClick = [](const BaseEventInfo* info) {};
@@ -2558,6 +2562,467 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     EXPECT_EQ(
         textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestPreProcessOverlay001
+ * @tc.desc: Verify PreProcessOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestPreProcessOverlay001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    OverlayRequest request;
+
+    textSelectOverlay->hostTextBase_ = nullptr;
+    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
+    textSelectOverlay->hostTextBase_ = pattern;
+
+    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
+ * @tc.desc: Verify GetFirstHandleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetFirstHandleInfo001, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    TextSelectOverlay textSelectOverlay(textBase);
+
+    ASSERT_EQ(textSelectOverlay.GetFirstHandleInfo(), std::nullopt);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSecondHandleInfo001
+ * @tc.desc: Verify GetSecondHandleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSecondHandleInfo001, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    TextSelectOverlay textSelectOverlay(textBase);
+
+    ASSERT_EQ(textSelectOverlay.GetSecondHandleInfo(), std::nullopt);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestCheckAndAdjustHandle001
+ * @tc.desc: Verify CheckAndAdjustHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+
+    textSelectOverlay->hostTextBase_ = nullptr;
+    ASSERT_EQ(textSelectOverlay->CheckAndAdjustHandle(paintRect), false);
+    textSelectOverlay->hostTextBase_ = pattern;
+
+    ASSERT_EQ(textSelectOverlay->CheckAndAdjustHandle(paintRect), false);
+
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto renderContext = frameNode->renderContext_;
+    frameNode->renderContext_ = nullptr;
+    ASSERT_EQ(textSelectOverlay->CheckAndAdjustHandle(paintRect), false);
+    frameNode->renderContext_ = renderContext;
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestCheckAndAdjustHandle002
+ * @tc.desc: Verify CheckAndAdjustHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(frameNode->geometryNode_, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF paintRect;
+    pattern->contentRect_.SetRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+
+    paintRect.SetRect(RECT_X_VALUE, RECT_Y_VALUE - RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE + RECT_Y_VALUE);
+    ASSERT_EQ(textSelectOverlay->CheckAndAdjustHandle(paintRect), true);
+
+    paintRect.SetRect(RECT_X_VALUE, RECT_Y_VALUE + RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE - RECT_Y_VALUE);
+    ASSERT_EQ(textSelectOverlay->CheckAndAdjustHandle(paintRect), true);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestCheckHandleVisible001
+ * @tc.desc: Verify CheckHandleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestCheckHandleVisible001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(frameNode->geometryNode_, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+    ASSERT_EQ(textSelectOverlay->CheckHandleVisible(paintRect), false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestCheckHandleVisible002
+ * @tc.desc: Verify CheckHandleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestCheckHandleVisible002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF paintRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+
+    textSelectOverlay->hostTextBase_ = nullptr;
+    ASSERT_EQ(textSelectOverlay->CheckHandleVisible(paintRect), false);
+    textSelectOverlay->hostTextBase_ = pattern;
+
+    ASSERT_EQ(textSelectOverlay->CheckHandleVisible(paintRect), false);
+
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto renderContext = frameNode->renderContext_;
+    frameNode->renderContext_ = nullptr;
+    ASSERT_EQ(textSelectOverlay->CheckHandleVisible(paintRect), false);
+    frameNode->renderContext_ = renderContext;
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnResetTextSelection001
+ * @tc.desc: Verify OnResetTextSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnResetTextSelection001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    auto textPattern = textSelectOverlay->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    OffsetF firstOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE + ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE + ADAPT_OFFSETX_VALUE);
+
+    textSelectOverlay->UpdateSelectorOnHandleMove(firstOffset, true);
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, false);
+    ASSERT_NE(textPattern->textSelector_.GetStart(), TEXT_ERROR);
+    textSelectOverlay->OnResetTextSelection();
+    ASSERT_EQ(textPattern->textSelector_.GetStart(), TEXT_ERROR);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnHandleMove001
+ * @tc.desc: Verify OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleMove001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(frameNode->geometryNode_, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF handleRect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+
+    ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
+    textSelectOverlay->OnHandleMove(handleRect, true);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
+    textSelectOverlay->OnHandleMove(handleRect, false);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestUpdateSelectorOnHandleMove001
+ * @tc.desc: Verify UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestUpdateSelectorOnHandleMove001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    OffsetF handleOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+
+    ASSERT_EQ(pattern->textSelector_.GetStart(), TEXT_ERROR);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_ERROR);
+    textSelectOverlay->UpdateSelectorOnHandleMove(handleOffset, true);
+    textSelectOverlay->UpdateSelectorOnHandleMove(handleOffset, false);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), 0);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSelectedText001
+ * @tc.desc: Verify GetSelectedText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectedText001, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    TextSelectOverlay textSelectOverlay(textBase);
+
+    ASSERT_EQ(textSelectOverlay.GetSelectedText(), "");
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSelectArea001
+ * @tc.desc: Verify GetSelectArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectArea001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(frameNode->geometryNode_, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    bool hasTransform = textSelectOverlay->hasTransform_;
+    textSelectOverlay->hasTransform_ = true;
+    ASSERT_EQ(textSelectOverlay->GetSelectArea(), RectF());
+    textSelectOverlay->hasTransform_ = hasTransform;
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSelectArea002
+ * @tc.desc: Verify GetSelectArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectArea002, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    TextSelectOverlay textSelectOverlay(textBase);
+
+    ASSERT_EQ(textSelectOverlay.GetSelectArea(), RectF());
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSelectAreaFromHandle001
+ * @tc.desc: Verify GetSelectAreaFromHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectAreaFromHandle001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(frameNode->geometryNode_, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    RectF rect;
+    textSelectOverlay->hasTransform_ = !textSelectOverlay->hasTransform_;
+    textSelectOverlay->GetSelectAreaFromHandle(rect);
+    textSelectOverlay->hasTransform_ = !textSelectOverlay->hasTransform_;
+    ASSERT_EQ(rect.GetX(), 0.0);
+    ASSERT_EQ(rect.GetY(), 0.0);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestGetSelectAreaFromHandle002
+ * @tc.desc: Verify GetSelectAreaFromHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectAreaFromHandle002, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    TextSelectOverlay textSelectOverlay(textBase);
+
+    RectF rect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+
+    textSelectOverlay.OnHandleMove(rect, false);
+    textSelectOverlay.GetSelectAreaFromHandle(rect);
+    ASSERT_EQ(rect.GetX(), RECT_X_VALUE);
+    ASSERT_EQ(rect.GetY(), RECT_Y_VALUE);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo001
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    SelectMenuInfo menuInfo;
+
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
+    ASSERT_EQ(menuInfo.showCut, true);
+
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_FIRST_HANDLE);
+    ASSERT_EQ(menuInfo.showCut, false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnMenuItemAction001
+ * @tc.desc: Verify OnMenuItemAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnMenuItemAction001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    pattern->textForDisplay_ = TEXT_CONTENT;
+    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::NO_MENU);
+    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::NO_MENU);
+    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnCloseOverlay001
+ * @tc.desc: Verify OnCloseOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnCloseOverlay001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    pattern->textForDisplay_ = TEXT_CONTENT;
+    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
+
+    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_TOOL_BAR);
+    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_HOLD_BY_OTHER);
+
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnHandleGlobalTouchEvent001
+ * @tc.desc: Verify OnHandleGlobalTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleGlobalTouchEvent001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    pattern->textForDisplay_ = TEXT_CONTENT;
+    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
+    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
+
+    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::DOWN);
+    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP);
+    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN);
+    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::UP);
+
+    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
+    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
+}
+
+/**
+ * @tc.name: TextStylesTestGetFontFamilyInJson001
+ * @tc.desc: Verify GetFontFamilyInJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextStylesTestGetFontFamilyInJson001, TestSize.Level1)
+{
+    std::optional<std::vector<std::string>> value;
+
+    value = std::vector<std::string>{ "Arial", "Calibri" };
+
+    ASSERT_EQ(GetFontFamilyInJson(value), "Arial,Calibri");
+}
+
+/**
+ * @tc.name: TextStylesTestGetSymbolRenderingStrategyInJson001
+ * @tc.desc: Verify GetSymbolRenderingStrategyInJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextStylesTestGetSymbolRenderingStrategyInJson001, TestSize.Level1)
+{
+    std::optional<uint32_t> value = RENDERINGSTRATEGY_MULTIPLE_COLOR;
+    ASSERT_EQ(GetSymbolRenderingStrategyInJson(value), "SymbolRenderingStrategy.MULTIPLE_COLOR");
+
+    value = RENDERINGSTRATEGY_MULTIPLE_OPACITY;
+    ASSERT_EQ(GetSymbolRenderingStrategyInJson(value), "SymbolRenderingStrategy.MULTIPLE_OPACITY");
+
+    value = UKNOWN_VALUE;
+    ASSERT_EQ(GetSymbolRenderingStrategyInJson(value), "SymbolRenderingStrategy.SINGLE");
+}
+
+/**
+ * @tc.name: TextStylesTestGetSymbolEffectStrategyInJson001
+ * @tc.desc: Verify GetSymbolEffectStrategyInJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextStylesTestGetSymbolEffectStrategyInJson001, TestSize.Level1)
+{
+    std::optional<uint32_t> value = static_cast<uint32_t>(SymbolEffectType::SCALE);
+    ASSERT_EQ(GetSymbolEffectStrategyInJson(value), "SymbolEffectStrategy.SCALE");
+
+    value = static_cast<uint32_t>(SymbolEffectType::HIERARCHICAL);
+    ASSERT_EQ(GetSymbolEffectStrategyInJson(value), "SymbolEffectStrategy.HIERARCHICAL");
+
+    value = UKNOWN_VALUE;
+    ASSERT_EQ(GetSymbolEffectStrategyInJson(value), "SymbolEffectStrategy.NONE");
 }
 
 /**
