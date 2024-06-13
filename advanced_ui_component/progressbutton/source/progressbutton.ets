@@ -36,7 +36,7 @@ export struct ProgressButton {
   @Prop @Watch('getProgressContext') progress: number
   @State textProgress: string = EMPTY_STRING
   @Prop content: string = EMPTY_STRING
-  @State isLoading: boolean = false
+  @State @Watch('getLoadingProgress')isLoading: boolean = false
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH
   clickCallback: () => void = () => {}
   @Prop enable: boolean = true
@@ -70,6 +70,18 @@ export struct ProgressButton {
     } else {
       this.isLoading = true
       this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%"
+    }
+  }
+
+  private getLoadingProgress() {
+    if (this.isLoading) {
+      if(this.progress < 0) {
+        this.textProgress = MIN_PERCENTAGE
+      } else if (this.progress >= MAX_PROGRESS) {
+        this.textProgress = MAX_PERCENTAGE
+      } else {
+        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%"
+      }
     }
   }
 
