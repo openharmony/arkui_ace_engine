@@ -512,6 +512,8 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
+    std::string paramsStr = delegate->GetParams();
+    napi_value params = paramsStr.empty() ? nullptr : ParseJSONParams(env, paramsStr);
     napi_value resultArray[RESULT_ARRAY_LENGTH] = { 0 };
     napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
     napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
@@ -522,6 +524,7 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     napi_set_named_property(env, result, "index", resultArray[RESULT_ARRAY_INDEX_INDEX]);
     napi_set_named_property(env, result, "name", resultArray[RESULT_ARRAY_NAME_INDEX]);
     napi_set_named_property(env, result, "path", resultArray[RESULT_ARRAY_PATH_INDEX]);
+    napi_set_named_property(env, result, "params", params);
     return result;
 }
 
