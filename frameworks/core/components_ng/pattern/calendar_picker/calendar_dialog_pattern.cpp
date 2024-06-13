@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -202,18 +203,14 @@ void CalendarDialogPattern::UpdateOptionsButton()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto button = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(button);
-
-            auto text = button->GetChildren().front();
-            CHECK_NULL_VOID(text);
-            auto textNode = AceType::DynamicCast<FrameNode>(text);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textLayoutProperty);
+            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
             } else {
-                textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
             }
-            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            button->MarkDirtyNode();
             buttonIndex++;
         }
     }
