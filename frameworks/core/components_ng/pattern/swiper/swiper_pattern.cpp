@@ -2152,8 +2152,10 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         }
-
-        FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+        bool skipGestureSwipe = TotalCount() == 1 && GetEdgeEffect() == EdgeEffect::NONE;
+        if (!skipGestureSwipe) {
+            FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
+        }
     }
     HandleSwiperCustomAnimation(offset);
     MarkDirtyNodeSelf();
