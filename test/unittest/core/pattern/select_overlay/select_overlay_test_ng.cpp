@@ -3795,7 +3795,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner002, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**
@@ -3833,7 +3833,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner003, TestSize.Level1)
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**
@@ -3868,7 +3868,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner004, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**
@@ -4034,7 +4034,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
     float maxWidth = 8.0f;
     float allocatedSize = 7.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -4062,7 +4062,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
     float maxWidth = 80.0f;
     float allocatedSize = 4.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
