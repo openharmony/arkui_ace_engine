@@ -702,13 +702,24 @@ HWTEST_F(TextTestFourNg, SetAdaptMaxFontSize001, TestSize.Level1)
 {
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContextRefPtr();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+
     RefPtr<TextContentModifier> textContentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), textPattern);
     ASSERT_NE(textContentModifier, nullptr);
 
-    textContentModifier->SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
+    textContentModifier->SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE, textStyle);
     EXPECT_EQ(textContentModifier->adaptMaxFontSize_, ADAPT_MAX_FONT_SIZE_VALUE);
 }
 
