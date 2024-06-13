@@ -1081,6 +1081,9 @@ export class ChipComponent extends ViewPU {
             else {
                 m3 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
             }
+            if (!this.isShowPressedBackGroundColor) {
+                return Color.Transparent;
+            }
         }
         if (!this.isShowPressedBackGroundColor) {
             return m3.color;
