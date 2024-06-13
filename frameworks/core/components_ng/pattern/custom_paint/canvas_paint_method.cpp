@@ -184,12 +184,11 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
+    RSRect rec = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
+    RSSaveLayerOps layerOps(&rec, &compositeOperationpBrush);
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
-        RSRect rec = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
-        RSSaveLayerOps layerOps(&rec, &compositeOperationpBrush);
         rsCanvas_->SaveLayer(layerOps);
     }
-
     if (globalState_.HasGlobalAlpha()) {
         imageBrush_.SetAlphaF(globalState_.GetAlpha());
     }
@@ -201,7 +200,8 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
             canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
         RSPath path;
         path.AddRect(rec);
-        PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
+        PaintImageShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr,
+            (globalState_.GetType() != CompositeOperation::SOURCE_OVER) ? &layerOps : nullptr);
     }
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(rsCanvas);
     CHECK_NULL_VOID(recordingCanvas);
@@ -240,7 +240,6 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         default:
             break;
     }
-
     if (globalState_.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->Restore();
     }
@@ -680,10 +679,32 @@ void CanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen::TextStyl
 }
 
 void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-    const RSBrush* brush, const RSPen* pen)
+    const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    CHECK_NULL_VOID(rsCanvas_);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        rsCanvas_->SaveLayer(*slo);
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+        rsCanvas_->Restore();
+    } else {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    }
+#endif
+}
+
+void CanvasPaintMethod::PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+    const RSBrush* brush, const RSPen* pen, RSSaveLayerOps* slo)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(rsCanvas_);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && slo != nullptr) {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+        rsCanvas_->Restore();
+        rsCanvas_->SaveLayer(*slo);
+    } else {
+        RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);
+    }
 #endif
 }
 

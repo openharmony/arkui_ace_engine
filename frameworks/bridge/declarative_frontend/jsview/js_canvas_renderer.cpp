@@ -976,7 +976,7 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
 {
     double offsetY = 0.0;
     if (info.GetDoubleArg(0, offsetY)) {
-        renderingContext2DModel_->SetShadowOffsetX(offsetY * GetDensity());
+        renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
     }
 }
 
