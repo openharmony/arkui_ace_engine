@@ -184,6 +184,10 @@ private:
         const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
     void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
         const RefPtr<GeometryNode>& textGeometryNode, float &countX);
+    float CalculateLongestLine(LayoutWrapper* layoutWrapper);
+    float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        float imageWidth, float longestLine);
+    float CalculateContentHeight(const LayoutConstraintF& contentConstraint, float longestLine);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
