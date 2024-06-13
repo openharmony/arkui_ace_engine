@@ -115,4 +115,21 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
     CHECK_NULL_RETURN(pattern, {});
     return pattern->GetParagraphInfo(start, end);
 }
+
+RefPtr<SpanStringBase> RichEditorController::ToStyledString(int32_t start, int32_t end)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, nullptr);
+    return richEditorPattern->ToStyledString(start, end);
+}
+
+SelectionInfo RichEditorController::FromStyledString(RefPtr<SpanStringBase> spanStringBase)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, SelectionInfo());
+    auto spanString = AceType::DynamicCast<SpanString>(spanStringBase);
+    CHECK_NULL_RETURN(spanString, SelectionInfo());
+    return richEditorPattern->FromStyledString(spanString);
+}
+
 } // namespace OHOS::Ace::NG
