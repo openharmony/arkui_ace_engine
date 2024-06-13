@@ -37,6 +37,7 @@ constexpr Dimension CONTAINER_SHRINK_DIAMETER = 16.0_vp;
 constexpr float ITEM_SHRINK_PADDING = 5.0;
 constexpr float SELECTED_ITEM_SHRINK_PADDING = 7.0;
 constexpr float ACTIVE_ITEM_SHRINK_ANGLE = 4.0;
+constexpr float BACKGROUND_OFFSET = 3.0;
 
 constexpr Dimension ITEM_DILATE_DIAMETER = 8.0_vp;
 constexpr Dimension SLECTED_ITEM_DILATE_DIAMETER = 8.0_vp;
@@ -48,6 +49,17 @@ constexpr double QUARTER_CIRCLE_ANGLE = 90.0;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr int32_t ITEM_TWO_NUM = 2;
 constexpr int32_t ITEM_THREE_NUM = 3;
+
+constexpr Dimension ITEM_SHRINK_MINOR_DIAMETER = 3.5_vp;
+constexpr Dimension ITEM_SHRINK_MINI_DIAMETER = 2.5_vp;
+constexpr Dimension ITEM_DILATE_MINOR_DIAMETER = 6.0_vp;
+constexpr Dimension ITEM_DILATE_MINI_DIAMETER = 4.0_vp;
+constexpr int32_t LEFT_SECOND_DOT_INDEX = 1;
+constexpr int32_t LEFT_THIRD_DOT_INDEX = 2;
+constexpr int32_t RIGHT_SECOND_DOT_INDEX = 13;
+constexpr int32_t RIGHT_FIRST_DOT_INDEX = 14;
+constexpr int32_t HALF_DIVISOR = 2;
+constexpr int32_t RELATIVE_STEP = 1;
 } // namespace
 
 void CircleDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -86,6 +98,7 @@ void CircleDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWra
     if (isLongPressed_) {
         PaintPressIndicator(paintWrapper);
         circleDotIndicatorModifier_->SetIsPressed(true);
+        UpdateBackground(paintWrapper);
     } else {
         PaintNormalIndicator(paintWrapper);
         circleDotIndicatorModifier_->SetIsPressed(false);
@@ -97,9 +110,11 @@ void CircleDotIndicatorPaintMethod::UpdateNormalIndicator(
 {
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
-        circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, longPointAngle_, gestureState_);
+        circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, vectorBlackPointRadius_,
+                                                            longPointAngle_, gestureState_);
     } else {
-        circleDotIndicatorModifier_->UpdateNormalPaintProperty(itemSizes, vectorBlackPointAngle_, longPointAngle_);
+        circleDotIndicatorModifier_->UpdateNormalPaintProperty(itemSizes, vectorBlackPointAngle_,
+                                                               vectorBlackPointRadius_, longPointAngle_);
     }
 }
 
@@ -109,7 +124,7 @@ void CircleDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* pai
     longPointAngle_ = longPointAngle;
     if (circleDotIndicatorModifier_->GetIsPressed()) {
         circleDotIndicatorModifier_->UpdatePressToNormalPaintProperty(
-            itemSizes, vectorBlackPointAngle_, longPointAngle_);
+            itemSizes, vectorBlackPointAngle_, vectorBlackPointRadius_, longPointAngle_);
     } else {
         UpdateNormalIndicator(itemSizes, paintWrapper);
     }
@@ -129,10 +144,120 @@ void CircleDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* pain
 
     longPointAngle_ = CalculatePointAngle(itemSizes, currentIndex_);
     if (circleDotIndicatorModifier_->GetIsPressed()) {
-        circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, longPointAngle_, gestureState_);
+        circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, vectorBlackPointRadius_,
+                                                            longPointAngle_, gestureState_);
     } else {
         circleDotIndicatorModifier_->UpdateNormalToPressPaintProperty(
-            itemSizes, vectorBlackPointAngle_, longPointAngle_);
+            itemSizes, vectorBlackPointAngle_, vectorBlackPointRadius_, longPointAngle_);
+    }
+}
+
+void CircleDotIndicatorPaintMethod::CalculatePointRadius(int32_t index, int32_t indicatorStartIndex)
+{
+    float itemMiniRadius = 0.0;
+    float itemMinorRadius = 0.0;
+    float itemNormalRadius = 0.0;
+    if (isLongPressed_) {
+        itemMiniRadius = ITEM_DILATE_MINI_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemMinorRadius = ITEM_DILATE_MINOR_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemNormalRadius = ITEM_DILATE_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+    } else {
+        itemMiniRadius = ITEM_SHRINK_MINI_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemMinorRadius = ITEM_SHRINK_MINOR_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemNormalRadius = ITEM_SHRINK_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+    }
+    if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
+        bool unsetFlag =
+            CalculateStartPointRadius(index, itemNormalRadius, itemMinorRadius, itemMiniRadius, indicatorStartIndex);
+        if (unsetFlag) {
+            CalculateRemainPointRadius(index, itemNormalRadius, itemMinorRadius, itemMiniRadius, indicatorStartIndex);
+        }
+    } else {
+        vectorBlackPointRadius_[index] = itemNormalRadius;
+    }
+}
+
+bool CircleDotIndicatorPaintMethod::CalculateStartPointRadius(
+    int32_t index, float itemNormalRadius, float itemMinorRadius, float itemMiniRadius, int32_t indicatorStartIndex)
+{
+    bool unsetFlag = false;
+    if (indicatorStartIndex > 0) {
+        if (index < indicatorStartIndex) {
+            vectorBlackPointRadius_[index] = 0;
+        } else if (index == indicatorStartIndex) {
+            vectorBlackPointRadius_[index] = itemMiniRadius;
+        } else if (index == indicatorStartIndex + LEFT_SECOND_DOT_INDEX) {
+            vectorBlackPointRadius_[index] = itemMinorRadius;
+        } else {
+            unsetFlag = true;
+        }
+    } else {
+        if (index < indicatorStartIndex + LEFT_SECOND_DOT_INDEX) {
+            vectorBlackPointRadius_[index] = itemNormalRadius;
+        } else {
+            unsetFlag = true;
+        }
+    }
+    return unsetFlag;
+}
+
+void CircleDotIndicatorPaintMethod::CalculateRemainPointRadius(
+    int32_t index, float itemNormalRadius, float itemMinorRadius, float itemMiniRadius, int32_t indicatorStartIndex)
+{
+    if (indicatorStartIndex + MAX_INDICATOR_DOT_COUNT < itemCount_) {
+        if (index == indicatorStartIndex + RIGHT_SECOND_DOT_INDEX) {
+            vectorBlackPointRadius_[index] = itemMinorRadius;
+        } else if (index == indicatorStartIndex + RIGHT_FIRST_DOT_INDEX) {
+            vectorBlackPointRadius_[index] = itemMiniRadius;
+        } else if (index > indicatorStartIndex + RIGHT_FIRST_DOT_INDEX) {
+            vectorBlackPointRadius_[index] = 0;
+        } else {
+            vectorBlackPointRadius_[index] = itemNormalRadius;
+        }
+    } else {
+        vectorBlackPointRadius_[index] = itemNormalRadius;
+    }
+}
+
+float CircleDotIndicatorPaintMethod::CalculateBlackPointRotateAngle(int32_t indicatorStartIndex)
+{
+    if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
+        auto itemPadding = ITEM_SHRINK_PADDING;
+        if (isLongPressed_) {
+            itemPadding = ITEM_DILATE_PADDING;
+        }
+        return -((itemCount_ - MAX_INDICATOR_DOT_COUNT) / HALF_DIVISOR - indicatorStartIndex) * itemPadding;
+    } else {
+        return 0.0;
+    }
+}
+
+int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex()
+{
+    if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
+        auto priorIndicatorIndex = circleDotIndicatorModifier_->GetIndicatorStartIndex();
+        int32_t indicatorStartIndex = priorIndicatorIndex;
+        if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+            if (currentIndex_ >= MAX_INDICATOR_DOT_COUNT - TRIGGER_BOUNDARY_DISTANCE &&
+                currentIndex_ < itemCount_ - TRIGGER_BOUNDARY_DISTANCE &&
+                currentIndex_ - priorIndicatorIndex >= RIGHT_SECOND_DOT_INDEX) {
+                indicatorStartIndex =
+                    currentIndex_ - (MAX_INDICATOR_DOT_COUNT - TRIGGER_BOUNDARY_DISTANCE) + RELATIVE_STEP;
+            } else if (currentIndex_ >= itemCount_ - TRIGGER_BOUNDARY_DISTANCE) {
+                indicatorStartIndex = itemCount_ - MAX_INDICATOR_DOT_COUNT;
+            }
+        } else if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+            if (currentIndex_ < itemCount_ - RIGHT_SECOND_DOT_INDEX && currentIndex_ >= LEFT_THIRD_DOT_INDEX &&
+                currentIndex_ - priorIndicatorIndex < LEFT_THIRD_DOT_INDEX) {
+                indicatorStartIndex = currentIndex_ - LEFT_THIRD_DOT_INDEX;
+            } else if (currentIndex_ < LEFT_THIRD_DOT_INDEX) {
+                indicatorStartIndex = 0;
+            }
+        }
+        circleDotIndicatorModifier_->SetIndicatorStartIndex(indicatorStartIndex);
+        return indicatorStartIndex;
+    } else {
+        return 0;
     }
 }
 
@@ -143,12 +268,20 @@ std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
         return {0.0, 0.0};
     }
     auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(currentIndex);
+    int index = endCurrentIndex;
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        index = startCurrentIndex;
+    }
+    int32_t indicatorStartIndex = CalculateIndicatorStartIndex();
     vectorBlackPointAngle_.resize(itemCount_);
+    vectorBlackPointRadius_.resize(itemCount_);
+    float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
     for (int32_t i = 0; i < itemCount_; ++i) {
-        vectorBlackPointAngle_[i] = GetBlackPointAngle(itemSizes, i, endCurrentIndex);
+        vectorBlackPointAngle_[i] = GetBlackPointAngle(itemSizes, i, index, offset);
+        CalculatePointRadius(i, indicatorStartIndex);
     }
 
-    return GetLongPointAngle(itemSizes, endCurrentIndex);
+    return GetLongPointAngle(itemSizes, index, indicatorStartIndex);
 }
 
 std::tuple<std::pair<float, float>, LinearVector<float>> CircleDotIndicatorPaintMethod::CalculateLongPointCenterAngle(
@@ -190,10 +323,11 @@ int32_t CircleDotIndicatorPaintMethod::GetHalfIndex()
 }
 
 std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetLongPointAngle(
-    const LinearVector<float>& itemSizes, int32_t currentIndex)
+    const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex)
 {
     float dotActiveAngle = itemSizes[ACTIVE_ITEM_ANGLE];
-    float selectItemAngle = GetBlackPointAngle(itemSizes, currentIndex, currentIndex);
+    float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
+    float selectItemAngle = GetBlackPointAngle(itemSizes, currentIndex, currentIndex, offset);
     float LongPointStartAngle = 0.0;
     float LongPointEndAngle = 0.0;
     // The number 2 represents equal division
@@ -229,7 +363,7 @@ float CircleDotIndicatorPaintMethod::GetAllPointArcAngle(const LinearVector<floa
 }
 
 float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
-    const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex)
+    const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex, float offset)
 {
     float dotPaddingAngle = itemSizes[ITEM_PADDING];
     float dotActivePaddingAngle = itemSizes[SELECTED_ITEM_PADDING];
@@ -270,7 +404,7 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
         }
         itemCenterAngle = -itemCenterAngle;
     }
-    return itemCenterAngle;
+    return itemCenterAngle + offset;
 }
 
 std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetIndex(int32_t index)
@@ -334,5 +468,27 @@ std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetStartAndEndIndex(i
     }
 
     return { startCurrentIndex, endCurrentIndex };
+}
+
+void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
+{
+    float offset = 0.0;
+    auto offSetPoint = vectorBlackPointAngle_;
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        for (size_t indexLeft = 0; indexLeft < currentIndex_; indexLeft++) {
+            offSetPoint[indexLeft] -= BACKGROUND_OFFSET / itemCount_;
+            offset -= BACKGROUND_OFFSET / itemCount_;
+        }
+    }
+
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+        for (size_t indexRight = itemCount_ - 1; indexRight > currentIndex_; indexRight--) {
+            offSetPoint[indexRight] += BACKGROUND_OFFSET / itemCount_;
+            offset += BACKGROUND_OFFSET / itemCount_;
+        }
+    }
+
+    circleDotIndicatorModifier_->UpdateTouchBottomAnimation(touchBottomType_, offSetPoint, longPointAngle_, offset);
+    return;
 }
 } // namespace OHOS::Ace::NG

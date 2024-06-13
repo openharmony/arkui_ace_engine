@@ -27,6 +27,10 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
+constexpr int32_t TRIGGER_BOUNDARY_DISTANCE = 2;
+} // namespace
 class ACE_EXPORT CircleDotIndicatorPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CircleDotIndicatorPaintMethod, NodePaintMethod)
 public:
@@ -106,6 +110,13 @@ public:
         nextValidIndex_ = nextValidIndex;
     }
 
+    void SetIsTouchBottom(TouchBottomType touchBottomType)
+    {
+        touchBottomType_ = touchBottomType;
+    }
+
+    void UpdateBackground(const PaintWrapper* paintWrapper);
+
 private:
     std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterAngle(
         const PaintWrapper* paintWrapper, bool isNormal);
@@ -113,9 +124,23 @@ private:
     std::pair<int32_t, int32_t> GetStartAndEndIndex(int32_t index);
     std::pair<int32_t, int32_t> GetIndex(int32_t index);
     int32_t GetHalfIndex();
-    float GetBlackPointAngle(const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex);
-    std::pair<int32_t, int32_t> GetLongPointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
+    float GetBlackPointAngle(const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex, float offset);
+    std::pair<int32_t, int32_t>
+        GetLongPointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex);
     float GetAllPointArcAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
+    void CalculatePointRadius(int32_t index, int32_t indicatorStartIndex);
+    void CalculateRemainPointRadius(int32_t index,
+                                    float itemNormalRadius,
+                                    float itemMinorRadius,
+                                    float itemMiniRadius,
+                                    int32_t indicatorStartIndex);
+    bool CalculateStartPointRadius(int32_t index,
+                                   float itemNormalRadius,
+                                   float itemMinorRadius,
+                                   float itemMiniRadius,
+                                   int32_t indicatorStartIndex);
+    float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex);
+    int32_t CalculateIndicatorStartIndex();
 
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
@@ -132,9 +157,11 @@ private:
     bool isLongPressed_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointAngle_ = {};
+    LinearVector<float> vectorBlackPointRadius_ = {};
     std::pair<float, float> longPointAngle_ = { 0, 0 };
     LinearVector<float> longPointCenter_ = {};
     ACE_DISALLOW_COPY_AND_MOVE(CircleDotIndicatorPaintMethod);
+    TouchBottomType touchBottomType_ = TouchBottomType::NONE;
 };
 } // namespace OHOS::Ace::NG
 
