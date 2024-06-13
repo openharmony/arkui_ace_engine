@@ -31,6 +31,7 @@ HWTEST_F(AceForwardCompatibilityTest, TestWithInit, TestSize.Level1)
 {
     constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
     AceForwardCompatibility::Init("do not care", 10, false);
+    AceForwardCompatibility::ReclaimFileCache(0);
     EXPECT_TRUE(AceForwardCompatibility::IsForceOldPipeline());
     EXPECT_TRUE(AceForwardCompatibility::PipelineChanged());
     EXPECT_STREQ(AceForwardCompatibility::GetAceLibName(), ARKUI_LIB_NAME_COMPATIBLE);
