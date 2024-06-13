@@ -1640,6 +1640,9 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (isMoveCaretAnywhere_) {
             // edit + longpress + move, show caret anywhere on fonts.
             selectController_->MoveCaretAnywhere(info.GetTouches().front().GetLocalLocation());
+            ShowCaretAndStopTwinkling();
+            selectOverlay_->HideMenu();
+            selectOverlay_->SetIsSingleHandle(false);
             return;
         }
         if (SelectOverlayIsOn() && !isTouchCaret_) {
