@@ -29,6 +29,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+struct OffscreenItems {
+    int32_t from;
+    int32_t to;
+};
 
 class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScrollNode, ForEachBaseNode);
@@ -84,7 +88,7 @@ public:
 
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated
-    void RecycleItems(int32_t from, int32_t to);
+    void RecycleItems(int32_t from, int32_t to) override;
 
     /** Called by Layout to request ListItem and child subtree
      for given index
@@ -153,6 +157,8 @@ private:
 
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
+
+    OffscreenItems offscreenItems_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };

@@ -13,24 +13,26 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
-std::vector<RefPtr<LazyForEachNode>> GetLazyForEachNodes(RefPtr<FrameNode>& host)
+std::vector<RefPtr<ForEachBaseNode>> GetForEachNodes(RefPtr<FrameNode>& host)
 {
-    std::vector<RefPtr<LazyForEachNode>> lazyNodes;
+    std::vector<RefPtr<ForEachBaseNode>> foreachNodes;
     for (const auto& child : host->GetChildren()) {
-        if (!AceType::InstanceOf<LazyForEachNode>(child)) {
+        if (!AceType::InstanceOf<ForEachBaseNode>(child)) {
             continue;
         }
-        auto lazyNode = AceType::DynamicCast<LazyForEachNode>(child);
-        if (!lazyNode) {
+        auto node = AceType::DynamicCast<ForEachBaseNode>(child);
+        if (!node) {
             continue;
         }
-        lazyNodes.push_back(lazyNode);
+        foreachNodes.push_back(node);
     }
-    return lazyNodes;
+    return foreachNodes;
 }
 
 bool OutOfBottomOrRightBoundary(
@@ -93,8 +95,8 @@ int32_t GetScrollUpOrLeftItemIndex(Axis axis, float offset, int32_t start, int32
     return outIndex;
 }
 
-void RecycleItemsByIndex(int32_t start, int32_t end,
-                         std::vector<RefPtr<LazyForEachNode>>& lazyNodes, LayoutWrapper* wrapper)
+void RecycleItemsByIndex(
+    int32_t start, int32_t end, std::vector<RefPtr<ForEachBaseNode>>& lazyNodes, LayoutWrapper* wrapper)
 {
     wrapper->RecycleItemsByIndex(start, end);
     for (const auto& node : lazyNodes) {
@@ -129,8 +131,8 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
     }
 
     auto host = wrapper->GetHostNode();
-    std::vector<RefPtr<LazyForEachNode>> lazyNodes = GetLazyForEachNodes(host);
-    if (lazyNodes.empty()) {
+    std::vector<RefPtr<ForEachBaseNode>> foreachNodes = GetForEachNodes(host);
+    if (foreachNodes.empty()) {
         return;
     }
     if (offset >= 0) {
@@ -138,13 +140,13 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
         if (inIndex >= end) {
             return;
         }
-        RecycleItemsByIndex(inIndex + 1, end + 1, lazyNodes, wrapper);
+        RecycleItemsByIndex(inIndex + 1, end + 1, foreachNodes, wrapper);
     } else {
         int32_t outIndex = GetScrollUpOrLeftItemIndex(axis, offset, start, end, host);
         if (outIndex <= start) {
             return;
         }
-        RecycleItemsByIndex(start, outIndex, lazyNodes, wrapper);
+        RecycleItemsByIndex(start, outIndex, foreachNodes, wrapper);
     }
 }
 

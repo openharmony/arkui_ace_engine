@@ -282,7 +282,6 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
             self->children_.emplace_back(node);
         }); // rebuild Lambda
 
-    LOGE("GetChildren() result: children_ count = %{public}d, includes:", children_.size());
     for (auto& c : children_) {
         LOGE("   child: NodeId %{public}d", (int)c->GetId());
     }
@@ -292,7 +291,8 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
 // FIXME , TODO haoyu function does not get called
 void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 {
-    LOGE("from: %{public}d, to: %{public}d", from, to);
+    offscreenItems_.from = from;
+    offscreenItems_.to = to;
 }
 
 int32_t RepeatVirtualScrollNode::FrameCount() const

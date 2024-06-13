@@ -141,7 +141,7 @@ public:
         startIndex_ = start;
         count_ = count;
     }
-    void RecycleItems(int32_t from, int32_t to);
+    void RecycleItems(int32_t from, int32_t to) override;
 
     const RefPtr<LazyForEachBuilder>& GetBuilder() const
     {
