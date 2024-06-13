@@ -3781,7 +3781,7 @@ void RichEditorPattern::UpdatePreviewTextOnInsert(const std::string& insertValue
 
 void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
 {
-    if (!IsEditing()) {
+    if (isIME && !IsEditing()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
         return;
     }
