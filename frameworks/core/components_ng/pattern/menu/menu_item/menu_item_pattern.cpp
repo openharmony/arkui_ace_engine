@@ -117,13 +117,10 @@ void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutPropert
 void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<std::vector<std::string>>& fontFamilies)
 {
-    std::vector<std::string> emptyFontfamily;
     if (fontFamilies.has_value()) {
         textProperty->UpdateFontFamily(fontFamilies.value());
     } else if (menuProperty && menuProperty->GetFontFamily().has_value()) {
         textProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
-    } else {
-        textProperty->UpdateFontFamily(emptyFontfamily);
     }
 }
 

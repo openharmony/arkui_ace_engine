@@ -112,7 +112,7 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetTextColor().has_value()) {
         textLayoutProperty->UpdateTextColor(layoutProperty->GetTextColor().value());
     }
-    if (layoutProperty->GetFontFamily().has_value()) {
+    if (layoutProperty->GetFontFamily().has_value() && !layoutProperty->GetFontFamily().value().empty()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
     if (layoutProperty->GetItalicFontStyle().has_value()) {
