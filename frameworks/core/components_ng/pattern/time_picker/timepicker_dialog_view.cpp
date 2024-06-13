@@ -34,7 +34,6 @@ const int32_t DIVIDER_ROWS_THREE = 3;
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
-constexpr Dimension BUTTON_BOTTOM_LEFTRIGHT_MARGIN = 0.0_vp;
 constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
@@ -392,7 +391,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
@@ -451,12 +450,12 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
         CHECK_NULL_VOID(buttonNextPrevLayoutProperty);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
-        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("stepper.next")) {
+        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("common.next")) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
         } else {
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         }
         timeNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -511,6 +510,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     auto dividerLayoutProps = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);
+
     dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -811,12 +811,12 @@ void TimePickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     } else {
         margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -829,12 +829,12 @@ void TimePickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }

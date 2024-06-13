@@ -101,7 +101,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFindDragFrameNodeByPositionTes
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::TEXT, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 }
 
@@ -426,7 +426,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnDragEventTest001, TestSi
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 
     /**
@@ -487,7 +487,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest003, Te
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 
     /**
@@ -584,7 +584,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest001, Te
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 
     /**
@@ -801,7 +801,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest002, TestSize.
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     /**
      * @tc.steps: step3. call FireOnDragEvent with type=DragEventType::DROP
      * @tc.expected: step3. FireOnDrop will be called
@@ -876,7 +876,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
 
     /**
      * @tc.steps: step3. call FireOnDragEvent with type=DragEventType::DROP

@@ -168,6 +168,8 @@ public:
         return scrollEffect_;
     }
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    void HandleFadeEffect(float offset, int32_t source, const SizeF& size,
+        bool isNotPositiveScrollableDistance);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {

@@ -58,6 +58,7 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
+constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -946,7 +947,7 @@ void SetTextAreaOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onChange = reinterpret_cast<std::function<void(const std::string&, TextRange&)>*>(callback);
         TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         TextFieldModelNG::SetOnChange(frameNode, nullptr);
@@ -1577,6 +1578,20 @@ void ResetTextAreaOnDidDelete(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
 }
+
+void SetTextAreaEnablePreviewText(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnablePreviewText(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextAreaEnablePreviewText(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1623,7 +1638,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
         SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
-        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete };
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete,
+        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText };
     return &modifier;
 }
 
@@ -1631,7 +1647,7 @@ void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str, TextRange&) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

@@ -271,6 +271,8 @@ public:
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
+    virtual RefPtr<SpanStringBase> ToStyledString(int32_t start, int32_t end) = 0;
+    virtual SelectionInfo FromStyledString(RefPtr<SpanStringBase> value) = 0;
 };
 
 class ACE_EXPORT RichEditorStyledStringControllerBase : virtual public RichEditorBaseControllerBase {

@@ -17,6 +17,7 @@ ace_unittest("overlay_manager_test_ng") {
   type = "new"
   sources = [
     "overlay_dialog_transition_test_ng.cpp",
+    "overlay_manager_dialog_test_ng.cpp",
     "overlay_manager_popup_test_ng.cpp",
     "overlay_manager_test_ng.cpp",
     "overlay_new_test_ng.cpp",

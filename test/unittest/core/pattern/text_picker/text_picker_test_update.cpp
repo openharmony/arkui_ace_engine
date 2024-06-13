@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <optional>
-#include <securec.h>
 
 #include "gtest/gtest.h"
 
@@ -1441,7 +1440,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0013, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(10.0);
     settingData.selected = 0;
@@ -1472,7 +1470,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0014, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(10.0);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };

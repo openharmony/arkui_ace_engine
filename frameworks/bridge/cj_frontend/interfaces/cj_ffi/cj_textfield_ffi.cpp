@@ -244,7 +244,11 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
-    TextFieldModel::GetInstance()->SetOnChange(FormatCharFunction(callback));
+    auto onChange = [func = FormatCharFunction(callback)](
+        const std::string& val, TextRange& range) {
+        func(val);
+    };
+    TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
 void FfiOHOSAceFrameworkTextFieldOnCopy(void (*callback)(const char* value))

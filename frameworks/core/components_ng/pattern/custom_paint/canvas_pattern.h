@@ -165,7 +165,7 @@ public:
     void RestoreLayer();
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     void Reset();
 

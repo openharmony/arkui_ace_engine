@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -198,6 +199,9 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = backButtonNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->MarkModifyDone();
 }
 
@@ -215,6 +219,9 @@ void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNod
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->AddChild(backButtonImageNode);
     backButtonImageNode->MarkModifyDone();
     backButtonNode->MarkModifyDone();

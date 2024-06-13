@@ -52,6 +52,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;
+constexpr float AGING_MIN_SCALE = 1.75f;
 } // namespace
 
 class SelectOverlayPaintMethodTestNg : public testing::Test {
@@ -1557,5 +1558,72 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, SelectOverlayPaintMethod001, TestSize.L
     selectOverlayPaintMethod->hasShowAnimation_ = false;
     selectOverlayPaintMethod->CheckCirclesAndBackArrowIsShown();
     EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier006
+ * @tc.desc: Test SelectOverlayPaintMethod UpdateOverlayModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(AGING_MIN_SCALE);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto overlayModifier = pattern->selectOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+    selectOverlayPaintMethod->isCreated_ = false;
+    selectOverlayPaintMethod->hasExtensionMenu_ = true;
+    selectOverlayPaintMethod->hasShowAnimation_ = true;
+    overlayModifier->SetHasExtensionMenu(false);
+    /**
+     * @tc.steps: step2. call CheckHasExtensionMenu.
+     * @tc.expected: cover branch selectOverlayModifier_->GetHasExtensionMenu() != hasExtensionMenu_,
+     * and hasExtensionMenu_ is true.
+     */
+    selectOverlayPaintMethod->CheckHasExtensionMenu();
+    EXPECT_EQ(overlayModifier->GetHasExtensionMenu(), true);
+    /**
+     * @tc.steps: step3. call UpdateOverlayModifier.
+     * @tc.expected: cover branch fontScale equal AGING_MIN_SCALE.
+     */
+    EXPECT_EQ(pipeline->GetFontScale(), AGING_MIN_SCALE);
+    selectOverlayPaintMethod->UpdateOverlayModifier(paintWrapper);
+    EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
+    EXPECT_EQ(overlayModifier->circlesAndBackArrowOpacity_->Get(), 1.0);
 }
 } // namespace OHOS::Ace::NG

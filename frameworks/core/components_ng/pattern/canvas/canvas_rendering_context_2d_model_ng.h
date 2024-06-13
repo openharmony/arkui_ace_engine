@@ -109,7 +109,7 @@ public:
     // All interfaces that only the 'CanvasRenderingContext2D' has.
     void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
     void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) override;
+    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;

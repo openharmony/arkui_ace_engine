@@ -136,7 +136,7 @@ public:
     virtual void TransferFromImageBitmap(
         RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
 #endif
-    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
+    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) {};
     virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModel);

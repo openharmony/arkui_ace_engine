@@ -771,24 +771,29 @@ napi_value UIContentImpl::GetUINapiContext()
 UIContentErrorCode UIContentImpl::Restore(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
+    LOGI("UIContent Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
+        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
-    std::tie(startUrl_, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    RouterRecoverRecord record;
+    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
+    startUrl_ = record.url;
     CHECK_ERROR_CODE_RETURN(errorCode);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
-    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s, isNamedRouter: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
+        (record.isNamedRouter ? "yes" : "no"));
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
 }
 
 std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo", bundleName_.c_str(), moduleName_.c_str(),
-        instanceId_);
-    return Platform::AceContainer::GetContentInfo(instanceId_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo, ContentInfoType: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, type);
+    return Platform::AceContainer::GetContentInfo(instanceId_, type);
 }
 
 // ArkTSCard start
@@ -3281,6 +3286,9 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

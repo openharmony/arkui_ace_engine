@@ -63,7 +63,7 @@ void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
 }
 

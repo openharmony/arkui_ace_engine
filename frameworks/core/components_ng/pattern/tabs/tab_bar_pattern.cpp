@@ -2150,7 +2150,9 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     StopTabBarTranslateAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetGeometryNode()->GetPaddingSize().Width() >= childrenMainSize_) {
+    auto mainSize = axis_ == Axis::HORIZONTAL ? host->GetGeometryNode()->GetPaddingSize().Width()
+                                              : host->GetGeometryNode()->GetPaddingSize().Height();
+    if (mainSize >= childrenMainSize_) {
         return;
     }
     auto space = GetSpace(targetIndex);
@@ -2159,7 +2161,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     auto targetOffset = space < 0.0f                    ? -frontChildrenMainSize
                         : frontChildrenMainSize < space ? 0.0f
                         : backChildrenMainSize < space
-                            ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
+                            ? mainSize - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
 

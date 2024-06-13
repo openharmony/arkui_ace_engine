@@ -1920,7 +1920,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         if (isPropertyDiffMarked_) {
             return;
         }
-        auto context = GetContext();
+        auto context = GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->AddDirtyPropertyNode(Claim(this));
         isPropertyDiffMarked_ = true;

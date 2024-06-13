@@ -1662,7 +1662,7 @@ void XComponentPattern::SetImageAIOptions(void *options)
     imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
-void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);

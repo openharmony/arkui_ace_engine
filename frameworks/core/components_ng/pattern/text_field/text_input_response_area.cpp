@@ -81,7 +81,17 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, size);
     return geometryNode->GetFrameSize();
-} // TextInputResponseArea end
+}
+
+SizeF TextInputResponseArea::GetFrameSize(bool withSafeArea)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, SizeF(0, 0));
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF(0, 0));
+    return geometryNode->GetFrameSize(withSafeArea);
+}
+// TextInputResponseArea end
 
 // PasswordResponseArea begin
 void PasswordResponseArea::InitResponseArea()

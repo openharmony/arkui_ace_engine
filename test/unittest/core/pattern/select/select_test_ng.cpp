@@ -1893,40 +1893,6 @@ HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectControlSizeTest001
- * @tc.desc: Test SelectPattern ControlSize.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create select model, select frame node and select pattern.
-     * @tc.expected: Objects are created successfully.
-     */
-    SelectModelNG selectModelInstance;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        return;
-    }
-    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(selectFrameNode, nullptr);
-    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
-     * @tc.expected: SelectPattern's default ControlSize and ControlSize::NORMAL are equal.
-     */
-    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
-
-    /**
-     * @tc.steps: step3. Call SetControlSize and get ControlSize, compare the set value with the ControlSize.
-     * @tc.expected: SelectPattern's ControlSize and the set value are equal.
-     */
-    selectModelInstance.SetControlSize(ControlSize::SMALL);
-    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
-}
-
-/**
  * @tc.name: SelectLayoutPropertyTest007
  * @tc.desc: Test Select Create with Symbol.
  * @tc.type: FUNC

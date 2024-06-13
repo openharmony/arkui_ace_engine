@@ -8201,6 +8201,23 @@ class SearchOnDidDeleteModifier extends ModifierWithKey {
   }
 }
 SearchOnDidDeleteModifier.identity = Symbol('searchOnDidDelete');
+class SearchEnablePreviewTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetEnablePreviewText(node);
+    }
+    else {
+      getUINativeModule().search.setEnablePreviewText(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchEnablePreviewTextModifier.identity = Symbol('searchEnablePreviewText');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8396,6 +8413,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   onDidDelete(callback) {
     modifierWithKey(this._modifiersWithKeys, SearchOnDidDeleteModifier.identity, SearchOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
     return this;
   }
 }
@@ -11408,6 +11429,23 @@ class TextAreaOnDidDeleteModifier extends ModifierWithKey {
   }
 }
 TextAreaOnDidDeleteModifier.identity = Symbol('textAreaOnDidDelete');
+class TextAreaEnablePreviewTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetEnablePreviewText(node);
+    }
+    else {
+      getUINativeModule().textArea.setEnablePreviewText(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaEnablePreviewTextModifier.identity = Symbol('textAreaEnablePreviewText');
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11684,6 +11722,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   onDidDelete(callback) {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnDidDeleteModifier.identity, TextAreaOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
     return this;
   }
 }
@@ -12941,6 +12983,23 @@ class TextInputOnDidDeleteModifier extends ModifierWithKey {
   }
 }
 TextInputOnDidDeleteModifier.identity = Symbol('textInputOnDidDelete');
+class TextInputEnablePreviewTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetEnablePreviewText(node);
+    }
+    else {
+      getUINativeModule().textInput.setEnablePreviewText(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputEnablePreviewTextModifier.identity = Symbol('textInputEnablePreviewText');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13282,6 +13341,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   onDidDelete(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnDidDeleteModifier.identity, TextInputOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
     return this;
   }
 }
@@ -16219,7 +16282,9 @@ class SelectDividerModifier extends ModifierWithKey {
           getUINativeModule().select.resetDivider(node, this.value);
       }
       else {
-          getUINativeModule().select.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
+          getUINativeModule().select.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth,
+            (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin,
+            (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
       }
   }
   checkObjectDiff() {
