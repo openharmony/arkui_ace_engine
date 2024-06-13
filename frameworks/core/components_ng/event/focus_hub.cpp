@@ -356,7 +356,9 @@ void FocusHub::RemoveSelf(BlurReason reason)
         FocusManager::FocusGuard guard(parent);
         LostFocus(reason);
     }
-    RemoveFocusScopeIdAndPriority();
+    if (!focusScopeId_.empty()) {
+        RemoveFocusScopeIdAndPriority();
+    }
 }
 
 void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
@@ -1278,6 +1280,9 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if ((focusDepend_ == FocusDependence::AUTO || focusDepend_ == FocusDependence::CHILD) && isAnyChildFocusable) {
         auto itFocusNode = itLastFocusNode;
         if (RequestFocusByPriorityInScope()) {
+            if (!currentHasFocused) {
+                OnFocusNode();
+            }
             return;
         }
         do {
