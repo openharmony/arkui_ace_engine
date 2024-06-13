@@ -4038,7 +4038,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
 
     float maxWidth = 8.0f;
-    float allocatedSize = 7.0f;
+    float allocatedSize = 14.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
     EXPECT_FALSE(ret);
 }
@@ -4065,8 +4065,8 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
 
-    float maxWidth = 80.0f;
-    float allocatedSize = 4.0f;
+    float maxWidth = 8.0f;
+    float allocatedSize = 11.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
     EXPECT_FALSE(ret);
 }
