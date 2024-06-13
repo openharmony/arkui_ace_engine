@@ -234,4 +234,94 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
     EXPECT_TRUE(retVal.first.empty());
 }
+
+/**
+ * @tc.name: TemplatesParserTestNg003
+ * @tc.desc: Test ParseArgsWithAutoStretch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseArgsWithAutoStretch with normal args.
+     * @tc.expected: retVal.first is { 4, 4} and retVal.second is 1
+     */
+    std::string args = "repeat(auto-stretch, 4)";
+    double size = 9;
+    double gap = 1;
+    int32_t childrenCount = 2;
+    vector<int> gt { 4, 4 };
+
+    auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    for (int i = 0; i < retVal.first.size(); i++) {
+        EXPECT_EQ(retVal.first[i], gt[i]);
+    }
+    EXPECT_EQ(retVal.second, 1);
+
+    /**
+     * @tc.steps: step2. Test ParseArgsWithAutoStretch with invalid args.
+     * @tc.expected: retVal.first is empty.
+     */
+    args = "repeat(auto-stretch, 4, 6)";
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_TRUE(retVal.first.empty());
+
+    /**
+     * @tc.steps: step3. Test ParseArgsWithAutoStretch with need calculate gap args.
+     * @tc.expected: retVal.first is { 4, 4} and retVal.second is 2
+     */
+    args = "repeat(auto-stretch, 4)";
+    size = 10;
+    gap = 1;
+    gt = { 4, 4 };
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), gt.size());
+    for (int i = 0; i < retVal.first.size(); i++) {
+        EXPECT_EQ(retVal.first[i], gt[i]);
+    }
+    EXPECT_EQ(retVal.second, 2);
+
+    /**
+     * @tc.steps: step4. Test ParseArgsWithAutoStretch with px args.
+     * @tc.expected: retVal.first is { 4, 4, 4, 4 } and retVal.second is 2.
+     */
+    args = "repeat(auto-stretch, 4px)";
+    size = 22;
+    gap = 1;
+    gt = { 4, 4, 4, 4 };
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), gt.size());
+    for (int i = 0; i < retVal.first.size(); i++) {
+        EXPECT_EQ(retVal.first[i], gt[i]);
+    }
+    EXPECT_EQ(retVal.second, 2);
+
+    /**
+     * @tc.steps: step4. Test ParseArgsWithAutoStretch with vp args.
+     * @tc.expected: retVal.first is { 5, 5, 5, 5, 5 } and retVal.second is 2.5 .
+     */
+    args = "repeat(auto-stretch, 5vp)";
+    size = 35;
+    gap = 2;
+    gt = { 5, 5, 5, 5, 5 };
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), gt.size());
+    for (int i = 0; i < retVal.first.size(); i++) {
+        EXPECT_EQ(retVal.first[i], gt[i]);
+    }
+    EXPECT_EQ(retVal.second, 2.5);
+
+    /**
+     * @tc.steps: step5. Test ParseArgsWithAutoStretch with % args.
+     * @tc.expected: retVal.first is empty .
+     */
+    args = "repeat(auto-stretch, 5%)";
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_TRUE(retVal.first.empty());
+}
 } // namespace OHOS::Ace::NG
