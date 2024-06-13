@@ -1332,7 +1332,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
 
     auto firstContent = spanItemContent.substr(0, offsetInSpan);
     spanNode->UpdateContent(StringUtils::ToString(firstContent));
-    spanItem->position = offsetInSpan;
+    spanItem->position = spanStart + offsetInSpan;
 
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     auto newSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
