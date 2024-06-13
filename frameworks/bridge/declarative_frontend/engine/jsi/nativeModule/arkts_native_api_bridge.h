@@ -33,6 +33,8 @@ public:
     static ArkUINativeModuleValue PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNavigationInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportedUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
