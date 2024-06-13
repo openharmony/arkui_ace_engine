@@ -58,6 +58,7 @@ public:
                 if (context) {
                     context->ClearDrawCommands();
                 }
+                bubble->PaintSingleBorder(canvas, paintWrapper);
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -118,6 +119,7 @@ public:
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
