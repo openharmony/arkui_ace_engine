@@ -14,7 +14,7 @@
  */
 
 // @ts-ignore
-if(globalThis.WithTheme !== undefined){
+if (globalThis.WithTheme !== undefined) {
     globalThis.LazyForEach.create = function (
         paramViewId: any,
         paramParentView: any,

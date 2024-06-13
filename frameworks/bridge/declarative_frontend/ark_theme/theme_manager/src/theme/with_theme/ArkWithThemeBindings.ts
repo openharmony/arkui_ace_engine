@@ -14,7 +14,7 @@
  */
 
 // @ts-ignore
-if(globalThis.WithTheme !== undefined){
+if (globalThis.WithTheme !== undefined) {
     globalThis.WithTheme.create = function (themeOptions) {
         const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
         // get theme instance from ThemeMap by CustomTheme instance

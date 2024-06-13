@@ -349,22 +349,25 @@ class ArkSystemTheme {
         this.typography = new ArkSystemTypography();
     }
 }
-globalThis.WithTheme.create = function (themeOptions) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
-    const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
-    }
-    ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
-    }
-    ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
-};
-globalThis.WithTheme.pop = function () {
-    ArkThemeScopeManager.getInstance().onScopeExit();
-};
+if (globalThis.WithTheme !== undefined) {
+    globalThis.WithTheme.create = function (themeOptions) {
+        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
+        const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+    };
+    globalThis.WithTheme.pop = function () {
+        ArkThemeScopeManager.getInstance().onScopeExit();
+    };
+}
+
 class ArkColorsImpl {
     constructor(colors = {}, baselineColors) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
