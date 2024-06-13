@@ -41,6 +41,7 @@
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 #include "interfaces/inner_api/ace/constants.h"
@@ -441,9 +442,9 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
-        int32_t instanceId, const std::string& contentInfo);
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
