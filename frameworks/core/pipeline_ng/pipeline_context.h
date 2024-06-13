@@ -88,6 +88,9 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
+    
+    static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
+
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
