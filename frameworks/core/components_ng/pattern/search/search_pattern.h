@@ -193,6 +193,7 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void SetAccessibilityAction();
+    void SetSearchFieldAccessibilityAction();
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitTextFieldClickEvent();
