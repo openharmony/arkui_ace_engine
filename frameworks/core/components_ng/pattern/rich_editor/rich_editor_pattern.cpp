@@ -1173,6 +1173,12 @@ void RichEditorPattern::ClearContent(const RefPtr<UINode>& child)
     if (imageSpanNode) {
         imageSpanNode->GetSpanItem()->content.clear();
         imageSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto placeholderSpanNode = DynamicCast<PlaceholderSpanNode>(child);
+    if (placeholderSpanNode) {
+        placeholderSpanNode->GetSpanItem()->content.clear();
+        placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
