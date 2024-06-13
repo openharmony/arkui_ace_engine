@@ -47,14 +47,14 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->sections_[0][0].items_.size(), 2);
-    EXPECT_EQ(info_->sections_[0][0].items_.back().idx, 3);
-    EXPECT_EQ(info_->sections_[0][0].items_.back().mainSize, 200.0f);
-    EXPECT_EQ(info_->sections_[0][0].endPos, 300.0f);
-    EXPECT_EQ(info_->sections_[0][1].items_.back().idx, 1);
-    EXPECT_EQ(info_->sections_[0][1].endPos, 200.0f);
-    EXPECT_EQ(info_->sections_[0][2].endPos, 200.0f);
-    EXPECT_EQ(info_->sections_[0][2].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[0][0].items_.size(), 2);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().mainSize, 200.0f);
+    EXPECT_EQ(info_->lanes_[0][0].endPos, 300.0f);
+    EXPECT_EQ(info_->lanes_[0][1].items_.back().idx, 1);
+    EXPECT_EQ(info_->lanes_[0][1].endPos, 200.0f);
+    EXPECT_EQ(info_->lanes_[0][2].endPos, 200.0f);
+    EXPECT_EQ(info_->lanes_[0][2].items_.back().idx, 4);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 4);
 }
@@ -140,9 +140,9 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 96), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
     EXPECT_EQ(
-        info_->sections_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [96 98 100 103 104 ] }");
+        info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [96 98 100 103 104 ] }");
     EXPECT_EQ(
-        info_->sections_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 550.000000 Items [95 97 99 101 102 ] }");
+        info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 550.000000 Items [95 97 99 101 102 ] }");
 
     // delete start index
     frameNode_->RemoveChildAtIndex(96);
@@ -154,9 +154,9 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 96), -50.0f);
     // triggered adjustOverScroll
-    EXPECT_EQ(info_->sections_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [95 97 100 101 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [95 97 100 101 ] }");
     EXPECT_EQ(
-        info_->sections_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [94 96 98 99 102 103 ] }");
+        info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [94 96 98 99 102 103 ] }");
 }
 
 /**
@@ -176,16 +176,16 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(info_->idxToLane_.at(8), 2);
-    EXPECT_EQ(info_->sections_[0][0].endPos, 200.0f);
-    EXPECT_EQ(info_->sections_[0][1].startPos, -100.0f);
-    EXPECT_EQ(info_->sections_[0][1].endPos, 300.0f);
-    EXPECT_EQ(info_->sections_[0][2].endPos, 100.0f);
-    EXPECT_EQ(info_->sections_[0][0].items_.size(), 1);
-    EXPECT_EQ(info_->sections_[0][0].items_.front().idx, 7);
-    EXPECT_EQ(info_->sections_[0][1].items_.size(), 2);
-    EXPECT_EQ(info_->sections_[0][1].items_.front().idx, 5);
-    EXPECT_EQ(info_->sections_[0][1].items_.back().idx, 9);
-    EXPECT_EQ(info_->sections_[0][2].items_.size(), 2);
+    EXPECT_EQ(info_->lanes_[0][0].endPos, 200.0f);
+    EXPECT_EQ(info_->lanes_[0][1].startPos, -100.0f);
+    EXPECT_EQ(info_->lanes_[0][1].endPos, 300.0f);
+    EXPECT_EQ(info_->lanes_[0][2].endPos, 100.0f);
+    EXPECT_EQ(info_->lanes_[0][0].items_.size(), 1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 7);
+    EXPECT_EQ(info_->lanes_[0][1].items_.size(), 2);
+    EXPECT_EQ(info_->lanes_[0][1].items_.front().idx, 5);
+    EXPECT_EQ(info_->lanes_[0][1].items_.back().idx, 9);
+    EXPECT_EQ(info_->lanes_[0][2].items_.size(), 2);
     EXPECT_TRUE(info_->itemEnd_);
     EXPECT_FALSE(info_->offsetEnd_);
     EXPECT_EQ(info_->startIndex_, 5);
@@ -268,17 +268,17 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 80), 550.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
-    EXPECT_EQ(info_->sections_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
     EXPECT_EQ(
-        info_->sections_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
+        info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
     child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(
-        info_->sections_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 850.000000 Items [70 71 74 75 78 79 ] }");
-    EXPECT_EQ(info_->sections_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 650.000000 Items [69 72 73 76 77 ] }");
+        info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 850.000000 Items [70 71 74 75 78 79 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 650.000000 Items [69 72 73 76 77 ] }");
     EXPECT_EQ(GetChildY(frameNode_, 80), 650.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
@@ -386,7 +386,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 0);
     EXPECT_EQ(info_->TopFinalPos(), -1000.0f);
-    for (auto& lane : info_->sections_[0]) {
+    for (auto& lane : info_->lanes_[0]) {
         if (lane.items_.empty()) {
             EXPECT_EQ(lane.startPos, lane.endPos);
         } else {
@@ -421,7 +421,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 49);
     EXPECT_EQ(info_->endIndex_, 49);
     EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
-    for (auto& lane : info_->sections_[0]) {
+    for (auto& lane : info_->lanes_[0]) {
         if (lane.items_.empty()) {
             EXPECT_EQ(lane.startPos, lane.endPos);
         } else {
@@ -488,8 +488,8 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 1).Bottom(), 53.0f);
     EXPECT_FALSE(info_->IsMisaligned());
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
-    EXPECT_EQ(info_->sections_[0][0].startPos, -47.0f);
-    EXPECT_EQ(info_->sections_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->lanes_[0][0].startPos, -47.0f);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
 }
 
 /**
@@ -588,23 +588,23 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
     });
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
-    std::vector<float> endPos = { info_->sections_[0][0].endPos, info_->sections_[0][1].endPos,
-        info_->sections_[0][2].endPos };
-    std::vector<int32_t> endItems = { info_->sections_[0][0].items_.back().idx,
-        info_->sections_[0][1].items_.back().idx, info_->sections_[0][2].items_.back().idx };
+    std::vector<float> endPos = { info_->lanes_[0][0].endPos, info_->lanes_[0][1].endPos,
+        info_->lanes_[0][2].endPos };
+    std::vector<int32_t> endItems = { info_->lanes_[0][0].items_.back().idx,
+        info_->lanes_[0][1].items_.back().idx, info_->lanes_[0][2].items_.back().idx };
 
     pattern_->SetAnimateCanOverScroll(true);
     info_->delta_ = -751.0f;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     for (int i = 0; i < 3; ++i) {
-        EXPECT_EQ(info_->sections_[0][i].endPos, endPos[i] - 751.0f);
+        EXPECT_EQ(info_->lanes_[0][i].endPos, endPos[i] - 751.0f);
         if (info_->idxToLane_[99] != i) {
-            EXPECT_EQ(info_->sections_[0][i].startPos, info_->sections_[0][i].endPos);
-            EXPECT_TRUE(info_->sections_[0][i].items_.empty());
+            EXPECT_EQ(info_->lanes_[0][i].startPos, info_->lanes_[0][i].endPos);
+            EXPECT_TRUE(info_->lanes_[0][i].items_.empty());
             EXPECT_FALSE(GetChildFrameNode(frameNode_, endItems[i] + 1)->IsActive()); // + 1 to skip footer node
         } else {
-            EXPECT_EQ(info_->sections_[0][i].items_.back().idx, 99);
+            EXPECT_EQ(info_->lanes_[0][i].items_.back().idx, 99);
         }
     }
 
@@ -617,11 +617,11 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         FlushLayoutTask(frameNode_);
         for (int i = 0; i < 3; ++i) {
-            if (!info_->sections_[0][i].items_.empty()) {
+            if (!info_->lanes_[0][i].items_.empty()) {
                 ASSERT_TRUE(GetChildFrameNode(frameNode_, endItems[i] + 1)->IsActive());
-                ASSERT_EQ(GetChildRect(frameNode_, endItems[i] + 1).Bottom(), info_->sections_[0][i].endPos);
+                ASSERT_EQ(GetChildRect(frameNode_, endItems[i] + 1).Bottom(), info_->lanes_[0][i].endPos);
             } else {
-                ASSERT_EQ(info_->sections_[0][i].startPos, info_->sections_[0][i].endPos);
+                ASSERT_EQ(info_->lanes_[0][i].startPos, info_->lanes_[0][i].endPos);
             }
         }
     }
@@ -646,9 +646,9 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     for (int i = 1; i < 3; ++i) {
-        EXPECT_EQ(info_->sections_[0][i].startPos, 800.0f);
-        EXPECT_EQ(info_->sections_[0][i].startPos, info_->sections_[0][i].endPos);
-        EXPECT_TRUE(info_->sections_[0][i].items_.empty());
+        EXPECT_EQ(info_->lanes_[0][i].startPos, 800.0f);
+        EXPECT_EQ(info_->lanes_[0][i].startPos, info_->lanes_[0][i].endPos);
+        EXPECT_TRUE(info_->lanes_[0][i].items_.empty());
         EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
     }
 
@@ -657,10 +657,10 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     for (int i = 0; i < 3; ++i) {
         ASSERT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
-        ASSERT_EQ(GetChildY(frameNode_, i), info_->sections_[0][i].startPos);
+        ASSERT_EQ(GetChildY(frameNode_, i), info_->lanes_[0][i].startPos);
         ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(),
-            info_->sections_[0][i].startPos + info_->sections_[0][i].items_.front().mainSize);
-        ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(), info_->sections_[0][i].endPos);
+            info_->lanes_[0][i].startPos + info_->lanes_[0][i].items_.front().mainSize);
+        ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(), info_->lanes_[0][i].endPos);
     }
 }
 

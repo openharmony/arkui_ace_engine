@@ -164,7 +164,7 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
             info_->PrepareSegmentStartPos();
         }
-        SegmentInit(sections, info_->margins_, frameSize);
+        SegmentedInit(sections, info_->margins_, frameSize);
     } else {
         RegularInit(frameSize);
         if (info_->footerIndex_ >= 0) {
@@ -190,7 +190,7 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     }
 }
 
-void WaterFlowSegmentLayoutBase::SegmentInit(const std::vector<WaterFlowSections::Section>& options,
+void WaterFlowSegmentLayoutBase::SegmentedInit(const std::vector<WaterFlowSections::Section>& options,
     const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());

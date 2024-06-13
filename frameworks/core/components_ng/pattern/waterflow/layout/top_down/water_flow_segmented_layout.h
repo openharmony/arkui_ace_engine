@@ -33,7 +33,7 @@ protected:
      * @param margins of each section.
      * @param frameSize of WaterFlow.
      */
-    void SegmentInit(const std::vector<WaterFlowSections::Section>& options,
+    void SegmentedInit(const std::vector<WaterFlowSections::Section>& options,
         const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize);
 
     LayoutWrapper* wrapper_ {};

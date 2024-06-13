@@ -162,7 +162,8 @@ public:
      * @param scale for calculating margins in PX.
      * @param percentWidth for calculating margins in PX.
      */
-    void InitMargins(const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+    void InitMargins(
+        const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
 
     bool itemStart_ = false;
     /**

@@ -76,10 +76,10 @@ public:
     int32_t GetMainCount() const override;
     int32_t GetCrossCount() const override
     {
-        if (sections_.empty()) {
+        if (lanes_.empty()) {
             return 0;
         }
-        return sections_[0].size();
+        return lanes_[0].size();
     }
 
     float CurrentPos() const override
@@ -137,7 +137,7 @@ public:
     int32_t EndIndex() const;
     inline bool ItemInView(int32_t idx) const
     {
-        return !sections_.empty() && idx >= StartIndex() && idx <= EndIndex();
+        return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
     }
     /**
      * @param idx of the item.
@@ -177,10 +177,10 @@ public:
      * @param idx current item index
      * @param forward true if preparing in the forward direction (prevIdx < curIdx).
      */
-    void PrepareSection(int32_t idx, bool forward);
+    void PrepareSectionPos(int32_t idx, bool forward);
 
     struct Lane;
-    std::vector<std::vector<Lane>> sections_; // lanes in sections
+    std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;
 

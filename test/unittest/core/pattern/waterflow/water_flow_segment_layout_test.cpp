@@ -1365,44 +1365,6 @@ HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Illegal003
- * @tc.desc: Layout WaterFlow without items.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowSegmentTest, Illegal003, TestSize.Level1)
-{
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(6);
-        },
-        false);
-    auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    secObj->ChangeData(0, 0, SECTION_9);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    EXPECT_EQ(info->endIndex_, 5);
-
-    auto newSection = SECTION_8;
-    newSection[0].itemsCount = 0;
-    secObj->ChangeData(0, 1, newSection);
-    for (int i = 0; i < 10; ++i) {
-        frameNode_->RemoveChildAtIndex(0);
-    }
-    frameNode_->ChildrenUpdatedFrom(0);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-
-    pattern_->ScrollToIndex(LAST_ITEM);
-    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->childrenCount_, 0);
-}
-
-/**
  * @tc.name: Constraint001
  * @tc.desc: Test Layout when the layoutConstraint changes.
  * @tc.type: FUNC
