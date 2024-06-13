@@ -463,7 +463,6 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     monthAndDayLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
     monthAndDayPickerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     monthAndDayPickerNode->MarkDirtyNode();
-
     auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(ampmNode);
     auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
@@ -499,20 +498,19 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     cancelNextLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
     cancelNextDividerNode->MarkDirtyNode();
 
-    auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(4));
+    auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(contentRow->GetLastChild());
     CHECK_NULL_VOID(buttonConfirmNode);
     auto confirmButtonLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(confirmButtonLayoutProperty);
     confirmButtonLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     buttonConfirmNode->MarkDirtyNode();
 
-    auto nextConfirmDividerNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(3));
+    auto nextConfirmDividerNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(DIVIDER_ROWS_THREE));
     CHECK_NULL_VOID(nextConfirmDividerNode);
     auto nextConfirmLayoutProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(nextConfirmLayoutProperty);
     nextConfirmLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     nextConfirmDividerNode->MarkDirtyNode();
-
     switchTimePickerFlag_ = !switchTimePickerFlag_;
 }
 
@@ -546,7 +544,7 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
     dateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary)
+void DatePickerDialogView::HideContentChildrenButton(const RefPtr<FrameNode>& contentRow)
 {
     CHECK_NULL_VOID(contentRow);
     for (const auto& child : contentRow->GetChildren()) {
@@ -1631,8 +1629,8 @@ std::function<void()> DatePickerDialogView::CreateAndSetDialogSwitchEvent(const 
     return titleSwitchEvent;
 }
 
-void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
-    const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary)
+void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack,
+    const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController,
     bool useMilitary)
 {
     auto pickerRow = pickerStack->GetLastChild();
