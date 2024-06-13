@@ -1639,6 +1639,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         // pop animation with top navDestination, recover navBar visible tag
         hostNode->SetNeedSetInvisible(false);
     }
+    ACE_SCOPED_TRACE("Navigation page custom transition start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     proxy->SetPreDestination(preTopNavDestination);
@@ -1708,6 +1709,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
+    ACE_SCOPED_TRACE("Navigation page custom transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -2332,6 +2334,7 @@ void NavigationPattern::RecoveryToLastStack()
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
+    ACE_SCOPED_TRACE("Navigation page transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
     hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
