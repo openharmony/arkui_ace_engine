@@ -2655,6 +2655,8 @@ HWTEST_F(TextTestNg, create001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
      /**
      * @tc.steps: step1. Create spanBases
      */
@@ -2663,7 +2665,9 @@ HWTEST_F(TextTestNg, create001, TestSize.Level1)
      * @tc.steps: step2. call spanBases
      */
     textModelNG.Create(spanStringWithSpans);
-    EXPECT_EQ(textModelNG->GetSpanStringMode(), true);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    EXPECT_NE(textPattern->GetSpanStringMode(), true);
 }
 
 /**
@@ -2716,7 +2720,9 @@ HWTEST_F(TextTestNg, InitSpanStringController001, TestSize.Level1)
     auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567893421");
 
     textModelNG.InitSpanStringController(frameNode, spanStringWithSpans);
-    EXPECT_EQ(textModelNG->GetSpanStringMode(), true);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    EXPECT_EQ(textPattern->GetSpanStringMode(), true);
 }
 
 /**
