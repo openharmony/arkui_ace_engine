@@ -133,6 +133,7 @@ public:
     {
         isScrollable_ = isScrollable;
     }
+    void SetScrollRadius(const Dimension& filletRadius);
 
 private:
     Offset GetHoverOffset(const Size& size) const;
@@ -142,6 +143,7 @@ private:
     RefPtr<AnimatablePropertyFloat> barHeight_;
     RefPtr<AnimatablePropertyFloat> barX_;
     RefPtr<AnimatablePropertyFloat> barY_;
+    Dimension filletRadius_;
 
     // no Animatable
     RefPtr<PropertyColor> barColor_;
