@@ -2009,14 +2009,23 @@ void PageRouterManager::ThrowError(const std::string& msg, int32_t code)
     runtime->ThrowError(msg, code);
 }
 
+int32_t PageRouterManager::GetPageIndex(const WeakPtr<FrameNode>& page)
+{
+    auto pageNode = page.Upgrade();
+    CHECK_NULL_RETURN(pageNode, INVALID_PAGE_INDEX);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, INVALID_PAGE_INDEX);
+    auto ret = pagePattern->GetPageInfo()->GetPageIndex();
+    // frontend index counts from 1, so need -1 for backend use
+    return ret == INVALID_PAGE_INDEX ? INVALID_PAGE_INDEX : ret - 1;
+}
+
 void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    auto stageNode = stageManager->GetStageNode();
-    auto popNode = stageNode->GetChildren().back();
-    int32_t popIndex = static_cast<int32_t>(stageNode->GetChildren().size() - 1);
+    auto popNode = pageRouterStack_.back().Upgrade();
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -2048,15 +2057,14 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         LoadPage(GenerateNextPageId(), info, true, false);
         isNewPageReplacing_ = false;
     }
-    if (popIndex < 0 || popNode == stageNode->GetChildren().back() ||
-        stageNode->GetChildIndex(popNode) != popIndex) {
+    if (popIndex < 0 || popNode == pageRouterStack_.back().Upgrade() || GetPageIndex(popNode) != popIndex) {
         return;
     }
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
-    popNode->MovePosition(stageNode->GetChildren().size() - 1);
+    popNode->MovePosition(pageRouterStack_.size() - 1);
     for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
         auto pageNode = iter->Upgrade();
         if (!pageNode) {
