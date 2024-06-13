@@ -36,6 +36,9 @@ public:
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
+    void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void MultiInit(const RefPtr<PickerTheme> pickerTheme) override;
     void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetIsCascade(bool isCascade) override;

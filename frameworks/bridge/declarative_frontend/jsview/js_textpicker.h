@@ -47,7 +47,7 @@ public:
     static bool ParseIconTextArray(const JSRef<JSObject>& paramObject, std::vector<NG::RangeContent>& result,
         uint32_t& kind, uint32_t& selected);
     static bool ParseTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
-    static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
+    static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
     static bool ParseMultiTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param);
     static bool ParseCascadeTextArray(const JSRef<JSObject>& paramObj, std::vector<uint32_t>& selecteds,
         std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
@@ -74,6 +74,7 @@ public:
     static void ParseMultiTextArrayValueSingleInternal(
         const std::vector<NG::TextCascadePickerOptions>& options, const std::string& value,
         std::vector<std::string>& values);
+    static void IsUserDefinedFontFamily(const std::string& pos);
 };
 
 class JSTextPicker : public JSViewAbstract {
