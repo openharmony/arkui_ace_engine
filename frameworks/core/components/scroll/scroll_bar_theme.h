@@ -177,8 +177,8 @@ private:
     Color backgroundColor_;
     Color foregroundColor_;
     Edge padding_;
-    double activemagnify_;
-    double touchmagnify_;
+    double activemagnify_ = 0.0;
+    double touchmagnify_ = 0.0;
     Dimension scrollradius_;
     Color scrollbarbackColor_;
 };
