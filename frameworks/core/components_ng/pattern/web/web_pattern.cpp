@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -2395,13 +2394,6 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
-    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->InitTouchEventListener();
-    };
-    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
-
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2540,6 +2532,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = false;
+    InitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2567,6 +2560,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
+    UninitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -2642,6 +2636,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    UninitTouchEventListener();
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -3482,26 +3477,29 @@ void WebPattern::NotifyForNextTouchEvent()
 void WebPattern::InitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
-    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
+    if (touchEventListener_) {
+        return;
+    }
+    touchEventListener_ = std::make_shared<TouchEventListener>();
+    touchEventListener_->SetPatternToListener(AceType::WeakClaim(this));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
-    context->RegisterTouchEventListener(listener);
+    context->RegisterTouchEventListener(touchEventListener_);
 }
 
 void WebPattern::UninitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+    touchEventListener_ = nullptr;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
     context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 
