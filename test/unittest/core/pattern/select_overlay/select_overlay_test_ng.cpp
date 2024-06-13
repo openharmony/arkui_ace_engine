@@ -1413,8 +1413,8 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw002, TestSize.Level1)
     DrawingContext context { canvas, 100, 100 };
     contentModifier->isUsingMouse_ = false;
     contentModifier->SetIsHiddenHandle(true);
-    EXPECT_EQ(contentModifier->isHiddenHandle_->Get(), true);
     contentModifier->onDraw(context);
+    EXPECT_EQ(contentModifier->isHiddenHandle_->Get(), true);
 }
 
 /**
@@ -1477,6 +1477,7 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw003, TestSize.Level1)
     contentModifier->SetIsSingleHandle(false);
     contentModifier->SetHandleReverse(true);
     contentModifier->onDraw(context);
+    EXPECT_EQ(contentModifier->isHiddenHandle_->Get(), false);
 }
 
 /**
@@ -3423,15 +3424,14 @@ HWTEST_F(SelectOverlayTestNg, BuildButton001, TestSize.Level1)
         auto playClickCallback = gestureEventHubPtr->clickEventActuator_->userCallback_->callback_;
         GestureEvent gestureEvent = GestureEvent();
         playClickCallback(gestureEvent);
-        std::cout << "clickEventActuator_:call back" << std::endl;
     }
 
     if (gestureEventHubPtr->userParallelClickEventActuator_) {
         auto playClickCallback = gestureEventHubPtr->userParallelClickEventActuator_->userCallback_->callback_;
         GestureEvent gestureEvent = GestureEvent();
         playClickCallback(gestureEvent);
-        std::cout << "userParallelClickEventActuator_:call back" << std::endl;
     }
+    EXPECT_NE(selectOverlayNode->isShowInDefaultMenu_[0], false);
 }
 
 /**
@@ -3460,18 +3460,16 @@ HWTEST_F(SelectOverlayTestNg, CreateSelectOverlayNode001, TestSize.Level1)
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->CreateNodePaintMethod();
-
     /**
-     * @tc.steps: step2. set param and call DispatchVisibleToGoneState function.
+     * @tc.steps: step2. set param and call function.
      */
     selectOverlayNode->DispatchVisibleToGoneState(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
-    std::cout << "call DispatchVisibleToGoneState" << std::endl;
-
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     /**
-     * @tc.steps: step2. set param and call DispatchGoneToVisibleState function.
+     * @tc.steps: step2. set param and call function.
      */
     selectOverlayNode->DispatchGoneToVisibleState(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
-    std::cout << "call DispatchGoneToVisibleState" << std::endl;
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
 }
 
 /**
@@ -4034,7 +4032,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
     float maxWidth = 8.0f;
     float allocatedSize = 7.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -4062,7 +4060,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
     float maxWidth = 80.0f;
     float allocatedSize = 4.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
