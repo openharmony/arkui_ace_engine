@@ -149,6 +149,7 @@ public:
     {
         WindowFocus(false);
     }
+    Dimension GetSideBarWidth();
 
 private:
     void WindowFocus(bool isFocus);
