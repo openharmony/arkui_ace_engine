@@ -3805,6 +3805,10 @@ bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
     if (obj->IsUndefined()) {
         return true;
     }
+    // filter dynamic $r raw input
+    if (obj->HasProperty("id")) {
+        return false;
+    }
     if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
         (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
         (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
