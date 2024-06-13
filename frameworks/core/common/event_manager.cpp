@@ -115,6 +115,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     TouchTestResult responseLinkResult;
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    TouchTestResult savePrevHitTestResult = touchTestResults_[touchPoint.id];
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -136,6 +137,46 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     SetHittedFrameNode(hitTestRecognizers);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
+
+    const auto& touchTestResult = touchTestResults_.find(touchPoint.id);
+    if (touchTestResult != touchTestResults_.end()) {
+        refereeNG_->AddGestureToScope(touchPoint.id, touchTestResult->second);
+        int64_t currentEventTime = static_cast<int64_t>(touchPoint.time.time_since_epoch().count());
+        int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
+        int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
+        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
+            std::list<std::pair<int32_t, std::string>> dumpList;
+            eventTree_.Dump(dumpList, 0);
+            for (auto& item : dumpList) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
+            eventTree_.eventTreeList.clear();
+            refereeNG_->CleanAll();
+
+            TouchTestResult reHitTestResult;
+            TouchTestResult reResponseLinkResult;
+            frameNode->TouchTest(point, point, point, touchRestrict,
+                reHitTestResult, touchPoint.id, reResponseLinkResult);
+            SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
+            if (needAppend) {
+#ifdef OHOS_STANDARD_SYSTEM
+                for (const auto& entry : reHitTestResult) {
+                    if (entry) {
+                        entry->SetSubPipelineGlobalOffset(offset, viewScale);
+                    }
+                }
+#endif
+                reHitTestResult.splice(reHitTestResult.end(), savePrevHitTestResult);
+            }
+            touchTestResults_[touchPoint.id] = std::move(reHitTestResult);
+            const auto& reTouchTestResult = touchTestResults_.find(touchPoint.id);
+            if (reTouchTestResult != touchTestResults_.end()) {
+                refereeNG_->AddGestureToScope(touchPoint.id, reTouchTestResult->second);
+            }
+        }
+    }
+
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     std::map<int32_t, NG::TouchTestResultInfo> touchTestResultInfo;
@@ -586,22 +627,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::DOWN) {
-        // first collect gesture into gesture referee.
-        refereeNG_->CleanGestureRefereeState(event.id);
-        refereeNG_->AddGestureToScope(point.id, iter->second);
-        int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
-        int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
-        int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
-        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
-            std::list<std::pair<int32_t, std::string>> dumpList;
-            eventTree_.Dump(dumpList, 0);
-            for (auto& item : dumpList) {
-                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
-            }
-            eventTree_.eventTreeList.clear();
-            refereeNG_->ForceCleanGestureRefereeState();
-        }
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
             AddGestureSnapshot(point.id, 0, target);
