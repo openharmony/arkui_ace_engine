@@ -585,10 +585,8 @@ struct SegmentButtonItemArrayComponent {
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
-  @State pressArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
-  @State hoverColorArray: HoverColorProperty[] = Array.from({
-    length: MAX_ITEM_COUNT
-  }, (_: Object, index) => new HoverColorProperty())
+  @Link pressArray: boolean[]
+  @Link hoverColorArray: HoverColorProperty[]
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
@@ -768,12 +766,6 @@ struct SegmentButtonItemArrayComponent {
         ForEach(this.optionsArray, (item: SegmentButtonItemOptions, index) => {
           if (index < MAX_ITEM_COUNT) {
             Stack() {
-              PressAndHoverEffect({
-                pressIndex: index,
-                colorProperty: this.hoverColorArray[index],
-                press: this.pressArray[index],
-                options: this.options,
-              })
               SegmentButtonItem({
                 selectedIndexes: $selectedIndexes,
                 focusIndex: this.focusIndex,
@@ -921,6 +913,10 @@ export struct SegmentButton {
   @Provide focusIndex: number = -1
   @Provide selectedItemPosition: LocalizedEdges = {}
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 1.0)
+  @State pressArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
+  @State hoverColorArray: HoverColorProperty[] = Array.from({
+    length: MAX_ITEM_COUNT
+  }, (_: Object, index) => new HoverColorProperty())
   private doSelectedChangeAnimate: boolean = false
   private isCurrentPositionSelected: boolean = false
   private panGestureStartPoint: Point = { x: 0, y: 0 }
@@ -1049,12 +1045,33 @@ export struct SegmentButton {
             options: this.options,
           })
         } else {
-          Stack()
-            .direction(this.options.direction)
-            .size(this.componentSize)
-            .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-            .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
-            .backgroundBlurStyle(this.options.backgroundBlurStyle)
+          Stack() {
+            if (this.options.buttons !== void 0 && this.options.buttons.length > 1) {
+              Row({ space: 1 }) {
+                ForEach(this.options.buttons, (item: SegmentButtonItemOptions, index) => {
+                  if (index < MAX_ITEM_COUNT) {
+                    Stack() {
+                      PressAndHoverEffect({
+                        pressIndex: index,
+                        colorProperty: this.hoverColorArray[index],
+                        press: this.pressArray[index],
+                        options: this.options,
+                      })
+                    }
+                    .scale({
+                      x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
+                      y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
+                    })
+                  }
+                })
+              }
+            }
+          }
+          .direction(this.options.direction)
+          .size(this.componentSize)
+          .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
+          .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
+          .backgroundBlurStyle(this.options.backgroundBlurStyle)
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1079,13 +1096,15 @@ export struct SegmentButton {
         .clip(true)
 
         SegmentButtonItemArrayComponent({
+          pressArray:this.pressArray,
+          hoverColorArray:this.hoverColorArray,
           optionsArray: this.options.buttons,
           options: this.options,
           selectedIndexes: $selectedIndexes,
         })
       }
     }
-    .direction(this.options.direction)
+    .direction(this.options ? this.options.direction : undefined)
     .onBlur(() => {
       this.focusIndex = -1
     })
