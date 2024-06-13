@@ -499,6 +499,7 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
 
 void NGGestureRecognizer::SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult)
 {
+    responseLinkRecognizer_.clear();
     for (const auto& item : responseLinkResult) {
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
         if (recognizer) {
