@@ -21,6 +21,9 @@
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -329,6 +332,9 @@ public:
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownCallbackFunc onCrownEventCallback_;
+#endif
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     OnKeyPreImeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
@@ -513,6 +519,9 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool HandleCrownEvent(const CrownEvent& CrownEvent);
+#endif
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
@@ -662,6 +671,43 @@ public:
         }
         focusCallbackEvents_->onKeyEventCallback_ = std::move(onKeyCallback);
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->onCrownEventCallback_ = std::move(onCrownCallback);
+    }
+
+    void ClearUserOnCrown()
+    {
+        if (focusCallbackEvents_ && focusCallbackEvents_->onCrownEventCallback_) {
+            focusCallbackEvents_->onCrownEventCallback_ = nullptr;
+        }
+    }
+
+    OnCrownCallbackFunc GetOnCrownCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->onCrownEventCallback_ : nullptr;
+    }
+
+    void SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback)
+    {
+        onCrownEventsInternal_ = std::move(onCrownEventCallback);
+    }
+
+    bool ProcessOnCrownEventInternal(const CrownEvent& event)
+    {
+        bool result = false;
+        if (onCrownEventsInternal_) {
+            onCrownEventsInternal_(event);
+            result = true;
+        }
+        return result;
+    }
+#endif
 
     void ClearUserOnKey()
     {
@@ -1022,6 +1068,11 @@ public:
 
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool OnCrownEvent(const CrownEvent& CrownEvent);
+    bool OnCrownEventNode(const CrownEvent& CrownEvent);
+    bool OnCrownEventScope(const CrownEvent& CrownEvent);
+#endif
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
     bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
@@ -1088,7 +1139,9 @@ private:
     OnPreFocusFunc onPreFocusCallback_;
     OnClearFocusStateFunc onClearFocusStateCallback_;
     OnPaintFocusStateFunc onPaintFocusStateCallback_;
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownEventFunc onCrownEventsInternal_;
+#endif
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 
     RefPtr<TouchEventImpl> focusOnTouchListener_;

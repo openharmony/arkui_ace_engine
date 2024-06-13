@@ -55,6 +55,9 @@ declare_args() {
 
   # Don't use currentIdSafely in some function
   use_origin_scope = false
+
+  # Enable ace_engine circular screen
+  ace_engine_feature_enable_digital_crown = false
 }
 
 enable_dump_drawcmd = false

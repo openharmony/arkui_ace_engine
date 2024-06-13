@@ -192,6 +192,9 @@ private:
     void InitializeMouseEventCallback();
     void InitializeAxisEventCallback();
     void InitializeKeyEventCallback();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitializeCrownEventCallback();
+#endif
     void InitializeRotationEventCallback();
     void InitializeViewChangeCallback();
     void InitializeDensityChangeCallback();

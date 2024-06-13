@@ -101,6 +101,26 @@ void DialogContainer::InitializeAxisEventCallback()
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void DialogContainer::InitializeCrownEventCallback()
+{
+    ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
+    auto&& crownEventCallback  = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
+        ContainerScope scope(id);
+        context->GetTaskExecutor()->PostTask(
+            [context, event, markProcess, id]() {
+                context->OnCrownEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDialogCrownEvent");
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+}
+#endif
+
 void DialogContainer::InitializeKeyEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
@@ -205,6 +225,9 @@ void DialogContainer::InitializeCallback()
     InitializeMouseEventCallback();
     InitializeAxisEventCallback();
     InitializeKeyEventCallback();
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitializeCrownEventCallback();
+#endif
     InitializeRotationEventCallback();
     InitializeViewChangeCallback();
     InitializeDensityChangeCallback();

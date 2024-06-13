@@ -1800,4 +1800,134 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
     EXPECT_FALSE(parentFocusHub->OnKeyEventScope(keyEvent));
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: FocusHubTestNg0108
+ * @tc.desc: Test the function HandleCrownEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 120, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    CrownEvent event;
+    parentFocusHub->HandleCrownEvent(event);
+
+    parentFocusHub->currentFocus_ = true;
+    parentFocusHub->HandleCrownEvent(event);
+    auto focus = parentFocusHub->IsCurrentFocus();
+    EXPECT_EQ(focus, true);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0109
+ * @tc.desc: Test the function OnCrownEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0109, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 121, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    CrownEvent event;
+    parentFocusHub->currentFocus_ = true;
+    parentFocusHub->focusType_ = FocusType::SCOPE;
+    parentFocusHub->HandleCrownEvent(event);
+    KeyEvent keyEvent;
+    auto OnKeyEvent = parentFocusHub->OnKeyEventScope(keyEvent);
+    EXPECT_EQ(OnKeyEvent, false);
+
+    parentFocusHub->focusType_ = FocusType::DISABLE;
+    parentFocusHub->currentFocus_ = true;
+    parentFocusHub->HandleCrownEvent(event);
+    auto CrownEvent = parentFocusHub->OnCrownEvent(event);
+    EXPECT_EQ(CrownEvent, false);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0110
+ * @tc.desc: Test the function OnCrownEventNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0110, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 122, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+
+    CrownEvent event;
+    parentFocusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    parentFocusHub->OnCrownEventNode(event);
+
+    auto ptr = parentFocusHub->GetOnCrownCallback();
+}
+
+/**
+ * @tc.name: FocusHubTestNg0111
+ * @tc.desc: Test the function OnCrownEventScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0111, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 123, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 124, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+    frameNode->children_.push_back(frameNode1);
+    parentFocusHub->focusable_ = true;
+    parentFocusHub->parentFocusable_ = true;
+    parentFocusHub->focusType_ = FocusType::SCOPE;
+    parentFocusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+
+    parentFocusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
+    CrownEvent event;
+    auto EventScope = parentFocusHub->OnCrownEventScope(event);
+    EXPECT_EQ(EventScope, false);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0112
+ * @tc.desc: Test the function OnCrownEventScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0112, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 125, AceType::MakeRefPtr<ButtonPattern>());
+    auto parentFocusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(parentFocusHub, nullptr);
+    CrownEvent event;
+
+    CrownEvent crownEvent;
+    crownEvent.action = CrownAction::UPDATE;
+    auto EventScope = parentFocusHub->OnCrownEventScope(event);
+    EXPECT_EQ(EventScope, false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->isFocusActive_ = false;
+    auto EventScope1 = parentFocusHub->OnCrownEventScope(event);
+    EXPECT_EQ(EventScope1, false);
+}
+#endif
 } // namespace OHOS::Ace::NG

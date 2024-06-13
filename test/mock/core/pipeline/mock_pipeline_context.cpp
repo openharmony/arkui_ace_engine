@@ -24,6 +24,9 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -611,6 +614,11 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void PipelineContext::OnCrownEvent(const CrownEvent& event, const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::OnCrownEvent(const CrownEvent& event) {}
+#endif
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

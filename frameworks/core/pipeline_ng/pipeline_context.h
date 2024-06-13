@@ -133,6 +133,12 @@ public:
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void OnCrownEvent(const CrownEvent& event, const RefPtr<NG::FrameNode>& node) override;
+    // Called by view when crown event received.
+    void OnCrownEvent(const CrownEvent& event) override;
+#endif
+
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
@@ -843,6 +849,10 @@ private:
     bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
 
     bool IsSkipShortcutAndFocusMove();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool CrownEventDispatch(const CrownEvent& event);
+#endif
 
     void FlushBuildFinishCallbacks();
 
