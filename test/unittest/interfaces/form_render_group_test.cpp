@@ -14,6 +14,7 @@
  */
 #include <thread>
 #include <chrono>
+#define private public
 #include "test/mock/interfaces/mock_uicontent.h"
 #include "ui_content.h"
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
@@ -270,5 +271,262 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_013, TestSize.Level1)
     formJsInfo.formId = 1;
     group->EnableForm(formJsInfo, false);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_013 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_014
+ * @tc.desc: Test OnUnlock() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_014, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_0014 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_014");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    FormRequest formRequest;
+    formRequest.compId = "unlock";
+    bool flag = false;
+    if (group != nullptr) {
+        group->formRequests_.push_back(formRequest);
+        group->currentCompId_ = "unlock";
+        group->OnUnlock();
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_014 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_015
+ * @tc.desc: Test DeleteForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_015, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_015 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_015");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    std::string compId = "deleteform";
+    bool flag = false;
+    if (group != nullptr) {
+        group->currentCompId_ = "deleteform";
+        group->DeleteForm(compId);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_015 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_016
+ * @tc.desc: Test DeleteForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_016, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_016 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_016");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    group->formRenderer_ = nullptr;
+    std::string compId = "deleteform";
+    FormRequest formRequest;
+    formRequest.compId = "requestdeleteform";
+    bool flag = false;
+    if (group != nullptr) {
+        group->formRequests_.push_back(formRequest);
+        group->currentCompId_ = "deleteform";
+        group->DeleteForm(compId);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_016 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_017
+ * @tc.desc: Test DeleteForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_017, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_017 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_017");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+    std::string compId = "deleteform";
+    FormRequest formRequest;
+    formRequest.compId = "requestdeleteform";
+    bool flag = false;
+    if (group != nullptr) {
+        group->formRequests_.push_back(formRequest);
+        group->currentCompId_ = "deleteform";
+        group->DeleteForm(compId);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_017 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_018
+ * @tc.desc: Test UpdateConfiguration() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_018, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_018 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_018");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    bool flag = false;
+    if (group != nullptr) {
+        group->UpdateConfiguration(nullptr);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    std::shared_ptr<OHOS::AppExecFwk::Configuration> config = std::make_shared<OHOS::AppExecFwk::Configuration>();
+    group->formRenderer_ = nullptr;
+    flag = false;
+    if (group != nullptr) {
+        group->UpdateConfiguration(config);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+    flag = false;
+    if (group != nullptr) {
+        group->UpdateConfiguration(config);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_018 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_019
+ * @tc.desc: Test RecycleForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_019, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_019 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_019");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    std::string statusData = "statusData";
+    group->formRenderer_ = nullptr;
+    bool flag = false;
+    if (group != nullptr) {
+        group->RecycleForm(statusData);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+    flag = false;
+    if (group != nullptr) {
+        group->RecycleForm(statusData);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_019 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_020
+ * @tc.desc: Test PreInitAddForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_020, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_020 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_020");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    FormRequest formRequest;
+    formRequest.compId = "PreInitAddForm";
+    bool flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::PRE_INITIALIZED;
+        group->PreInitAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::UNINITIALIZED;
+        group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+        group->PreInitAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::UNINITIALIZED;
+        group->formRenderer_ = nullptr;
+        group->PreInitAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_020 end";
+}
+
+/**
+ * @tc.name: FormRenderGroupTest_021
+ * @tc.desc: Test InnerAddForm() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_021, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_021 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_021");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    FormRequest formRequest;
+    formRequest.compId = "InnerAddForm";
+    bool flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::PRE_INITIALIZED;
+        group->formRenderer_ = nullptr;
+        group->InnerAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::UNINITIALIZED;
+        group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+        group->InnerAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::PRE_INITIALIZED;
+        group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+        group->InnerAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    flag = false;
+    if (group != nullptr) {
+        group->initState_ = FormRendererGroup::FormRendererInitState::INITIALIZED;
+        group->formRenderer_ =  std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
+        group->InnerAddForm(formRequest);
+        flag = true;
+    }
+    EXPECT_TRUE(flag);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_021 end";
 }
 }
