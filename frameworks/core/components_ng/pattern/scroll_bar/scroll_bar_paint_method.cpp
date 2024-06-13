@@ -48,5 +48,10 @@ void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    scrollBarOverlayModifier->SetScrollRadius(theme->GetScrollRadius());
 }
 } // namespace OHOS::Ace::NG

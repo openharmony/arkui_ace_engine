@@ -318,6 +318,7 @@ bool ScrollBarPattern::UpdateScrollBarDisplay()
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    Updatebackgroundcolor(renderContext);
     if (controlDistanceChanged_) {
         controlDistanceChanged_ = false;
         if (!Positive(controlDistance_)) {
@@ -892,5 +893,15 @@ bool ScrollBarPattern::IsReverse() const
 void ScrollBarPattern::SetReverse(bool reverse)
 {
     isReverse_ = reverse;
+}
+void ScrollBarPattern::Updatebackgroundcolor(RefPtr<RenderContext>& renderContext)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    }
 }
 } // namespace OHOS::Ace::NG

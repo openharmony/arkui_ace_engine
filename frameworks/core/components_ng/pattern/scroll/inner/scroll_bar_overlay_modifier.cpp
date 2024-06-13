@@ -24,7 +24,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double FULL_ALPHA = 255.0;
-constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr int32_t BAR_DISAPPEAR_DURATION = 300;  // 300ms
@@ -70,7 +69,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
         brush.SetBlendMode(RSBlendMode::SRC_OVER);
         brush.SetAntiAlias(true);
         RSRect fgRect(barX, barY, barX + barWidth, barY + barHeight);
-        double filletRadius = barWidth * HALF;
+        double filletRadius = filletRadius_.Value();
         RSColor barColor = ToRSColor(barColor_->Get().BlendOpacity(opacity_->Get() / FULL_ALPHA));
         brush.SetColor(barColor);
         canvas.AttachBrush(brush);
@@ -284,5 +283,9 @@ Offset ScrollBarOverlayModifier::GetHoverOffset(const Size& size) const
         return Offset(0.f, size.Height() - barHeight_->Get());
     }
     return Offset::Zero();
+}
+void ScrollBarOverlayModifier::SetScrollRadius(const Dimension& filletRadius)
+{
+    filletRadius_  = filletRadius;
 }
 } // namespace OHOS::Ace::NG

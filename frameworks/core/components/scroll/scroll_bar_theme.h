@@ -54,13 +54,15 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
+            theme->activemagnify_ = pattern->GetAttr<double>("scroll_bar_activemagnify", 0.0);
+            theme->touchmagnify_ = pattern->GetAttr<double>("scroll_bar_touchmagnify", 0.0);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
-            theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
+            theme->activeWidth_ = theme->normalWidth_ * theme->activemagnify_;
             theme->minHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_height", 0.0_vp);
             theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
             theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
-            theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
+            theme->touchWidth_ = theme->normalWidth_ * theme->touchmagnify_;
             theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
             auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
@@ -70,6 +72,8 @@ public:
             theme->scrollBarMargin_ = padding;
             theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
             theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
+            theme->scrollradius_ = pattern->GetAttr<Dimension>("search_text_field_border_radius", 2.0_vp);
+            theme->scrollbarbackColor_ =  pattern->GetAttr<Color>("scroll_bar_back_color", Color());
         }
     };
 
@@ -139,6 +143,22 @@ public:
     {
         return defaultHeight_;
     }
+    double GetActivemagnify() const
+    {
+        return activemagnify_;
+    }
+    double GetTouchmagnify() const
+    {
+        return touchmagnify_;
+    }
+    const Dimension& GetScrollRadius() const
+    {
+        return scrollradius_;
+    }
+    const Color& GetScrollBarBackColor() const
+    {
+        return scrollbarbackColor_;
+    }
 
 protected:
     ScrollBarTheme() = default;
@@ -157,6 +177,10 @@ private:
     Color backgroundColor_;
     Color foregroundColor_;
     Edge padding_;
+    double activemagnify_ = 0.0;
+    double touchmagnify_ = 0.0;
+    Dimension scrollradius_;
+    Color scrollbarbackColor_;
 };
 
 } // namespace OHOS::Ace
