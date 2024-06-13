@@ -141,8 +141,9 @@ static std::string TextureImagesToStr(const RefPtr<ModelPaintProperty>& modelPai
         return ret;
     }
     auto& imageTextures = modelPaintProperty->GetModelImageTexturePaths().value();
-    for (auto& imageTexture : imageTextures) {
-        ret += imageTexture + " ";
+    auto size = imageTextures.size();
+    for (auto i = 0u; i < size; i++) {
+        ret += imageTextures[i] + (i + 1 == size ? "" : " ");
     }
     return ret;
 }
@@ -164,7 +165,7 @@ static std::string ShaderInputBufferToStr(const RefPtr<ModelPaintProperty>& mode
         return ret;
     }
     for (auto i = 0u; i < fSize; i++) {
-        ret += std::to_string(buffer[i]) + " ";
+        ret += std::to_string(buffer[i]) + (i + 1 == fSize ? "" : " ");
     }
     return ret;
 }
@@ -178,7 +179,7 @@ static std::string SurfaceTypeToStr(const RefPtr<ModelAdapterWrapper>& modelAdap
     auto surfaceType = modelAdapter->GetSurfaceType();
     switch (surfaceType) {
         case Render3D::SurfaceType::UNDEFINE: {
-            ret = "UNDEFINE";
+            ret = "ModelType.UNDEFINE";
             break;
         }
         case Render3D::SurfaceType::SURFACE_WINDOW: {
@@ -190,11 +191,11 @@ static std::string SurfaceTypeToStr(const RefPtr<ModelAdapterWrapper>& modelAdap
             break;
         }
         case Render3D::SurfaceType::SURFACE_BUFFER: {
-            ret = "SURFACE_BUFFER";
+            ret = "ModelType.BUFFER";
             break;
         }
         default: {
-            ret = "SURFACE_WINDOW";
+            ret = "ModelType.SURFACE";
             break;
         }
     }
