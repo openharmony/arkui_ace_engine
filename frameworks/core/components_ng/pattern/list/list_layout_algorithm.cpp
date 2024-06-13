@@ -1360,6 +1360,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
     }
+    DelAnimate(listLayoutProperty, layoutWrapper);
+    UpdateOverlay(layoutWrapper);
+}
+
+void ListLayoutAlgorithm::DelAnimate(RefPtr<ListLayoutProperty> listLayoutProperty, LayoutWrapper* layoutWrapper)
+{
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
     if (!itemPosition_.empty() && cacheCount > 0) {
         auto items = LayoutCachedItem(layoutWrapper, cacheCount);
@@ -1373,6 +1379,26 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             pattern->SetPredictLayoutParam(std::nullopt);
         }
     }
+}
+
+void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    if (!pattern->IsFadingEdge()) {
+        return;
+    }
+    CHECK_NULL_VOID(pattern);
+    auto overlayNode = frameNode ->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto listFrameSize = geometryNode->GetMarginFrameSize();
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(listFrameSize);
+    overlayNode->Layout();
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
