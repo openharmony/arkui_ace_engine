@@ -146,6 +146,7 @@ export const defaultTheme = {
             "moduleName": "__harDefaultModuleName__"
         }],
         fontSize: 16,
+        defaultEffect: -1,
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -343,6 +344,7 @@ export class ChipComponent extends ViewPU {
         this.callbackId = undefined;
         this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width), this, "prefixSymbolWidth");
         this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width), this, "suffixSymbolWidth");
+        this.__symbolEffect = new ObservedPropertyObjectPU(new SymbolEffect(), this, "symbolEffect");
         this.setInitiallyProvidedValue(l5);
         this.finalizeConstruction();
     }
@@ -450,6 +452,9 @@ export class ChipComponent extends ViewPU {
         if (j5.suffixSymbolWidth !== undefined) {
             this.suffixSymbolWidth = j5.suffixSymbolWidth;
         }
+        if (j5.symbolEffect !== undefined) {
+            this.symbolEffect = j5.symbolEffect;
+        }
     }
 
     updateStateVars(i5) {
@@ -496,6 +501,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.purgeDependencyOnElmtId(h5);
         this.__prefixSymbolWidth.purgeDependencyOnElmtId(h5);
         this.__suffixSymbolWidth.purgeDependencyOnElmtId(h5);
+        this.__symbolEffect.purgeDependencyOnElmtId(h5);
     }
 
     aboutToBeDeleted() {
@@ -526,6 +532,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.aboutToBeDeleted();
         this.__prefixSymbolWidth.aboutToBeDeleted();
         this.__suffixSymbolWidth.aboutToBeDeleted();
+        this.__symbolEffect.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -744,6 +751,14 @@ export class ChipComponent extends ViewPU {
 
     set suffixSymbolWidth(g4) {
         this.__suffixSymbolWidth.set(g4);
+    }
+
+    get symbolEffect() {
+        return this.__symbolEffect.get();
+    }
+
+    set symbolEffect(a6) {
+        this.__symbolEffect.set(a6);
     }
 
     isChipSizeEnum() {
@@ -1413,6 +1428,9 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
                         SymbolGlyph.attributeModifier.bind(this)(this.getPrefixSymbolModifier());
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), this.theme.defaultSymbol.defaultEffect);
                         SymbolGlyph.onSizeChange((v1, w1) => {
                             this.prefixSymbolWidth = w1?.width;
                         });
@@ -1472,6 +1490,9 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
                         SymbolGlyph.attributeModifier.bind(this)(this.getSuffixSymbolModifier());
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), this.theme.defaultSymbol.defaultEffect);
                         SymbolGlyph.onSizeChange((f1, g1) => {
                             this.suffixSymbolWidth = g1?.width;
                         });
