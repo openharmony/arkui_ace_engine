@@ -435,6 +435,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             }
         }
         StartAutoPlay();
+        InitArrow();
     }
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= RealTotalCount()
         || GetDisplayCount() >= RealTotalCount()) {
