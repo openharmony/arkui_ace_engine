@@ -176,7 +176,7 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
                 timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_TWO);
             }
         }
-        if (!NeedadaptForAging()) {
+        if (!NeedadaptForAging() || (settingData.useMilitary && NeedadaptForAging())) {
             timeLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_FOUR : RATIO_SEVEN);
             for (const auto& child : timeNode->GetChildren()) {
                 auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
@@ -474,51 +474,49 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     const RefPtr<FrameNode> &buttonConfirmNode,
     const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    monthAndDayPickerNode->SetActive(switchTimePickerFlag_ ? true : false);
     auto monthAndDayLayoutProperty = monthAndDayPickerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(monthAndDayLayoutProperty);
     monthAndDayLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    monthAndDayPickerNode->MarkDirtyNode();
 
     auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(ampmNode);
-    ampmNode->SetActive(switchTimePickerFlag_ ? true : false);
     auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(ampmLayoutProperty);
     ampmLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    ampmNode->MarkDirtyNode();
 
     auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(hourNode);
-    hourNode->SetActive(switchTimePickerFlag_ ? false : true);
     auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
     hourLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-
     auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
     CHECK_NULL_VOID(minuteNode);
-    minuteNode->SetActive(switchTimePickerFlag_ ? false : true);
     auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
     minuteLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     hourNode->MarkDirtyNode();
     minuteNode->MarkDirtyNode();
 
-    buttonCancelNode->SetActive(switchTimePickerFlag_ ? true : false);
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    buttonCancelNode->MarkDirtyNode();
 
-    cancelNextDividerNode->SetActive(switchTimePickerFlag_ ? true : false);
     auto cancelNextLayoutProperty = cancelNextDividerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelNextLayoutProperty);
     cancelNextLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    cancelNextDividerNode->MarkDirtyNode();
 
-    buttonConfirmNode->SetActive(switchTimePickerFlag_ ? false : true);
     auto confirmButtonLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(confirmButtonLayoutProperty);
     confirmButtonLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    buttonConfirmNode->MarkDirtyNode();
 
-    nextConfirmDividerNode->SetActive(switchTimePickerFlag_ ? false : true);
     auto nextConfirmLayoutProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(nextConfirmLayoutProperty);
     nextConfirmLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    nextConfirmDividerNode->MarkDirtyNode();
+
     switchTimePickerFlag_ = !switchTimePickerFlag_;
 }
 
@@ -703,19 +701,13 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNodeForAging(const DatePicke
 
     if (!switchTimePickerFlag_) {
         if ((!settingData.useMilitary)) {
-            buttonConfirmNode->SetActive(false);
             auto layoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateVisibility(VisibleType::GONE);
-
-            nextConfirmDividerNode->SetActive(false);
             auto nextConfirmDividerProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
             nextConfirmDividerProperty->UpdateVisibility(VisibleType::GONE);
         } else {
-            buttonNextPreNode->SetActive(false);
             auto layoutProperty = buttonNextPreNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateVisibility(VisibleType::GONE);
-
-            nextConfirmDividerNode->SetActive(false);
             auto nextConfirmDividerProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
             nextConfirmDividerProperty->UpdateVisibility(VisibleType::GONE);
         }
@@ -1571,14 +1563,12 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     if (NeedadaptForAging() && (!settingData.useMilitary)) {
         auto hourNode = AceType::DynamicCast<FrameNode>(timeNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(hourNode, nullptr);
-        hourNode->SetActive(false);
         auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_RETURN(hourLayoutProperty, nullptr);
         hourLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
         auto minuteNode = AceType::DynamicCast<FrameNode>(timeNode->GetChildAtIndex(2));
         CHECK_NULL_RETURN(minuteNode, nullptr);
-        minuteNode->SetActive(false);
         auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
         minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
