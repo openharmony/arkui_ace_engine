@@ -54,8 +54,8 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
-            theme->activemagnify_ = pattern->GetAttr<double>("scroll_bar_activemagnify", 2.0);
-            theme->touchmagnify_ = pattern->GetAttr<double>("scroll_bar_touchmagnify", 2.0);
+            theme->activemagnify_ = pattern->GetAttr<double>("scroll_bar_activemagnify", 0.0);
+            theme->touchmagnify_ = pattern->GetAttr<double>("scroll_bar_touchmagnify", 0.0);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
             theme->activeWidth_ = theme->normalWidth_ * theme->activemagnify_;
