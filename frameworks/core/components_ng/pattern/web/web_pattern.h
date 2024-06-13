@@ -53,6 +53,7 @@
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
@@ -532,6 +533,21 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
+    void CreateOverlay(
+        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight,
+        int pointX,
+        int pointY);
+    void OnOverlayStateChanged(
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight);
+    void OnTextSelected();
+    void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
@@ -566,6 +582,7 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -905,6 +922,8 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
+    bool overlayCreating_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;

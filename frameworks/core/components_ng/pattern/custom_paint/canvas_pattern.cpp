@@ -1099,7 +1099,7 @@ void CanvasPattern::SetImageAIOptions(void* options)
     imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
-void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
