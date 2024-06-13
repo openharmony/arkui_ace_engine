@@ -415,6 +415,11 @@ public:
         return buttonMinTextSize_;
     }
 
+    const Dimension& GetNormalButtonFontSize() const
+    {
+        return normalButtonFontSize_;
+    }
+
     const Dimension& GetDefaultPaddingBottomFixed()
     {
         return defaultPaddingBottomFixed_;
@@ -569,6 +574,7 @@ private:
     Dimension marginBottom_;
     Dimension buttonHeight_;
     Dimension buttonTextSize_;
+    Dimension normalButtonFontSize_;
     Dimension buttonMinTextSize_;
     Dimension minButtonWidth_;
     Dimension maxButtonWidth_;

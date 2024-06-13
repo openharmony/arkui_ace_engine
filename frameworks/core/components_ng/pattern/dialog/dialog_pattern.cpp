@@ -256,8 +256,6 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
 void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
     auto contentRenderContext = contentNode->GetRenderContext();
-    CHECK_NULL_VOID(contentRenderContext);
-    contentRenderContext_ = contentRenderContext;
     UpdateBgBlurStyle(contentRenderContext, props);
     if (props.borderRadius.has_value()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -280,8 +278,11 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     } else {
         BorderWidthProperty borderWidth;
-        Dimension width = dialogTheme_->GetBackgroudBorderWidth();
-        borderWidth.SetBorderWidth(width);
+        borderWidth.SetBorderWidth(dialogTheme_->GetBackgroudBorderWidth());
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        if (layoutProps) {
+            layoutProps->UpdateBorderWidth(borderWidth);
+        }
         contentRenderContext->UpdateBorderWidth(borderWidth);
         contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     }
@@ -292,8 +293,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderColor(props.borderColor.value());
     } else {
         BorderColorProperty borderColor;
-        Color color = dialogTheme_->GetBackgroudBorderColor();
-        borderColor.SetColor(color);
+        borderColor.SetColor(dialogTheme_->GetBackgroudBorderColor());
         contentRenderContext->UpdateBorderColor(borderColor);
     }
     if (props.shadow.has_value()) {
@@ -306,6 +306,8 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
 }
 void DialogPattern::UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props)
 {
+    CHECK_NULL_VOID(contentRenderContext);
+    contentRenderContext_ = contentRenderContext;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
@@ -922,8 +924,8 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    Dimension buttonTextSize =
-        dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
+    Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
+                                                                           : dialogTheme_->GetNormalButtonFontSize();
     textProps->UpdateFontSize(buttonTextSize);
     if (isSuitableForElderly_ && isLandspace_ && !isThreeButtonsDialog_) {
         textProps->UpdateFontSize(LANDSCAPE_BUTTON_TEXT_FONT_SIZE);
