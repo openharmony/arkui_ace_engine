@@ -1439,13 +1439,13 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
     CHECK_NULL_VOID(textLayoutProperty);
 
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
     toastPattern->UpdateTextSizeConstraint(textNode);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
     MockPipelineContext::GetCurrent()->SetThemeManager(backupThemeManager);
@@ -1471,10 +1471,10 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     CHECK_NULL_VOID(textLayoutProperty);
 
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
