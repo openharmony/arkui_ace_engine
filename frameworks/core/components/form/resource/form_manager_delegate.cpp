@@ -836,6 +836,7 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
 {
     if (!enableFormCallback_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "enableFormCallback_. is null");
+        return;
     }
     enableFormCallback_(enable);
 }
@@ -1022,6 +1023,13 @@ void FormManagerDelegate::ProcessRecycleForm()
         recycleStatus_ = RecycleStatus::RECYCLED;
     }
     HandleSnapshotCallback(0);
+}
+
+void FormManagerDelegate::ProcessEnableForm(bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}s",
+        std::to_string(runningCardId_).c_str());
+    HandleEnableFormCallback(enable);
 }
 #endif
 } // namespace OHOS::Ace
