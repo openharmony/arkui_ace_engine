@@ -167,6 +167,7 @@ public:
     void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
     void GetPageNameAndPath(const std::string& url, std::string& name, std::string& path);
+    int32_t GetPageIndex(const WeakPtr<FrameNode>& page);
 
     std::string GetParams() const;
 
