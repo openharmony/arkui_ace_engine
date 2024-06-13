@@ -47,7 +47,7 @@ export interface SuffixIconOptions extends IconCommonOptions {
 
 export interface PrefixIconOptions extends IconCommonOptions {}
 
-export interface SymbolOptions {
+export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
 }
@@ -89,6 +89,7 @@ interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
   fontSize: Length;
+  defaultEffect: number;
 }
 
 interface LabelTheme {
@@ -186,6 +187,7 @@ export const defaultTheme: ChipTheme = {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
     fontSize: 16,
+    defaultEffect: -1,
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -229,10 +231,10 @@ const noop = () => {
 
 interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: SuffixIconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
   enabled?: boolean;
   activated?: boolean;
@@ -273,10 +275,10 @@ export struct ChipComponent {
   @Prop allowClose: boolean = true
   @Prop chipDirection: Direction = Direction.Auto
   @Prop prefixIcon: PrefixIconOptions = { src: "" }
-  @Prop prefixSymbol: SymbolOptions
+  @Prop prefixSymbol: ChipSymbolGlyphOptions
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: SymbolOptions
+  @Prop suffixSymbol: ChipSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
@@ -310,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -909,6 +912,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getPrefixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
             })
@@ -950,6 +956,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getSuffixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width
             })

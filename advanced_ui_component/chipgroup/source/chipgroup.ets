@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Chip, ChipSize, SymbolOptions } from '@ohos.arkui.advanced.Chip';
+import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -47,7 +47,8 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   normalBackgroundSize: 36,
   marginLeft: 8,
   marginRight: 16,
-  fillColor: $r('sys.color.ohos_id_color_primary')
+  fillColor: $r('sys.color.ohos_id_color_primary'),
+  defaultEffect: -1
 }
 
 enum ChipGroupHeight {
@@ -83,10 +84,10 @@ interface LabelOptions {
 
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
 }
 
@@ -119,6 +120,7 @@ interface IconGroupSuffixTheme {
   marginLeft: number;
   marginRight: number;
   fillColor: ResourceColor;
+  defaultEffect: number;
 }
 
 function parseDimension<T>(
@@ -175,6 +177,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier> = [];
+  symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
@@ -207,6 +210,9 @@ export struct IconGroupSuffix {
               .fontSize(this.getIconSize())
               .attributeModifier(suffixItem)
               .focusable(true)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(this.symbolEffect, false)
+              .symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect)
           } else {
             Image(suffixItem.icon.src)
               .fillColor(iconGroupSuffixTheme.fillColor)
