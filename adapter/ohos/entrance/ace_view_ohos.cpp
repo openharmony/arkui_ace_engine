@@ -147,6 +147,11 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             view->ProcessDragEvent(pointerEvent);
             view->ProcessMouseEvent(pointerEvent, node, isInjected);
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_CROWN) {
+        // crown event
+        view->ProcessDigitalCrownEvent(pointerEvent, node, isInjected);
+#endif
     } else {
         // touch event
         view->ProcessDragEvent(pointerEvent);
@@ -278,6 +283,14 @@ void AceViewOhos::RegisterRotationEventCallback(RotationEventCallBack&& callback
     ACE_DCHECK(callback);
     rotationEventCallBack_ = std::move(callback);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void AceViewOhos::RegisterCrownEventCallback(CrownEventCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    crownEventCallback_ = std::move(callback);
+}
+#endif
 
 void AceViewOhos::Launch()
 {
@@ -422,6 +435,26 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
     axisEventCallback_(event, markProcess, node);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected)
+{
+    CrownEvent event;
+    ConvertCrownEvent(pointerEvent, event);
+    event.isInjected = isInjected;
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "crown event: action:%{public}d, AV:%{public}f, degree:%{public}f",
+        event.action, event.angularVelocity, event.degree);
+
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.timeStamp.time_since_epoch()).count(),
+            enabled);
+    };
+    CHECK_NULL_VOID(crownEventCallback_);
+    crownEventCallback_(event, markProcess, node);
+}
+#endif
 
 bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme)
 {

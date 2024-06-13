@@ -31,6 +31,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -149,6 +152,16 @@ bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 
     return OnKeyEvent(keyEvent);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::HandleCrownEvent(const CrownEvent& CrownEvent)
+{
+    if (!IsCurrentFocus()) {
+        return false;
+    }
+    return OnCrownEvent(CrownEvent);
+}
+#endif
 
 void FocusHub::DumpFocusTree(int32_t depth)
 {
@@ -627,6 +640,20 @@ void FocusHub::RefreshFocus()
     parent->RequestFocusImmediately();
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::OnCrownEvent(const CrownEvent& CrownEvent)
+{
+    if (focusType_ == FocusType::SCOPE) {
+        return OnCrownEventScope(CrownEvent);
+    }
+    if (focusType_ == FocusType::NODE) {
+        return OnCrownEventNode(CrownEvent);
+    }
+    TAG_LOGW(AceLogTag::ACE_FOCUS, "Current node focus type: %{public}d is invalid.", focusType_);
+    return false;
+}
+#endif
+
 bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (focusType_ == FocusType::SCOPE) {
@@ -731,6 +758,48 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     }
     return retInternal || retCallback;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusHub::OnCrownEventNode(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto* pipeline = frameNode->GetContext();
+    bool retCallback = false;
+
+    auto onCrownEventCallback = GetOnCrownCallback();
+    if (onCrownEventCallback) {
+        CrownEventInfo crownInfo(CrownEvent);
+        onCrownEventCallback(crownInfo);
+        retCallback = crownInfo.IsStopPropagation();
+        auto eventManager = pipeline->GetEventManager();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnCrownEventUser: Node %{public}s/%{public}d handle CrownAction:%{public}d",
+            GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
+    } else {
+        retCallback = ProcessOnCrownEventInternal(CrownEvent);
+    }
+    return retCallback;
+}
+
+bool FocusHub::OnCrownEventScope(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (lastFocusNode && lastFocusNode->HandleCrownEvent(CrownEvent)) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "OnCrownEvent: Node %{public}s/%{public}d Because its"
+            " child %{public}s/%{public}d already has consumed this event.",
+            GetFrameName().c_str(), GetFrameId(), lastFocusNode->GetFrameName().c_str(), lastFocusNode->GetFrameId());
+        return true;
+    }
+    if (OnCrownEventNode(CrownEvent)) {
+        return true;
+    }
+    return false;
+}
+#endif
 
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
 {

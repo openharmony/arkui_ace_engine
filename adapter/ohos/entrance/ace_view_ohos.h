@@ -68,6 +68,9 @@ public:
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
     void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
+#endif
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
 
@@ -82,7 +85,10 @@ public:
 
     void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
+#endif
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 
     bool ProcessRotationEvent(float rotationValue);
@@ -225,6 +231,9 @@ private:
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
     AxisEventCallback axisEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
     ViewPositionChangeCallback viewPositionChangeCallback_;

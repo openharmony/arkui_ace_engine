@@ -246,6 +246,9 @@ public:
     virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
+#endif
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
@@ -284,6 +287,9 @@ public:
     virtual void DisableOnClick() = 0;
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void DisableOnCrownEvent() = 0;
+#endif
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnMouse() = 0;

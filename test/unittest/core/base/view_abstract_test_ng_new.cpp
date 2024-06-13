@@ -1742,4 +1742,29 @@ HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Finish();
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: DisableOnCrownEvent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create and put frameNode, expect frameNode is't nullptr.
+    */
+    ViewAbstract::DisableOnCrownEvent();
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ViewAbstract::DisableOnCrownEvent(AceType::RawPtr(node));
+    EXPECT_NE(frameNode, nullptr);
+
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+    ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+}
+#endif
 } // namespace OHOS::Ace::NG

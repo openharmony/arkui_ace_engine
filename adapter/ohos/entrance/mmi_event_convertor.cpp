@@ -396,6 +396,28 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     }
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)
+{
+    event.touchEventId = pointerEvent->GetId();
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
+        event.action = Ace::CrownAction::BEGIN;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
+        event.action = Ace::CrownAction::UPDATE;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        event.action = Ace::CrownAction::END;
+    } else {
+        event.action = Ace::CrownAction::UNKNOWN;
+    }
+    event.angularVelocity =  pointerEvent->GetVelocity();
+    event.degree =  pointerEvent->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    event.timeStamp = time;
+}
+#endif
+
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
     event.rawKeyEvent = keyEvent;
