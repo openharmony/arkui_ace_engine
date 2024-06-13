@@ -584,10 +584,12 @@ void TextPickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     } else {
         margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -600,10 +602,12 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -613,13 +617,15 @@ void TextPickerDialogView::UpdateForwardButtonMargin(
 {
     MarginProperty margin;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     } else {
-        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.left = CalcLength(0.0_vp);
     }
     buttonForwardNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -632,10 +638,12 @@ void TextPickerDialogView::UpdateBackwardButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
+        margin.right = CalcLength(0.0_vp);
     }
     buttonBackwardNode->GetLayoutProperty()->UpdateMargin(margin);
 }
