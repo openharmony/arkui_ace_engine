@@ -27,7 +27,7 @@ if (use_mac) {
       "//base/global/resource_management/frameworks/resmgr:global_resmgr_win"
   label_hilog =
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows"
-} else if (use_linux) {
+} else {
   dylib_suffix = ".so"
   label_res =
       "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux"

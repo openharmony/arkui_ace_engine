@@ -130,7 +130,9 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_preview_shared_library") {
     deps = []
     foreach(module, napi_modules) {
-      deps += [ ":copy_napi_${module.prefix}libs" ]
+      if (!(is_linux && host_cpu == "arm64")) {
++        deps += [ ":copy_napi_${module.prefix}libs" ]
++     }
     }
 
     # The dynamic library here is used for local testing of the previewer.
