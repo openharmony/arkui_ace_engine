@@ -101,6 +101,14 @@ static napi_value ParseJSONParams(napi_env env, const std::string& paramsStr)
     return result;
 }
 
+static void ParseRecoverable(napi_env env, napi_value recoverableNApi, bool& recoverable)
+{
+    if (recoverableNApi == nullptr) {
+        return;
+    }
+    napi_get_value_bool(env, recoverableNApi, &recoverable);
+}
+
 struct RouterAsyncContext {
     napi_env env = nullptr;
     napi_ref callbackSuccess = nullptr;
@@ -110,6 +118,7 @@ struct RouterAsyncContext {
     std::string keyForUrl;
     std::string paramsString;
     std::string uriString;
+    bool recoverable = true;
     uint32_t mode = STANDARD;
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
@@ -222,6 +231,7 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             }
             napi_value uriNApi = nullptr;
             napi_value params = nullptr;
+            napi_value recoverable = nullptr;
             napi_get_named_property(env, argv[i], asyncContext->keyForUrl.c_str(), &uriNApi);
             napi_typeof(env, uriNApi, &valueType);
             if (valueType != napi_string) {
@@ -231,6 +241,8 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             ParseUri(env, uriNApi, asyncContext->uriString);
             napi_get_named_property(env, argv[i], "params", &params);
             ParseParams(env, params, asyncContext->paramsString);
+            napi_get_named_property(env, argv[i], "recoverable", &recoverable);
+            ParseRecoverable(env, recoverable, asyncContext->recoverable);
         } else if (valueType == napi_number) {
             napi_get_value_uint32(env, argv[i], &asyncContext->mode);
         } else if (valueType == napi_function) {
@@ -345,9 +357,11 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
             return;
         }
         if (delegate) {
-            delegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            delegate->PushWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         } else {
-            defaultDelegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            defaultDelegate->PushWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         }
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
@@ -363,10 +377,11 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
             return;
         }
         if (delegate) {
-            delegate->ReplaceWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            delegate->ReplaceWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         } else {
             defaultDelegate->ReplaceWithCallback(context->uriString, context->paramsString,
-                errorCallback, context->mode);
+                context->recoverable, errorCallback, context->mode);
         }
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
@@ -380,7 +395,8 @@ static napi_value JSPushNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        delegate->PushNamedRoute(context->uriString, context->paramsString, errorCallback, context->mode);
+        delegate->PushNamedRoute(context->uriString, context->paramsString,
+            context->recoverable, errorCallback, context->mode);
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
@@ -393,7 +409,8 @@ static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        delegate->ReplaceNamedRoute(context->uriString, context->paramsString, errorCallback, context->mode);
+        delegate->ReplaceNamedRoute(context->uriString, context->paramsString,
+            context->recoverable, errorCallback, context->mode);
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
@@ -808,12 +825,10 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    
     std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         return nullptr;
     }
-    
     napi_value result = ParseJSONParams(env, paramsStr);
     return result;
 }

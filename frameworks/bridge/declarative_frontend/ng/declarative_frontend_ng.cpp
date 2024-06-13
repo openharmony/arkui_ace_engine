@@ -403,10 +403,10 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
-UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name)
+UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
     if (delegate_) {
-        delegate_->RunPage(name, "", pageProfile_, true);
+        delegate_->RunPage(name, params, pageProfile_, true);
         return UIContentErrorCode::NO_ERRORS;
     }
     return UIContentErrorCode::NULL_POINTER;
@@ -570,18 +570,19 @@ void DeclarativeFrontendNG::NotifyUIIdle()
     }
 }
 
-std::pair<std::string, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> DeclarativeFrontendNG::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     if (delegate_) {
-        return delegate_->RestoreRouterStack(contentInfo);
+        return delegate_->RestoreRouterStack(contentInfo, type);
     }
-    return std::make_pair("", UIContentErrorCode::NULL_POINTER);
+    return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER);
 }
 
-std::string DeclarativeFrontendNG::GetContentInfo() const
+std::string DeclarativeFrontendNG::GetContentInfo(ContentInfoType type) const
 {
     if (delegate_) {
-        return delegate_->GetContentInfo();
+        return delegate_->GetContentInfo(type);
     }
     return "";
 }
