@@ -623,6 +623,9 @@ export struct ChipComponent {
       } else {
         sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
       }
+      if (!this.isShowPressedBackGroundColor) {
+        return Color.Transparent
+      }
     }
     if (!this.isShowPressedBackGroundColor) {
       return sourceColor.color
