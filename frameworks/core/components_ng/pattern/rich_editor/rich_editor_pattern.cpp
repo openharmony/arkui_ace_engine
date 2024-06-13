@@ -3561,6 +3561,10 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         caretHeight = overlayModifier ? overlayModifier->GetCaretHeight() : DEFAULT_CARET_HEIGHT;
     }
+    if (NearZero(caretHeight)) {
+        auto [caretAdjustOffset, caretAdjustHeight] = CalculateCaretOffsetAndHeight();
+        caretHeight = caretAdjustHeight;
+    }
     auto offset = KEYBOARD_AVOID_OFFSET.ConvertToPx();
     auto caretTop = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY();
     height = caretTop + caretHeight + offset - positionY;
