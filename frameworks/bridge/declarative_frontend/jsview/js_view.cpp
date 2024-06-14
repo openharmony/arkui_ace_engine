@@ -165,6 +165,7 @@ void JSView::JsGetCardId(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(cardId_)));
 }
 
+
 JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
     viewId_ = viewId;
@@ -693,7 +694,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
-        .jsViewName = GetJSViewName() };
+        .jsViewName = GetJSViewName(),
+        .isV2 = GetJSIsV2() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -1023,6 +1025,11 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 #endif
 }
 
+void JSViewPartialUpdate::JSSetIsV2(const bool isV2)
+{
+    isV2_ = isV2;
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -1056,6 +1063,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "getStateProfilerStatus", &JSViewPartialUpdate::JSGetStateProfilerStatus);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
+    JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

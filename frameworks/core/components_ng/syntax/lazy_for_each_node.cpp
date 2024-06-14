@@ -318,11 +318,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false);
+        child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
     if (isActive_) {
-        child.second->SetJSViewActive(true);
+        child.second->SetJSViewActive(true, true);
     }
     if (addToRenderTree) {
         child.second->SetActive(true);

@@ -8564,6 +8564,7 @@ class ViewV2 extends PUV2ViewBase {
             }
             return repeat;
         };
+        this.setIsV2(true);
         
     }
     /**
