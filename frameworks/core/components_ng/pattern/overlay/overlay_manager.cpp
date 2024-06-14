@@ -131,6 +131,8 @@ constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
+constexpr int32_t EVENT_COLUMN_SLOT = -2;
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -4591,7 +4593,7 @@ void OverlayManager::MountEventToRootNode(const RefPtr<FrameNode>& columnNode)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    columnNode->MountToParent(rootNode, 1);
+    columnNode->MountToParent(rootNode, EVENT_COLUMN_SLOT);
     columnNode->OnMountToParentDone();
     eventColumnNodeWeak_ = columnNode;
     hasEvent_ = true;
