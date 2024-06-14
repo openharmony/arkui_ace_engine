@@ -161,7 +161,7 @@ public:
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetDragDampStartPointInfo(const Point& point, int32_t pointerId);
-    void HandleDragDampingMove(const Point& point, int32_t pointerId);
+    void HandleDragDampingMove(const Point& point, int32_t pointerId, bool isRedragStart = false);
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     void RestartDragTask(const GestureEvent& info);
     static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
@@ -307,6 +307,7 @@ private:
     PanDirection direction_;
     int32_t fingers_ = 1;
     float distance_ = 0.0f;
+    bool isRedragStart_ = false;
 };
 
 } // namespace OHOS::Ace::NG

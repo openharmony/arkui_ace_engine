@@ -213,7 +213,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
-    auto actionStart = [weak = WeakClaim(this), this, hasContextMenu](GestureEvent& info) {
+    auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -249,9 +249,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else if (!isNotInPreviewState_) {
                 HideEventColumn();
-                if (hasContextMenu) {
-                    SubwindowManager::GetInstance()->HidePreviewNG();
-                }
                 if (gestureHub->GetTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 } else {
@@ -283,9 +280,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HideEventColumn();
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
-                if (hasContextMenu) {
-                    SubwindowManager::GetInstance()->HidePreviewNG();
-                }
                 SubwindowManager::GetInstance()->HideMenuNG(false, true);
             } else {
                 // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
@@ -688,9 +682,10 @@ void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t po
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDragDampStartPoint(point);
     dragDropManager->SetDraggingPointer(pointerId);
+    isRedragStart_ = false;
 }
 
-void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointerId)
+void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointerId, bool isRedragStart)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -713,7 +708,12 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
-    SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset);
+    if (isRedragStart && !isRedragStart_) {
+        isRedragStart_ = true;
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, true);
+    } else {
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, false);
+    }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
 }
 

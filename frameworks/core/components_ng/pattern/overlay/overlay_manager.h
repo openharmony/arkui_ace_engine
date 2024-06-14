@@ -311,13 +311,19 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
-    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, bool isRedragStart = false);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
     {
         isContextMenuDragHideFinished_ = false;
+        dragMoveVector_ = OffsetF(0.0f, 0.0f);
+        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+    }
+
+    void ResetContextMenuRestartDragVector()
+    {
         dragMoveVector_ = OffsetF(0.0f, 0.0f);
         lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
     }
@@ -574,7 +580,7 @@ private:
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
-
+    bool isHasContextMenu();
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
     void SetDialogTransitionEffect(const RefPtr<FrameNode>& node);

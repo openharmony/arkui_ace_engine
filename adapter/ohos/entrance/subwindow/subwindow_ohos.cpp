@@ -652,7 +652,7 @@ void SubwindowOhos::UpdatePreviewPosition()
     overlay->UpdatePixelMapPosition(true);
 }
 
-void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart)
 {
     ContainerScope scope(childContainerId_);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -662,7 +662,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
     }
-    overlay->UpdateContextMenuDisappearPosition(offset);
+    overlay->UpdateContextMenuDisappearPosition(offset, isRedragStart);
 }
 
 void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,

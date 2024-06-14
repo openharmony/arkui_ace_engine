@@ -47,7 +47,8 @@ public:
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
-    virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
+    virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f),
+        bool isRedragStart = false) = 0;
     virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
     virtual void UpdatePreviewPosition() = 0;
