@@ -258,7 +258,9 @@ void DisposeGesture(ArkUI_GestureRecognizer* recognizer)
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->dispose(recognizer->gesture);
     delete reinterpret_cast<GestureInnerData*>(recognizer->extraData);
+    recognizer->extraData = nullptr;
     delete recognizer;
+    recognizer = nullptr;
 }
 
 int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask mask,
@@ -268,6 +270,7 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
     // 把回调函数和上下文都封装到内部结构体中。
     if (recognizer->extraData) {
         delete reinterpret_cast<GestureInnerData*>(recognizer->extraData);
+        recognizer->extraData = nullptr;
     }
     recognizer->extraData = new GestureInnerData { targetReceiver, extraParam };
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->registerGestureEvent(
@@ -318,15 +321,28 @@ int32_t RemoveChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecogniz
 
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
+    if (event == nullptr) {
+        return;
+    }
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
+    if (extraData == nullptr) {
+        return;
+    }
     ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent);
+    if (gestureEvent == nullptr || extraData->targetReceiver == nullptr) {
+        return;
+    }
     ArkUI_UIInputEvent uiEvent;
-    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    if (gestureEvent->eventData.source == static_cast<int32_t>(UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE)) {
+        uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    } else {
+        uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    }
     uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
     gestureEvent->eventData.rawPointerEvent = &uiEvent;
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
-    delete event;
 }
 
 int32_t SetGestureInterrupterToNode(

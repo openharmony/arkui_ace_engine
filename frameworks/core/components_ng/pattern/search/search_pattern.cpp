@@ -190,6 +190,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(buttonFrameNode);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateVisibility(searchButton.has_value() ? VisibleType::VISIBLE : VisibleType::GONE);
     buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
@@ -222,6 +223,7 @@ void SearchPattern::OnModifyDone()
 void SearchPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
     textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
@@ -243,6 +245,25 @@ void SearchPattern::SetAccessibilityAction()
         CHECK_NULL_RETURN(pattern, -1);
         auto index = pattern->HandleGetCaretIndex();
         return index;
+    });
+    SetSearchFieldAccessibilityAction();
+}
+
+void SearchPattern::SetSearchFieldAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    textFieldAccessibilityProperty->SetActionClick([host]() {
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        auto actuator = gesture->GetUserClickEventActuator();
+        CHECK_NULL_VOID(actuator);
+        auto callBack = actuator->GetClickEvent();
+        CHECK_NULL_VOID(callBack);
+        GestureEvent gestureEvent;
+        callBack(gestureEvent);
     });
 }
 
@@ -320,7 +341,7 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
-        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value, TextRange& range) {
             auto searchPattern = weak.Upgrade();
             searchPattern->UpdateChangeEvent(value);
         };
@@ -633,7 +654,8 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnChange("");
+    TextRange range {};
+    eventHub->FireOnChange("", range);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();

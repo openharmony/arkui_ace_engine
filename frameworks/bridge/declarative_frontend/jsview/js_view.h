@@ -350,8 +350,6 @@ public:
         recycleCustomNode_.Reset();
     }
 
-    void JSGetStateProfilerStatus(const JSCallbackInfo& info);
-
     void JSSendStateInfo(const std::string& stateInfo);
 
     bool isFullUpdate() const override

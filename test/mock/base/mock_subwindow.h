@@ -28,6 +28,7 @@ public:
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(GetRect, NG::RectF());
+    MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(ShowMenu, void(const RefPtr<Component>& newComponent));
     MOCK_METHOD4(ShowMenuNG, void(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
                                  const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));

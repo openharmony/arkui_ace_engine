@@ -87,9 +87,9 @@ typedef enum {
     ARKUI_NODE_CALENDAR_PICKER = 16,
     /** Slider. */
     ARKUI_NODE_SLIDER = 17,
-    /** Radio */
+    /** Radio button. */
     ARKUI_NODE_RADIO = 18,
-    /** 帧动画组件 */
+    /** Frame-by-frame animation component. */
     ARKUI_NODE_IMAGE_ANIMATOR = 19,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
@@ -115,7 +115,7 @@ typedef enum {
     ARKUI_NODE_WATER_FLOW,
     /** Water flow item. */
     ARKUI_NODE_FLOW_ITEM,
-    /** relative container. */
+    /** Relative layout component. */
     ARKUI_NODE_RELATIVE_CONTAINER,
     /** Grid. */
     ARKUI_NODE_GRID,
@@ -227,10 +227,12 @@ typedef enum {
      * @brief Defines the interactivity attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: The value <b>true</b> means that the component can interact with users, and <b>false</b> means the opposite.\n
+     * .value[0].i32: The value <b>true</b> means that the component can interact with users, and <b>false</b> means
+     * the opposite.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: The value <b>1</b> means that the component can interact with users, and <b>0</b> means the opposite. \n
+     * .value[0].i32: The value <b>1</b> means that the component can interact with users, and <b>0</b> means
+     * the opposite. \n
      *
      */
     NODE_ENABLED,
@@ -347,7 +349,7 @@ typedef enum {
      * The parameter type is {@link ArkUI_LinearGradientDirection}. \n
      * .value[2].i32: whether the colors are repeated. The default value is <b>false</b>. \n
      * .object: array of color stops, each of which consists of a color and its stop position.
-     * Invalid colors are automatically skipped. \n
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -357,7 +359,7 @@ typedef enum {
      * .value[1].i32: direction of the linear gradient. It does not take effect when <b>angle</b> is set. \n
      * .value[2].i32: whether the colors are repeated. \n
      * .object: array of color stops, each of which consists of a color and its stop position.
-     * Invalid colors are automatically skipped. \n
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -520,7 +522,7 @@ typedef enum {
      * The value is <b>ARKUI_CLIP_TYPE_CIRCLE</b> for the circle shape.\n
      * .value[1].f32: width of the circle.\n
      * .value[2].f32: height of the circle.\n
-     * 3.Ellipse:\n
+     * 3. Ellipse:\n
      * .value[0].i32: type of shape. The parameter type is {@link ArkUI_ClipType}.
      * The value is <b>ARKUI_CLIP_TYPE_ELLIPSE</b> for the ellipse shape.\n
      * .value[1].f32: width of the ellipse.\n
@@ -544,7 +546,7 @@ typedef enum {
      * The value is <b>ARKUI_CLIP_TYPE_CIRCLE</b> for the circle shape.\n
      * .value[1].f32: width of the circle.\n
      * .value[2].f32: height of the circle.\n
-     * 3.Ellipse:\n
+     * 3. Ellipse:\n
      * .value[0].i32: type of shape. The parameter type is {@link ArkUI_ClipType}.
      * The value is <b>ARKUI_CLIP_TYPE_ELLIPSE</b> for the ellipse shape.\n
      * .value[1].f32: width of the ellipse.\n
@@ -819,13 +821,26 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3]?.i32: animation delay duration, in milliseconds. \n
+     * .value[4]?.i32: number of times that the animation is played. \n
+     * .value[5]?.i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6]?.f32: animation playback speed. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[0].i32: The parameter type is {@link ArkUI_TransitionEdge}. \n
+     * .value[1].i32: animation duration, in milliseconds.\n
+     * .value[2].i32: animation curve type. The value is an enum of {@link ArkUI_AnimationCurve}.\n
+     * .value[3].i32: animation delay duration, in milliseconds. \n
+     * .value[4].i32: number of times that the animation is played. \n
+     * .value[5].i32: animation playback mode. The value is an enum of {@link ArkUI_AnimationPlayMode}. \n
+     * .value[6].f32: animation playback speed. \n
      *
      */
     NODE_MOVE_TRANSITION,
+
     /**
      * @brief Defines the focus attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -904,8 +919,8 @@ typedef enum {
      * .value[4]?.f32: rotation angle of the sweep gradient. The default value is <b>0</b>. \n
      * .value[5]?.i32: whether the colors are repeated. The value <b>1</b> means that the colors are repeated,
      * and <b>0</b> means the opposite.\n
-     * .object: array of color stops, each of which consists of a color and its stop position. Invalid colors are
-     * automatically skipped.\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -918,8 +933,8 @@ typedef enum {
      * .value[4].f32: rotation angle of the sweep gradient. The default value is <b>0</b>. \n
      * .value[5].i32: whether the colors are repeated. The value <b>1</b> means that the colors are repeated,
      * and <b>0</b> means the opposite.\n
-     * .object: array of color stops, each of which consists of a color and its stop position. Invalid colors are
-     * automatically skipped.\n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -936,8 +951,8 @@ typedef enum {
      * .value[2]?.f32: radius of the radial gradient. The default value is <b>0</b>. \n
      * .value[3]?.i32: whether the colors are repeated. The value <b>1</b> means that the colors are repeated,
      * and <b>0</b> means the opposite. \n
-     * .object: array of color stops, each of which consists of a color and its stop position. Invalid colors are
-     * automatically skipped. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -948,8 +963,8 @@ typedef enum {
      * .value[2].f32: radius of the radial gradient. The default value is <b>0</b>. \n
      * .value[3].i32: whether the colors are repeated. The value <b>1</b> means that the colors are repeated,
      * and <b>0</b> means the opposite.\n
-     * .object: array of color stops, each of which consists of a color and its stop position. Invalid colors are
-     * automatically skipped. \n
+     * .object: array of color stops, each of which consists of a color and its stop position.
+     * The parameter type is {@link ArkUI_ColorStop}. Invalid colors are automatically skipped. \n
      * colors: colors of the color stops. \n
      * stops: stop positions of the color stops. \n
      * size: number of colors. \n
@@ -984,8 +999,8 @@ typedef enum {
      * .value[0].u32 fill color, in 0xARGB format. \n
      * .value[1].u32: stroke color, in 0xARGB format. \n
      * .value[2].f32: stroke width, in vp. \n
-      * .value[3].i32: mask type. The parameter type is {@link ArkUI_MaskType}.
-      * The value is <b>ARKUI_MASK_TYPE_ELLIPSE</b> for the ellipse shape.\n
+     * .value[3].i32: mask type. The parameter type is {@link ArkUI_MaskType}.
+     * The value is <b>ARKUI_MASK_TYPE_ELLIPSE</b> for the ellipse shape.\n
      * .value[4].f32: width of the ellipse.\n
      * .value[5].f32: height of the ellipse.\n
      * 4. Path:\n
@@ -1049,15 +1064,15 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}. \n
-     * The default value is <b>ARKUI_BLEND_MODE_NONE</b>. \n
-     * .value[1]?.i32: blendMode实现方式是否离屏. The parameter type is {@link ArkUI_BlendApplyType}. \n
+     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}. The default value is
+     * <b>ARKUI_BLEND_MODE_NONE</b>. \n
+     * .value[1].?i32: how the specified blend mode is applied. The parameter type is {@link ArkUI_BlendApplyType}.
      * The default value is <b>ARKUI_BLEND_APPLY_TYPE_FAST</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}.
-     * The default value is <b>ARKUI_BLEND_MODE_NONE</b>. \n
-     * .value[1].i32: blendMode实现方式是否离屏. The parameter type is {@link ArkUI_BlendApplyType}. \n
+     * .value[0].i32: blend mode. The parameter type is {@link ArkUI_BlendMode}. The default value is
+     * <b>ARKUI_BLEND_MODE_NONE</b>. \n
+     * .value[1].i32: how the specified blend mode is applied. The parameter type is {@link ArkUI_BlendApplyType}.
      * The default value is <b>ARKUI_BLEND_APPLY_TYPE_FAST</b>. \n
      *
      */
@@ -1258,13 +1273,11 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlignment}.
-     * The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
+     * The parameter type is {@link ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ArkUI_ItemAlignment}. The default value is
-     * <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
+     * The parameter type is {@link ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      *
      */
     NODE_ALIGN_SELF,
@@ -1602,7 +1615,7 @@ typedef enum {
      * .value[0].u32: font color, in 0xARGB format. For example, 0xFFFF0000 indicates red.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-      * .value[0].u32: font color value, in 0xARGB format.\n
+     * .value[0].u32: font color value, in 0xARGB format.\n
      *
      */
     NODE_FONT_COLOR,
@@ -2005,6 +2018,7 @@ typedef enum {
      *
      */
     NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT,
+    NODE_IMAGE_SPAN_ALT,
     /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -2194,7 +2208,7 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     *.value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
+     * .value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].u32: background color, in 0xARGB format. \n
@@ -3790,52 +3804,58 @@ typedef enum {
     NODE_SLIDER_TRACK_THICKNESS,
 
     /**
-     * @brief Set the selection status of an option button. Attribute setting,
-     * attribute resetting, and attribute obtaining are supported.
-     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
-     * .value[0].i32: check status of an option button. The default value is false.
-     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
-     * .value[0].i32: selection status of an option button.
+     * @brief Sets whether the radio button is selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the radio button is selected. The default value is <b>false</b>.
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the radio button is selected.
+     *
      */
     NODE_RADIO_CHECKED = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
     /**
-     * @brief Set the styles of the selected and deselected states of the option button.
-     * The attribute setting, attribute resetting, and attribute obtaining are supported.
-     * Attribute setting method {@Link ArkUI_AttributeItem} Parameter format:\n
-     * .value[0]?. u32: color of the mother board in enabled state. \n
-     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
-     * .value[1]?. u32: stroke color in the close state. \n
-     * The type is 0xARGB, and the default value is 0xFF182431. \n
-     * .value[2]?. u32: color of the internal round pie in the enabled state. \n
-     * The type is 0xARGB, and the default value is 0xFFFFFFFF. \n
-     * Attribute obtaining method return value {@Link ArkUI_AttributeItem} format:\n
-     * .value[0]. u32: color of the mother board in enabled state. \n
-     * The type is 0xARGB, and the default value is 0xFF007DFF. \n
-     * .value[1]. u32: stroke color in the close state. \n
-     * The type is 0xARGB, and the default value is 0xFF182431. \n
-     * .value[2]. u32: color of the internal round pie in the enabled state. \n
-     * The type is 0xARGB, and the default value is 0xFFFFFFF. \n
+     * @brief Sets the style of the radio button in selected or deselected state.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0]?.u32: color of the background when the radio button is selected, in 0xARGB format.
+     * The default value is <b>0xFF007DFF</b>. \n
+     * .value[1]?.u32: color of the border when the radio button is deselected, in 0xARGB format.
+     * The default value is <b>0xFF182431</b>. \n
+     * .value[2]?.u32: color of the indicator when the radio button is selected, in 0xARGB format.
+     * The default value is <b>0xFFFFFFFF</b>. \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: color of the background when the radio button is selected, in 0xARGB format.
+     * The default value is <b>0xFF007DFF</b>. \n
+     * .value[1].u32: color of the border when the radio button is deselected, in 0xARGB format.
+     * The default value is <b>0xFF182431</b>. \n
+     * .value[2].u32: color of the indicator when the radio button is selected, in 0xARGB format.
+     * The default value is <b>0xFFFFFFFF</b>. \n
+     *
      */
     NODE_RADIO_STYLE,
     /**
-     * @brief 设置当前单选框的值，支持属性设置、重置和获取。
+     * @brief Sets the current value of the radio button.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .string: 单选框的值.\n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: value of the radio button. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 单选框的值.\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: value of the radio button. \n
      *
      */
     NODE_RADIO_VALUE,
     /**
-     * @brief 设置当前单选框的所属群组名称，相同group的Radio只能有一个被选中，支持属性设置、重置和获取。
+     * @brief Sets the name of the group to which the radio button belongs. Only one radio button in a given group can
+     * be selected at a time. This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .string: 当前单选框的所属群组名称.\n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: name of the group to which the radio button belongs. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .string: 当前单选框的所属群组名称.\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: name of the group to which the radio button belongs. \n
      *
      */
     NODE_RADIO_GROUP,
@@ -4112,6 +4132,9 @@ typedef enum {
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
     * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .object: {@link ArkUI_NodeAdapter} object. \n
     */
     NODE_LIST_NODE_ADAPTER,
 
@@ -4121,6 +4144,9 @@ typedef enum {
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
     * .value[0].i32: number of cached items in the list adapter. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: number of cached items in the list adapter. \n
     */
     NODE_LIST_CACHED_COUNT,
 
@@ -4162,6 +4188,16 @@ typedef enum {
      * .object: The parameter format is {@ ArkUI-ListChildrenMainSize} \n
      */
     NODE_LIST_CHILDREN_MAIN_SIZE = 1003007,
+    /**
+     * @brief 设置当前List初次加载时视口起始位置显示的item的索引值，支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值，默认值：0。 \n
+     */
+    NODE_LIST_INITIAL_INDEX = 1003008,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4354,6 +4390,9 @@ typedef enum {
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
     * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .object: {@link ArkUI_NodeAdapter} object. \n
     */
     NODE_SWIPER_NODE_ADAPTER,
 
@@ -4363,6 +4402,9 @@ typedef enum {
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
     * .value[0].i32: number of cached items in the swiper adapter. \n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: number of cached items in the swiper adapter. \n
     */
     NODE_SWIPER_CACHED_COUNT,
 
@@ -4397,15 +4439,15 @@ typedef enum {
     NODE_SWIPER_NEXT_MARGIN,
 
     /**
-     * @brief Defines the navigation indicator type of the swiper.
-     * The attribute can be set, reset, and obtained as required through APIs.
+     * @brief Sets the navigation point indicator of the dot style for the swiper.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
-     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
+     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
+     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: navigation indicator type, the parameter type is {@link ArkUI_SwiperIndicatorType}.\n
-     * .object: The parameter type is {@link ArkUI_SwiperIndicator}.\n
+     * .value[0].i32: navigation point indicator type. The parameter type is {@link ArkUI_SwiperIndicatorType}. \n
+     * .object: navigation point indicator. The parameter type is {@link ArkUI_SwiperIndicator}. \n
      *
      */
     NODE_SWIPER_INDICATOR,
@@ -4565,9 +4607,9 @@ typedef enum {
      * @brief Defines the flex attribute. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0]? .i32: direction in which flex items are arranged. The parameter type is {@link ArkUI_FlexDirection}.
+     * .value[0]?.i32: direction in which flex items are arranged. The parameter type is {@link ArkUI_FlexDirection}.
      * The default value is <b>ARKUI_FLEX_DIRECTION_ROW</b>.\n
-     *.value[1]? .i32: how the flex items are wrapped. The parameter type is {@link ArkUI_FlexWrap}.
+     * .value[1]?.i32: how the flex items are wrapped. The parameter type is {@link ArkUI_FlexWrap}.
      * The default value is <b>ARKUI_FLEX_WRAP_NO_WRAP</b>.\n
      * .value[2]?.i32: alignment mode along the main axis. The parameter type is {@link ArkUI_FlexAlignment}.
      * The default value is <b>ARKUI_FLEX_ALIGNMENT_START</b>.\n
@@ -4603,35 +4645,60 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: The parameter type is {@Link ArkUI_NodeHandle}.
+     * .object: The parameter type is {@link ArkUI_NodeHandle}.
      *
      */
     NODE_REFRESH_CONTENT,
     /**
-     * @brief 设置下拉跟手系数，支持属性设置，属性重置和属性获取接口。
+     * @brief Sets the pull-down ratio. This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: pull-down ratio. The value is in the range from 0 to 1.
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：下拉跟手系数,有效值为0-1之间的值。
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: pull-down ratio. The value is in the range from 0 to 1.
      *
      */
     NODE_REFRESH_PULL_DOWN_RATIO = 1009002,
+    /**
+     * @brief Sets the pull-down offset that initiates a refresh.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+      *.value[0].f32: pull-down offset, in vp. The default value is <b>64vp</b>.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+      *.value[0].f32: pull-down offset, in vp. The default value is <b>64vp</b>.
+     *
+     */
+    NODE_REFRESH_OFFSET = 1009003,
+    /**
+     * @brief Sets whether to initiate a refresh when the pull-down distance exceeds the value of <b>refreshOffset</b>.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to initiate a refresh. The value <b>true</b> means to initiate a refresh, and
+     * <b>false</b> means the opposite.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to initiate a refresh. The value <b>1</b> means to initiate a refresh, and
+     * <b>0</b> means the opposite.
+     *
+     */
+    NODE_REFRESH_PULL_TO_REFRESH = 1009004,
 
     /**
      * @brief Defines the main axis direction of the <b><WaterFlow></b> component layout.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: main axis direction. The parameter type is {@Link ArkUI_FlexDirection}.
+     * .value[0].i32: main axis direction. The parameter type is {@link ArkUI_FlexDirection}.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: main axis direction. The parameter type is {@Link ArkUI_FlexDirection}.
+     * .value[0].i32: main axis direction. The parameter type is {@link ArkUI_FlexDirection}.
      *
      */
     NODE_WATER_FLOW_LAYOUT_DIRECTION = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
-
     /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used
      * by default. This attribute can be set, reset, and obtained as required through APIs.
@@ -4699,7 +4766,8 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: 从0开始计算的索引，会转换为整数，表示要开始改变分组的位置.\n
+     * .value[0].i32: zero-based index of the water flow item section to update.
+     * The value is converted to an integer. \n
      * .object: {@ArkUI_WaterFlowSectionOption} object.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
@@ -4713,6 +4781,9 @@ typedef enum {
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
     * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: {@link ArkUI_NodeAdapter} object. \n
     */
     NODE_WATER_FLOW_NODE_ADAPTER,
 
@@ -4721,7 +4792,7 @@ typedef enum {
     * This attribute can be set, reset, and obtained as required through APIs.
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: number of cached items in the water flowadapter. \n
+    * .value[0].i32: number of cached items in the water flow adapter. \n
     */
     NODE_WATER_FLOW_CACHED_COUNT,
     /**
@@ -4749,32 +4820,33 @@ typedef enum {
     NODE_WATER_FLOW_SCROLL_TO_INDEX,
 
     /**
-     * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
+     * @brief Defines the size constraints to apply to water flow items.
+     * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].f32：最小宽度，单位vp； \n
-     * .value[1].f32：最大宽度，单位vp； \n
-     * .value[2].f32：最小高度，单位vp； \n
-     * .value[3].f32：最大高度，单位vp； \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: minimum width. The value <b>-1</b> indicates that the minimum width is not set. \n
+     * .value[1].f32: maximum width. The value <b>-1</b> indicates that the maximum width is not set. \n
+     * .value[2].f32: minimum height. The value <b>-1</b> indicates that the minimum height is not set. \n
+     * .value[3].f32: maximum height. The value <b>-1</b> indicates that the maximum height is not set. \n
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[0].f32：最小宽度，单位vp； \n
-     * .value[1].f32：最大宽度，单位vp； \n
-     * .value[2].f32：最小高度，单位vp； \n
-     * .value[3].f32：最大高度，单位vp； \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: minimum width. The value <b>-1</b> indicates that the minimum width is not set. \n
+     * .value[1].f32: maximum width. The value <b>-1</b> indicates that the maximum width is not set. \n
+     * .value[2].f32: minimum height. The value <b>-1</b> indicates that the minimum height is not set. \n
+     * .value[3].f32: maximum height. The value <b>-1</b> indicates that the maximum height is not set. \n
      *
      */
     NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
 
-/**
-     * @brief Sets the number of columns in the grid layout. If this parameter is not set, one column is used
-     * by default. This attribute can be set, reset, and obtained as required through APIs.
+    /**
+     * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
+     * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
      * component's full width, the second column 1/4, and the third column 2/4.
      * You can use <b>columnsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of
      * columns based on the specified column width <b>track-size</b>.
-     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
-     * or a valid number.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %, or
+     * a valid number.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .string: number of columns in the layout.\n
@@ -4786,14 +4858,14 @@ typedef enum {
     NODE_GRID_COLUMN_TEMPLATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_GRID,
 
     /**
-     * @brief Sets the number of rows in the grid layout. If this parameter is not set, one row is used
-     * by default. This attribute can be set, reset, and obtained as required through APIs.
+     * @brief Sets the number of rows or the minimum row height in the grid layout. If this parameter is not set, one
+     * row is used by default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three rows, with the first row taking up 1/4 of the parent
      * component's full height, the second row 1/4, and the third row 2/4.
      * You can use <b>rowsTemplate('repeat(auto-fill,track-size)')</b> to automatically calculate the number of rows
      * based on the specified row height <b>track-size</b>.
-     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %,
-     * or a valid number.
+     * <b>repeat</b> and <b>auto-fill</b> are keywords. The units for <b>track-size</b> can be px, vp (default), %, or
+     * a valid number.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .string: number of rows in the layout. \n
@@ -4829,20 +4901,23 @@ typedef enum {
     NODE_GRID_ROW_GAP,
 
     /**
-    * @brief Defines the grid adapter. The attribute can be set, reset, and obtained as required through APIs.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
-    */
+     * @brief Defines the grid adapter. The attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: {@link ArkUI_NodeAdapter} object as the adapter. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: {@link ArkUI_NodeAdapter} object. \n
+     */
     NODE_GRID_NODE_ADAPTER,
 
     /**
-    * @brief Sets the number of cached items in the grid adapter.
-    * This attribute can be set, reset, and obtained as required through APIs.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32: number of cached items in the grid adapter. \n
-    */
+     * @brief Sets the number of cached items in the grid adapter.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: number of cached items in the water flow adapter. \n
+     */
     NODE_GRID_CACHED_COUNT,
 
     /**
@@ -5482,11 +5557,12 @@ typedef enum {
     NODE_SLIDER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SLIDER,
 
     /**
-     * @brief Defines the event callback function triggered when an object is dragged or clicked by ARKUI_NODE_RADIO.
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
-     * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains one parameter:\n
-     * ArkUI_NodeComponentEvent.data[0].i32: option button status. \n
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_RADIO</b> component is dragged or clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: status of the radio button. \n
      */
     NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
 
@@ -5543,20 +5619,27 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_GESTURE_SWIPE,
 
     /**
-     * @brief 定义ARKUI_NODE_SWIPER监听Swiper页面滑动事件。
-     * 使用说明 ：\n
-     * 1、设置{@link ArkUI_SwiperDisplayModeType}属性为ARKUI_SWIPER_DISPLAY_MODE_AUTO_LINEAR时，该接口不生效。\n
-     * 2、循环场景下，设置prevMargin和nextMargin属性，使得Swiper前后端显示同一页面时，该接口不生效。\n
-     * 3、在页面滑动过程中，会对视窗内所有页面逐帧触发ContentDidScrollCallback回调。\n
-     * 例如，当视窗内有下标为0、1的两个页面时，会每帧触发两次index值分别为0和1的回调。\n
-     * 4、设置displayCount属性的swipeByGroup参数为true时，若同组中至少有一个页面在视窗内时，\n
-     * 则会对同组中所有页面触发回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含4个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：Swiper组件的索引，和onChange事件中的index值变化保持一致。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>：视窗内某个页面的索引。\n
-     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>：页面相对于Swiper主轴起始位置（selectedIndex对应页面的起始位置）的移动比例。\n
-     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>：主轴方向上页面的长度。\n
+     * @brief Defines the event triggered when content in the swiper component scrolls.
+     * Instructions: \n
+     * 1. This API does not work when {@link ArkUI_SwiperDisplayModeType} is set to
+     * <b>ARKUI_SWIPER_DISPLAY_MODE_AUTO_LINEAR</b>. \n
+     * 2. This API does not work when <b>prevMargin</b> and <b>nextMargin</b> are set in such a way that the
+     * swiper frontend and backend display the same page during loop playback. \n
+     * 3. During page scrolling, the </b>ContentDidScrollCallback</b> callback is invoked for all pages in the viewport
+     * on a frame-by-frame basis. \n
+     * For example, when there are two pages whose subscripts are 0 and 1 in the viewport, two callbacks whose indexes
+     * are 0 and 1 are invoked in each frame. \n
+     * 4. When the </b>swipeByGroup</b> parameter of the </b>displayCount</b> attribute is set to </b>true</b>,
+     * the callback is invoked for all pages in a group if any page in the group is within the viewport. \n \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains four parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the swiper component, which is the same as the index in the
+     * <b>onChange</b> event. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of a page in the viewport. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: position of the page relative to the start position of the swiper
+     * main axis (start position of the page corresponding to <b>selectedIndex</b>). \n
+     * <b>ArkUI_NodeComponentEvent.data[3].f32</b>: length of the page in the main axis direction. \n
      */
     NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
 
@@ -5593,48 +5676,46 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
-
     /**
-     * @brief Define the enumeration value of the pre sliding trigger event for the scrolling container component.
+     * @brief Defines the event triggered when the container is about to scroll.
      *
-     * The conditions that trigger this event: \n
-     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
-     * operations that trigger scrolling.\n
-     * 2. Called through the rolling controller API interface.\n
-     * 3. Cross boundary rebound.\n
-     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the <b>ARKUI_NODE_SCROLL</b> component or other input
+     * settings, such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
-     * the left and negative when scrolling to the right, measured in vp. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
-     * scrolling up and a negative offset when scrolling down, measured in vp. \n
-     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
-     * {@link ArkUI_ScrollState}.\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame, in vp. The offset is positive when
+     * the content is scrolled left and negative when the content is scrolled right. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: scroll offset of each frame, in vp. The offset is positive when
+     * the content is scrolled up and negative when the content is scrolled down. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: current scroll state.
+     * The parameter type is {@link ArkUI_ScrollState}. \n
      */
     NODE_SCROLL_EVENT_ON_WILL_SCROLL,
-
     /**
-     * @brief Define the event enumeration value triggered when sliding a scrolling container component.
+     * @brief Defines the event triggered when the container scrolls.
      *
-     * The conditions that trigger this event: \n
-     * 1. When the scrolling component triggers scrolling, it supports input settings such as keyboard and mouse
-     * operations that trigger scrolling.\n
-     * 2. Called through the rolling controller API interface.\n
-     * 3. Cross boundary rebound.\n
-     * When an event callback occurs, the union type in the event parameter {@ link ArkUI_NodeEvent} object is
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the <b>ARKUI_NODE_SCROLL</b> component or other input
+     * settings, such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: The offset for each frame of scrolling is positive when scrolling to
-     * the left and negative when scrolling to the right, measured in vp. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: The offset of each frame scrolling, with a positive offset when
-     * scrolling up and a negative offset when scrolling down, measured in vp. \n
-     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: Current sliding state, parameter type is
-     * {@link ArkUI_ScrollState}.\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame, in vp. The offset is positive when the
+     * content is scrolled left and negative when the content is scrolled right. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: scroll offset of each frame, in vp. The offset is positive when the
+     * content is scrolled up and negative when the content is scrolled down. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: current scroll state. The parameter type is
+     * {@link ArkUI_ScrollState}. \n
      */
     NODE_SCROLL_EVENT_ON_DID_SCROLL,
     /**
-     * @brief Defines the event triggered when scrolling starts in the <b>ARKUI_NODE_SCROLL</b> component.
+     * @brief Defines the event triggered when the container starts scrolling.
      *
      * Notes for triggering the event:\n
      * 1. This event is triggered when scrolling is started, with support for other input settings, such as keyboard
@@ -5693,53 +5774,48 @@ typedef enum {
     NODE_SCROLL_EVENT_ON_REACH_END,
 
     /**
-     * @brief Defines the enumerated values of the event triggered, \n
-     * when a subcomponent of ARKUI_NODE_LIST is moved into or out of the list display area. \n
-     * Condition for triggering the event: \n
-     * This method is triggered once during list initialization. \n
-     * It is triggered when the index value of the first or last subcomponent in the list display area changes. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is
-     * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains three parameters: \n
-     * ArkUI_NodeComponentEvent.data[0].i32: List Displays \n
-     * the index value of the first child component in the region. \n
-     * ArkUI_NodeComponentEvent.data[1].i32: List Displays \n
-     * the index value of the last child component in the region. \n
-     * ArkUI_NodeComponentEvent.data[2].i32: List Displays \n
-     * the index value of the subcomponent in the middle of the area. \n
+     * @brief Defines the event triggered when a child component enters or leaves the list display area.
+     *
+     * Notes for triggering the event:\n
+     * This event is triggered once when the list is initialized and when the index of the first child component or the
+     * next child component in the list display area changes. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: index of the first child component in the list display area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: index of the last child component in the list display area. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: index of the center child component in the list display area. \n
      */
     NODE_LIST_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
-     * @brief Defines the enumerated values of the event triggered \n
-     * before the sliding of the ARKUI_NODE_LIST component. \n
-     * Condition for triggering the event: \n
-     * This event is triggered when the scrolling component triggers scrolling. \n
-     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
-     * Called through the scroll controller API. \n
-     * Out-of-bounds rebound. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
-     * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
-     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
-     * The offset is positive when the list content is \n
-     * scrolled up and is negative when the list content is scrolled down. \n
-     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     * @brief Defines the event triggered when the list is about to scroll.
+     *
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the <b>ARKUI_NODE_SCROLL</b> component or other input
+     * settings, such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
+     * is scrolled up and negative when the list is scrolled down. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
     NODE_LIST_ON_WILL_SCROLL,
     /**
-     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_LIST component is flicked.
-     * Condition for triggering the event: \n
-     * This event is triggered when the scrolling component triggers scrolling. \n
-     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
-     * Called through the scroll controller API. \n
-     * Out-of-bounds rebound. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
-     * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains two parameters: \n
-     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. \n
-     * The offset is positive when the list content is scrolled up and is negative \n
-     * when the list content is scrolled down. \n
-     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     * @brief Defines the event triggered when the list scrolls.
+     *
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the <b>ARKUI_NODE_SCROLL</b> component or other input
+     * settings, such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the list
+     * is scrolled up and negative when the list is scrolled down. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
     NODE_LIST_ON_DID_SCROLL,
     /**
@@ -5760,12 +5836,12 @@ typedef enum {
      */
     NODE_REFRESH_ON_REFRESH,
     /**
-     * @brief Defines the event that is triggered when the <b>ARKUI_NODE_REFRESH</b> drop-down distance changes.
+     * @brief Defines the event triggered when the pull-down distance of <b>ARKUI_NODE_REFRESH</b> changes.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
-     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Pull-down distance. \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: pull-down distance. \n
      */
     NODE_REFRESH_ON_OFFSET_CHANGE = 1009002,
 
@@ -5786,18 +5862,19 @@ typedef enum {
      */
     NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
     /**
-     * @brief Define the enumerated values of the event triggered when the ARKUI_NODE_WATER_FLOW component slides.
-     * Condition for triggering the event: \n
-     * This event is triggered when the scrolling component triggers scrolling.
-     * Other inputs that trigger scrolling, such as keyboard and mouse operations, can be set. \n
-     * Called through the scroll controller API. \n
-     * Out-of-bounds rebound. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is \n
-     * {@Link ArkUI_NodeComponentEvent}. \n
-     * {@Link ArkUI_NodeComponentEvent} contains two parameters:\n
-     * ArkUI_NodeComponentEvent.data[0].f32: offset of each frame scrolling. 
-     * The offset is positive when the content is scrolled up and is negative when the content is scrolled down. \n
-     * ArkUI_NodeComponentEvent.data[1].i32: Current sliding state. \n
+     * @brief Defines the event triggered when the water flow container scrolls.
+     *
+     * Notes for triggering the event:\n
+     * 1. This event is triggered when scrolling is started by the <b>ARKUI_NODE_SCROLL</b> component or other input
+     * settings, such as keyboard and mouse operations. \n
+     * 2. Scrolling can be initiated by calling the controller API. \n
+     * 3. The out-of-bounds bounce effect is supported. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the
+     * content is scrolled up and negative when the content is scrolled down. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
     NODE_WATER_FLOW_ON_DID_SCROLL,
     /**
@@ -6040,8 +6117,9 @@ void OH_ArkUI_NodeAdapter_Dispose(ArkUI_NodeAdapterHandle handle);
 *
 * @param handle Indicates the target component adapter.
 * @param size Indicates the number of elements.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_SetTotalNodeCount(ArkUI_NodeAdapterHandle handle, uint32_t size);
@@ -6061,8 +6139,9 @@ uint32_t OH_ArkUI_NodeAdapter_GetTotalNodeCount(ArkUI_NodeAdapterHandle handle);
 * @param handle Indicates the target component adapter.
 * @param userData Indicates custom data.
 * @param receiver Indicates the event receiver callback.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_RegisterEventReceiver(
@@ -6080,8 +6159,9 @@ void OH_ArkUI_NodeAdapter_UnregisterEventReceiver(ArkUI_NodeAdapterHandle handle
 * @brief Instructs the specified adapter to reload all elements.
 *
 * @param handle Indicates the target component adapter.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle);
@@ -6092,8 +6172,9 @@ int32_t OH_ArkUI_NodeAdapter_ReloadAllItems(ArkUI_NodeAdapterHandle handle);
 * @param handle Indicates the target component adapter.
 * @param startPosition Indicates the start position of the elements to reload.
 * @param itemCount Indicates the number of the elements to reload.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_ReloadItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
@@ -6104,8 +6185,9 @@ int32_t OH_ArkUI_NodeAdapter_ReloadItem(ArkUI_NodeAdapterHandle handle, uint32_t
 * @param handle Indicates the target component adapter.
 * @param startPosition Indicates the start position of the elements to remove.
 * @param itemCount Indicates the number of the elements to remove.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_RemoveItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
@@ -6116,8 +6198,9 @@ int32_t OH_ArkUI_NodeAdapter_RemoveItem(ArkUI_NodeAdapterHandle handle, uint32_t
 * @param handle Indicates the target component adapter.
 * @param startPosition Indicates the start position of the elements to insert.
 * @param itemCount Indicates the number of the elements to insert.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_InsertItem(ArkUI_NodeAdapterHandle handle, uint32_t startPosition, uint32_t itemCount);
@@ -6127,9 +6210,10 @@ int32_t OH_ArkUI_NodeAdapter_InsertItem(ArkUI_NodeAdapterHandle handle, uint32_t
 *
 * @param handle Indicates the target component adapter.
 * @param from Indicates the start position of the elements to move.
-* @param to  Indicates the end position of the elements to move.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @param to Indicates the end position of the elements to move.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t from, uint32_t to);
@@ -6143,8 +6227,9 @@ int32_t OH_ArkUI_NodeAdapter_MoveItem(ArkUI_NodeAdapterHandle handle, uint32_t f
 * @param handle Indicates the target component adapter.
 * @param items Indicates the pointer to the array of the elements in the adapter.
 * @param size Indicates the number of elements.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapter_GetAllItems(ArkUI_NodeAdapterHandle handle, ArkUI_NodeHandle** items, uint32_t* size);
@@ -6188,8 +6273,9 @@ uint32_t OH_ArkUI_NodeAdapterEvent_GetItemIndex(ArkUI_NodeAdapterEvent* event);
 * @brief Obtains the scrollable container node that uses the specified adapter.
 *
 * @param event Indicates the target adapter event.
-* @return Returns 0 if success.
-* Returns 401 if a parameter exception occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetHostNode(ArkUI_NodeAdapterEvent* event);
@@ -6199,7 +6285,9 @@ ArkUI_NodeHandle OH_ArkUI_NodeAdapterEvent_GetHostNode(ArkUI_NodeAdapterEvent* e
 *
 * @param event Indicates the target adapter event.
 * @param node Indicates the component to be added.
-* @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapterEvent_SetItem(ArkUI_NodeAdapterEvent* event, ArkUI_NodeHandle node);
@@ -6209,7 +6297,9 @@ int32_t OH_ArkUI_NodeAdapterEvent_SetItem(ArkUI_NodeAdapterEvent* event, ArkUI_N
 *
 * @param event Indicates the target adapter event.
 * @param id Indicates the component ID to set.
-* @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
+* @return Returns the error code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 * @since 12
 */
 int32_t OH_ArkUI_NodeAdapterEvent_SetNodeId(ArkUI_NodeAdapterEvent* event, int32_t id);
@@ -6246,10 +6336,12 @@ typedef struct {
      *
      * @param parent Indicates the pointer to the parent node.
      * @param child Indicates the pointer to the child node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     * on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*addChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
@@ -6258,10 +6350,12 @@ typedef struct {
      *
      * @param parent Indicates the pointer to the parent node.
      * @param child Indicates the pointer to the child node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     * on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*removeChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
@@ -6272,26 +6366,28 @@ typedef struct {
      * @param child Indicates the pointer to the child node.
      * @param sibling Indicates the pointer to the sibling node after which the target node is to be inserted.
      * If the value is null, the node is inserted at the start of the parent node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     * on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*insertChildAfter)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
 
     /**
      * @brief Inserts a component to a parent node before the specified <b>sibling</b> node.
      *
-     * When the parent component is being displayed, this API must be called in the main thread.
-     *
      * @param parent Indicates the pointer to the parent node.
      * @param child Indicates the pointer to the child node.
      * @param sibling Indicates the pointer to the sibling node before which the target node is to be inserted.
      * If the value is null, the node is inserted at the end of the parent node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     * on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*insertChildBefore)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
 
@@ -6302,10 +6398,12 @@ typedef struct {
      * @param child Indicates the pointer to the child node.
      * @param position Indicates the position to which the target child node is to be inserted. If the value is a
      * negative number or invalid, the node is inserted at the end of the parent node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     * on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*insertChildAt)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, int32_t position);
 
@@ -6315,11 +6413,14 @@ typedef struct {
      * @param node Indicates the node whose attribute needs to be set.
      * @param attribute Indicates the type of attribute to set.
      * @param item Indicates the attribute value.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106102 if the dynamic implementation library of the native API was not found.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} if the dynamic implementation library
+     *         of the native API was not found.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     *         on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*setAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* item);
 
@@ -6341,11 +6442,14 @@ typedef struct {
      *
      * @param node Indicates the node whose attribute needs to be reset.
      * @param attribute Indicates the type of attribute to reset.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106102 if the dynamic implementation library of the native API was not found.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} if the dynamic implementation library
+     *         of the native API was not found.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     *         on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*resetAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
@@ -6358,19 +6462,20 @@ typedef struct {
      * when the event is triggered.
      * @param userData Indicates the custom event parameter, which is passed in the callback of {@link ArkUI_NodeEvent}
      * when the event is triggered.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106102 if the dynamic implementation library of the native API was not found.
-     * Returns 106103 if the following operations are not allowed on BuilderNode generated nodes: setting or resetting
-     * attributes, setting events, or adding or editing subnodes.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} if the dynamic implementation library
+     *         of the native API was not found.
+     *         Returns {@link ARKUI_ERROR_CODE_NOT_SUPPROTED_FOR_ARKTS_NODE} if the following operations are not allowed
+     *         on BuilderNode generated nodes:
+     *         setting or resetting attributes, setting events, or adding or editing subnodes.
      */
     int32_t (*registerNodeEvent)(
         ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t targetId, void* userData);
 
     /**
      * @brief Unregisters an event for the specified node.
-     *
-     * When the component is being displayed, this API must be called in the main thread.
      *
      * @param node Indicates the target node.
      * @param eventType Indicates the type of event to unregister.
@@ -6412,8 +6517,9 @@ typedef struct {
      * @brief Obtains the number of subnodes.
      *
      * @param node Indicates the target node.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     uint32_t (*getTotalChildCount)(ArkUI_NodeHandle node);
 
@@ -6470,9 +6576,11 @@ typedef struct {
      * when the event is triggered.
      * @param userData Indicates the custom event parameter, which is passed in the callback of
      * {@link ArkUI_NodeCustomEvent} when the event is triggered.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
-     * Returns 106102 if the dynamic implementation library of the native API was not found.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     *         Returns {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} if the dynamic implementation library
+     *         of the native API was not found.
      */
     int32_t (*registerNodeCustomEvent)(
         ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData);
@@ -6511,8 +6619,9 @@ typedef struct {
      * @param node Indicates the target node.
      * @param width Indicates the width.
      * @param height Indicates the height.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*setMeasuredSize)(ArkUI_NodeHandle node, int32_t width, int32_t height);
 
@@ -6522,8 +6631,9 @@ typedef struct {
      * @param node Indicates the target node.
      * @param positionX Indicates the X coordinate.
      * @param positionY Indicates the Y coordinate.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*setLayoutPosition)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
 
@@ -6548,21 +6658,21 @@ typedef struct {
      *
      * @param node Indicates the target node.
      * @param Constraint Indicates the size constraint.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*measureNode)(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* Constraint);
 
     /**
      * @brief Lays outs a component and passes the expected position of the component relative to its parent component.
      *
-     * When the component is being displayed, this API must be called in the main thread.
-     *
      * @param node Indicates the target node.
      * @param positionX Indicates the X coordinate.
      * @param positionY Indicates the Y coordinate.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*layoutNode)(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
 
@@ -6579,8 +6689,9 @@ typedef struct {
      *
      * @param node Indicates the component for which you want to add the event callback function.
      * @param eventReceiver Indicates the component event callback function to add.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*addNodeEventReceiver)(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 
@@ -6589,8 +6700,9 @@ typedef struct {
      *
      * @param node Indicates the component from which you want to remove the event callback function.
      * @param eventReceiver Indicates the component event callback function to remove.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*removeNodeEventReceiver)(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 
@@ -6607,8 +6719,9 @@ typedef struct {
      *
      * @param node Indicates the component for which you want to add the custom event callback function.
      * @param eventReceiver Indicates the custom event callback function to add.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*addNodeCustomEventReceiver)(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
 
@@ -6617,8 +6730,9 @@ typedef struct {
      *
      * @param node Indicates the component from which you want to remove the custom event callback function.
      * @param eventReceiver Indicates the custom event callback function to remove.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*removeNodeCustomEventReceiver)(
         ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
@@ -6628,8 +6742,9 @@ typedef struct {
      *
      * @param node Indicates the component on which the custom data will be saved.
      * @param userData Indicates the custom data to be saved.
-     * @return Returns 0 if success.
-     * Returns 401 if a parameter exception occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*setUserData)(ArkUI_NodeHandle node, void* userData);
 
@@ -6646,16 +6761,17 @@ typedef struct {
      *
      * @param node Indicates the component for which you want to set the unit.
      * @param unit Indicates the unit, which is an enumerated value of {@link ArkUI_LengthMetricUnit}.
-     * The default value is <b>ARKUI_LENGTH_METRIC_UNIT_DEFAULT</b>.
-     * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
+     * @return Returns the error code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      */
     int32_t (*setLengthMetricUnit)(ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit);
 
-     /**
-     * @brief 获取父节点。
+    /**
+     * @brief Obtains the parent node.
      *
-     * @param node 目标节点对象。
-     * @return 返回组件的指针，如果没有返回NULL
+     * @param node Indicates the target node.
+     * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
 } ArkUI_NativeNodeAPI_1;
@@ -6727,35 +6843,35 @@ ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustom
 /**
  * @brief Adds a component to a node content.
  *
- * @param handle Indicates the pointer to the node content instance.
+ * @param content Indicates the pointer to the node content instance.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node);
 
 /**
  * @brief Adds a component to a node content.
  *
- * @param handle Indicates the pointer to the node content instance.
+ * @param content Indicates the pointer to the node content instance.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position);
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node, int32_t position);
 
 /**
  * @brief Removes a component from a node content.
  *
- * @param handle Indicates the pointer to the node content.
+ * @param content Indicates the pointer to the node content.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node);
 
 /**
  * @brief Defines the node content event type.
@@ -6786,12 +6902,12 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
 /**
  * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
  *
- * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
+ * @param content Indicates the <b>ArkUI_NodeContentHandle</b> instance.
  * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b>
  * @return Returns the status code
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, ArkUI_NodeContentCallback callback);
 
 /**
  * @brief Obtains the type of a node content.
@@ -6801,6 +6917,36 @@ int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, Ar
  * @since 12
  */
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Obtains the node content object that triggers a node content event.
+ *
+ * @param event Indicates the pointer to the node content event.
+ * @return Returns the node content object that triggers the node content event.
+ * @since 12
+ */
+ArkUI_NodeContentHandle OH_ArkUI_NodeContentEvent_GetNodeContentHandle(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Saves custom data on the specified node content.
+ *
+ * @param content Indicates the node content on which the custom data will be saved.
+ * @param userData Indicates the custom data to be saved.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* userData);
+
+/**
+ * @brief Obtains the custom data saved on the specified node content.
+ *
+ * @param content Indicates the target node content.
+ * @return Returns the custom data.
+ * @since 12
+ */
+void* OH_ArkUI_NodeContent_GetUserData(ArkUI_NodeContentHandle content);
 
 /**
  * @brief Get the size of the component layout area.

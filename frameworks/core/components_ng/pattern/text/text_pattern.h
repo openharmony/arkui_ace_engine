@@ -332,7 +332,7 @@ public:
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
-    void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
+    virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
 
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
@@ -530,6 +530,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    void SetTextSelectableMode(TextSelectableMode value);
 
     OffsetF GetTextPaintOffset() const override
     {
@@ -611,6 +612,13 @@ public:
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
+    void OnTouchTestHit(SourceType hitTestType) override
+    {
+        selectOverlay_->OnTouchTestHit(hitTestType);
+    }
+
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -655,8 +663,10 @@ protected:
     void HandleSelectionUp(int32_t start, int32_t end);
     void HandleSelectionDown(int32_t start, int32_t end);
     void HandleSelection(int32_t start, int32_t end);
-    float GetTextHeight();
+    double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
+    bool IsSelectableAndCopy();
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
     virtual bool CanStartAITask()
     {
@@ -770,7 +780,6 @@ private:
         return lastDragTool_;
     }
 
-    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
@@ -802,7 +811,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
+    SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;

@@ -64,6 +64,9 @@ public:
     void SetTextOverflow(const TextOverflow value);
     void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
+    void StartTextRace();
+    void StopTextRace();
+    void SetTextFadeoutEnabled(bool enabled);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -79,6 +82,13 @@ private:
     void ProcessErrorParagraph(DrawingContext& context, float errorMargin);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
+    void DoNormalDraw(DrawingContext& context);
+    void DoTextFadeoutDraw(DrawingContext& context);
+    float GetTextRacePercent();
+    void DrawTextFadeout(DrawingContext& context);
+    void UpdateTextFadeout(
+        RSCanvas& canvas, const RectF& textRect, float gradientPercent, bool leftFade, bool rightFade);
+    void AdjustTextFadeRect(RectF& textFadeRect);
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
@@ -121,6 +131,12 @@ private:
     RefPtr<PropertyInt> fontStyle_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyInt> textOverflow_;
+
+    bool textFadeoutEnabled_ { false };
+    float textRaceSpaceWidth_ = 0;
+    bool textRacing_ { false };
+    std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
+    RefPtr<AnimatablePropertyFloat> racePercentFloat_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

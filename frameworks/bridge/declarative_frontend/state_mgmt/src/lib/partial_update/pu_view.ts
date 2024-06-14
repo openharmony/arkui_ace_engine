@@ -46,10 +46,6 @@ abstract class ViewPU extends PUV2ViewBase
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
 
-  // Set of dependent elmtIds that need partial update
-  // during next re-render
-  protected dirtDescendantElementIds_: Set<number> = new Set<number>();
-
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
@@ -274,23 +270,42 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
+   /**
+   * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+   * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+   * or depending how UI compiler works also with 'undefined'
+   * @param freezeState only value 'true' will be used, otherwise inherits from parent
+   * if not parent, set to false.
+   */
+   protected initAllowComponentFreeze(freezeState: boolean | undefined): void {
+    // set to true if freeze parameter set for this @Component to true
+    // otherwise inherit from parent @Component (if it exists).
+    this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+    stateMgmtConsole.debug(`${this.debugInfo__()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+  }
+
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+ * ArkUI engine will not recurse children nodes to inform the stateMgmt for the performance reason.
+ * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
+ * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
  */
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
-    if (!this.isCompFreezeAllowed()) {
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ViewPU.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
-      stateMgmtProfiler.end();
-      return;
+    if (this.isCompFreezeAllowed()) {
+      this.isActive_ = active;
+      if (this.isActive_) {
+        this.onActiveInternal();
+      } else {
+        this.onInactiveInternal();
+      }
     }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: ViewPU.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
-    this.isActive_ = active;
-    if (this.isActive_) {
-      this.onActiveInternal();
-    } else {
-      this.onInactiveInternal();
+    for (const child of this.childrenWeakrefMap_.values()) {
+      const childView: IView | undefined = child.deref();
+      if (childView) {
+        childView.setActiveInternal(active);
+      }
     }
     stateMgmtProfiler.end();
   }
@@ -304,12 +319,6 @@ abstract class ViewPU extends PUV2ViewBase
     this.performDelayedUpdate();
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
-      }
-    }
   }
 
 
@@ -324,13 +333,6 @@ abstract class ViewPU extends PUV2ViewBase
     }
     // Add the inactive Components to Map for Dfx listing
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childViewPU: IView | undefined = child.deref();
-      if (childViewPU) {
-        childViewPU.setActiveInternal(this.isActive_);
-      }
-    }
   }
 
 
@@ -380,42 +382,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.isRenderInProgress = false;
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} - DONE`);
     }
-    stateMgmtProfiler.end();
-  }
-
-  /**
-   * force a complete rerender / update by executing all update functions
-   * exec a regular rerender first
-   *
-   * @param deep recurse all children as well
-   *
-   * framework internal functions, apps must not call
-   */
-  public forceCompleteRerender(deep: boolean = false): void {
-    stateMgmtProfiler.begin('ViewPU.forceCompleteRerender');
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
-
-    // see which elmtIds are managed by this View
-    // and clean up all book keeping for them
-    this.purgeDeletedElmtIds();
-
-    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-
-    if (deep) {
-      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
-        const child = weakRefChild.deref();
-        if (child) {
-          if (child instanceof ViewPU) {
-            if (!child.hasBeenRecycled_) {
-              child.forceCompleteRerender(true);
-            }
-          } else {
-            throw new Error('forceCompleteRerender not implemented for ViewV2, yet');
-          }
-        }
-      });
-    }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
   }
 
@@ -720,6 +686,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId_.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -746,6 +713,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
+        stateMgmtDFX.inRenderingElementId_.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1138,13 +1106,11 @@ abstract class ViewPU extends PUV2ViewBase
     return retVaL;
   }
 
-
-
   /**
-    * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+    * onDumpInspector is invoked by native side to create Inspector tree including state variables
     * @returns dump info
     */
-  protected onDumpInspetor(): string {
+  protected onDumpInspector(): string {
     let res: DumpInfo = new DumpInfo();
     res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
     Object.getOwnPropertyNames(this)
@@ -1153,21 +1119,30 @@ abstract class ViewPU extends PUV2ViewBase
         const prop: any = Reflect.get(this, varName);
         if ('debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
+          let isCircleReference: boolean = false;
+          let errorMsg: string = '';
+          try {
+            JSON.stringify(observedProp.getRawObjectValue());
+          } catch (error) {
+            stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${(error as Error).message}`);
+            errorMsg = (error as Error).message;
+            isCircleReference = true;
+          }
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: observedProp.getRawObjectValue(),
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
-            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+            value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
+            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
           };
           res.observedPropertiesInfo.push(observedPropertyInfo);
         }
       });
-      let resInfo: string = '';
-      try {
-        resInfo = JSON.stringify(res);
-      } catch (error) {
-        stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
-      }
+    let resInfo: string = '';
+    try {
+      resInfo = JSON.stringify(res);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+    }
     return resInfo;
   }
 

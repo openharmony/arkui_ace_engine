@@ -38,6 +38,7 @@ public:
     ~StageManager() override = default;
 
     bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     bool PopPage(bool needShowNext = true, bool needTransition = true);
     bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     bool CleanPageStack();
@@ -70,7 +71,8 @@ private:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
-    void FireAutoSave(const RefPtr<FrameNode>& pageNode);
+    void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
+    void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
 
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;

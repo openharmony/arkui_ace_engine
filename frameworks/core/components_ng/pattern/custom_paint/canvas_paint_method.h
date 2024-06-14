@@ -102,26 +102,13 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
-    void SetTransform(const TransformParam& param) override;
     void Reset();
 
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-    void PaintText(const SizeF& contentSize, double x, double y, std::optional<double> maxWidth, bool isStroke,
-        bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
-        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void PaintImageShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas, const RSBrush* brush = nullptr,
-        const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr) override;
-    void Path2DRect(const PathArgs& args) override;
-    RSCanvas* GetRawPtrOfRSCanvas() override
-    {
-        return rsCanvas_.get();
-    }
 #ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
 #else

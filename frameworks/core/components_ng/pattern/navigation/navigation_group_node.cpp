@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
+#include "base/log/ace_checker.h"
+#include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -138,6 +140,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     CHECK_NULL_VOID(navigationContentNode);
     bool hasChanged = false;
     int32_t slot = 0;
+    int32_t beforeLastStandardIndex = lastStandardIndex_;
+    auto preLastStandardNode = navigationContentNode->GetChildAtIndex(beforeLastStandardIndex);
     UpdateLastStandardIndex();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
     if (!ReorderNavDestination(navDestinationNodes, navigationContentNode, slot, hasChanged)) {
@@ -148,11 +152,11 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         const auto& childNode = navDestinationNodes[index];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index, navDestinationNodes.size())
-         || hasChanged);
+        hasChanged = (UpdateNavDestinationVisibility(navDestination, remainChild, index,
+            navDestinationNodes.size(), preLastStandardNode) || hasChanged);
     }
 
-    RemoveRedundantNavDestination(navigationContentNode, remainChild, slot, hasChanged);
+    RemoveRedundantNavDestination(navigationContentNode, remainChild, slot, hasChanged, beforeLastStandardIndex);
     if (modeChange) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else if (hasChanged) {
@@ -204,8 +208,8 @@ bool NavigationGroupNode::ReorderNavDestination(
     return true;
 }
 
-void NavigationGroupNode::RemoveRedundantNavDestination(
-    RefPtr<FrameNode>& navigationContentNode, const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
+void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
+    const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex)
 {
     auto pattern = GetPattern<NavigationPattern>();
     // record remove destination size
@@ -237,7 +241,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
-        if (navDestination->GetIndex() >= lastStandardIndex_) {
+        if (navDestination->GetIndex() >= beforeLastStandardIndex) {
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
@@ -686,6 +690,22 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         pushAnimations_.emplace_back(backButtonAnimation);
     }
     isOnAnimation_ = true;
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        int64_t startTime = GetSysTimestamp();
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        // After completing layout tasks at all nodes on the page, perform performance testing and management
+        pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime]() {
+            auto navigation = weakNav.Upgrade();
+            CHECK_NULL_VOID(navigation);
+            auto curNode = weakNode.Upgrade();
+            int64_t endTime = GetSysTimestamp();
+            CHECK_NULL_VOID(curNode);
+            PerformanceCheckNodeMap nodeMap;
+            curNode->GetPerformanceCheckData(nodeMap);
+            AceScopedPerformanceCheck::RecordPerformanceCheckDataForNavigation(
+                nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
+        });
+    }
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::BackButtonAnimation(
@@ -878,7 +898,7 @@ void NavigationGroupNode::UpdateLastStandardIndex()
 }
 
 bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-    const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize)
+    const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize, const RefPtr<UINode>& preLastStandardNode)
 {
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
@@ -906,7 +926,15 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         }
         eventHub->FireChangeEvent(false);
         if (pattern->GetCustomNode() != remainChild) {
-            hideNodes_.insert(hideNodes_.begin(), std::pair(navDestination, false));
+            if (navDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG ||
+                navDestination == AceType::DynamicCast<NavDestinationGroupNode>(preLastStandardNode)) {
+                hideNodes_.insert(hideNodes_.begin(), std::pair(navDestination, false));
+            } else {
+                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
+            }
         }
         return false;
     }
@@ -1072,6 +1100,10 @@ void NavigationGroupNode::RemoveDialogDestination()
             navDestination->SetJSViewActive(false);
             continue;
         }
+        auto parent = navDestination->GetParent();
+        if (!parent) {
+            continue;
+        }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
         if (!navDestinationPattern) {
             continue;
@@ -1083,7 +1115,6 @@ void NavigationGroupNode::RemoveDialogDestination()
         if (navDestination->GetContentNode()) {
             navDestination->GetContentNode()->Clean();
         }
-        auto parent = navDestination->GetParent();
         parent->RemoveChild(navDestination);
     }
     hideNodes_.clear();

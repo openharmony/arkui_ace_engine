@@ -49,8 +49,8 @@ class ComponentContent extends Content {
   }
   public dispose(): void {
     this.detachFromParent();
-    this.attachNodeRef_.dispose();
-    this.builderNode_.dispose();
+    this.attachNodeRef_?.dispose();
+    this.builderNode_?.dispose();
   }
 
   public detachFromParent() {
@@ -69,7 +69,7 @@ class ComponentContent extends Content {
     if (nodeType === "BuilderProxyNode") {
       const result = getUINativeModule().frameNode.getFirstUINode(node);
       this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
-      getUINativeModule().frameNode.clearChildren(node);
+      getUINativeModule().frameNode.removeChild(node, result);
       return result;
     }
     return node;

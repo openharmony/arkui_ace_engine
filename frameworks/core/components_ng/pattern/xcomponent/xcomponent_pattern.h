@@ -296,7 +296,8 @@ public:
     void ClearIdealSurfaceOffset(bool isXAxis);
     void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void SetImageAIOptions(void* options);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
@@ -428,6 +429,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
     OH_NativeXComponent_TouchEvent lastTouchInfo_;

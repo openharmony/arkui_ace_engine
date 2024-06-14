@@ -42,6 +42,33 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 1;
+  }
+  initialize(value: Object[]) {
+    if (value.length >= 1 && (isResource(value[0]) || isString(value[0]))) {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
+    }
+    if (value.length === 1) {
+      if (isObject(value[0])) {
+        modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[0]);
+      } else if (isResource(value[0]) || isString(value[0])) {
+        modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, undefined);
+        modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, undefined);
+      }
+    } else if (value.length === 2) {
+      modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[1]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, undefined);
+    }
+    return this;
+  }
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
     return this;
@@ -91,7 +118,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<ButtonConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ButtonContentModifier.identity, ButtonContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
@@ -518,6 +545,66 @@ class ButtonControlSizeModifier extends ModifierWithKey<ControlSize> {
     return (
       !isBaseOrResourceEqual(this.stageValue, this.value)
     );
+  }
+}
+
+class ButtonLabelModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonLabel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetLabel(node);
+    } else {
+      getUINativeModule().button.setLabel(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ButtonOptionsModifier extends ModifierWithKey<ButtonOptions> {
+  static identity: Symbol = Symbol('buttonOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetOptions(node);
+    } else {
+      getUINativeModule().button.setOptions(node, this.value.type, this.value.stateEffect,
+        this.value.buttonStyle, this.value.controlSize, this.value.role);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.stateEffect, this.value.stateEffect) ||
+      !isBaseOrResourceEqual(this.stageValue.buttonStyle, this.value.buttonStyle) ||
+      !isBaseOrResourceEqual(this.stageValue.controlSize, this.value.controlSize) ||
+      !isBaseOrResourceEqual(this.stageValue.role, this.value.role)
+    );
+  }
+}
+
+class ButtonCreateTypeModifier extends ModifierWithKey<boolean> {
+  static identity: Symbol = Symbol('buttonCreateType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (!reset) {
+      getUINativeModule().button.setCreateWithLabel(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class ButtonContentModifier extends ModifierWithKey<ContentModifier<ButtonConfiguration>> {
+  constructor(value: ContentModifier<ButtonConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let buttonComponent = component as ArkButtonComponent;
+    buttonComponent.setContentModifier(this.value);
   }
 }
 

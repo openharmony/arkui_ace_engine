@@ -45,6 +45,7 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
     static void OnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
@@ -80,6 +81,8 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

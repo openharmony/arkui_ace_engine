@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
@@ -52,6 +53,7 @@ public:
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
+    virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;
@@ -63,6 +65,7 @@ public:
     }
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

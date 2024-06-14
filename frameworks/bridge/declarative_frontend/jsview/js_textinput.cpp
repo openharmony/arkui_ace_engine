@@ -127,6 +127,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextInput>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextInput>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
+    JSClass<JSTextInput>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

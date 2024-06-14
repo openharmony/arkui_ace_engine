@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 
 #include <cstdint>
+#include <memory>
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -105,10 +106,28 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
+    density_ = PipelineBase::GetCurrentDensity();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
+            auto canvasRender = self.Upgrade();
+            CHECK_NULL_VOID(canvasRender);
+            canvasRender->density_ = density;
+        });
+    }
+}
+
+JSCanvasRenderer::~JSCanvasRenderer()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
 }
 
 // A helper fucntion to create GradientObj
-JSRef<JSObject> JSCanvasRenderer::createGradientObj(Gradient* gradient)
+JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradient>& gradient)
 {
     JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
     pasteObj->SetProperty("__type", "gradient");
@@ -125,9 +144,8 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
     double x1 = 0.0;
     double y1 = 0.0;
     if (info.GetDoubleArg(0, x0) && info.GetDoubleArg(1, y0) && info.GetDoubleArg(2, x1) && info.GetDoubleArg(3, y1)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::LINEAR);
         gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
         gradient->SetEndOffset(Offset(x1 * density, y1 * density));
@@ -147,9 +165,8 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
     double endRadial = 0.0;
     if (info.GetDoubleArg(0, startX) && info.GetDoubleArg(1, startY) && info.GetDoubleArg(2, startRadial) &&
         info.GetDoubleArg(3, endX) && info.GetDoubleArg(4, endY) && info.GetDoubleArg(5, endRadial)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::RADIAL);
         gradient->SetBeginOffset(Offset(startX * density, startY * density));
         gradient->SetEndOffset(Offset(endX * density, endY * density));
@@ -173,9 +190,8 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     info.GetDoubleArg(0, startAngle);
     info.GetDoubleArg(1, x);
     info.GetDoubleArg(2, y);
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
-    Gradient* gradient = new Gradient();
+    auto gradient = std::make_shared<Gradient>();
     gradient->SetType(GradientType::CONIC);
     gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
@@ -189,7 +205,6 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
 {
     FillTextInfo textInfo;
     if (info.GetStringArg(0, textInfo.text) && info.GetDoubleArg(1, textInfo.x) && info.GetDoubleArg(2, textInfo.y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         textInfo.x *= density;
         textInfo.y *= density;
@@ -208,7 +223,6 @@ void JSCanvasRenderer::JsFillText(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsStrokeText(const JSCallbackInfo& info)
 {
     FillTextInfo textInfo;
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     if (info.GetStringArg(0, textInfo.text) && info.GetDoubleArg(1, textInfo.x) && info.GetDoubleArg(2, textInfo.y)) {
         textInfo.x *= density;
@@ -236,7 +250,6 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, fontStr)) {
         return;
     }
-    ContainerScope scope(instanceId_);
     std::vector<std::string> fontProps;
     StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
     bool updateFontweight = false;
@@ -279,12 +292,11 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
 // getLineDash(): number[]
 void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     std::vector<double> lineDash = renderingContext2DModel_->GetLineDash();
     JSRef<JSArray> lineDashObj = JSRef<JSArray>::New();
     double density = GetDensity();
     for (auto i = 0U; i < lineDash.size(); i++) {
-        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] * density)));
+        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] / density)));
     }
     info.SetReturnValue(lineDashObj);
 }
@@ -315,9 +327,9 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetFillGradient(*gradient);
+        renderingContext2DModel_->SetFillGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
@@ -352,9 +364,9 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetStrokeGradient(*gradient);
+        renderingContext2DModel_->SetStrokeGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
@@ -462,8 +474,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 #else
     CHECK_NULL_VOID(jsImage);
     isImage = true;
-    std::string imageValue = jsImage->GetSrc();
-    image.src = imageValue;
+    image.src = jsImage->GetSrc();
+    image.imageData = jsImage->GetImageData();
     imageInfo.imgWidth = jsImage->GetWidth();
     imageInfo.imgHeight = jsImage->GetHeight();
     imageInfo.isImage = true;
@@ -477,7 +489,6 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage)
 {
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     switch (info.Length()) {
         case 3:
@@ -529,11 +540,12 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
 // createPattern(image: ImageBitmap, repetition: string | null): CanvasPattern | null
 void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
-    std::string repeat;
     auto arg0 = info[0];
-    if (arg0->IsObject() && info.GetStringArg(1, repeat)) {
+    if (arg0->IsObject()) {
         JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         CHECK_NULL_VOID(jsImage);
+        std::string repeat;
+        info.GetStringArg(1, repeat);
         auto pattern = std::make_shared<Pattern>();
         pattern->SetImgSrc(jsImage->GetSrc());
         pattern->SetImageWidth(jsImage->GetWidth());
@@ -560,7 +572,6 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 // createImageData(imageData: ImageData): ImageData
 void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     double fWidth = 0.0;
     double fHeight = 0.0;
@@ -616,7 +627,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     int32_t imgHeight = jsImgHeight->ToNumber<int32_t>();
 
     // Parse other parameters
-    ImageData imageData = {.dirtyWidth = imgWidth, .dirtyHeight = imgHeight};
+    ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
     ParseImageData(info, imageData);
     imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
                                                 : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
@@ -644,7 +655,6 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData)
 {
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     std::string argStr;
     if (info.GetStringArg(1, argStr)) {
@@ -695,7 +705,6 @@ void JSCanvasRenderer::JsCloseImageBitmap(const std::string& src)
 // getImageData(sx: number, sy: number, sw: number, sh: number): ImageData
 void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     ImageSize imageSize;
     info.GetDoubleArg(0, imageSize.left);
@@ -726,7 +735,6 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 {
 #ifdef PIXEL_MAP_SUPPORTED
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     ImageSize imageSize;
     info.GetDoubleArg(0, imageSize.left);
@@ -741,6 +749,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pixelmap);
 
     // 3 pixelmap to NapiValue
+    ContainerScope scope(instanceId_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_VOID(runtime);
     NativeEngine* nativeEngine = runtime->GetNativeEngine();
@@ -1010,7 +1019,6 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         renderingContext2DModel_->MoveTo(x * density, y * density);
     }
@@ -1022,7 +1030,6 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         renderingContext2DModel_->LineTo(x * density, y * density);
     }
@@ -1034,7 +1041,6 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
     BezierCurveParam param;
     if (info.GetDoubleArg(0, param.cp1x) && info.GetDoubleArg(1, param.cp1y) && info.GetDoubleArg(2, param.cp2x) &&
         info.GetDoubleArg(3, param.cp2y) && info.GetDoubleArg(4, param.x) && info.GetDoubleArg(5, param.y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.cp1x *= density;
         param.cp1y *= density;
@@ -1052,7 +1058,6 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
     QuadraticCurveParam param;
     if (info.GetDoubleArg(0, param.cpx) && info.GetDoubleArg(1, param.cpy) && info.GetDoubleArg(2, param.x) &&
         info.GetDoubleArg(3, param.y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.cpx *= density;
         param.cpy *= density;
@@ -1068,7 +1073,6 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
     ArcToParam param;
     if (info.GetDoubleArg(0, param.x1) && info.GetDoubleArg(1, param.y1) && info.GetDoubleArg(2, param.x2) &&
         info.GetDoubleArg(3, param.y2) && info.GetDoubleArg(4, param.radius)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.x1 *= density;
         param.y1 *= density;
@@ -1086,7 +1090,6 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
     if (info.GetDoubleArg(0, param.x) && info.GetDoubleArg(1, param.y) && info.GetDoubleArg(2, param.radius) &&
         info.GetDoubleArg(3, param.startAngle) && info.GetDoubleArg(4, param.endAngle)) {
         info.GetBooleanArg(5, param.anticlockwise); // Non mandatory parameter with default value 'false'
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.x *= density;
         param.y *= density;
@@ -1104,7 +1107,6 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
         info.GetDoubleArg(3, param.radiusY) && info.GetDoubleArg(4, param.rotation) &&
         info.GetDoubleArg(5, param.startAngle) && info.GetDoubleArg(6, param.endAngle)) {
         info.GetBooleanArg(7, param.anticlockwise); // Non mandatory parameter with default value 'false'
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.x *= density;
         param.y *= density;
@@ -1248,7 +1250,6 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 // setTransform(transform?: Matrix2D): void
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
@@ -1293,7 +1294,6 @@ void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
     if (info.GetDoubleArg(0, param.scaleX) && info.GetDoubleArg(1, param.skewX) && info.GetDoubleArg(2, param.skewY) &&
         info.GetDoubleArg(3, param.scaleY) && info.GetDoubleArg(4, param.translateX) &&
         info.GetDoubleArg(5, param.translateY)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         param.translateX *= density;
         param.translateY *= density;
@@ -1307,7 +1307,6 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
     double x = 0.0;
     double y = 0.0;
     if (info.GetDoubleArg(0, x) && info.GetDoubleArg(1, y)) {
-        ContainerScope scope(instanceId_);
         double density = GetDensity();
         renderingContext2DModel_->Translate(x * density, y * density);
     }
@@ -1316,7 +1315,6 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
 // setLineDash(segments: number[]): void
 void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     std::vector<double> lineDash;
     info.GetDoubleArrayArg(0, lineDash);
     if (lineDash.size() % 2 != 0) {
@@ -1393,7 +1391,6 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 // measureText(text: string): TextMetrics
 void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
     std::string text;
     paintState_.SetTextStyle(style_);
     double density = GetDensity();
@@ -1458,13 +1455,13 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
     }
 }
 
-// Abandoned
+// saveLayer(): void
 void JSCanvasRenderer::JsSaveLayer(const JSCallbackInfo& info)
 {
     renderingContext2DModel_->SaveLayer();
 }
 
-// Abandoned
+// restoreLayer(): void
 void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 {
     renderingContext2DModel_->RestoreLayer();

@@ -22,24 +22,12 @@ void SwiperTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->SetThemeManager(themeManager);
-    // set button theme
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
-    // set swiper indicator theme
-    auto resAdapter = RefPtr<ResourceAdapter>();
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
-    std::unordered_map<std::string, ResValueWrapper> attributes;
-    ResValueWrapper resValueWrapper;
-    resValueWrapper.type = ThemeConstantsType::THEME;
-    resValueWrapper.value = AceType::MakeRefPtr<ThemeStyle>();
-    attributes.insert(std::pair<std::string, ResValueWrapper>(THEME_PATTERN_SWIPER, resValueWrapper));
-    themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
-    themeConstants->currentThemeStyle_->SetAttributes(attributes);
-    // call Builder::Build to trigger ParsePattern to return error themeValue
-    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
-    SwiperIndicatorTheme::Builder().ParsePattern(themeConstants, swiperIndicatorTheme);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SWIPER);
+    auto swiperIndicatorTheme = SwiperIndicatorTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(SwiperIndicatorTheme::TypeId())).WillRepeatedly(Return(swiperIndicatorTheme));
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
     swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;
@@ -51,7 +39,6 @@ void SwiperTestNg::SetUpTestSuite()
     textStyle.SetFontSize(INDICATOR_TEXT_FONT_SIZE);
     textStyle.SetFontWeight(INDICATOR_TEXT_FONT_WEIGHT);
     swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
-    EXPECT_CALL(*themeManager, GetTheme(SwiperIndicatorTheme::TypeId())).WillRepeatedly(Return(swiperIndicatorTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
@@ -106,6 +93,7 @@ void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
 {
     SwiperModelNG model;
     model.Create();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
     ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     if (callback) {
@@ -932,7 +920,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper002, TestSize.Level
             }
             pattern_->mainSizeIsMeasured_ = true;
         }
-        pattern_->isNeedResetPrevMarginAndNextMargin_ = true;
     }
 }
 
@@ -2055,6 +2042,7 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -2070,5 +2058,26 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
     indicatorPattern->swiperController_->addSwiperEventCallback_();
     indicatorPattern->OnAfterModifyDone();
     EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
+}
+
+/**
+ * @tc.name: SwiperSetFrameRateTest001
+ * @tc.desc: Test SetFrameRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and frameRateRange
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto type = SwiperDynamicSyncSceneType::GESTURE;
+    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, 60);
+
+    /**
+     * @tc.steps: step2. call SetFrameRateRange.
+     */
+    pattern_->SetFrameRateRange(frameRateRange, type);
+    EXPECT_TRUE(pattern_->frameRateRange_[type] == frameRateRange);
 }
 } // namespace OHOS::Ace::NG

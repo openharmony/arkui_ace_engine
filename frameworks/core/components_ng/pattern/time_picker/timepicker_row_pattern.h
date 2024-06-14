@@ -434,6 +434,36 @@ public:
         preAmPmTimeOrder == amPmTimeOrder_ ? isAmPmTimeOrderUpdate_ = false : isAmPmTimeOrderUpdate_ = true;
     }
 
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedDisappearFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedDisappearFontFamily()
+    {
+        return hasUserDefinedDisappearFontFamily_;
+    }
+
+    void HasUserDefinedNormalFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedNormalFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedNormalFontFamily()
+    {
+        return hasUserDefinedNormalFontFamily_;
+    }
+
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedSelectedFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedSelectedFontFamily()
+    {
+        return hasUserDefinedSelectedFontFamily_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -487,6 +517,10 @@ private:
     bool wheelModeEnabled_ = true;
     std::vector<WeakPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
+
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 

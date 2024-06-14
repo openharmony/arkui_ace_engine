@@ -55,7 +55,7 @@ public:
     virtual void SetHeight(const Dimension& height);
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
@@ -88,6 +88,8 @@ public:
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
     virtual void SetTextIndent(const Dimension& value) {};
+    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

@@ -1266,13 +1266,13 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     /**
      * @tc.expected: call CheckPreviewTextValidate and check return true
      */
-    EXPECT_TRUE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_THR.text, PREVIEW_THR.range), 0);
 
     /**
      * @tc.steps:call invalid CheckPreviewTextValidate
      * @tc.expected: check return false
      */
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_BAD_DATA}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_BAD_DATA.text, PREVIEW_BAD_DATA.range), -1);
 
     /**
      * @tc.steps:Set select and call CheckPreviewTextValidate
@@ -1282,7 +1282,7 @@ HWTEST_F(TextInputCursorTest, CheckPreviewTextValidate001, TestSize.Level1)
     controller->UpdateCaretIndex(5);
     pattern_->HandleSelectionLeftWord();
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(pattern_->CheckPreviewTextValidate({PREVIEW_THR}));
+    EXPECT_EQ(pattern_->CheckPreviewTextValidate(PREVIEW_THR.text, PREVIEW_THR.range), -1);
 }
 
 /**
@@ -1505,4 +1505,44 @@ HWTEST_F(TextInputCursorTest, TextInputLineBreakStrategy001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
 }
+
+HWTEST_F(TextInputCursorTest, OnFocusNodeChange_001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField();
+    auto textFieldNode_1 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto textFieldNode_2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    textFieldNode_1->SetParent(frameNode_);
+    textFieldNode_2->SetParent(frameNode_);
+
+    auto focusHub_1 = textFieldNode_1->GetFocusHub();
+    ASSERT_NE(focusHub_1, nullptr);
+    RefPtr<TextFieldPattern> pattern_1 = textFieldNode_1->GetPattern<TextFieldPattern>();
+    auto focusHub_2 = textFieldNode_2->GetFocusHub();
+    RefPtr<TextFieldPattern> pattern_2 = textFieldNode_2->GetPattern<TextFieldPattern>();
+
+    focusHub_1->currentFocus_ = true;
+    pattern_1->HandleFocusEvent();
+
+    FlushLayoutTask(frameNode_);
+    FlushLayoutTask(textFieldNode_1);
+    FlushLayoutTask(textFieldNode_2);
+    EXPECT_TRUE(pattern_1->needToRequestKeyboardInner_);
+    EXPECT_FALSE(pattern_2->needToRequestKeyboardInner_);
+
+    focusHub_1->currentFocus_ = false;
+    focusHub_2->currentFocus_ = true;
+    pattern_1->HandleBlurEvent();
+    pattern_2->HandleFocusEvent();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_1->needToRequestKeyboardInner_);
+    EXPECT_TRUE(pattern_2->needToRequestKeyboardInner_);
+}
+
 } // namespace OHOS::Ace::NG

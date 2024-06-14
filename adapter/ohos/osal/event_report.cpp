@@ -486,11 +486,13 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
 }
 
-void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
+                                    const std::string& pageName)
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "APP_PAGE_INFO_UPDATE",
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName);
+        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_PAGE_NAME, pageName);
 }
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)

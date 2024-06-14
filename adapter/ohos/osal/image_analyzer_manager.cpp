@@ -39,12 +39,14 @@ ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNod
 void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
     const NG::OffsetF& offset)
 {
-    CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
-    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    void* pixelmapNapiVal = nullptr;
+    if (pixelMap) {
+        pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    }
 
     analyzerUIConfig_.holder = holder_;
-    if (holder_ != ImageAnalyzerHolder::IMAGE) {
+    if (holder_ != ImageAnalyzerHolder::IMAGE && holder_ != ImageAnalyzerHolder::WEB) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
     }
@@ -128,6 +130,10 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
     CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
     (analyzerUIConfig_.onAnalyzed.value())(ImageAnalyzerState::STOPPED);
     analyzerUIConfig_.onAnalyzed = std::nullopt;
+
+    napi_value nullValue = nullptr;
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(nullValue);
 }
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
@@ -236,6 +242,10 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
 void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    bool hasConfig = imageAnalyzerAdapter_->HasImageAnalyzerConfig();
+    if (hasConfig) {
+        return;
+    }
     imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {
@@ -243,7 +253,17 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
     }
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAIOptions(void* options)
+{
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(options);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    if (isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
+    }
+}
+
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
     analyzerUIConfig_.onAnalyzed = callback;
 }
@@ -253,5 +273,69 @@ void ImageAnalyzerManager::ReleaseImageAnalyzer()
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().Release(&overlayData_);
     }
+}
+
+void ImageAnalyzerManager::UpdatePressOverlay(
+    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight,
+    int pointX,
+    int pointY,
+    OnTextSelectedCallback callback)
+{
+    analyzerUIConfig_.overlayOffset.SetX(offsetX);
+    analyzerUIConfig_.overlayOffset.SetY(offsetY);
+    analyzerUIConfig_.touchInfo.touchPoint.x = pointX;
+    analyzerUIConfig_.touchInfo.touchPoint.y = pointY;
+    analyzerUIConfig_.touchInfo.touchType = TouchType::DOWN;
+    analyzerUIConfig_.selectedStatus = Status::SELECTED;
+    analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
+    if (!analyzerUIConfig_.onTextSelected) {
+        analyzerUIConfig_.onTextSelected = std::move(callback);
+    }
+    if (pixelMap && imageAnalyzerAdapter_) {
+        analyzerUIConfig_.contentWidth = rectWidth;
+        analyzerUIConfig_.contentHeight = rectHeight;
+        analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+        analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+        analyzerUIConfig_.pixelmapNapiVal =
+            imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    }
+    ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
+    analyzerUIConfig_.pixelmapNapiVal = nullptr;
+}
+
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(
+    int touchPointX,
+    int touchPointY,
+    TouchType touchType)
+{
+    analyzerUIConfig_.touchInfo.touchPoint.x = touchPointX - analyzerUIConfig_.overlayOffset.GetX();
+    analyzerUIConfig_.touchInfo.touchPoint.y = touchPointY - analyzerUIConfig_.overlayOffset.GetY();
+    analyzerUIConfig_.touchInfo.touchType = touchType;
+    ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
+}
+
+void ImageAnalyzerManager::UpdateOverlayStatus(
+    bool status,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight)
+{
+    if (status) {
+        analyzerUIConfig_.overlayOffset.SetX(offsetX);
+        analyzerUIConfig_.overlayOffset.SetY(offsetY);
+        analyzerUIConfig_.contentWidth = rectWidth;
+        analyzerUIConfig_.contentHeight = rectHeight;
+        analyzerUIConfig_.selectedStatus = Status::SELECTED;
+        analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
+    } else {
+        analyzerUIConfig_.selectedStatus = Status::UNSELECTED;
+        analyzerUIConfig_.menuStatus = Status::MENU_HIDE;
+    }
+    ImageAnalyzerMgr::GetInstance().UpdateOverlayStatus(&overlayData_, &analyzerUIConfig_);
 }
 } // namespace OHOS::Ace

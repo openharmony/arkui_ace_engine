@@ -51,6 +51,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -84,7 +85,12 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContextSafely();
 
+    static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
+
     static PipelineContext* GetCurrentContextPtrSafely();
+    
+    static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
+
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -246,6 +252,8 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
+    void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
+
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
     void AddPredictTask(PredictTask&& task);
@@ -304,6 +312,9 @@ public:
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
     RefPtr<AccessibilityManagerNG> GetAccessibilityManagerNG();
+
+    void SendEventToAccessibilityWithNode(
+        const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node);
 
     const RefPtr<StageManager>& GetStageManager();
 
@@ -392,7 +403,7 @@ public:
         return isTabJustTriggerOnKeyEvent_;
     }
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }
@@ -432,7 +443,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -624,6 +635,11 @@ public:
 
     void OnTransformHintChanged(uint32_t transform) override;
 
+    uint32_t GetTransformHint() const
+    {
+        return transform_;
+    }
+
     // for frontend animation interface.
     void OpenFrontendAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -757,6 +773,9 @@ public:
 
     void FlushFrameCallback(uint64_t nanoTimestamp);
 
+    void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
+    void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
+
     void SetPredictNode(const RefPtr<FrameNode>& node)
     {
         predictNode_ = node;
@@ -765,6 +784,19 @@ public:
     void ResetPredictNode()
     {
         predictNode_.Reset();
+    }
+
+    void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
+
+    bool IsDensityChanged() const override
+    {
+        return isDensityChanged_;
+    }
+
+
+    void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) override
+    {
+        lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -942,6 +974,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t lastVsyncEndTimestamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -958,6 +991,7 @@ private:
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
     bool isFreezeFlushMessage_ = false;
+    bool destroyed_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -998,12 +1032,14 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
+    uint32_t transform_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

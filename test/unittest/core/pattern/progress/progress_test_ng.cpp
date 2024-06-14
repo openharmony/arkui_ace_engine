@@ -29,6 +29,8 @@ void ProgressTestNg::SetUpTestSuite()
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    progressTheme = ProgressTheme::Builder().Build(themeConstants);
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackThickness_ = TEST_PROGRESS_THICKNESS;
     progressTheme->scaleLength_ = TEST_PROGRESS_STROKE_WIDTH;
@@ -767,6 +769,54 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure002, TestSize.Level1)
     contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
     auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
+}
+/**
+ * @tc.name: CapsuleProgressMeasure003
+ * @tc.desc: Test all the properties of Capsule type progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, CapsuleProgressMeasure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
+     * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    model.SetStrokeWidth(STROKE_WIDTH);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step3. create contentConstraint.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+
+    /**
+     * @tc.steps: step4. add layoutWrapper to progress frameNode_ layoutWrapper.
+     * @tc.expected: step4. create layoutWrapper success.
+     */
+    LayoutWrapperNode layoutWrapper(frameNode_, nullptr, layoutProperty_);
+
+    /**
+     * @tc.steps: step5. do capsule progress LayoutAlgorithm Measure and compare values.
+     * @tc.expected: step5. layout result equals expected result.
+     */
+    auto progressPattern = frameNode_->GetPattern();
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_CAPSULE);
+    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Height(), DEFAULT_CAPSULE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+
+    LayoutConstraintF contentConstraintChild;
+    contentConstraintChild.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    auto childsize = progressLayoutAlgorithm->MeasureContent(contentConstraintChild, &layoutWrapper);
+    ASSERT_NE(childsize, std::nullopt);
+    EXPECT_EQ(childsize->Height(), size->Height());
+    EXPECT_EQ(childsize->Width(), size->Width());
 }
 
 /**

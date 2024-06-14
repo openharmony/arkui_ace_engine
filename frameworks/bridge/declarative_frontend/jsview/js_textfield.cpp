@@ -348,7 +348,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1) {
         return;
     }
     auto styleString = info[0]->ToString();
@@ -905,7 +905,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject() || !info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto jsValue = info[0];
@@ -947,12 +947,27 @@ void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 #endif
 }
 
+JSRef<JSVal> JSTextField::CreateJsOnChangeObj(const TextRange& textRange)
+{
+    JSRef<JSObject> range = JSRef<JSObject>::New();
+    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
+    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
+    return JSRef<JSVal>::Cast(range);
+}
+
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
-    TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const std::string& val, TextRange& range) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onChange");
+        func->Execute(val, range);
+    };
+    TextFieldModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -1704,5 +1719,24 @@ void JSTextField::OnDidDelete(const JSCallbackInfo& info)
         func->ExecuteWithValue(deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
+}
+
+void JSTextField::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+}
+
+void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetEnablePreviewText(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

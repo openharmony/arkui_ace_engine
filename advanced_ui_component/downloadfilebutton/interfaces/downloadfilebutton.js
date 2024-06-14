@@ -20,20 +20,20 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 
 export var DownloadIconStyle;
 (function (b2) {
-    b2[b2["FULL_FILLED"] = 0] = "FULL_FILLED";
-    b2[b2["LINES"] = 1] = "LINES";
+    b2[b2["FULL_FILLED"] = 1] = "FULL_FILLED";
+    b2[b2["LINES"] = 2] = "LINES";
 })(DownloadIconStyle || (DownloadIconStyle = {}));
 
 export var DownloadDescription;
 (function (a2) {
-    a2[a2["DOWNLOAD"] = 0] = "DOWNLOAD";
-    a2[a2["DOWNLOAD_FILE"] = 1] = "DOWNLOAD_FILE";
-    a2[a2["SAVE"] = 2] = "SAVE";
-    a2[a2["SAVE_IMAGE"] = 3] = "SAVE_IMAGE";
-    a2[a2["SAVE_FILE"] = 4] = "SAVE_FILE";
-    a2[a2["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
-    a2[a2["RECEIVE"] = 6] = "RECEIVE";
-    a2[a2["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+    a2[a2["DOWNLOAD"] = 1] = "DOWNLOAD";
+    a2[a2["DOWNLOAD_FILE"] = 2] = "DOWNLOAD_FILE";
+    a2[a2["SAVE"] = 3] = "SAVE";
+    a2[a2["SAVE_IMAGE"] = 4] = "SAVE_IMAGE";
+    a2[a2["SAVE_FILE"] = 5] = "SAVE_FILE";
+    a2[a2["DOWNLOAD_AND_SHARE"] = 6] = "DOWNLOAD_AND_SHARE";
+    a2[a2["RECEIVE"] = 7] = "RECEIVE";
+    a2[a2["CONTINUE_TO_RECEIVE"] = 8] = "CONTINUE_TO_RECEIVE";
 })(DownloadDescription || (DownloadDescription = {}));
 
 export var DownloadLayoutDirection;
@@ -107,9 +107,10 @@ export class DownloadFileButton extends ViewPU {
         if (typeof x1 === "function") {
             this.paramsGenerator_ = x1;
         }
-        this.__contentOptions =
-            new ObservedPropertyObjectPU({ icon: DownloadIconStyle.FULL_FILLED, text: DownloadDescription.DOWNLOAD },
-                this, "contentOptions");
+        this.__contentOptions = new ObservedPropertyObjectPU({
+            icon: DownloadIconStyle.FULL_FILLED,
+            text: DownloadDescription.DOWNLOAD
+        }, this, "contentOptions");
         this.__styleOptions = new ObservedPropertyObjectPU({
             iconSize: '16vp',
             layoutDirection: DownloadLayoutDirection.HORIZONTAL,

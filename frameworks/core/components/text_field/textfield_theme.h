@@ -180,9 +180,13 @@ public:
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
 
+            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
+            theme->textFadeoutEnabled_ = isTextFadeout == "true";
+
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_delete", "");
         }
     };
 
@@ -543,6 +547,11 @@ public:
         return cancelButtonStyle_;
     }
 
+    bool TextFadeoutEnabled() const
+    {
+        return textFadeoutEnabled_;
+    }
+
     const Color& GetCancelButtonIconColor() const
     {
         return cancelButtonIconColor_;
@@ -556,6 +565,11 @@ public:
     const Color& GetPreviewBoardColor() const
     {
         return previewBoardColor_;
+    }
+
+    const std::string& GetCancelButton() const
+    {
+        return cancelButton_;
     }
 
 protected:
@@ -646,12 +660,16 @@ private:
     Dimension errorTextInputBorderWidth_ = 1.0_vp;
     Color textInputBorderColor_;
     bool showPasswordIcon_ = true;
+
+    bool textFadeoutEnabled_ = false;
     
     // cancelButton
     Color cancelButtonIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     Color previewUnderlineColor_;
     Color previewBoardColor_;
+
+    std::string cancelButton_;
 };
 
 } // namespace OHOS::Ace

@@ -719,14 +719,17 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.L
      * @tc.steps: step3. delete backward
      */
     richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->caretPosition_ = 2;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
 
     richEditorPattern->textSelector_.Update(2, 5);
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
 
     richEditorPattern->textSelector_.Update(1, 3);
+    richEditorPattern->caretPosition_ = 3;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 2);
 }
@@ -809,5 +812,53 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
     richEditorPattern->textSelector_.Update(1, 3);
     richEditorPattern->DeleteForward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 2);
+}
+
+/**
+ * @tc.name: CustomSpan001
+ * @tc.desc: Test caret and handles with customSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with customSpan and text
+     */
+    auto mutableStr = CreateCustomSpanStyledString();
+    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    mutableStr->AppendSpanString(mutableTextStr);
+
+    /**
+     * @tc.steps: step2. set styledString
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetStyledString(mutableStr);
+
+    /**
+     * @tc.steps: step3. add paragraph
+     */
+    CaretMetricsF caretMetricsLeft = { OffsetF(0, 0), 50.0f };
+    CaretMetricsF caretMetricsRight = { OffsetF(100.f, 0), 50.0f };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 8,
+        .testCursorItems = { { 0, caretMetricsLeft, caretMetricsLeft}, {1, caretMetricsRight, caretMetricsRight} } };
+    AddParagraph(paragraphItem);
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
+    richEditorNode_->Measure(layoutConstraintF);
+    richEditorNode_->Layout();
+
+    /**
+     * @tc.steps: step4. calculate caret and handles with customSpan
+     */
+    richEditorPattern->caretPosition_ = 1;
+    auto [caretOffset, caretHeight] = richEditorPattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(caretOffset, OffsetF(100.f, 0));
+    EXPECT_EQ(caretHeight, 50.0f);
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), 50.f };
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(OffsetF(0, 0), handlePaintSize));
+    EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(OffsetF(100.f, 0), handlePaintSize));
 }
 } // namespace OHOS::Ace::NG

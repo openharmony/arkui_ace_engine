@@ -1282,4 +1282,59 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ((*it)->interval.first, 11);
     EXPECT_EQ((*it)->interval.second, 14);
 }
+
+/**
+ * @tc.name: SpanStringTest009
+ * @tc.desc: Test basic function of span object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
+{
+    std::string buffer;
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10);
+    buffer = fontSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("FontSpan"), 0);
+
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan =
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+    EXPECT_FALSE(decorationSpan->IsAttributesEqual(fontSpan));
+
+    auto baselineOffsetSpan = AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2);
+    EXPECT_FALSE(baselineOffsetSpan->IsAttributesEqual(decorationSpan));
+    baselineOffsetSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = baselineOffsetSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("BaselineOffsetSpan"), 0);
+
+    auto letterSpacingSpan = AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3);
+    EXPECT_FALSE(letterSpacingSpan->IsAttributesEqual(decorationSpan));
+    letterSpacingSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = letterSpacingSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
+
+    Shadow textShadow;
+    textShadow.SetBlurRadius(1.0);
+    textShadow.SetColor(Color::BLACK);
+    textShadow.SetOffsetX(6.0);
+    textShadow.SetOffsetY(6.0);
+    vector<Shadow> textShadows { textShadow };
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9);
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(decorationSpan));
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = textShadowSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("TextShadowSpan"), 0);
+}
 } // namespace OHOS::Ace::NG

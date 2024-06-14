@@ -50,7 +50,7 @@ public:
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
@@ -82,6 +82,8 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetEnablePreviewText(bool enablePreviewText) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -123,7 +125,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
@@ -142,6 +144,7 @@ public:
     static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
+    static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,

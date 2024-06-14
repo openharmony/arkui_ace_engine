@@ -249,6 +249,7 @@ public:
     virtual void AddTaskObserver(Task&& callback) = 0;
     virtual void RemoveTaskObserver() = 0;
     virtual bool WillRunOnCurrentThread(TaskType type) const = 0;
+    virtual void RemoveTask(TaskType type, const std::string &name) = 0;
 
     virtual int32_t GetTid(TaskType type)
     {
@@ -282,12 +283,13 @@ private:
 #ifdef ACE_DEBUG
         bool result = false;
         if (OnPreSyncTask(type)) {
-            result = OnPostTask(Task(task), type, 0, name) && task.WaitUntilComplete(timeoutMs);
+            result =
+                OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
             OnPostSyncTask();
         }
         return result;
 #else
-        return OnPostTask(Task(task), type, 0, name) && task.WaitUntilComplete(timeoutMs);
+        return OnPostTask(Task(task), type, 0, name, PriorityType::IMMEDIATE) && task.WaitUntilComplete(timeoutMs);
 #endif
     }
 };

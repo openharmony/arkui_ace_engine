@@ -106,33 +106,41 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
         return false;
     }
-    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
         return false;
     }
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptFontSizeStep(TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
     Dimension step = stepUnit;
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
     stepSize = 0.0;
-    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
         pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
@@ -162,5 +170,23 @@ bool TextAdaptFontSizer::IsAdaptExceedLimit(const SizeF& maxSize)
     CHECK_NULL_RETURN(paragraph, false);
     return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const double& maxFontSize, const double& minFontSize)
+{
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        return false;
+    }
+    return true;
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
+    return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
 } // namespace OHOS::Ace::NG

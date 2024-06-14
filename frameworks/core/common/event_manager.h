@@ -231,7 +231,8 @@ public:
         return responseCtrl_;
     }
 
-    void CheckTouchEvent(TouchEvent touchEvent);
+    void CheckDownEvent(const TouchEvent& touchEvent);
+    void CheckUpEvent(const TouchEvent& touchEvent);
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
@@ -284,7 +285,7 @@ private:
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
-    std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
+    std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
     MouseTestResult pressMouseTestResults_;
     HoverTestResult currHoverTestResults_;
@@ -316,6 +317,7 @@ private:
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
+    int32_t lastDownFingerNumber_ = 0;
 };
 
 } // namespace OHOS::Ace

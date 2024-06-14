@@ -49,9 +49,9 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
 
     void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetAdaptMinFontSize(const Dimension& value);
-    void SetAdaptMaxFontSize(const Dimension& value);
+    void SetFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetTextShadow(const std::vector<Shadow>& value);
@@ -159,6 +159,7 @@ private:
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;

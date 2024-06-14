@@ -22,9 +22,11 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/window/foldable_window.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -35,7 +37,32 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_HALF_SIZE = 2;
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
+constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
+constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
+std::map<Placement, std::vector<Placement>> DIRECTIONS_STATES = {
+    { Placement::BOTTOM,
+        {
+            Placement::BOTTOM,
+        } },
+};
+std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
+    { Placement::BOTTOM,
+        {
+            Placement::BOTTOM,
+            Placement::BOTTOM_RIGHT,
+            Placement::BOTTOM_LEFT,
+        } },
+};
 } // namespace
+
+void SheetPresentationLayoutAlgorithm::InitParameter()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    sheetRadius_ = sheetTheme->GetSheetRadius().ConvertToPx();
+}
 
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -60,7 +87,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         maxSize = layoutConstraint->maxSize;
         sheetMaxHeight_ = maxSize.Height();
         sheetMaxWidth_ = maxSize.Width();
-        sheetWidth_ = GetWidthByScreenSizeType(maxSize);
+        sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
         if (sheetStyle_.width.has_value()) {
             float width = 0.0f;
@@ -185,8 +212,12 @@ OffsetF SheetPresentationLayoutAlgorithm::GetOffsetInAvoidanceRule(const SizeF& 
 {
     // The current default Placement is Placement::BOTTOM
     auto placement = Placement::BOTTOM;
-    auto tartgetPlacement = AvoidanceRuleOfPlacement(placement, targetSize, targetOffset);
-    auto offsetFunc = getOffsetFunc_[tartgetPlacement];
+    auto targetPlacement = AvoidanceRuleOfPlacement(placement, targetSize, targetOffset);
+    if (getOffsetFunc_.find(targetPlacement) == getOffsetFunc_.end()) {
+        TAG_LOGW(AceLogTag::ACE_SHEET, "It is an invalid Placement for current PopSheet.");
+        return {};
+    }
+    auto offsetFunc = getOffsetFunc_[targetPlacement];
     CHECK_NULL_RETURN(offsetFunc, OffsetF());
     return (this->*offsetFunc)(targetSize, targetOffset);
 }
@@ -198,12 +229,6 @@ Placement SheetPresentationLayoutAlgorithm::AvoidanceRuleOfPlacement(
     TAG_LOGD(AceLogTag::ACE_SHEET, "Init PopupSheet placement: %{public}s",
         PlacementUtils::ConvertPlacementToString(targetPlacement).c_str());
     // Step1: Determine the direction
-    static std::map<Placement, std::vector<Placement>> DIRECTIONS_STATES = {
-        { Placement::BOTTOM,
-            {
-                Placement::BOTTOM,
-            } },
-    };
     auto& directionVec = DIRECTIONS_STATES[targetPlacement];
     for (auto placement : directionVec) {
         auto& placementFunc = directionCheckFunc_[placement];
@@ -218,14 +243,6 @@ Placement SheetPresentationLayoutAlgorithm::AvoidanceRuleOfPlacement(
     TAG_LOGD(AceLogTag::ACE_SHEET, "After step1, placement: %{public}s",
         PlacementUtils::ConvertPlacementToString(targetPlacement).c_str());
     // Step2: Determine the Placement in that direction
-    static std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
-        { Placement::BOTTOM,
-            {
-                Placement::BOTTOM,
-                Placement::BOTTOM_RIGHT,
-                Placement::BOTTOM_LEFT,
-            } },
-    };
     auto& placementVec = PLACEMENT_STATES[targetPlacement];
     for (auto placement : placementVec) {
         auto& placementFunc = placementCheckFunc_[placement];
@@ -288,14 +305,45 @@ OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottom(const SizeF& targe
 OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
 {
     arrowOffsetX_ = targetSize.Width() / SHEET_HALF_SIZE;
-    return OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
+    auto sheetOffset =
+        OffsetF(targetOffset.GetX(), targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
+
+    // if the arrow overlaps the sheet left corner, move sheet to the 6vp from the left edge
+    if (LessNotEqual(arrowOffsetX_ - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(), sheetRadius_)) {
+        sheetOffset.SetX(WINDOW_EDGE_SPACE.ConvertToPx());
+        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetOffset.GetX();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Adjust sheet to the left boundary of the screen");
+    }
+
+    // if the arrow still overlaps the sheet left corner, the arrow will become a right angle.
+    if (LessNotEqual(arrowOffsetX_ - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(), sheetRadius_)) {
+        isRightAngleArrow_ = true;
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Need to switch the arrow into the right-angle arrow");
+    }
+    return sheetOffset;
 }
 
 OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight(const SizeF& targetSize, const OffsetF& targetOffset)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     arrowOffsetX_ = sheetWidth_ - targetSize.Width() / SHEET_HALF_SIZE;
-    return OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
+    auto sheetOffset = OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
         targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
+
+    // if the arrow overlaps the sheet right corner, move sheet to the 6vp from the right edge
+    if (GreatNotEqual(arrowOffsetX_ + sheetRadius_ + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(), sheetWidth_)) {
+        sheetOffset.SetX(windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx() - sheetWidth_);
+        arrowOffsetX_ = targetOffset.GetX() + targetSize.Width() / SHEET_HALF_SIZE - sheetOffset.GetX();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Adjust sheet to the right boundary of the screen");
+    }
+
+    // if the arrow still overlaps the sheet right corner, the arrow will become a right angle.
+    if (GreatNotEqual(arrowOffsetX_ + sheetRadius_ + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(), sheetWidth_)) {
+        isRightAngleArrow_ = true;
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Need to switch the arrow into the right angle arrow");
+    }
+    return sheetOffset;
 }
 
 float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& maxSize) const
@@ -320,11 +368,20 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
     return height;
 }
 
-float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& maxSize) const
+float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& maxSize,
+    LayoutWrapper* layoutWrapper) const
 {
     float width = maxSize.Width();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, width);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, width);
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
+            if (sheetPattern->IsPhoneOrFold()) {
+                width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+                break;
+            }
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             width = maxSize.Width();
             break;

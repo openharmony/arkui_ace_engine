@@ -17,7 +17,6 @@
 #define FRAMEWORKS_CORE_COMMON_SHARE_DATA_SHARE_DATA_H
 
 #include <map>
-#include <mutex>
 
 #include "base/memory/ace_type.h"
 
@@ -37,7 +36,6 @@ public:
 
 private:
     static std::map<int32_t, std::shared_ptr<std::vector<uint8_t>>> shareDataMap_;
-    static std::mutex shareDataMapMutex_;
 };
 
 } // namespace OHOS::Ace

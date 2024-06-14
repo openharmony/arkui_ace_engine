@@ -117,6 +117,9 @@ void LazyForEachNode::OnDataReloaded()
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataReloaded();
+        if (FrameCount() == 0) {
+            PostIdleTask();
+        }
     }
     NotifyDataCountChanged(0);
     MarkNeedSyncRenderTree(true);
@@ -469,11 +472,16 @@ RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
     CHECK_NULL_RETURN(child.second, nullptr);
     return AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
 }
-int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+
+int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
 {
+    if (!isExpanded) {
+        return UINode::GetFrameNodeIndex(node, false);
+    }
     CHECK_NULL_RETURN(builder_, -1);
     return builder_->GetChildIndex(node);
 }
+
 void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
 {
     CHECK_NULL_VOID(childNode);

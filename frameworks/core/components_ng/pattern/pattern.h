@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
@@ -277,6 +278,8 @@ public:
         return true;
     }
 
+    virtual void NotifyForNextTouchEvent() {}
+
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
@@ -353,6 +356,12 @@ public:
     FrameNode* GetUnsafeHostPtr() const
     {
         return UnsafeRawPtr(frameNode_);
+    }
+
+    PipelineContext* GetContext() {
+        auto frameNode = GetUnsafeHostPtr();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetContext();
     }
 
     virtual void DumpInfo() {}
@@ -480,6 +489,7 @@ public:
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
+    virtual void OnFontConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -550,6 +560,7 @@ public:
 
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
+    virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

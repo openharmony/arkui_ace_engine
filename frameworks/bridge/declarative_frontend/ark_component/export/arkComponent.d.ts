@@ -732,6 +732,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     lineBreakStrategy(value: LineBreakStrategy): TextAttribute;
     onCopy(callback: (value: string) => void): TextAttribute;
     selection(selectionStart: number, selectionEnd: number): TextAttribute;
+    textSelectable(value: TextSelectableMode): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
 }
@@ -1743,6 +1744,9 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     alignListItem(value: ListItemAlign): this;
     listDirection(value: Axis): this;
     scrollBar(value: BarState): this;
+    scrollBarWidth(value: string | number): this;
+    scrollBarColor(value: string | number | Color): this;
+    flingSpeedLimit(value: number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
     contentStartOffset(value: number): this;
     contentEndOffset(value: number): this;
@@ -1780,6 +1784,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
         offsetRemain: number;
     }): this;
     fadingEdge(value: boolean): this;
+    childrenMainSize(value: ChildrenMainSize): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1798,6 +1803,7 @@ declare class ArkListItemGroupComponent extends ArkComponent implements ListItem
         startMargin?: any;
         endMargin?: any;
     } | null): this;
+    childrenMainSize(value: ChildrenMainSize): this;
 }
 declare class ArkRelativeContainerComponent extends ArkComponent implements RelativeContainerAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1815,7 +1821,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
     cachedCount(value: number): this;
-    displayCount(value: string | number | SwiperAutoFill): this;
+    displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;
     curve(value: string | Curve | ICurve): this;
@@ -1841,7 +1847,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
-    animateMode(value: AnimateMode): TabsAttribute;
+    animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;
     onTabBarClick(event: (index: number) => void): TabsAttribute;
     fadingEdge(value: boolean): TabsAttribute;

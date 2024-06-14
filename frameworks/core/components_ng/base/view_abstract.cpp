@@ -405,6 +405,11 @@ void ViewAbstract::SetPixelRound(uint8_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
 }
 
+void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint8_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
+}
+
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -614,6 +619,70 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
 void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
+}
+
+void ViewAbstract::SetDashGap(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty dashGap;
+    dashGap.SetBorderWidth(value);
+
+    ACE_UPDATE_RENDER_CONTEXT(DashGap, dashGap);
+}
+
+void ViewAbstract::SetDashGap(FrameNode *frameNode, const Dimension& value)
+{
+    BorderWidthProperty dashGap;
+    dashGap.SetBorderWidth(value);
+
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
+}
+
+void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DashGap, value);
+}
+
+void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, value, frameNode);
+}
+
+void ViewAbstract::SetDashWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    BorderWidthProperty dashWidth;
+    dashWidth.SetBorderWidth(value);
+
+    ACE_UPDATE_RENDER_CONTEXT(DashWidth, dashWidth);
+}
+
+void ViewAbstract::SetDashWidth(FrameNode *frameNode, const Dimension& value)
+{
+    BorderWidthProperty dashWidth;
+    dashWidth.SetBorderWidth(value);
+
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, dashWidth, frameNode);
+}
+
+void ViewAbstract::SetDashWidth(const BorderWidthProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DashWidth, value);
+}
+
+void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DashWidth, value, frameNode);
 }
 
 void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
@@ -1676,6 +1745,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     }
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    CHECK_NULL_VOID(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -3374,13 +3444,13 @@ void ViewAbstract::SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLe
 void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
     const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    CHECK_NULL_VOID(frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     if (value.empty() || keys.empty()) {
         eventHub->ClearSingleKeyboardShortcut();
@@ -3433,7 +3503,7 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF& oldOrigin, const RectF &rect, const OffsetF& origin)>&& onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
@@ -3935,6 +4005,7 @@ Dimension ViewAbstract::GetFrontBlur(FrameNode* frameNode)
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     auto& property = target->GetForeground();
+    CHECK_NULL_RETURN(property, value);
     auto getValue = property->propBlurRadius;
     if (getValue.has_value()) {
         return getValue.value();
@@ -4282,9 +4353,9 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
     int32_t interval)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback(true);
 
     constexpr uint32_t minInterval = 100; // 100ms
@@ -4446,9 +4517,9 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
     const std::vector<double>& ratioList)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
 }
@@ -4465,7 +4536,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     frameNode->ClearUserOnAreaChange();
     pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
@@ -4474,7 +4545,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());

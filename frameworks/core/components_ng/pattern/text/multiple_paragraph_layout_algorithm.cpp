@@ -30,6 +30,7 @@
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,8 +72,13 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (contentModifier) {
-        SetPropertyToModifier(textLayoutProperty, contentModifier);
+        SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
@@ -242,7 +248,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
-    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
+    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier, TextStyle& textStyle)
 {
     auto fontFamily = layoutProperty->GetFontFamily();
     if (fontFamily.has_value()) {
@@ -250,15 +256,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
     }
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
-        modifier->SetFontSize(fontSize.value());
+        modifier->SetFontSize(fontSize.value(), textStyle);
     }
     auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
     if (adaptMinFontSize.has_value()) {
-        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value(), textStyle);
     }
     auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
     if (adaptMaxFontSize.has_value()) {
-        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value(), textStyle);
     }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {

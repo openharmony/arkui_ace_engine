@@ -59,6 +59,8 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
 constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
 float animationScale_ = DEFAULT_ANIMATION_SCALE;
+constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
+constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 std::shared_mutex mutex_;
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
@@ -113,6 +115,11 @@ bool IsLayoutTraceEnabled()
 bool IsTextTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
+}
+
+bool IsAccessTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.access.enabled", "false") == "true");
 }
 
 bool IsTraceInputEventEnabled()
@@ -202,6 +209,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsLayoutDetectEnabled()
+{
+    return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
+}
+
 bool IsNavigationBlurEnabled()
 {
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
@@ -252,7 +264,8 @@ void OnAnimationScaleChanged(const char* key, const char* value, void* context)
 
 uint32_t GetSysDumpFrameCount()
 {
-    return system::GetUintParameter<uint32_t>("persist.ace.framedumpcount", 10);
+    return system::GetUintParameter<uint32_t>(
+        "persist.ace.framedumpcount", 10); // 10: Pipeline dump of the last 10 frames' task.
 }
 
 bool GetAstcEnabled()
@@ -262,7 +275,7 @@ bool GetAstcEnabled()
 
 int32_t GetAstcMaxErrorProp()
 {
-    return system::GetIntParameter<int>("persist.astc.max", 50000);
+    return system::GetIntParameter<int>("persist.astc.max", 50000); // 50000: Anomaly threshold of astc.
 }
 
 int32_t GetAstcPsnrProp()
@@ -311,6 +324,17 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+float ReadDragStartDampingRatio()
+{
+    return system::GetIntParameter("debug.ace.drag.damping.ratio", DEFAULT_DRAG_START_DAMPING_RATIO) / 100.0f;
+}
+
+float ReadDragStartPanDistanceThreshold()
+{
+    return system::GetIntParameter("debug.ace.drag.pan.threshold",
+        DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
+}
+
 bool IsFaultInjectEnabled()
 {
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
@@ -334,6 +358,7 @@ bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
+bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -366,6 +391,7 @@ bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled()
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
@@ -383,7 +409,8 @@ bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnabl
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
-
+float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
+float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -507,6 +534,7 @@ void SystemProperties::InitDeviceInfo(
     paramDeviceType_ = ::GetDeviceType();
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
+    layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
@@ -575,6 +603,11 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
 ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetLayoutDetectEnabled()
+{
+    return layoutDetectEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()
@@ -749,5 +782,15 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

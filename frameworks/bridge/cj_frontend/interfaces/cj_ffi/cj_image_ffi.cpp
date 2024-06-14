@@ -96,6 +96,11 @@ void FfiOHOSAceFrameworkImageSetAlt(const char* url)
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url, bundleName, moduleName });
 }
 
+CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
+{
+    ImageModel::GetInstance()->SetBackBorder();
+}
+
 void FfiOHOSAceFrameworkImageSetObjectFit(int32_t objectFit)
 {
     if (!OHOS::Ace::Framework::Utils::CheckParamsValid(objectFit, IMAGE_FITS.size())) {

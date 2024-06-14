@@ -786,7 +786,7 @@ public:
 
     void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }
@@ -808,13 +808,18 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
 
+    bool IsDensityChanged() const override
+    {
+        return isDensityUpdate_;
+    }
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
     void FlushReloadTransition() override;
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override
     {

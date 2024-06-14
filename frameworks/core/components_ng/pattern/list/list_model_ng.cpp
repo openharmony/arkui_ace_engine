@@ -769,6 +769,11 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
+void ListModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
+{
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -793,5 +798,12 @@ void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
+}
+
+int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
+{
+    int32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, InitialIndex, value, frameNode, value);
+    return value;
 }
 } // namespace OHOS::Ace::NG

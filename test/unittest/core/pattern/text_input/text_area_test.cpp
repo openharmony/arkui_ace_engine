@@ -1257,8 +1257,8 @@ HWTEST_F(TextFieldUXTest, TextIsEmptyRect001, TestSize.Level1)
 }
 
 /**
- * @tc.name: testWordBreak001
- * @tc.desc: test testArea text WordBreak
+ * @tc.name: TextAreaWordBreak001
+ * @tc.desc: test textArea WordBreak attribute, set the value to NORMAL
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
@@ -1274,20 +1274,257 @@ HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
     layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+}
+
+/**
+ * @tc.name: TextAreaWordBreak002
+ * @tc.desc: test textArea WordBreak attribute, set the value to BREAK_ALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak002, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.step: step3. Set wordBreak BREAK_ALL
+     * @tc.step: step2. Set wordBreak BREAK_ALL
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: TextAreaWordBreak003
+ * @tc.desc: test textArea WordBreak attribute, set the value to BREAK_WORD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak003, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
 
     /**
-     * @tc.step: step4. Set wordBreak BREAK_WORD
+     * @tc.step: step2. Set wordBreak BREAK_WORD
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: TextAreaWordBreak004
+ * @tc.desc: test textArea WordBreak attribute, set the invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak004, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak invalid value
+     */
+    const uint32_t invalidValue = 3;
+    layoutProperty_->UpdateWordBreak((OHOS::Ace::WordBreak)invalidValue);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ((uint32_t)(layoutProperty_->GetWordBreak().value()), invalidValue);
+}
+
+/**
+ * @tc.name: TextAreaWordBreak005
+ * @tc.desc: test textArea WordBreak attribute, set the invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak005, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak invalid value
+     */
+    const int32_t invalidValue = -1;
+    layoutProperty_->UpdateWordBreak((OHOS::Ace::WordBreak)invalidValue);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ((int32_t)(layoutProperty_->GetWordBreak().value()), invalidValue);
+}
+
+/**
+ * @tc.name: TextAreaLayout001
+ * @tc.desc: test textStyle, set the value to NORMAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak NORMAL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::NORMAL);
+}
+
+/**
+ * @tc.name: TextAreaLayout002
+ * @tc.desc: test textStyle, set the value to BREAK_ALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: TextAreaLayout003
+ * @tc.desc: test textStyle, set the value to BREAK_WORD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLayout003, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak BREAK_WORD
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: TextAreaLayout004
+ * @tc.desc: test textStyle, set the invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLayout004, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak invalid value
+     */
+    const uint32_t invalidValue = 3;
+    layoutProperty_->UpdateWordBreak((OHOS::Ace::WordBreak)invalidValue);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ((uint32_t)(layoutProperty_->GetWordBreak().value()), invalidValue);
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ((uint32_t)(textStyle.GetWordBreak()), invalidValue);
+}
+
+/**
+ * @tc.name: TextAreaLayout005
+ * @tc.desc: test textStyle, set the invalid value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLayout005, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak invalid value
+     */
+    const int32_t invalidValue = -1;
+    layoutProperty_->UpdateWordBreak((OHOS::Ace::WordBreak)invalidValue);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ((int32_t)(layoutProperty_->GetWordBreak().value()), invalidValue);
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textAreaLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextAreaLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);
 }
 
 /**
@@ -1359,5 +1596,28 @@ HWTEST_F(TextFieldUXTest, TextAreaLineBreakStrategy001, TestSize.Level1)
     layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::BALANCED);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
+}
+
+
+/**
+ * @tc.name: TextAreaTextAlign001
+ * @tc.desc: test testArea text align
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TextAlign textAligns[] = {TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START,
+        TextAlign::END};
+    TextDirection textDirectoins[] = {TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO};
+    for (auto textAlign : textAligns) {
+        for (auto textDirectoin : textDirectoins) {
+            layoutProperty_->UpdateTextAlign(textAlign);
+            layoutProperty_->UpdateLayoutDirection(textDirectoin);
+            frameNode_->MarkModifyDone();
+            EXPECT_EQ(layoutProperty_->GetTextAlign(), textAlign);
+            EXPECT_EQ(layoutProperty_->GetLayoutDirection(), textDirectoin);
+        }
+    }
 }
 }

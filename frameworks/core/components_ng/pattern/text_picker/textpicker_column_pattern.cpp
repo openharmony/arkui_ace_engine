@@ -22,7 +22,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -402,6 +404,42 @@ void TextPickerColumnPattern::UpdateTexOverflow(bool isSel, const RefPtr<TextLay
     }
 }
 
+void TextPickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = parentNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(textPickerLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = pattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = pattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = pattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        textPickerLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        textPickerLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        textPickerLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void TextPickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isDirectlyClear, bool isUpdateAnimationProperties)
 {
@@ -418,6 +456,8 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
     isTextFadeOut_ = IsTextFadeOut();
+
+    InitTextFontFamily();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -593,16 +633,16 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(iconPattern);
         auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconLayoutProperty);
+        auto iconLayoutDirection = iconLayoutProperty->GetNonAutoLayoutDirection();
         CalcSize idealSize = { CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;
         iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
         MarginProperty margin;
+        margin.right = CalcLength(ICON_TEXT_SPACE);
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (isRtl) {
+        if (isRtl || iconLayoutDirection == TextDirection::RTL) {
             margin.left = CalcLength(ICON_TEXT_SPACE);
-        } else {
-            margin.right = CalcLength(ICON_TEXT_SPACE);
         }
         iconLayoutProperty->UpdateMargin(margin);
 
@@ -1254,26 +1294,40 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
 
 double TextPickerColumnPattern::GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
+    double distance = 0.0;
     double val = 0.0;
-    val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
-          optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-    val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-    if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-        val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+    if (columnkind_ == TEXT) {
+        if (GreatOrEqual(optionProperties_[nextIndex].fontheight, optionProperties_[nextIndex].height)) {
+            distance = (dir == ScrollDirection::UP) ?
+                - optionProperties_[nextIndex].height : optionProperties_[index].height;
+        } else {
+            val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
+                  optionProperties_[nextIndex].fontheight / HALF_NUMBER;
+            val = std::round(val);
+            distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
+        }
+    } else {
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
-    return std::round(val);
+    return distance;
 }
 
 double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t nextIndex, ScrollDirection dir)
 {
     double distance = 0.0;
     double val = 0.0;
-    if (dir == ScrollDirection::UP) {
-        distance = -optionProperties_[nextIndex].height;
+    if (columnkind_ == TEXT) {
+        if (dir == ScrollDirection::UP) {
+            distance = -optionProperties_[nextIndex].height;
+        } else {
+            val = optionProperties_[index].height +
+                  (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+            distance = std::round(val);
+        }
     } else {
-        val = optionProperties_[index].height +
-              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-        distance = std::round(val);
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
     return distance;
 }
@@ -1282,15 +1336,20 @@ double TextPickerColumnPattern::GetDownCandidateDistance(int32_t index, int32_t 
 {
     double distance = 0.0;
     double val = 0.0;
-    if (dir == ScrollDirection::DOWN) {
-        distance = optionProperties_[index].height;
-    } else {
-        val = optionProperties_[index].height +
-              (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-        if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-            val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+    if (columnkind_ == TEXT) {
+        if (dir == ScrollDirection::DOWN) {
+            distance = optionProperties_[index].height;
+        } else {
+            val = optionProperties_[index].height +
+                  (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+            if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
+                val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
+            }
+            distance = - std::round(val);
         }
-        distance = - std::round(val);
+    } else {
+        val = std::round((optionProperties_[index].height + optionProperties_[nextIndex].height) / HALF_NUMBER);
+        distance = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
     }
     return distance;
 }
@@ -1305,39 +1364,17 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
     auto isDown = dir == ScrollDirection::DOWN;
     nextIndex = isDown ? (optionCounts + index + 1) % optionCounts : (optionCounts + index - 1) % optionCounts;
     double distance = 0.0;
-    double val = 0.0;
     switch (static_cast<OptionIndex>(index)) {
         case OptionIndex::COLUMN_INDEX_0:
-            if (dir == ScrollDirection::UP) {
-                distance = 0.0 - optionProperties_[index].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                distance = std::round(val);
-            }
+            distance = GetUpCandidateDistance(index, nextIndex, dir);
             break;
 
         case OptionIndex::COLUMN_INDEX_1:
-            val = optionProperties_[index].height / HALF_NUMBER + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / HALF_NUMBER;
-            val = (dir == ScrollDirection::DOWN) ? val : (0.0 - val);
-            if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-                val = val - (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
-            }
-            distance = std::round(val);
+            distance = GetSelectedDistance(index, nextIndex, dir);
             break;
 
         case OptionIndex::COLUMN_INDEX_2:
-            if (dir == ScrollDirection::DOWN) {
-                distance = optionProperties_[index].height;
-            } else {
-                val = optionProperties_[index].height +
-                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
-                if (GreatNotEqual(optionProperties_[nextIndex].fontheight, optionProperties_[index].height)) {
-                    val = val + (optionProperties_[nextIndex].fontheight - optionProperties_[index].height);
-                }
-                distance = - std::round(val);
-            }
+            distance = GetDownCandidateDistance(index, nextIndex, dir);
             break;
         default:
             break;

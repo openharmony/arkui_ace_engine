@@ -18,7 +18,9 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/system_bar/system_bar_style.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -80,20 +82,67 @@ void JSNavDestination::Create()
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+    if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
         return;
     }
 
-    auto builderFunctionJS = info[0];
-    auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
-        JAVASCRIPT_EXECUTION_SCOPE(context)
-        JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
-    };
-    auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
-    auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
-    ctx->SetNavPathInfo(navPathInfo);
-    NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+    std::string moduleName;
+    std::string pagePath;
+    if (info.Length() == 1) {
+        if (info[0]->IsFunction()) {
+            auto builderFunctionJS = info[0];
+            auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+                JAVASCRIPT_EXECUTION_SCOPE(context)
+                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+            };
+            auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
+            auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
+            ctx->SetNavPathInfo(navPathInfo);
+            NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+            return;
+        } else if (info[0]->IsObject()) {
+            auto infoObj = JSRef<JSObject>::Cast(info[0]);
+            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+                TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+                return;
+            }
+            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+            NavDestinationModel::GetInstance()->Create();
+            NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
+            return;
+        }
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION,
+            "current input info is neither buildFunction or navDestination usefulInfo");
+        return;
+    } else if (info.Length() == 2) {
+        if (!info[0]->IsFunction() || !info[1]->IsObject()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "buider or pageInfo is invalid");
+            return;
+        }
+        auto builderFunctionJS = info[0];
+        auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+            JAVASCRIPT_EXECUTION_SCOPE(context)
+            JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+        };
+        auto ctx = AceType::MakeRefPtr<NG::NavDestinationContext>();
+        auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
+        ctx->SetNavPathInfo(navPathInfo);
+        
+        auto infoObj = JSRef<JSObject>::Cast(info[1]);
+        if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+            !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navDestination current pageInfo is invalid");
+            return;
+        }
+        moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+        pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+        NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+        NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
+    }
+    return;
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)
@@ -446,7 +495,20 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
+    JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+void JSNavDestination::SetSystemBarStyle(const JSCallbackInfo& info)
+{
+    RefPtr<SystemBarStyle> style = nullptr;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);
+        auto env = GetCurrentEnv();
+        if (env) {
+            style = SystemBarStyle::CreateStyleFromJsObj(env, styleObj);
+        }
+    }
+    NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
+}
 } // namespace OHOS::Ace::Framework

@@ -138,6 +138,7 @@ constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 const Color DEFAULT_TEXT_COLOR_VALUE = Color::FromARGB(229, 0, 0, 0);
 bool g_isOnWillChangeCalled = false;
 bool g_isOnDidChangeCalled = false;
+bool g_isOnEditChangeCalled = false;
 RichEditorChangeValue onWillChangeValue;
 RichEditorChangeValue onDidChangeValue;
 auto& onWillRangeBefore = onWillChangeValue.rangeBefore_;
@@ -166,6 +167,7 @@ const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
     .imagePixelMap = std::nullopt,
     .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
 };
+} // namespace
 
 struct TestCursorItem {
     int32_t index;
@@ -188,12 +190,12 @@ struct TestParagraphItem {
     std::vector<TestCursorItem> testCursorItems;
     std::vector<TestParagraphRect> testParagraphRects;
 };
-} // namespace
 
 class RichEditorCommonTestNg : public TestNG {
 public:
     void AddSpan(const std::string& content);
     void AddImageSpan();
+    void AddParagraph(TestParagraphItem testParagraphItem);
     void ClearParagraph();
     void ClearSpan();
     void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);

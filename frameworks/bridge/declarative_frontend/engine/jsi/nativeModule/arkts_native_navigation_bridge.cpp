@@ -402,14 +402,14 @@ ArkUINativeModuleValue NavigationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCal
         typeCppStr = secondArg->ToString(vm)->ToString();
     } else {
         //type system
-        typeCppStr = "1";
+        typeCppStr = "0";
     }
 
     if (thirdArg->IsString()) {
         edgesCppStr = thirdArg->ToString(vm)->ToString();
     } else {
-        //edge bottom and top
-        edgesCppStr = "1|2";
+        //edge top and bottom
+        edgesCppStr = "0|1";
     }
     const char* typeStr = typeCppStr.c_str();
     const char* edgesStr = edgesCppStr.c_str();

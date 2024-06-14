@@ -567,6 +567,7 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto selectOverlayLayoutAlgorithm =
         DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(selectOverlayLayoutAlgorithm, false);
+    defaultMenuStartOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuStartOffset();
     defaultMenuEndOffset_ = selectOverlayLayoutAlgorithm->GetDefaultMenuEndOffset();
     menuWidth_ = selectOverlayLayoutAlgorithm->GetMenuWidth();
     menuHeight_ = selectOverlayLayoutAlgorithm->GetMenuHeight();

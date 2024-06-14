@@ -53,7 +53,7 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    void FlushFrameRate(int32_t rate, bool isAnimatorStopped) override;
+    void FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType) override;
 
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
@@ -114,6 +114,8 @@ public:
     {
         return rsUIDirector_->GetAnimateExpectedRate();
     }
+
+    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

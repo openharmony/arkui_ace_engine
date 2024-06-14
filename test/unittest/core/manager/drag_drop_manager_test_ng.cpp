@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -823,7 +824,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 
     /**
@@ -912,7 +913,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
      * @tc.expected: dragDropManager->currentId_ equals -1.
      */
     dragDropManager->OnTextDragEnd(globalX, globalY, extraInfo);
-    auto dragFrameNode = dragDropManager->FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT, true);
+    auto dragFrameNode = dragDropManager->FindDragFrameNodeByPosition(globalX, globalY);
     EXPECT_EQ(dragDropManager->currentId_, -1);
 }
 
@@ -1051,7 +1052,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest022, TestSize.Level1)
     frameNodeGeoNull->SetGeometryNode(nullptr);
     dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType(10), false);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y);
     EXPECT_FALSE(targetFrameNode);
 }
 
@@ -1478,7 +1479,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest034, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
 
-    Point point;
+    OHOS::Ace::PointerEvent point;
     RefPtr<FrameNode> dragFrameNode = nullptr;
     dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, dragFrameNode);
 
@@ -1579,6 +1580,10 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
      */
     dragDropManager->draggedGridFrameNode_ = gridNode;
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    gridNode->renderContext_ = mockRenderContext;
+    mockRenderContext->rect_ = { 0.0f, 0.0f, 1.0f, 1.0f };
     bool retFlag = gridEvent->CheckPostionInGrid(0, 0);
     EXPECT_TRUE(retFlag);
 }
@@ -1825,5 +1830,38 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest040, TestSize.Level1)
      */
     frameNodeList = dragDropManager->FindHitFrameNodes(Point(1.0f, 1.0f));
     EXPECT_TRUE(frameNodeList.empty());
+}
+
+/**
+ * @tc.name: DragDropManagerTest041
+ * @tc.desc: Test SetDragDampStartPoint and GetDragDampStartPoint
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create a point, than call SetDragDampStartPoint.
+     * @tc.expected: The values of dragDampStartPoint_ and point are equal
+     */
+    Point point(1.0f, 1.0f);
+    dragDropManager->SetDragDampStartPoint(point);
+    EXPECT_EQ(dragDropManager->dragDampStartPoint_, point);
+
+    /**
+     * @tc.steps: step3. create a point, than call GetDragDampStartPoint.
+     * @tc.expected: The return values of dragDampStartPoint_ and point are equal
+     */
+    Point point2(2.0f, 2.0f);
+    dragDropManager->dragDampStartPoint_ = point2;
+    auto returnPoint = dragDropManager->GetDragDampStartPoint();
+    EXPECT_EQ(returnPoint, point2);
 }
 } // namespace OHOS::Ace::NG

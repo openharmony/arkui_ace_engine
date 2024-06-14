@@ -40,6 +40,7 @@ public:
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
     void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;

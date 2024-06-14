@@ -41,6 +41,10 @@ public:
     {
         return loadingPage_;
     }
+    void FlushReload() override
+    {
+        LOGE("not support in old pipeline");
+    }
 
 protected:
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode) override;

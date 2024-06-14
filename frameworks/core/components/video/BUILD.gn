@@ -32,11 +32,6 @@ if (enable_player_framework) {
 
     rosen_sources = [ "rosen_render_texture.cpp" ]
 
-    include_dirs = [
-      "//drivers/peripheral/display/interfaces/include",
-      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
-    ]
-
     if (!build_ohos_sdk) {
       external_deps = [ "player_framework:media_client" ]
     }

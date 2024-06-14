@@ -38,7 +38,7 @@ const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
 constexpr uint32_t SCALE_EFFECT = 2;
 constexpr uint32_t NONE_EFFECT = 0;
-constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.2f;
+constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -654,8 +654,10 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+            float fontScale = std::clamp(
+                pipelineContext->GetFontScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
             txtStyle.fontSize =
-                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
+                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * fontScale);
         }
     } else {
         txtStyle.fontSize = textStyle.GetFontSize().Value();

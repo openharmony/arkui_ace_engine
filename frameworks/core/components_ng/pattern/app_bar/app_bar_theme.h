@@ -278,6 +278,7 @@ private:
             LOGE("Pattern of app bar is null, please check!");
             return;
         }
+        initColorParameters(theme, appBarPattern);
         theme->appBarHeight_ = appBarPattern->GetAttr<Dimension>("app_bar_height", 0.0_vp);
         theme->iconSize_ = appBarPattern->GetAttr<Dimension>("icon_size", 0.0_vp);
         theme->iconCornerRadius_ = appBarPattern->GetAttr<Dimension>("icon_corner_radius", 0.0_vp);

@@ -251,6 +251,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
+        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     if (frameNode) {
         FontRegisterCallback(frameNode, textStyle);
     }

@@ -1,0 +1,70 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ohos_unittest("html_convert_test") {
+  module_out_path = adapter_test_output_path
+  include_dirs = [ "$ace_root/adapter/ohos/capability/html" ]
+  sources = [
+    "$ace_root/adapter/ohos/capability/html/html_to_span.cpp",
+    "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
+    "html_convert_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "libxml2:libxml2",
+    "napi:ace_napi",
+  ]
+}
+
+group("capability_unittest") {
+  testonly = true
+  deps = [ ":html_convert_test" ]
+}

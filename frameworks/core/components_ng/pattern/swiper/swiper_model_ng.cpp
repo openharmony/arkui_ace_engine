@@ -26,6 +26,7 @@
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
@@ -38,15 +39,20 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
-
-RefPtr<SwiperController> SwiperModelNG::Create()
+RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SWIPER_ETS_TAG, nodeId);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    RefPtr<FrameNode> swiperNode = nullptr;
+    if (isCreateArc) {
+        swiperNode = FrameNode::GetOrCreateFrameNode(
+            V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcSwiperPattern>(); });
+    } else {
+        swiperNode = FrameNode::GetOrCreateFrameNode(
+            V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    }
 
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -236,6 +242,11 @@ void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOp
     pattern->SetNestedScroll(option);
 }
 
+void SwiperModelNG::SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, SwipeByGroup, swipeByGroup, frameNode);
+}
+
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
 
 void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
@@ -413,9 +424,8 @@ void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMar
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, ignoreBlank, frameNode);
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNextMarginIgnoreBlank(ignoreBlank);
 }
@@ -424,9 +434,8 @@ void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& pre
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, ignoreBlank, frameNode);
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
 }

@@ -625,9 +625,9 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto itemProps = parentItem->GetLayoutProperty<MenuItemLayoutProperty>();
-        CHECK_NULL_VOID(itemProps);
-        auto expandingMode = itemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(parentPattern);
+        auto expandingMode = parentPattern->GetExpandingMode();
         if (expandingMode == SubMenuExpandingMode::STACK) {
             auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(parentPattern);
@@ -1319,6 +1319,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
         if (menuPattern->IsSelectOverlayRightClickMenu()) {
@@ -1596,6 +1600,7 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
     const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize)
 {
     auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
+    auto direction = menuProp->GetNonAutoLayoutDirection();
     auto targetSize = menuProp->GetTargetSizeValue(SizeF());
     switch (alignType) {
         case MenuAlignType::CENTER: {
@@ -1603,6 +1608,16 @@ void MenuLayoutAlgorithm::ComputeMenuPositionByAlignType(
             break;
         }
         case MenuAlignType::END: {
+            if (direction == TextDirection::RTL) {
+                return;
+            }
+            position_.AddX(targetSize.Width() - menuSize.Width());
+            break;
+        }
+        case MenuAlignType::START: {
+            if (direction != TextDirection::RTL) {
+                return;
+            }
             position_.AddX(targetSize.Width() - menuSize.Width());
             break;
         }
@@ -1920,7 +1935,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
     } else {
-        targetSize_ = geometryNode->GetFrameSize();
+        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
         targetOffset_ = targetNode->GetPaintRectOffset();
     }
     dumpInfo_.targetSize = targetSize_;
@@ -2424,26 +2439,39 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapperNode = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto containerId = Container::CurrentIdSafely();
     if (expandDisplay && !isShowInSubWindow) {
-        hierarchicalParameters_ = false;
+        if (containerId >= MIN_SUBCONTAINER_ID && menuWrapperPattern->IsSelectMenu()) {
+            hierarchicalParameters_ = true;
+        } else {
+            hierarchicalParameters_ = false;
+        }
         return;
     }
 
     hierarchicalParameters_ = expandDisplay;
 
     RefPtr<Container> container = Container::Current();
-    auto containerId = Container::CurrentId();
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
+    CHECK_NULL_VOID(container);
+    auto wrapperPipline = menuWrapperNode->GetContext();
+    auto wrapperRect = wrapperPipline ? wrapperPipline->GetDisplayWindowRectInfo() : Rect();
+    auto mainPipline = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto mainRect = mainPipline ? mainPipline->GetDisplayWindowRectInfo() : Rect();
+    if (wrapperRect.IsValid() && mainRect.IsValid() && wrapperRect != mainRect) {
+        hierarchicalParameters_ = true;
+    }
 
-    if (container && container->IsUIExtensionWindow()) {
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWrapperNode = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapperNode);
-        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+    if (container->IsUIExtensionWindow()) {
+        if (menuWrapperPattern->IsContextMenu()) {
             hierarchicalParameters_ = true;
         }
     }

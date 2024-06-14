@@ -154,9 +154,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     hasExtensionMenu_ = true;
     auto buttonSize = button->GetGeometryNode()->GetMarginFrameSize();
     auto menuSize = menu->GetGeometryNode()->GetMarginFrameSize();
+    bool isReverse = IsReverseLayout(layoutWrapper);
     OffsetF buttonOffset;
     if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
-        buttonOffset = OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+        buttonOffset = isReverse ? menuOffset :
+            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
     } else {
         buttonOffset = menuOffset;
     }
@@ -201,6 +203,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     CHECK_NULL_RETURN(theme, OffsetF());
     OffsetF menuPosition;
     bool isExtension = false;
+    bool isReverse = IsReverseLayout(layoutWrapper);
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
@@ -264,13 +267,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
-    auto frameNode = info_->callerFrameNode.Upgrade();
-    if (frameNode) {
-        auto viewPortOption = frameNode->GetViewPort();
-        if (viewPortOption.has_value()) {
-            viewPort = viewPortOption.value();
-        }
-    }
+    info_->GetCallerNodeAncestorViewPort(viewPort);
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
         auto defaultMenuPositionX = theme->GetDefaultMenuPositionX();
@@ -329,8 +326,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     menuPosition = info_->isNewAvoid && !info_->isSingleHandle ? NewMenuAvoidStrategy(menuWidth, menuHeight) :
         AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
     AdjustMenuInRootRect(menuPosition, menuRect.GetSize(), layoutWrapper->GetGeometryNode()->GetFrameSize());
+
+    defaultMenuStartOffset_ = menuPosition;
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
-    if (isExtension) {
+    // back and more button layout is on the left side of the selectmenu when reverse layout.
+    if (isExtension && !isReverse) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
     }
     return menuPosition;
@@ -475,41 +475,81 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
-    auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
-    auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
-    auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    auto viewPort = pipeline->GetRootRect();
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
                                           : safeAreaManager->GetSafeArea().bottom_.start - menuHeight;
+    auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
+    auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandle.paintRect.Bottom(),
+        (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
+
+    AvoidStrategyMember avoidStrategyMember;
+    avoidStrategyMember.menuHeight = menuHeight;
+    avoidStrategyMember.menuSpacingBetweenText = menuSpacingBetweenText;
+    avoidStrategyMember.bottomLimitOffsetY = bottomLimitOffsetY;
+    avoidStrategyMember.menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
+    avoidStrategyMember.hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
+    avoidStrategyMember.keyboardInsertStart = keyboardInsert.start;
+    avoidStrategyMember.downHandleIsReallyShow = downHandle.isShow && downHandleIsReallyShow;
+    float offsetY = 0.0f;
+    NewMenuAvoidStrategyGetY(avoidStrategyMember, offsetY);
+    return OffsetF(positionX, offsetY);
+}
+
+void SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember,
+                                                            float& offsetY)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
+    auto viewPort = pipeline->GetRootRect();
     // 顶部避让
-    auto offsetY = selectArea.Top() - menuSpacing - menuHeight;
+    auto selectArea = info_->selectArea;
+    offsetY = selectArea.Top() - avoidStrategyMember.menuSpacing - avoidStrategyMember.menuHeight;
     if (!upHandle.isShow || LessOrEqual(offsetY, topArea)) {
         selectArea = selectArea.IntersectRectT(viewPort);
-        auto offsetUponSelectArea = selectArea.Top() - menuSpacingBetweenText - menuHeight;
-        auto offsetBetweenSelectArea = std::clamp(
-            (double)(selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f, (double)topArea, bottomLimitOffsetY);
-        if (downHandle.isShow) {
+        auto offsetUponSelectArea = selectArea.Top() - avoidStrategyMember.menuSpacingBetweenText -
+                                    avoidStrategyMember.menuHeight;
+        auto selectBottom = avoidStrategyMember.hasKeyboard ? std::min((double)selectArea.Bottom(),
+            (double)avoidStrategyMember.keyboardInsertStart) : (double)selectArea.Bottom();
+        auto offsetBetweenSelectArea = std::clamp((double)(selectArea.Top() + selectBottom -
+            avoidStrategyMember.menuHeight) / 2.0f, (double)topArea, avoidStrategyMember.bottomLimitOffsetY);
+        if (avoidStrategyMember.downHandleIsReallyShow) {
             bool isOffsetYInBottom = false;
             // The upper handle is not visible and not in a single row, or offsetY <= topArea
             if ((!upHandle.isShow && !info_->isSingleLine) || (LessOrEqual(offsetY, topArea))) {
-                offsetY = selectArea.Bottom() + menuSpacing;
+                offsetY = selectArea.Bottom() + avoidStrategyMember.menuSpacing;
                 isOffsetYInBottom = true;
             }
-            if (isOffsetYInBottom && (offsetY > bottomLimitOffsetY)) {
+            if (isOffsetYInBottom && GreatNotEqual(offsetY, avoidStrategyMember.bottomLimitOffsetY)) {
                 // 底部避让失败 -> 选区上方 > 选区中间
                 offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
                                                                                           : offsetBetweenSelectArea;
             }
         } else {
-            // 上下手柄均不可见 -> 选区上方 > 选区中间
-            offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
-                                                                                      : offsetBetweenSelectArea;
+            // 上下手柄均不可见  文本单行 选中区上>选中区下>选中区中 其它选中区中
+            if (info_->isSingleLine) {
+                auto offsetYTmp = selectArea.Bottom() + avoidStrategyMember.menuSpacing;
+                offsetY = LessOrEqual(offsetY, topArea) ?
+                    ((GreatNotEqual(offsetYTmp, avoidStrategyMember.bottomLimitOffsetY)) ?
+                        offsetBetweenSelectArea : offsetYTmp) : offsetY;
+            } else {
+                offsetY = offsetBetweenSelectArea;
+            }
         }
     }
-    if (hasKeyboard && GreatNotEqual(offsetY, bottomLimitOffsetY)) {
-        offsetY = bottomLimitOffsetY;
+    if (avoidStrategyMember.hasKeyboard && GreatNotEqual(offsetY, avoidStrategyMember.bottomLimitOffsetY)) {
+        offsetY = avoidStrategyMember.bottomLimitOffsetY;
     }
-    return OffsetF(positionX, offsetY);
+}
+
+bool SelectOverlayLayoutAlgorithm::IsReverseLayout(LayoutWrapper* layoutWrapper) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
 }
 } // namespace OHOS::Ace::NG

@@ -70,6 +70,7 @@ const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
+constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
 
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -419,6 +420,10 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         // not click hide menu for select and bindMenu default option
         return;
     }
+    if (!needHideAfterTouch_) {
+        // not click hide menu if needn't hide after touch
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
@@ -498,8 +503,7 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             CHECK_NULL_VOID(itemPattern);
 
             auto expandingMode = layoutProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-            if (expandingMode != itemProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE)) {
-                itemProperty->UpdateExpandingMode(expandingMode);
+            if (expandingMode != itemPattern->GetExpandingMode() || IsEmbedded()) {
                 auto expandNode = itemPattern->GetHost();
                 CHECK_NULL_VOID(expandNode);
                 expandNode->MarkModifyDone();
@@ -634,6 +638,19 @@ bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
         clickAreaZone.SetTop(hostZone.GetY());
         if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             HideStackMenu();
+            return true;
+        }
+    } else if (expandingMode == SubMenuExpandingMode::STACK) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto hostZone = host->GetPaintRectOffset();
+        auto clickAreaZone = host->GetGeometryNode()->GetFrameRect();
+        clickAreaZone.SetLeft(hostZone.GetX());
+        clickAreaZone.SetTop(hostZone.GetY());
+        if (clickAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            auto wrapperPattern = wrapper->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_RETURN(wrapperPattern, false);
+            wrapperPattern->HideSubMenu();
             return true;
         }
     }
@@ -907,7 +924,11 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     // make menu round rect
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        borderRadius.SetRadius(MENU_DEFAULT_RADIUS);
+    } else {
+        borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    }
     renderContext->UpdateBorderRadius(borderRadius);
 }
 
@@ -1081,6 +1102,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
     });
+    SetEndOffset(menuPosition);
     isFirstShow_ = false;
 }
 
@@ -1383,8 +1405,14 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
     auto radiusBottomRight = borderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
     auto maxRadiusW = std::max(radiusTopLeft + radiusTopRight, radiusBottomLeft + radiusBottomRight);
     auto maxRadiusH = std::max(radiusTopLeft + radiusBottomLeft, radiusTopRight + radiusBottomRight);
-    if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
-        radius = borderRadius;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (LessOrEqual(maxRadiusW, menuSize.Width()) && LessOrEqual(maxRadiusH, menuSize.Height())) {
+            radius = borderRadius;
+        }
+    } else {
+        if (LessNotEqual(maxRadiusW, menuSize.Width())) {
+            radius = borderRadius;
+        }
     }
 
     return radius;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -102,8 +103,8 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
         auto callback = pipeline->GetWindowFocusCallback();
         if (callback) {
             callback();
+            return;
         }
-        return;
     }
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
@@ -142,6 +143,14 @@ bool InputMethodManager::NeedSoftKeyboard() const
 
 void InputMethodManager::CloseKeyboard()
 {
+    CHECK_NULL_VOID(curFocusNode_);
+    auto pipeline = curFocusNode_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = pipeline->GetTextFieldManager();
+    CHECK_NULL_VOID(textFieldManager);
+    if (!textFieldManager->GetImeShow()) {
+        return;
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");

@@ -112,6 +112,11 @@ void SequencedRecognizer::OnBlocked()
 
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "InputTracking id:%{public}d, sequenced recognizer receives %{public}d touch event, type: %{public}d",
+            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+    }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
@@ -122,16 +127,19 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }
+    if (point.type == TouchType::DOWN && !point.childTouchTestList.empty()) {
+        childTouchTestList_ = point.childTouchTestList;
+    }
     touchPoints_[point.id] = point;
-    if (currentIndex_ > 0) {
-        auto prevState = curRecognizer->GetRefereeState();
-        if (prevState == RefereeState::READY) {
-            // the prevState is ready, need to pase down event to the new coming recognizer.
-            for (auto& item : touchPoints_) {
-                item.second.type = TouchType::DOWN;
-                curRecognizer->HandleEvent(item.second);
-                AddGestureProcedure(item.second, curRecognizer);
+    if (currentIndex_ > 0 && curRecognizer->GetRefereeState() == RefereeState::READY) {
+        // the prevState is ready, need to pase down event to the new coming recognizer.
+        for (auto& item : touchPoints_) {
+            item.second.type = TouchType::DOWN;
+            if (!childTouchTestList_.empty()) {
+                item.second.childTouchTestList = childTouchTestList_;
             }
+            curRecognizer->HandleEvent(item.second);
+            AddGestureProcedure(item.second, curRecognizer);
         }
     }
     switch (point.type) {

@@ -609,6 +609,23 @@ class TextSelectionModifier extends ModifierWithKey<ArkSelection> {
   }
 }
 
+class TextSelectableModifier extends ModifierWithKey<TextSelectableMode> {
+  constructor(value: TextSelectableMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTextSelectable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextSelectableMode(node);
+    } else {
+      getUINativeModule().text.setTextSelectableMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
   constructor(value: TextDataDetectorConfig) {
     super(value);
@@ -807,6 +824,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     arkSelection.selectionStart = selectionStart;
     arkSelection.selectionEnd = selectionEnd;
     modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
+    return this;
+  }
+  textSelectable(value: TextSelectableMode): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
   ellipsisMode(value: EllipsisMode): TextAttribute {

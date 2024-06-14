@@ -123,22 +123,62 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     if (filter.IsFastFilter()) {
         return;
     }
-    if (padding_) {
-        json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
-    } else {
-        json->PutExtAttr("padding", "0.00vp", filter);
-    }
 
-    if (margin_) {
-        json->PutExtAttr("margin", margin_->ToJsonString().c_str(), filter);
-    } else {
-        json->PutExtAttr("margin", "0.00vp", filter);
-    }
+    PaddingToJsonValue(json, filter);
+    MarginToJsonValue(json, filter);
 
     json->PutExtAttr("visibility",
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
     json->PutExtAttr("direction", TextDirectionToString(GetLayoutDirection()).c_str(), filter);
     json->PutExtAttr("pixelRound", PixelRoundToJsonValue().c_str(), filter);
+}
+
+void LayoutProperty::PaddingToJsonValue(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (padding_) {
+        if (!padding_->top.has_value() || !padding_->right.has_value()
+            || !padding_->left.has_value() || !padding_->bottom.has_value()) {
+            auto paddingJsonValue = JsonUtil::Create(true);
+            paddingJsonValue->Put("top", padding_->top.has_value()
+                ? padding_->top.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("right", padding_->right.has_value()
+                ? padding_->right.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("bottom", padding_->bottom.has_value()
+                ? padding_->bottom.value().ToString().c_str() : "0.00vp");
+            paddingJsonValue->Put("left", padding_->left.has_value()
+                ? padding_->left.value().ToString().c_str() : "0.00vp");
+            json->PutExtAttr("padding", paddingJsonValue->ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("padding", padding_->ToJsonString().c_str(), filter);
+        }
+    } else {
+        json->PutExtAttr("padding", "0.00vp", filter);
+    }
+}
+
+void LayoutProperty::MarginToJsonValue(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (margin_) {
+        if (!margin_->top.has_value() || !margin_->right.has_value()
+            || !margin_->left.has_value() || !margin_->bottom.has_value()) {
+            auto marginJsonValue = JsonUtil::Create(true);
+            marginJsonValue->Put("top", margin_->top.has_value()
+                ? margin_->top.value().ToString().c_str() : "0.00vp");
+            marginJsonValue->Put("right", margin_->right.has_value()
+                ? margin_->right.value().ToString().c_str() : "0.00vp");
+            marginJsonValue->Put("bottom", margin_->bottom.has_value()
+                ? margin_->bottom.value().ToString().c_str() : "0.00vp");
+            marginJsonValue->Put("left", margin_->left.has_value()
+                ? margin_->left.value().ToString().c_str() : "0.00vp");
+            json->PutExtAttr("margin", marginJsonValue->ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("margin", margin_->ToJsonString().c_str(), filter);
+        }
+    } else {
+        json->PutExtAttr("margin", "0.00vp", filter);
+    }
 }
 
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -1214,11 +1254,12 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     if (!preContentConstraint || !contentConstraint_) {
         return false;
     }
+    bool isNeedPercent = false;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_RETURN(pattern, false);
-    auto isNeedPercent = pattern->IsNeedPercent();
+    if (host) {
+        auto pattern = host->GetPattern();
+        isNeedPercent = pattern ? pattern->IsNeedPercent() : false;
+    }
     const auto& layout = layoutConstraint_.value();
     const auto& content = contentConstraint_.value();
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {

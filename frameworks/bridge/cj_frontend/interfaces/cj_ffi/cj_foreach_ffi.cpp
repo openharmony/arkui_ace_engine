@@ -29,14 +29,14 @@ using namespace OHOS::Ace::Framework;
 
 extern "C" {
 void FfiOHOSAceFrameworkForEachCreateFU(
-    char* viewId, int64_t parentViewID, int64_t dataSize, void (*callbackView)(int64_t), char* (*callbackKey)(int64_t))
+    char* viewId, int64_t parentViewID, int64_t dataSize, ViewCallBack callbackView, IdCallBack callbackKey)
 {
     std::function<void(int64_t)> ffiViewCallback = CJLambda::Create(callbackView);
     std::function<std::string(int64_t)> ffiKeyCallback = [callback = CJLambda::Create(callbackKey)](
                                                              int64_t info) -> std::string {
-        char* ffiStr = callback(info);
-        std::string res = std::string(ffiStr);
-        free(ffiStr);
+        auto ffiStr = callback(info);
+        std::string res = ffiStr.value;
+        ffiStr.free(ffiStr.value);
         return res;
     };
     auto* model = ForEachModel::GetInstance();

@@ -671,7 +671,7 @@ bool TxtParagraph::IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& e
     CHECK_NULL_RETURN(paragrah, false);
     int32_t start = 0;
     int32_t end = 0;
-    if (!GetWordBoundary(index, start, end)) {
+    if (!GetWordBoundary(index, start, end) || index > end) {
         return false;
     }
     std::vector<RectF> selectedRects;
@@ -870,10 +870,7 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     TextLineMetrics lineMetrics;
     OHOS::Rosen::LineMetrics resMetric;
     CHECK_NULL_RETURN(paragraphTxt, lineMetrics);
-    bool success = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
-    if (!success) {
-        TAG_LOGE(AceLogTag::ACE_TEXT, "TxtParagraph::GetLineMetrics failed");
-    }
+    paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
  
     lineMetrics.ascender = resMetric.ascender;
     lineMetrics.descender = resMetric.descender;
@@ -907,6 +904,9 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
 {
     auto textStyleRes = runMetricsRes.textStyle;
     runMetrics.textStyle.SetTextDecoration(static_cast<TextDecoration>(textStyleRes->decoration));
+    Color color;
+    color.SetValue(textStyleRes->color.CastToColorQuad());
+    runMetrics.textStyle.SetTextColor(color);
     runMetrics.textStyle.SetFontWeight(static_cast<FontWeight>(textStyleRes->fontWeight));
     runMetrics.textStyle.SetFontStyle(static_cast<FontStyle>(textStyleRes->fontStyle));
     runMetrics.textStyle.SetTextBaseline(static_cast<TextBaseline>(textStyleRes->baseline));
@@ -917,7 +917,12 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
     runMetrics.textStyle.SetHeightScale(textStyleRes->heightScale);
     runMetrics.textStyle.SetHalfLeading(textStyleRes->halfLeading);
     runMetrics.textStyle.SetHeightOnly(textStyleRes->heightOnly);
-    runMetrics.textStyle.SetEllipsis(textStyleRes->ellipsis);
+    auto& ellipsis = textStyleRes->ellipsis;
+    if (ellipsis == StringUtils::DEFAULT_USTRING || ellipsis.empty()) {
+        runMetrics.textStyle.SetEllipsis(u"");
+    } else {
+        runMetrics.textStyle.SetEllipsis(ellipsis);
+    }
     runMetrics.textStyle.SetEllipsisMode(static_cast<EllipsisMode>(textStyleRes->ellipsisModal));
     runMetrics.textStyle.SetLocale(textStyleRes->locale);
  

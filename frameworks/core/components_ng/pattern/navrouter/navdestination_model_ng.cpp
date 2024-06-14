@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -153,6 +154,12 @@ void NavDestinationModelNG::Create()
         } else {
             CreateBackButton(navDestinationNode);
         }
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+        if (titleBarNode) {
+            auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+            CHECK_NULL_VOID(titleBarLayoutProperty);
+            titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+        }
     }
     // content node
     if (!navDestinationNode->GetContentNode()) {
@@ -192,11 +199,10 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = backButtonNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->MarkModifyDone();
-
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
 }
 
 void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNode>& titleBarNode)
@@ -213,11 +219,11 @@ void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNod
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->AddChild(backButtonImageNode);
     backButtonImageNode->MarkModifyDone();
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     backButtonNode->MarkModifyDone();
 }
 
@@ -231,14 +237,10 @@ void CreateSymbolBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNo
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    symbolProperty->UpdateFontSize(theme->GetIconWidth());
     symbolNode->MountToParent(backButtonNode);
     auto iconColor = theme->GetIconColor();
     symbolProperty->UpdateSymbolColorList({ iconColor });
     symbolNode->MarkDirtyNode();
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     backButtonNode->MarkModifyDone();
 }
 
@@ -333,6 +335,12 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             CreateImageButton(navDestinationNode);
         } else {
             CreateBackButton(navDestinationNode);
+        }
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+        if (titleBarNode) {
+            auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+            CHECK_NULL_VOID(titleBarLayoutProperty);
+            titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
         }
     }
     // content node
@@ -660,5 +668,23 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const 
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
     navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+}
+
+void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetNavDestinationPathInfo(moduleName, pagePath);
+}
+
+void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSystemBarStyle(style);
 }
 } // namespace OHOS::Ace::NG

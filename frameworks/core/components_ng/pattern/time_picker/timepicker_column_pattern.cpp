@@ -22,6 +22,8 @@
 
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -81,7 +83,7 @@ void TimePickerColumnPattern::OnModifyDone()
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
@@ -329,6 +331,42 @@ bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void TimePickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = timePickerRowPattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = timePickerRowPattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = timePickerRowPattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        timePickerLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        timePickerLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        timePickerLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
 {
     auto host = GetHost();
@@ -355,6 +393,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     auto child = host->GetChildren();
     auto iter = child.begin();
+    InitTextFontFamily();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -463,7 +502,7 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(uint32_t index, uint32_t showO
     if (showOptionCount != CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -490,7 +529,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     if (showOptionCount == CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -878,7 +917,7 @@ void TimePickerColumnPattern::CalcAlgorithmOffset(TimePickerScrollDirection dir,
 
 float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -946,7 +985,7 @@ float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScroll
 
 float TimePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -1044,7 +1083,7 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
     if (childSize != CHILDREN_SIZE) {

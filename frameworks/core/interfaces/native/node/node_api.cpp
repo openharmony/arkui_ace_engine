@@ -56,6 +56,7 @@
 #include "core/interfaces/native/node/select_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -315,6 +316,7 @@ const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
     NodeModifier::SetRefreshOnOffsetChange,
+    NodeModifier::SetRefreshChangeEvent,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -374,6 +376,10 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListDidScroll,
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
+};
+
+const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetListItemOnSelect,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -581,6 +587,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_LIST_ITEM: {
+            // list item event type.
+            if (subKind >= sizeof(LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_WATER_FLOW: {

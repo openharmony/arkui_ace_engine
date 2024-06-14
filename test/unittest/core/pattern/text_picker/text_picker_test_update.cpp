@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <optional>
-#include <securec.h>
 
 #include "gtest/gtest.h"
 
@@ -790,6 +789,602 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles014, TestSi
     auto testval3 = layoutProperty->GetButtonRoleValue();
     EXPECT_EQ(testval3, ButtonRole::NORMAL);
 }
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles015
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles015, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles016
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles016, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles017
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles017, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles018
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles018, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(100);
+    info2.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles019
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles019, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(1);
+    info2.fontSize = Dimension(100);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(100));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles020
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles020, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(0);
+    info2.fontSize = Dimension(1);
+    info3.fontSize = Dimension(100);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval2 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(1));
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(100));
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles021
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles021, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::BLACK);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles022
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles022, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    info1.fontColor = Color::GREEN;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GREEN);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles023
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles023, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::GRAY;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GRAY);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles024
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles024, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::GRAY;
+    info2.fontSize = Dimension(0);
+    info2.fontColor = Color::FOREGROUND;
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GRAY);
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(0));
+    auto testval4 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval4, Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles025
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles025, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::GRAY;
+    info2.fontSize = Dimension(0);
+    info2.fontColor = Color::FOREGROUND;
+    buttonInfos.push_back(info1);
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GRAY);
+
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval3 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(100));
+    auto testval4 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval4, Color::GRAY);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles026
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles026, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(1);
+    info1.fontColor = Color::GRAY;
+    info2.fontSize = Dimension(0);
+    info2.fontColor = Color::FOREGROUND;
+    info3.fontSize = Dimension(100);
+    info3.fontColor = Color::GREEN;
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+    auto testval2 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GRAY);
+    sizet++;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+
+    sizet--;
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval5 = layoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval5, Dimension(1));
+    auto testval6 = layoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval6, Color::GRAY);
+}
+
+// /**
+//  * @tc.name: TextPickerDialogViewUpdateButtonStyleAndRole002
+//  * @tc.desc: Test UpdateButtonStyleAndRole.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyleAndRole002, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.type = std::make_optional<ButtonType>(ButtonType::TEXT);
+    info1.buttonStyle = ButtonStyleMode::NORMAL;
+    info1.role = ButtonRole::ERROR;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    TextPickerDialogView::UpdateButtonStyleAndRole(buttonInfos, sizet, layoutProperty, renderContext, buttonTheme);
+
+    auto testval = layoutProperty->GetButtonRoleValue();
+    EXPECT_EQ(testval, ButtonRole::ERROR);
+}
+
 // /**
 //  * @tc.name: TextPickerDialogViewUpdateButtonStyleAndRole001
 //  * @tc.desc: Test UpdateButtonStyleAndRole.
@@ -845,7 +1440,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0013, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(10.0);
     settingData.selected = 0;
@@ -876,7 +1470,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0014, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(10.0);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };

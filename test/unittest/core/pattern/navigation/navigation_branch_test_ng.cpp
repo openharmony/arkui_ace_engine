@@ -263,8 +263,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg002, TestSize.Level1)
     ASSERT_NE(json, nullptr);
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
-    ASSERT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
-    navigationGroupNode.ToJsonValue(json, filter);
+    auto narbar = AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode());
+    ASSERT_NE(narbar, nullptr);
 }
 
 /**
@@ -348,5 +348,347 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
     EXPECT_NE(navBarLayoutProperty, nullptr);
     navigationModel.SetHideTitleBar(false);
     EXPECT_EQ(navBarLayoutProperty->GetHideTitleBar().value_or(false), false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest006
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest006, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = nullptr;
+    pattern->FireNavigationInner(frameNode, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTest007
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest007, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", nullptr));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    pattern->FireNavigationInner(frameNode, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTest008
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest008, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is not nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    // set curDestination->IsActive() is false
+    curDestination->isActive_ = false;
+    // set navDestinationPattern->GetIsOnShow() is false
+    auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(false);
+    pattern->FireNavigationInner(frameNode, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTest009
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest009, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is not nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    // set curDestination->IsActive() is true
+    curDestination->isActive_ = true;
+    // set navDestinationPattern->GetIsOnShow() is true
+    auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(true);
+    pattern->FireNavigationInner(frameNode, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTest010
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest010, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = nullptr;
+    pattern->FireNavigationInner(frameNode, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest011
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest011, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", nullptr));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    pattern->FireNavigationInner(frameNode, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest012
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest012, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is not nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    // set curDestination->IsActive() is false
+    curDestination->isActive_ = false;
+    // set navDestinationPattern->GetIsOnShow() is false
+    auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(false);
+    pattern->FireNavigationInner(frameNode, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest013
+ * @tc.desc: Test FireNavigationInner function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest013, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    // set curDestination is not nullptr
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set curDestination->GetLayoutProperty() is not nullptr
+    auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    curDestination->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    // set curDestination->IsActive() is true
+    curDestination->isActive_ = true;
+    // set navDestinationPattern->GetIsOnShow() is true
+    auto navDestinationPattern = curDestination->GetPattern<NavDestinationPattern>();
+    navDestinationPattern->SetIsOnShow(true);
+    pattern->FireNavigationInner(frameNode, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest014
+ * @tc.desc: Test FireNavigationChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest014, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->OnModifyDone();
+    // test FireNavigationChange function if isFirst is true
+    pattern->FireNavigationChange(frameNode, true, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTest015
+ * @tc.desc: Test FireNavigationChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest015, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->OnModifyDone();
+    // test FireNavigationChange function if isFirst is false
+    pattern->FireNavigationChange(frameNode, true, false);
 }
 } // namespace OHOS::Ace::NG

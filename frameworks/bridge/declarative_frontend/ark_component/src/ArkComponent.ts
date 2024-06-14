@@ -183,10 +183,10 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
     this.stageValue = value;
   }
 
-  applyStage(node: KNode): boolean {
+  applyStage(node: KNode, component?: ArkComponent): boolean {
     if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
-      this.applyPeer(node, true);
+      this.applyPeer(node, true, component);
       return true;
     }
     const stageTypeInfo: string = typeof this.stageValue;
@@ -201,12 +201,12 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
     }
     if (different) {
       this.value = this.stageValue;
-      this.applyPeer(node, false);
+      this.applyPeer(node, false, component);
     }
     return false;
   }
 
-  applyPeer(node: KNode, reset: boolean): void { }
+  applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void { }
 
   checkObjectDiff(): boolean {
     return true;
@@ -294,6 +294,24 @@ class HeightModifier extends ModifierWithKey<Length> {
       getUINativeModule().common.resetHeight(node);
     } else {
       getUINativeModule().common.setHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ChainModeifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('chainMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetChainMode(node);
+    } else {
+      getUINativeModule().common.setChainMode(node, this.value.direction, this.value.style);
     }
   }
 
@@ -2813,6 +2831,35 @@ class SystemBarEffectModifier extends ModifierWithKey<null> {
     getUINativeModule().common.setSystemBarEffect(node, true);
   }
 }
+class PixelRoundModifier extends ModifierWithKey<PixelRoundPolicy> {
+  constructor(value: PixelRoundPolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pixelRound');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetPixelRound(node);
+    } else {
+      let start: PixelRoundCalcPolicy;
+      let top: PixelRoundCalcPolicy;
+      let end: PixelRoundCalcPolicy;
+      let bottom: PixelRoundCalcPolicy;
+      if (isObject(this.value)) {
+        start = (this.value as PixelRoundCalcPolicy)?.start;
+        top = (this.value as PixelRoundCalcPolicy)?.top;
+        end = (this.value as PixelRoundCalcPolicy)?.end;
+        bottom = (this.value as PixelRoundCalcPolicy)?.bottom;
+      }
+      getUINativeModule().common.setPixelRound(node, start, top, end, bottom);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.start === this.value.start &&
+      this.stageValue.end === this.value.end &&
+      this.stageValue.top === this.value.top &&
+      this.stageValue.bottom === this.value.bottom);
+  }
+}
 
 class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
   constructor(value: ArkFocusScopeId) {
@@ -2875,6 +2922,11 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   }
 }
 
+declare class __JSScopeUtil__ {
+  static syncInstanceId(instanceId: number): void;
+  static restoreInstanceId(): void;
+}
+
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -2883,19 +2935,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
   _gestureEvent: UIGestureEvent;
+  _instanceId: number;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._instanceId = -1;
     if (classType === ModifierType.FRAME_NODE) {
       this._modifiersWithKeys = new ObservedMap();
       (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
         if (this.nativePtr === undefined) {
           return;
         }
-        value.applyStage(this.nativePtr);
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.syncInstanceId(this._instanceId);
+        }
+        value.applyStage(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.restoreInstanceId();
+        }
       })
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
@@ -2910,6 +2970,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   setNodePtr(nodePtr: KNode) {
     this.nativePtr = nodePtr;
+  }
+
+  setInstanceId(instanceId: number): void {
+    this._instanceId = instanceId;
   }
 
   getOrCreateGestureEvent() {
@@ -2941,7 +3005,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -3921,6 +3985,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  chainMode(direction: Axis, style: ChainStyle): this {
+    let arkChainMode = new ArkChainMode();
+    arkChainMode.direction = direction;
+    arkChainMode.style = style;
+    modifierWithKey(this._modifiersWithKeys, ChainModeifier.identity, ChainModeifier, arkChainMode);
+    return this;
+  }
+  
   key(value: string): this {
     if (typeof value === 'string') {
       modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
@@ -4112,6 +4184,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     modifierWithKey(
       this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
     return this;
+  }
+  pixelRound(value:PixelRoundPolicy):this {
+    modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
   }
 }
 

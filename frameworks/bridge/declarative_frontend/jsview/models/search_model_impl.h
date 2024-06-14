@@ -54,7 +54,7 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
@@ -73,6 +73,7 @@ public:
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetEnablePreviewText(bool enablePreviewText) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

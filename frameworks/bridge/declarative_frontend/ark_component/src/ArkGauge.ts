@@ -53,8 +53,8 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
-  contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
-    this.setContentModifier(value);
+  contentModifier(value: ContentModifier<GaugeConfiguration>): this {
+    modifierWithKey(this._modifiersWithKeys, GaugeContentModifier.identity, GaugeContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<GaugeConfiguration>): this {
@@ -97,6 +97,17 @@ class GaugeIndicatorModifier extends ModifierWithKey<GaugeIndicatorOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.icon, this.value.icon) ||
       !isBaseOrResourceEqual(this.stageValue.space, this.value.space);
+  }
+}
+
+class GaugeContentModifier extends ModifierWithKey<ContentModifier<GaugeConfiguration>> {
+  constructor(value: ContentModifier<GaugeConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gaugeContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let gaugeComponent = component as ArkGaugeComponent;
+    gaugeComponent.setContentModifier(this.value);
   }
 }
 

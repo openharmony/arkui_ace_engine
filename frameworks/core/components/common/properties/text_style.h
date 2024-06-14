@@ -67,6 +67,16 @@ inline std::string ToString(const FontStyle& fontStyle)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToStringNDK(const FontStyle& fontStyle)
+{
+    static const LinearEnumMapNode<FontStyle, std::string> table[] = {
+        { FontStyle::NORMAL, "normal" },
+        { FontStyle::ITALIC, "italic" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), fontStyle);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace StringUtils
 
 enum class TextBaseline {
@@ -306,6 +316,26 @@ public:
     void SetFontSize(const Dimension& fontSize)
     {
         fontSize_ = fontSize;
+    }
+
+    void SetMaxFontScale(float maxFontScale)
+    {
+        maxFontScale_ = maxFontScale;
+    }
+
+    void SetMinFontScale(float minFontScale)
+    {
+        minFontScale_ = minFontScale;
+    }
+
+    float GetMaxFontScale() const
+    {
+        return maxFontScale_;
+    }
+
+    float GetMinFontScale() const
+    {
+        return minFontScale_;
     }
 
     FontWeight GetFontWeight() const
@@ -751,7 +781,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::list<std::pair<std::string, int32_t>> fontFeatures_ { { "\"pnum\"", 1 } };
+    std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
@@ -787,6 +817,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    float minFontScale_ = 0.85f;
+    float maxFontScale_ = 3.20f;
 
     // for Symbol
     std::vector<Color> renderColors_;

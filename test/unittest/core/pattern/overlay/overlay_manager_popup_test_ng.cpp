@@ -174,4 +174,1527 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest002, TestSize.Level1)
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
 }
+
+/**
+ * @tc.name: PopupTest003
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].markNeedUpdate = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest004
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest005
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest006
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest007
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].markNeedUpdate = true;
+    popups[0].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest008
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].markNeedUpdate = true;
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest009
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].markNeedUpdate = true;
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest010
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].isCurrentOnShow = true;
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest011
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    popups[0].isCurrentOnShow = true;
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_TRUE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->SetDismissPopupId(targetId1);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->HasOnWillDismiss());
+    EXPECT_FALSE(overlayManager->PopupCallBackOnWillDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->SetDismissPopupId(targetId2);
+    overlayManager->DismissPopup();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest012
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].markNeedUpdate = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest013
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest014
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest015
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest016
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].markNeedUpdate = true;
+    popups[0].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].isCurrentOnShow = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest017
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].markNeedUpdate = true;
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest018
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].markNeedUpdate = true;
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest019
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].isCurrentOnShow = true;
+    popups[0].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    popups[1].isBlockEvent = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest020
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].isCurrentOnShow = true;
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].isCurrentOnShow = true;
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest021
+ * @tc.desc: Test Test OverlayManager hasOnWillDismiss
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    std::vector<RefPtr<FrameNode>> targetNodes;
+    std::vector<PopupInfo> popups;
+    CreatePopupNodes(targetNodes, popups, POPUP_NODE_2);
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: Push popup successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto targetId1 = targetNodes[0]->GetId();
+    auto targetId2 = targetNodes[1]->GetId();
+    rootNode->isLayoutComplete_ = true;
+
+    popups[0].markNeedUpdate = true;
+    popups[0].isCurrentOnShow = true;
+    popups[0].focusable = true;
+    overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_TRUE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_FALSE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId1);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
+
+    popups[1].markNeedUpdate = true;
+    popups[1].isCurrentOnShow = true;
+    popups[1].focusable = true;
+    overlayManager->ShowPopup(targetId2, popups[1], nullptr, false);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+    rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    EXPECT_FALSE(overlay->GetPattern<BubblePattern>()->GetInteractiveDismiss());
+    EXPECT_TRUE(overlayManager->PopupInteractiveDismiss(overlay));
+    EXPECT_EQ(overlayManager->GetPopupIdByNode(overlay), targetId2);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
+}
+
+/**
+ * @tc.name: PopupTest022
+ * @tc.desc: Test ShowPopupAnimation when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimation(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::ENTERING);
+    EXPECT_EQ(layoutProp->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: PopupTest023
+ * @tc.desc: Test ShowPopupAnimationNG when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimationNG.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimationNG(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::ENTERING);
+    EXPECT_EQ(layoutProp->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: PopupTest024
+ * @tc.desc: Test ShowPopupAnimation when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimation(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest025
+ * @tc.desc: Test ShowPopupAnimationNG when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimationNG.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimationNG(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest026
+ * @tc.desc: Test HidePopupAnimation when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HidePopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->HidePopupAnimation(popupNode, nullptr);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest027
+ * @tc.desc: Test HidePopupAnimation when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HidePopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->HidePopupAnimation(popupNode, nullptr);
+    EXPECT_FALSE(popupNode->GetRenderContext()->HasDisappearTransition());
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest028
+ * @tc.desc: Test ShowPopupAnimation when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimation(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::ENTERING);
+    EXPECT_EQ(layoutProp->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: PopupTest029
+ * @tc.desc: Test ShowPopupAnimationNG when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimationNG.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimationNG(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::ENTERING);
+    EXPECT_EQ(layoutProp->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: PopupTest030
+ * @tc.desc: Test ShowPopupAnimation when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimation(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest031
+ * @tc.desc: Test ShowPopupAnimationNG when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopupAnimationNG.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->ShowPopupAnimationNG(popupNode);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest033
+ * @tc.desc: Test HidePopupAnimation when hastransition is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HidePopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(true);
+    EXPECT_TRUE(popupPattern->GetHasTransition());
+    overlayManager->HidePopupAnimation(popupNode, nullptr);
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
+
+/**
+ * @tc.name: PopupTest034
+ * @tc.desc: Test HidePopupAnimation when hastransition is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HidePopupAnimation.
+     * @tc.expected: transitionStatus_ and visibility of layoutProperty is updated successfully
+     */
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(false);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    rootNode->isLayoutComplete_ = true;
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    popupPattern->SetHasTransition(false);
+    EXPECT_FALSE(popupPattern->GetHasTransition());
+    overlayManager->HidePopupAnimation(popupNode, nullptr);
+    EXPECT_FALSE(popupNode->GetRenderContext()->HasDisappearTransition());
+    EXPECT_EQ(popupPattern->transitionStatus_, TransitionStatus::INVISIABLE);
+}
 } // namespace OHOS::Ace::NG

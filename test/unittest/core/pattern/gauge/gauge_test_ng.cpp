@@ -115,10 +115,10 @@ public:
 void GaugeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
 }
 
@@ -1183,7 +1183,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     layoutWrapper->AppendChild(textLayoutWrapper);
 
     auto descriptionNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, pattern_->GetDescriptionNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        V2::TEXT_ETS_TAG, pattern_->GetDescriptionNodeId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     frameNode_->AddChild(descriptionNode);
     auto descriptionWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(descriptionNode, geometryNode, layoutProperty_);
     layoutWrapper->AppendChild(descriptionWrapper);

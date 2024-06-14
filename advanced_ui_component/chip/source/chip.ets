@@ -47,7 +47,7 @@ export interface SuffixIconOptions extends IconCommonOptions {
 
 export interface PrefixIconOptions extends IconCommonOptions {}
 
-export interface SymbolOptions {
+export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
 }
@@ -89,6 +89,7 @@ interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
   fontSize: Length;
+  defaultEffect: number;
 }
 
 interface LabelTheme {
@@ -163,16 +164,16 @@ export const defaultTheme: ChipTheme = {
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
     localizedNormalMargin: {
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4)
+      start: LengthMetrics.vp(6),
+      end: LengthMetrics.vp(6),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0)
     },
     localizedSmallMargin: {
       start: LengthMetrics.vp(4),
       end: LengthMetrics.vp(4),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0),
     }
   },
   suffixIcon: {
@@ -186,6 +187,7 @@ export const defaultTheme: ChipTheme = {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
     fontSize: 16,
+    defaultEffect: -1,
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -229,10 +231,10 @@ const noop = () => {
 
 interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: SuffixIconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
   enabled?: boolean;
   activated?: boolean;
@@ -273,10 +275,10 @@ export struct ChipComponent {
   @Prop allowClose: boolean = true
   @Prop chipDirection: Direction = Direction.Auto
   @Prop prefixIcon: PrefixIconOptions = { src: "" }
-  @Prop prefixSymbol: SymbolOptions
+  @Prop prefixSymbol: ChipSymbolGlyphOptions
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: SymbolOptions
+  @Prop suffixSymbol: ChipSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
@@ -310,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -495,12 +498,12 @@ export struct ChipComponent {
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
+    let localizedLabelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && this.label.localizedLabelMargin) {
+      return localizedLabelMargin
+    }
     if (this.label && this.label.labelMargin) {
       return this.getLabelMargin()
-    }
-    if (this.label && this.label.localizedLabelMargin) {
-      return this.getLocalizedLabelMargin()
     }
     return localizedLabelMargin
   }
@@ -612,9 +615,6 @@ export struct ChipComponent {
       currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
 
-    if (!this.isShowPressedBackGroundColor) {
-      return currentColor
-    }
     let sourceColor: ColorMetrics;
 
     try {
@@ -626,6 +626,12 @@ export struct ChipComponent {
       } else {
         sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
       }
+      if (!this.isShowPressedBackGroundColor) {
+        return Color.Transparent
+      }
+    }
+    if (!this.isShowPressedBackGroundColor) {
+      return sourceColor.color
     }
 
     return sourceColor
@@ -746,9 +752,11 @@ export struct ChipComponent {
       this.chipOpacity = 0
       this.chipBlendColor = Color.Transparent
     })
-    animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-      this.deleteChip = true
-    } },
+    animateTo({
+      duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
+        this.deleteChip = true
+      }
+    },
       () => {
         this.chipScale = { x: 0.85, y: 0.85 }
       })
@@ -904,6 +912,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getPrefixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
             })
@@ -945,6 +956,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getSuffixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width
             })
@@ -1003,6 +1017,7 @@ export struct ChipComponent {
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
     }
+    .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)
     .type(ButtonType.Normal)
     .clip(false)

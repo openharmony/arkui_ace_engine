@@ -111,7 +111,16 @@ RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionA
 
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    if (!wantWrap) {
+        UIEXT_LOGW("wantWrap is nullptr");
+        return;
+    }
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    if (!wantWrapOhos) {
+        UIEXT_LOGW("DynamicCast failed, wantWrapOhos is nullptr");
+        return;
+    }
+    auto want = wantWrapOhos->GetWant();
     UpdateWant(want);
 }
 
@@ -158,7 +167,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
         isKeyAsync_, shouldCallSystem);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, shouldCallSystem);
+    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
 }
 
@@ -255,6 +264,11 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void UIExtensionPattern::OnAreaChangedInner()
+{
+    DispatchDisplayArea();
+}
+
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
@@ -329,19 +343,6 @@ void UIExtensionPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
-        const RectF& oldRect,
-        const OffsetF& oldOrigin,
-        const RectF& rect,
-        const OffsetF& origin) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->DispatchDisplayArea();
-    };
-    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {

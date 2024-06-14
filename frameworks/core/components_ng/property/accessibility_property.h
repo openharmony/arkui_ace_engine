@@ -127,6 +127,12 @@ public:
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
+        json->PutExtAttr("accessibilityLevel", GetAccessibilityLevel().c_str(), filter);
+        json->PutExtAttr("accessibilityGroup", IsAccessibilityGroup(), filter);
+        json->PutExtAttr("accessibilityVirtualNode", HasAccessibilityVirtualNode(), filter);
+        json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
+        json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
+        json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
@@ -486,7 +492,10 @@ public:
         return accessibilityVirtualNode_ != nullptr;
     }
 
-    std::string GetAccessibilityText() const;
+    virtual std::string GetAccessibilityText() const
+    {
+        return accessibilityText_.value_or("");
+    }
 
     std::string GetAccessibilityDescription() const
     {

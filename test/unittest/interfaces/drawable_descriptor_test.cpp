@@ -19,6 +19,8 @@
 #define protected public
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "interfaces/inner_api/drawable_descriptor/image_converter.h"
+#include "node_extened.h"
+#include "native_drawable_descriptor.h"
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -48,6 +50,9 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest001, TestSize.Level1)
     Napi::DrawableDescriptor drawableDescriptor;
     auto res = drawableDescriptor.GetPixelMap();
     EXPECT_EQ(res, nullptr);
+    ArkUI_DrawableDescriptor *drawDes = OH_ArkUI_CreateFromNapiDrawable(&drawableDescriptor);
+    EXPECT_EQ(drawDes->size, 0);
+    delete drawDes;
 }
 
 /**
@@ -526,5 +531,30 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0016, TestSize.Level1)
      * @tc.steps: step3. check duration should be the value set.
      */
     EXPECT_EQ(animatedDrawable->GetIterations(), 1);
+}
+
+/**
+ * @tc.name: DrawableDescTest0017
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawable
+     */
+    auto drawable = Napi::LayeredDrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set param to layeredDrawable
+     */
+    std::shared_ptr<Media::PixelMap> layeredPixelMap;
+    std::shared_ptr<Media::PixelMap> badgedPixelMap;
+    std::shared_ptr<Media::PixelMap> compositePixelMap;
+    bool ret = drawable.GetCompositePixelMapWithBadge(layeredPixelMap, badgedPixelMap, compositePixelMap);
+    /**
+     * @tc.steps: step3. check layeredDrawable result
+     */
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace

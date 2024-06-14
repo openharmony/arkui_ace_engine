@@ -35,18 +35,16 @@ void GridTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).WillRepeatedly(Return());
-
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
-
-    auto gridItemTheme = AceType::MakeRefPtr<GridItemTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
+    auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
-
     RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;

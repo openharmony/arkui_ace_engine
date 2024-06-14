@@ -443,7 +443,8 @@ size_t OffscreenCanvasPattern::GetBitmapSize()
 void OffscreenCanvasPattern::Reset()
 {
     offscreenPaintMethod_->Reset();
-    currentSetTextDirection_ = TextDirection::INHERIT;
+    offscreenPaintMethod_->SetTextDirection(
+        AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 void OffscreenCanvasPattern::UpdateTextDefaultDirection()

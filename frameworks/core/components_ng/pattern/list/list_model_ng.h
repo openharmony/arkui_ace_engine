@@ -98,6 +98,7 @@ public:
     static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
+    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
@@ -128,7 +129,7 @@ public:
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
-
+    static int32_t GetInitialIndex(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
 };

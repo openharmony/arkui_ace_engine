@@ -36,7 +36,7 @@ template("js_pa_engine") {
     deps += [ "$ace_root/build:libace_compatible" ]
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
-      external_deps = [ "napi:ace_container_scope" ]
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
     }
   }
 }

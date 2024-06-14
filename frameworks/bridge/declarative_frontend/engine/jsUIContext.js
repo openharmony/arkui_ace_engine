@@ -460,6 +460,20 @@ class UIContext {
         return node;
     }
 
+    getPageInfoByUniqueId(uniqueId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const pageInfo = getUINativeModule().getPageInfoByUniqueId(uniqueId);
+        __JSScopeUtil__.restoreInstanceId();
+        return pageInfo;
+    }
+
+    getNavigationInfoByUniqueId(uniqueId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const navigationInfo = getUINativeModule().getNavigationInfoByUniqueId(uniqueId);
+        __JSScopeUtil__.restoreInstanceId();
+        return navigationInfo;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);
@@ -497,7 +511,7 @@ class UIContext {
         return windowName
     }
 
-    clearResourceManagerCache() {
+    clearResourceCache() {
         getUINativeModule().resource.clearCache();
     }
 
@@ -511,6 +525,58 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().common.postFrameCallback(frameCallback, delayMillis);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    requireDynamicSyncScene(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dynamicSceneInfo = getUINativeModule().requireDynamicSyncScene(id);
+        if (!dynamicSceneInfo) {
+            __JSScopeUtil__.restoreInstanceId();
+            return [];
+        }
+        if (dynamicSceneInfo.tag == 'Swiper') {
+            __JSScopeUtil__.restoreInstanceId();
+            let nodeRef = dynamicSceneInfo.nativeRef;
+            return SwiperDynamicSyncScene.Create(nodeRef);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return [];
+    }
+}
+
+class DynamicSyncScene {
+    /**
+     * Construct new instance of DynamicSyncScene.
+     * initialize with instanceId.
+     * @param nodeRef obtained on the c++ side.
+     * @param frameRateRange frameRateRange
+     * @since 12
+     */
+    constructor(nodeRef, frameRateRange) {
+        this.frameRateRange = frameRateRange;
+        this.nodeRef = nodeRef;
+        this.nodePtr = this.nodeRef.getNativeHandle();
+    }
+
+    getFrameRateRange() {
+        return this.frameRateRange;
+    }
+}
+
+class SwiperDynamicSyncScene extends DynamicSyncScene {
+    static Create(nodeRef) {
+        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
+        return swiperDynamicSyncScene;
+    }
+
+    constructor(nodeRef, type) {
+        super(nodeRef, { min: 0, max: 120, expected: 120 });
+        this.type = type;
+    }
+
+    setFrameRateRange(frameRateRange) {
+        this.frameRateRange = frameRateRange;
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
     }
 }
 

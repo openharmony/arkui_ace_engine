@@ -335,6 +335,33 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         TimePickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
+void TimePickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->HasUserDefinedDisappearFontFamily(isUserDefined);
+}
+
+void TimePickerModelNG::HasUserDefinedNormalFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->HasUserDefinedNormalFontFamily(isUserDefined);
+}
+
+void TimePickerModelNG::HasUserDefinedSelectedFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->HasUserDefinedSelectedFontFamily(isUserDefined);
+}
+
 void TimePickerModelNG::SetBackgroundColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -579,7 +606,10 @@ void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType&
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -598,7 +628,10 @@ PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -617,7 +650,10 @@ PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(

@@ -16,7 +16,7 @@
 #include "test/mock/core/common/mock_image_analyzer_adapter.h"
 
 namespace OHOS::Ace {
-void ImageAnalyzerAdapter::SetImageAnalyzerConfig(void* config) {};
+void ImageAnalyzerAdapter::SetImageAnalyzerConfig(void* config, bool isOptions) {};
 void* ImageAnalyzerAdapter::GetImageAnalyzerConfig()
 {
     return nullptr;
@@ -25,6 +25,12 @@ void* ImageAnalyzerAdapter::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
 {
     return nullptr;
 }
+
+bool ImageAnalyzerAdapter::HasImageAnalyzerConfig()
+{
+    return false;
+}
+
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()
 {
     return nullptr;

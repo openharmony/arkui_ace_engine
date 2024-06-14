@@ -118,6 +118,13 @@ var LineBreakStrategy;
   LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
 })(LineBreakStrategy || (LineBreakStrategy = {}));
 
+var TextSelectableMode;
+(function (TextSelectableMode) {
+  TextSelectableMode[TextSelectableMode["SELECTABLE_UNFOCUSABLE"] = 0] = "selectable-unfocusable";
+  TextSelectableMode[TextSelectableMode["SELECTABLE_FOCUSABLE"] = 1] = "selectable-focusable";
+  TextSelectableMode[TextSelectableMode["UNSELECTABLE"] = 2] = "unselectable";
+})(TextSelectableMode || (TextSelectableMode = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
@@ -769,12 +776,12 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
-var AnimateMode;
-(function (AnimateMode) {
-  AnimateMode["CONTENT_FIRST"] = "CONTENT_FIRST";
-  AnimateMode["ACTION_FIRST"] = "ACTION_FIRST";
-  AnimateMode["NO_ANIMATION"] = "NO_ANIMATION";
-})(AnimateMode || (AnimateMode = {}));
+var AnimationMode;
+(function (AnimationMode) {
+  AnimationMode[AnimationMode["CONTENT_FIRST"] = 0] = "CONTENT_FIRST";
+  AnimationMode[AnimationMode["ACTION_FIRST"] = 1] = "ACTION_FIRST";
+  AnimationMode[AnimationMode["NO_ANIMATION"] = 2] = "NO_ANIMATION";
+})(AnimationMode || (AnimationMode = {}));
 
 var SelectedMode;
 (function (SelectedMode) {
@@ -1565,6 +1572,12 @@ var SheetMode;
   SheetMode[SheetMode["EMBEDDED"] = 1] = "EMBEDDED";
 })(SheetMode || (SheetMode = {}));
 
+var ScrollSizeMode ;
+(function (ScrollSizeMode ) {
+  ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
+  ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
+})(ScrollSizeMode || (ScrollSizeMode = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -1805,6 +1818,10 @@ class DotIndicator extends Indicator {
     this.selectedColorValue = value;
     return this;
   }
+  maxDisplayCount(value) {
+    this.maxDisplayCountValue = value;
+    return this;
+  }
 }
 
 class DigitIndicator extends Indicator {
@@ -1980,8 +1997,6 @@ class NavPathInfo {
     this.param = param;
     this.onPop = onPop;
     this.index = -1;
-    // index that if check navdestination exists first
-    this.checkNavDestinationFlag = false;
     this.needUpdate = false;
   }
 }
@@ -2080,7 +2095,6 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2159,7 +2173,6 @@ class NavPathStack {
     if (ret) {
       return promiseRet;
     }
-    info.checkNavDestinationFlag = true;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2380,7 +2393,7 @@ class NavPathStack {
   }
   removeInvalidPage(name, param) {
     for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].checkNavDestinationFlag && this.pathArray[i].name === name &&
+      if (this.pathArray[i].name === name &&
         this.pathArray[i].param === param) {
         this.pathArray.splice(i, 1);
         return;
@@ -2422,13 +2435,6 @@ class NavPathStack {
       return undefined;
     }
     return item.name;
-  }
-  getCheckNavDestinationFlagByIndex(index) {
-    let item = this.pathArray[index];
-    if (item === undefined) {
-      return undefined;
-    }
-    return item.checkNavDestinationFlag;
   }
   getOnPopByIndex(index) {
     let item = this.pathArray[index];
@@ -3046,10 +3052,12 @@ var ControlSize;
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
   ControlSize[ControlSize["NORMAL"] = 1] = "NORMAL";
 })(ControlSize || (ControlSize = {}));
+
 var ImageAnalyzerType;
 (function (ImageAnalyzerType) {
   ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
   ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
+  ImageAnalyzerType[ImageAnalyzerType["OBJECT_LOOKUP"] = 2] = "OBJECT_LOOKUP";
 })(ImageAnalyzerType || (ImageAnalyzerType = {}));
 
 function wrapBuilder(builder) {
@@ -3189,3 +3197,23 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["SUCCESSFUL"] = 4] = "SUCCESSFUL";
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
+
+class ImageAnalyzerController {
+  constructor() {
+  }
+
+  registerSupportTypesAction(getSupportTypesAction) {
+    this.getSupportTypesAction = getSupportTypesAction;
+  }
+
+  unRegisterSupportTypesAction() {
+    this.getSupportTypesAction = null;
+  }
+
+  getImageAnalyzerSupportTypes() {
+    if (this.getSupportTypesAction === null || this.getSupportTypesAction === undefined) {
+      return null;
+    }
+    return this.getSupportTypesAction();
+  }
+}

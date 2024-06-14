@@ -344,7 +344,7 @@ public:
         return true;
     }
 
-    bool IsInAttachedNode(const TouchEvent& event);
+    bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
     
     void SetUserData(void* userData)
@@ -395,6 +395,11 @@ public:
     }
 
     void SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult);
+
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
+    }
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)

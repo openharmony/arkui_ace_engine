@@ -191,9 +191,9 @@ void HandleCustomEvent(ArkUI_NodeCustomEvent* event)
     if (!event) {
         return;
     }
-    if (event->node && event->node->eventListeners) {
+    if (event->node && event->node->customEventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-            event->node->eventListeners);
+            event->node->customEventListeners);
         if (eventListenersSet) {
             for (const auto& eventlistener : *eventListenersSet) {
                 (*eventlistener)(event);
@@ -210,11 +210,11 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
     if (!nodePtr || !eventReceiver) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (!nodePtr->eventListeners) {
-        nodePtr->eventListeners = new std::set<void (*)(ArkUI_NodeCustomEvent*)>();
+    if (!nodePtr->customEventListeners) {
+        nodePtr->customEventListeners = new std::set<void (*)(ArkUI_NodeCustomEvent*)>();
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-        nodePtr->eventListeners);
+        nodePtr->customEventListeners);
     if (!eventListenersSet) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -225,18 +225,18 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
 int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
     void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
-    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners) {
+    if (!nodePtr || !eventReceiver || !nodePtr->customEventListeners) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-        nodePtr->eventListeners);
+        nodePtr->customEventListeners);
     if (!eventListenersSet) {
         return ERROR_CODE_PARAM_INVALID;
     }
     eventListenersSet->erase(eventReceiver);
     if (eventListenersSet->empty()) {
         delete eventListenersSet;
-        nodePtr->eventListeners = nullptr;
+        nodePtr->customEventListeners = nullptr;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -357,7 +357,7 @@ uint32_t GetTotalChildCount(ArkUI_NodeHandle node)
         return 0;
     }
     auto* impl = GetFullImpl();
-    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle);
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getChildrenCount(node->uiNodeHandle, true);
 }
 
 ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
@@ -366,7 +366,7 @@ ArkUI_NodeHandle GetChildAt(ArkUI_NodeHandle node, int32_t position)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(node->uiNodeHandle, position, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -380,7 +380,7 @@ ArkUI_NodeHandle GetFirstChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getFirst(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -394,7 +394,7 @@ ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getLast(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -408,7 +408,7 @@ ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getPreviousSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
@@ -422,7 +422,7 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node)
         return nullptr;
     }
     auto* impl = GetFullImpl();
-    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle);
+    auto* value = impl->getNodeModifiers()->getFrameNodeModifier()->getNextSibling(node->uiNodeHandle, true);
     void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(value);
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);

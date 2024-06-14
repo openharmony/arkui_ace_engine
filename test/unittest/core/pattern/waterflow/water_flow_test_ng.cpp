@@ -36,6 +36,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
@@ -56,7 +57,6 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -137,6 +137,29 @@ void WaterFlowTestNg::CreateItem(int32_t number)
             ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
         } else {
             ViewAbstract::SetHeight(CalcLength(Dimension(BIG_ITEM_HEIGHT)));
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
+void WaterFlowTestNg::CreateFocusableItem(int32_t number)
+{
+    for (int32_t i = 0; i < number; i++) {
+        WaterFlowItemModelNG waterFlowItemModel;
+        waterFlowItemModel.Create();
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        // set irregular height
+        int32_t two = 2;
+        if (i % two == 0) {
+            ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
+        } else {
+            ViewAbstract::SetHeight(CalcLength(Dimension(BIG_ITEM_HEIGHT)));
+        }
+        {
+            ButtonModelNG buttonModelNG;
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel({ .label = "label" }, buttonChildren);
+            ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
     }

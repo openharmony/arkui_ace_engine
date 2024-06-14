@@ -47,6 +47,9 @@ public:
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
+    virtual void HasUserDefinedDisappearFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedNormalFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(ChangeEvent&& onChange) = 0;
 

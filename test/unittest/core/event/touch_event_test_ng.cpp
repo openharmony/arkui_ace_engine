@@ -470,4 +470,18 @@ HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
     touchEventActuator->ClearTouchAfterEvent();
     EXPECT_EQ(touchEventActuator->touchAfterEvents_, nullptr);
 }
+
+/**
+ * @tc.name: SetPressedKeyCodesTest001
+ * @tc.desc: SetPressedKeyCodest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, SetPressedKeyCodesTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.SetPressedKeyCodes({KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT});
+    EXPECT_EQ(touchEvent.pressedKeyCodes_.size(), 2);
+    EXPECT_EQ(touchEvent.pressedKeyCodes_[0], KeyCode::KEY_DPAD_LEFT);
+}
+
 } // namespace OHOS::Ace::NG

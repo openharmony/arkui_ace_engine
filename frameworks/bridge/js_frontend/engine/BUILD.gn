@@ -57,9 +57,9 @@ template("js_engine") {
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_arkui_x) {
-          deps += [ "$ace_napi:ace_container_scope_static" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
         } else {
-          external_deps += [ "napi:ace_container_scope" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
         }
       }
     }

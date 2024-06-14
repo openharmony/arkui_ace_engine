@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
@@ -269,7 +270,7 @@ void ResetScrollScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBarTheme);
@@ -354,6 +355,8 @@ RefPtr<ScrollControllerBase> GetController(ArkUINodeHandle node)
         return ListModelNG::GetOrCreateController(frameNode);
     } else if (frameNode->GetTag() == V2::WATERFLOW_ETS_TAG) {
         return WaterFlowModelNG::GetOrCreateController(frameNode);
+    } else if (frameNode->GetTag() == V2::GRID_ETS_TAG) {
+        return GridModelNG::GetOrCreateController(frameNode);
     }
     return nullptr;
 }
@@ -514,6 +517,13 @@ void SetScrollBarProxy(ArkUINodeHandle node, ArkUINodeHandle proxy)
     CHECK_NULL_VOID(scrollProxy);
     ScrollModelNG::SetScrollBarProxy(frameNode, scrollProxy);
 }
+
+void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 smooth, ArkUI_Int32 align)
+{
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->ScrollToIndex(index, smooth, static_cast<ScrollAlign>(align));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -567,7 +577,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollPage,
         SetScrollBy,
         GetScroll,
-        SetScrollBarProxy,
+        SetScrollBarProxy, SetScrollToIndex,
     };
     /* clang-format on */
     return &modifier;

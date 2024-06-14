@@ -131,6 +131,8 @@ public:
             theme->maxFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_max_font_size_scale", 0.0);
             theme->agingNormalPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_normal_padding", 0.0_vp);
             theme->agingSmallPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_small_padding", 0.0_vp);
+            theme->agingTextMaxLines_ =
+                static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_aging_text_max_lines", 0.0));
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -519,6 +521,11 @@ public:
         return agingSmallPadding_;
     }
 
+    uint32_t GetAgingTextMaxLines() const
+    {
+        return agingTextMaxLines_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -584,6 +591,7 @@ private:
     float maxFontSizeScale_ = 3.2f;
     Dimension agingNormalPadding_;
     Dimension agingSmallPadding_;
+    uint32_t agingTextMaxLines_ = 2;
 };
 
 } // namespace OHOS::Ace

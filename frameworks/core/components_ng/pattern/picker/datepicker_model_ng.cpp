@@ -363,7 +363,10 @@ void DatePickerModelNG::SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& 
 PickerTextStyle DatePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -401,7 +404,10 @@ void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
 PickerTextStyle DatePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -439,7 +445,10 @@ void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
 PickerTextStyle DatePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -506,6 +515,33 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
+}
+
+void DatePickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedDisappearFontFamily(isUserDefined);
+}
+
+void DatePickerModelNG::HasUserDefinedNormalFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedNormalFontFamily(isUserDefined);
+}
+
+void DatePickerModelNG::HasUserDefinedSelectedFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedSelectedFontFamily(isUserDefined);
 }
 
 void DatePickerModelNG::SetBackgroundColor(const Color& color)
@@ -755,7 +791,10 @@ LunarDate DatePickerModelNG::getEndDate(FrameNode* frameNode)
 LunarDate DatePickerModelNG::getSelectedDate(FrameNode* frameNode)
 {
     LunarDate lunarDate;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, lunarDate);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, lunarDate);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, lunarDate);
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(datePickerPattern, lunarDate);

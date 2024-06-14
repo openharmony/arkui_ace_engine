@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 class CanvasModel {
 public:
-    static CanvasModel* GetInstance();
+    ACE_FORCE_EXPORT static CanvasModel* GetInstance();
     static CanvasModel* GetInstanceNG();
     virtual ~CanvasModel() = default;
 
@@ -31,6 +31,7 @@ public:
     virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
     virtual void SetOnReady(std::function<void()>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};
+    virtual void SetImageAIOptions(void* options) {};
 
 private:
     static std::unique_ptr<CanvasModel> instance_;

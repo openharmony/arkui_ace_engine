@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -339,6 +340,33 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
+void TextPickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedDisappearFontFamily(isUserDefined);
+}
+
+void TextPickerModelNG::HasUserDefinedNormalFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedNormalFontFamily(isUserDefined);
+}
+
+void TextPickerModelNG::HasUserDefinedSelectedFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedSelectedFontFamily(isUserDefined);
+}
+
 void TextPickerModelNG::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -649,6 +677,14 @@ void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value, frameNode);
 }
 
+int32_t TextPickerModelNG::GetCanLoop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 1);
+    return textPickerPattern->GetCanLoop();
+}
+
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
 {
     CHECK_NULL_VOID(frameNode);
@@ -695,6 +731,7 @@ void TextPickerModelNG::SetNormalTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
 }
+
 void TextPickerModelNG::SetSelectedTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
@@ -720,6 +757,7 @@ void TextPickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
 }
+
 void TextPickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
@@ -745,11 +783,21 @@ void TextPickerModelNG::SetDisappearTextStyle(
         TextPickerLayoutProperty, DisappearFontStyle,
         value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
 }
+
 void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value, frameNode);
 }
+
+Dimension TextPickerModelNG::GetDefaultPickerItemHeight(FrameNode* frameNode)
+{
+    Dimension value = Dimension(-1.0f);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    return layoutProperty->GetDefaultPickerItemHeightValue();
+}
+
 void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -949,7 +997,10 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
 PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -968,7 +1019,10 @@ PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -987,7 +1041,10 @@ PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(

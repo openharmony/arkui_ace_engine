@@ -46,12 +46,12 @@ class TrackedObject {
    */
   public static notifyObjectValueAssignment(obj1: Object, obj2: Object,
     notifyPropertyChanged: (isFromSource) => void, // notify as assignment (none-optimised)
-    notifyTrackedPropertyChange: (propName, isFromSource) => void, obSelf: ObservedPropertyAbstractPU<any>, isFromSource: boolean): boolean {
+    notifyTrackedPropertyChange: (propName) => void, obSelf: ObservedPropertyAbstractPU<any>): boolean {
     if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
       (obj1.constructor !== obj2.constructor) ||
       TrackedObject.isCompatibilityMode(obj1)) {
       stateMgmtConsole.debug(`TrackedObject.notifyObjectValueAssignment notifying change as assignment (non-optimised)`);
-      notifyPropertyChanged.call(obSelf, isFromSource);
+      notifyPropertyChanged.call(obSelf);
       return false;
     }
 
@@ -65,7 +65,7 @@ class TrackedObject {
         if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`) &&
           (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
           stateMgmtConsole.debug(`   ... '@Track ${propName}' value changed - notifying`);
-          notifyTrackedPropertyChange.call(obSelf, propName, isFromSource);
+          notifyTrackedPropertyChange.call(obSelf, propName);
           shouldFakePropPropertyBeNotified = true;
         } else {
           stateMgmtConsole.debug(`   ... '${propName}' value unchanged or not @Track'ed - not notifying`);

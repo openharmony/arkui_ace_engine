@@ -56,6 +56,7 @@ enum class PointerAction : int32_t {
 };
 
 struct PointerEvent final {
+    int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     bool pressed = false;
     int32_t windowX = 0;

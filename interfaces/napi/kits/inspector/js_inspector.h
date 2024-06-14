@@ -51,10 +51,15 @@ public:
     std::string componentId_;
     std::list<napi_ref> cbLayoutList_;
     std::list<napi_ref> cbDrawList_;
+    void SetEngine(const RefPtr<Framework::JsEngine>& engine)
+    {
+        weakEngine_ = engine;
+    }
 
 private:
     void FunctionOn(napi_env& env, napi_value result, const char* funName);
     void FunctionOff(napi_env& env, napi_value result, const char* funName);
+    WeakPtr<Framework::JsEngine> weakEngine_;
 };
 } // namespace OHOS::Ace::Napi
 #endif

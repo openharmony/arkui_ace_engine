@@ -112,6 +112,7 @@ constexpr Dimension IMAGE_WIDTH = 170.0_vp;
 constexpr Dimension IMAGE_HEIGHT = 120.0_vp;
 constexpr Dimension IMAGE_TOP = 0.0_vp;
 constexpr Dimension IMAGE_LEFT = 0.0_vp;
+const std::vector<float> COLOR_FILTER_NULL;
 
 class ImageBases : public testing::Test {
 public:

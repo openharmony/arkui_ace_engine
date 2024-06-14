@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1683,6 +1684,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotPlayIndicatorAnimation001, Test
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
 
@@ -1713,6 +1715,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorUpdateContentModifier0
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
     RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
@@ -1757,6 +1760,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintNormalIndicator00
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1800,6 +1804,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintUnselectedIndicat
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1846,6 +1851,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorCalculatePointAngle001
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1878,6 +1884,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetHalfIndex001, TestS
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1910,6 +1917,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetLongPointAngle001, 
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1943,6 +1951,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetBlackPointAngle001,
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -1982,6 +1991,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetIndex001, TestSize.
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -2015,6 +2025,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetStartAndEndIndex001
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
@@ -2061,6 +2072,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorSetFunctions001, TestS
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });

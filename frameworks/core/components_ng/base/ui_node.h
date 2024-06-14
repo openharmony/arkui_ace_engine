@@ -71,12 +71,12 @@ public:
     virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
-
+    virtual int32_t CurrentFrameCount() const;
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -108,7 +108,17 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    void UpdateModalUiextensionCount(bool addNode)
+    {
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
+    }
+
     int32_t TotalChildCount() const;
+    virtual void UpdateGeometryTransition();
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -140,6 +150,8 @@ public:
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -162,6 +174,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
@@ -405,8 +418,9 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false);
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
-
+    virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
+    // Get current frameNode index with or without expanded all LazyForEachNode;
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -621,19 +635,8 @@ public:
         return instanceId_;
     }
 
-    bool GetIsGeometryTransitionIn() const
-    {
-        return isGeometryTransitionIn_;
-    }
-
-    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
-    {
-        isGeometryTransitionIn_ = isGeometryTransitionIn;
-    }
-
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
-        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         for (const auto& child : GetChildren()) {
             child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
         }
@@ -698,6 +701,9 @@ protected:
     }
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+
+    virtual void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
@@ -768,7 +774,6 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
-    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
@@ -788,6 +793,10 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

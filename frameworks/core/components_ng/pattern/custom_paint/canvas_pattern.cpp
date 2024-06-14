@@ -711,15 +711,15 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
 #endif
 }
 
-void CanvasPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
+void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
 #ifndef USE_FAST_TASKPOOL
-    auto task = [grad](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetStrokeGradient(grad);
+    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetStrokeGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
 #else
-    paintMethod_->PushTask<SetStrokeGradientOp>(grad);
+    paintMethod_->PushTask<SetStrokeGradientOp>(gradient);
 #endif
 }
 
@@ -783,11 +783,11 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 #endif
 }
 
-void CanvasPattern::UpdateFillGradient(const Ace::Gradient& gradient)
+void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
 #ifndef USE_FAST_TASKPOOL
-    auto task = [gradient](CanvasPaintMethod& paintMethod) {
-        paintMethod.SetFillGradient(gradient);
+    auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetFillGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
 #else
@@ -846,6 +846,7 @@ void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 #else
     paintMethod_->PushTask<SetLineDashOp>(segments);
 #endif
+    paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()
@@ -1089,7 +1090,16 @@ void CanvasPattern::EnableAnalyzer(bool enable)
     });
 }
 
-void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void CanvasPattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::CANVAS);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
+}
+
+void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
@@ -1192,7 +1202,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
-    currentSetTextDirection_ = TextDirection::INHERIT;
+    SetTextDirection(TextDirection::INHERIT);
 }
 
 void CanvasPattern::OnLanguageConfigurationUpdate()

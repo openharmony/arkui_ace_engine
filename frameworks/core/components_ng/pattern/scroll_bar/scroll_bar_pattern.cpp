@@ -247,9 +247,6 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ScrollBarPattern::RegisterScrollBarEventTask()
@@ -298,7 +295,6 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     bool updateFlag = false;
     if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateScrollBarOffset();
         updateFlag = true;
     } else {
         auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -348,10 +344,7 @@ bool ScrollBarPattern::IsInScrollBar()
     auto scrollBarSize = scrollBar->GetGeometryNode()->GetFrameSize();
     const bool isInVerticalScrollBar = (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Width()) &&
                                        (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Height());
-
-    const bool isInHorizontalScrollBar = (locationInfo_.GetY() >= 0 && locationInfo_.GetY() <= scrollBarSize.Width()) &&
-                                         (locationInfo_.GetX() >= 0 && locationInfo_.GetX() <= scrollBarSize.Height());
-    return (axis_ == Axis::VERTICAL) ? isInVerticalScrollBar : isInHorizontalScrollBar;
+    return isInVerticalScrollBar;
 }
 
 bool ScrollBarPattern::IsAtTop() const
@@ -514,7 +507,7 @@ void ScrollBarPattern::StartDisappearAnimator()
     if (disapplearDelayTask_) {
         disapplearDelayTask_.Cancel();
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

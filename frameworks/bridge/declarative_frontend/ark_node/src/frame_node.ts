@@ -136,9 +136,9 @@ class FrameNode {
     if (node === null) {
       return;
     }
-    let child = node.getFirstChild();
+    let child = node.getFirstChildWithoutExpand();
     FrameNode.disposeTreeRecursively(child);
-    let sibling = node.getNextSibling();
+    let sibling = node.getNextSiblingWithoutExpand();
     FrameNode.disposeTreeRecursively(sibling);
     node.dispose();
   }
@@ -216,7 +216,7 @@ class FrameNode {
   }
 
   removeComponentContent(content: ComponentContent): void {
-    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -288,8 +288,34 @@ class FrameNode {
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
   }
 
+  getFirstChildWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
   getNextSibling(): FrameNode | null {
     const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getNextSiblingWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -475,6 +501,7 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
+      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
     return this._commonAttribute;
@@ -610,6 +637,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
       this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
     }
     this.attribute_.setNodePtr(this.nodePtr_);
+    this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this.attribute_;
   }
 
@@ -739,6 +767,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
     ["Search", (context: UIContext) => {
       return new TypedFrameNode(context, "Search", (node: NodePtr, type: ModifierType) => {
         return new ArkSearchComponent(node, type);
+      })
+    }],
+    ["Button", (context: UIContext) => {
+      return new TypedFrameNode(context, "Button", (node: NodePtr, type: ModifierType) => {
+        return new ArkButtonComponent(node, type);
       })
     }],
   ]

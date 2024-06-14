@@ -72,6 +72,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 FrameReport::GetInstance().FlushEnd();
             }
             ArkUIPerfMonitor::GetInstance().FinishPerf();
+            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -109,12 +110,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
+void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
+    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
 }
 
 void RosenWindow::RequestFrame()
@@ -132,11 +133,10 @@ void RosenWindow::RequestFrame()
             auto windowId = rsWindow_->GetWindowId();
             auto instanceId = Container::CurrentIdSafely();
             auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
-                LOGE("ArkUI request vsync，but no vsync was received within 3 seconds");
+                LOGE("ArkUI request vsync,but no vsync was received within 3 seconds");
                 EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
-            onVsyncEventCheckTimer_.Reset(task);
-            taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::JS,
                 VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
 #endif
@@ -246,4 +246,14 @@ std::string RosenWindow::GetWindowName() const
     return rsWindow_->GetWindowName();
 }
 
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    Window::OnVsync(nanoTimestamp, frameCount);
+    auto taskExecutor = taskExecutor_.Upgrade();
+#ifdef VSYNC_TIMEOUT_CHECK
+        if (taskExecutor) {
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::JS, "ArkUIVsyncTimeoutCheck");
+        }
+#endif
+}
 } // namespace OHOS::Ace::NG

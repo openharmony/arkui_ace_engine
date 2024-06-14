@@ -725,9 +725,9 @@ class FrameNode {
         if (node === null) {
             return;
         }
-        let child = node.getFirstChild();
+        let child = node.getFirstChildWithoutExpand();
         FrameNode.disposeTreeRecursively(child);
-        let sibling = node.getNextSibling();
+        let sibling = node.getNextSiblingWithoutExpand();
         FrameNode.disposeTreeRecursively(sibling);
         node.dispose();
     }
@@ -800,7 +800,7 @@ class FrameNode {
         }
     }
     removeComponentContent(content) {
-        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -868,8 +868,32 @@ class FrameNode {
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
+    getFirstChildWithoutExpand() {
+        const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
     getNextSibling() {
         const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr());
+        const nodeId = result?.nodeId;
+        if (nodeId === undefined || nodeId === -1) {
+            return null;
+        }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            return frameNode === undefined ? null : frameNode;
+        }
+        return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getNextSiblingWithoutExpand() {
+        const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1025,6 +1049,7 @@ class FrameNode {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(this.nodePtr_);
+        this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonAttribute;
     }
     get commonEvent() {
@@ -1143,6 +1168,7 @@ class TypedFrameNode extends FrameNode {
             this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this.attribute_.setNodePtr(this.nodePtr_);
+        this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this.attribute_;
     }
     checkValid(node) {
@@ -1269,6 +1295,11 @@ const __creatorMap__ = new Map([
                 return new ArkSearchComponent(node, type);
             });
         }],
+    ["Button", (context) => {
+            return new TypedFrameNode(context, "Button", (node, type) => {
+                return new ArkButtonComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {
@@ -1388,14 +1419,14 @@ class ColorMetrics {
             return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
         }
         else {
-            const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.");
+            const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
     }
     static resourceColor(color) {
         if (color === undefined || color === null) {
-            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1403,7 +1434,7 @@ class ColorMetrics {
         if (typeof color === 'object') {
             chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
             if (chanels === undefined) {
-                const error = new Error("Get color resource failed.");
+                const error = new Error('Failed to obtain the color resource.');
                 error.code = ERROR_CODE_RESOURCE_GET_FAILED;
                 throw error;
             }
@@ -1425,7 +1456,7 @@ class ColorMetrics {
             }
         }
         else {
-            const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.");
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1464,13 +1495,13 @@ class ColorMetrics {
     }
     blendColor(overlayColor) {
         if (overlayColor === undefined || overlayColor === null) {
-            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
         const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
         if (chanels === undefined) {
-            const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.");
+            const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.');
             error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
             throw error;
         }
@@ -1549,7 +1580,11 @@ class RenderNode {
         this.childrenList = [];
         this.parentRenderNode = null;
         this.backgroundColorValue = 0;
+        this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
         this.clipToFrameValue = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrameValue = false;
+        }
         this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
         this.opacityValue = 1.0;
         this.pivotValue = { x: 0.5, y: 0.5 };
@@ -1566,12 +1601,17 @@ class RenderNode {
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
         this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+        this.markNodeGroupValue = false;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
             return;
         }
         this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
         this.nodePtr = this._nativeRef?.getNativeHandle();
-        this.clipToFrame = true;
+        if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+            this.clipToFrame = false;
+        } else {
+            this.clipToFrame = true;
+        }
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -1711,6 +1751,14 @@ class RenderNode {
             this.lengthMetricsUnitValue = unit;
         }
     }
+    set markNodeGroup(isNodeGroup) {
+        if (isNodeGroup === undefined || isNodeGroup === null) {
+            this.markNodeGroupValue = false;
+        } else {
+            this.markNodeGroupValue = isNodeGroup;
+        }
+        getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+    }
     get backgroundColor() {
         return this.backgroundColorValue;
     }
@@ -1761,6 +1809,9 @@ class RenderNode {
     }
     get lengthMetricsUnit() {
         return this.lengthMetricsUnitValue;
+    }
+    get markNodeGroup() {
+        return this.markNodeGroupValue;
     }
     checkUndefinedOrNullWithDefaultValue(arg, defaultValue) {
         if (arg === undefined || arg === null) {
@@ -2088,8 +2139,8 @@ class ComponentContent extends Content {
     }
     dispose() {
         this.detachFromParent();
-        this.attachNodeRef_.dispose();
-        this.builderNode_.dispose();
+        this.attachNodeRef_?.dispose();
+        this.builderNode_?.dispose();
     }
     detachFromParent() {
         if (this.parentWeak_ === undefined) {
@@ -2106,7 +2157,7 @@ class ComponentContent extends Content {
         if (nodeType === "BuilderProxyNode") {
             const result = getUINativeModule().frameNode.getFirstUINode(node);
             this.attachNodeRef_ = getUINativeModule().nativeUtils.createNativeStrongRef(result);
-            getUINativeModule().frameNode.clearChildren(node);
+            getUINativeModule().frameNode.removeChild(node, result);
             return result;
         }
         return node;

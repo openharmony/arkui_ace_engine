@@ -154,6 +154,8 @@ public:
         jsonValue->Put(
             "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
         jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
+        jsonValue->Put("maxDisplayCount",
+            (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
         return jsonValue->ToString();
     }
 
@@ -197,20 +199,7 @@ public:
         return jsonValue->ToString();
     }
 
-    std::string GetArcDotIndicatorStyle() const;
-
-    std::string GradientToJson(Gradient colors) const
-    {
-        auto jsonArray = JsonUtil::CreateArray(true);
-        for (size_t index = 0; index < colors.GetColors().size(); ++index) {
-            auto gradientColor = colors.GetColors()[index];
-            auto gradientColorJson = JsonUtil::Create(true);
-            gradientColorJson->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
-            gradientColorJson->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
-            jsonArray->Put(std::to_string(index).c_str(), gradientColorJson);
-        }
-        return jsonArray->ToString();
-    }
+    virtual std::string GetArcDotIndicatorStyle() const { return ""; }
 
     int32_t GetCurrentShownIndex() const
     {
@@ -388,10 +377,7 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
-    void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters)
-    {
-        swiperArcDotParameters_ = std::make_shared<SwiperArcDotParameters>(swiperArcDotParameters);
-    }
+    virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
     void ShowNext();
     void ShowPrevious();
@@ -536,7 +522,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
-    std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const;
+    virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -636,6 +622,7 @@ public:
     void UpdateNextValidIndex();
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
+    TextDirection GetNonAutoLayoutDirection() const;
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -660,6 +647,8 @@ public:
         prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
+    virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
+
     bool GetPrevMarginIgnoreBlank()
     {
         return prevMarginIgnoreBlank_;
@@ -672,6 +661,21 @@ public:
 
     bool IsAtStart() const;
     bool IsAtEnd() const;
+
+    void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
+    {
+        frameRateRange_[type] = rateRange;
+    }
+    void UpdateNodeRate();
+    int32_t GetMaxDisplayCount() const
+    {
+        if ((swiperParameters_ != nullptr) && (swiperParameters_->maxDisplayCountVal.has_value())) {
+            return swiperParameters_->maxDisplayCountVal.value();
+        }
+        return 0;
+    }
+protected:
+    void MarkDirtyNodeSelf();
 
 private:
     void OnModifyDone() override;
@@ -771,8 +775,8 @@ private:
     void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
-    void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
+    void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
@@ -811,7 +815,7 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
-    void MarkDirtyNodeSelf();
+    
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
     bool IsAutoLinear() const;
@@ -901,8 +905,9 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void PreloadItems(const std::set<int32_t>& indexSet);
-    void DoPreloadItems(const std::set<int32_t>& indexSet, int32_t errorCode);
-    void FirePreloadFinishEvent(int32_t errorCode);
+    void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
+    void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
     void InitCapture();
     int32_t GetLeftCaptureId()
@@ -1044,7 +1049,6 @@ private:
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
-    mutable std::shared_ptr<SwiperArcDotParameters> swiperArcDotParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
 
@@ -1062,6 +1066,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
+    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
@@ -1078,7 +1083,6 @@ private:
     float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
-    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
@@ -1114,6 +1118,7 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
+    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
     // capture
     std::optional<int32_t> leftCaptureIndex_;
     std::optional<int32_t> rightCaptureIndex_;
@@ -1121,6 +1126,7 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
+    bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     std::optional<bool> isSwipeByGroup_;

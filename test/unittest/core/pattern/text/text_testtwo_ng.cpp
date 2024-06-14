@@ -1972,4 +1972,186 @@ HWTEST_F(TextTestTwoNg, TextContentModifier005, TestSize.Level1)
     EXPECT_EQ(textPaintMethod->textContentModifier_->imageNodeList_.size(), 1);
     textPattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: TextOverlayModifierTest002
+ * @tc.desc: test IsSelectedRectsChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextOverlayModifierTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textOverlayModifier
+     */
+    TextOverlayModifier textOverlayModifier;
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
+    rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
+    textOverlayModifier.SetSelectedRects(rectList);
+    /**
+     * @tc.steps: step2. test IsSelectedRectsChanged
+     */
+    RectF secondRect(RECT_SECOND_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+    textOverlayModifier.selectedRects_[0] = secondRect;
+    bool rectsChanged = textOverlayModifier.IsSelectedRectsChanged(rectList);
+    EXPECT_EQ(rectsChanged, true);
+}
+
+/**
+ * @tc.name: TextOverlayModifierTest003
+ * @tc.desc: test TextOverlayModifier function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextOverlayModifierTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textOverlayModifier
+     */
+    TextOverlayModifier textOverlayModifier;
+    OffsetF paintOffset;
+    textOverlayModifier.SetPrintOffset(paintOffset);
+    textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
+
+    /**
+     * @tc.steps: step2. change version and save initial version
+     */
+    int32_t settingHighApiVersion = 12;
+    int32_t settingLowApiVersion = 10;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingHighApiVersion);
+
+    /**
+     * @tc.steps: step3. test TextOverlayModifier
+     */
+    TextOverlayModifier();
+    EXPECT_EQ(textOverlayModifier.isClip_->Get(), true);
+
+    /**
+     * @tc.steps: step4. test TextOverlayModifier again and reuse initial ApiTargetVersion
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingLowApiVersion);
+    TextOverlayModifier();
+    EXPECT_EQ(textOverlayModifier.isClip_->Get(), true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextOverlayModifierTest004
+ * @tc.desc: test onDraw function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextOverlayModifierTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textOverlayModifier
+     */
+    TextOverlayModifier textOverlayModifier;
+    OffsetF paintOffset;
+    textOverlayModifier.SetPrintOffset(paintOffset);
+    textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
+
+    /**
+     * @tc.steps: step1. create selectedRects_
+     */
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(RECT_SECOND_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
+    textOverlayModifier.SetSelectedRects(rectList);
+
+    /**
+     * @tc.steps: step3. create canvas
+     */
+
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+
+    /**
+     * @tc.steps: step4. change ApiVersion and set isClip_ is true
+     */
+
+    int32_t changeApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(changeApiVersion);
+    TextOverlayModifier();
+    EXPECT_EQ(textOverlayModifier.isClip_->Get(), true);
+
+    /**
+     * @tc.steps: step5. create context and textContentRect
+     */
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    RectF textContentRect = CONTENT_RECT;
+    textOverlayModifier.SetContentRect(textContentRect);
+
+    /**
+     * @tc.steps: step6. test onDraw
+     */
+    textOverlayModifier.SetShowSelect(true);
+    textOverlayModifier.onDraw(context);
+    RectF finalSelectRect = textOverlayModifier.selectedRects_[0];
+    EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
+    EXPECT_EQ(finalSelectRect.Width(), 5);
+    EXPECT_EQ(textOverlayModifier.contentRect_, textContentRect);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextPaintMethodTest004
+ * @tc.desc: test text_paint_method.cpp UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextPaintMethodTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textLayoutProperty.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. create textPaintMethod and update textLayoutProperty.
+     */
+    auto pattern = textFrameNode->GetPattern<Pattern>();
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> textContentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
+    textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+
+    /**
+     * @tc.steps: step3. update ClipEdge and create textTheme.
+     */
+    RefPtr<RenderContext> renderContext = RenderContext::Create();
+    renderContext->UpdateClipEdge(true);
+    auto paintProperty = textPattern->CreatePaintProperty();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    ASSERT_NE(textTheme, nullptr);
+
+    /**
+     * @tc.steps: step4. call UpdateContentModifier and GetOverlayModifier.
+     */
+    textPaintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    auto OverlayModifier = textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper));
+    ASSERT_NE(OverlayModifier, nullptr);
+    EXPECT_EQ(textOverlayModifier->isClip_->Get(), true);
+}
+
 } // namespace OHOS::Ace::NG

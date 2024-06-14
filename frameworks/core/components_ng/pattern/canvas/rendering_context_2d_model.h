@@ -41,10 +41,10 @@ public:
     virtual void SetFontFamilies(const std::vector<std::string>& families) = 0;
     virtual void SetFontSize(const Dimension& size) = 0;
     virtual std::vector<double> GetLineDash() = 0;
-    virtual void SetFillGradient(const Ace::Gradient& gradient) = 0;
+    virtual void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
     virtual void SetFillColor(const Color& color, bool colorFlag) = 0;
-    virtual void SetStrokeGradient(const Ace::Gradient& gradient) = 0;
+    virtual void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
     virtual void SetStrokeColor(const Color& color, bool colorFlag) = 0;
     virtual void DrawImage(const ImageInfo& imageInfo) = 0;
@@ -134,9 +134,9 @@ public:
     virtual void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) {};
 #else
     virtual void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::unique_ptr<Ace::ImageData>& imageData) {};
+        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
 #endif
-    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
+    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) {};
     virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModel);

@@ -62,6 +62,34 @@ void ButtonPattern::OnAttachToFrameNode()
     renderContext->SetAlphaOffscreen(true);
 }
 
+bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+
+    if (layoutProperty->HasLabel() && layoutProperty->GetLabel()->empty()) {
+        return false;
+    }
+
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
+        return false;
+    }
+    const auto& calcConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+        return false;
+    }
+    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
+        return false;
+    }
+    return true;
+}
+
 void ButtonPattern::UpdateTextLayoutProperty(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
@@ -85,6 +113,17 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFamily().has_value()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
+
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetAgingTextMaxLines());
+    } else {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
+    }
+
     if (layoutProperty->GetTextOverflow().has_value()) {
         textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
     }
@@ -395,11 +434,13 @@ void ButtonPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
+            buttonPattern->UpdateTexOverflow(!(buttonPattern->isPress_));
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->OnTouchUp();
+            buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -520,18 +561,21 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
+    UpdateTexOverflow(isHover || isFocus_);
+}
+
+void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
+{
     if (isTextFadeOut_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        if (isHover) {
-            textLayoutProperty->UpdateTextMarqueeStart(isHover);
-        } else {
-            textLayoutProperty->UpdateTextMarqueeStart(isFocus_);
-        }
+        textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
         textNode->MarkDirtyNode();
     }
 }

@@ -25,7 +25,7 @@ public:
     static CommonViewModel* GetInstance();
     virtual ~CommonViewModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(bool isLayoutNode) = 0;
 
 private:
     static std::unique_ptr<CommonViewModel> instance_;

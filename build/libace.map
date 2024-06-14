@@ -223,6 +223,9 @@
       OHOS::Ace::PipelineBase::PrepareOpenImplicitAnimation*;
       OHOS::Ace::PipelineBase::PrepareCloseImplicitAnimation*;
       OHOS::Ace::PipelineBase::GetCurrentDensity*;
+      OHOS::Ace::PipelineBase::RegisterFont*;
+      OHOS::Ace::PipelineBase::GetSystemFontList*;
+      OHOS::Ace::PipelineBase::GetSystemFont*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -238,6 +241,9 @@
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
+      OHOS::Ace::AceScoringLog::*;
+      "OHOS::Ace::NG::CustomNode::FlushReload()";
+      "OHOS::Ace::CanvasModel::GetInstance()";
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -272,6 +278,7 @@
       vtable?for?OHOS::Ace::NG::SwipeGesture;
       vtable?for?OHOS::Ace::NG::PanGesture;
       vtable?for?OHOS::Ace::NG::GestureGroup;
+      vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -292,6 +299,7 @@
       VTT?for?OHOS::Ace::NG::SwipeGesture;
       VTT?for?OHOS::Ace::NG::PanGesture;
       VTT?for?OHOS::Ace::NG::GestureGroup;
+      VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;

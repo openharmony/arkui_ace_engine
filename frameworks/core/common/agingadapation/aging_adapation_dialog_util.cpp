@@ -28,29 +28,48 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, ImageSourceInfo& imageSourceInfo)
 {
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-    auto color = dialogTheme->GetDialogIconColor();
-    imageSourceInfo.SetFillColor(Color(color.GetValue()));
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(dialogTheme->GetIdealSize()), CalcLength(dialogTheme->GetIdealSize())));
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    MarginProperty imageMargin = {
-        .top = CalcLength(dialogTheme->GetDialogPropertyTop()),
-        .bottom = CalcLength(dialogTheme->GetDialogPropertyBottom()),
-    };
-    imageLayoutProperty->UpdateMargin(imageMargin);
-    imageNode->MountToParent(columnNode);
-    imageNode->MarkModifyDone();
+
+    if (imageSourceInfo.IsValid()) {
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(context, nullptr);
+        auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+        CHECK_NULL_RETURN(dialogTheme, nullptr);
+        auto color = dialogTheme->GetDialogIconColor();
+        imageSourceInfo.SetFillColor(Color(color.GetValue()));
+        auto imageNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+        imageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(dialogTheme->GetIdealSize()), CalcLength(dialogTheme->GetIdealSize())));
+        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        MarginProperty imageMargin;
+        Dimension dialogHeight;
+        if (message.empty()) {
+            float scale = context->GetFontScale();
+            if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||
+                NearEqual(scale, dialogTheme->GetLargeFontSizeScale())) {
+                dialogHeight = Dimension(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP);
+            } else if (NearEqual(scale, dialogTheme->GetMaxFontSizeScale())) {
+                dialogHeight = Dimension(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP);
+            }
+            auto marginSize = (dialogHeight - dialogTheme->GetIdealSize()).ConvertToPx() / 2;
+            imageMargin.top = CalcLength(Dimension(marginSize, DimensionUnit::PX));
+            imageMargin.bottom = CalcLength(Dimension(marginSize, DimensionUnit::PX));
+            imageLayoutProperty->UpdateMargin(imageMargin);
+            imageNode->MountToParent(columnNode);
+            imageNode->MarkModifyDone();
+            return CreateCustomDialog(columnNode);
+        }
+        imageMargin.top = CalcLength(dialogTheme->GetDialogPropertyTop());
+        imageMargin.bottom = CalcLength(dialogTheme->GetDialogPropertyBottom());
+        imageLayoutProperty->UpdateMargin(imageMargin);
+        imageNode->MountToParent(columnNode);
+        imageNode->MarkModifyDone();
+    }
     CreateDialogTextNode(columnNode, message);
     return CreateCustomDialog(columnNode);
 }
@@ -71,11 +90,27 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
     symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
     symbolProperty->UpdateSymbolColorList({dialogTheme->GetDialogIconColor()});
-    MarginProperty imageMargin = {
-        .top = CalcLength(dialogTheme->GetDialogPropertyTop()),
-        .bottom = CalcLength(dialogTheme->GetDialogPropertyBottom()),
-    };
-    symbolProperty->UpdateMargin(imageMargin);
+    MarginProperty symbolMargin;
+    Dimension dialogHeight;
+    if (message.empty()) {
+        float scale = context->GetFontScale();
+        if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||
+            NearEqual(scale, dialogTheme->GetLargeFontSizeScale())) {
+            dialogHeight = Dimension(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP);
+        } else if (NearEqual(scale, dialogTheme->GetMaxFontSizeScale())) {
+            dialogHeight = Dimension(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP);
+        }
+        auto marginSize = (dialogHeight - dialogTheme->GetIdealSize()).ConvertToPx() / 2;
+        symbolMargin.top = CalcLength(Dimension(marginSize, DimensionUnit::PX));
+        symbolMargin.bottom = CalcLength(Dimension(marginSize, DimensionUnit::PX));
+        symbolProperty->UpdateMargin(symbolMargin);
+        symbolNode->MountToParent(columnNode);
+        symbolNode->MarkModifyDone();
+        return CreateCustomDialog(columnNode);
+    }
+    symbolMargin.top = CalcLength(dialogTheme->GetDialogPropertyTop());
+    symbolMargin.bottom = CalcLength(dialogTheme->GetDialogPropertyBottom());
+    symbolProperty->UpdateMargin(symbolMargin);
     symbolNode->MountToParent(columnNode);
     symbolNode->MarkModifyDone();
     CreateDialogTextNode(columnNode, message);
@@ -95,21 +130,26 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     dialogProperties.isModal = false;
     dialogProperties.backgroundColor = Color::TRANSPARENT;
     dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
+    dialogProperties.borderRadius = BorderRadiusProperty(dialogTheme->GetDialogCornerRadius());
     BlurStyleOption styleOption;
     styleOption.blurStyle = static_cast<BlurStyle>(
         dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackBlurStyle(styleOption);
+    CalcSize columnMinSize;
     float scale = context->GetFontScale();
     if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||
         NearEqual(scale, dialogTheme->GetLargeFontSizeScale())) {
         dialogProperties.width = CalcDimension(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP);
+        columnMinSize.SetHeight(CalcLength(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP));
     } else if (NearEqual(scale, dialogTheme->GetMaxFontSizeScale())) {
         dialogProperties.width = CalcDimension(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP);
+        columnMinSize.SetHeight(CalcLength(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP));
     }
     auto layoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateCalcMinSize(columnMinSize);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -131,13 +171,29 @@ void AgingAdapationDialogUtil::CreateDialogTextNode(const RefPtr<FrameNode>& col
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(message);
+    textLayoutProperty->UpdateFontSize(dialogTheme->GetDialogFontSize());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(dialogTheme->GetMaxLines());
-    MarginProperty margin = {
-        .left = CalcLength(dialogTheme->GetTextPropertyLeft()),
-        .right = CalcLength(dialogTheme->GetTextPropertyRight()),
-        .bottom = CalcLength(dialogTheme->GetTextPropertyBottom()),
-    };
+    MarginProperty margin;
+    margin.left = CalcLength(dialogTheme->GetTextPropertyLeft());
+    margin.right = CalcLength(dialogTheme->GetTextPropertyRight());
+    margin.bottom = CalcLength(dialogTheme->GetTextPropertyBottom());
+    if (columnNode->GetFirstChild() == nullptr) {
+        margin.top = CalcLength(dialogTheme->GetTextPropertyBottom());
+        CalcSize textMinSize;
+        Dimension textMinHeight;
+        float scale = context->GetFontScale();
+        if (NearEqual(scale, dialogTheme->GetBigFontSizeScale()) ||
+            NearEqual(scale, dialogTheme->GetLargeFontSizeScale())) {
+            textMinHeight = Dimension(dialogTheme->GetBigDialogWidth(), DimensionUnit::VP) -
+                            dialogTheme->GetTextPropertyBottom() - dialogTheme->GetTextPropertyBottom();
+        } else if (NearEqual(scale, dialogTheme->GetMaxFontSizeScale())) {
+            textMinHeight = Dimension(dialogTheme->GetMaxDialogWidth(), DimensionUnit::VP) -
+                            dialogTheme->GetTextPropertyBottom() - dialogTheme->GetTextPropertyBottom();
+        }
+        textMinSize.SetHeight(CalcLength(textMinHeight));
+        textLayoutProperty->UpdateCalcMinSize(textMinSize);
+    }
     textLayoutProperty->UpdateMargin(margin);
     auto color = dialogTheme->GetDialogFontColor();
     textLayoutProperty->UpdateTextColor(Color(color.GetValue()));

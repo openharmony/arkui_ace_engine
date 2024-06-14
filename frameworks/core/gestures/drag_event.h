@@ -25,7 +25,8 @@
 #include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
-
+constexpr Dimension DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD = 10.0_vp;
+constexpr float DEFAULT_DRAG_START_SCALE = 0.2;
 class PasteData : public AceType {
     DECLARE_ACE_TYPE(PasteData, AceType);
 

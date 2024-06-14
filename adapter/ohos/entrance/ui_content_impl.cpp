@@ -46,6 +46,7 @@
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
+#include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
@@ -139,6 +140,18 @@ void AddMccAndMncToResConfig(
     resourceManager->GetResConfig(*resConfig);
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
+}
+
+void AddSetAppColorModeToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    CHECK_NULL_VOID(context);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_VOID(config);
+    auto colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    if (!colorModeIsSetByApp.empty()) {
+        aceResCfg.SetColorModeIsSetByApp(true);
+    }
 }
 } // namespace
 
@@ -415,7 +428,8 @@ public:
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
+        auto aceView =
+            AceType::DynamicCast<Platform::AceViewOhos>(Platform::AceContainer::GetContainer(instanceId)->GetAceView());
         CHECK_NULL_VOID(aceView);
         DragEventAction action;
         switch (event) {
@@ -550,13 +564,18 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    CHECK_NULL_VOID(hapModuleInfo);
-    moduleName_ = hapModuleInfo->name;
-    hapPath_ = hapModuleInfo->hapPath;
-    isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
-    SetConfiguration(context->GetConfiguration());
-    context_ = context->weak_from_this();
+    if (CJUtils::IsCJFrontendContext(context)) {
+        LOGD("UIContentImpl cj");
+        context_ = context->weak_from_this();
+    } else {
+        auto hapModuleInfo = context->GetHapModuleInfo();
+        CHECK_NULL_VOID(hapModuleInfo);
+        moduleName_ = hapModuleInfo->name;
+        hapPath_ = hapModuleInfo->hapPath;
+        isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
+        SetConfiguration(context->GetConfiguration());
+        context_ = context->weak_from_this();
+    }
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
@@ -752,24 +771,29 @@ napi_value UIContentImpl::GetUINapiContext()
 UIContentErrorCode UIContentImpl::Restore(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
+    LOGI("UIContent Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
+        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
-    std::tie(startUrl_, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    RouterRecoverRecord record;
+    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
+    startUrl_ = record.url;
     CHECK_ERROR_CODE_RETURN(errorCode);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
-    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s, isNamedRouter: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
+        (record.isNamedRouter ? "yes" : "no"));
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
 }
 
 std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo", bundleName_.c_str(), moduleName_.c_str(),
-        instanceId_);
-    return Platform::AceContainer::GetContentInfo(instanceId_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo, ContentInfoType: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, type);
+    return Platform::AceContainer::GetContentInfo(instanceId_, type);
 }
 
 // ArkTSCard start
@@ -1054,6 +1078,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
@@ -1083,7 +1108,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
 
     // create ace_view
-    Platform::AceViewOhos* aceView = nullptr;
+    RefPtr<Platform::AceViewOhos> aceView = nullptr;
     if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
@@ -1101,6 +1126,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         frontend->SetModuleName(moduleName_);
         // arkTSCard only support "esModule" compile mode
         frontend->SetIsBundle(false);
+        container->SetBundleName(bundleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
@@ -1462,7 +1488,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
 #endif
     // create container
-    if (runtime_) {
+    auto isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
+    if (runtime_ || isCJFrontend) {
         instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
         instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
@@ -1471,8 +1498,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
+    auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     auto container =
-        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
+        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
                 [window = window_] {
                     CHECK_NULL_VOID(window);
@@ -1498,7 +1526,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
-    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    if (!isCJFrontend) {
+        container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    }
     container->SetNavigationRoute(AceType::MakeRefPtr<NavigationRouteOhos>(context->GetBundleName()));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1507,6 +1537,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
+    } else if (isCJFrontend) {
+        container->GetSettings().SetUsingSharedRuntime(true);
     } else {
         container->GetSettings().SetUsingSharedRuntime(false);
     }
@@ -1525,6 +1557,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
+    AddSetAppColorModeToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -1849,6 +1882,10 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, color);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -1931,7 +1968,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
 }
@@ -1949,7 +1986,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
     return true;
 }
@@ -1963,7 +2000,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent, isPreIme);
 }
 
@@ -1998,6 +2035,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.fontFamily = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_FONT);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             parsedConfig.colorModeIsSetByApp =
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
@@ -2060,7 +2098,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                 pipelineContext->StartWindowAnimation();
             }
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
@@ -2071,12 +2109,14 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             pipelineContext->CheckAndUpdateKeyboardInset();
             pipelineContext->ChangeDarkModeBrightness();
         }
+        SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
+            Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
+            static_cast<WindowSizeChangeReason>(reason));
     };
 
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-    if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-                                             reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
-        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
@@ -2264,6 +2304,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();
+    bool isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
+    auto frontendType = isCJFrontend ? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (isDialog) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -2272,20 +2314,20 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         UpdateDialogResourceConfiguration(container);
     } else {
 #ifdef NG_BUILD
-        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
             context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
             }), false, true, true);
 #else
         if (Container::IsCurrentUseNewPipeline()) {
-            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }), false, true, true);
         } else {
-            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
@@ -2301,6 +2343,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
+    } else {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        container->SetApiTargetVersion(apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2469,7 +2514,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::ChangeViewSize(aceView, width, height);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -2491,8 +2536,12 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
     if (!Color::ParseColorString(color, bgColor)) {
         return;
     }
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    if (aceContainer) {
+        aceContainer->SetIsUseCustomBg(true);
+    }
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -2616,14 +2665,14 @@ int32_t UIContentImpl::CreateModalUIExtension(
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
-            sessionId =
-                overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack, config.isAsyncModalBinding);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks,
+                config.isProhibitBack, config.isAsyncModalBinding, config.isAllowedBeCovered);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
     LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "
-         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d",
+         "isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, isAllowedBeCovered=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding);
+        config.isAsyncModalBinding, config.isAllowedBeCovered);
     return sessionId;
 }
 
@@ -3025,6 +3074,7 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetIsCaretMode(false);
+            popupParam->SetBlockEvent(false);
             auto popupConfig = customPopupConfigMap_.find(targetId);
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;
@@ -3236,6 +3286,25 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDragNodeGrayscale(grayscale);
+}
+
+void UIContentImpl::PreLayout()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [pipelineContext] {
+            pipelineContext->PreLayout(pipelineContext->GetTimeFromExternalTimer(), 0);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPreLayout");
 }
 
 void UIContentImpl::SetStatusBarItemColor(uint32_t color)

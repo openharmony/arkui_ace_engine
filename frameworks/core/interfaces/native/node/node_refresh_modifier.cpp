@@ -110,6 +110,19 @@ ArkUI_Float32 GetPullDownRatio(ArkUINodeHandle node)
     return RefreshModelNG::GetPullDownRatio(frameNode);
 }
 
+ArkUI_Float32 GetRefreshOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetRefreshOffset(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Bool GetPullToRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullToRefresh(frameNode));
+}
 } // namespace
 namespace NodeModifier {
 
@@ -117,7 +130,7 @@ const ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
         SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio };
+        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
     return &modifier;
 }
 
@@ -163,6 +176,22 @@ void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
+}
+
+void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& value) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REFRESH_CHANGE_EVENT;
+        bool newValue = value == "true";
+        event.componentAsyncEvent.data[0].u32 = newValue;
+        SendArkUIAsyncEvent(&event);
+    };
+    RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

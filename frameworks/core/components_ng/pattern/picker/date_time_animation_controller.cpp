@@ -232,12 +232,16 @@ void DateTimeAnimationController::PlayButtonOpacityInAnimation()
         CHECK_NULL_VOID(buttonNode);
         auto layoutProperty = buttonNode->GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        if (!ref->isDatePickerButtonHade_) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
         auto focusHub = buttonNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetShow(false);
     });
-    buttonRender->OpacityAnimation(animationOption, 1.0f, 0.0f);
+    if (!isDatePickerButtonHade_) {
+        buttonRender->OpacityAnimation(animationOption, 1.0f, 0.0f);
+    }
 }
 
 void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()

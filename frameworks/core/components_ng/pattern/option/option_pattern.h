@@ -194,6 +194,11 @@ public:
     {
         return hasOptionWidth_;
     }
+
+    const RefPtr<SelectTheme>& GetSelectTheme() const
+    {
+        return selectTheme_;
+    }
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

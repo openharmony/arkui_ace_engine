@@ -177,7 +177,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             needReEstimateOffset_ = false;
             posMap_->ClearPosMap();
         }
-        CalculateCurrentOffset(relativeOffset);
+        CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
@@ -185,7 +185,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         targetIndexInGroup_.reset();
     }
     if (predictSnapOffset.has_value()) {
-        if (scrollable_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
+        if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
+            !AnimateRunning()) {
             scrollable_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
@@ -377,6 +378,10 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
+    auto layoutDirection = listLayoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        paint->SetDirection(true);
+    }
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -856,7 +861,8 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 float ListPattern::GetStartOverScrollOffset(float offset) const
 {
     float startOffset = 0.0f;
-    auto startPos = startMainPos_ + GetChainDelta(0);
+    float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(0, -offset) : 0.f;
+    auto startPos = startMainPos_ + ChainDelta;
     auto newStartPos = startPos + offset;
     if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
         startOffset = offset;
@@ -879,7 +885,8 @@ float ListPattern::GetStartOverScrollOffset(float offset) const
 float ListPattern::GetEndOverScrollOffset(float offset) const
 {
     float endOffset = 0.0f;
-    auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+    float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
+    auto endPos = endMainPos_ + ChainDelta;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
     if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
         endPos = startMainPos_ + contentEndPos;
@@ -1057,12 +1064,12 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
         CHECK_NULL_RETURN(list, 0.0);
-        return list->startMainPos_ + list->GetChainDelta(list->startIndex_) - list->currentDelta_;
+        return list->startMainPos_ - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
+        auto endPos = list->endMainPos_;
+        auto startPos = list->startMainPos_;
         if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
@@ -1084,8 +1091,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
+        auto endPos = list->endMainPos_;
+        auto startPos = list->startMainPos_;
         if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
@@ -1312,7 +1319,7 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
     ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1444,7 +1451,7 @@ void ListPattern::ScrollTo(float position)
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
@@ -1454,11 +1461,15 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
+            SetExtraOffset(extraOffset);
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
             }
         } else {
+            if (extraOffset.has_value()) {
+                currentDelta_ = extraOffset.value();
+            }
             jumpIndex_ = index;
             scrollAlign_ = align;
         }
@@ -1667,6 +1678,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         }
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
+    auto extraOffset = GetExtraOffset();
+    if (extraOffset.has_value()) {
+        SetUseTotalOffset(false);
+        targetPos += extraOffset.value();
+        ResetExtraOffset();
+    }
     if (!NearZero(targetPos)) {
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
@@ -1783,18 +1800,22 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
 }
 
-void ListPattern::CalculateCurrentOffset(float delta)
+void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
 {
     if (itemPosition_.empty()) {
         return;
     }
+    auto itemPos = itemPosition_;
+    for (auto& [index, pos] : recycledItemPosition) {
+        itemPos.try_emplace(index, pos);
+    }
     posMap_->UpdatePosMapStart(
-        delta, currentOffset_, spaceWidth_, itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
-    for (auto& [index, pos] : itemPosition_) {
+        delta, currentOffset_, spaceWidth_, itemPos.begin()->first, itemPos.begin()->second.startPos);
+    for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
     }
-    posMap_->UpdatePosMapEnd(itemPosition_.rbegin()->first, spaceWidth_);
+    posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_);
 }
 
 void ListPattern::UpdateScrollBarOffset()

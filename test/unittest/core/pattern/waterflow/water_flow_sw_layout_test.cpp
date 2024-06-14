@@ -348,6 +348,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     Create([](WaterFlowModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetRowsGap(Dimension(5.0f));
         CreateRandomItem(50);
     });
     pattern_->SetAnimateCanOverScroll(true);
@@ -361,6 +362,13 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 0);
     EXPECT_EQ(info_->TopFinalPos(), -1000.0f);
+    for (auto& lane : info_->lanes_) {
+        if (lane.items_.empty()) {
+            EXPECT_EQ(lane.startPos, lane.endPos);
+        } else {
+            EXPECT_EQ(lane.endPos - lane.startPos, GetChildHeight(frameNode_, 0));
+        }
+    }
 }
 
 /**
@@ -373,6 +381,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     Create([](WaterFlowModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetRowsGap(Dimension(5.0f));
         CreateRandomItem(50);
     });
     pattern_->SetAnimateCanOverScroll(true);
@@ -388,6 +397,41 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 49);
     EXPECT_EQ(info_->endIndex_, 49);
     EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
+    for (auto& lane : info_->lanes_) {
+        if (lane.items_.empty()) {
+            EXPECT_EQ(lane.startPos, lane.endPos);
+        } else {
+            EXPECT_EQ(lane.endPos - lane.startPos, GetChildHeight(frameNode_, 49));
+        }
+    }
+}
+
+/**
+ * @tc.name: OverScroll004
+ * @tc.desc: Test overScroll with content < WATERFLOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, OverScroll005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        model.SetFooter(GetDefaultHeaderBuilder());
+        CreateItem(3);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    info_->UpdateOffset(200.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 200.0f);
+    EXPECT_EQ(info_->TopFinalPos(), -200.0f);
+
+    info_->UpdateOffset(-300.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -100.0f);
+    EXPECT_EQ(info_->maxHeight_, 250.0f);
+    EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 100.0f);
 }
 
 /**
@@ -501,5 +545,97 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
 
     UpdateCurrentOffset(5.0f);
     EXPECT_FALSE(info->itemEnd_);
+}
+
+/**
+ * @tc.name: ScrollToEdge003
+ * @tc.desc: ScrollToEdge and check overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetFooter(GetDefaultHeaderBuilder());
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+
+        CreateRandomItem(100);
+    });
+    UpdateCurrentOffset(-Infinity<float>());
+    EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+    std::vector<float> endPos = { info_->lanes_[0].endPos, info_->lanes_[1].endPos, info_->lanes_[2].endPos };
+    std::vector<int32_t> endItems = { info_->lanes_[0].items_.back().idx, info_->lanes_[1].items_.back().idx,
+        info_->lanes_[2].items_.back().idx };
+
+    pattern_->SetAnimateCanOverScroll(true);
+    info_->delta_ = -751.0f;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 3; ++i) {
+        EXPECT_EQ(info_->lanes_[i].endPos, endPos[i] - 751.0f);
+        if (info_->idxToLane_[99] != i) {
+            EXPECT_EQ(info_->lanes_[i].startPos, info_->lanes_[i].endPos);
+            EXPECT_TRUE(info_->lanes_[i].items_.empty());
+            EXPECT_FALSE(GetChildFrameNode(frameNode_, endItems[i] + 1)->IsActive()); // + 1 to skip footer node
+        } else {
+            EXPECT_EQ(info_->lanes_[i].items_.back().idx, 99);
+        }
+    }
+
+    const std::function<bool()> canEnd = [&]() {
+        return std::all_of(endItems.begin(), endItems.end(),
+            [this](int32_t idx) { return GetChildFrameNode(frameNode_, idx)->IsActive(); });
+    };
+    while (!canEnd()) {
+        info_->delta_ = 2.0f;
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        FlushLayoutTask(frameNode_);
+        for (int i = 0; i < 3; ++i) {
+            if (!info_->lanes_[i].items_.empty()) {
+                ASSERT_TRUE(GetChildFrameNode(frameNode_, endItems[i] + 1)->IsActive());
+                ASSERT_EQ(GetChildRect(frameNode_, endItems[i] + 1).Bottom(), info_->lanes_[i].endPos);
+            } else {
+                ASSERT_EQ(info_->lanes_[i].startPos, info_->lanes_[i].endPos);
+            }
+        }
+    }
+}
+
+/**
+ * @tc.name: ScrollToEdge003
+ * @tc.desc: overScroll top and scroll back
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(5.0f));
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+
+        CreateRandomItem(100);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    info_->delta_ = 800.0f;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    for (int i = 1; i < 3; ++i) {
+        EXPECT_EQ(info_->lanes_[i].startPos, 800.0f);
+        EXPECT_EQ(info_->lanes_[i].startPos, info_->lanes_[i].endPos);
+        EXPECT_TRUE(info_->lanes_[i].items_.empty());
+        EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
+    }
+
+    info_->delta_ = -2.0f;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 3; ++i) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
+        ASSERT_EQ(GetChildY(frameNode_, i), info_->lanes_[i].startPos);
+        ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(),
+            info_->lanes_[i].startPos + info_->lanes_[i].items_.front().mainSize);
+        ASSERT_EQ(GetChildRect(frameNode_, i).Bottom(), info_->lanes_[i].endPos);
+    }
 }
 } // namespace OHOS::Ace::NG

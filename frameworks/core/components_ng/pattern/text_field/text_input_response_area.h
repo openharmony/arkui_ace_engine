@@ -50,6 +50,9 @@ public:
     }
 
     virtual const RefPtr<FrameNode> GetFrameNode() = 0;
+
+    SizeF GetFrameSize(bool withSafeArea = false);
+
 protected:
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
@@ -62,7 +65,10 @@ class PasswordResponseArea : public TextInputResponseArea {
 public:
     PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
         : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
-    ~PasswordResponseArea() = default;
+    ~PasswordResponseArea()
+    {
+        ClearArea();
+    }
 
     void InitResponseArea() override;
 
@@ -182,6 +188,7 @@ public:
     void Refresh() override;
 
 private:
+    bool IsShowClean();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();

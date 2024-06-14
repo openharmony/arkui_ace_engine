@@ -358,6 +358,15 @@ void FormRenderer::OnFormLinkInfoUpdate(const std::vector<std::string>& formLink
     formRendererDelegate_->OnFormLinkInfoUpdate(formLinkInfos);
 }
 
+void FormRenderer::OnEnableForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("formRendererDelegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnEnableForm(formJsInfo, enable);
+}
+
 void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
 {
     HILOG_INFO("Get renderRemoteObj, add death recipient.");

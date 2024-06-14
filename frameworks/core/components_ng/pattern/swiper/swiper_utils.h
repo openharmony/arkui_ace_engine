@@ -41,11 +41,7 @@ public:
     {
         // If display count is setted, use stretch mode.
         CHECK_NULL_RETURN(property, true);
-        if (property->HasDisplayCount() && !property->HasMinSize()) {
-            return true;
-        }
-
-        return property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+        return property->IsStretch();
     }
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
@@ -68,6 +64,7 @@ public:
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
         // re-determine ignoreItemSpace_ based on child calc length
+        property->ResetIgnorePrevMarginAndNextMargin();
         property->ResetIgnoreItemSpace();
         auto itemSpace = GetItemSpace(property);
         auto parentMainSize = idealSize.MainSize(axis);
@@ -175,8 +172,7 @@ private:
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
             GreatNotEqual(nextMargin, childCalcIdealLength)) {
-            property->UpdatePrevMarginWithoutMeasure(0.0_px);
-            property->UpdateNextMarginWithoutMeasure(0.0_px);
+            property->MarkIgnorePrevMarginAndNextMargin();
             return true;
         }
         return false;

@@ -289,6 +289,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
+    void SetNeedHideAfterTouch(bool needHideAfterTouch)
+    {
+        needHideAfterTouch_ = needHideAfterTouch;
+    }
+
     void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
@@ -358,12 +363,14 @@ public:
         isExtensionMenuShow_ = true;
     }
 
-    void SetHasDisappearAnimation(bool hasAnimation)
+    void SetDisappearAnimation(bool hasAnimation)
     {
+        // false：exit from BOTTOM to TOP
+        // true：exit from LEFT_BOTTOM to RIGHT_TOP
         hasAnimation_ = hasAnimation;
     }
 
-    bool HasDisappearAnimation() const
+    bool GetDisappearAnimation() const
     {
         return hasAnimation_;
     }
@@ -468,6 +475,35 @@ public:
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
     void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
+    
+    void BlockFurtherExpand()
+    {
+        canExpand_ = false;
+    }
+    
+    bool CanExpand()
+    {
+        return canExpand_;
+    }
+
+    RefPtr<FrameNode> GetLastSelectedItem()
+    {
+        return lastSelectedItem_;
+    }
+
+    void SetLastSelectedItem(const RefPtr<FrameNode>& lastSelectedItem)
+    {
+        lastSelectedItem_ = lastSelectedItem;
+    }
+
+    void SetIsEmbedded()
+    {
+        isEmbedded_ = true;
+    }
+    bool IsEmbedded()
+    {
+        return isEmbedded_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -537,6 +573,7 @@ private:
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
+    bool needHideAfterTouch_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;
@@ -549,6 +586,9 @@ private:
     bool hasOptionWidth_ = false;
     SizeF targetSize_;
     bool expandDisplay_ = false;
+    bool canExpand_ = true;
+    RefPtr<FrameNode> lastSelectedItem_ = nullptr;
+    bool isEmbedded_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

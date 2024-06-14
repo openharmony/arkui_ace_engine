@@ -607,6 +607,28 @@ void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onF
         scrollControllerBase->CloseAllSwipeActions(nullptr);
     }
 }
+
+ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ListModelNG::GetInitialIndex(frameNode);
+}
+
+void SetListFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+}
+
+void ResetListFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -624,7 +646,8 @@ const ArkUIListModifier* GetListModifier()
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit };
     return &modifier;
 }
 

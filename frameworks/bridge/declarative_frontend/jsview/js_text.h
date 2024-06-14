@@ -54,6 +54,7 @@ public:
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
+    static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
@@ -82,6 +83,7 @@ public:
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

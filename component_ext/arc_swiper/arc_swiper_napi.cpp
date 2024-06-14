@@ -60,7 +60,7 @@ SwiperModel* SwiperModel::GetInstance()
 
 napi_value JsCreate(napi_env env, napi_callback_info info)
 {
-    auto controller = SwiperModel::GetInstance()->Create();
+    auto controller = SwiperModel::GetInstance()->Create(true);
     SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::ARC_DOT);
 
     size_t argc = MAX_ARG_NUM;

@@ -114,22 +114,23 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
      * @tc.steps: step1. Build a PageEventHub.
      */
     PageEventHub pageEventHub;
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    auto groupManager = pageEventHub.GetGroupManager();
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
 
     /**
      * @tc.steps: step2. Add radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_TRUE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
-    EXPECT_FALSE(pageEventHub.HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_TRUE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    EXPECT_FALSE(groupManager->HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
 
     /**
      * @tc.steps: step3. Add another two radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
 
     /**
      * @tc.steps: step4. Create real node and fake node to ElementRegister.
@@ -144,15 +145,15 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
     /**
      * @tc.steps: step5. UpdateRadioGroupValue.
      */
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
 
     /**
      * @tc.steps: step6. RemoveRadioFromGroup.
      * @tc.expected: The radio remove successful .
      */
-    pageEventHub.RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_FALSE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_FALSE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
 }
 
 /**

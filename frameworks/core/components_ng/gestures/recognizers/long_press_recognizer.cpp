@@ -122,8 +122,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d", event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, long press recognizer receives %{public}d,"
+        " state: %{public}d", event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -183,8 +183,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event", event.touchEventId,
-        event.id);
+        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -344,6 +344,9 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);

@@ -68,9 +68,10 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     OffsetF& returnNavBarOffset)
 {
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    bool isZeroNavbarWidth = false;
     if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
         navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        return 0.0f;
+        isZeroNavbarWidth = true;
     }
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
@@ -91,7 +92,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         geometryNode->SetMarginFrameOffset(navBarOffset);
         navBarWrapper->Layout();
         returnNavBarOffset = navBarOffset;
-        return geometryNode->GetFrameSize().Width();
+        return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
     }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
@@ -100,7 +101,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
-    return geometryNode->GetFrameSize().Width();
+    return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
 }
 
 float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
@@ -187,13 +188,31 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
     option.SetCurve(MODE_SWITCH_CURVE);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+    option.SetOnFinishEvent([weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
+        auto hostNode = weakHost.Upgrade();
+        CHECK_NULL_VOID(hostNode);
+        hostNode->ReduceModeSwitchAnimationCnt();
+        if (hostNode->GetModeSwitchAnimationCnt() == 0) {
+            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+            CHECK_NULL_VOID(dividerNode);
+            auto layoutProperty = dividerNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+    });
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
         auto hostNode = weakHost.Upgrade();
         CHECK_NULL_VOID(hostNode);
+        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+        CHECK_NULL_VOID(dividerNode);
+        auto layoutProperty = dividerNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        hostNode->IncreaseModeSwitchAnimationCnt();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();
         hostNode->SetDoingModeSwitchAnimationFlag(false);
-    });
+    }, option.GetOnFinishEvent());
 }
 
 } // namespace
@@ -299,9 +318,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     CHECK_NULL_VOID(hostNode);
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto usrNavigationMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
-    bool isAutoMode = false;
     if (usrNavigationMode == NavigationMode::AUTO) {
-        isAutoMode = true;
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
             usrNavigationMode = NavigationMode::SPLIT;
             auto navBarNode = hostNode->GetNavBarNode();
@@ -314,7 +331,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
-    bool doModeSwitchAnimationInAnotherTask = isAutoMode && modeChange && !hostNode->IsOnModeSwitchAnimation();
+    bool doModeSwitchAnimationInAnotherTask = modeChange && !hostNode->IsOnModeSwitchAnimation();
     // First time layout, no need to do animation
     doModeSwitchAnimationInAnotherTask &= (navigationPattern->GetNavigationMode() != INITIAL_MODE);
     if (!doModeSwitchAnimationInAnotherTask) {
@@ -381,8 +398,8 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     realContentWidth_ = minContentWidth;
 
     if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarSize_ = SizeF(0.0f, 0.0f);
-        dividerSize_ = SizeF(0.0f, 0.0f);
+        navBarSize_.SetWidth(0.0f);
+        dividerSize_.SetWidth(0.0f);
         realNavBarWidth_ = 0.0f;
         realContentWidth_ = frameWidth;
     } else {

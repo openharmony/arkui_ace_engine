@@ -271,6 +271,8 @@ public:
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual SelectionInfo GetSelectionSpansInfo() = 0;
+    virtual RefPtr<SpanStringBase> ToStyledString(int32_t start, int32_t end) = 0;
+    virtual SelectionInfo FromStyledString(RefPtr<SpanStringBase> value) = 0;
 };
 
 class ACE_EXPORT RichEditorStyledStringControllerBase : virtual public RichEditorBaseControllerBase {
@@ -304,6 +306,7 @@ public:
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetPlaceholder(PlaceholderOptions& options) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
+    virtual void SetSupportPreviewText(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
     virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
     virtual void SetCaretColor(const Color& color) = 0;
@@ -314,6 +317,7 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

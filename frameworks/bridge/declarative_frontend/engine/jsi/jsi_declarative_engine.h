@@ -44,6 +44,7 @@ struct NamedRouterProperty {
     std::string bundleName;
     std::string moduleName;
     std::string pagePath;
+    std::string ohmUrl;
 };
 
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
@@ -206,6 +207,9 @@ public:
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     // ArkTsCard end
     static bool IsPlugin();
+    static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);
+    static panda::Local<panda::StringRef> GetCachedString(const EcmaVM *vm, int32_t propertyIndex);
+    static void SetCachedString(const EcmaVM* vm);
 
 private:
     void InitGlobalObjectTemplate();
@@ -355,11 +359,15 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void NotifyUIIdle() override;
+
     std::string GetStacktraceMessage() override;
 
     void GetStackTrace(std::string& trace) override;
 
     static std::string GetPagePath(const std::string& url);
+
+    static std::string GetFullPathInfo(const std::string& url);
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
@@ -442,6 +450,12 @@ public:
     static void AddToNavigationBuilderMap(std::string name,
         panda::Global<panda::ObjectRef> builderFunc);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
+    std::unique_ptr<JsonValue> GetFullPathInfo() override;
+    void RestoreFullPathInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    std::unique_ptr<JsonValue> GetNamedRouterInfo() override;
+    void RestoreNamedRouterInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    bool IsNamedRouterNeedPreload(const std::string& name) override;
+    void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
     bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
@@ -508,6 +522,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, std::string> routerPathInfoMap_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
     static thread_local panda::Global<panda::ObjectRef> obj_;

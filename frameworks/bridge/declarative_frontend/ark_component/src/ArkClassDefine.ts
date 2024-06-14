@@ -351,6 +351,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkChainMode {
+  direction: Axis | undefined;
+  style: ChainStyle  | undefined;
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkChainMode): boolean {
+    return (this.direction === another.direction) && (this.style === another.style);
+  }
+}
+
 class ArkListEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -975,6 +987,7 @@ class ArkDotIndicator extends DotIndicator {
   maskValue: boolean | undefined;
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
+  maxDisplayCountValue: ResourceColor | undefined;
 
   constructor() {
     super();
@@ -990,6 +1003,7 @@ class ArkDotIndicator extends DotIndicator {
     this.maskValue = undefined;
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
+    this.maxDisplayCountValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1005,7 +1019,8 @@ class ArkDotIndicator extends DotIndicator {
       this.selectedItemHeightValue === another.selectedItemHeightValue &&
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
-      this.selectedColorValue === another.selectedColorValue
+      this.selectedColorValue === another.selectedColorValue &&
+      this.maxDisplayCountValue === another.maxDisplayCountValue
     );
   }
 }
@@ -1091,6 +1106,20 @@ class ArkDisplayArrow {
 
   isEqual(another: ArkDisplayArrow): boolean {
     return this.value === another.value && this.isHoverShow === another.isHoverShow;
+  }
+}
+
+class ArkDisplayCount {
+  value: string | number | SwiperAutoFill;
+  swipeByGroup: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+
+  isEqual(another: ArkDisplayCount): boolean {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
   }
 }
 
@@ -1345,6 +1374,47 @@ class ArkDragPreviewOptions {
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
     );
   }
+}
+
+class ArkRelativeContainerGuideLine {
+  ids: Array<string> | undefined;
+  directions: Array<Axis> | undefined;
+  positions: Array<GuideLinePosition> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  ids: Array<string> | undefined;
+  directions: Array<BarrierDirection> | undefined;
+  referencedIds: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
 
 class ArkFocusScopeId {
   id: string | undefined;

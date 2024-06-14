@@ -41,7 +41,6 @@ public:
         TextLayoutProperty::Clone(value);
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propFormat_ = CloneFormat();
-        value->propIsDefaultFormat_ = CloneIsDefaultFormat();
         value->propHoursWest_ = CloneHoursWest();
         value->propFontSize_ = CloneFontSize();
         value->propTextColor_ = CloneTextColor();
@@ -57,7 +56,6 @@ public:
     {
         TextLayoutProperty::Reset();
         ResetFormat();
-        ResetIsDefaultFormat();
         ResetHoursWest();
         ResetFontSize();
         ResetTextColor();
@@ -71,7 +69,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDefaultFormat, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoursWest, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);

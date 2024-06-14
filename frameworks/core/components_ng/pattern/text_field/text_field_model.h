@@ -291,7 +291,7 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
@@ -357,6 +357,8 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
+    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

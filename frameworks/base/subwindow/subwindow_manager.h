@@ -74,6 +74,7 @@ public:
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
+    void UpdatePreviewPosition();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -139,6 +140,8 @@ public:
     {
         systemToastWindow_ = systemToastWindow;
     }
+    void ClearToastInSystemSubwindow();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -168,6 +171,7 @@ private:
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     RefPtr<Subwindow> systemToastWindow_;
+    Rect uiExtensionWindowRect_;
 };
 
 } // namespace OHOS::Ace

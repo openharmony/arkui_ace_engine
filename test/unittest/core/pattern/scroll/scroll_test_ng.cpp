@@ -21,9 +21,12 @@ void ScrollTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
-    scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+    scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
+    scrollBarTheme->padding_ = Edge(0.0);
+    scrollBarTheme->scrollBarMargin_ = Dimension(0.0);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 

@@ -1016,6 +1016,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
             break;
         }
+        recycledItemPosition_.emplace(pos->first, pos->second);
         itemPosition_.erase(pos++);
     }
 }
@@ -1084,6 +1085,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             }
             break;
         }
+        recycledItemPosition_.emplace(pos->first, pos->second);
         removeIndexes.emplace_back(pos->first);
     }
     for (const auto& index : removeIndexes) {
@@ -1354,6 +1356,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
+    for (auto& pos : recycledItemPosition_) {
+        pos.second.startPos -= currentOffset_;
+        pos.second.endPos -= currentOffset_;
+    }
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
     if (!itemPosition_.empty() && cacheCount > 0) {
         auto items = LayoutCachedItem(layoutWrapper, cacheCount);
@@ -1596,6 +1602,36 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     host->ForceSyncGeometryNode();
 }
 
+bool ListLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index,
+    bool forward, float &currPos, float crossSize)
+{
+    auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+    if (!wrapper) {
+        return true;
+    }
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (CheckNeedMeasure(wrapper)) {
+        return !isGroup;
+    }
+    auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
+    int32_t id = wrapper->GetHostNode()->GetId();
+    ListItemInfo pos;
+    if (forward) {
+        auto endPos = currPos + GetMainAxisSize(childSize, axis_);
+        pos = { id, currPos, endPos, isGroup };
+        currPos = endPos + spaceWidth_;
+    } else {
+        auto startPos = currPos - GetMainAxisSize(childSize, axis_);
+        pos = { id, startPos, currPos, isGroup };
+        currPos = startPos - spaceWidth_;
+    }
+    auto startIndex = index;
+    LayoutItem(wrapper, index, pos, startIndex, crossSize);
+    SyncGeometry(wrapper);
+    wrapper->SetActive(false);
+    return false;
+}
+
 std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
     std::list<int32_t> predictBuildList;
@@ -1606,42 +1642,18 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
-        if (!wrapper || CheckNeedMeasure(wrapper)) {
+        if (LayoutCachedALine(layoutWrapper, index, true, currPos, crossSize)) {
             predictBuildList.emplace_back(index);
-            continue;
         }
-        bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-        auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
-        auto endPos = currPos + GetMainAxisSize(childSize, axis_);
-        int32_t id = wrapper->GetHostNode()->GetId();
-        ListItemInfo pos = { id, currPos, endPos, isGroup };
-        currPos = endPos + spaceWidth_;
-        auto startIndex = index;
-        LayoutItem(wrapper, index, pos, startIndex, crossSize);
-        SyncGeometry(wrapper);
-        wrapper->SetActive(false);
     }
 
     currIndex = itemPosition_.begin()->first - 1;
     currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
-        if (!wrapper || CheckNeedMeasure(wrapper)) {
+        if (LayoutCachedALine(layoutWrapper, index, false, currPos, crossSize)) {
             predictBuildList.emplace_back(index);
-            continue;
         }
-        bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-        auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
-        auto startPos = currPos - GetMainAxisSize(childSize, axis_);
-        int32_t id = wrapper->GetHostNode()->GetId();
-        ListItemInfo pos = { id, startPos, currPos, isGroup };
-        currPos = startPos - spaceWidth_;
-        auto startIndex = index;
-        LayoutItem(wrapper, index, pos, startIndex, crossSize);
-        SyncGeometry(wrapper);
-        wrapper->SetActive(false);
     }
     return predictBuildList;
 }

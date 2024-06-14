@@ -187,6 +187,16 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetIsShowHoverImagePreviewStartDrag(bool isStart)
+    {
+        isShowHoverImagePreviewStartDrag_ = isStart;
+    }
+
+    bool GetIsShowHoverImagePreviewStartDrag()
+    {
+        return isShowHoverImagePreviewStartDrag_;
+    }
+
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -347,10 +357,23 @@ public:
         lastTouchItem_ = lastTouchItem;
     }
 
+    int IncreaseEmbeddedSubMenuCount()
+    {
+        return ++embeddedSubMenuCount_;
+    }
+    
+    int DecreaseEmbeddedSubMenuCount()
+    {
+        return --embeddedSubMenuCount_;
+    }
+
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
-
+    bool HasEmbeddedSubMenu();
+    void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
+    bool HasStackSubMenu();
+    int embeddedSubMenuCount_ = 0;
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -376,7 +399,8 @@ private:
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
-
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
+    void SetExitAnimation(const RefPtr<FrameNode>& host);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -393,6 +417,7 @@ private:
     bool isFirstShow_ = true;
     bool isShowInSubWindow_ = true;
     bool isShowHoverImage_ = false;
+    bool isShowHoverImagePreviewStartDrag_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

@@ -33,6 +33,7 @@ public:
     explicit DotIndicatorPaintMethod(const RefPtr<DotIndicatorModifier>& dotIndicatorModifier)
         : dotIndicatorModifier_(dotIndicatorModifier)
     {}
+    DotIndicatorPaintMethod() = default;
     ~DotIndicatorPaintMethod() override = default;
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
@@ -42,11 +43,13 @@ public:
     }
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-    void PaintNormalIndicator(const PaintWrapper* paintWrapper);
+    virtual void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
+    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize);
-    std::pair<float, float> CalculatePointCenterX(
+    void CalculateNormalMargin(
+        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount);
+    virtual std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index);
     void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);
     bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter,
@@ -147,18 +150,19 @@ public:
     {
         isHorizontalAndRightToLeft_ = axis_ == Axis::HORIZONTAL && textDirection == TextDirection::RTL;
     }
-private:
+protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
         float endLongPointLeftCenterX = 0.0f;
         float startLongPointRightCenterX = 0.0f;
         float endLongPointRightCenterX = 0.0f;
     };
-    std::pair<float, float> CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
-        const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX);
-    std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterX(
+    virtual std::pair<float, float> CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
+        const LinearVector<float>& startVectorBlackPointCenterX,
+        const LinearVector<float>& endVectorBlackPointCenterX);
+    virtual std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterX(
         const PaintWrapper* paintWrapper);
-    std::pair<float, float> ForwardCalculation(
+    virtual std::pair<float, float> ForwardCalculation(
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
     std::pair<float, float> BackwardCalculation(
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
@@ -170,7 +174,7 @@ private:
         CHECK_NULL_RETURN(swiperTheme, nullptr);
         return swiperTheme;
     }
-    void UpdateNormalIndicator(LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper);
+    virtual void UpdateNormalIndicator(LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper);
     std::pair<int32_t, int32_t> GetStartAndEndIndex(int32_t index);
     void GetLongPointAnimationStateSecondCenter(
         const PaintWrapper* paintWrapper, std::vector<std::pair<float, float>>& pointCenterX);
