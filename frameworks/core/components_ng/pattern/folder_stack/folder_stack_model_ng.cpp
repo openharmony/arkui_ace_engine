@@ -67,9 +67,19 @@ void FolderStackModelNG::SetAlignment(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void FolderStackModelNG::SetEnableAnimation(FrameNode* frameNode, bool isEnableAnimation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FolderStackLayoutProperty, EnableAnimation, isEnableAnimation, frameNode);
+}
+
 void FolderStackModelNG::SetEnableAnimation(bool IsEnableAnimation)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FolderStackLayoutProperty, EnableAnimation, IsEnableAnimation);
+}
+
+void FolderStackModelNG::SetAutoHalfFold(FrameNode* frameNode, bool isAutoHalfFold)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FolderStackLayoutProperty, AutoHalfFold, isAutoHalfFold, frameNode);
 }
 
 void FolderStackModelNG::SetAutoHalfFold(bool IsAutoHalfFold)

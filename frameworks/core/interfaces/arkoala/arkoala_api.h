@@ -2110,6 +2110,13 @@ struct ArkUIStackModifier {
     ArkUI_Int32 (*getAlignContent)(ArkUINodeHandle node);
 };
 
+struct ArkUIFolderStackModifier {
+    void (*setEnableAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableAnimation)(ArkUINodeHandle node);
+    void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAutoHalfFold)(ArkUINodeHandle node);
+};
+
 struct ArkUINavigatorModifier {
     void (*setTarget)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTarget)(ArkUINodeHandle node);
@@ -4196,6 +4203,7 @@ struct ArkUINodeModifiers {
     const ArkUISliderModifier* (*getSliderModifier)();
     const ArkUIDividerModifier* (*getDividerModifier)();
     const ArkUIStackModifier* (*getStackModifier)();
+    const ArkUIFolderStackModifier* (*getFolderStackModifier)();
     const ArkUINavDestinationModifier* (*getNavDestinationModifier)();
     const ArkUIGridModifier* (*getGridModifier)();
     const ArkUIGridColModifier* (*getGridColModifier)();
