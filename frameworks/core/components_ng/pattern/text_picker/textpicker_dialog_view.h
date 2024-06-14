@@ -118,7 +118,6 @@ private:
         const RefPtr<ButtonTheme>& buttonTheme);
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
         const RefPtr<FrameNode>& buttonNode, bool isConfirm);
-    static bool GetIsOverRange(const float& scale);
     static void SetDialogNodePageActive(RefPtr<FrameNode>& contentRow, RefPtr<FrameNode>& textPickerNode,
         const uint32_t& dialogNodePage, const uint32_t& showCount);
     static RefPtr<FrameNode> SeparatedOptionsShow(RefPtr<FrameNode>& contentColumn, RefPtr<FrameNode>& textPickerNode,
@@ -132,6 +131,9 @@ private:
     static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetFirstDividerNodeActive(RefPtr<UINode>& contentRow);
+    static void SetSecondDividerNodeActive(RefPtr<UINode>& contentRow);
+    static void SetThirdDividerNodeActive(RefPtr<UINode>& contentRow);
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;
 };
