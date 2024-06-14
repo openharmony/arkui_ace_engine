@@ -153,10 +153,10 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":prefetcher",
       ":shape",
       ":uicontext",
       ":x_node",
-      ":prefetcher",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
 
@@ -673,10 +673,10 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":prefetcher",
       ":shape",
       ":uicontext",
       ":x_node",
-      ":prefetcher",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
 
