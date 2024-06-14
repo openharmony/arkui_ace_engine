@@ -446,6 +446,11 @@ public:
         return showCountPortrait_;
     }
 
+    const Dimension& GetPaddingVertical() const
+    {
+        return paddingVertical_;
+    }
+
 private:
     PickerTheme() = default;
 
@@ -507,6 +512,7 @@ private:
     Dimension paddingHorizontal_;
     Dimension contentMarginVertical_;
     Dimension lunarswitchTextSize_;
+    Dimension paddingVertical_;
 
     PickerDate defaultStartDate_ = PickerDate(1970, 1, 1);
     PickerDate defaultEndDate_ = PickerDate(2100, 12, 31);

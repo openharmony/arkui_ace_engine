@@ -105,5 +105,6 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     auto showCountPortrait = static_cast<int32_t>(pattern->GetAttr<double>("picker_show_count_portrait", 5));
     theme->showCountPortrait_ =
         showCountPortrait < 0 ? theme->showCountPortrait_ : static_cast<uint32_t>(showCountPortrait);
+    theme->paddingVertical_ = pattern->GetAttr<Dimension>("text_picker_vertical_padding", 0.0_vp);
 }
 } // namespace OHOS::Ace
