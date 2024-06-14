@@ -793,6 +793,7 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
+    NotifyExitTextPreview();
     OperationRecord record;
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = options.value;
@@ -966,6 +967,7 @@ void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
 
 void RichEditorPattern::DeleteSpans(const RangeOptions& options)
 {
+    NotifyExitTextPreview();
     auto length = GetTextContentLength();
     int32_t start = options.start.value_or(0);
     int32_t end = options.end.value_or(length);
@@ -992,6 +994,12 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     ClearRedoOperationRecords();
     record.afterCaretPosition = start;
     AddOperationRecord(record);
+    DeleteSpansOperation(start, end);
+    AfterChangeText(changeValue);
+}
+
+void RichEditorPattern::DeleteSpansOperation(int32_t start, int32_t end)
+{
     auto startInfo = GetSpanPositionInfo(start);
     auto endInfo = GetSpanPositionInfo(end - 1);
     if (startInfo.spanIndex_ == endInfo.spanIndex_) {
@@ -1013,7 +1021,6 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
         textForDisplay_.clear();
     }
     UpdateSpanPosition();
-    AfterChangeText(changeValue);
 }
 
 void RichEditorPattern::RemoveEmptySpanItems()
@@ -3825,7 +3832,6 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
         caretPosition_ = previewTextRecord_.startOffset + addLength;
     }
     previewTextRecord_.currentClickedPosition = caretPosition_;
-    UpdateCaretInfoToController();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return NO_ERRORS;
 }
@@ -4004,8 +4010,10 @@ void RichEditorPattern::FinishTextPreview()
     CHECK_NULL_VOID(IsPreviewTextInputting());
     auto& record = previewTextRecord_;
     auto previewContent = record.previewTextSpan->content;
+    auto shouldInsertContent = !previewContent.empty() && !record.exitPreviewBySelf;
     auto previewStartPos = record.startOffset;
     record.previewTextSpan->content.clear();
+    caretPosition_ = record.startOffset;
     auto beforeSpanItem = record.beforeSpanNode ? record.beforeSpanNode->GetSpanItem() : nullptr;
     auto afterSpanItem = record.afterSpanNode ? record.afterSpanNode->GetSpanItem() : nullptr;
     bool needMerge = record.isSplitSpan && beforeSpanItem && afterSpanItem;
@@ -4015,7 +4023,7 @@ void RichEditorPattern::FinishTextPreview()
     RemoveEmptySpans();
     UpdateSpanPosition();
     previewTextRecord_.Reset();
-    if (!previewContent.empty()) {
+    if (shouldInsertContent) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert preview text pos = %{public}d", previewStartPos);
         caretPosition_ = previewStartPos;
         InsertValue(previewContent);
@@ -4023,6 +4031,20 @@ void RichEditorPattern::FinishTextPreview()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void RichEditorPattern::NotifyExitTextPreview()
+{
+    CHECK_NULL_VOID(IsPreviewTextInputting());
+    CHECK_NULL_VOID(HasFocus());
+    previewTextRecord_.exitPreviewBySelf = true;
+    FinishTextPreview();
+    std::string text = "";
+#if defined(ENABLE_STANDARD_INPUT)
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(text), caretPosition_, caretPosition_);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "notify imf that richEditor exit textPreview");
+#endif
 }
 
 std::vector<RectF> RichEditorPattern::GetPreviewTextRects()
