@@ -2702,6 +2702,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         return;
     }
 
+    // preload state management
+    isModulePreloaded_ = PreloadStateManagement(arkRuntime);
+
     // preload ark styles
     bool arkThemeResult = PreloadArkTheme(arkRuntime);
     if (!arkThemeResult) {
@@ -2709,9 +2712,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         globalRuntime_ = nullptr;
         return;
     }
-
-    // preload state management
-    isModulePreloaded_ = PreloadStateManagement(arkRuntime);
 
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
