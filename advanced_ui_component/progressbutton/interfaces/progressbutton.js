@@ -179,7 +179,7 @@ export class ProgressButton extends ViewPU {
     }
     else {
       this.isLoading = true;
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%";
+      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
     }
   }
   getLoadingProgress() {
@@ -191,7 +191,7 @@ export class ProgressButton extends ViewPU {
         this.textProgress = MAX_PERCENTAGE;
       }
       else {
-        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%";
+        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
       }
     }
   }

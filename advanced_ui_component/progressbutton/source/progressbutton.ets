@@ -69,7 +69,7 @@ export struct ProgressButton {
       this.textProgress = MAX_PERCENTAGE
     } else {
       this.isLoading = true
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%"
+      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%'
     }
   }
 
@@ -80,7 +80,7 @@ export struct ProgressButton {
       } else if (this.progress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE
       } else {
-        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%"
+        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%'
       }
     }
   }
