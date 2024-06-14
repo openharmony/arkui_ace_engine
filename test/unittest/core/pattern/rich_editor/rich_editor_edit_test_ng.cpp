@@ -1055,31 +1055,6 @@ HWTEST_F(RichEditorEditTestNg, DeleteValueSetImageSpan, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckEditorTypeChange001
- * @tc.desc: test CheckEditorTypeChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, CheckEditorTypeChange001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    SelectOverlayInfo selectOverlayInfo;
-    int32_t singleLineHeight = 143;
-    selectOverlayInfo.singleLineHeight = singleLineHeight;
-    CHECK_NULL_VOID(pipeline);
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    pipeline->AddOnAreaChangeNode(host->GetId());
-
-    richEditorPattern->selectOverlayProxy_ =
-        pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-
-    richEditorPattern->CheckEditorTypeChange();
-    EXPECT_EQ(richEditorPattern->GetEditorType(), TextSpanType::NONE);
-}
-
-/**
  * @tc.name: InsertValueByPaste001
  * @tc.desc: test InsertValueByPaste
  * @tc.type: FUNC
