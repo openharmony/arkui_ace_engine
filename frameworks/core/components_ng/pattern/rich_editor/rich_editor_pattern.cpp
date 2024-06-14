@@ -8407,6 +8407,7 @@ void RichEditorPattern::GetDeletedSpan(
     if (!spans_.empty()) {
         CalcDeleteValueObj(innerPosition, length, info);
         changeValue.SetRangeBefore({ innerPosition, innerPosition + length });
+        changeValue.SetRangeAfter({ innerPosition, innerPosition });
     }
     const std::list<RichEditorAbstractSpanResult>& resultList = info.GetRichEditorDeleteSpans();
     for (auto& it : resultList) {
