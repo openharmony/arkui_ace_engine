@@ -770,10 +770,6 @@ Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
 float TabBarLayoutAlgorithm::GetSpace(
     LayoutWrapper* layoutWrapper, int32_t indicator, const SizeF& frameSize, Axis axis)
 {
-    if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-        auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
-        indicator = childCount - indicator - 1;
-    }
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(indicator);
     if (!childWrapper) {
         return 0.0f;
@@ -785,13 +781,14 @@ float TabBarLayoutAlgorithm::GetSpace(
 
 float TabBarLayoutAlgorithm::CalculateFrontChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis)
 {
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
+    float frontChildrenMainSize = scrollMargin_;
     if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-        auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
         indicator = childCount - indicator - 1;
     }
-    float frontChildrenMainSize = scrollMargin_;
     for (int32_t index = 0; index < indicator; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto pos = (isRTL_ && axis_ == Axis::HORIZONTAL) ? (childCount - index - 1) : index;
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(pos);
         if (!childWrapper) {
             return 0.0f;
         }
@@ -889,14 +886,14 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::
 
 float TabBarLayoutAlgorithm::CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis)
 {
+    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
     if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-        auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
         indicator = childCount - indicator - 1;
     }
     float backChildrenMainSize = scrollMargin_;
-    auto childCount = layoutWrapper->GetTotalChildCount() - MASK_COUNT;
     for (int32_t index = indicator + 1; index < childCount; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto pos = (isRTL_ && axis_ == Axis::HORIZONTAL) ? (childCount - index - 1) : index;
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(pos);
         if (!childWrapper) {
             return 0.0f;
         }
