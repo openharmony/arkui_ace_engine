@@ -445,6 +445,7 @@ FrameNode::~FrameNode()
             frameRateManager->RemoveNodeRate(GetId());
         }
     }
+    FireOnNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -904,9 +905,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
-    if (attachFunc_) {
-        attachFunc_(GetId());
-    }
+
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1004,11 +1003,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
             focusHub->RemoveSelf();
         }
     }
-    pattern_->OnDetachFromMainTree();
-    if (detachFunc_) {
-        detachFunc_(GetId());
-    }
     eventHub_->FireOnDetach();
+    pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
@@ -1257,49 +1253,59 @@ void FrameNode::TriggerOnSizeChangeCallback()
     }
 }
 
+bool FrameNode::IsFrameDisappear()
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, true);
+    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    if (isFrameDisappear) {
+        return true;
+    }
+    bool curFrameIsActive = isActive_;
+    bool curIsVisible = IsVisible();
+    auto parent = GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrame) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (!parentFrame->isActive_) {
+            curFrameIsActive = false;
+            break;
+        }
+        if (!parentFrame->IsVisible()) {
+            curIsVisible = false;
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    return !curIsVisible || !curFrameIsActive;
+}
+
 void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
-
-    bool isFrameDisappear = forceDisappear || !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
-    if (!isFrameDisappear) {
-        bool curFrameIsActive = isActive_;
-        bool curIsVisible = IsVisible();
-        auto parent = GetParent();
-        while (parent) {
-            auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
-            if (!parentFrame) {
-                parent = parent->GetParent();
-                continue;
-            }
-            if (!parentFrame->isActive_) {
-                curFrameIsActive = false;
-                break;
-            }
-            if (!parentFrame->IsVisible()) {
-                curIsVisible = false;
-                break;
-            }
-            parent = parent->GetParent();
-        }
-        isFrameDisappear = !curIsVisible || !curFrameIsActive;
-    }
-
     CHECK_NULL_VOID(eventHub_);
     auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
-    if (isFrameDisappear) {
+    ProcessThrottledVisibleCallback();
+    if (forceDisappear || IsFrameDisappear()) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
-            ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
-                VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
-            ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
-                VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
+            ProcessAllVisibleCallback(
+                visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
+            ProcessAllVisibleCallback(
+                visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
+        return;
+    }
+
+    if (!eventHub_->HasImmediatelyVisibleCallback()) {
         return;
     }
 
@@ -1310,10 +1316,10 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
         auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
-        ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio);
-        ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio);
+        ProcessAllVisibleCallback(
+            visibleAreaUserRatios, visibleAreaUserCallback, currentVisibleRatio, lastVisibleCallbackRatio);
+        ProcessAllVisibleCallback(
+            visibleAreaInnerRatios, visibleAreaInnerCallback, currentVisibleRatio, lastVisibleCallbackRatio);
         lastVisibleRatio_ = currentVisibleRatio;
     }
 }
@@ -1327,26 +1333,28 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 }
 
 void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio)
+    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio, bool isThrottled)
 {
     bool isHandled = false;
     bool isVisible = false;
+    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ : &lastVisibleCallbackRatio_;
+
     for (const auto& callbackRatio : visibleAreaUserRatios) {
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            *lastVisibleCallbackRatio = currentVisibleRatio;
             isVisible = true;
             isHandled = true;
         } else if (LessNotEqual(currentVisibleRatio, callbackRatio) && GreatOrEqual(lastVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = currentVisibleRatio;
+            *lastVisibleCallbackRatio = currentVisibleRatio;
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MIN) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MIN;
+            *lastVisibleCallbackRatio = VISIBLE_RATIO_MIN;
             currentVisibleRatio = VISIBLE_RATIO_MIN;
             isVisible = false;
             isHandled = true;
         } else if (NearEqual(callbackRatio, VISIBLE_RATIO_MAX) && NearEqual(currentVisibleRatio, callbackRatio)) {
-            lastVisibleCallbackRatio_ = VISIBLE_RATIO_MAX;
+            *lastVisibleCallbackRatio = VISIBLE_RATIO_MAX;
             currentVisibleRatio = VISIBLE_RATIO_MAX;
             isVisible = true;
             isHandled = true;
@@ -1356,6 +1364,64 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
         callback(isVisible, currentVisibleRatio);
+    }
+}
+
+void FrameNode::ThrottledVisibleTask()
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
+    auto& userCallback = eventHub_->GetThrottledVisibleAreaCallback();
+    CHECK_NULL_VOID(userCallback.callback);
+    if (!throttledCallbackOnTheWay_) {
+        return;
+    }
+
+    RectF frameRect;
+    RectF visibleRect;
+    GetVisibleRect(visibleRect, frameRect);
+    double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
+                                      : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
+                                          VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+        throttledCallbackOnTheWay_ = false;
+        return;
+    }
+    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+    lastThrottledVisibleRatio_ = ratio;
+    throttledCallbackOnTheWay_ = false;
+    lastThrottledTriggerTime_ = GetCurrentTimestamp();
+}
+
+void FrameNode::ProcessThrottledVisibleCallback()
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto& visibleAreaUserCallback = eventHub_->GetThrottledVisibleAreaCallback();
+    CHECK_NULL_VOID(visibleAreaUserCallback.callback);
+
+    auto task = [weak = WeakClaim(this)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->ThrottledVisibleTask();
+    };
+
+    auto pipeline = GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    if (throttledCallbackOnTheWay_) {
+        return;
+    }
+
+    throttledCallbackOnTheWay_ = true;
+    int64_t interval = GetCurrentTimestamp() - lastThrottledTriggerTime_;
+    if (interval < visibleAreaUserCallback.period) {
+        executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, visibleAreaUserCallback.period,
+            "ThrottledVisibleChangeCallback", PriorityType::IDLE);
+    } else {
+        executor->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ThrottledVisibleChangeCallback", PriorityType::IDLE);
     }
 }
 
