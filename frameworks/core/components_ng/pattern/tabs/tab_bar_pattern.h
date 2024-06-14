@@ -252,7 +252,7 @@ public:
     }
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
-        if (selectedModes_.size() == position) {
+        if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
         } else {
             selectedModes_[position] = selectedMode;
@@ -261,7 +261,7 @@ public:
 
     void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
     {
-        if (indicatorStyles_.size() == position) {
+        if (indicatorStyles_.size() <= position) {
             indicatorStyles_.emplace_back(indicatorStyle);
         } else {
             indicatorStyles_[position] = indicatorStyle;
@@ -270,7 +270,7 @@ public:
 
     void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
     {
-        if (tabBarStyles_.size() == position) {
+        if (tabBarStyles_.size() <= position) {
             tabBarStyles_.emplace_back(tabBarStyle);
         } else {
             tabBarStyles_[position] = tabBarStyle;
@@ -279,7 +279,7 @@ public:
 
     void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position)
     {
-        if (bottomTabBarStyles_.size() == position) {
+        if (bottomTabBarStyles_.size() <= position) {
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
         } else {
             bottomTabBarStyles_[position] = bottomTabBarStyle;
@@ -288,7 +288,7 @@ public:
 
     void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
     {
-        if (labelStyles_.size() == position) {
+        if (labelStyles_.size() <= position) {
             labelStyles_.emplace_back(labelStyle);
         } else {
             labelStyles_[position] = labelStyle;
@@ -297,7 +297,7 @@ public:
 
     void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
     {
-        if (iconStyles_.size() == position) {
+        if (iconStyles_.size() <= position) {
             iconStyles_.emplace_back(iconStyle);
         } else {
             iconStyles_[position] = iconStyle;
@@ -311,7 +311,7 @@ public:
 
     void SetSymbol(const TabBarSymbol& symbol, uint32_t position)
     {
-        if (symbolArray_.size() == position) {
+        if (symbolArray_.size() <= position) {
             symbolArray_.emplace_back(symbol);
         } else {
             symbolArray_[position] = symbol;
