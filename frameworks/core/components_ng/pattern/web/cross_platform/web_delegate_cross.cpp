@@ -99,7 +99,6 @@ constexpr char WEB_EVENT_ONHTTPERRORRECEIVE[] = "onHttpErrorReceive";
 constexpr char WEB_EVENT_ONPAGEVISIBLE[] = "onPageVisible";
 constexpr char WEB_EVENT_ONHTTPAUTHREQUEST[] = "onHttpAuthRequest";
 constexpr char WEB_EVENT_ONPERMISSIONREQUEST[] = "onPermissionRequest";
-constexpr char WEB_EVENT_ONADSBLOCKED[] = "onAdsBlocked";
 
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
@@ -758,7 +757,6 @@ void WebDelegateCross::RegisterWebEvent()
                 delegate->OnGeolocationPermissionsHidePrompt();
             }
         });
-    RegisterWebEventInternalForAdsBlock();
 }
 
 void WebDelegateCross::RegisterWebObjectEvent()
@@ -1725,44 +1723,8 @@ void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t 
     // cross platform is not support now;
 }
 
-void WebDelegateCross::RegisterWebEventInternalForAdsBlock()
+void WebDelegateCross::DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width)
 {
-    auto context = DynamicCast<NG::PipelineContext>(context_.Upgrade());
-    CHECK_NULL_VOID(context);
-    auto resRegister = context->GetPlatformResRegister();
-    if (resRegister == nullptr) {
-        return;
-    }
-    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_ONADSBLOCKED), [weak = WeakClaim(this)](
-                const std::string& url, const std::vector<std::string>& adsBlocked) {
-        auto delegate = weak.Upgrade();
-        if (delegate) {
-            delegate->OnAdsBlocked(url, adsBlocked);
-        }
-    });
-}
-
-void WebDelegateCross::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
-{
-    ContainerScope scope(instanceId_);
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), url, adsBlocked]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto webPattern = delegate->webPattern_.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                auto webEventHub = webPattern->GetWebEventHub();
-                CHECK_NULL_VOID(webEventHub);
-                auto propOnTitleReceive = webEventHub->GetOnAdsBlockedEvent();
-                CHECK_NULL_VOID(propOnTitleReceive);
-                auto eventParam = std::make_shared<AdsBlockedEvent>(url, adsBlocked);
-                propOnTitleReceive(eventParam);
-                return;
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUIWebAdsBlockedEvent");
+    // cross platform is not support now;
 }
 }
