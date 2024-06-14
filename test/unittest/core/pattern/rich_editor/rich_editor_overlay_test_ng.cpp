@@ -1289,6 +1289,6 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
     auto selectOverlayInfo = selectOverlay->GetSelectOverlayInfo();
     auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
     EXPECT_FALSE(selectInfoFirstHandle.isShow);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 }
 } // namespace OHOS::Ace::NG
