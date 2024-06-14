@@ -37,6 +37,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t BUFFER_NODE_NUMBER = 2;
+const int32_t SECOND_DIVEDER_NODE_INDEX = 3;
+const int32_t THIRD_DIVEDER_NODE_INDEX = 5;
+const int32_t BACKWARD_BUTTON_DIVEDER_INDEX = 2;
+const int32_t FORWAED_BUTTON_DIVEDER_INDEX = 4;
+const int32_t CONFIRM_BUTTON_DIVEDER_INDEX = 6;
 constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
@@ -243,7 +248,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     float scale = pipeline->GetFontScale();
-    if (scale >= LARGE_SCALE) {
+    if (scale >= LARGE_SCALE && GetIsOverRange(scale)) {
         dialogNode = SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData,
             dialogEvent, dialogCancelEvent, scale, closeCallBack, dialogNode);
         return dialogNode;
@@ -983,6 +988,11 @@ void TextPickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo
     }
 }
 
+bool TextPickerDialogView::GetIsOverRange(const float& scale)
+{
+    return true;
+}
+
 RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent& moveForwardEvent,
     const RefPtr<FrameNode>& textPickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
@@ -1088,7 +1098,7 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
     buttonCancelLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto buttonForward = contentRow->GetChildAtIndex(4);
+    auto buttonForward = contentRow->GetChildAtIndex(FORWAED_BUTTON_DIVEDER_INDEX);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
     CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(true);
@@ -1096,7 +1106,7 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
     buttonForwardLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto buttonBackward = contentRow->GetChildAtIndex(2);
+    auto buttonBackward = contentRow->GetChildAtIndex(BACKWARD_BUTTON_DIVEDER_INDEX);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
     CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(false);
@@ -1104,15 +1114,13 @@ void TextPickerDialogView::SetFirstDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
     buttonBackwardLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
-    auto buttonConfirm = contentRow->GetChildAtIndex(6);
+    auto buttonConfirm = contentRow->GetChildAtIndex(CONFIRM_BUTTON_DIVEDER_INDEX);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
     CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(false);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    
-    SetFirstDividerNodeActive(contentRow);
 }
 
 void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRow)
@@ -1126,7 +1134,7 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
     buttonCancelLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
-    auto buttonForward = contentRow->GetChildAtIndex(4);
+    auto buttonForward = contentRow->GetChildAtIndex(FORWAED_BUTTON_DIVEDER_INDEX);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
     CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(true);
@@ -1134,7 +1142,7 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
     buttonForwardLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto buttonBackward = contentRow->GetChildAtIndex(2);
+    auto buttonBackward = contentRow->GetChildAtIndex(BACKWARD_BUTTON_DIVEDER_INDEX);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
     CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(true);
@@ -1142,15 +1150,13 @@ void TextPickerDialogView::SetSecondDialogButtonActive(RefPtr<UINode>& contentRo
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
     buttonBackwardLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto buttonConfirm = contentRow->GetChildAtIndex(6);
+    auto buttonConfirm = contentRow->GetChildAtIndex(CONFIRM_BUTTON_DIVEDER_INDEX);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
     CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(false);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    
-    SetSecondDividerNodeActive(contentRow);
 }
 
 void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow)
@@ -1164,7 +1170,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
     buttonCancelLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
-    auto buttonForward = contentRow->GetChildAtIndex(4);
+    auto buttonForward = contentRow->GetChildAtIndex(FORWAED_BUTTON_DIVEDER_INDEX);
     auto buttonForwardNode = AceType::DynamicCast<FrameNode>(buttonForward);
     CHECK_NULL_VOID(buttonForwardNode);
     buttonForwardNode->SetActive(false);
@@ -1172,7 +1178,7 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonForwardLayoutProperty);
     buttonForwardLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
-    auto buttonBackward = contentRow->GetChildAtIndex(2);
+    auto buttonBackward = contentRow->GetChildAtIndex(BACKWARD_BUTTON_DIVEDER_INDEX);
     auto buttonBackwardNode = AceType::DynamicCast<FrameNode>(buttonBackward);
     CHECK_NULL_VOID(buttonBackwardNode);
     buttonBackwardNode->SetActive(true);
@@ -1180,99 +1186,13 @@ void TextPickerDialogView::SetThirdDialogButtonActive(RefPtr<UINode>& contentRow
     CHECK_NULL_VOID(buttonBackwardLayoutProperty);
     buttonBackwardLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto buttonConfirm = contentRow->GetChildAtIndex(6);
+    auto buttonConfirm = contentRow->GetChildAtIndex(CONFIRM_BUTTON_DIVEDER_INDEX);
     auto buttonConfirmNode = AceType::DynamicCast<FrameNode>(buttonConfirm);
     CHECK_NULL_VOID(buttonConfirmNode);
     buttonConfirmNode->SetActive(true);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    
-    SetThirdDividerNodeActive(contentRow);
-}
-
-void TextPickerDialogView::SetFirstDividerNodeActive(RefPtr<UINode>& contentRow)
-{
-    CHECK_NULL_VOID(contentRow);
-    auto firstDivider = contentRow->GetChildAtIndex(1);
-    auto firstDividerNode = AceType::DynamicCast<FrameNode>(firstDivider);
-    CHECK_NULL_VOID(firstDividerNode);
-    firstDividerNode->SetActive(true);
-    auto firstDividerLayoutProperty = firstDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(firstDividerLayoutProperty);
-    firstDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-
-    auto secondDivider = contentRow->GetChildAtIndex(3);
-    auto secondDividerNode = AceType::DynamicCast<FrameNode>(secondDivider);
-    CHECK_NULL_VOID(secondDividerNode);
-    secondDividerNode->SetActive(false);
-    auto secondDividerLayoutProperty = secondDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(secondDividerLayoutProperty);
-    secondDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto thirdDivider = contentRow->GetChildAtIndex(5);
-    auto thirdDividerNode = AceType::DynamicCast<FrameNode>(thirdDivider);
-    CHECK_NULL_VOID(thirdDividerNode);
-    thirdDividerNode->SetActive(false);
-    auto thirdDividerLayoutProperty = thirdDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(thirdDividerLayoutProperty);
-    thirdDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-}
-
-void TextPickerDialogView::SetSecondDividerNodeActive(RefPtr<UINode>& contentRow)
-{
-    CHECK_NULL_VOID(contentRow);
-    auto firstDivider = contentRow->GetChildAtIndex(1);
-    auto firstDividerNode = AceType::DynamicCast<FrameNode>(firstDivider);
-    CHECK_NULL_VOID(firstDividerNode);
-    firstDividerNode->SetActive(false);
-    auto firstDividerLayoutProperty = firstDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(firstDividerLayoutProperty);
-    firstDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto secondDivider = contentRow->GetChildAtIndex(3);
-    auto secondDividerNode = AceType::DynamicCast<FrameNode>(secondDivider);
-    CHECK_NULL_VOID(secondDividerNode);
-    secondDividerNode->SetActive(true);
-    auto secondDividerLayoutProperty = secondDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(secondDividerLayoutProperty);
-    secondDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-
-    auto thirdDivider = contentRow->GetChildAtIndex(5);
-    auto thirdDividerNode = AceType::DynamicCast<FrameNode>(thirdDivider);
-    CHECK_NULL_VOID(thirdDividerNode);
-    thirdDividerNode->SetActive(false);
-    auto thirdDividerLayoutProperty = thirdDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(thirdDividerLayoutProperty);
-    thirdDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-}
-
-void TextPickerDialogView::SetThirdDividerNodeActive(RefPtr<UINode>& contentRow)
-{
-    CHECK_NULL_VOID(contentRow);
-    auto firstDivider = contentRow->GetChildAtIndex(1);
-    auto firstDividerNode = AceType::DynamicCast<FrameNode>(firstDivider);
-    CHECK_NULL_VOID(firstDividerNode);
-    firstDividerNode->SetActive(false);
-    auto firstDividerLayoutProperty = firstDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(firstDividerLayoutProperty);
-    firstDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto secondDivider = contentRow->GetChildAtIndex(3);
-    auto secondDividerNode = AceType::DynamicCast<FrameNode>(secondDivider);
-    CHECK_NULL_VOID(secondDividerNode);
-    secondDividerNode->SetActive(false);
-    auto secondDividerLayoutProperty = secondDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(secondDividerLayoutProperty);
-    secondDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto thirdDivider = contentRow->GetChildAtIndex(5);
-    auto thirdDividerNode = AceType::DynamicCast<FrameNode>(thirdDivider);
-    CHECK_NULL_VOID(thirdDividerNode);
-    thirdDividerNode->SetActive(true);
-    auto thirdDividerLayoutProperty = thirdDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(thirdDividerLayoutProperty);
-    thirdDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 }
 
 void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColumn,
@@ -1282,10 +1202,54 @@ void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColum
     auto contentRow = contentColumn->GetLastChild();
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
+        SetDividerNodeActive(contentRow, true, false, false);
     } else if (dialogNodePage == 1 && dialogNodePage != (columnCount - 1)) {
         SetSecondDialogButtonActive(contentRow);
+        SetDividerNodeActive(contentRow, false, true, false);
     } else {
         SetThirdDialogButtonActive(contentRow);
+        SetDividerNodeActive(contentRow, false, false, true);
+    }
+}
+
+void TextPickerDialogView::SetDividerNodeActive(RefPtr<UINode>& contentRow, bool firstDividerActive,
+    bool secondDividerActive, bool thirdDividerActive)
+{
+    CHECK_NULL_VOID(contentRow);
+    auto firstDivider = contentRow->GetChildAtIndex(1);
+    auto firstDividerNode = AceType::DynamicCast<FrameNode>(firstDivider);
+    CHECK_NULL_VOID(firstDividerNode);
+    firstDividerNode->SetActive(firstDividerActive);
+    auto firstDividerLayoutProperty = firstDividerNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(firstDividerLayoutProperty);
+    if (firstDividerActive) {
+        firstDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        firstDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    }
+
+    auto secondDivider = contentRow->GetChildAtIndex(SECOND_DIVEDER_NODE_INDEX);
+    auto secondDividerNode = AceType::DynamicCast<FrameNode>(secondDivider);
+    CHECK_NULL_VOID(secondDividerNode);
+    secondDividerNode->SetActive(secondDividerActive);
+    auto secondDividerLayoutProperty = secondDividerNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(secondDividerLayoutProperty);
+    if (secondDividerActive) {
+        secondDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        secondDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    }
+
+    auto thirdDivider = contentRow->GetChildAtIndex(THIRD_DIVEDER_NODE_INDEX);
+    auto thirdDividerNode = AceType::DynamicCast<FrameNode>(thirdDivider);
+    CHECK_NULL_VOID(thirdDividerNode);
+    thirdDividerNode->SetActive(thirdDividerActive);
+    auto thirdDividerLayoutProperty = thirdDividerNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(thirdDividerLayoutProperty);
+    if (thirdDividerActive) {
+        thirdDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        thirdDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
 }
 
@@ -1420,8 +1384,8 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
             closeCallBack, nextCallBack, previousCallBack);
     CHECK_NULL_RETURN(contentRow, nullptr);
     contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
-    contentRow->AddChild(CreateDividerNode(textPickerNode), 3);
-    contentRow->AddChild(CreateDividerNode(textPickerNode), 5);
+    contentRow->AddChild(CreateDividerNode(textPickerNode), SECOND_DIVEDER_NODE_INDEX);
+    contentRow->AddChild(CreateDividerNode(textPickerNode), THIRD_DIVEDER_NODE_INDEX);
     contentRow->MountToParent(contentColumn);
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
