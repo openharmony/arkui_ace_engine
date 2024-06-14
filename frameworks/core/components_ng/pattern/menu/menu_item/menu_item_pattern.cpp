@@ -804,26 +804,27 @@ void MenuItemPattern::OnClick()
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = GetMenuWrapper();
+    auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
+    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
+        return;
+    }
+    if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
+        menuWrapperPattern->HideSubMenu();
+        return;
+    }
     auto lastSelectedItem = menuPattern->GetLastSelectedItem();
     if (lastSelectedItem && lastSelectedItem != host) {
         auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         SetChange();
     }
-    auto expandingMode = GetExpandingMode();
-    auto menuWrapper = GetMenuWrapper();
-    auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
-    auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
     if (GetSubBuilder() != nullptr &&
-        (expandingMode == SubMenuExpandingMode::SIDE ||
-        (expandingMode == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
-        (expandingMode == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
+        (expandingMode_ == SubMenuExpandingMode::SIDE ||
+        (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
+        (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
         ShowSubMenu();
-        return;
-    }
-    if (expandingMode == SubMenuExpandingMode::STACK &&
-        ((!IsSubMenu() && hasSubMenu) || IsStackSubmenuHeader())) {
-        menuWrapperPattern->HideSubMenu();
         return;
     }
     menuPattern->SetLastSelectedItem(host);
