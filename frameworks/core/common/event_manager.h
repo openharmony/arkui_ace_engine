@@ -284,6 +284,7 @@ private:
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
+    void MockCancelEventAndDispatch(const TouchEvent& touchPoint);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;

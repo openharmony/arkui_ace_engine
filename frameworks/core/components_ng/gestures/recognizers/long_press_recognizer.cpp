@@ -162,6 +162,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -188,6 +191,9 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }

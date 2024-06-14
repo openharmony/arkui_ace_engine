@@ -70,10 +70,6 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
-
-    bool AboutToAddCurrentFingers(int32_t touchId) override;
-
-    bool AboutToMinusCurrentFingers(int32_t touchId) override;
     
     void UpdateFingerListInfo() override;
 
