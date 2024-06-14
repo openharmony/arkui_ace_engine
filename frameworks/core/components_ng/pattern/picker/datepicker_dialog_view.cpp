@@ -462,14 +462,12 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     CHECK_NULL_VOID(monthAndDayLayoutProperty);
     monthAndDayLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
     monthAndDayPickerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    monthAndDayPickerNode->MarkDirtyNode();
     auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(ampmNode);
     auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(ampmLayoutProperty);
     ampmLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
     ampmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    ampmNode->MarkDirtyNode();
     auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(hourNode);
     auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
@@ -479,9 +477,7 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
     minuteLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     hourNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    hourNode->MarkDirtyNode();
     minuteNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    minuteNode->MarkDirtyNode();
     auto buttonCancelNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(0));
     CHECK_NULL_VOID(buttonCancelNode);
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
@@ -500,7 +496,6 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     CHECK_NULL_VOID(confirmButtonLayoutProperty);
     confirmButtonLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     buttonConfirmNode->MarkDirtyNode();
-
     auto nextConfirmDividerNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(DIVIDER_ROWS_THREE));
     CHECK_NULL_VOID(nextConfirmDividerNode);
     auto nextConfirmLayoutProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
