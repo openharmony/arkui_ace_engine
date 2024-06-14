@@ -233,7 +233,7 @@ struct ScrollableFrameInfo {
     uint64_t scrollStateTime_ = 0;
     int32_t scrollState_ = 0;
     bool canOverScroll_ = false;
-    int32_t canOverScrollInfo_ = 0;
+    uint32_t canOverScrollInfo_ = 0;
 
     std::string ToString() const
     {
