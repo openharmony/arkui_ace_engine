@@ -27,7 +27,6 @@ constexpr Dimension SHEET_BLANK_FLOATING_STATUS_BAR = 32.0_vp;
 constexpr Dimension SHEET_SPLIT_AI_BAR = 24.0_vp;
 constexpr Dimension SHEET_SPLIT_STATUS_BAR = 24.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_PADDING = 8.0_vp;
-constexpr Dimension SHEET_OPERATION_AREA_HEIGHT = 56.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_HEIGHT_DOUBLE = 72.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_WIDTH = 40.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_HEIGHT = 40.0_vp;
@@ -99,6 +98,9 @@ public:
             theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
             theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
             theme->sheetBackgroundBlurStyle_ = sheetPattern->GetAttr<int>("sheet_background_blur_style", 0);
+            theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
+            theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
+            theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
         }
     };
     ~SheetTheme() override = default;
@@ -126,6 +128,11 @@ public:
     const Dimension& GetSubtitleTextMargin() const
     {
         return subtitleTextMargin_;
+    }
+
+    const Dimension& GetOperationAreaHeight() const
+    {
+        return operationAreaHeight_;
     }
 
     const Color& GetTitleTextFontColor() const
@@ -178,6 +185,16 @@ public:
         return sheetBackgroundBlurStyle_;
     }
 
+    const double& GetLargePercent() const
+    {
+        return largePercent_;
+    }
+
+    const double& GetMediumPercent() const
+    {
+        return mediumPercent_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -187,6 +204,9 @@ private:
     Dimension titleTextMargin_;
     Dimension subtitleTextFontSize_;
     Dimension subtitleTextMargin_;
+    Dimension operationAreaHeight_;
+    double largePercent_ = 0.0f;
+    double mediumPercent_ = 0.0f;
     Color titleTextFontColor_;
     Color subtitleTextFontColor_;
     Color sheetBackgoundColor_;
