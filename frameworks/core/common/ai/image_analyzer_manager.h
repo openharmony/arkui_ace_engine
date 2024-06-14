@@ -64,7 +64,7 @@ public:
         int rectHeight);
 
 private:
-    RefPtr<NG::FrameNode> frameNode_;
+    WeakPtr<NG::FrameNode> frameNode_;
     ImageAnalyzerHolder holder_;
     ImageAnalyzerInnerConfig analyzerUIConfig_;
     std::shared_ptr<ImageAnalyzerAdapter> imageAnalyzerAdapter_;
