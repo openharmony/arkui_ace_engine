@@ -110,6 +110,7 @@ public:
         int32_t spanIndex = INVALID_VALUE;
         int32_t currentClickedPosition = INVALID_VALUE;
         bool isPreviewTextInputting = false;
+        std::string deltaStr;
         RefPtr<SpanItem> previewTextSpan;
 
         std::string ToString() const
@@ -134,6 +135,7 @@ public:
             spanIndex = INVALID_VALUE;
             currentClickedPosition = INVALID_VALUE;
             isPreviewTextInputting = false;
+            deltaStr.clear();
             previewTextSpan = nullptr;
         }
 
@@ -148,6 +150,11 @@ public:
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
 
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    bool CallbackBeforeSetPreviewText(
+        int32_t& delta, const std::string& previewTextValue, const PreviewRange& range, bool isReplaceAll);
+
+    bool CallbackAfterSetPreviewText(int32_t& delta);
 
     void FinishTextPreview() override;
 
@@ -172,6 +179,11 @@ public:
     void InsertValueInPreview(const std::string& insertValue);
 
     bool BetweenPreviewTextPosition(const Offset& globalOffset);
+
+    void SetSupportPreviewText(bool isTextPreviewSupported)
+    {
+        isTextPreviewSupported_ = isTextPreviewSupported;
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
@@ -818,6 +830,7 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    RefPtr<SpanNode> GetSpanNodeBySpanItem(const RefPtr<SpanItem> spanItem);
     int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetSymbolSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
@@ -1011,6 +1024,7 @@ private:
     int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
+    bool isTextPreviewSupported_ = true;
 };
 } // namespace OHOS::Ace::NG
 

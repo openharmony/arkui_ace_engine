@@ -33,9 +33,19 @@ void RichEditorInsertValue::SetInsertValue(const std::string& insertValue)
     insertValue_ = insertValue;
 }
 
+void RichEditorInsertValue::SetPreviewText(const std::string& previewText)
+{
+    previewText_ = previewText;
+}
+
 const std::string& RichEditorInsertValue::GetInsertValue() const
 {
     return insertValue_;
+}
+
+const std::string& RichEditorInsertValue::GetPreviewText() const
+{
+    return previewText_;
 }
 
 void RichEditorAbstractSpanResult::SetSpanIndex(int32_t spanIndex)
@@ -106,6 +116,16 @@ void RichEditorAbstractSpanResult::SetValue(const std::string& value)
 const std::string& RichEditorAbstractSpanResult::GetValue() const
 {
     return value_;
+}
+
+void RichEditorAbstractSpanResult::SetPreviewText(const std::string& previewText)
+{
+    previewText_ = previewText;
+}
+
+const std::string& RichEditorAbstractSpanResult::GetPreviewText() const
+{
+    return previewText_;
 }
 
 void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
