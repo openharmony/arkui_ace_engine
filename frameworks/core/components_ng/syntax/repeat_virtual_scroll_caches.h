@@ -171,6 +171,11 @@ public:
         l1_activeNodeKeys_.emplace(key);
     }
 
+    bool isInL1Cache(const std::string& key) const
+    {
+        return l1_activeNodeKeys_.find(key) != l1_activeNodeKeys_.end();
+    }
+
     /**
      * memorize last active range(s)
      */

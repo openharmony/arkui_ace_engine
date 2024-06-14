@@ -200,20 +200,6 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             return nullptr;
         }
 
-            if (isCache) {
-                // the item for index has been pre-build just to add it to L2 cache
-                frameNode4Index->SetParent(WeakClaim(this));
-                frameNode4Index->SetJSViewActive(false);
-
-                LOGE("index %{public}d item builder made or updated FrameNode %{public}d, isCache==true, adding the "
-                     "Node "
-                     "to L2 "
-                     "cache, no further processing, returning the node.",
-                    index, frameNode4Index->GetId());
-
-            return frameNode4Index->GetFrameChildByIndex(0, needBuild);
-        }
-
         LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
             frameNode4Index->GetId());
     } // frameNode4Index needs to be created or updated on JS side
@@ -225,18 +211,20 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         frameNode4Index->SetJSViewActive(true);
     }
 
-        if (addToRenderTree) {
+        if (addToRenderTree && !isCache) {
             LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache",
                 index, frameNode4Index->GetId());
 
             frameNode4Index->SetActive(true);
-            caches_.addKeyToL1(key);
         } else {
             LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
                  "add to L2 cache",
                 index, frameNode4Index->GetId());
         }
-
+    if (caches_.isInL1Cache(key)) {
+        return frameNode4Index->GetFrameChildByIndex(0, needBuild);
+    }
+    caches_.addKeyToL1(key);
     if (frameNode4Index->GetDepth() != GetDepth() + 1) {
         frameNode4Index->SetDepth(GetDepth() + 1);
     }
