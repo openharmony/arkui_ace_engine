@@ -32,6 +32,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/common/mock_udmf.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
