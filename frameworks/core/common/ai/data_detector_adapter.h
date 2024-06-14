@@ -113,7 +113,7 @@ private:
     std::string uiExtensionAbilityName_;
     std::unordered_map<int32_t, std::string> entityJson_;
     TimeStamp startDetectorTimeStamp_;
-    std::vector<std::string> detectTexts;
+    std::vector<std::string> detectTexts_;
 };
 } // namespace OHOS::Ace
 

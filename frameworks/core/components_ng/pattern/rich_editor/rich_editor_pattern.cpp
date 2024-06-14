@@ -482,9 +482,6 @@ void RichEditorPattern::OnModifyDone()
     ProcessInnerPadding();
     InitScrollablePattern();
     SetAccessibilityAction();
-    if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-        dataDetectorAdapter_->StartAITask();
-    }
     if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
@@ -2562,10 +2559,8 @@ void RichEditorPattern::HandleBlurEvent()
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent");
     isLongPress_ = false;
-    if (textDetectEnable_) {
-        if (CanStartAITask()) {
-            dataDetectorAdapter_->StartAITask();
-        }
+    if (CanStartAITask()) {
+        dataDetectorAdapter_->StartAITask();
     }
     magnifierController_->UpdateShowMagnifier();
     StopTwinkling();

@@ -331,8 +331,8 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         do {
             std::string detectText = StringUtils::ToString(
                 wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
-            bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts.size() &&
-                                    detectText == dataDetectorAdapter->detectTexts[detectTextIdx];
+            bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts_.size() &&
+                                    detectText == dataDetectorAdapter->detectTexts_[detectTextIdx];
             while (!aiSpanMap.empty() && aiSpanMapIt != aiSpanMap.end() && aiSpanMapIt->first >= 0 &&
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
@@ -346,10 +346,10 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             }
             if (!isSameDetectText) {
                 dataDetectorAdapter->InitTextDetect(startPos, detectText);
-                if (detectTextIdx < dataDetectorAdapter->detectTexts.size()) {
-                    dataDetectorAdapter->detectTexts[detectTextIdx] = detectText;
+                if (detectTextIdx < dataDetectorAdapter->detectTexts_.size()) {
+                    dataDetectorAdapter->detectTexts_[detectTextIdx] = detectText;
                 } else {
-                    dataDetectorAdapter->detectTexts.emplace_back(detectText);
+                    dataDetectorAdapter->detectTexts_.emplace_back(detectText);
                 }
             }
             ++detectTextIdx;
@@ -374,6 +374,8 @@ void DataDetectorAdapter::StartAITask()
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_) {
         aiSpanMapCopy = aiSpanMap_;
+    } else {
+        detectTexts_.clear();
     }
     aiSpanMap_.clear();
     typeChanged_ = false;
