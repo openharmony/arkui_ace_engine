@@ -104,6 +104,20 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     renderContext->UpdateBorderRadius(borderRadius);
 
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
+    BorderColorProperty borderColor;
+    BorderWidthProperty borderWidth;
+    borderColor.SetColor(searchTheme->GetBorderColor());
+    borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
+    if (!layoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext->HasBorderWidth()) {
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext->HasBorderColor()) {
+            renderContext->UpdateBorderColor(borderColor);
+        }
+    }
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
@@ -663,6 +677,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
             pattern->InitEditingValueText(value.value());
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
         if (!textFieldPaintProperty || !textFieldPaintProperty->HasTextColorFlagByUser()) {
