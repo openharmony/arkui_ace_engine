@@ -287,6 +287,10 @@ bool RepeatVirtualScrollCaches::rebuildL1(std::function<bool(int32_t index, RefP
     std::swap(l1_copy, l1_activeNodeKeys_);
     bool modified = false;
     for (const auto& key : l1_copy) {
+        if (index4Key_.find(key) == index4Key_.end()) {
+            continue;
+        }
+
         const RefPtr<UINode> node = node4key_[key];
         int32_t index = index4Key_[key];
 
