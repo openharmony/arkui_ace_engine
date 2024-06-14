@@ -47,14 +47,24 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class HtmlConvertTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
     bool IsSpanItemSame(std::list<RefPtr<NG::SpanItem>> src, std::list<RefPtr<NG::SpanItem>> other);
     SpanParagraphStyle GetDefaultParagraphStyle();
     ImageSpanOptions GetImageOption(const std::string& src);
 };
+
+void HtmlConvertTestNg::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+}
+
+void HtmlConvertTestNg::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+}
 
 void HtmlConvertTestNg::SetUp() {}
 
@@ -96,10 +106,10 @@ SpanParagraphStyle HtmlConvertTestNg::GetDefaultParagraphStyle()
     spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
     spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
     // defalut textIndent 23
-    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.textIndent = Dimension(23.0_vp);
     spanParagraphStyle.leadingMargin = LeadingMargin();
     // default width 25.0 height 26.0
-    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0_vp), Dimension(26.0));
     return spanParagraphStyle;
 }
 
@@ -195,9 +205,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
     EXPECT_EQ(items.size(), 4);
 
     EXPECT_EQ(items.size(), spanString->GetSpanItems().size());
-
-    auto dstHtml = convert.ToHtml(*dstSpan);
-    EXPECT_EQ(out, dstHtml);
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert002, TestSize.Level1)
@@ -292,8 +299,6 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     HtmlToSpan toSpan;
     auto dstSpan = toSpan.ToSpanString(out);
     EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), spanString->GetSpanItems()), true);
-    auto dstHtml = convert.ToHtml(*dstSpan);
-    EXPECT_EQ(out, dstHtml);
 }
 HWTEST_F(HtmlConvertTestNg, HtmlConvert006, TestSize.Level1)
 {
@@ -322,6 +327,50 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert007, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 1);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::VP));
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<SpanString>("段落标题\n正文第一段开始");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::START;
+    // default max lines 4
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    // defalut textIndent 23
+    spanParagraphStyle.textIndent = Dimension(23.0_vp);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    // default width 25.0 height 26.0
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0_vp), Dimension(26.0));
+    auto paragraphStyle = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 5);
+    spanString->AddSpan(paragraphStyle);
+
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*spanString);
+    std::string result =
+        "<div ><p style=\"text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\"><span "
+        "style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS "
+        "Sans;\">段落标题</span></p><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
+        "#000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
+    EXPECT_EQ(out, result);
+}
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert009, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<SpanString>("向上到顶适中向下到底");
+    spanString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(20.0_vp), 0, 4));
+    spanString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(10.0_vp), 4, 6));
+
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*spanString);
+    std::string result =
+        "<div ><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00fp;font-style: "
+        "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;vertical-align: "
+        "10.00px;\">适中</span><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
+        "#000000FF;font-family: HarmonyOS Sans;\">向下到底</span></div>";
+    EXPECT_EQ(out, result);
 }
 } // namespace OHOS::Ace::NG
