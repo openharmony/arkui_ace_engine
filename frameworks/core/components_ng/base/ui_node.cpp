@@ -1009,7 +1009,7 @@ void UINode::SetJSViewActive(bool active)
         // do not need to recursive here, stateMgmt will recursive all children when set active
         if (customNode) {
             customNode->SetJSViewActive(active);
-            return;
+            continue;
         }
         child->SetJSViewActive(active);
     }

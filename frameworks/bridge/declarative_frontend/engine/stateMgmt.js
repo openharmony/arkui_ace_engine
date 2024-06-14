@@ -6306,22 +6306,27 @@ class ViewPU extends PUV2ViewBase {
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+   * ArkUI engine will not recurse children nodes to inform the stateMgmt for the performance reason.
+   * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
+   * may enable the freezeWhenInActive.
    * @param active true for active, false for inactive
    */
     setActiveInternal(active) {
         
-        if (!this.isCompFreezeAllowed()) {
-            
-            
-            return;
+        if (this.isCompFreezeAllowed()) {
+            this.isActive_ = active;
+            if (this.isActive_) {
+                this.onActiveInternal();
+            }
+            else {
+                this.onInactiveInternal();
+            }
         }
-        
-        this.isActive_ = active;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(active);
+            }
         }
         
     }
@@ -6333,12 +6338,6 @@ class ViewPU extends PUV2ViewBase {
         this.performDelayedUpdate();
         // Remove the active component from the Map for Dfx
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -6350,12 +6349,6 @@ class ViewPU extends PUV2ViewBase {
         }
         // Add the inactive Components to Map for Dfx listing
         ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     initialRenderView() {
         
