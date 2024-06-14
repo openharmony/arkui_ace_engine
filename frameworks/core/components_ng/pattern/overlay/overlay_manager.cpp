@@ -4173,13 +4173,16 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     }
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     if (sheetStyle.sheetMode.has_value()) {
+        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
             }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = largeHeight;
+            double largePercent = sheetTheme->GetLargePercent();
+            sheetHeight_ = NearEqual(largePercent, LARGE_SIZE) ? largeHeight : sheetMaxHeight * largePercent;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = sheetPattern->GetFitContentHeight();
             if (GreatNotEqual(sheetHeight_, largeHeight)) {
@@ -4187,19 +4190,7 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
             }
         }
     } else {
-        float height = 0.0f;
-        if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
-        } else {
-            height = sheetStyle.height->ConvertToPx();
-        }
-        if (height > largeHeight) {
-            sheetHeight_ = largeHeight;
-        } else if (height < 0) {
-            sheetHeight_ = largeHeight;
-        } else {
-            sheetHeight_ = height;
-        }
+        ComputeWithoutSheetMode(sheetStyle.height, sheetMaxHeight, statusBarHeight);
     }
 }
 
@@ -4223,13 +4214,16 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
     auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
+        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
             }
         } else if (selection.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = largeHeight;
+            double largePercent = sheetTheme->GetLargePercent();
+            sheetHeight_ = NearEqual(largePercent, LARGE_SIZE) ? largeHeight : sheetMaxHeight * largePercent;
         } else if (selection.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = sheetPattern->GetFitContentHeight();
             if (GreatNotEqual(sheetHeight_, largeHeight)) {
@@ -4237,19 +4231,26 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
             }
         }
     } else {
-        float height = 0.0f;
-        if (selection.height->Unit() == DimensionUnit::PERCENT) {
-            height = selection.height->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
-        } else {
-            height = selection.height->ConvertToPx();
-        }
-        if (height > largeHeight) {
-            sheetHeight_ = largeHeight;
-        } else if (height < 0) {
-            sheetHeight_ = largeHeight;
-        } else {
-            sheetHeight_ = height;
-        }
+        ComputeWithoutSheetMode(selection.height, sheetMaxHeight, statusBarHeight);
+    }
+}
+
+void OverlayManager::ComputeWithoutSheetMode(
+    std::optional<Dimension>& styleHeight, float sheetMaxHeight, float statusBarHeight)
+{
+    auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - statusBarHeight;
+    float height = 0.0f;
+
+    if (styleHeight->Unit() == DimensionUnit::PERCENT) {
+        height = styleHeight->ConvertToPxWithSize(sheetMaxHeight - statusBarHeight);
+    } else {
+        height = styleHeight->ConvertToPx();
+    }
+
+    if (height > largeHeight || height < 0) {
+        sheetHeight_ = largeHeight;
+    } else {
+        sheetHeight_ = height;
     }
 }
 
