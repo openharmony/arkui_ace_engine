@@ -3427,7 +3427,15 @@ bool RichEditorPattern::SelectOverlayIsOn()
 
 void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+#ifdef ENABLE_STANDARD_INPUT
     InsertValue(value->text, true);
+#else
+    if (value->isDelete) {
+        HandleOnDelete(true);
+    } else {
+        InsertValue(value->appendText);
+    }
+#endif
 }
 
 void RichEditorPattern::InitMouseEvent()
