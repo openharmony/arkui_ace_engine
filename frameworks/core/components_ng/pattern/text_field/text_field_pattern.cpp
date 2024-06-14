@@ -5852,7 +5852,7 @@ void TextFieldPattern::ApplyInlineTheme()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    layoutProperty->UpdatePadding({ CalcLength(0.0f), theme->getInlinePaddingRight(), CalcLength(0.0f),
+    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
         CalcLength(0.0f) });
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
