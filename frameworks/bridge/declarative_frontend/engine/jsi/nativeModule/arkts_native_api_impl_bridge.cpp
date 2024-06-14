@@ -3683,6 +3683,10 @@ void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> ob
 void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto tabContent = panda::ObjectRef::New(vm);
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabBar));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabBar));
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentWidth));
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentHeight"),

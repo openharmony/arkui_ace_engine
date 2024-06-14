@@ -25654,7 +25654,8 @@ class ArkTabContentComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   tabBar(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabContentTabBarModifier.identity, TabContentTabBarModifier, value);
+    return this;
   }
   size(value) {
     modifierWithKey(this._modifiersWithKeys, TabContentSizeModifier.identity, TabContentSizeModifier, value);
@@ -25669,6 +25670,22 @@ class ArkTabContentComponent extends ArkComponent {
     return this;
   }
 }
+class TabContentTabBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabContent.resetTabBar(node);
+    } else {
+      getUINativeModule().tabContent.setTabBar(this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabContentTabBarModifier.identity = Symbol('tabContentTabBar');
 class TabContentWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

@@ -34,8 +34,9 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void Pop();
 
-protected:
     static void SetTabBar(const JSCallbackInfo& info);
+
+protected:
 
     // The width and height of tabcontent depend on the size constraints of tabs and tabbar.
     static void SetTabContentWidth(const JSCallbackInfo& info)
