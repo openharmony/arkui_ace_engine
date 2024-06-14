@@ -1659,6 +1659,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
+    lastKeyboardHeight_ = keyboard;
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         return;
     }
@@ -2469,7 +2470,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateWebLayoutSize(width, height, false);
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
-    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
         drawSizeCache_.SetSize(drawSize_);
         if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
