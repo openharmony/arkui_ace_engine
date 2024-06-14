@@ -943,33 +943,6 @@ void PanRecognizer::PanVelocity::SetDirection(int32_t directionType)
     axis_ = axis;
 }
 
-bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
-{
-    if (fingersId_.find(touchId) != fingersId_.end()) {
-        auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "Pan recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
-            touchId, node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
-        return false;
-    }
-    currentFingers_++;
-    return true;
-}
-
-bool PanRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
-{
-    if (fingersId_.find(touchId) != fingersId_.end()) {
-        return true;
-    }
-    auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Pan recognizer has already receive touchId: %{public}d up event, node tag = %{public}s, id = %{public}s",
-        touchId, node ? node->GetTag().c_str() : "null",
-        node ? std::to_string(node->GetId()).c_str() : "invalid");
-    return false;
-}
-
 void PanRecognizer::UpdateFingerListInfo()
 {
     MultiFingersRecognizer::UpdateFingerListInfo();

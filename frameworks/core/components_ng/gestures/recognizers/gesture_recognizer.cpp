@@ -151,11 +151,15 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::CANCEL:
-            HandleTouchCancelEvent(point);
-            HandleEventToBridgeObjList(point, bridgeObjList_);
-            currentFingers_--;
+        case TouchType::CANCEL: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchCancelEvent(point);
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+                currentFingers_--;
+            }
             break;
+        }
         default:
             break;
     }
@@ -227,11 +231,15 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::CANCEL:
-            HandleTouchCancelEvent(point);
-            currentFingers_--;
-            HandleEventToBridgeObjList(point, bridgeObjList_);
+        case TouchType::CANCEL: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchCancelEvent(point);
+                currentFingers_--;
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+            }
             break;
+        }
         default:
             break;
     }
@@ -506,5 +514,32 @@ void NGGestureRecognizer::SetResponseLinkRecognizers(const std::list<RefPtr<Touc
             responseLinkRecognizer_.emplace_back(recognizer);
         }
     }
+}
+
+bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
+            touchId, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
+        return false;
+    }
+    currentFingers_++;
+    return true;
+}
+
+bool NGGestureRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        return true;
+    }
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Recognizer has already receive touchId: %{public}d up event, node tag = %{public}s, id = %{public}s",
+        touchId, node ? node->GetTag().c_str() : "null",
+        node ? std::to_string(node->GetId()).c_str() : "invalid");
+    return false;
 }
 } // namespace OHOS::Ace::NG
