@@ -3506,6 +3506,12 @@ bool FrameNode::SelfExpansive()
     return opts && opts->Expansive();
 }
 
+bool FrameNode::SelfExpansiveToKeyboard()
+{
+    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    return opts && opts->ExpansiveToKeyboard();
+}
+
 bool FrameNode::ParentExpansive()
 {
     auto parent = GetAncestorNodeOfFrame();

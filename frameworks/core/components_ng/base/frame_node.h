@@ -721,6 +721,7 @@ public:
     void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
+    bool SelfExpansiveToKeyboard();
     bool ParentExpansive();
 
     bool IsActive() const override

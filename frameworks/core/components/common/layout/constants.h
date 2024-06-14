@@ -866,6 +866,12 @@ enum class MarqueeUpdateStrategy : uint32_t {
     PRESERVE_POSITION,
 };
 
+enum class SafeAreaSyncType : uint32_t {
+    SYNC_TYPE_NONE = 0,
+    SYNC_TYPE_KEYBOARD,
+    SYNC_TYPE_AVOID_AREA,
+    SYNC_TYPE_WINDOW_IGNORE
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

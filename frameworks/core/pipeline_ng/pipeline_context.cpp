@@ -1356,21 +1356,21 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
 {
     if (safeAreaManager_->SetIgnoreSafeArea(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
 void PipelineContext::SetIsLayoutFullScreen(bool value)
 {
     if (safeAreaManager_->SetIsFullScreen(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
 void PipelineContext::SetIsNeedAvoidWindow(bool value)
 {
     if (safeAreaManager_->SetIsNeedAvoidWindow(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
@@ -1389,14 +1389,16 @@ float PipelineContext::GetPageAvoidOffset()
     return safeAreaManager_->GetKeyboardOffset();
 }
 
-void PipelineContext::SyncSafeArea(bool onKeyboard)
+void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
     CHECK_NULL_VOID(stageManager_);
     auto lastPage = stageManager_->GetLastPageWithTransition();
     auto prevPage = stageManager_->GetPrevPageWithTransition();
     if (lastPage) {
-        lastPage->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
-                                                                                       : PROPERTY_UPDATE_MEASURE);
+        lastPage->MarkDirtyNode(
+            syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
+                ? PROPERTY_UPDATE_LAYOUT
+                : PROPERTY_UPDATE_MEASURE);
         lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     if (prevPage) {
@@ -1413,7 +1415,10 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     for (auto&& wk : restoreNodes) {
         auto node = wk.Upgrade();
         if (node) {
-            node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            bool needMeasure = (syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && node->SelfExpansiveToKeyboard()) ||
+                               (syncType == SafeAreaSyncType::SYNC_TYPE_AVOID_AREA ||
+                                   syncType == SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
+            node->MarkDirtyNode(needMeasure ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_LAYOUT);
         }
     }
 }
@@ -1532,7 +1537,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
             }
         }
         safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
-        SyncSafeArea(true);
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         FlushUITasks();
 
@@ -1585,7 +1590,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         } else {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
-        SyncSafeArea(true);
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         FlushUITasks();
 
@@ -1659,7 +1664,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, final calculate keyboard"
             "offset is %{public}f",
             keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
-        context->SyncSafeArea(true);
+        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         context->FlushUITasks();
 
@@ -3335,7 +3340,7 @@ void PipelineContext::AnimateOnSafeAreaUpdate()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        self->SyncSafeArea();
+        self->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
         self->FlushUITasks();
     });
 }
