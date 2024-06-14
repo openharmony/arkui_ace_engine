@@ -463,7 +463,7 @@ public:
     void HandleDraggableFlag(bool isTouchSelectArea);
     bool JudgeContentDraggable();
     std::pair<OffsetF, float> CalculateCaretOffsetAndHeight();
-    OffsetF CalculateEmptyValueCaretRect();
+    std::pair<OffsetF, float> CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     void RemoveEmptySpanItems();
     void RemoveEmptySpanNodes();
@@ -795,6 +795,14 @@ public:
     {
         return std::move(menuOptionItems_);
     }
+
+    void PreferredParagraph();
+
+    const RefPtr<Paragraph>& GetPresetParagraph()
+    {
+        return presetParagraph_;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1077,6 +1085,7 @@ private:
 
     // still in progress
     ParagraphManager paragraphs_;
+    RefPtr<Paragraph> presetParagraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
