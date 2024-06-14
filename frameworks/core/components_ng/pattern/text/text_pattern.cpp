@@ -2064,6 +2064,14 @@ void TextPattern::OnModifyDone()
             CloseSelectOverlay();
             ResetSelection();
         }
+
+        if (textDetectEnable_) {
+            auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+                dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+                textLayoutProperty->UpdateContent(textForDisplay_);
+            }
+        }
     }
 
     RecoverCopyOption();
