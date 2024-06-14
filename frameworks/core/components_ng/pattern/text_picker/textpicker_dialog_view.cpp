@@ -1419,6 +1419,9 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
             std::move(dialogMoveForwardEvent), std::move(dialogMoveBackwardFunc),
             closeCallBack, nextCallBack, previousCallBack);
     CHECK_NULL_RETURN(contentRow, nullptr);
+    contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
+    contentRow->AddChild(CreateDividerNode(textPickerNode), 3);
+    contentRow->AddChild(CreateDividerNode(textPickerNode), 5);
     contentRow->MountToParent(contentColumn);
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
