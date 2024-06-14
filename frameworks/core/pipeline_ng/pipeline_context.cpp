@@ -2200,10 +2200,11 @@ void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, Ref
     }
 }
 
-void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent)
+void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
+    const std::string& fillContent, bool isPopup)
 {
     CHECK_NULL_VOID(node);
-    node->NotifyFillRequestFailed(errCode, fillContent);
+    node->NotifyFillRequestFailed(errCode, fillContent, isPopup);
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const

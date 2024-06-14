@@ -369,7 +369,7 @@ public:
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
-    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
+    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {
         return false;

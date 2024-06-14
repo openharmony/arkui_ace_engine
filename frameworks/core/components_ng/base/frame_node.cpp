@@ -1977,10 +1977,10 @@ void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     }
 }
 
-void FrameNode::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
+void FrameNode::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
     if (pattern_) {
-        pattern_->NotifyFillRequestFailed(errCode, fillContent);
+        pattern_->NotifyFillRequestFailed(errCode, fillContent, isPopup);
     }
 }
 

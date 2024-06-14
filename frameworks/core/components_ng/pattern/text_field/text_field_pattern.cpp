@@ -6325,24 +6325,24 @@ bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue
     return true;
 }
 
-void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent)
+void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
     SetFillRequestFinish(true);
 
 #if defined(ENABLE_STANDARD_INPUT)
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
-    if (errCode == AUTO_FILL_CANCEL && !fillContent.empty() && IsAutoFillPasswordType(GetAutoFillType())) {
-        auto jsonObject = JsonUtil::ParseJsonString(fillContent);
-        CHECK_NULL_VOID(jsonObject);
-        fillContentMap_.clear();
-        ParseFillContentJsonValue(jsonObject, fillContentMap_);
-        if (!fillContentMap_.empty() && HasFocus()) {
-            auto inputMethod = MiscServices::InputMethodController::GetInstance();
-            CHECK_NULL_VOID(inputMethod);
-            if (inputMethod->SendPrivateCommand(fillContentMap_) == 0) {
-                fillContentMap_.clear();
-            }
+    if (errCode == AUTO_FILL_CANCEL) {
+        if (!fillContent.empty() && IsAutoFillPasswordType(GetAutoFillType())) {
+            auto jsonObject = JsonUtil::ParseJsonString(fillContent);
+            CHECK_NULL_VOID(jsonObject);
+            fillContentMap_.clear();
+            ParseFillContentJsonValue(jsonObject, fillContentMap_);
+        }
+    }
+    if (!isPopup || (isPopup && errCode == AUTO_FILL_CANCEL)) {
+        if (RequestKeyboard(false, true, true)) {
+            NotifyOnEditChanged(true);
         }
     }
 #endif
