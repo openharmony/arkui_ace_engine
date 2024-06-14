@@ -411,6 +411,10 @@ public:
     void FireOnDeleteComplete(const RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
+    std::string GetContentBySpans();
+    ResultObject TextEmojiSplit(int32_t& start, int32_t end, std::string& content);
+    SelectionInfo GetEmojisBySelect(int32_t start, int32_t end);
+    void MixTextEmojiUpdateStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetSelectSpanStyle(int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart);
     void GetSelectSpansPositionInfo(
         int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
