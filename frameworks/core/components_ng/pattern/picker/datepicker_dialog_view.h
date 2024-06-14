@@ -146,7 +146,8 @@ private:
         const RefPtr<FrameNode> &monthAndDayPickerNode, const RefPtr<FrameNode> &timePickerNode,
         const RefPtr<FrameNode> &contentRow);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
-
+    static void SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,
+        const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool hasSwitchContentRow_;
