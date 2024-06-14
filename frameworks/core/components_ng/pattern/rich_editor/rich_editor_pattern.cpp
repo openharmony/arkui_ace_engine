@@ -126,6 +126,7 @@ constexpr static int32_t SECOND_LINE = 2;
 
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+constexpr int32_t RICH_DEFAULT_AI_WORD = 100;
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -8912,6 +8913,7 @@ void RichEditorPattern::HandleOnShowMenu()
 
 int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
 {
+    int32_t index = GetCaretPosition();
     switch (direction) {
         case CaretMoveIntent::Left:
             return CaretPositionSelectEmoji(CaretMoveIntent::Left);
@@ -8921,10 +8923,20 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
             return HandleSelectPosition(true);
         case CaretMoveIntent::Down:
             return HandleSelectPosition(false);
-        case CaretMoveIntent::LeftWord:
-            return GetLeftWordPosition(caretPosition_);
-        case CaretMoveIntent::RightWord:
-            return GetRightWordPosition(caretPosition_);
+        case CaretMoveIntent::LeftWord: {
+            int32_t startPosition = 0;
+            int32_t aiContentStart = 0;
+            aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+            AIDeleteComb(aiContentStart, index, startPosition, true);
+            return startPosition;
+        }
+        case CaretMoveIntent::RightWord: {
+            int32_t endPosition = 0;
+            int32_t aiContentEnd = GetTextContentLength();
+            aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+            AIDeleteComb(index, aiContentEnd, endPosition, false);
+            return endPosition;
+        }
         case CaretMoveIntent::ParagraghBegin:
             return HandleSelectParagraghPos(true);
         case CaretMoveIntent::ParagraghEnd:
@@ -9009,24 +9021,57 @@ void RichEditorPattern::HandleSelectFontStyleWrapper(KeyCode code, TextStyle& sp
     }
 }
 
+void RichEditorPattern::AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction)
+{
+    auto selectTextContent = GetContentBySpans();
+    std::u16string u16Content = StringUtils::Str8ToStr16(selectTextContent);
+    // get select content
+    std::u16string selectData16 = u16Content.substr(static_cast<int32_t>(start), static_cast<int32_t>(end - start));
+    std::string selectData = StringUtils::Str16ToStr8(selectData16);
+    int32_t aiPosStart;
+    int32_t aiPosEnd;
+    int32_t caretPosition;
+    int32_t size = 1;
+
+    if (direction) {
+        caretPosition = end - start - size;
+        DataDetectorMgr::GetInstance().AdjustWordSelection(caretPosition, selectData, aiPosStart, aiPosEnd);
+        aiPosition = aiPosStart + start;
+    } else {
+        caretPosition = 0;
+        DataDetectorMgr::GetInstance().AdjustWordSelection(caretPosition, selectData, aiPosStart, aiPosEnd);
+        aiPosition = aiPosEnd + start;
+    }
+    if (aiPosStart < 0 || aiPosEnd < 0) {
+        aiPosition = GetCaretPosition();
+    }
+}
+
 bool RichEditorPattern::HandleOnDeleteComb(bool backward)
 {
     CloseSelectOverlay();
     ResetSelection();
-    int32_t newPos;
+    int32_t startPosition = 0;
+    int32_t endPosition = 0;
+    int32_t index = GetCaretPosition();
+    int32_t aiContentStart = 0;
+    int32_t aiContentEnd = GetTextContentLength();
+
     if (backward) {
-        newPos = GetLeftWordPosition(caretPosition_);
-        if (newPos == caretPosition_) {
+        aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+        AIDeleteComb(aiContentStart, index, startPosition, backward);
+        if (startPosition == caretPosition_) {
             return false;
         }
-        DeleteBackward(caretPosition_ - newPos);
-        SetCaretPosition(newPos);
+        DeleteBackward(caretPosition_ - startPosition);
+        SetCaretPosition(startPosition);
     } else {
-        newPos = GetRightWordPosition(caretPosition_);
-        if (newPos == caretPosition_) {
+        aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
+        AIDeleteComb(index, aiContentEnd, endPosition, backward);
+        if (endPosition == caretPosition_) {
             return false;
         }
-        DeleteForward(newPos - caretPosition_);
+        DeleteForward(endPosition - caretPosition_);
     }
     MoveCaretToContentRect();
     StartTwinkling();
