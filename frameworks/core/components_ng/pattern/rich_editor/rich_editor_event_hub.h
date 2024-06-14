@@ -64,11 +64,14 @@ public:
     void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
     void SetInsertValue(const std::string& insertValue);
+    void SetPreviewText(const std::string& previewText);
     const std::string& GetInsertValue() const;
+    const std::string& GetPreviewText() const;
 
 private:
     int32_t insertOffset_;
     std::string insertValue_;
+    std::string previewText_;
 };
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
@@ -91,6 +94,8 @@ public:
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
     const std::string& GetValue() const;
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
     void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
@@ -161,6 +166,7 @@ private:
     int32_t offsetInSpan_ = 0;
     int32_t eraseLength_ = 0;
     std::string value_;
+    std::string previewText_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;

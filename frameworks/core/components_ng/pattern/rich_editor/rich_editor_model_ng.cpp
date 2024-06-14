@@ -198,6 +198,15 @@ void RichEditorModelNG::SetTextDetectEnable(bool value)
     pattern->SetTextDetectEnable(value);
 }
 
+void RichEditorModelNG::SetSupportPreviewText(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(value);
+}
+
 void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
     std::function<void(const std::string&)>&& onResult)
 {
