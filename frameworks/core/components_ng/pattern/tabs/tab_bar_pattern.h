@@ -145,10 +145,7 @@ public:
         layoutAlgorithm->SetIndicator(indicator_);
         layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
-        if (needSetCentered_) {
-            layoutAlgorithm->SetNeedSetCentered();
-            needSetCentered_ = false;
-        }
+        layoutAlgorithm->SetNeedSetCentered(needSetCentered_);
         layoutAlgorithm->SetScrollMargin(scrollMargin_);
         return layoutAlgorithm;
     }
