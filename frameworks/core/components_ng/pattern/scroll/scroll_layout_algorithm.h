@@ -83,6 +83,7 @@ private:
     SizeF viewPort_;
     SizeF viewPortExtent_;
     SizeF viewSize_;
+    void UpdateScrollAlignment(Alignment& scrollAlignment);
 };
 
 } // namespace OHOS::Ace::NG
