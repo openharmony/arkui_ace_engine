@@ -28,13 +28,13 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
-#include "base/log/dump_log.h"
+#include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "core/text/text_emoji_processor.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
@@ -68,6 +68,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/text/text_emoji_processor.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1538,6 +1539,10 @@ void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextS
 {
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
+    if (presetParagraph_) {
+        presetParagraph_->Reset();
+        presetParagraph_ = nullptr;
+    }
 }
 
 void RichEditorPattern::UpdateFontFeatureTextStyle(
@@ -2415,7 +2420,8 @@ std::pair<OffsetF, float> RichEditorPattern::CalcAndRecordLastClickCaretInfo(con
 
     lastClickOffset += richTextRect_.GetOffset();
     if (isShowPlaceholder_) {
-        lastClickOffset = CalculateEmptyValueCaretRect();
+        auto [caretOffset, preferredHeight] = CalculateEmptyValueCaretRect();
+        lastClickOffset = caretOffset;
     }
     SetLastClickOffset(lastClickOffset);
     return std::make_pair(lastClickOffset, caretHeight);
@@ -2620,9 +2626,11 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
     if (GetTextContentLength() <= 0) {
         constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
-        caretOffset = CalculateEmptyValueCaretRect();
-        caretHeight =
-            isShowPlaceholder_ ? caretHeightUp : Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
+        auto [caretOffset, preferredHeight] = CalculateEmptyValueCaretRect();
+        caretHeight = isShowPlaceholder_
+                          ? caretHeightUp
+                          : static_cast<float>(Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
+        caretHeight = typingTextStyle_.has_value() ? preferredHeight : caretHeight;
         return std::make_pair(caretOffset, caretHeight);
     }
     float caretHeightDown = 0.0f;
@@ -2645,11 +2653,11 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     return std::make_pair(caretOffset, caretHeight);
 }
 
-OffsetF RichEditorPattern::CalculateEmptyValueCaretRect()
+std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
 {
     OffsetF offset;
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, offset);
+    CHECK_NULL_RETURN(layoutProperty, std::make_pair(offset, 0.0f));
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
     auto direction = layoutProperty->GetLayoutDirection();
     if (direction == TextDirection::RTL) {
@@ -2672,8 +2680,19 @@ OffsetF RichEditorPattern::CalculateEmptyValueCaretRect()
         default:
             break;
     }
-    offset.SetY(contentRect_.GetY());
-    return offset;
+    auto offsetY = contentRect_.GetY();
+    float caretHeight = 0.0f;
+    if (!presetParagraph_) {
+        PreferredParagraph();
+    }
+    if (presetParagraph_) {
+        CaretMetricsF caretCaretMetric;
+        presetParagraph_->CalcCaretMetricsByPosition(1, caretCaretMetric, TextAffinity::UPSTREAM, false);
+        offsetY += caretCaretMetric.offset.GetY();
+        caretHeight = caretCaretMetric.height;
+    }
+    offset.SetY(offsetY);
+    return std::make_pair(offset, caretHeight);
 }
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
@@ -7695,7 +7714,8 @@ RectF RichEditorPattern::GetSelectArea()
         float caretHeight = 0.0f;
         auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
         if (isShowPlaceholder_) {
-            caretOffset = CalculateEmptyValueCaretRect();
+            auto [offset, preferredHeight] = CalculateEmptyValueCaretRect();
+            caretOffset = offset;
         }
         auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
         return RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
@@ -9129,5 +9149,32 @@ bool RichEditorPattern::CheckTripClickEvent(GestureEvent& info)
         }
     }
     return false;
+}
+
+void RichEditorPattern::PreferredParagraph()
+{
+    CHECK_NULL_VOID(typingTextStyle_.has_value());
+    if (presetParagraph_) {
+        presetParagraph_->Reset();
+        presetParagraph_ = nullptr;
+    }
+    std::string textContent;
+    textContent = "a";
+    TextStyle textStyle;
+    textStyle = typingTextStyle_.value();
+    ParagraphStyle paraStyle {
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
+        .textOverflow = textStyle.GetTextOverflow(),
+        .fontSize = textStyle.GetFontSize().ConvertToPx() };
+    presetParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(presetParagraph_);
+    presetParagraph_->PushStyle(textStyle);
+    presetParagraph_->AddText(StringUtils::Str8ToStr16(textContent));
+    presetParagraph_->Build();
+    presetParagraph_->Layout(std::numeric_limits<double>::infinity());
 }
 } // namespace OHOS::Ace::NG
