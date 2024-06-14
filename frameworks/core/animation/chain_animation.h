@@ -39,6 +39,7 @@ public:
         int32_t index, float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty);
     void SetDelta(float delta, float duration);
     float GetDelta() const;
+    float GetDeltaPredict(float delta, float duration);
     bool TickAnimation(float duration);
     void SetIndex(int32_t index)
     {
@@ -69,6 +70,7 @@ public:
     ChainAnimation(float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty);
     void SetDelta(float delta, bool isOverDrag);
     float GetValue(int32_t index);
+    float GetValuePredict(int32_t index, float delta);
     float SetControlIndex(int32_t index);
     int32_t GetControlIndex()
     {
