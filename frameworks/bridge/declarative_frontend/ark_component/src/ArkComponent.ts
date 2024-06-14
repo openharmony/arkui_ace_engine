@@ -3242,7 +3242,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
+  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat): this {
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;

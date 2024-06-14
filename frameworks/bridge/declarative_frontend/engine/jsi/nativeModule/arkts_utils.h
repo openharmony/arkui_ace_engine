@@ -164,6 +164,12 @@ public:
     static Local<JSValueRef> GetModifierKeyState(
         ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
+    static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
+    static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+#if !defined(PREVIEW)
+    static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
