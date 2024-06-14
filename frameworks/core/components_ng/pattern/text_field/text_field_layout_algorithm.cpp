@@ -332,30 +332,59 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
 {
     ApplyIndent(contentConstraint.maxSize.Width());
     paragraph_->Layout(std::numeric_limits<double>::infinity());
+    float longestLine = CalculateLongestLine(layoutWrapper);
+
+    float contentWidth = CalculateContentWidth(contentConstraint, layoutWrapper, imageWidth, longestLine);
+    float contentHeight = CalculateContentHeight(contentConstraint, longestLine);
+    longestLine = paragraph_->GetLongestLine();
+    textRect_.SetSize(SizeF(std::max(0.0f, longestLine) + indent_, paragraph_->GetHeight()));
+    return SizeF(contentWidth, contentHeight);
+}
+
+float TextFieldLayoutAlgorithm::CalculateLongestLine(LayoutWrapper* layoutWrapper)
+{
     auto longestLine = paragraph_->GetLongestLine();
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, SizeF());
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
     if (layoutProperty->HasLetterSpacing()) {
-        auto letterSpacing = layoutProperty->GetLetterSpacing().value().ConvertToPx();
+        double letterSpacing = layoutProperty->GetLetterSpacing().value().ConvertToPx();
         if (GreatNotEqual(letterSpacing, 0.0)) {
             longestLine = longestLine + letterSpacing;
         }
     }
+    return longestLine;
+}
 
+float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper, float imageWidth, float longestLine)
+{
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
-    paragraph_->Layout(std::max(std::ceil(longestLine) + indent_, contentWidth - 1.0f));
+    auto textFieldWidth = contentWidth;
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    if (pattern->GetCleanNodeResponseArea()) {
+        textFieldWidth -= pattern->GetCleanNodeResponseArea()->GetFrameSize().Width();
+    }
+    if (pattern->GetResponseArea()) {
+        textFieldWidth -= pattern->GetResponseArea()->GetFrameSize().Width();
+    }
+
+    paragraph_->Layout(std::max(std::ceil(longestLine) + indent_, textFieldWidth));
     CounterNodeMeasure(contentWidth, layoutWrapper);
     if (autoWidth_) {
-        auto minWidth = INLINE_MIN_WITH.ConvertToPx();
+        double minWidth = INLINE_MIN_WITH.ConvertToPx();
         contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
         contentWidth = std::min(contentWidth, longestLine);
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
-        const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+        const auto &calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
         if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
             calcLayoutConstraint->minSize->Width().has_value() &&
             !contentConstraint.selfIdealSize.Width().has_value()) {
@@ -363,16 +392,17 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
                 std::max(longestLine, contentConstraint.minSize.Width() - imageWidth));
         }
     }
-
-    auto height = GreatNotEqual(longestLine, 0.0)
-                      ? paragraph_->GetHeight()
-                      : std::max(preferredHeight_, paragraph_->GetHeight());
-
-    auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
-
-    textRect_.SetSize(SizeF(std::max(0.0f, longestLine) + indent_, paragraph_->GetHeight()));
-    return SizeF(contentWidth, contentHeight);
+    return contentWidth;
 }
+
+float TextFieldLayoutAlgorithm::CalculateContentHeight(const LayoutConstraintF& contentConstraint, float longestLine)
+{
+    auto height =
+        GreatNotEqual(longestLine, 0.0) ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
+
+    return std::min(contentConstraint.maxSize.Height(), height);
+}
+
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
     uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)

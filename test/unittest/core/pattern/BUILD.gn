@@ -94,7 +94,7 @@ group("core_pattern_unittest") {
     "text_drag:text_drag_test_ng",
 
     # "text_input:TextInputTest",
-    # "text_picker:text_picker_test_ng",
+    "text_picker:text_picker_test_ng",
     "text_timer:text_timer_test_ng",
     "time_picker:time_picker_test_ng",
     "toggle:toggle_test_ng",

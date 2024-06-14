@@ -98,6 +98,7 @@ constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
+constexpr int32_t VSYNC_PERIOD_COUNT = 2;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 } // namespace
@@ -133,9 +134,25 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
+
 PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
 {
     auto currentContainer = Container::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    const auto& base = currentContainer->GetPipelineContext();
+    CHECK_NULL_RETURN(base, nullptr);
+    return DynamicCast<PipelineContext>(RawPtr(base));
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     const auto& base = currentContainer->GetPipelineContext();
     CHECK_NULL_RETURN(base, nullptr);
@@ -803,9 +820,9 @@ void PipelineContext::FlushFrameRate()
     frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
     bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
     if (frameRateManager_->IsRateChanged() || currAnimationStatus != lastAnimationStatus_) {
-        auto rate = frameRateManager_->GetExpectedRate();
-        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
-        window_->FlushFrameRate(rate, currAnimationStatus);
+        auto [rate, rateType] = frameRateManager_->GetExpectedRate();
+        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d frameRateType = %d", rate, rateType);
+        window_->FlushFrameRate(rate, currAnimationStatus, rateType);
         frameRateManager_->SetIsRateChanged(false);
         lastAnimationStatus_ = currAnimationStatus;
     }
@@ -1370,21 +1387,21 @@ bool PipelineContext::IsEnableKeyBoardAvoidMode()
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
 {
     if (safeAreaManager_->SetIgnoreSafeArea(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
 void PipelineContext::SetIsLayoutFullScreen(bool value)
 {
     if (safeAreaManager_->SetIsFullScreen(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
 void PipelineContext::SetIsNeedAvoidWindow(bool value)
 {
     if (safeAreaManager_->SetIsNeedAvoidWindow(value)) {
-        SyncSafeArea();
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
     }
 }
 
@@ -1403,14 +1420,16 @@ float PipelineContext::GetPageAvoidOffset()
     return safeAreaManager_->GetKeyboardOffset();
 }
 
-void PipelineContext::SyncSafeArea(bool onKeyboard)
+void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
 {
     CHECK_NULL_VOID(stageManager_);
     auto lastPage = stageManager_->GetLastPageWithTransition();
     auto prevPage = stageManager_->GetPrevPageWithTransition();
     if (lastPage) {
-        lastPage->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
-                                                                                       : PROPERTY_UPDATE_MEASURE);
+        lastPage->MarkDirtyNode(
+            syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
+                ? PROPERTY_UPDATE_LAYOUT
+                : PROPERTY_UPDATE_MEASURE);
         lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
     }
     if (prevPage) {
@@ -1427,7 +1446,10 @@ void PipelineContext::SyncSafeArea(bool onKeyboard)
     for (auto&& wk : restoreNodes) {
         auto node = wk.Upgrade();
         if (node) {
-            node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            bool needMeasure = (syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && node->SelfExpansiveToKeyboard()) ||
+                               (syncType == SafeAreaSyncType::SYNC_TYPE_AVOID_AREA ||
+                                   syncType == SafeAreaSyncType::SYNC_TYPE_WINDOW_IGNORE);
+            node->MarkDirtyNode(needMeasure ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_LAYOUT);
         }
     }
 }
@@ -1546,7 +1568,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
             }
         }
         safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
-        SyncSafeArea(true);
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         FlushUITasks();
 
@@ -1599,7 +1621,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         } else {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
-        SyncSafeArea(true);
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         FlushUITasks();
 
@@ -1673,7 +1695,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, final calculate keyboard"
             "offset is %{public}f",
             keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
-        context->SyncSafeArea(true);
+        context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         // layout immediately
         context->FlushUITasks();
 
@@ -1723,7 +1745,7 @@ bool PipelineContext::OnBackPressed()
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
             hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
-            hasOverlay = hasOverlay || overlay->RemoveOverlay(true);
+            hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
@@ -3202,6 +3224,14 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 
 void PipelineContext::OnIdle(int64_t deadline)
 {
+    if (deadline == 0  && lastVsyncEndTimestamp_ > 0 && GetSysTimestamp() > lastVsyncEndTimestamp_
+        && GetSysTimestamp() - lastVsyncEndTimestamp_ >
+        VSYNC_PERIOD_COUNT * static_cast<uint64_t>(window_->GetVSyncPeriod())) {
+        auto frontend = weakFrontend_.Upgrade();
+        if (frontend) {
+            frontend->NotifyUIIdle();
+        }
+    }
     if (deadline == 0 || isWindowAnimation_) {
         canUseLongPredictTask_ = false;
         return;
@@ -3351,7 +3381,7 @@ void PipelineContext::AnimateOnSafeAreaUpdate()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        self->SyncSafeArea();
+        self->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
         self->FlushUITasks();
     });
 }

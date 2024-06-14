@@ -205,6 +205,8 @@ struct ArkUIMouseEvent {
     ArkUI_Int64 timeStamp;
     ArkUITouchPoint actionTouchPoint;
     ArkUI_Int32 subKind;
+    ArkUI_Int32 sourceType;
+    ArkUI_Int32 interceptResult;
 };
 
 struct ArkUIStringAndFloat {
@@ -858,6 +860,13 @@ struct ArkUIAPIEventSinglePointer {
     ArkUI_Int32 x;
     ArkUI_Int32 y;
     ArkUI_Int32 state; // 0 - down, 1 - up, 2 - move
+};
+
+struct ArkUIImageSourceInfo {
+    ArkUI_CharPtr url;
+    void* resource;
+    void* pixelMap;
+    void* pixelMapArray;
 };
 
 #define ARKUI_MULTIPOINTER_ARGS_COUNT 10
@@ -1869,6 +1878,12 @@ struct ArkUIImageModifier {
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
     void (*resetImageSrc)(ArkUINodeHandle node);
     void (*setInitialPixelMap)(ArkUINodeHandle node, ArkUI_Int64 pixelMap);
+    void (*setAltSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
+    void (*setOnComplete)(ArkUINodeHandle node, void* callback);
+    void (*setOnError)(ArkUINodeHandle node, void* callback);
+    void (*resetOnError)(ArkUINodeHandle node);
+    void (*setImageOnFinish)(ArkUINodeHandle node, void* callback);
+    void (*resetImageOnFinish)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnModifier {
@@ -2073,6 +2088,14 @@ struct ArkUISwiperModifier {
     void (*setSwiperIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
     void (*getSwiperIndicator)(ArkUINodeHandle node, ArkUISwiperIndicator* swiperIndicator);
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
+    void (*setSwiperOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnChange)(ArkUINodeHandle node);
+    void (*setSwiperOnAnimationStart)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnAnimationStart)(ArkUINodeHandle node);
+    void (*setSwiperOnAnimationEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnAnimationEnd)(ArkUINodeHandle node);
+    void (*setSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2085,6 +2108,13 @@ struct ArkUIStackModifier {
     void (*setAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
     void (*resetAlignContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignContent)(ArkUINodeHandle node);
+};
+
+struct ArkUIFolderStackModifier {
+    void (*setEnableAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableAnimation)(ArkUINodeHandle node);
+    void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAutoHalfFold)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigatorModifier {
@@ -2667,6 +2697,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnWillDelete)(ArkUINodeHandle node);
     void (*setTextAreaOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetTextAreaOnDidDelete)(ArkUINodeHandle node);
+    void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2857,6 +2889,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     ArkUINodeHandle (*getTextInputController)(ArkUINodeHandle node);
     void (*getTextInputMargin)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit);
+    void (*setTextInputEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetTextInputEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3427,6 +3461,8 @@ struct ArkUISearchModifier {
     void (*resetSearchOnWillDelete)(ArkUINodeHandle node);
     void (*setSearchOnDidDelete)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetSearchOnDidDelete)(ArkUINodeHandle node);
+    void (*setSearchEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetSearchEnablePreviewText)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -3494,6 +3530,7 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Int32 dUnit);
 };
 
 struct ArkUITextTimerModifier {
@@ -4045,6 +4082,7 @@ struct ArkUIFrameNodeModifier {
 struct ArkUINodeContentEvent {
     ArkUI_Int32 type;
     void* userData;
+    ArkUINodeContentHandle nodeContent;
 };
 
 struct ArkUINodeContentModifier {
@@ -4053,6 +4091,8 @@ struct ArkUINodeContentModifier {
     ArkUI_Int32 (*removeChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
     ArkUI_Int32 (*registerEvent)(
         ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event));
+    ArkUI_Int32 (*setUserData)(ArkUINodeContentHandle content, void* userData);
+    void* (*getUserData)(ArkUINodeContentHandle content);
 };
 
 struct ArkUIAnimation {
@@ -4163,6 +4203,7 @@ struct ArkUINodeModifiers {
     const ArkUISliderModifier* (*getSliderModifier)();
     const ArkUIDividerModifier* (*getDividerModifier)();
     const ArkUIStackModifier* (*getStackModifier)();
+    const ArkUIFolderStackModifier* (*getFolderStackModifier)();
     const ArkUINavDestinationModifier* (*getNavDestinationModifier)();
     const ArkUIGridModifier* (*getGridModifier)();
     const ArkUIGridColModifier* (*getGridColModifier)();

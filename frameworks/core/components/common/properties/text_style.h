@@ -318,6 +318,26 @@ public:
         fontSize_ = fontSize;
     }
 
+    void SetMaxFontScale(float maxFontScale)
+    {
+        maxFontScale_ = maxFontScale;
+    }
+
+    void SetMinFontScale(float minFontScale)
+    {
+        minFontScale_ = minFontScale;
+    }
+
+    float GetMaxFontScale() const
+    {
+        return maxFontScale_;
+    }
+
+    float GetMinFontScale() const
+    {
+        return minFontScale_;
+    }
+
     FontWeight GetFontWeight() const
     {
         return fontWeight_;
@@ -797,6 +817,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    float minFontScale_ = 0.85f;
+    float maxFontScale_ = 3.20f;
 
     // for Symbol
     std::vector<Color> renderColors_;

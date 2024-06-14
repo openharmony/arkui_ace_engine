@@ -57,8 +57,6 @@ public:
 
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
-    void AddExpandableAreaView(RefPtr<FrameNode> menuItem);
-    void AddClickableAreaView(RefPtr<FrameNode> menuItem, BorderRadiusProperty border);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

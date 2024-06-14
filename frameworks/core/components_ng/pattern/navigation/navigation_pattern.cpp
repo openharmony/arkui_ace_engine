@@ -164,6 +164,29 @@ void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowSizeChangeCallback(id);
 }
 
+
+void NavigationPattern::DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode)
+{
+    AnimationOption option;
+    option.SetCurve(MODE_SWITCH_CURVE);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+    AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
+        auto hostNode = weakHost.Upgrade();
+        CHECK_NULL_VOID(hostNode);
+        auto layoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        bool hideNavBar = layoutProperty->GetHideNavBarValue(false);
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty();
+        CHECK_NULL_VOID(navBarLayoutProperty);
+        navBarLayoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        hostNode->GetContext()->FlushUITasks();
+    });
+}
+
 void NavigationPattern::OnModifyDone()
 {
     // !!! Do not add operations about NavPathStack here, see @SyncWithJsStackIfNeeded
@@ -209,16 +232,7 @@ void NavigationPattern::OnModifyDone()
     }
 
     if (GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
-        AnimationOption option;
-        option.SetCurve(MODE_SWITCH_CURVE);
-        option.SetFillMode(FillMode::FORWARDS);
-        option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
-        AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
-            auto hostNode = weakHost.Upgrade();
-            CHECK_NULL_VOID(hostNode);
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            hostNode->GetContext()->FlushUITasks();
-        });
+        DoNavbarHideAnimation(hostNode);
     }
 }
 
@@ -1872,7 +1886,6 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
             if (pattern->NeedSyncWithJsStackMarked()) {
                 return;
             }
-
             pattern->MarkNeedSyncWithJsStack();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);

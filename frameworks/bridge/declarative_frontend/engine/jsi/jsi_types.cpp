@@ -486,11 +486,12 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsNumber()) {
+    if (arg.IsEmpty()) {
         return false;
     }
-    value = arg->ToNumber(info_->GetVM())->Value();
-    return true;
+    bool ret = false;
+    value = arg->GetValueDouble(ret);
+    return ret;
 }
 
 bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const

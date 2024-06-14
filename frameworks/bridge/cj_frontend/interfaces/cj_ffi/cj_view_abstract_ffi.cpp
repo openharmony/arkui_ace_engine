@@ -1558,7 +1558,7 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    ParseSheetCallback(option, onAppearCallback, onWillDisappearCallback, shouldDismissFunc,
+    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc,
         onWillAppearCallback, onWillDisappearCallback);
     ParseSheetStyle(option, sheetStyle);
     ParseSheetTitle(option, sheetStyle, titleBuilderFunction);

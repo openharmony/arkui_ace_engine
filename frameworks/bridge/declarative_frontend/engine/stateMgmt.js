@@ -4113,15 +4113,21 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
-            for (const child of this.childrenWeakrefMap_.values()) {
-                const childView = child.deref();
-                if (childView) {
-                    childView.forceCompleteRerender(true);
+            this.childrenWeakrefMap_.forEach((weakRefChild) => {
+                const child = weakRefChild.deref();
+                if (child) {
+                    if (child instanceof ViewPU) {
+                        if (!child.hasBeenRecycled_) {
+                            child.forceCompleteRerender(true);
+                        } else {
+                            child.delayCompleteRerender(deep);
+                        }
+                    }
+                } else {
+                    throw new Error('forceCompleteRender not implemented for ViewV2, yet');
                 }
-            }
+            });
         }
-        
-        
     }
     /**
     * force a complete rerender / update on specific node by executing update function.
@@ -4606,18 +4612,28 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         return rawObject;
     }
-    dumpSyncPeers(changedTrackPropertyName) {
+    dumpSyncPeers(isProfiler, changedTrackPropertyName) {
         let res = [];
         this.subscriberRefs_.forEach((subscriber) => {
             var _a, _b;
             if ('debugInfo' in subscriber) {
                 const observedProp = subscriber;
+                let isCircleReference = false;
+                let errorMsg = '';
+                try {
+                    JSON.stringify(observedProp.getRawObjectValue());
+                }
+                catch (error) {
+                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
+                    errorMsg = error.message;
+                    isCircleReference = true;
+                }
                 let syncPeer = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
                     changedTrackPropertyName: changedTrackPropertyName,
-                    value: observedProp.getRawObjectValue(),
+                    value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
                     inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, true),
+                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
                     owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
                 };
                 res.push(syncPeer);
@@ -4628,13 +4644,23 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     onDumpProfiler(changedTrackPropertyName) {
         var _a, _b, _c, _d;
         let res = new DumpInfo();
+        let isCircleReference = false;
+        let errorMsg = '';
+        try {
+            JSON.stringify(this.getRawObjectValue());
+        }
+        catch (error) {
+            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
+            errorMsg = error.message;
+            isCircleReference = true;
+        }
         let observedPropertyInfo = {
             decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-            value: this.getRawObjectValue(),
+            value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : this.getRawObjectValue(),
             inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
             dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
             owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
-            syncPeers: this.dumpSyncPeers()
+            syncPeers: this.dumpSyncPeers(true, changedTrackPropertyName)
         };
         res.viewInfo = { componentName: (_c = this.owningView_) === null || _c === void 0 ? void 0 : _c.constructor.name, id: (_d = this.owningView_) === null || _d === void 0 ? void 0 : _d.id__() };
         res.observedPropertiesInfo.push(observedPropertyInfo);
@@ -5587,7 +5613,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             const alreadyCopiedObject = copiedObjects.get(obj);
             if (alreadyCopiedObject) {
                 let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
-                stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
                 
                 return alreadyCopiedObject;
             }
@@ -6280,22 +6305,27 @@ class ViewPU extends PUV2ViewBase {
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+   * ArkUI engine will not recurse children nodes to inform the stateMgmt for the performance reason.
+   * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
+   * may enable the freezeWhenInActive.
    * @param active true for active, false for inactive
    */
     setActiveInternal(active) {
         
-        if (!this.isCompFreezeAllowed()) {
-            
-            
-            return;
+        if (this.isCompFreezeAllowed()) {
+            this.isActive_ = active;
+            if (this.isActive_) {
+                this.onActiveInternal();
+            }
+            else {
+                this.onInactiveInternal();
+            }
         }
-        
-        this.isActive_ = active;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(active);
+            }
         }
         
     }
@@ -6307,12 +6337,6 @@ class ViewPU extends PUV2ViewBase {
         this.performDelayedUpdate();
         // Remove the active component from the Map for Dfx
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -6324,12 +6348,6 @@ class ViewPU extends PUV2ViewBase {
         }
         // Add the inactive Components to Map for Dfx listing
         ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     initialRenderView() {
         
@@ -7022,10 +7040,10 @@ class ViewPU extends PUV2ViewBase {
         return retVaL;
     }
     /**
-      * onDumpInspetor is invoked by native side to create Inspector tree including state variables
+      * onDumpInspector is invoked by native side to create Inspector tree including state variables
       * @returns dump info
       */
-    onDumpInspetor() {
+    onDumpInspector() {
         let res = new DumpInfo();
         res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
         Object.getOwnPropertyNames(this)
@@ -7034,11 +7052,21 @@ class ViewPU extends PUV2ViewBase {
             const prop = Reflect.get(this, varName);
             if ('debugInfoDecorator' in prop) {
                 const observedProp = prop;
+                let isCircleReference = false;
+                let errorMsg = '';
+                try {
+                    JSON.stringify(observedProp.getRawObjectValue());
+                }
+                catch (error) {
+                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
+                    errorMsg = error.message;
+                    isCircleReference = true;
+                }
                 let observedPropertyInfo = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    value: observedProp.getRawObjectValue(),
+                    value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
                     dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
-                    owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers()
+                    owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
                 };
                 res.observedPropertiesInfo.push(observedPropertyInfo);
             }

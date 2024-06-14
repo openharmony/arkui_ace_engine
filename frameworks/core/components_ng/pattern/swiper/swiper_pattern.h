@@ -1066,6 +1066,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
+    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;

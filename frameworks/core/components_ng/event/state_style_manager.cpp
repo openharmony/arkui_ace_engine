@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include <cstdint>
 
 namespace OHOS::Ace::NG {
 
@@ -71,6 +72,9 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
+                auto frameNode = stateStyleMgr->GetFrameNode();
+                TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s/%{public}d",
+                    frameNode->GetTag().c_str(), frameNode->GetId());
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
                 if (stateStyleMgr->pointerId_.size() == 0) {
                     stateStyleMgr->ResetPressedState();
@@ -85,6 +89,8 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
 
 void StateStyleManager::HandleTouchDown()
 {
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s/%{public}d",
+        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
     HandleScrollingParent();
     if (!hasScrollingParent_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
@@ -100,6 +106,8 @@ void StateStyleManager::HandleTouchDown()
 
 void StateStyleManager::HandleTouchUp()
 {
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s/%{public}d",
+        GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
     if (IsPressedStatePending()) {
         DeletePressStyleTask();
         ResetPressedPendingState();
@@ -115,13 +123,13 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
-void StateStyleManager::FireStateFunc()
+void StateStyleManager::FireStateFunc(bool isReset)
 {
-    auto node = host_.Upgrade();
+    auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
-    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, tag is %{public}s, id is %{public}d",
-        node->GetTag().c_str(), nodeId);
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
+        "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
     RefPtr<CustomNodeBase> customNode;
     if (AceType::InstanceOf<CustomNodeBase>(node)) {
         customNode = DynamicCast<CustomNodeBase>(node);
@@ -213,7 +221,7 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
 void StateStyleManager::PostListItemPressStyleTask(UIState state)
 {
     bool isPressed = state == UI_STATE_PRESSED;
-    auto node = host_.Upgrade();
+    auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
     if (node->GetTag() == V2::LIST_ITEM_ETS_TAG) {
@@ -236,7 +244,7 @@ void StateStyleManager::PostListItemPressStyleTask(UIState state)
 
 void StateStyleManager::HandleScrollingParent()
 {
-    auto node = host_.Upgrade();
+    auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
 
     auto scrollingEventCallback = [weak = WeakClaim(this)]() {
@@ -267,7 +275,7 @@ void StateStyleManager::HandleScrollingParent()
 
 void StateStyleManager::CleanScrollingParentListener()
 {
-    auto node = host_.Upgrade();
+    auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
 
     auto parent = node->GetAncestorNodeOfFrame();
@@ -307,7 +315,7 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
 
 bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const
 {
-    auto node = host_.Upgrade();
+    auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
     if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
         return true;
@@ -346,5 +354,10 @@ bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, 
         return true;
     }
     return false;
+}
+
+RefPtr<FrameNode> StateStyleManager::GetFrameNode() const
+{
+    return host_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

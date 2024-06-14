@@ -222,6 +222,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
@@ -858,6 +859,7 @@ public:
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();
+    void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
@@ -1288,8 +1290,19 @@ public:
     {
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
+    
+    int32_t GetPreviewTextStart() const
+    {
+        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
+    }
+
+    int32_t GetPreviewTextEnd() const
+    {
+        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
+    }
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
+    void HiddenMenu();
 
 protected:
     virtual void InitDragEvent();
@@ -1314,7 +1327,6 @@ private:
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
     void HandleTouchMove(const TouchEventInfo& info);
-    void HandleTouchMoveAfterLongPress(const TouchEventInfo& info);
     void UpdateCaretByTouchMove(const TouchEventInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
@@ -1377,6 +1389,7 @@ private:
     void FireEventHubOnChange(const std::string& text);
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
+    void AddTextFireOnChange();
 
     void FilterInitializeText();
 
@@ -1500,21 +1513,10 @@ private:
         previewTextEnd_ = end;
     }
 
-    int32_t GetPreviewTextStart() const
-    {
-        return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
-    }
-
-    int32_t GetPreviewTextEnd() const
-    {
-        return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
-    }
-
     void CalculatePreviewingTextMovingLimit(const Offset& touchOffset, double& limitL, double& limitR);
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
     void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
-    void ChangeEditState();
 
     void TwinklingByFocus();
 
@@ -1704,8 +1706,9 @@ private:
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
+    bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
-    bool previewLongPress_ = false;
+    bool isMoveCaretAnywhere_ = false;
 };
 } // namespace OHOS::Ace::NG
 

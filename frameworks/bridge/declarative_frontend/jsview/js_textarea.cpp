@@ -110,6 +110,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
     JSClass<JSTextArea>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

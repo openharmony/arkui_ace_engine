@@ -124,7 +124,7 @@ namespace {
  */
 float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
 {
-    if (info->endIndex_ == -1) {
+    if (info->endIndex_ == -1 || info->jumpIndex_ != EMPTY_JUMP_INDEX) {
         // implies that LayoutInfo has already been reset, no need to jump
         return 0.0f;
     }

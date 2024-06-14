@@ -248,8 +248,32 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     return button;
 }
 
-RefPtr<FrameNode> BuildButton(
-    const std::string& data, const std::function<void(std::string&)>& callback, int32_t overlayId, float& contentWidth)
+void BindButtonClickEvent(const RefPtr<FrameNode>& button, const MenuOptionsParam& menuOption, int32_t overlayId)
+{
+    auto callback = menuOption.action;
+    auto actionRange = menuOption.actionRange;
+    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, actionRange, overlayId](GestureEvent& /*info*/) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetSelectOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+
+        auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+        CHECK_NULL_VOID(selectOverlay);
+        auto pattern = selectOverlay->GetPattern<SelectOverlayPattern>();
+        auto selectInfo = pattern->GetSelectInfo();
+        if (callback) {
+            callback(selectInfo);
+        }
+        // close text overlay.
+        if (!actionRange) {
+            overlayManager->DestroySelectOverlay(overlayId);
+            overlayManager->CloseSelectContentOverlay(overlayId, CloseReason::CLOSE_REASON_TOOL_BAR, false);
+        }
+    });
+}
+
+RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overlayId, float& contentWidth)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -259,6 +283,7 @@ RefPtr<FrameNode> BuildButton(
     // Update text property and mount to button.
     auto textLayoutProperty = text->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, button);
+    auto data = menuOption.content.value_or("");
     textLayoutProperty->UpdateContent(data);
     text->MountToParent(button);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -291,23 +316,7 @@ RefPtr<FrameNode> BuildButton(
     }
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId](GestureEvent& /*info*/) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetSelectOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-
-        auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
-        CHECK_NULL_VOID(selectOverlay);
-        auto pattern = selectOverlay->GetPattern<SelectOverlayPattern>();
-        auto selectInfo = pattern->GetSelectInfo();
-        if (callback) {
-            callback(selectInfo);
-        }
-        // close text overlay.
-        overlayManager->DestroySelectOverlay(overlayId);
-        overlayManager->CloseSelectContentOverlay(overlayId, CloseReason::CLOSE_REASON_TOOL_BAR, false);
-    });
+    BindButtonClickEvent(button, menuOption, overlayId);
     SetResponseRegion(button);
     button->MarkModifyDone();
     return button;
@@ -888,7 +897,8 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
     int32_t itemNum = 0;
     for (auto item : menuOptionItems) {
         if (itemNum >= index) {
-            auto callback = [overlayId = id, func = std::move(item.action)]() {
+            auto callback = [overlayId = id, func = std::move(item.action),
+                                actionRange = std::move(item.actionRange)]() {
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
@@ -898,6 +908,7 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
                 auto pattern = selectOverlay->GetPattern<SelectOverlayPattern>();
                 auto selectInfo = pattern->GetSelectInfo();
                 func(selectInfo);
+                CHECK_NULL_VOID(!actionRange);
                 overlayManager->DestroySelectOverlay(overlayId);
                 overlayManager->CloseSelectContentOverlay(overlayId, CloseReason::CLOSE_REASON_TOOL_BAR, false);
             };
@@ -1251,7 +1262,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     for (auto item : info->menuOptionItems) {
         itemNum++;
         float extensionOptionWidth = 0.0f;
-        auto button = BuildButton(item.content.value_or("null"), item.action, GetId(), extensionOptionWidth);
+        auto button = BuildButton(item, GetId(), extensionOptionWidth);
         allocatedSize += extensionOptionWidth;
         if (allocatedSize > maxWidth) {
             button.Reset();

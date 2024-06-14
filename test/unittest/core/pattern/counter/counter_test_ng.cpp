@@ -60,16 +60,17 @@ public:
 
 void CounterTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 }
 
 void CounterTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void CounterTestNg::SetUp() {}

@@ -74,9 +74,9 @@ void RotationRecognizer::OnRejected()
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch down event, begin to detect "
-        "rotation event",
-        event.touchEventId, event.id);
+        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch down event, begin to detect"
+        "rotation event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -110,8 +110,9 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives axis start event, begin to detect rotation event",
-        event.touchEventId);
+        "InputTracking id:%{public}d, rotation recognizer receives axis start event, begin to detect rotation event, "
+        "state: %{public}d",
+        event.touchEventId, refereeState_);
     lastAxisEvent_ = event;
     touchPoints_[event.id] = TouchEvent();
     UpdateTouchPointWithAxisEvent(event);
@@ -127,8 +128,8 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch up event", event.touchEventId,
-        event.id);
+        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch up event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -158,8 +159,9 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, rotation recognizer receives axis end event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives axis end event, state: %{public}d",
+        event.touchEventId, refereeState_);
     // if rotation recognizer received another axisEvent, no need to active.
     if (!event.isRotationEvent) {
         return;

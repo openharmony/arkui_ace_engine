@@ -29,12 +29,8 @@ int32_t Container::CurrentId()
     return ContainerScope::CurrentId();
 }
 
-int32_t Container::CurrentIdSafely()
+int32_t Container::SafelyId()
 {
-    int32_t currentId = ContainerScope::CurrentId();
-    if (currentId >= 0) {
-        return currentId;
-    }
     uint32_t containerCount = ContainerScope::ContainerCount();
     if (containerCount == 0) {
         return INSTANCE_ID_UNDEFINED;
@@ -42,7 +38,7 @@ int32_t Container::CurrentIdSafely()
     if (containerCount == 1) {
         return ContainerScope::SingletonId();
     }
-    currentId = ContainerScope::RecentActiveId();
+    int32_t currentId = ContainerScope::RecentActiveId();
     if (currentId >= 0) {
         return currentId;
     }
@@ -53,6 +49,15 @@ int32_t Container::CurrentIdSafely()
     return ContainerScope::DefaultId();
 }
 
+int32_t Container::CurrentIdSafely()
+{
+    int32_t currentId = ContainerScope::CurrentId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    return SafelyId();
+}
+
 RefPtr<Container> Container::Current()
 {
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
@@ -61,6 +66,19 @@ RefPtr<Container> Container::Current()
 RefPtr<Container> Container::CurrentSafely()
 {
     return AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+}
+
+RefPtr<Container> Container::CurrentSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        auto container = GetContainer(currentId);
+        if (container) {
+            return container;
+        }
+    }
+    currentId = SafelyId();
+    return GetContainer(currentId);
 }
 
 RefPtr<Container> Container::GetContainer(int32_t containerId)
@@ -107,6 +125,20 @@ RefPtr<Container> Container::GetFoucsed()
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
+    CHECK_NULL_RETURN(curContainer, nullptr);
+    return curContainer->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafely()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, nullptr);
+    return curContainer->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafelyWithCheck()
+{
+    auto curContainer = CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(curContainer, nullptr);
     return curContainer->GetTaskExecutor();
 }

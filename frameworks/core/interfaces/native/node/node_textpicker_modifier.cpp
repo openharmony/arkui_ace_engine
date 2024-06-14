@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -23,6 +24,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -31,11 +33,13 @@ constexpr int32_t SIZE_OF_THREE = 3;
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 std::string g_strValue;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -119,18 +123,34 @@ void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
     NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
 }
 
-void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerTextStyle(ArkUINodeHandle node)
@@ -147,18 +167,34 @@ void ResetTextPickerTextStyle(ArkUINodeHandle node)
 }
 
 void SetTextPickerSelectedTextStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
@@ -175,18 +211,34 @@ void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
 }
 
 void SetTextPickerDisappearTextStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
@@ -200,6 +252,13 @@ void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
+}
+
+ArkUI_Float32 GetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, ArkUI_Int32 dUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextPickerModelNG::GetDefaultPickerItemHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(dUnit));
 }
 
 void SetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, float dVal, ArkUI_Int32 dUnit)
@@ -447,7 +506,7 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
         SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize, GetTextPickerCanLoop };
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
 
     return &modifier;
 }

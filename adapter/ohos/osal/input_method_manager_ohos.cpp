@@ -103,8 +103,8 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
         auto callback = pipeline->GetWindowFocusCallback();
         if (callback) {
             callback();
+            return;
         }
-        return;
     }
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||

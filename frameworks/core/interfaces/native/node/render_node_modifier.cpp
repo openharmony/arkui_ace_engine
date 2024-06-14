@@ -323,8 +323,8 @@ void SetBorderColor(ArkUINodeHandle node, uint32_t left, uint32_t top, uint32_t 
 
     BorderColorProperty borderColorProperty {
         .leftColor = Color(left),
-        .topColor = Color(top),
         .rightColor = Color(right),
+        .topColor = Color(top),
         .bottomColor = Color(bottom),
         .multiValued = true
     };

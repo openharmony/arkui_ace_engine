@@ -49,9 +49,9 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
 
     void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetAdaptMinFontSize(const Dimension& value);
-    void SetAdaptMaxFontSize(const Dimension& value);
+    void SetFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetTextShadow(const std::vector<Shadow>& value);

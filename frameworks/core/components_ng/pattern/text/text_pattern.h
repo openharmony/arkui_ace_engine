@@ -332,7 +332,7 @@ public:
     void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
-    void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
+    virtual void AddUdmfData(const RefPtr<Ace::DragEvent>& event);
 
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
@@ -666,6 +666,7 @@ protected:
     double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
     bool IsSelectableAndCopy();
+    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
     virtual bool CanStartAITask()
     {
@@ -779,7 +780,6 @@ private:
         return lastDragTool_;
     }
 
-    void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);

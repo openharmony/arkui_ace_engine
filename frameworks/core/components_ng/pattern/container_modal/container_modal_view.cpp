@@ -293,18 +293,19 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         CHECK_NULL_VOID(buttonNodeRenderContext);
         CHECK_NULL_VOID(imageIconRenderContext);
         float imageScale = isHover ? baseScale : 1.0f;
+        float btnScale = 1.0f;
         AnimationOption option = AnimationOption();
         auto motion = MakeRefPtr<ResponsiveSpringMotion>(SPRINGMOTION_RESPONSE, CURRENT_RATIO, CURRENT_DURATION);
         option.SetCurve(motion);
         if (isHover) {
-            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
-                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, btnScale]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(btnScale, btnScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
             });
         } else {
             baseScale = 1.0f;
-            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
-                buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, btnScale]() {
+                buttonNodeRenderContext->UpdateTransformScale(VectorF(btnScale, btnScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
             });
         }
@@ -339,14 +340,15 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageScale = baseScale;
+        float btnScale = 1.0f;
         float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
         float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
         float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
         auto motion = MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
         AnimationOption option = AnimationOption();
         option.SetCurve(motion);
-        AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
-            buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+        AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, btnScale]() {
+            buttonNodeRenderContext->UpdateTransformScale(VectorF(btnScale, btnScale));
             imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
         });
     };

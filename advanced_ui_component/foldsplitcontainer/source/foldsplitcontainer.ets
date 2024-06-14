@@ -119,7 +119,7 @@ export interface ExpandedRegionLayoutOptions {
 }
 
 /**
- * The layout options for the container when the foldable screen is semi-folded.
+ * The layout options for the container when the foldable screen is in hover mode.
  *
  * @interface SemiFoldedRegionLayoutOptions
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -127,7 +127,7 @@ export interface ExpandedRegionLayoutOptions {
  * @atomicservice
  * @since 12
  */
-export interface SemiFoldedRegionLayoutOptions {
+export interface HoverModeRegionLayoutOptions {
   /**
    * The ratio of the widths of two areas in the horizontal direction.
    *
@@ -226,7 +226,7 @@ export enum PresetSplitRatio {
 }
 
 /**
- * The hover status.
+ * The status of hover mode.
  *
  * @interface HoverStatus
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -247,7 +247,8 @@ export interface HoverModeStatus {
   foldStatus: display.FoldStatus;
 
   /**
-   * Is it in hover mode.
+   * Is the app currently in hover mode?
+   * In hover mode, the upper half of the screen is used for display, and the lower half is used for operation.
    *
    * @type { boolean }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -392,7 +393,7 @@ export struct FoldSplitContainer {
     extraRegionPosition: ExtraRegionPosition.TOP
   };
   /**
-   * The layout options for the container when the foldable screen is semi-folded.
+   * The layout options for the container when the foldable screen is in hover mode.
    *
    * @type { SemiFoldedRegionLayoutOptions }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -402,7 +403,7 @@ export struct FoldSplitContainer {
    */
   @Prop
   @Watch('updateLayout')
-  semiFoldedLayoutOptions: SemiFoldedRegionLayoutOptions = {
+  hoverModeLayoutOptions: HoverModeRegionLayoutOptions = {
     horizontalSplitRatio: PresetSplitRatio.LAYOUT_3V2,
     showExtraRegion: true,
     extraRegionPosition: ExtraRegionPosition.TOP
@@ -433,7 +434,8 @@ export struct FoldSplitContainer {
   @Prop
   animationOptions?: AnimateParam | null = undefined;
   /**
-   * The callback function that is triggered when the foldable screen enters or exits the hover state
+   * The callback function that is triggered when the foldable screen enters or exits hover mode.
+   * In hover mode, the upper half of the screen is used for display, and the lower half is used for operation.
    *
    * @type { ?OnHoverStatusChangeHandler }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -603,7 +605,7 @@ export struct FoldSplitContainer {
       if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
         regionLayout = this.getExpandedRegionLayouts();
       } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
-        regionLayout = this.getSemiFoldedRegionLayouts();
+        regionLayout = this.getHoverModeRegionLayouts();
       } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
         regionLayout = this.getFoldedRegionLayouts();
       } else {
@@ -682,7 +684,7 @@ export struct FoldSplitContainer {
     return { primary: primaryLayout, secondary: secondaryLayout, extra: extraLayout };
   }
 
-  private getSemiFoldedRegionLayouts(): RegionLayout {
+  private getHoverModeRegionLayouts(): RegionLayout {
     const width = this.containerSize.width;
     const height = this.containerSize.height;
     const primaryLayout: Layout = initLayout();
@@ -701,7 +703,7 @@ export struct FoldSplitContainer {
     secondaryLayout.size.height = height - secondaryLayout.position.y;
     primaryLayout.size.height = creaseRegionRect.top;
 
-    const showExtraRegion = withDefaultValue(this.semiFoldedLayoutOptions.showExtraRegion, false);
+    const showExtraRegion = withDefaultValue(this.hoverModeLayoutOptions.showExtraRegion, false);
 
     if (!showExtraRegion) {
       primaryLayout.size.width = width;
@@ -715,9 +717,9 @@ export struct FoldSplitContainer {
       }
     } else {
       const horizontalSplitRatio =
-        getSplitRatio(this.semiFoldedLayoutOptions.horizontalSplitRatio, PresetSplitRatio.LAYOUT_3V2);
+        getSplitRatio(this.hoverModeLayoutOptions.horizontalSplitRatio, PresetSplitRatio.LAYOUT_3V2);
       const extraRegionPosition =
-        withDefaultValue(this.semiFoldedLayoutOptions.extraRegionPosition, ExtraRegionPosition.TOP);
+        withDefaultValue(this.hoverModeLayoutOptions.extraRegionPosition, ExtraRegionPosition.TOP);
       if (this.hasExtraRegion()) {
         extraLayout.size.width = width / (horizontalSplitRatio + 1);
       } else {

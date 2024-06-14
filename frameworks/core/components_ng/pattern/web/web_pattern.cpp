@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -173,7 +172,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
-constexpr Dimension TOOLTIP_FONT_SIZE = 10.0_vp;
+constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_MARGIN = 10.0f;
@@ -753,7 +752,10 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
-    OnTooltip("");
+    auto localLocation = info.GetLocalLocation();
+    if ((mouseHoveredX_ != localLocation.GetX()) || (mouseHoveredY_ != localLocation.GetY())) {
+        OnTooltip("");
+    }
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
@@ -774,7 +776,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
 
-    auto localLocation = info.GetLocalLocation();
     if (!HandleDoubleClickEvent(info)) {
         delegate_->OnMouseEvent(
             localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
@@ -1670,15 +1671,7 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         return;
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipelineContext = host->GetContextRefPtr();
-        CHECK_NULL_VOID(pipelineContext);
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto bottomArea = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
-        double newHeight = height - keyboard - bottomArea - topArea;
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
         if (GreatOrEqual(newHeight, oldWebHeight)) {
             newHeight = oldWebHeight;
         }
@@ -2392,13 +2385,6 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
-    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->InitTouchEventListener();
-    };
-    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
-
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2537,6 +2523,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = false;
+    InitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2564,6 +2551,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
+    UninitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -2639,6 +2627,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    UninitTouchEventListener();
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -3282,6 +3271,7 @@ void WebPattern::OnTooltip(const std::string& tooltip)
 
     if (tooltipId_ != -1) {
         overlayManager->RemoveIndexerPopupById(tooltipId_);
+        tooltipId_ = -1;
     }
 
     if (tooltip == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
@@ -3319,7 +3309,7 @@ void WebPattern::CloseCustomKeyboard()
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
 {
-    if (tooltipTimestamp_ != tooltipTimestamp) {
+    if ((tooltipTimestamp_ != tooltipTimestamp) || (tooltip == "")) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -3478,26 +3468,29 @@ void WebPattern::NotifyForNextTouchEvent()
 void WebPattern::InitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
-    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
+    if (touchEventListener_) {
+        return;
+    }
+    touchEventListener_ = std::make_shared<TouchEventListener>();
+    touchEventListener_->SetPatternToListener(AceType::WeakClaim(this));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
-    context->RegisterTouchEventListener(listener);
+    context->RegisterTouchEventListener(touchEventListener_);
 }
 
 void WebPattern::UninitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+    touchEventListener_ = nullptr;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
     context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 

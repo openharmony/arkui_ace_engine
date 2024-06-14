@@ -62,6 +62,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         currentIndex_ = itemCount_ - 1 - currentIndex_;
     }
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);

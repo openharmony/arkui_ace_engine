@@ -16,6 +16,7 @@
 
 #include "jsnapi_expo.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/observer_handler.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h"
@@ -69,6 +70,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
@@ -106,6 +108,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -169,6 +173,77 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCal
     }
     
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    auto pageInfo = panda::ObjectRef::New(vm);
+    CHECK_NULL_RETURN(nodePtr, pageInfo);
+
+    auto routerPageResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetRouterPageState(nodePtr);
+    if (routerPageResult) {
+        auto jsContext = Framework::JsConverter::ConvertNapiValueToJsVal(routerPageResult->context);
+        Local<JSValueRef> routerPageValues[] = { jsContext->GetLocalHandle(),
+            panda::NumberRef::New(vm, routerPageResult->index),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->name.c_str()),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->path.c_str()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(routerPageResult->state)),
+            panda::StringRef::NewFromUtf8(vm, routerPageResult->pageId.c_str()) };
+        const char* routerPageKeys[] = { "context", "index", "name", "path", "state", "pageId" };
+        auto routerPageObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(routerPageKeys), routerPageKeys,
+            routerPageValues);
+        pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "routerPageInfo"), routerPageObj);
+    }
+
+    auto navDestinationResult = OHOS::Ace::NG::UIObserverHandler::GetInstance().GetNavigationState(nodePtr);
+    if (navDestinationResult) {
+        Local<JSValueRef> navDestinationValues[] = {
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navigationId.c_str()),
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->name.c_str()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->state)),
+            panda::NumberRef::New(vm, navDestinationResult->index),
+            Framework::JsConverter::ConvertNapiValueToJsVal(navDestinationResult->param)->GetLocalHandle(),
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()) };
+        const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId" };
+        auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
+            navDestinationKeys, navDestinationValues);
+        pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestinationInfo"), navDestinationObj);
+    }
+
+    return pageInfo;
+}
+
+ArkUINativeModuleValue ArkUINativeModule::GetNavigationInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::ObjectRef::New(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
+    auto defaultResult = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(nodePtr, defaultResult);
+
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, defaultResult);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationMgr, defaultResult);
+    auto result = navigationMgr->GetNavigationInfo(nodePtr);
+    CHECK_NULL_RETURN(result, defaultResult);
+    auto jsStack = AceType::DynamicCast<Framework::JSNavigationStack>(result->pathStack.Upgrade());
+    CHECK_NULL_RETURN(jsStack, defaultResult);
+    Framework::JSRef<Framework::JSObject> navPathStackObj = jsStack->GetDataSourceObj();
+    CHECK_NULL_RETURN(!navPathStackObj->IsEmpty(), defaultResult);
+    auto obj = panda::ObjectRef::New(vm);
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigationId"),
+        panda::StringRef::NewFromUtf8(vm, result->navigationId.c_str()));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pathStack"), navPathStackObj->GetLocalHandle());
+    
+    return obj;
 }
 
 ArkUINativeModuleValue ArkUINativeModule::GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -263,6 +338,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeById));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByUniqueId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByUniqueId));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPageInfoByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetPageInfoByUniqueId));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNavigationInfoByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetNavigationInfoByUniqueId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getUIState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportedUIState"),
@@ -1287,6 +1366,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetOnDidDelete));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidDelete"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetOnDidDelete));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnablePreviewText));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnablePreviewText));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -1295,6 +1378,17 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetAlignContent));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stack"), stack);
+
+    auto folderStack = panda::ObjectRef::New(vm);
+    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetEnableAnimation));
+    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetEnableAnimation));
+    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoHalfFold"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetAutoHalfFold));
+    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoHalfFold"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetAutoHalfFold));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "folderStack"), folderStack);
 
     auto imageSpan = panda::ObjectRef::New(vm);
     imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVerticalAlign"),
@@ -1697,6 +1791,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnDidDelete));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidDelete"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnDidDelete));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnablePreviewText));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnablePreviewText));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -2112,6 +2210,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetOnDidDelete));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidDelete"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetOnDidDelete));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetEnablePreviewText));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnablePreviewText"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetEnablePreviewText));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -3090,6 +3192,18 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::EnableAnalyzer));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "analyzerConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::AnalyzerConfig));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::SetOnComplete));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetOnComplete));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::SetOnError));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetOnError));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::SetOnFinish));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ImageBridge::ResetOnFinish));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 
@@ -3581,6 +3695,10 @@ void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> ob
 void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto tabContent = panda::ObjectRef::New(vm);
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabBar));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabBar));
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentWidth));
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentHeight"),
@@ -4235,6 +4353,10 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperCurve));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperCurve"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperCurve));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnChange));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnChange));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperDisableSwipe"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperDisableSwipe));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperDisableSwipe"),
@@ -4291,6 +4413,18 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetNestedScroll));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetNestedScroll));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnAnimationStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnAnimationStart));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnAnimationStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnAnimationStart));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnAnimationEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnAnimationEnd));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnAnimationEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnAnimationEnd));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnGestureSwipe"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnGestureSwipe));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnGestureSwipe"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperOnGestureSwipe));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIndicatorInteractive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetIndicatorInteractive));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIndicatorInteractive"),

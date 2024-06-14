@@ -460,6 +460,20 @@ class UIContext {
         return node;
     }
 
+    getPageInfoByUniqueId(uniqueId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const pageInfo = getUINativeModule().getPageInfoByUniqueId(uniqueId);
+        __JSScopeUtil__.restoreInstanceId();
+        return pageInfo;
+    }
+
+    getNavigationInfoByUniqueId(uniqueId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const navigationInfo = getUINativeModule().getNavigationInfoByUniqueId(uniqueId);
+        __JSScopeUtil__.restoreInstanceId();
+        return navigationInfo;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);

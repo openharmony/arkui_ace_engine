@@ -1920,7 +1920,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         if (isPropertyDiffMarked_) {
             return;
         }
-        auto context = GetContext();
+        auto context = GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->AddDirtyPropertyNode(Claim(this));
         isPropertyDiffMarked_ = true;
@@ -3500,6 +3500,12 @@ bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     return opts && opts->Expansive();
+}
+
+bool FrameNode::SelfExpansiveToKeyboard()
+{
+    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    return opts && opts->ExpansiveToKeyboard();
 }
 
 bool FrameNode::ParentExpansive()

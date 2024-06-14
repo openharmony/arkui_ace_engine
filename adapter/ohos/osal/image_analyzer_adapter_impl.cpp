@@ -36,12 +36,15 @@ ImageAnalyzerAdapterImpl::~ImageAnalyzerAdapterImpl()
     }
 }
 
-void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config)
+void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config, bool isOptions)
 {
     napi_ref configRef = nullptr;
     napi_value configValue = reinterpret_cast<napi_value>(config);
     napi_create_reference(env_, configValue, 1, &configRef);
     analyzerConfigRef_ = configRef;
+    if (isOptions) {
+        hasOptions_ = true;
+    }
 }
 
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
@@ -82,7 +85,7 @@ bool ImageAnalyzerAdapterImpl::HasImageAnalyzerConfig()
 {
     napi_value analyzerConfig = nullptr;
     napi_get_reference_value(env_, analyzerConfigRef_, &analyzerConfig);
-    return analyzerConfig != nullptr;
+    return analyzerConfig != nullptr && hasOptions_;
 }
 
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()

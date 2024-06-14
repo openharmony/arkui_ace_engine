@@ -95,7 +95,18 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     return MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafelyWithCheck()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
 PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    return AceType::RawPtr(context);
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafelyWithCheck()
 {
     auto context = MockPipelineContext::GetCurrent();
     return AceType::RawPtr(context);

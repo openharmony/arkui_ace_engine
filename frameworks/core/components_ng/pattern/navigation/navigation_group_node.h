@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 
+#include <atomic>
 #include <cstdint>
 #include <list>
 
@@ -182,6 +183,21 @@ public:
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    void ReduceModeSwitchAnimationCnt()
+    {
+        --modeSwitchAnimationCnt_;
+    }
+
+    void IncreaseModeSwitchAnimationCnt()
+    {
+        ++modeSwitchAnimationCnt_;
+    }
+
+    int32_t GetModeSwitchAnimationCnt()
+    {
+        return modeSwitchAnimationCnt_;
+    }
+
     float CheckLanguageDirection();
 
     void RemoveDialogDestination();
@@ -224,6 +240,7 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };

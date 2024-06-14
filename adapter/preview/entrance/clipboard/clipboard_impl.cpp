@@ -29,6 +29,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&, bool is
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
 {}
+void ClipboardImpl::GetSpanStringData(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode) {}
 
 RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 {

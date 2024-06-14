@@ -114,12 +114,14 @@ void UINode::DetachContext(bool recursive)
     }
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
+    bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    if (isProhibitedAddChildNode_) {
-        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d)",
-            GetId(), child->GetTag().c_str(), child->GetId());
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+            "Current modalUiextension count is : %{public}d",
+            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
         return;
     }
 
@@ -820,6 +822,14 @@ PipelineContext* UINode::GetContext()
     return PipelineContext::GetCurrentContextPtrSafely();
 }
 
+PipelineContext* UINode::GetContextWithCheck()
+{
+    if (context_) {
+        return context_;
+    }
+    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+}
+
 RefPtr<PipelineContext> UINode::GetContextRefPtr()
 {
     auto* context = GetContext();
@@ -999,7 +1009,7 @@ void UINode::SetJSViewActive(bool active)
         // do not need to recursive here, stateMgmt will recursive all children when set active
         if (customNode) {
             customNode->SetJSViewActive(active);
-            return;
+            continue;
         }
         child->SetJSViewActive(active);
     }

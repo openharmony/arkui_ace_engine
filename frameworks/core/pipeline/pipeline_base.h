@@ -104,6 +104,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContextSafely();
 
+    static RefPtr<PipelineBase> GetCurrentContextSafelyWithCheck();
+
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
     static RefPtr<ThemeManager> CurrentThemeManager();
@@ -1240,6 +1242,8 @@ public:
     virtual bool IsDensityChanged() const = 0;
 
     virtual bool GetOnShow() const = 0;
+
+    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
 protected:
     virtual bool MaybeRelease() override;

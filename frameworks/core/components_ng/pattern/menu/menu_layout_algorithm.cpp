@@ -625,9 +625,9 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto itemProps = parentItem->GetLayoutProperty<MenuItemLayoutProperty>();
-        CHECK_NULL_VOID(itemProps);
-        auto expandingMode = itemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(parentPattern);
+        auto expandingMode = parentPattern->GetExpandingMode();
         if (expandingMode == SubMenuExpandingMode::STACK) {
             auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(parentPattern);
@@ -1935,8 +1935,8 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
     } else {
-        targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetParentGlobalOffsetDuringLayout() + geometryNode->GetFrameOffset();
+        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
+        targetOffset_ = targetNode->GetPaintRectOffset();
     }
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;

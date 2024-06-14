@@ -42,11 +42,14 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 1;
+  }
   initialize(value: Object[]) {
-    if (value.length >= 1 && isObject(value[0])) {
-      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
-    } else {
+    if (value.length >= 1 && (isResource(value[0]) || isString(value[0]))) {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
     }
     if (value.length === 1) {
       if (isObject(value[0])) {
@@ -115,7 +118,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<ButtonConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ButtonContentModifier.identity, ButtonContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
@@ -368,7 +371,7 @@ class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
       let widthRight;
       let widthTop;
       let widthBottom;
-      if (!isUndefined(this.value.width) && this.value.width != null) {
+      if (!isUndefined(this.value.width) && this.value.width !== null) {
         if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
           widthLeft = this.value.width;
           widthRight = this.value.width;
@@ -385,7 +388,7 @@ class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -402,7 +405,7 @@ class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;
@@ -419,7 +422,7 @@ class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
       let styleRight;
       let styleBottom;
       let styleLeft;
-      if (!isUndefined(this.value.style) && this.value.style != null) {
+      if (!isUndefined(this.value.style) && this.value.style !== null) {
         if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
           styleTop = this.value.style;
           styleRight = this.value.style;
@@ -455,12 +458,10 @@ class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
   }
 
   checkObjectDiff(): boolean {
-    return (
-      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
-      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
-      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
-      !isBaseOrResourceEqual(this.stageValue.style, this.value.style)
-    );
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+           !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+           !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+           !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
   }
 }
 
@@ -592,6 +593,16 @@ class ButtonCreateTypeModifier extends ModifierWithKey<boolean> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class ButtonContentModifier extends ModifierWithKey<ContentModifier<ButtonConfiguration>> {
+  constructor(value: ContentModifier<ButtonConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let buttonComponent = component as ArkButtonComponent;
+    buttonComponent.setContentModifier(this.value);
   }
 }
 

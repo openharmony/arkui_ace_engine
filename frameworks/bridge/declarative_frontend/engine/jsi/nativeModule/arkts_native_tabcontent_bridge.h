@@ -22,6 +22,8 @@
 namespace OHOS::Ace::NG {
 class TabContentBridge : public CommonBridge {
 public:
+    static ArkUINativeModuleValue SetTabBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabBar(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabContentHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabContentSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabContentWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);

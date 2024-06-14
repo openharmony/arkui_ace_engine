@@ -31,6 +31,8 @@
 namespace OHOS::Ace::NG {
 
 struct ListItemGroupPaintInfo {
+    TextDirection layoutDirection = TextDirection::LTR;
+    float mainSize = 0.0f;
     bool vertical = false;
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
@@ -212,6 +214,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
@@ -240,6 +243,8 @@ private:
     float laneGutter_ = 0.0f;
     float startHeaderPos_ = 0.0f;
     float endFooterPos_ = 0.0f;
+    TextDirection layoutDirection_ = TextDirection::LTR;
+    float mainSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG

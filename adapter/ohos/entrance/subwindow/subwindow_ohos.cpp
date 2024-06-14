@@ -639,7 +639,7 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HideFilter(true);
 }
 
-void SubwindowOhos::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+void SubwindowOhos::UpdatePreviewPosition()
 {
     ContainerScope scope(childContainerId_);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -649,7 +649,7 @@ void SubwindowOhos::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect&
     if (overlay->GetHasPixelMap()) {
         return;
     }
-    overlay->UpdatePixelMapPosition(Point(offset.GetX(), offset.GetY()), rect, true);
+    overlay->UpdatePixelMapPosition(true);
 }
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)

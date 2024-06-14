@@ -21,9 +21,12 @@ void ScrollTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
-    scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+    scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
+    scrollBarTheme->padding_ = Edge(0.0);
+    scrollBarTheme->scrollBarMargin_ = Dimension(0.0);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
@@ -43,11 +46,12 @@ void ScrollTestNg::TearDown()
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     scrollBar_ = nullptr;
+    ClearOldNodes();  // Each testcase will create new list at begin
 }
 
-void ScrollTestNg::GetInstance()
+void ScrollTestNg::GetScroll()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ScrollPattern>();
     eventHub_ = frameNode_->GetEventHub<ScrollEventHub>();
@@ -56,53 +60,45 @@ void ScrollTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();
 }
 
-void ScrollTestNg::Create(const std::function<void(ScrollModelNG)>& callback)
+ScrollModelNG ScrollTestNg::CreateScroll()
 {
+    ResetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ScrollModelNG model;
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
     ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
     ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-}
-
-void ScrollTestNg::CreateWithContent(const std::function<void(ScrollModelNG)>& callback, int32_t childNumber)
-{
-    Create([callback, childNumber](ScrollModelNG model) {
-        if (callback) {
-            callback(model);
-        }
-        CreateContent(childNumber);
-    });
+    GetScroll();
+    return model;
 }
 
 void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
     const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
 {
-    CreateWithContent(
-        [scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
-            model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
-        }, SNAP_ITEM_NUMBER);
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent(SNAP_ITEM_NUMBER);
+    CreateDone(frameNode_);
 }
 
 void ScrollTestNg::CreateContent(int32_t childNumber)
 {
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     if (GetAxis() == Axis::HORIZONTAL) {
         RowModelNG rowModel;
         rowModel.Create(Dimension(0), nullptr, "");
         ViewAbstract::SetWidth(CalcLength(Dimension(childNumber * ITEM_WIDTH)));
         ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
         for (int32_t index = 0; index < childNumber; index++) {
+            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
             RowModelNG rowModel;
             rowModel.Create(Dimension(0), nullptr, "");
             ViewAbstract::SetWidth(CalcLength(Dimension(ITEM_WIDTH)));
             ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
             ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
         }
     } else {
         ColumnModelNG colModel;
@@ -110,14 +106,17 @@ void ScrollTestNg::CreateContent(int32_t childNumber)
         ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(Dimension(childNumber * ITEM_HEIGHT)));
         for (int32_t index = 0; index < childNumber; index++) {
+            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
             ColumnModelNG colModel;
             colModel.Create(Dimension(0), nullptr, "");
             ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
             ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
             ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
         }
     }
     ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
 void ScrollTestNg::UpdateCurrentOffset(float offset)
@@ -237,19 +236,29 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     /**
      * @tc.steps: step1. Text default value: VERTICAL
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
 
     /**
      * @tc.steps: step2. Text set value: HORIZONTAL
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
 
     /**
      * @tc.steps: step3. Text set value: NONE
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1));
 }
 
@@ -263,13 +272,19 @@ HWTEST_F(ScrollTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test default value: true
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 
     /**
      * @tc.steps: step2. Test set value: false
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetScrollEnabled(false); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollEnabled(false);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
@@ -280,12 +295,13 @@ HWTEST_F(ScrollTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollTest002, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetAxis(Axis::HORIZONTAL);
-        model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
-        auto scrollProxy = model.CreateScrollBarProxy();
-        model.SetScrollBarProxy(scrollProxy);
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
+    auto scrollProxy = model.CreateScrollBarProxy();
+    model.SetScrollBarProxy(scrollProxy);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. When Axis is HORIZONTAL, Verify the callback function registered in scrollBarProxy.
@@ -310,7 +326,10 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
      * @tc.steps: step1. Set ScrollSpringEffect and call relevant callback functions.
      * @tc.expected: Check whether the return value is correct.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollableDistance_, VERTICAL_SCROLLABLE_DISTANCE);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEdgeEffect);
@@ -364,10 +383,11 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
      * @tc.steps: step5. When direction is the default value and scrollableDistance_ <= 0.
      * @tc.expected: return 0.0
      */
-    Create([](ScrollModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateContent(VIEW_LINE_NUMBER);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollableDistance_, 0);
     scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     leading = scrollEdgeEffect->leadingCallback_();
@@ -387,7 +407,9 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
      * @tc.steps: step1. Set ScrollFadeEffect and call relevant callback functions.
      * @tc.expected: Check whether the return value is correct.
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     pattern_->SetEdgeEffect(EdgeEffect::FADE);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     ASSERT_NE(scrollEdgeEffect, nullptr);
@@ -412,21 +434,28 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
      * @tc.steps: step1. When unscrollable
      * @tc.expected: currentOffset would not change
      */
-    Create();
+    CreateScroll();
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, 0, SCROLL_FROM_UPDATE));
 
     /**
      * @tc.steps: step2. When !HandleEdgeEffect and !IsOutOfBoundary
      * @tc.expected: currentOffset would not change
      */
-    CreateWithContent();
+    ClearOldNodes();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_UPDATE));
 
     /**
      * @tc.steps: step3. When !HandleEdgeEffect and IsOutOfBoundary
      * @tc.expected: currentOffset would not change
      */
-    CreateWithContent();
+    ClearOldNodes();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     pattern_->currentOffset_ = 10.f;
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_UPDATE));
 }
@@ -441,7 +470,9 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     /**
      * @tc.steps: step1. When Axis::VERTICAL
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ROTATE));
@@ -451,7 +482,11 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     /**
      * @tc.steps: step2. When Axis::HORIZONTAL
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_ROTATE));
@@ -461,7 +496,11 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     /**
      * @tc.steps: step3. When EdgeEffect::SPRING, Test ValidateOffset
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->IsRestrictBoundary());
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_JUMP));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_BAR));
@@ -477,7 +516,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     pattern_->UpdateScrollBarOffset();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(),
-        -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_LINE_NUMBER - SCROLL_HEIGHT));
+        -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_ITEM_NUMBER - SCROLL_HEIGHT));
 
     pattern_->currentOffset_ = -100.f;
     pattern_->UpdateScrollBarOffset();
@@ -495,7 +534,10 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset003, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll model with spring edgeEffect.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     pattern_->isAnimationStop_ = false;
 
     /**
@@ -527,7 +569,10 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset004, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll model with spring edgeEffect.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     /**
      * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
      * @tc.expected: the return value of UpdateCurrentOffset is true.
@@ -553,8 +598,8 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
     ScrollModelNG model;
     model.Create();
     model.SetAxis(Axis::NONE);
-    CreateContent();
-    GetInstance();
+    GetScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
 
     /**
      * @tc.steps: step1. Do not set idealSize
@@ -570,7 +615,7 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
     layoutWrapper->Layout();
     layoutWrapper->MountToHostOnMainThread();
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
-    auto expectSize = SizeF(SCROLL_WIDTH, ITEM_HEIGHT * TOTAL_LINE_NUMBER);
+    auto expectSize = SizeF(SCROLL_WIDTH, ITEM_HEIGHT * TOTAL_ITEM_NUMBER);
     EXPECT_EQ(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
                                       << " expectSize: " << expectSize.ToString();
 }
@@ -582,7 +627,10 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, Layout001, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
     FlushLayoutTask(frameNode_);
     auto col = frameNode_->GetChildAtIndex(0);
@@ -604,7 +652,9 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
      * @tc.steps: step1. ScrollToNode in VERTICAL
      * @tc.expected: currentOffset_ is correct
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(ScrollToNode(5, 0));
     EXPECT_TRUE(ScrollToNode(8, -1));
     EXPECT_TRUE(ScrollToNode(9, -2));
@@ -615,7 +665,11 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
      * @tc.steps: step2. ScrollToNode in HORIZONTAL
      * @tc.expected: currentOffset_ is correct
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(ScrollToNode(5, 0));
     EXPECT_TRUE(ScrollToNode(8, -1));
     EXPECT_TRUE(ScrollToNode(9, -2));
@@ -626,7 +680,10 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
      * @tc.steps: step1. ScrollToNode itSelf
      * @tc.expected: currentOffset_ is zero
      */
-    CreateWithContent();
+    ClearOldNodes();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     pattern_->ScrollToNode(frameNode_);
     EXPECT_TRUE(IsEqualCurrentPosition(0));
     pattern_->ScrollToNode(GetChildFrameNode(frameNode_, 0));
@@ -640,7 +697,9 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, Pattern003, TestSize.Level1)
 {
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. When scrollBar is not OFF
@@ -666,7 +725,9 @@ HWTEST_F(ScrollTestNg, Pattern003, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, Test001, TestSize.Level1)
 {
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     OverScrollOffset expectOffset = { ITEM_HEIGHT, 0 };
@@ -734,7 +795,8 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step1. Create unscrollable scroll, test SetSpecificSupportAction
      * @tc.expected: action is correct
      */
-    Create();
+    CreateScroll();
+    CreateDone(frameNode_);
     accessibilityProperty_->ResetSupportAction();
     EXPECT_EQ(GetActions(accessibilityProperty_), 0);
 
@@ -742,7 +804,10 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step2. scroll is at top
      * @tc.expected: action is correct
      */
-    CreateWithContent();
+    ClearOldNodes();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     accessibilityProperty_->ResetSupportAction();
     uint64_t expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -773,9 +838,16 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step6. test IsScrollable()
      * @tc.expected: return value is correct
      */
-    CreateWithContent();
+    ClearOldNodes();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
 
@@ -790,7 +862,9 @@ HWTEST_F(ScrollTestNg, OnModifyDone001, TestSize.Level1)
      * @tc.steps: step1. Create to trigger OnModifyDone
      * @tc.expected: Has ScrollableEvent, has AccessibilityAction, set Axis::VERTICAL
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
     ASSERT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
     ASSERT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
@@ -823,7 +897,9 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      * @tc.steps: step1. Test SetAccessibilityAction with scrollable scroll
      * @tc.expected: Can trigger AnimateTo()
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     accessibilityProperty_->actionScrollForwardImpl_();
     ASSERT_NE(pattern_->springAnimation_, nullptr);
     pattern_->springAnimation_ = nullptr;
@@ -834,7 +910,8 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      * @tc.steps: step2. Test SetAccessibilityAction with unScrollable scroll, scrollableDistance_ <= 0
      * @tc.expected: Cannot trigger AnimateTo()
      */
-    Create();
+    CreateScroll();
+    CreateDone(frameNode_);
     accessibilityProperty_->actionScrollForwardImpl_();
     EXPECT_EQ(pattern_->animator_, nullptr);
     accessibilityProperty_->actionScrollBackwardImpl_();
@@ -844,7 +921,11 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      * @tc.steps: step3. Test SetAccessibilityAction with unScrollable scroll, Axis::NONE
      * @tc.expected: Cannot trigger AnimateTo()
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     accessibilityProperty_->actionScrollForwardImpl_();
     EXPECT_EQ(pattern_->animator_, nullptr);
     accessibilityProperty_->actionScrollBackwardImpl_();
@@ -861,7 +942,10 @@ HWTEST_F(ScrollTestNg, ScrollTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll and initialize related properties.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step2. Get scroll frameNode and pattern, set callback function.
@@ -917,12 +1001,13 @@ HWTEST_F(ScrollTestNg, ScrollTest006, TestSize.Level1)
     double touchPosY = 500.0;
     float offset = 10.0f;
     float velocity = 1200.0f;
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetAxis(Axis::HORIZONTAL);
-        model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
-        auto scrollProxy = model.CreateScrollBarProxy();
-        model.SetScrollBarProxy(scrollProxy);
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
+    auto scrollProxy = model.CreateScrollBarProxy();
+    model.SetScrollBarProxy(scrollProxy);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
 
@@ -975,11 +1060,9 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     double friction = -1;
-    ScrollModelNG scrollModelNG_1;
-    scrollModelNG_1.Create();
-    scrollModelNG_1.SetFriction(friction);
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    ScrollModelNG model = CreateScroll();
+    model.SetFriction(friction);
+    CreateDone(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), NEW_DEFAULT_FRICTION);
 
     /**
@@ -987,11 +1070,10 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
      * @tc.expected: friction should be more than 0.0,if out of range,should be default value.
      */
     friction = 10;
-    ScrollModelNG scrollModelNG_2;
-    scrollModelNG_2.Create();
-    scrollModelNG_2.SetFriction(friction);
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetFriction(friction);
+    CreateDone(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), friction);
 }
 
@@ -1024,6 +1106,7 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
     EXPECT_FALSE(pattern_->NeedScrollSnapToSide(0.f));
 
     enableSnapToSide = { true, false };
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
@@ -1038,6 +1121,7 @@ HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
 
     // snapOffsets_: { 0.f, -10.f, -20.f, -30.f, -40.f, ... , -180.f, -190.f, -200.f }
     snapPaginations = {};
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
@@ -1071,6 +1155,7 @@ HWTEST_F(ScrollTestNg, Snap002, TestSize.Level1)
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
     enableSnapToSide = { true, false };
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_TRUE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = -1200.f;
@@ -1080,6 +1165,7 @@ HWTEST_F(ScrollTestNg, Snap002, TestSize.Level1)
 
     // snapOffsets_: { 0.f, -5.f, -15.f, -25.f, -35.f, ... , -2185.f, -2195.f }
     snapPaginations = {};
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
@@ -1111,6 +1197,7 @@ HWTEST_F(ScrollTestNg, Snap003, TestSize.Level1)
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(0.f).has_value());
 
     enableSnapToSide = { true, false };
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-40.f).has_value());
     pattern_->currentOffset_ = 20.f;
@@ -1119,6 +1206,7 @@ HWTEST_F(ScrollTestNg, Snap003, TestSize.Level1)
 
     // snapOffsets_: { 0.f, -10.f, -20.f, -30.f, -40.f, ... , -180.f, -190.f, -200.f }
     snapPaginations = {};
+    ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
@@ -1352,7 +1440,9 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize Scroll node
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     // need dpi to be 1
     /**
@@ -1380,7 +1470,10 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize Scroll.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step2. Get invalid ScrollItem Rect.
@@ -1394,7 +1487,7 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
      * @tc.expected: Return actual Rect when input valid index.
      */
     EXPECT_TRUE(IsEqual(
-        pattern_->GetItemRect(0), Rect(0, 0, TOTAL_LINE_NUMBER * ITEM_WIDTH, FILL_LENGTH.Value() * SCROLL_HEIGHT)));
+        pattern_->GetItemRect(0), Rect(0, 0, TOTAL_ITEM_NUMBER * ITEM_WIDTH, FILL_LENGTH.Value() * SCROLL_HEIGHT)));
 }
 
 /**
@@ -1405,11 +1498,13 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the scroll width property
+     * @tc.steps: step1. verify the scroll width property
      * of scroll layout property.
      * @tc.expected: Default value is ought to be false.
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     float scrollWidth = 150.0f;
     EXPECT_FALSE(layoutProperty_->GetScrollWidth().has_value());
     layoutProperty_->UpdateScrollWidth(scrollWidth);
@@ -1425,11 +1520,13 @@ HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the default value of the flags
+     * @tc.steps: step1. verify the default value of the flags
      * which inform whether the scroll belongs to or is modified by a select.
      * @tc.expected: Default value is ought to be false.
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->IsWidthModifiedBySelect());
     EXPECT_FALSE(pattern_->IsSelectScroll());
     /**
@@ -1455,15 +1552,9 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
      * the scroll and get its instance.
      * @tc.expected: Objects are created successfully.
      */
-    CreateWithContent();
-    ScrollModelNG model;
-    model.Create();
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
-    model.SetAxis(Axis::NONE);
-    CreateContent();
-    GetInstance();
-
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
     FlushLayoutTask(frameNode_);
@@ -1473,7 +1564,7 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
     columnInfo->GetParent()->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
-    auto expectSize = SizeF(defaultWidth, ITEM_HEIGHT * TOTAL_LINE_NUMBER);
+    auto expectSize = SizeF(defaultWidth, ITEM_HEIGHT * TOTAL_ITEM_NUMBER);
     EXPECT_NE(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
                                       << " expectSize: " << expectSize.ToString();
 }
@@ -1488,7 +1579,8 @@ HWTEST_F(ScrollTestNg, Measure003, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll without children
      */
-    Create();
+    CreateScroll();
+    CreateDone(frameNode_);
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
     auto expectSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
     EXPECT_TRUE(IsEqual(scrollSize, expectSize));
@@ -1518,7 +1610,9 @@ HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
      * of its default value.
      * @tc.expected: Default width of select scroll should be 0.0.
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     ASSERT_NE(pattern_, nullptr);
     auto ScrollWidth = pattern_->GetSelectScrollWidth();
     ASSERT_NE(ScrollWidth, 0.0);
@@ -1534,7 +1628,10 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll and initialize related properties.
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     auto viewPortLength = pattern_->GetMainContentSize();
     pattern_->scrollableDistance_ = viewPortLength * 10;
     pattern_->currentOffset_ = -viewPortLength * 5 - 10.0f;
@@ -1598,7 +1695,10 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step1. Create scroll and set enablePaging.
      * @tc.expected: the value of GetEnablePaging() is VALID
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEnablePaging(true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 
     /**
@@ -1613,40 +1713,48 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     };
     std::pair<bool, bool> enableSnapToSide = { false, false };
     auto scrollSnapAlign = ScrollSnapAlign::START;
-    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-        model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetEnablePaging(true);
+    model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
      * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
      * @tc.expected: the value of GetEnablePaging() is INVALID
      */
-    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
-        model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
-        model.SetEnablePaging(true);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+    model.SetEnablePaging(true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
      * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
      * @tc.expected: the value of GetEnablePaging() is NONE
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-        model.SetEnablePaging(false);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetEnablePaging(true);
+    model.SetEnablePaging(false);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::NONE);
 
     /**
      * @tc.steps: step5. Create scroll, set enablePaging false and than set enablePaging true.
      * @tc.expected: the value of GetEnablePaging() is VALID
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(false);
-        model.SetEnablePaging(true);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetEnablePaging(false);
+    model.SetEnablePaging(true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 }
 
@@ -1661,47 +1769,56 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
      * @tc.steps: step1. Create scroll.
      * @tc.expected: the value of currentOffset_ is 0
      */
-    CreateWithContent([](ScrollModelNG model) {});
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
 
     /**
      * @tc.steps: step2. Create scroll and set initialOffset ITEM_HEIGHT.
      * @tc.expected: the value of currentOffset_ is -ITEM_HEIGHT
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(ITEM_HEIGHT)));
-    });
+    ClearOldNodes();
+    ScrollModelNG model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(ITEM_HEIGHT)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, -ITEM_HEIGHT);
 
     /**
      * @tc.steps: step3. Create scroll , set axis HORIZONTAL and set initialOffset ITEM_HEIGHT.
      * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetInitialOffset(OffsetT(CalcDimension(ITEM_WIDTH), CalcDimension(0.f)));
-        model.SetAxis(Axis::HORIZONTAL);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(ITEM_WIDTH), CalcDimension(0.f)));
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - ITEM_WIDTH);
 
     /**
      * @tc.steps: step4. Create scroll , set initialOffset 10%.
      * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
      */
-    CreateWithContent([](ScrollModelNG model) {
-        auto offset = Dimension(0.1, DimensionUnit::PERCENT);
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    auto offset = Dimension(0.1, DimensionUnit::PERCENT);
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - SCROLL_HEIGHT * 0.1f);
 
     /**
      * @tc.steps: step5. Create scroll , set axis HORIZONTAL and set initialOffset 10%.
      * @tc.expected: the value of currentOffset_ is -ITEM_WIDTH
      */
-    CreateWithContent([](ScrollModelNG model) {
-        auto offset = Dimension(0.1, DimensionUnit::PERCENT);
-        model.SetInitialOffset(OffsetT(CalcDimension(offset), CalcDimension(0.f)));
-        model.SetAxis(Axis::HORIZONTAL);
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(offset), CalcDimension(0.f)));
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - SCROLL_WIDTH * 0.1f);
 }
 
@@ -1716,37 +1833,44 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
      * @tc.steps: step1. Create scroll and set initialOffset 2*ITEM_HEIGHT.
      * @tc.expected: the value of currentOffset_ is -2*ITEM_HEIGHT
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(2 * ITEM_HEIGHT)));
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(2 * ITEM_HEIGHT)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
 
     /**
      * @tc.steps: step2. Create scroll and set initialOffset 3*ITEM_HEIGHT.
      * @tc.expected: the value of currentOffset_ is -2*ITEM_HEIGHT
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(3 * ITEM_HEIGHT)));
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(3 * ITEM_HEIGHT)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
 
     /**
      * @tc.steps: step3. Create scroll and set initialOffset -ITEM_HEIGHT.
      * @tc.expected: the value of currentOffset_ is 0
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(- ITEM_HEIGHT)));
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(- ITEM_HEIGHT)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
 
     /**
      * @tc.steps: step4. Create scroll , set initialOffset 100%.
      * @tc.expected: the value of currentOffset_ is -2*ITEM_WIDTH
      */
-    CreateWithContent([](ScrollModelNG model) {
-        auto offset = Dimension(100, DimensionUnit::PERCENT);
-        model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
-    });
+    ClearOldNodes();
+    model = CreateScroll();
+    auto offset = Dimension(100, DimensionUnit::PERCENT);
+    model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

@@ -36,7 +36,7 @@ std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_RETURN(pref, "");
-    LOGI("Get preference with key %{public}s", key.c_str());
+    LOGD("Get preference with key %{public}s", key.c_str());
     return pref->GetString(key, "");
 }
 
@@ -45,7 +45,7 @@ void StorageImpl::Clear()
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
     pref->Clear();
-    LOGI("StorageImpl: Clear preferences");
+    LOGD("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
 }
 
@@ -53,7 +53,7 @@ void StorageImpl::Delete(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    LOGI("StorageImpl: Delete preference with key %{public}s", key.c_str());
+    LOGD("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();
 }

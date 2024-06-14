@@ -95,10 +95,11 @@ protected:
 void BadgeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-    // set badgeTheme to themeManager before using themeManager to get badgeTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<BadgeTheme>()));
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_BADGE);
+    auto badgeTheme = BadgeTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(badgeTheme));
 }
 
 void BadgeTestNg::TearDownTestSuite()
@@ -937,7 +938,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
     layoutProperty_->SetIsDefault(true, true);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 0);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 16);
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
     MockPipelineContext::GetCurrentContext()->SetFontScale(fontScale);
 }

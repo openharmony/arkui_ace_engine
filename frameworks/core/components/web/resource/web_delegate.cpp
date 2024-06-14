@@ -2764,6 +2764,8 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
         cutoutSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT);
         navigationIndicatorSafeArea_ =
             container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        OnSafeInsetsChange();
+
         avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
         OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);

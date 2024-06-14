@@ -165,6 +165,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEvent_GetNode"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
     },
     {
@@ -662,6 +666,18 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeContentEvent_GetEventType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContentEvent_GetNodeContentHandle"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_SetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_GetUserData"
     },
     {
         "first_introduced": "12",

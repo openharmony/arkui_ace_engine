@@ -33,6 +33,23 @@ void ListItemGroupPattern::OnAttachToFrameNode()
     }
 }
 
+void ListItemGroupPattern::OnColorConfigurationUpdate()
+{
+    if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD) {
+        return;
+    }
+    auto itemGroupNode = GetHost();
+    CHECK_NULL_VOID(itemGroupNode);
+    auto renderContext = itemGroupNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = itemGroupNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+
+    renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+}
+
 void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
 {
     auto renderContext = itemGroupNode->GetRenderContext();
@@ -118,7 +135,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     V2::ItemDivider itemDivider;
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
-    ListItemGroupPaintInfo listItemGroupPaintInfo { drawVertical, lanes_, spaceWidth_, laneGutter_, itemTotalCount_ };
+    ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
+        spaceWidth_, laneGutter_, itemTotalCount_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
 }
 
@@ -135,6 +153,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
+    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
+    mainSize_ = layoutAlgorithm->GetMainSize();
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
     itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
