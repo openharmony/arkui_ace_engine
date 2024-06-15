@@ -1119,18 +1119,10 @@ abstract class ViewPU extends PUV2ViewBase
         const prop: any = Reflect.get(this, varName);
         if ('debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          let isCircleReference: boolean = false;
-          let errorMsg: string = '';
-          try {
-            JSON.stringify(observedProp.getRawObjectValue());
-          } catch (error) {
-            stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${(error as Error).message}`);
-            errorMsg = (error as Error).message;
-            isCircleReference = true;
-          }
+          let rawValue: any = observedProp.getRawObjectValue();
           let observedPropertyInfo: ObservedPropertyInfo<any> = {
             decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
             dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
             owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
           };
