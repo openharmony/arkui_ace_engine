@@ -457,6 +457,7 @@ void MenuItemPattern::ShowSubMenu()
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
