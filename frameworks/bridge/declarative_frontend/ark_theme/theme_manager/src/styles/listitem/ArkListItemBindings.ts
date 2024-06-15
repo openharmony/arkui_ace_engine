@@ -14,7 +14,7 @@
  */
 
 // @ts-ignore
-if (globalThis.WithTheme !== undefined) {
+if (globalThis.ListItem !== undefined) {
     globalThis.ListItem.create = function (deepRenderFunction: (elmtId, isInitialRender) => {}, isLazy: boolean, options: any) {
         // no need to add deep render theme scope when ListItem doesn`t use lazy mode
         if (isLazy === false) {
