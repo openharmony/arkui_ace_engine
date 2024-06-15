@@ -38,10 +38,6 @@ public:
 
     ~RepeatNode() override = default;
 
-    // FIXME 
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
-    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache);
-
     bool IsAtomicNode() const override
     {
         return false;
@@ -53,7 +49,6 @@ public:
     void FinishRepeatRender(std::list<int32_t>& removedElmtId);
 
     void FlushUpdateAndMarkDirty() override;
-
 
     // RepeatNode only
     void MoveChild(uint32_t fromIndex);
@@ -73,11 +68,6 @@ public:
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
-
-    // FIXME
-        // FIXME
-      RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
-        bool addToRenderTree = false) override;
 
 private:
     std::list<std::string> ids_;

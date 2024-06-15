@@ -207,34 +207,4 @@ void RepeatNode::InitAllChildrenDragManager(bool init)
     }
 }
 
-// FIXME added
-void RepeatNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
-{
-    LOGE("Guido RepeatNode::DoSetActiveChildRange nodeId: %{public}d: start: %{public}d, end: %{public}d", (int) GetId(),  (int) start, (int) end);
-}
-
-// FIXME added
-RefPtr<LayoutWrapper> RepeatNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache) {
-    LOGE("Guido RepeatNode::GetOrCreateChildByIndex nodeId: %{public}d: $index: %{public}d, addToRenderTree %{public}d, isCache: %{public}d", (int) GetId(),  (int) index, (int) addToRenderTree, (int) isCache);
-
-    return nullptr;
-}
-
-
-RefPtr<UINode> RepeatNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
-{
-    LOGE("Guido RepeatNode::GetFrameChildByIndex nodeId: %{public}d: index: %{public}d, needBuild: %{public}d", (int) GetId(),  (int) index, (int) needBuild);
-
-    for (const auto& child : GetChildren()) {
-        uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
-        }
-        index -= count;
-    }
-    return nullptr;
-}
-
-
-
 } // namespace OHOS::Ace::NG

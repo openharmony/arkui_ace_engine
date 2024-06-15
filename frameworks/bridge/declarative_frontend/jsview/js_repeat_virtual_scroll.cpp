@@ -59,7 +59,6 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     auto onCreateNode = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onCreateNode")](
                             uint32_t forIndex) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCOPED_TRACE("Create %d RepeatNode", forIndex);
         auto params = ConvertToJSValues(forIndex);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
@@ -67,7 +66,6 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     auto onUpdateNode = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onUpdateNode")](
                             const std::string& fromKey, uint32_t forIndex) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCOPED_TRACE("Update orgin %s RepeatNode with %d index", fromKey.c_str(), forIndex);
         auto params = ConvertToJSValues(fromKey, forIndex);
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
@@ -76,7 +74,6 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
                                uint32_t from, uint32_t to) -> std::list<std::string> {
         std::list<std::string> list;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, list);
-        ACE_SCOPED_TRACE("Get Keys %d to  %d", from, to);
         auto params = ConvertToJSValues(from, to);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
         // convert js-array to std::list
@@ -91,7 +88,6 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
                                 uint32_t from, uint32_t to) -> std::list<std::string> {
         std::list<std::string> list;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, list);
-        ACE_SCOPED_TRACE("Get Types %d to  %d", from, to);
         auto params = ConvertToJSValues(from, to);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
 

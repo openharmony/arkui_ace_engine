@@ -16,18 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_VIRTUAL_SCROLL_CACHES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_VIRTUAL_SCROLL_CACHES_H
 
-#include <algorithm>
 #include <functional>
-#include <limits>
 #include <map>
-#include <queue>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
-#include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -36,26 +32,14 @@ namespace OHOS::Ace::NG {
 // with operator() inside
 class RepeatVirtualScrollCaches;
 struct KeySorterClass {
-public:
-    const RepeatVirtualScrollCaches* thiz_;
+    const RepeatVirtualScrollCaches* virtualScroll_;
 
-    KeySorterClass(const RepeatVirtualScrollCaches* thiz)
-    {
-        thiz_ = thiz;
-    }
-    bool operator()(const std::string& a, const std::string& b) const;
+    explicit KeySorterClass(const RepeatVirtualScrollCaches* virtualScroll) : virtualScroll_(virtualScroll) {}
+    bool operator()(const std::string& left, const std::string& right) const;
 };
 
 class RepeatVirtualScrollCaches {
     friend struct KeySorterClass;
-
-public:
-    /**
-      * for given index get key
-      * fetch from TS if not in cache
-      * return false if index out of range
-     */
-    std::pair<bool, std::string> getKey4Index(uint32_t index);
 
 public:
     RepeatVirtualScrollCaches(const std::map<std::string, uint32_t>& cacheCountL24ttype,
@@ -64,179 +48,178 @@ public:
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
-public:
     /** scenario:
-         *         Repeat gets updated due to data change.
-         *         1. TS calls RepeatVirtualScrollNode,
-         *            then calls this function.
-         * 2. RepeatVirtualScrollNode requests layout to rebuild the UI
-         * 3. layout sends RepeatVirtualScrollNode::GetFrameChild calls
-         * 4. how to service GetFrameChild  call:
-         *   - first check for L1 keys (same template type) if any can be updated.
-         *     These UINodes remain in the render tree.
-         *   - if no L1 item, the look for L2 keys (same template type)
-         */
-    void invalidateKeyAndTTypeCaches();
-
-public:
-    /**
-         * scenario: scroll, try to update an existing UINode
-         *
-         * find an key / UINode in L2 and update the UINode to
-         *   render the data source item 'forIndex'.
-         */
-    RefPtr<UINode> updateFromL2(uint32_t forIndex);
-
-    /**
-      * request TS to create a new node for given index / key/
+     *         Repeat gets updated due to data change.
+     *         1. TS calls RepeatVirtualScrollNode,
+     *            then calls this function.
+     * 2. RepeatVirtualScrollNode requests layout to rebuild the UI
+     * 3. layout sends RepeatVirtualScrollNode::GetFrameChild calls
+     * 4. how to service GetFrameChild  call:
+     *   - first check for L1 keys (same template type) if any can be updated.
+     *     These UINodes remain in the render tree.
+     *   - if no L1 item, the look for L2 keys (same template type)
      */
-    RefPtr<UINode> createNewNode(uint32_t forIndex);
+    void InvalidateKeyAndTTypeCaches();
+
+    /**
+     * scenario: scroll, try to update an existing UINode
+     *
+     * find an key / UINode in L2 and update the UINode to
+     *   render the data source item 'forIndex'.
+     */
+    RefPtr<UINode> UpdateFromL2(uint32_t forIndex);
+
+    /**
+     * request TS to create a new node for given index / key/
+     */
+    RefPtr<UINode> CreateNewNode(uint32_t forIndex);
 
     // iterate over L1 keys, not allowed to modify L1
-    void forEachL1IndexUINode(std::function<void(uint32_t index, RefPtr<UINode> node)> cbFunc);
+    void ForEachL1IndexUINode(const std::function<void(uint32_t index, const RefPtr<UINode>& node)>& cbFunc);
 
     void RecycleItemsByIndex(int32_t index);
 
-private:
     /**
-         * intended scenario: scroll
-         * servicing GetFrameChild, search for key that can be updated.
-         *
-         * return a key whose UINode can be updated
-         * the key must not be in L1, i.e. l1_activeNodeKeys_
-         * the given ttype must match the template type the UINode for this key
-         * has been rendered for (this info is available from node4key4ttype_)
-         */
-    std::pair<bool, std::string> getL2KeyToUpdate(const std::string ttype) const;
+     * for given index get key
+     * fetch from TS if not in cache
+     * return false if index out of range
+     */
+    std::optional<std::string> GetKey4Index(uint32_t index);
 
-    /**
-         * scenario: UI rebuild following key invalidation by TS side
-         * L1 includes keys that are no longer used, the linked UINodes
-         * should be updated.
-         *
-         * This function checks all L1 keys (of active UINodes) if the key
-         * can still be found from
-         * (previously updated following invalidation) key -> index map and
-         *
-         */
-    std::pair<bool, std::string> getL1KeyToUpdate(const std::string ttype) const;
-
-    /**
-         * scenario: UINode of fromKey has been updated to render data for 'forKey'
-         *     the template type (ttype) remains unchanged
-         *     update node4key4ttype_ and node4key_ entries to use new key point to same UINode
-         */
-    RefPtr<UINode> uiNodeHasBeenUpdated(std::string ttype, std::string fromKey, std::string forKey);
-
-    /** scenario: keys cache has been updated
-         *
-         * find which keys in key -> UINode map are no longer used
-         * returned set entries are pairs:
-         *   pair.first: is this key a L1 item,
-         *   pair.second: key
-         */
-    void findUnusedKeys(std::set<std::pair<bool, std::string>>& result) const;
-
-public:
     /**
      * iterate over all entries of L1 and call function for each entry
      * if function returns true, entry is added to rebuild L1, otherwise it is moved to L2
      * cbFunc return true, [index, key] pair stays in L1 (index remains unchanged)
      * cbFunc returns false, enqueue key in L2
      */
-    bool rebuildL1(const std::function<bool(int32_t index, RefPtr<UINode> node)>& cbFunc);
+    bool RebuildL1(const std::function<bool(int32_t index, const RefPtr<UINode>& node)>& cbFunc);
 
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
-    /**
-         * scenario: in idle process , following GetChildren()
-         *
-         * enforce L2 cacheCount for each ttype
-         * by deleting UINodes, delete their entry from
-         *   node4key4ttype_ and node4key_
-         *   FIXME haoyu: any other processing steps needed before UINode
-         *                tree can be deleted
-         */
-    bool purge();
 
     /**
-      * return the UINode for given index
-      * bool return indicates if in L1
-      * 
-      * resolve index -> key -> UINode
-      * 
+     * scenario: in idle process , following GetChildren()
+     *
+     * enforce L2 cacheCount for each ttype
+     * by deleting UINodes, delete their entry from
+     *   node4key4ttype_ and node4key_
+     *   FIXME haoyu: any other processing steps needed before UINode
+     *                tree can be deleted
      */
-    std::pair<bool, RefPtr<UINode>> getNode4Index(uint32_t forIndex) const;
+    bool Purge();
 
-    void addKeyToL1(const std::string key)
+    /**
+     * return the UINode for given index
+     * bool return indicates if in L1
+     *
+     * resolve index -> key -> UINode
+     *
+     */
+    RefPtr<UINode> GetNode4Index(uint32_t forIndex) const;
+
+    void AddKeyToL1(const std::string& key)
     {
-        l1_activeNodeKeys_.emplace(key);
+        activeNodeKeysInL1_.emplace(key);
     }
 
-    bool isInL1Cache(const std::string& key) const
+    bool IsInL1Cache(const std::string& key) const
     {
-        return l1_activeNodeKeys_.find(key) != l1_activeNodeKeys_.end();
+        return activeNodeKeysInL1_.find(key) != activeNodeKeysInL1_.end();
+    }
+
+    const std::unordered_map<std::string, RefPtr<UINode>>& GetAllNodes() const
+    {
+        return node4key_;
     }
 
     /**
      * memorize last active range(s)
      */
-    void setLastActiveRange(uint32_t from, uint32_t to);
+    void SetLastActiveRange(uint32_t from, uint32_t to);
 
-private:
-    /**
-         * given ley return the index position (reverse lookup)
-         * invalidated keys (after Repeat rerender/ data change)
-         * are keys for which no index exists anymore,
-         * method returns int max value for these.
-         * int max value causes that distance from active range is max
-         * these keys will be selected for update first.
-         */
-    uint32_t getIndex4Key2(const std::string& key) const;
-
-    /**
-         *  for given index return distance from active range,
-         *  or 0 if within active range
-         *  distance is int max for invalidated keys
-         */
-    int32_t distFromRange(uint32_t index) const;
-    /**
-         * scenario: find L1 key that should be updated
-         * choose the key whose index is the furthest away from active range
-         * given two keys compare their distFromRange
-         */
-    bool cmpKeyByIndexDistance(const std::string& key1, const std::string& key2) const;
-
-    /**
-         * scenario: find L1 key(s) that should be updated
-         *
-         * return a sorted set of L2 keys, sorted by increasing distance from active range
-         */
-    std::function<bool(const std::string, const std::string)> l2KeyDistanceComparator =
-        [&](const std::string& keyA, const std::string& keyB) -> bool { return cmpKeyByIndexDistance(keyA, keyB); };
-    decltype(l2KeyDistanceComparator) l2KeyDistanceComparatorType;
-
-    std::set<std::string, KeySorterClass> getSortedL2KeysForTType(
-        const std::map<std::string, RefPtr<UINode>>& uiNode4Key) const;
-
-    /**
-      * get more index -> key and index -> ttype from TS side
-     */
-    void FetchMoreKeysTTypes(uint32_t from, uint32_t to);
-
-public:
     // formatting internal structures to string for debug output
     // and possibly in modified form for DFX in the future
-    const std::string dumpL1() const;
-    const std::string dumpL2() const;
-    const std::string dumpKey4Index() const;
-    const std::string dumpTType4Index() const;
-    const std::string dumpUINode4Key4TType() const;
-    const std::string dumpUINode4Key() const;
+    std::string DumpL1() const;
+    std::string DumpL2() const;
+    std::string DumpKey4Index() const;
+    std::string DumpTType4Index() const;
+    std::string DumpUINode4Key4TType() const;
+    std::string DumpUINode4Key() const;
 
-    const std::string dumpUINodeWithKey(std::string key) const;
-    const std::string dumpUINode(const RefPtr<UINode>& node) const;
+    std::string DumpUINodeWithKey(const std::string& key) const;
+    std::string DumpUINode(const RefPtr<UINode>& node) const;
 
 private:
+    /**
+     * intended scenario: scroll
+     * servicing GetFrameChild, search for key that can be updated.
+     *
+     * return a key whose UINode can be updated
+     * the key must not be in L1, i.e. activeNodeKeysInL1_
+     * the given ttype must match the template type the UINode for this key
+     * has been rendered for (this info is available from node4key4ttype_)
+     */
+    std::optional<std::string> GetL2KeyToUpdate(const std::string& ttype) const;
+
+    /**
+     * scenario: UI rebuild following key invalidation by TS side
+     * L1 includes keys that are no longer used, the linked UINodes
+     * should be updated.
+     *
+     * This function checks all L1 keys (of active UINodes) if the key
+     * can still be found from
+     * (previously updated following invalidation) key -> index map and
+     *
+     */
+    std::optional<std::string> GetL1KeyToUpdate(const std::string& ttype) const;
+
+    /**
+     * scenario: UINode of fromKey has been updated to render data for 'forKey'
+     *     the template type (ttype) remains unchanged
+     *     update node4key4ttype_ and node4key_ entries to use new key point to same UINode
+     */
+    RefPtr<UINode> HasUINodeBeenUpdated(
+        const std::string& ttype, const std::string& fromKey, const std::string& forKey);
+
+    /** scenario: keys cache has been updated
+     *
+     * find which keys in key -> UINode map are no longer used
+     * returned set entries are pairs:
+     *   pair.first: is this key a L1 item,
+     *   pair.second: key
+     */
+    void FindUnusedKeys(std::set<std::pair<bool, std::string>>& result) const;
+
+    /**
+     * given key return the index position (reverse lookup)
+     * invalidated keys (after Repeat rerender/ data change)
+     * are keys for which no index exists anymore,
+     * method returns int max value for these.
+     * int max value causes that distance from active range is max
+     * these keys will be selected for update first.
+     */
+    uint32_t GetIndex4Key(const std::string& key) const;
+
+    /**
+     *  for given index return distance from active range,
+     *  or 0 if within active range
+     *  distance is int max for invalidated keys
+     */
+    int32_t GetDistanceFromRange(uint32_t index) const;
+    /**
+     * scenario: find L1 key that should be updated
+     * choose the key whose index is the furthest away from active range
+     * given two keys compare their distFromRange
+     */
+    bool CompareKeyByIndexDistance(const std::string& key1, const std::string& key2) const;
+
+    std::set<std::string, KeySorterClass> GetSortedL2KeysForTType(
+        const std::unordered_map<std::string, RefPtr<UINode>>& uiNode4Key) const;
+
+    /**
+     * get more index -> key and index -> ttype from TS side
+     */
+    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to);
+
     // Map ttype -> cacheSize. Each ttype incl default has own L2 size
     std::map<std::string, uint32_t> cacheCountL24ttype_;
 
@@ -258,10 +241,10 @@ private:
     // SetActiveRange calls and use to calc scroll direction
     std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { { 0, 0 }, { 0, 0 } };
 
-    // keys of active nodes, UINodes must be on the render tree,
+    // keys of active nodes, UINodes must be on the UI tree,
     // this list is also known as L1
     // all keys not in this set are in "L2"
-    std::set<std::string> l1_activeNodeKeys_;
+    std::unordered_set<std::string> activeNodeKeysInL1_;
 
     // L1
     // index -> key and reverse
@@ -275,7 +258,7 @@ private:
     std::unordered_map<std::string, uint32_t> index4ttype_;
 
     // Map ttype -> Map key -> UINode
-    std::unordered_map<std::string, std::map<std::string, RefPtr<UINode>>> node4key4ttype_;
+    std::unordered_map<std::string, std::unordered_map<std::string, RefPtr<UINode>>> node4key4ttype_;
 
     // Map Map key -> UINode
     std::unordered_map<std::string, RefPtr<UINode>> node4key_;

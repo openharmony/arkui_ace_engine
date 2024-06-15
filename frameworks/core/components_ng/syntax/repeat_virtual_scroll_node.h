@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
@@ -105,50 +106,63 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(
         uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
 
-    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
-
     bool IsAtomicNode() const override
     {
         return false;
     }
 
-    // FIXME implement:
-    // void SetJSViewActive(bool active = true) override;
-
-    // what are these functions, are the needed?
+    // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
+
+    void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
+
+    void SetJSViewActive(bool active = true, bool /*isLazyForEachNode*/ = false) override
+    {
+        const auto& children = caches_.GetAllNodes();
+        for (const auto& [key, child] : children) {
+            child->SetJSViewActive(active);
+        }
+        isActive_ = active;
+    }
+    void PaintDebugBoundaryTreeAll(bool flag) override
+    {
+        const auto& children = caches_.GetAllNodes();
+        for (const auto& [key, child] : children) {
+            child->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
 
 private:
     void PostIdleTask();
 
     // try to find entry for given index in L1 or L2 cache
-    std::pair<bool, RefPtr<UINode>> GetFromCaches(uint32_t forIndex)
+    RefPtr<UINode> GetFromCaches(uint32_t forIndex)
     {
-        return caches_.getNode4Index(forIndex);
+        return caches_.GetNode4Index(forIndex);
     }
 
     // index is not in L1 or L2 cache, need to make it
     // either by TS rendering new children or by TS updating
     // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, std::string forKey);
+    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, const std::string& forKey);
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside
-    // TODO implement!
     bool isActive_ = true;
 
     // size of data source when all data items loaded
-    uint32_t totalCount_;
+    uint32_t totalCount_ = 0;
 
     // caches:
-    RepeatVirtualScrollCaches caches_;
+    mutable RepeatVirtualScrollCaches caches_;
 
     // FIXME used by one of the unknown functions
     std::list<std::string> ids_;

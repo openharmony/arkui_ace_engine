@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline/base/element_register.h"
@@ -60,18 +61,16 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
 
 void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
-    // FIXME lijunfeng  , yeyinglong:  can you advise how to enable LOGD output ? We are not using DevEco but use hilog
-    // directly?
-    LOGE("DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d, cacheStart: %{public}d, "
-         "cacheEnd: %{public}d",
-        (int)GetId(), (int)start, (int)end, (int)cacheStart, (int)cacheEnd);
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "DoSetActiveChildRange: nodeId: %{public}d: start: %{public}d, end: %{public}d, cacheStart: %{public}d, "
+        "cacheEnd: %{public}d",
+        GetId(), start, end, cacheStart, cacheEnd);
 
     // memorize active range
-    caches_.setLastActiveRange(static_cast<uint32_t>(start), static_cast<uint32_t>(end));
+    caches_.SetLastActiveRange(static_cast<uint32_t>(start), static_cast<uint32_t>(end));
 
-    // caches_.forEachL1IndexUINode([&](int32_t index, RefPtr<UINode> node) -> void {
     bool needSync =
-        caches_.rebuildL1([start, end, cacheStart, cacheEnd](int32_t index, const RefPtr<UINode>& node) -> bool {
+        caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](int32_t index, const RefPtr<UINode>& node) -> bool {
             if (node == nullptr) {
                 return false;
             }
@@ -90,7 +89,15 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
             if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
                 return true;
             }
-            node->DetachFromMainTree();
+            // active node moved into L2 cached.
+            // check transition flag.
+            if (node->OnRemoveFromParent(true)) {
+                // OnRemoveFromParent returns true means the child can be removed from tree immediately.
+                RemoveDisappearingChild(node);
+            } else {
+                // else move child into disappearing children, skip syncing render tree
+                AddDisappearingChild(node);
+            }
             return false;
         });
 
@@ -98,7 +105,6 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
     // only in that case do the re-sync , re-assembly of children
     if (needSync) {
         UINode::MarkNeedSyncRenderTree(false);
-
         children_.clear();
         // re-assemble children_
         PostIdleTask();
@@ -107,14 +113,13 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
 
 void RepeatVirtualScrollNode::InvalidateKeyCache()
 {
-    LOGE("InvalidateKeyCache triggered by Repeat rerender: nodeId: %{public}d .", (int)GetId());
-
     // empty the cache index -> key
     // C++ will need to ask all new keys from JS side
-    caches_.invalidateKeyAndTTypeCaches();
+    caches_.InvalidateKeyAndTTypeCaches();
     children_.clear();
 
-    if (auto frameNode = GetParentFrameNode()) {
+    auto frameNode = GetParentFrameNode();
+    if (frameNode) {
         frameNode->ChildrenUpdatedFrom(0);
     }
 
@@ -128,24 +133,14 @@ void RepeatVirtualScrollNode::InvalidateKeyCache()
  * Ask TS to update a Node, if possible
  * If no suitable node, request to crete a new node
  */
-RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t forIndex, std::string forKey)
+RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t forIndex, const std::string& forKey)
 {
-    RefPtr<UINode> frameNode4Index = caches_.updateFromL2(forIndex);
-    if (frameNode4Index != nullptr) {
-        LOGE("Item update for index %{public}d - key %{public}s, node: %{public}s", forIndex, forKey.c_str(),
-            caches_.dumpUINode(frameNode4Index).c_str());
-        return frameNode4Index;
+    RefPtr<UINode> node4Index = caches_.UpdateFromL2(forIndex);
+    if (!node4Index) {
+        return node4Index;
     }
 
-    LOGE("Requesting new item build for index index %{public}d -> key %{public}s  from TS side ...", (int)forIndex,
-        forKey.c_str());
-
-    frameNode4Index = caches_.createNewNode(forIndex);
-
-    LOGE("For index %{public}d item builder success, made node %{public}s(%{public}d) .", forIndex,
-        frameNode4Index->GetTag().c_str(), frameNode4Index->GetId());
-
-    return frameNode4Index;
+    return caches_.CreateNewNode(forIndex);
 }
 
 // FIXME added
@@ -159,121 +154,90 @@ RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t 
 RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
-    const auto pair = caches_.getKey4Index(index);
-    if (!pair.first) {
-        // FIXME error msg
+    // It will get or create new key.
+    const auto& key = caches_.GetKey4Index(index);
+    if (!key) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get key for %{public}d", index);
         return nullptr;
     }
-    const std::string key = pair.second;
-
-    LOGE("nodeId: %{public}d: GetFrameChildByIndex(index: %{public}d, key %{public}s, needBuild:  %{public}d, "
-         "isCache: "
-         "%{public}d, "
-         "addToRenderTree: %{public}d) ...",
-        (int)GetId(), (int)index, key.c_str(), (int)needBuild, (int)isCache, (int)addToRenderTree);
-
     // search if index -> key -> Node exist
     // pair.first tells of key is in L1
-    auto nodePair = GetFromCaches(index);
-    RefPtr<UINode> frameNode4Index = nodePair.second;
-    if ((frameNode4Index == nullptr) && !needBuild) {
-        LOGE("index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
+    auto node4Index = GetFromCaches(index);
+    if (!node4Index && !needBuild) {
+        TAG_LOGD(AceLogTag::ACE_REPEAT,
+            "index %{public}d not in caches && needBuild==false, GetFrameChildByIndex returns nullptr .", index);
         return nullptr;
     }
 
-    if (frameNode4Index == nullptr) {
+    // node4Index needs to be created or updated on JS side
+    if (!node4Index) {
         // TS to either make new or update existing nodes
-        frameNode4Index = CreateOrUpdateFrameChild4Index(index, key);
+        node4Index = CreateOrUpdateFrameChild4Index(index, key.value());
 
-        if (frameNode4Index == nullptr) {
+        if (!node4Index) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d not in caches and failed to build.", index);
             return nullptr;
         }
-
-        LOGE("index %{public}d item builder made new FrameNode %{public}d, further processing ...", index,
-            frameNode4Index->GetId());
-    } // frameNode4Index needs to be created or updated on JS side
+        // move item to L1 cache.
+        caches_.AddKeyToL1(key.value());
+    } else {
+        // TODO need update existed node4Index with new index.
+    }
 
     // if the item was in L2 cache, remove it from there
 
     if (isActive_) {
-        // FIXME lijunfeng, yeyinglong: review is handling active state of RepeatVirtualScroll and its children handled
-        // correctly?
-        frameNode4Index->SetJSViewActive(true);
+        node4Index->SetJSViewActive(true);
     }
 
     if (addToRenderTree && !isCache) {
-        LOGE("index %{public}d ,FrameNode %{public}d: addToRenderTree==true -> setActive and adding to L1 cache", index,
-            frameNode4Index->GetId());
-
-        frameNode4Index->SetActive(true);
-    } else {
-        LOGE("index %{public}d, FrameNode %{public}d: addToRenderTree==false  -> NO setActive, "
-             "add to L2 cache",
-            index, frameNode4Index->GetId());
+        node4Index->SetActive(true);
     }
-    if (caches_.isInL1Cache(key)) {
-        return frameNode4Index->GetFrameChildByIndex(0, needBuild);
+    if (node4Index->GetDepth() != GetDepth() + 1) {
+        node4Index->SetDepth(GetDepth() + 1);
     }
-    caches_.addKeyToL1(key);
-    if (frameNode4Index->GetDepth() != GetDepth() + 1) {
-        frameNode4Index->SetDepth(GetDepth() + 1);
-    }
-    MarkNeedSyncRenderTree();
-    frameNode4Index->SetParent(WeakClaim(this));
-
-    // FIXME why do this if addToRenderTree == false ?
+    // attach to repeat node and pass context to it.
+    node4Index->SetParent(WeakClaim(this));
     if (IsOnMainTree()) {
-        frameNode4Index->AttachToMainTree(false, GetContext());
+        node4Index->AttachToMainTree(false, GetContext());
     }
 
+    MarkNeedSyncRenderTree();
     children_.clear();
     // re-assemble children_
     PostIdleTask();
 
-    auto childNode = frameNode4Index->GetFrameChildByIndex(0, needBuild);
+    auto childNode = node4Index->GetFrameChildByIndex(0, needBuild);
     if (onMoveEvent_) {
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
 
-    LOGE("index %{public}d, Node %{public}d, its child is %{public}d, returning child.", (int)index,
-        (int)frameNode4Index->GetId(), (int)childNode->GetId());
-
     return childNode;
 }
 
-int32_t RepeatVirtualScrollNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
+int32_t RepeatVirtualScrollNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool /*isExpanded*/)
 {
-    if (!isExpanded) {
-        return UINode::GetFrameNodeIndex(node, isExpanded);
-    }
     return caches_.GetFrameNodeIndex(node);
 }
 
 const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
 {
     if (!children_.empty()) {
-        LOGE("GetChildren just returns non-empty children_");
         return children_;
     }
 
-    // FIXME in logs we can see this function gets called , sems like gets called while its executing
-    LOGE("GetChildren children_ reassembly ....");
-
-    // self is mutable this
-    auto* self = const_cast<RepeatVirtualScrollNode*>(this);
-
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const
-    self->caches_.forEachL1IndexUINode(
-        [self](int32_t index, RefPtr<UINode> node) -> void { self->children_.emplace_back(node); }); // rebuild Lambda
-
-    for (auto& c : children_) {
-        LOGE("   child: NodeId %{public}d", (int)c->GetId());
+    // need to order the child.
+    std::map<int32_t, RefPtr<UINode>> children;
+    caches_.ForEachL1IndexUINode(
+        [&children](int32_t index, const RefPtr<UINode>& node) -> void { children.emplace(index, node); });
+    for (const auto& [index, child] : children) {
+        children_.emplace_back(child);
     }
     return children_;
 }
 
-// FIXME , TODO haoyu function does not get called
 void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 {
     offscreenItems_.from = from;
@@ -292,8 +256,6 @@ void RepeatVirtualScrollNode::SetNodeIndexOffset(int32_t start, int32_t /*count*
 
 int32_t RepeatVirtualScrollNode::FrameCount() const
 {
-    // FIXME min L2 size is 1,  what is data size is 0? Does it pose an issue?
-    LOGE("FrameCount returns %{public}d", (int)totalCount_);
     return totalCount_;
 }
 
@@ -302,39 +264,30 @@ void RepeatVirtualScrollNode::PostIdleTask()
     if (postUpdateTaskHasBeenScheduled_) {
         return;
     }
-    LOGE("Posting idle task");
     postUpdateTaskHasBeenScheduled_ = true;
-    auto context = GetContext();
+    auto* context = GetContext();
     CHECK_NULL_VOID(context);
 
-    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
-        ACE_SCOPED_TRACE("LazyForEach predict");
-        LOGE("Exec Predict idle task");
+    context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t /*deadline*/, bool /*canUseLongPredictTask*/) {
+        ACE_SCOPED_TRACE("RepeatVirtualScrollNode predict");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->postUpdateTaskHasBeenScheduled_ = false;
-
-        LOGE("idle task calls GetChildren");
         node->GetChildren();
-
-        LOGE(" ============ before caches.purge ============= ");
-        LOGE("%{public}s", node->caches_.dumpL1().c_str());
-        LOGE("%{public}s", node->caches_.dumpL2().c_str());
-        LOGE("%{public}s", node->caches_.dumpKey4Index().c_str());
-        LOGE("%{public}s", node->caches_.dumpTType4Index().c_str());
-        LOGE("%{public}s", node->caches_.dumpUINode4Key4TType().c_str());
-
-        if (node->caches_.purge()) {
-            LOGE(" ============ after caches.purge ============= ");
-            LOGE("%{public}s", node->caches_.dumpL1().c_str());
-            LOGE("%{public}s", node->caches_.dumpL2().c_str());
-            LOGE("%{public}s", node->caches_.dumpKey4Index().c_str());
-            LOGE("%{public}s", node->caches_.dumpTType4Index().c_str());
-            LOGE("%{public}s", node->caches_.dumpUINode4Key4TType().c_str());
-        }
-        // TODO haoyu: initiate prediction
-        // expected outcome: RecycleItems(int32_t from, int32_t to); gets called
+        node->caches_.Purge();
     });
+}
+
+void RepeatVirtualScrollNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
+{
+    if ((configurationChange.colorModeUpdate || configurationChange.fontUpdate)) {
+        const auto& children = caches_.GetAllNodes();
+        for (const auto& [key, child] : children) {
+            if (child) {
+                child->UpdateConfigurationUpdate(configurationChange);
+            }
+        }
+    }
 }
 
 // FIXME Which of the following methods are actually needed ?
@@ -346,7 +299,7 @@ void RepeatVirtualScrollNode::SetOnMove(std::function<void(int32_t, int32_t)>&& 
         if (parentNode) {
             InitAllChildrenDragManager(true);
         } else {
-            auto piplineContext = PipelineContext::GetCurrentContext();
+            auto* piplineContext = GetContext();
             CHECK_NULL_VOID(piplineContext);
             auto taskExecutor = piplineContext->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -361,7 +314,7 @@ void RepeatVirtualScrollNode::SetOnMove(std::function<void(int32_t, int32_t)>&& 
     } else if (!onMove && onMoveEvent_) {
         InitAllChildrenDragManager(false);
     }
-    onMoveEvent_ = onMove;
+    onMoveEvent_ = std::move(onMove);
 }
 
 // FOREAch
@@ -391,10 +344,8 @@ void RepeatVirtualScrollNode::MoveData(int32_t from, int32_t to)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-// FIXME called from where ?
 RefPtr<FrameNode> RepeatVirtualScrollNode::GetFrameNode(int32_t index)
 {
-    // FIXME ????
     return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
 }
 
