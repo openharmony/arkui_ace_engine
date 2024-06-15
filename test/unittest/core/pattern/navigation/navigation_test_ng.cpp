@@ -694,10 +694,10 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0020, TestSize.Level1)
     property->propHideNavBar_ = true;
     property->layoutConstraint_ = LayoutConstraintF();
 
-    algorithm->SizeCalculationSplit(property, SizeF());
+    algorithm->SizeCalculationSplit(navigation, property, SizeF());
     property->propHideNavBar_ = false;
     algorithm->realNavBarWidth_ = -1.0f;
-    algorithm->SizeCalculationSplit(property, SizeF(0.0f, 0.0f));
+    algorithm->SizeCalculationSplit(navigation, property, SizeF(0.0f, 0.0f));
 }
 
 /**
