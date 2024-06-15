@@ -332,6 +332,8 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     CHECK_NULL_VOID(pManager);
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     auto customSpanPlaceholderInfo = pattern->GetCustomSpanPlaceholderInfo();
+    auto x = paintOffset_.GetX();
+    auto y = paintOffset_.GetY();
     for (auto customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw) {
             continue;
@@ -340,10 +342,10 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
         auto rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;
-        customSpanOptions.x = static_cast<double>(rect.Left());
-        customSpanOptions.lineTop = lineMetrics.y;
-        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height;
-        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender;
+        customSpanOptions.x = static_cast<double>(rect.Left()) + x;
+        customSpanOptions.lineTop = lineMetrics.y + y;
+        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height + y;
+        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender + y;
         customSpanPlaceholder.onDraw(drawingContext, customSpanOptions);
     }
 }
