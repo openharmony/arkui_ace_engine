@@ -68,7 +68,7 @@ public:
     /**
      * @brief Change section data.
      *
-     * @param start first modified section index.
+     * @param start index of the first modified section.
      * @param deleteCount number of sections to delete at index [start].
      * @param newSections to insert at index [start].
      */

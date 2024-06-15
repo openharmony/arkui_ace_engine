@@ -25,7 +25,7 @@ void WaterFlowSections::ChangeData(
     prevSections_ = sections_;
 
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-        "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
+        "section changed, start:%{public}zu, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
         newSections.size());
     if (start < sections_.size()) {
         auto it = sections_.begin() + static_cast<int32_t>(start);
@@ -42,16 +42,17 @@ void WaterFlowSections::ChangeData(
         }
         if (sections_[start] != prevSections_[start]) {
             // can skip re-init the first modified section with only an itemCount diff
-            // common scenario when develop add/remove items at the end
+            // to optimize the common scenario when developers add/remove items at the end
             if (sections_[start].OnlyCountDiff(prevSections_[start])) {
                 ++start;
             }
             break;
         }
     }
+    prevSections_.clear();
 
     if (onSectionDataChange_) {
-        onSectionDataChange_(start);
+        onSectionDataChange_(static_cast<int32_t>(start));
     }
 }
 
