@@ -4651,7 +4651,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         }
         preViewOptions.isModeArray = true;
         preViewOptions.modeArray = modeIntArray;
-        preViewOptions.modeArrayLength = arrLength;
+        preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
 
     if (numberBadge->IsBoolean()) {

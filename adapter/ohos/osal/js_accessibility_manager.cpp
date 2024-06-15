@@ -3947,7 +3947,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     if (!IsRegister()) {
         return;
     }
-    int windowId = GetWindowId();
+    int windowId = static_cast<int>(GetWindowId());
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
