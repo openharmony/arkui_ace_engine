@@ -58,6 +58,7 @@ struct NodeInfoPU {
     int32_t codeCol = -1;
 
     std::string jsViewName;
+    bool isV2 = false;
     NG::ExtraInfo extraInfo;
 };
 

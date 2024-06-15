@@ -405,6 +405,13 @@ public:
         return isRecycleRerender_;
     }
 
+    void JSSetIsV2(const bool isV2);
+
+    bool GetJSIsV2() const
+    {
+        return isV2_;
+    }
+
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
 private:
@@ -438,6 +445,7 @@ private:
     std::string jsViewName_;
 
     bool isRecycleRerender_ = false;
+    bool isV2_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

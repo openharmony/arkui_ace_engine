@@ -1003,11 +1003,14 @@ void UINode::SetActive(bool active)
     }
 }
 
-void UINode::SetJSViewActive(bool active)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
         // do not need to recursive here, stateMgmt will recursive all children when set active
+        if (customNode && customNode->GetIsV2() && isLazyForEachNode) {
+            return;
+        }
         if (customNode) {
             customNode->SetJSViewActive(active);
             continue;
