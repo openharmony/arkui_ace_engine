@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string SWITCH_TAG = "Switch";
+}
 bool SwitchAccessibilityProperty::IsCheckable() const
 {
     return true;
@@ -32,5 +35,10 @@ bool SwitchAccessibilityProperty::IsChecked() const
     auto switchPattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(switchPattern, false);
     return switchPattern->IsChecked();
+}
+
+std::string SwitchAccessibilityProperty::GetHintText() const
+{
+    return SWITCH_TAG;
 }
 } // namespace OHOS::Ace::NG
