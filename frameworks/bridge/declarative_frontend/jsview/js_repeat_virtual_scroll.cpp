@@ -14,9 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+
 #include <string>
 
-#include "base/memory/referenced.h"
+#include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
@@ -54,73 +56,67 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 
     // arg 2
     auto handlers = JSRef<JSObject>::Cast(info[2]);
-    auto onCreateNode =
-        [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onCreateNode")]
-        (uint32_t forIndex) -> void {
-            LOGE("Calling JS handler onCreateNode(forIndex: %{public}d)", forIndex);
-            auto params = ConvertToJSValues(forIndex);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+    auto onCreateNode = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onCreateNode")](
+                            uint32_t forIndex) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCOPED_TRACE("Create %d RepeatNode", forIndex);
+        auto params = ConvertToJSValues(forIndex);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
 
-    auto onUpdateNode =
-        [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onUpdateNode")]
-        (const std::string& fromKey, uint32_t forIndex) -> void {
-            LOGE("Calling JS handler OnUpdateNode(fromKey: %{public}s, forIndex: %{public}d)", fromKey.c_str(), forIndex);
-            auto params = ConvertToJSValues(fromKey, forIndex);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+    auto onUpdateNode = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onUpdateNode")](
+                            const std::string& fromKey, uint32_t forIndex) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCOPED_TRACE("Update orgin %s RepeatNode with %d index", fromKey.c_str(), forIndex);
+        auto params = ConvertToJSValues(fromKey, forIndex);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
 
-    auto onGetKeys4Range =
-        [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onGetKeys4Range")]
-        (uint32_t from, uint32_t to) -> std::list<std::string> {
-            LOGE("Calling JS handler OnGetKeys4Range(from %{public}d, to: %{public}d)", from, to);
-            auto params = ConvertToJSValues(from, to);
-            JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
+    auto onGetKeys4Range = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onGetKeys4Range")](
+                               uint32_t from, uint32_t to) -> std::list<std::string> {
+        std::list<std::string> list;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, list);
+        ACE_SCOPED_TRACE("Get Keys %d to  %d", from, to);
+        auto params = ConvertToJSValues(from, to);
+        JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
+        // convert js-array to std::list
+        JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
+        for (size_t i = 0; i < jsArr->Length(); i++) {
+            list.emplace_back(jsArr->GetValueAt(i)->ToString());
+        }
+        return list;
+    };
 
-            // convert js-array to std::list
-            std::list<std::string> list;
-            JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
-            for (size_t i = 0; i < jsArr->Length(); i++) {
-                list.emplace_back(jsArr->GetValueAt(i)->ToString());
-            }
-            return list;
-        };
+    auto onGetTypes4Range = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onGetTypes4Range")](
+                                uint32_t from, uint32_t to) -> std::list<std::string> {
+        std::list<std::string> list;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, list);
+        ACE_SCOPED_TRACE("Get Types %d to  %d", from, to);
+        auto params = ConvertToJSValues(from, to);
+        JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
 
-    auto onGetTypes4Range =
-        [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onGetTypes4Range")]
-        (uint32_t from, uint32_t to) -> std::list<std::string> {
-            LOGE("Calling JS handler onGetTypes4Range(from %{public}d, to: %{public}d)", from, to);
-            auto params = ConvertToJSValues(from, to);
-            JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
-
-            // convert js-array to std::list
-            std::list<std::string> list;
-            JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
-            for (size_t i = 0; i < jsArr->Length(); i++) {
-                list.emplace_back(jsArr->GetValueAt(i)->ToString());
-            }
-            return list;
-        };
+        // convert js-array to std::list
+        JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
+        for (size_t i = 0; i < jsArr->Length(); i++) {
+            list.emplace_back(jsArr->GetValueAt(i)->ToString());
+        }
+        return list;
+    };
 
     RepeatVirtualScrollModel::GetInstance()->Create(
-        totalCount, templateCacheCountMap,
-        onCreateNode,
-        onUpdateNode,
-        onGetKeys4Range,
-        onGetTypes4Range
-    );
+        totalCount, templateCacheCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
 }
 
 void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)
 {
-    LOGE("Guido JSRepeatVirtualScroll::InvalidateKeyCache");
+    ACE_SCOPED_TRACE("RepeatVirtualScroll:InvalidateKeyCache");
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::InvalidateKeyCache");
     auto totalCount = info[0]->ToNumber<uint32_t>();
     RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
 }
 
 void JSRepeatVirtualScroll::JSBind(BindingTarget globalObj)
 {
-    LOGE("Guido JSRepeatVirtualScroll::JSBind");
     JSClass<JSRepeatVirtualScroll>::Declare("RepeatVirtualScrollNative");
     JSClass<JSRepeatVirtualScroll>::StaticMethod("create", &JSRepeatVirtualScroll::Create);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("invalidateKeyCache", &JSRepeatVirtualScroll::InvalidateKeyCache);

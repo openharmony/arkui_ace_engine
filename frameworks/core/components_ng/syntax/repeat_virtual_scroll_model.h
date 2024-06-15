@@ -20,9 +20,8 @@
 #include <functional>
 #include <list>
 #include <map>
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
 
 #include "base/utils/macros.h"
 
@@ -30,23 +29,20 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT RepeatVirtualScrollModel {
 public:
-    static RepeatVirtualScrollModel* GetInstance();
+    RepeatVirtualScrollModel() = default;
     virtual ~RepeatVirtualScrollModel() = default;
-    
-    virtual void Create(
-        uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap,
+
+    static RepeatVirtualScrollModel* GetInstance();
+    virtual void Create(uint32_t totalCount, const std::map<std::string, uint32_t>& templateCacheCountMap,
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range
-    ) = 0;
+        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) = 0;
     virtual void InvalidateKeyCache(uint32_t totalCount) = 0;
 
 private:
-     static std::unique_ptr<RepeatVirtualScrollModel> instance;
-
+    static std::unique_ptr<RepeatVirtualScrollModel> instance;
 };
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_H

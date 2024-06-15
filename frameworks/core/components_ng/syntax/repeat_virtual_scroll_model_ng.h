@@ -29,18 +29,13 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RepeatVirtualScrollModelNG : public RepeatVirtualScrollModel {
 public:
-    virtual ~RepeatVirtualScrollModelNG() override = default;
-
-    void Create(
-        uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap,
+    void Create(uint32_t totalCount, const std::map<std::string, uint32_t>& templateCacheCountMap,
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range
-    ) override;
+        const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) override;
 
-    virtual void InvalidateKeyCache(uint32_t totalCount) override;
+    void InvalidateKeyCache(uint32_t totalCount) override;
 };
 
 } // namespace OHOS::Ace::NG

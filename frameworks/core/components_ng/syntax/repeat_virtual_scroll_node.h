@@ -38,27 +38,23 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScrollNode, ForEachBaseNode);
 
 public:
-    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId,
-        uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap,
-        const std::function<void(uint32_t)>& onCreateNode,
+    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
-    explicit RepeatVirtualScrollNode(int32_t nodeId,
-        int32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap,
-        const std::function<void(uint32_t)>& onCreateNode,
+    explicit RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
     ~RepeatVirtualScrollNode() override = default;
 
-    void UpdateTotalCount(int32_t totalCount)
+    void UpdateTotalCount(uint32_t totalCount)
     {
-        totalCount_= totalCount;
+        totalCount_ = totalCount;
     }
 
     // Number of children that Repeat can product
@@ -67,7 +63,7 @@ public:
 
     // called from TS upon Repeat rerender
     void InvalidateKeyCache();
-    
+
     /**
      *  GetChildren re-assembles children_ and cleanup the L1 cache
      *  active items remain in L1 cache and are added to RepeatVirtualScroll.children_
@@ -128,7 +124,8 @@ private:
     void PostIdleTask();
 
     // try to find entry for given index in L1 or L2 cache
-    std::pair<bool, RefPtr<UINode>> GetFromCaches(uint32_t forIndex) {
+    std::pair<bool, RefPtr<UINode>> GetFromCaches(uint32_t forIndex)
+    {
         return caches_.getNode4Index(forIndex);
     }
 
@@ -146,7 +143,7 @@ private:
     bool isActive_ = true;
 
     // size of data source when all data items loaded
-    int32_t totalCount_;
+    uint32_t totalCount_;
 
     // caches:
     RepeatVirtualScrollCaches caches_;
