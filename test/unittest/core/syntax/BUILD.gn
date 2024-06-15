@@ -42,6 +42,7 @@ group("core_syntax_unittest") {
   deps = [
     ":for_each_syntax_test_ng",
     ":if_else_syntax_test_ng",
+    ":lazy_for_each_builder_syntax_test_ng",
     ":lazy_for_each_syntax_test_ng",
   ]
 }
