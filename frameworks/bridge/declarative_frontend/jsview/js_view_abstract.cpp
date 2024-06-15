@@ -3831,11 +3831,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         return;
     }
 
-    if (IsBorderWidthObjUndefined(info[0])) {
-        ViewAbstractModel::GetInstance()->SetBorderWidth({});
-        return;
-    }
-
     ParseBorderWidth(jsVal);
 }
 
@@ -3851,6 +3846,10 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
+        if (IsBorderWidthObjUndefined(args)) {
+            ViewAbstractModel::GetInstance()->SetBorderWidth({});
+            return;
+        }
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
         ParseCommonEdgeWidths(obj, commonCalcDimension, true);
