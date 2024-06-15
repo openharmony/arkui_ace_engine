@@ -28,8 +28,7 @@ bool KeySorterClass::operator()(const std::string& a, const std::string& b) cons
     return thiz_->cmpKeyByIndexDistance(a, b);
 }
 
-RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
-    const std::map<std::string, uint32_t>& cacheCountL24ttype,
+RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const std::map<std::string, uint32_t>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
@@ -39,8 +38,8 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
       // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // FIXME API might need to change to tell which old item to update
-      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode),
-      onGetTypes4Range_(onGetTypes4Range),onGetKeys4Range_(onGetKeys4Range)
+      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode), onGetTypes4Range_(onGetTypes4Range),
+      onGetKeys4Range_(onGetKeys4Range)
 {}
 
 std::pair<bool, std::string> RepeatVirtualScrollCaches::getKey4Index(uint32_t index)
@@ -64,11 +63,11 @@ std::pair<bool, std::string> RepeatVirtualScrollCaches::getKey4Index(uint32_t in
 }
 
 /**
-      * get more index -> key and index -> ttype from TS side
-     */
+ * get more index -> key and index -> ttype from TS side
+ */
 void RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
 {
-    LOGE("fetching from %{public}d to %{public}d ....", (int) from, (int) to);
+    LOGE("fetching from %{public}d to %{public}d ....", (int)from, (int)to);
     // always request the same range for keys and ttype
     // TODO optimism by merging the two calls into one
     std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
@@ -88,7 +87,7 @@ void RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
         from1++;
     }
 
-    LOGE("fetching from %{public}d to %{public}d - done", (int) from, (int) to);
+    LOGE("fetching from %{public}d to %{public}d - done", (int)from, (int)to);
 }
 
 // get UINode for given index
@@ -115,16 +114,16 @@ std::pair<bool, RefPtr<UINode>> RepeatVirtualScrollCaches::getNode4Index(uint32_
 }
 
 /** scenario:
-         *         Repeat gets updated due to data change.
-         *         1. TS calls RepeatVirtualScrollNode,
-         *            then calls this function.
-         * 2. RepeatVirtualScrollNode requests layout to rebuild the UI
-         * 3. layout sends RepeatVirtualScrollNode::GetFrameChild calls
-         * 4. how to service GetFrameChild  call:
-         *   - first check for L1 keys (same template type) if any can be updated.
-         *     These UINodes remain in the render tree.
-         *   - if no L1 item, the look for L2 keys (same template type)
-         */
+ *         Repeat gets updated due to data change.
+ *         1. TS calls RepeatVirtualScrollNode,
+ *            then calls this function.
+ * 2. RepeatVirtualScrollNode requests layout to rebuild the UI
+ * 3. layout sends RepeatVirtualScrollNode::GetFrameChild calls
+ * 4. how to service GetFrameChild  call:
+ *   - first check for L1 keys (same template type) if any can be updated.
+ *     These UINodes remain in the render tree.
+ *   - if no L1 item, the look for L2 keys (same template type)
+ */
 void RepeatVirtualScrollCaches::invalidateKeyAndTTypeCaches()
 {
     key4index_.clear();
@@ -143,11 +142,11 @@ void RepeatVirtualScrollCaches::invalidateKeyAndTTypeCaches()
 }
 
 /**
-         * scenario: scroll, try to update an existing UINode
-         *
-         * find an key / UINode in L2 and update the UINode to
-         *   render the data source item 'forIndex'.
-         */
+ * scenario: scroll, try to update an existing UINode
+ *
+ * find an key / UINode in L2 and update the UINode to
+ *   render the data source item 'forIndex'.
+ */
 RefPtr<UINode> RepeatVirtualScrollCaches::updateFromL2(uint32_t forIndex)
 {
     const auto iterTType = ttype4index_.find(forIndex);
@@ -245,7 +244,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::createNewNode(uint32_t forIndex)
         node4key4ttype_.emplace(ttype, std::move(node4Key));
         LOGE("B");
     }
-            LOGE("C");
+    LOGE("C");
 
     // add node to node4key_
     node4key_.emplace(forKey, frameNode4Index);
@@ -281,7 +280,7 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
  * cbFunc return true, key
  * cbFunc returns false drop from L1
  */
-bool RepeatVirtualScrollCaches::rebuildL1(std::function<bool(int32_t index, RefPtr<UINode> node)> cbFunc)
+bool RepeatVirtualScrollCaches::rebuildL1(const std::function<bool(int32_t index, RefPtr<UINode> node)>& cbFunc)
 {
     std::set<std::string> l1_copy;
     std::swap(l1_copy, l1_activeNodeKeys_);
@@ -294,8 +293,8 @@ bool RepeatVirtualScrollCaches::rebuildL1(std::function<bool(int32_t index, RefP
         const RefPtr<UINode> node = node4key_[key];
         int32_t index = index4Key_[key];
 
-        LOGE("rebuildL1() index = %{public}d, key = %{public}s, nodeId = %{public}d",
-            (int)index, key.c_str(), (int)node->GetId());
+        LOGE("rebuildL1() index = %{public}d, key = %{public}s, nodeId = %{public}d", (int)index, key.c_str(),
+            (int)node->GetId());
 
         if (cbFunc(index, node)) {
             l1_activeNodeKeys_.emplace(key);
@@ -338,14 +337,14 @@ int32_t RepeatVirtualScrollCaches::GetFrameNodeIndex(const RefPtr<FrameNode>& fr
 }
 
 /**
-         * intended scenario: scroll
-         * servicing GetFrameChild, search for key that can be updated.
-         *
-         * return a key whose UINode can be updated
-         * the key must not be in L1, i.e. l1_activeNodeKeys_
-         * the given ttype must match the template type the UINode for this key
-         * has been rendered for (this info is available from node4key4ttype_)
-         */
+ * intended scenario: scroll
+ * servicing GetFrameChild, search for key that can be updated.
+ *
+ * return a key whose UINode can be updated
+ * the key must not be in L1, i.e. l1_activeNodeKeys_
+ * the given ttype must match the template type the UINode for this key
+ * has been rendered for (this info is available from node4key4ttype_)
+ */
 std::pair<bool, std::string> RepeatVirtualScrollCaches::getL2KeyToUpdate(const std::string ttype) const
 {
     const auto itNodes = node4key4ttype_.find(ttype);
@@ -363,15 +362,15 @@ std::pair<bool, std::string> RepeatVirtualScrollCaches::getL2KeyToUpdate(const s
 }
 
 /**
-         * scenario: UI rebuild following key invalidation by TS side
-         * L1 includes keys that are no longer used, the linked UINodes
-         * should be updated.
-         *
-         * This function checks all L1 keys (of active UINodes) if the key
-         * can still be found from
-         * (previously updated following invalidation) key -> index map and
-         *
-         */
+ * scenario: UI rebuild following key invalidation by TS side
+ * L1 includes keys that are no longer used, the linked UINodes
+ * should be updated.
+ *
+ * This function checks all L1 keys (of active UINodes) if the key
+ * can still be found from
+ * (previously updated following invalidation) key -> index map and
+ *
+ */
 std::pair<bool, std::string> RepeatVirtualScrollCaches::getL1KeyToUpdate(const std::string ttype) const
 {
     for (auto keyIter : l1_activeNodeKeys_) {
@@ -392,10 +391,10 @@ std::pair<bool, std::string> RepeatVirtualScrollCaches::getL1KeyToUpdate(const s
 }
 
 /**
-         * scenario: UINode of fromKey has been updated to render data for 'forKey'
-         *     the template type (ttype) remains unchanged
-         *     update node4key4ttype_ and node4key_ entries to use new key point to same UINode
-         */
+ * scenario: UINode of fromKey has been updated to render data for 'forKey'
+ *     the template type (ttype) remains unchanged
+ *     update node4key4ttype_ and node4key_ entries to use new key point to same UINode
+ */
 RefPtr<UINode> RepeatVirtualScrollCaches::uiNodeHasBeenUpdated(
     std::string ttype, std::string fromKey, std::string forKey)
 {
@@ -423,12 +422,12 @@ RefPtr<UINode> RepeatVirtualScrollCaches::uiNodeHasBeenUpdated(
 }
 
 /** scenario: keys cache has been updated
-         *
-         * find which keys in key -> UINode map are no longer used
-         * returned set entries are pairs:
-         *   pair.first: is this key a L1 item,
-         *   pair.second: key
-         */
+ *
+ * find which keys in key -> UINode map are no longer used
+ * returned set entries are pairs:
+ *   pair.first: is this key a L1 item,
+ *   pair.second: key
+ */
 void RepeatVirtualScrollCaches::findUnusedKeys(std::set<std::pair<bool, std::string>>& result) const
 {
     for (auto iter : node4key_) {
@@ -444,17 +443,17 @@ void RepeatVirtualScrollCaches::findUnusedKeys(std::set<std::pair<bool, std::str
 }
 
 /**
-         * scenario: in idle process , following GetChildren()
-         * execute purge()
-         *
-         * enforce L2 cacheCount for each ttype
-         * logical L2 cache is map key->UINode map filtered out L1 keys
-         * purge by by deleting UINodes, delete their entry from
-         *   node4key4ttype_ and node4key_
-         * 
-         *   FIXME haoyu: any other processing steps needed before UINode
-         *                tree can be deleted
-         */
+ * scenario: in idle process , following GetChildren()
+ * execute purge()
+ *
+ * enforce L2 cacheCount for each ttype
+ * logical L2 cache is map key->UINode map filtered out L1 keys
+ * purge by by deleting UINodes, delete their entry from
+ *   node4key4ttype_ and node4key_
+ *
+ *   FIXME haoyu: any other processing steps needed before UINode
+ *                tree can be deleted
+ */
 bool RepeatVirtualScrollCaches::purge()
 {
     bool didMakeChanges = false;
@@ -481,18 +480,18 @@ bool RepeatVirtualScrollCaches::purge()
             itL2Key++;
             didMakeChanges = true;
         } // while
-    } // for (auto itTType : node4key4ttype_)
+    }     // for (auto itTType : node4key4ttype_)
     return didMakeChanges;
 }
 
 /**
-         * given ley return the index position (reverse lookup)
-         * invalidated keys (after Repeat rerender/ data change)
-         * are keys for which no index exists anymore,
-         * method returns int max value for these.
-         * int max value causes that distance from active range is max
-         * these keys will be selected for update first.
-         */
+ * given ley return the index position (reverse lookup)
+ * invalidated keys (after Repeat rerender/ data change)
+ * are keys for which no index exists anymore,
+ * method returns int max value for these.
+ * int max value causes that distance from active range is max
+ * these keys will be selected for update first.
+ */
 uint32_t RepeatVirtualScrollCaches::getIndex4Key2(const std::string& key) const
 {
     auto it = index4Key_.find(key);
@@ -506,16 +505,16 @@ uint32_t RepeatVirtualScrollCaches::getIndex4Key2(const std::string& key) const
 }
 
 /**
-         *  for given index return distance from active range,
-         *  or 0 if within active range
-         *  distance is int max for invalidated keys
-         * 
-         * TODO Denis: instead of just using previous active range 
-         * use the ranges informed by previous two SetActiveRaneg calls.
-         * Obtain the scroll direction and use it to calc the distance.
-         * Items left 'behind' when scrolling get larger distance and are more 
-         * likely updated or purged from L2 cache.
-         */
+ *  for given index return distance from active range,
+ *  or 0 if within active range
+ *  distance is int max for invalidated keys
+ *
+ * TODO Denis: instead of just using previous active range
+ * use the ranges informed by previous two SetActiveRaneg calls.
+ * Obtain the scroll direction and use it to calc the distance.
+ * Items left 'behind' when scrolling get larger distance and are more
+ * likely updated or purged from L2 cache.
+ */
 int32_t RepeatVirtualScrollCaches::distFromRange(uint32_t index) const
 {
     int32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
@@ -552,20 +551,20 @@ int32_t RepeatVirtualScrollCaches::distFromRange(uint32_t index) const
 }
 
 /**
-         * scenario: find L1 key that should be updated
-         * choose the key whose index is the furthest away from active range
-         * given two keys compare their distFromRange
-         */
+ * scenario: find L1 key that should be updated
+ * choose the key whose index is the furthest away from active range
+ * given two keys compare their distFromRange
+ */
 bool RepeatVirtualScrollCaches::cmpKeyByIndexDistance(const std::string& key1, const std::string& key2) const
 {
     return distFromRange(getIndex4Key2(key1)) < distFromRange(getIndex4Key2(key2));
 }
 
 /**
-         * scenario: find L1 key(s) that should be updated
-         *
-         * return a sorted set of L2 keys, sorted by increasing distance from active range
-         */
+ * scenario: find L1 key(s) that should be updated
+ *
+ * return a sorted set of L2 keys, sorted by increasing distance from active range
+ */
 std::set<std::string, KeySorterClass> RepeatVirtualScrollCaches::getSortedL2KeysForTType(
     const std::map<std::string, RefPtr<UINode>>& uiNode4Key) const
 {

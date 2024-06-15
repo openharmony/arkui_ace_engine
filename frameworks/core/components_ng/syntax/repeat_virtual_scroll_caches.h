@@ -23,6 +23,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -31,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-// custom sorting for std::set only works with struct 
+// custom sorting for std::set only works with struct
 // with operator() inside
 class RepeatVirtualScrollCaches;
 struct KeySorterClass {
@@ -46,7 +47,8 @@ public:
 };
 
 class RepeatVirtualScrollCaches {
-     friend struct KeySorterClass;
+    friend struct KeySorterClass;
+
 public:
     /**
       * for given index get key
@@ -56,8 +58,7 @@ public:
     std::pair<bool, std::string> getKey4Index(uint32_t index);
 
 public:
-    RepeatVirtualScrollCaches(
-        const std::map<std::string, uint32_t>& cacheCountL24ttype,
+    RepeatVirtualScrollCaches(const std::map<std::string, uint32_t>& cacheCountL24ttype,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
@@ -136,16 +137,14 @@ private:
          */
     void findUnusedKeys(std::set<std::pair<bool, std::string>>& result) const;
 
-
 public:
     /**
-      * iterate over all entries of L1 and call function for each entry
-      * if function returns true, entry is added to rebuild L1, otherwise it is moved to L2
-      * cbFunc return true, [index, key] pair stays in L1 (index remains unchanged)
-      * cbFunc returns false, enqueue key in L2
-      */
-    //void rebuildL1(std::function<bool(std::string key, RefPtr<UINode> node)> cbFunc);
-    bool rebuildL1(std::function<bool(int32_t index, RefPtr<UINode> node)> cbFunc);
+     * iterate over all entries of L1 and call function for each entry
+     * if function returns true, entry is added to rebuild L1, otherwise it is moved to L2
+     * cbFunc return true, [index, key] pair stays in L1 (index remains unchanged)
+     * cbFunc returns false, enqueue key in L2
+     */
+    bool rebuildL1(const std::function<bool(int32_t index, RefPtr<UINode> node)>& cbFunc);
 
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
     /**
@@ -257,9 +256,9 @@ private:
 
     // memorize active ranges of past 2 (last, prev)
     // SetActiveRange calls and use to calc scroll direction
-    std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { {0, 0}, {0, 0} };
+    std::pair<uint32_t, uint32_t> lastActiveRanges_[2] = { { 0, 0 }, { 0, 0 } };
 
-    // keys of active nodes, UINodes must be on the render tree, 
+    // keys of active nodes, UINodes must be on the render tree,
     // this list is also known as L1
     // all keys not in this set are in "L2"
     std::set<std::string> l1_activeNodeKeys_;
@@ -267,19 +266,19 @@ private:
     // L1
     // index -> key and reverse
     // lazy request from TS side can be invalidated
-    std::map<uint32_t, std::string> key4index_;
-    std::map<std::string, uint32_t> index4Key_;
+    std::unordered_map<uint32_t, std::string> key4index_;
+    std::unordered_map<std::string, uint32_t> index4Key_;
 
     // index -> ttype
     // lazy request from TS side can be invalidated
-    std::map<uint32_t, std::string> ttype4index_;
-    std::map<std::string, uint32_t> index4ttype_;
+    std::unordered_map<uint32_t, std::string> ttype4index_;
+    std::unordered_map<std::string, uint32_t> index4ttype_;
 
     // Map ttype -> Map key -> UINode
-    std::map<std::string, std::map<std::string, RefPtr<UINode>>> node4key4ttype_;
+    std::unordered_map<std::string, std::map<std::string, RefPtr<UINode>>> node4key4ttype_;
 
     // Map Map key -> UINode
-    std::map<std::string, RefPtr<UINode>> node4key_;
+    std::unordered_map<std::string, RefPtr<UINode>> node4key_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

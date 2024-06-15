@@ -19,19 +19,16 @@
 #include <cstdint>
 #include <list>
 #include <string>
-#include <type_traits>
-#include <unordered_set>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 struct OffscreenItems {
-    int32_t from;
-    int32_t to;
+    int32_t from = -1;
+    int32_t to = -1;
 };
 
 class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
@@ -46,10 +43,8 @@ public:
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
-    explicit RepeatVirtualScrollNode(int32_t nodeId,
-        int32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCachedCountMap,
-        const std::function<void(uint32_t)>& onCreateNode,
+    RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
@@ -69,17 +64,17 @@ public:
     void InvalidateKeyCache();
 
     /**
-     *  GetChildren re-assembles children_ and cleanup the L1 cache
-     *  active items remain in L1 cache and are added to RepeatVirtualScroll.children_
-     *  inactive items are moved from L1 to L2 cache, not added to children_
-     *  function returns children_
+     * GetChildren re-assembles children_ and cleanup the L1 cache
+     * active items remain in L1 cache and are added to RepeatVirtualScroll.children_
+     * inactive items are moved from L1 to L2 cache, not added to children_
+     * function returns children_
      * function runs as part of idle task
      */
     const std::list<RefPtr<UINode>>& GetChildren() const override;
 
     /**
-     *  update range of Active items inside Repeat:
-     * iterative  L1 cache entries
+     * update range of Active items inside Repeat:
+     * iterative L1 cache entries
      * those items with index in range [ start ... end ] are marked active
      * those out of range marked inactive.
      * retests idle task
@@ -89,6 +84,8 @@ public:
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated
     void RecycleItems(int32_t from, int32_t to) override;
+
+    // Called by parent generate frame child.
     void SetNodeIndexOffset(int32_t start, int32_t count) override;
 
     /** Called by Layout to request ListItem and child subtree
@@ -97,7 +94,7 @@ public:
      update of L2 cache item to new index TODO)
      result is in L1 cache if isCache is false, and L2 cache if isCache is true.
 
-     meaning of parameters 
+     meaning of parameters
      needBuild: true - if found in cache, then return, if not in cache then return newly build
                 false: - if found in cache, then return, if not found in cache then return nullptr
      isCache: true indicates prebuild item (only used by List/Grid/Waterflow, this item should go to L2 cache,
@@ -164,7 +161,6 @@ private:
 
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
-    int32_t count_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };

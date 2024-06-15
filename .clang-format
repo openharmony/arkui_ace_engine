@@ -45,7 +45,7 @@ BreakAfterJavaFieldAnnotations: true
 ColumnLimit: 120
 CommentPragmas:  '^ IWYU pragma:'
 QualifierAlignment: Leave
-ReflowComments: false
+ReflowComments: true
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
