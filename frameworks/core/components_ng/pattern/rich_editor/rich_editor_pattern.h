@@ -769,6 +769,7 @@ public:
         contentChange_ = onChange;
     }
 
+    void HiddenMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
     RectF GetTextContentRect(bool isActualText = false) const override

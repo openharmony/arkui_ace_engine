@@ -9190,6 +9190,11 @@ void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
 }
 
+void RichEditorPattern::HiddenMenu()
+{
+    selectOverlay_->HideMenu();
+}
+
 void RichEditorPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
 {
     menuOptionItems_ = std::move(menuOptionsItems);
@@ -9204,7 +9209,7 @@ void RichEditorPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptio
                 auto end = richEditorPattern->textSelector_.GetTextEnd();
                 actionRange(start, end);
             }
-            richEditorPattern->CloseSelectOverlay();
+            richEditorPattern->HiddenMenu();
         };
     }
 }
