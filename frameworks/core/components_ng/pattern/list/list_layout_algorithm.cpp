@@ -817,8 +817,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             endIndex = midIndex;
         }
         if ((NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
-            (overScrollFeature_ && overScrollTop) ||
-            LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) &&
+            (overScrollFeature_ && overScrollTop) || (canOverScroll_ &&
+            LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
             if (overScrollTop && !canOverScroll_) {

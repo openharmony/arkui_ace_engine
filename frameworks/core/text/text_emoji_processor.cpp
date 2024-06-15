@@ -691,7 +691,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthAtFront(const std::u32string& u32Conte
 {
     int32_t deleteCount = 0;
     int32_t state = STATE_BEGIN;
-    uint32_t tempOffset = 0;
+    int32_t tempOffset = 0;
     int32_t u32ContentLength = static_cast<int32_t>(u32Content.length());
     do {
         int32_t codePoint = static_cast<int32_t>(u32Content[tempOffset]);

@@ -1078,10 +1078,10 @@ const ArkUI_AttributeItem* GetMargin(ArkUI_NodeHandle node)
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputMargin(
-            node->uiNodeHandle, margins, length, unit);
+            node->uiNodeHandle, &margins, length, unit);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaMargin(
-            node->uiNodeHandle, margins, length, unit);
+            node->uiNodeHandle, &margins, length, unit);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->getMargin(node->uiNodeHandle, &margins, length, unit);
     }
@@ -2697,7 +2697,7 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             pathAttributes[NUM_1] = item->value[NUM_5].f32;
         }
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
-            node->uiNodeHandle, "path", fill, stroke, strokeWidth, pathAttributes, item->string, unit);
+            node->uiNodeHandle, "path", fill, stroke, strokeWidth, &pathAttributes, item->string, unit);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
         ArkUI_Float32 progressAttributes[NUM_2];
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
@@ -8466,7 +8466,7 @@ int32_t SetLayoutRect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     intArray[1] = item->value[1].i32;
     intArray[2] = item->value[2].i32; // 2:index of width
     intArray[3] = item->value[3].i32; // 3:index of height
-    fullImpl->getNodeModifiers()->getCommonModifier()->setLayoutRect(node->uiNodeHandle, intArray);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setLayoutRect(node->uiNodeHandle, &intArray);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8474,7 +8474,7 @@ const ArkUI_AttributeItem* GetLayoutRect(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     ArkUI_Int32 intArray[NUM_4];
-    fullImpl->getNodeModifiers()->getCommonModifier()->getLayoutRect(node->uiNodeHandle, intArray);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getLayoutRect(node->uiNodeHandle, &intArray);
     g_numberValues[0].i32 = intArray[0];
     g_numberValues[1].i32 = intArray[1];
     g_numberValues[2].i32 = intArray[2]; // 2:index of width
@@ -8704,7 +8704,7 @@ int32_t SetRotateTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         return ERROR_CODE_PARAM_INVALID;
     }
     std::array<float, ARRAY_SIZE> rotateArray;
-    for (int32_t i = 0; i < static_cast<uint32_t>(actualSize) && i < rotateArray.size(); i++) {
+    for (int32_t i = 0; i < actualSize && i < rotateArray.size(); i++) {
         rotateArray[i] = item->value[i].f32;
     }
     float angle = 0.0f;

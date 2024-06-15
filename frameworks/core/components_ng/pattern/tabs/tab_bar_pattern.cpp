@@ -939,6 +939,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
     indicator_ = tabBarLayoutAlgorithm->GetIndicator();
     scrollMargin_ = tabBarLayoutAlgorithm->GetScrollMargin();
+    needSetCentered_ = tabBarLayoutAlgorithm->GetNeedSetCentered();
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

@@ -7322,6 +7322,7 @@ class ObserveV2 {
         this.elmtIdsChanged_ = new Set();
         this.computedPropIdsChanged_ = new Set();
         this.monitorIdsChanged_ = new Set();
+        this.persistenceChanged_ = new Set();
         // avoid recursive execution of updateDirty
         // by state changes => fireChange while
         // UINode rerender or @monitor function execution
@@ -7604,8 +7605,11 @@ class ObserveV2 {
             else if (id < MonitorV2.MIN_WATCH_ID) {
                 this.computedPropIdsChanged_.add(id);
             }
-            else {
+            else if (id < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
                 this.monitorIdsChanged_.add(id);
+            }
+            else {
+                this.persistenceChanged_.add(id);
             }
         } // for
     }
@@ -7635,12 +7639,17 @@ class ObserveV2 {
                     this.computedPropIdsChanged_ = new Set();
                     this.updateDirtyComputedProps(computedProps);
                 }
+                if (this.persistenceChanged_.size) {
+                    const persistKeys = Array.from(this.persistenceChanged_);
+                    this.persistenceChanged_ = new Set();
+                    PersistenceV2Impl.instance().onChangeObserved(persistKeys);
+                }
                 if (this.monitorIdsChanged_.size) {
                     const monitors = this.monitorIdsChanged_;
                     this.monitorIdsChanged_ = new Set();
                     this.updateDirtyMonitors(monitors);
                 }
-            } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+            } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
             if (this.elmtIdsChanged_.size) {
                 const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
                 this.elmtIdsChanged_ = new Set();
@@ -9190,6 +9199,339 @@ const Computed = (target, propertyKey, descriptor) => {
         : target[watchProp] = { [propertyKey]: computeFunction };
 };
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const V2_STATE_PREFIX = '__ob_';
+const V2_PREFIX_LENGTH = V2_STATE_PREFIX.length;
+;
+class Meta {
+    static define(proto, prop, value) {
+        const meta = Meta.proto2props.get(proto);
+        if (!meta) {
+            Meta.proto2props.set(proto, { [prop]: value });
+        }
+        else {
+            meta[prop] = value;
+        }
+    }
+    static get(obj, prop) {
+        let proto = obj.__proto__;
+        while (proto) {
+            let meta = Meta.proto2props.get(proto);
+            if (meta && meta[prop]) {
+                return meta[prop];
+            }
+            proto = proto.__proto__;
+        }
+        return undefined;
+    }
+    static gets(obj) {
+        const ret = {};
+        let proto = obj.__proto__;
+        while (proto) {
+            let meta = Meta.proto2props.get(proto);
+            Object.assign(ret, meta);
+            proto = proto.__proto__;
+        }
+        return ret;
+    }
+    static getOwn(obj, prop) {
+        const meta = Meta.proto2props.get(obj.__proto__);
+        return meta && meta[prop];
+    }
+}
+Meta.proto2props = new WeakMap();
+function __Type__(type, alias) {
+    const options = JSONCoder.getOptions(type);
+    if (alias) {
+        options.alias = alias;
+    }
+    return (target, prop) => {
+        const tar = typeof target === 'function' ? target.prototype : target;
+        Meta.define(tar, prop, options);
+    };
+}
+function ObservedReplacer(replacer) {
+    const defaultReplacer = function (key, value) {
+        return value;
+    };
+    const realReplacer = replacer || defaultReplacer;
+    return function (key, value) {
+        if (typeof value !== 'object' || Array.isArray(value)) {
+            return realReplacer.call(this, key, value);
+        }
+        if (value instanceof Set) {
+            return realReplacer.call(this, key, Array.from(value));
+        }
+        if (value instanceof Map) {
+            return realReplacer.call(this, key, Array.from(value.entries()));
+        }
+        const ret = {};
+        const meta = Meta.gets(value);
+        Object.keys(value).forEach(key => {
+            let saveKey = key.startsWith(V2_STATE_PREFIX) ? key.substring(V2_PREFIX_LENGTH) : key;
+            let options = meta && meta[saveKey];
+            if (options && options.disabled) {
+                return;
+            }
+            ret[(options && options.alias) || saveKey] = value[saveKey];
+        });
+        return realReplacer.call(this, key, ret);
+    };
+}
+/**
+ * JSONCoder
+ *
+ * The JSONCoder utility enhances the serialization and deserialization capabilities beyond
+ * the standard JSON.stringify and JSON.parse methods. While JSON.stringify serializes
+ * object properties and their values, it drops functions, class, property, and function decorators,
+ * and does not support Map, Set, or Date serialization. JSONCoder addresses these limitations,
+ * providing robust support for a wider range of JavaScript features.
+ *
+ * Main Features:
+ * - Adds support for serializing and deserializing class instances, including methods and decorators.
+ * - Supports serialization of complex data structures like Map, Set, and Date.
+ * - Provides full reconstruction of class instances through the JSONCoder.parseTo method.
+ *
+ * Usage Scenarios:
+ * - Serializing class instances to JSON for network transmission or storage.
+ * - Deserializing JSON data back into fully functional class instances, preserving methods and decorators.
+ * - Converting JSON data received from network or database into state management observable view models (e.g., @ObservedV2 class objects).
+ *
+ * The name 'JSONCoder' is derived from the 'JSON stringify/parse', reflecting its purpose to enhance JSON serialization and deserialization for classes.
+ *
+ */
+class JSONCoder {
+    /**
+     * Serializes the given object into a string. This string includes additional meta info
+     * allowing `stringify` to fully reconstruct the original object, including its class
+     * type and properties.
+     *
+     * @template T - The type of the object being serialized.
+     * @param { T } value - The object to serialize.
+     * @param { (this: JSONAny, key: string, value: JSONAny) => JSONAny } [replacer] - A function that alters the behavior when stringify
+     * @param { string | number } [space] - For format
+     * @returns { string } The serialized string representation of the object.
+     */
+    static stringify(value, replacer, space) {
+        return JSON.stringify(value, ObservedReplacer(replacer), space);
+    }
+    /**
+     * Parses a JSON string or object and applies the nested key-values to a class object.
+     * The main usage scenario is to convert JSON data received from a network or database
+     * to a state management observable view model.
+     *
+     * @template T - The type of the object being parsed.
+     * @param { TypeConstructor<T> | TransformOptions<T> } type - The class prototype or constructor function that has no parameters.
+     * @param { object | string } source - The JSON string or JSON object.
+     * @returns { T | T[] } The parsed object of type T or T[].
+     */
+    static parse(type, source) {
+        const json = typeof source === 'string' ? JSON.parse(source) : source;
+        const options = JSONCoder.getOptions(type);
+        return Array.isArray(json) ?
+            JSONCoder.parseIntoArray([], json, options) :
+            JSONCoder.parseInto(JSONCoder.newItem(json, options), json);
+    }
+    /**
+     * Deserializes a string produced by `parseTo` back into the original object,
+     * fully reconstructing its class type and properties.
+     *
+     * @template T - The original object being parsed.
+     * @param { T | T[] } type - The original object.
+     * @param { object | string } source - The JSON string or JSON object.
+     * @param { TypeConstructor<T> | TransformOptions<T> } [type] - The class prototype or constructor function that has no parameters.
+     * @returns { T | T[] } The parsed object of type T or T[].
+     */
+    static parseTo(target, source, type) {
+        const json = typeof source === 'string' ? JSON.parse(source) : source;
+        const t1 = Array.isArray(json);
+        const t2 = Array.isArray(target);
+        const options = JSONCoder.getOptions(type);
+        if (t1 && t2) {
+            JSONCoder.parseIntoArray(target, json, options);
+        }
+        else if (!t1 && !t2) {
+            JSONCoder.parseInto(target, json);
+        }
+        else {
+            throw `The type of target '${t2}' mismatches the type of source '${t1}'`;
+        }
+        return target;
+    }
+    /**
+     * Get the type options from the object creator.
+     *
+     * @template T - The object being parsed.
+     * @param { TypeConstructor<T> | TransformOptions<T> | string } [type] - The type info of the object creator.
+     * @returns { TransformOptions<T> } The options of the type info.
+     */
+    static getOptions(type) {
+        const paramType = typeof type;
+        const options = {};
+        if (paramType === 'object') {
+            Object.assign(options, type);
+        }
+        else if (paramType === 'function') {
+            options.factory = (_) => type;
+        }
+        else if (paramType === 'string') {
+            options.alias = type;
+        }
+        return options;
+    }
+    static getAlias2Prop(meta, target) {
+        const ret = new Map();
+        Object.keys(meta).forEach(prop => {
+            const options = meta[prop];
+            ret.set(options.alias || prop, prop);
+        });
+        return ret;
+    }
+    static parseInto(target, source) {
+        if (typeof source !== 'object') {
+            throw `The type of target '${typeof target}' mismatches the type of source '${typeof source}' in parseInto`;
+        }
+        const meta = Meta.gets(target);
+        const alias2prop = JSONCoder.getAlias2Prop(meta, target);
+        Object.keys(source).forEach((key) => {
+            const prop = alias2prop.get(key) || key;
+            const options = meta && meta[prop];
+            if (options && options.disabled) {
+                return;
+            }
+            JSONCoder.parseItemInto(target, prop, source, options);
+        });
+        return target;
+    }
+    static parseItemInto(target, targetKey, source, options) {
+        if (source === null || source === undefined) {
+            return;
+        }
+        let tarType = typeof target[targetKey];
+        if (tarType === 'function') {
+            return;
+        }
+        const sourceKey = (options === null || options === void 0 ? void 0 : options.alias) || targetKey;
+        // Handling invalid values
+        const value = JSONCoder.getTargetValue(source[sourceKey], options);
+        if (value === undefined || value === null) {
+            if (tarType === 'object') {
+                if (target[targetKey] instanceof Map || target[targetKey] instanceof Set) {
+                    target[targetKey].clear();
+                }
+                else if (Array.isArray(target[targetKey])) {
+                    target[targetKey].splice(0, target[targetKey].length);
+                }
+                else if (options && options.factory) {
+                    // if options.factory exists, can be assigned to undefined or null
+                    target[targetKey] = value;
+                }
+            }
+            // other scene ignore all
+            return;
+        }
+        // value is array, it maybe array or map or set
+        if (Array.isArray(value)) {
+            target[targetKey] = JSONCoder.parseIntoArray(target[targetKey], value, options);
+            return;
+        }
+        // if target[targetKey] invalid, then attempt create
+        if (target[targetKey] === null || target[targetKey] === undefined) {
+            target[targetKey] = JSONCoder.newItem(value, options);
+            tarType = typeof target[targetKey];
+        }
+        if (typeof value !== 'object') {
+            // value is Primitive Type
+            if (target[targetKey] instanceof Date) {
+                target[targetKey] = new Date(value);
+            }
+            else if (tarType === 'string') {
+                target[targetKey] = value.toString();
+            }
+            else if (tarType === typeof value) {
+                target[targetKey] = value;
+            }
+            else if (target[targetKey] !== undefined) {
+                throw `The type of target '${tarType}' mismatches the type of source '${typeof value}' in parseItemInto`;
+            }
+            return;
+        }
+        // value is object, target[targetKey] is undefined or null
+        if (target[targetKey] === null) {
+            throw `Miss @Type in object defined, the property name is ${targetKey}`;
+        }
+        else if (target[targetKey] === undefined) {
+            // ignore target[targetKey] undefined
+            return;
+        }
+        this.parseInto(target[targetKey], value);
+    }
+    static newItem(json, options) {
+        const type = options === null || options === void 0 ? void 0 : options.factory(json);
+        return type && new type();
+    }
+    static getTargetValue(value, options) {
+        // future can convert the value to different type or value
+        return value;
+    }
+    static parseIntoArray(target, source, options) {
+        if (typeof target !== 'object') {
+            throw `The type of target '${typeof target}' mismatches the type of source '${typeof source}'`;
+        }
+        // here, source maybe a array or map or set
+        if (target instanceof Map) {
+            target.clear();
+            for (let i = 0; i < source.length; ++i) {
+                // If target is a map, item must be an array. Otherwise, ignore it
+                const item = source[i];
+                if (!Array.isArray(item) || item.length < 2 || typeof item[0] !== 'string') {
+                    continue;
+                }
+                target.set(item[0], typeof item[1] !== 'object' ? item[1] : JSONCoder.parse(options, item[1]));
+            }
+            return target;
+        }
+        if (target instanceof Set) {
+            target.clear();
+            for (let i = 0; i < source.length; ++i) {
+                const item = source[i];
+                target.add(typeof item !== 'object' ? item : JSONCoder.parse(options, item));
+            }
+            return target;
+        }
+        target.length = source.length;
+        for (let i = 0; i < source.length; ++i) {
+            const item = source[i];
+            if (typeof item !== 'object') {
+                target[i] = item;
+                continue;
+            }
+            if (i === 0) {
+                if (!(options === null || options === void 0 ? void 0 : options.factory)) {
+                    target.length = 0;
+                    throw `Miss @Type in array defined`;
+                }
+            }
+            target[i] = Array.isArray(item) ?
+                JSONCoder.parseIntoArray(target[i] || [], item, options) :
+                JSONCoder.parseInto(target[i] || JSONCoder.newItem(item, options), item);
+        }
+        return target;
+    }
+}
+/*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9457,6 +9799,265 @@ class __RepeatPU extends __RepeatV2 {
     }
 }
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+;
+class AppStorageV2Impl {
+    constructor() {
+        this.memorizedValues_ = new Map();
+    }
+    static instance() {
+        if (AppStorageV2Impl.instance_) {
+            return AppStorageV2Impl.instance_;
+        }
+        AppStorageV2Impl.instance_ = new AppStorageV2Impl();
+        return AppStorageV2Impl.instance_;
+    }
+    connect(key, defaultCreator) {
+        if (!this.memorizedValues_.has(key)) {
+            if (typeof defaultCreator !== 'function') {
+                stateMgmtConsole.error(AppStorageV2Impl.defaultValueErrorMessage);
+                return undefined;
+            }
+            const defaultValue = defaultCreator();
+            this.memorizedValues_.set(key, defaultValue);
+            return defaultValue;
+        }
+        return this.memorizedValues_.get(key);
+    }
+    remove(key) {
+        return this.removeFromMemory(key);
+    }
+    getMemoryKeys() {
+        return Array.from(this.memorizedValues_.keys());
+    }
+    removeFromMemory(key) {
+        return this.memorizedValues_.delete(key);
+    }
+}
+AppStorageV2Impl.defaultValueErrorMessage = 'The default creator should be function when first connect';
+AppStorageV2Impl.instance_ = undefined;
+class PersistenceV2Impl {
+    constructor() {
+        this.cb_ = undefined;
+        this.map_ = new Proxy(new Map(), ObserveV2.arraySetMapProxy);
+        this.keysArr_ = new Set();
+        this.idToKey_ = new Map();
+    }
+    static instance() {
+        if (PersistenceV2Impl.instance_) {
+            return PersistenceV2Impl.instance_;
+        }
+        PersistenceV2Impl.instance_ = new PersistenceV2Impl();
+        return PersistenceV2Impl.instance_;
+    }
+    static configureBackend(storage) {
+        PersistenceV2Impl.storage_ = storage;
+    }
+    connect(key, defaultCreator) {
+        if (key === PersistenceV2Impl.KEYS_ARR_) {
+            this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
+            return undefined;
+        }
+        // In memory
+        if (this.map_.has(key)) {
+            return this.map_.get(key);
+        }
+        if (!PersistenceV2Impl.storage_) {
+            this.errorHelper(key, "unknown" /* Unknown */, `The storage is null`);
+            return undefined;
+        }
+        if (typeof defaultCreator !== 'function') {
+            this.errorHelper(key, "quota" /* Quota */, AppStorageV2Impl.defaultValueErrorMessage);
+            return undefined;
+        }
+        const observedValue = defaultCreator();
+        if (this.isNotClassObject(observedValue)) {
+            this.errorHelper(key, "quota" /* Quota */, `Not support! only the class object can be serialized`);
+            return undefined;
+        }
+        const id = ++PersistenceV2Impl.nextPersistId_;
+        this.idToKey_.set(id, key);
+        // Not in memory, but in disk
+        if (PersistenceV2Impl.storage_.has(key)) {
+            let newObservedValue;
+            try {
+                const json = PersistenceV2Impl.storage_.get(key);
+                // Adding ref for persistence
+                ObserveV2.getObserve().startRecordDependencies(this, id);
+                newObservedValue = JSONCoder.parseTo(observedValue, json);
+                ObserveV2.getObserve().stopRecordDependencies();
+            }
+            catch (err) {
+                if (this.cb_ && typeof this.cb_ === 'function') {
+                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    return undefined;
+                }
+                throw err;
+            }
+            this.map_.set(key, newObservedValue);
+            this.storeKeyToPersistenceV2(key);
+            return newObservedValue;
+        }
+        // Neither in memory or in disk
+        ObserveV2.getObserve().startRecordDependencies(this, id);
+        // Map is a proxy object. When it is connected for the first time, map.has is used to add dependencies,
+        // and map.set is used to trigger writing to disk.
+        const hasKey = this.map_.has(key);
+        ObserveV2.getObserve().stopRecordDependencies();
+        // Writing to persistence by ref
+        if (!hasKey) {
+            this.map_.set(key, observedValue);
+            this.storeKeyToPersistenceV2(key);
+        }
+        return observedValue;
+    }
+    keys() {
+        try {
+            if (!this.keysArr_.size) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+        }
+        catch (err) {
+            if (this.cb_ && typeof this.cb_ === 'function') {
+                this.cb_('', "unknown" /* Unknown */, `fail to get all persisted keys`);
+                return;
+            }
+            throw err;
+        }
+        return Array.from(this.keysArr_);
+    }
+    remove(key) {
+        this.map_.delete(key);
+        return this.removeFromPersistenceV2(key);
+    }
+    save(key) {
+        const value = this.map_.get(key);
+        if (value) {
+            try {
+                PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(value));
+            }
+            catch (err) {
+                if (this.cb_ && typeof this.cb_ === 'function') {
+                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    return;
+                }
+                throw err;
+            }
+        }
+    }
+    notifyOnError(cb) {
+        this.cb_ = cb;
+    }
+    onChangeObserved(persistKeys) {
+        this.writeAllChangedToFile(persistKeys);
+    }
+    writeAllChangedToFile(persistKeys) {
+        for (let i = 0; i < persistKeys.length; ++i) {
+            const id = persistKeys[i];
+            const key = this.idToKey_.get(id);
+            try {
+                const hasKey = this.map_.has(key);
+                if (hasKey) {
+                    const value = this.map_.get(key);
+                    ObserveV2.getObserve().startRecordDependencies(this, id);
+                    const json = JSONCoder.stringify(value);
+                    ObserveV2.getObserve().stopRecordDependencies();
+                    PersistenceV2Impl.storage_.set(key, json);
+                }
+            }
+            catch (err) {
+                if (this.cb_ && typeof this.cb_ === 'function') {
+                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    continue;
+                }
+                throw err;
+            }
+        }
+    }
+    isNotClassObject(value) {
+        return Array.isArray(value) || value instanceof Set || value instanceof Map || value instanceof Date ||
+            value instanceof Boolean || value instanceof Number || value instanceof BigInt || value instanceof String ||
+            value instanceof Symbol || value === undefined || value === null;
+    }
+    storeKeyToPersistenceV2(key) {
+        try {
+            if (this.keysArr_.has(key)) {
+                return;
+            }
+            // Initializing the keys arr in memory
+            if (!this.keysArr_.size) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+            this.keysArr_.add(key);
+            // Updating the keys arr in disk
+            this.storeKeysArrToStorage(this.keysArr_);
+        }
+        catch (err) {
+            if (this.cb_ && typeof this.cb_ === 'function') {
+                this.cb_(key, "unknown" /* Unknown */, `fail to store the key '${key}'`);
+                return;
+            }
+            throw err;
+        }
+    }
+    removeFromPersistenceV2(key) {
+        try {
+            if (PersistenceV2Impl.storage_.has(key)) {
+                PersistenceV2Impl.storage_.delete(key);
+                // The first call to remove
+                if (!this.keysArr_.has(key)) {
+                    this.keysArr_ = this.getKeysArrFromStorage();
+                }
+                this.keysArr_.delete(key);
+                this.storeKeysArrToStorage(this.keysArr_);
+                return true;
+            }
+            return false;
+        }
+        catch (err) {
+            if (this.cb_ && typeof this.cb_ === 'function') {
+                this.cb_(key, "unknown" /* Unknown */, `fail to remove the key '${key}'`);
+                return;
+            }
+            throw err;
+        }
+    }
+    getKeysArrFromStorage() {
+        if (!PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
+            return this.keysArr_;
+        }
+        const jsonKeysArr = PersistenceV2Impl.storage_.get(PersistenceV2Impl.KEYS_ARR_);
+        return new Set(JSON.parse(jsonKeysArr));
+    }
+    storeKeysArrToStorage(keysArr) {
+        PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)));
+    }
+    errorHelper(key, reason, message) {
+        if (this.cb_ && typeof this.cb_ === 'function') {
+            this.cb_(key, reason, message);
+        }
+        else {
+            stateMgmtConsole.error(message);
+        }
+    }
+}
+PersistenceV2Impl.MIN_PERSISTENCE_ID = 0x1010000000000;
+PersistenceV2Impl.nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
+PersistenceV2Impl.KEYS_ARR_ = '___keys_arr';
+PersistenceV2Impl.instance_ = undefined;
+/*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9471,6 +10072,7 @@ class __RepeatPU extends __RepeatV2 {
  * limitations under the License.
  */
 
+PersistenceV2Impl.configureBackend(new Storage());
 PersistentStorage.configureBackend(new Storage());
 Environment.configureBackend(new EnvironmentSetting());
 

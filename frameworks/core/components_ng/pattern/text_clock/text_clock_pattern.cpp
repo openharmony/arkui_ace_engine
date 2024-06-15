@@ -39,7 +39,9 @@ constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr bool ON_TIME_CHANGE = true;
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
+const std::string DEFAULT_FORMAT_24HOUR = "HH:mm:ss";
 const std::string FORM_FORMAT = "hh:mm";
+const std::string FORM_FORMAT_24HOUR = "HH:mm";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
@@ -384,6 +386,11 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, in
 void TextClockPattern::ParseInputFormat(bool& is24H)
 {
     std::string inputFormat = GetFormat();
+    if (inputFormat.find('H') != std::string::npos) {
+        is24H = true;
+    } else if (inputFormat.find('h') != std::string::npos || inputFormat.find('a') != std::string::npos) {
+        is24H = false;
+    }
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -393,9 +400,6 @@ void TextClockPattern::ParseInputFormat(bool& is24H)
     tempFormatElement.formatElement = "";
     tempFormatElement.formatElementNum = 0;
     for (tempFormat = inputFormat[i]; i < len; i++) {
-        if (inputFormat[i] == 'H') {
-            is24H = true;
-        }
         if ((i + 1) < len) {
             if (inputFormat[i] == inputFormat[i + 1]) {
                 tempFormat += inputFormat[i + 1]; // the same element format
@@ -688,15 +692,17 @@ std::string TextClockPattern::GetFormat() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     if (isForm_) {
-        CHECK_NULL_RETURN(textClockLayoutProperty, FORM_FORMAT);
-        std::string result = textClockLayoutProperty->GetFormat().value_or(FORM_FORMAT);
+        std::string defaultFormFormat = is24H_ ? FORM_FORMAT_24HOUR : FORM_FORMAT;
+        CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormFormat);
+        std::string result = textClockLayoutProperty->GetFormat().value_or(defaultFormFormat);
         if (result.find("s") != std::string::npos || result.find("S") != std::string::npos) {
-            return FORM_FORMAT;
+            return defaultFormFormat;
         }
         return result;
     }
-    CHECK_NULL_RETURN(textClockLayoutProperty, DEFAULT_FORMAT);
-    return textClockLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    std::string defaultFormat = is24H_ ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
+    CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormat);
+    return textClockLayoutProperty->GetFormat().value_or(defaultFormat);
 }
 
 float TextClockPattern::GetHoursWest() const

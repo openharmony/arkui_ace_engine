@@ -109,9 +109,6 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
-    JSClass<JSCheckbox>::StaticMethod("width", &JSCheckbox::JsWidth);
-    JSClass<JSCheckbox>::StaticMethod("height", &JSCheckbox::JsHeight);
-    JSClass<JSCheckbox>::StaticMethod("size", &JSCheckbox::JsSize);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
     JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

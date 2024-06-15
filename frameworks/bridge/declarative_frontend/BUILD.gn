@@ -154,6 +154,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
+      ":statemanagement",
       ":uicontext",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -673,6 +674,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
+      ":statemanagement",
       ":uicontext",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -1078,6 +1080,15 @@ foreach(item, ace_platforms) {
       }
     }
   }
+}
+
+ohos_abc("statemanagement") {
+  sources = [ "engine/jsStateManagement.js" ]
+  output_name = "statemanagement"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
 ohos_abc("x_node") {

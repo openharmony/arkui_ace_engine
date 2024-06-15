@@ -26,30 +26,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
+constexpr int32_t FIRST_OVERLAY_INDEX = 1;
+
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeArea();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     manager->SetIsAtomicService(true);
     manager->AddGeoRestoreNode(host);
-    PaddingProperty padding {
-        .left = CalcLength(safeArea.left_.Length()),
-        .right = CalcLength(safeArea.right_.Length()),
-        .top = CalcLength(safeArea.top_.Length()),
-        .bottom = CalcLength(safeArea.bottom_.Length()),
-    };
-    host->GetLayoutProperty()->UpdatePadding(padding);
-
     auto systemSafeArea = manager->GetSystemSafeArea();
     auto theme = pipeline->GetTheme<AppBarTheme>();
     CHECK_NULL_VOID(theme);
     float topMargin = theme->GetMenuBarTopMargin().ConvertToPx();
-    topMargin += (systemSafeArea.top_.Length() - safeArea.top_.Length());
+    topMargin += systemSafeArea.top_.Length();
+    UpdateOverlayLayout();
     auto menuBarRow = GetMenuBarRow();
     CHECK_NULL_VOID(menuBarRow);
     auto renderContext = menuBarRow->GetRenderContext();
@@ -61,9 +56,58 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     } else {
         UpdateMenuBarColor(theme, menuBar, SystemProperties::GetColorMode() != ColorMode::DARK);
     }
+    UpdateLayoutMargin();
+}
 
+void AtomicServicePattern::UpdateLayoutMargin()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeArea();
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    MarginProperty margin;
+    margin.left = CalcLength(safeArea.left_.Length());
+    margin.right = CalcLength(safeArea.right_.Length());
+    margin.top = CalcLength(safeArea.top_.Length());
+    margin.bottom = CalcLength(safeArea.bottom_.Length());
+    // update stage margin
+    auto stage = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(0));
+    CHECK_NULL_VOID(stage);
+    auto layoutProperty = stage->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMargin(margin);
+    stage->MarkModifyDone();
+    stage->MarkDirtyNode();
+    // update menuBarRow margin
+    MarginProperty appBarmargin;
+    appBarmargin.left = CalcLength(safeArea.left_.Length());
+    appBarmargin.right = CalcLength(safeArea.right_.Length());
+    auto menuBarRow = GetMenuBarRow();
+    CHECK_NULL_VOID(menuBarRow);
+    auto property = menuBarRow->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateMargin(appBarmargin);
     menuBarRow->MarkModifyDone();
     menuBarRow->MarkDirtyNode();
+}
+
+void AtomicServicePattern::UpdateOverlayLayout()
+{
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    if (atom->GetChildren().size() <= ATOMIC_SERVICE_MIN_SIZE) {
+        return;
+    }
+    for (int index = FIRST_OVERLAY_INDEX;
+        index <= static_cast<int32_t>(atom->GetChildren().size()) - ATOMIC_SERVICE_MIN_SIZE; index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(index));
+        CHECK_NULL_VOID(overlay);
+        auto overlayRender = overlay->GetRenderContext();
+        overlayRender->UpdatePosition(OffsetT<Dimension>());
+        overlay->MarkModifyDone();
+        overlay->MarkDirtyNode();
+    }
 }
 
 void AtomicServicePattern::OnAttachToFrameNode()
@@ -99,7 +143,7 @@ RefPtr<FrameNode> AtomicServicePattern::GetMenuBarRow()
 {
     auto atom = GetHost();
     CHECK_NULL_RETURN(atom, nullptr);
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
+    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildren().back());
     return menuBarRow;
 }
 

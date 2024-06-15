@@ -507,7 +507,7 @@ void GetTextAreaPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        int index = 0;
+        uint32_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {
@@ -1491,15 +1491,15 @@ void ResetTextAreaMargin(ArkUINodeHandle node)
     TextFieldModelNG::SetMargin(frameNode, paddings);
 }
 
-void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit)
+void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto margin = TextFieldModelNG::GetMargin(frameNode);
-    values[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
 

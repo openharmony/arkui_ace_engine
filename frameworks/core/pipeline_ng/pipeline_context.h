@@ -872,7 +872,7 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
-    void SyncSafeArea(bool onKeyboard = false);
+    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
     // only used for static form.
     void UpdateFormLinkInfos();

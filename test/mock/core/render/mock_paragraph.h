@@ -66,7 +66,8 @@ public:
 #endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
 
-    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {
         return false;
     }

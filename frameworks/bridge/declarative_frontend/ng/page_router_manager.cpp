@@ -293,7 +293,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
             return;
         }
         auto index = FindPageInRestoreStack(target.url);
-        if (index != -1) {
+        if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, target, RestorePageDestination::TOP);
             return;
@@ -1076,7 +1076,7 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
             return entryPageInfo->GetPageUrl() == url;
         });
     if (iter == pageRouterStack_.rend()) {
-        return { -1, nullptr };
+        return { INVALID_PAGE_INDEX, nullptr };
     }
     // Returns to the forward position.
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
@@ -1089,7 +1089,7 @@ int32_t PageRouterManager::FindPageInRestoreStack(const std::string& url)
             return record.url == url;
         });
     if (iter == restorePageStack_.rend()) {
-        return -1;
+        return INVALID_PAGE_INDEX;
     }
 
     return std::distance(iter, restorePageStack_.rend()) - 1;
@@ -1116,7 +1116,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
-        if (index != -1) {
+        if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP);
             return;
@@ -1183,7 +1183,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
-        if (index != -1) {
+        if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP);
             return;
@@ -1209,7 +1209,7 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
-        if (index != -1) {
+        if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP, false);
             return;
@@ -1307,7 +1307,7 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
     }
 
     auto index = FindPageInRestoreStack(target.url);
-    if (index == -1) {
+    if (index == INVALID_PAGE_INDEX) {
         return;
     }
 
@@ -1579,7 +1579,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
 
     // update index in pageInfo
     int32_t restorePageNumber = static_cast<int32_t>(restorePageStack_.size());
-    RefreshPageIndex(last, index + 1 + restorePageNumber);
+    RefreshPageIndex(last, index + restorePageNumber);
 }
 
 void PageRouterManager::RefreshPageIndex(std::list<WeakPtr<FrameNode>>::iterator startIter, int32_t startIndex)
@@ -1591,7 +1591,7 @@ void PageRouterManager::RefreshPageIndex(std::list<WeakPtr<FrameNode>>::iterator
         }
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         if (pagePattern) {
-            pagePattern->GetPageInfo()->SetPageIndex(startIndex);
+            pagePattern->GetPageInfo()->SetPageIndex(startIndex + 1);
         }
     }
 }
@@ -1963,6 +1963,9 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         ReplacePageInNewLifecycle(info);
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "router replace in old lifecycle(API version < 12), replace mode: %{public}d, url: %{public}s",
+        static_cast<int32_t>(info.routerMode), info.url.c_str());
     PopPage("", false, false);
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1972,7 +1975,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
-        if (index != -1) {
+        if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP, false);
             return;
@@ -2024,6 +2027,9 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    TAG_LOGI(AceLogTag::ACE_ROUTER,
+        "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
+        static_cast<int32_t>(info.routerMode), info.url.c_str());
     auto popNode = pageRouterStack_.back().Upgrade();
     int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
     bool findPage = false;
@@ -2045,7 +2051,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             findPage = true;
         } else {
             auto index = FindPageInRestoreStack(info.url);
-            if (index != -1) {
+            if (index != INVALID_PAGE_INDEX) {
                 // find page in restore page, create page, move position and update params.
                 RestorePageWithTarget(index, false, info, RestorePageDestination::BELLOW_TOP, false);
                 return;
@@ -2071,7 +2077,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             continue;
         }
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        pagePattern->GetPageInfo()->SetPageIndex(popIndex);
+        pagePattern->GetPageInfo()->SetPageIndex(popIndex + 1);
     }
     PopPage("", false, false);
 }

@@ -56,6 +56,10 @@ public:
     void UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLeft);
 
     std::optional<bool> settedColorMode = std::nullopt;
+
+private:
+    void UpdateLayoutMargin();
+    void UpdateOverlayLayout();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
