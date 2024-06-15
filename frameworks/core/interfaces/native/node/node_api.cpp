@@ -26,12 +26,14 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
-#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -41,9 +43,9 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
@@ -53,7 +55,9 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
@@ -534,7 +538,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
-            break;            
+            break;
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
@@ -1190,6 +1194,100 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void* event, vo
     ViewAnimate::AnimateTo(context, option, reinterpret_cast<void (*)(void*)>(event), user);
 }
 
+void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animateOption)
+{
+    ViewAnimate::KeyframeAnimateTo(context, animateOption);
+}
+
+ArkUIAnimatorHandle CreateAnimator(ArkUIContext* context, ArkUIAnimatorOption* animateOption)
+{
+    return ViewAnimate::CreateAnimator(context, animateOption);
+}
+
+void DisposeAnimator(ArkUIAnimatorHandle animator)
+{
+    ViewAnimate::DisposeAnimator(animator);
+}
+
+ArkUI_Int32 AnimatorReset(ArkUIAnimatorHandle animator, ArkUIAnimatorOption* option)
+{
+    return ViewAnimate::AnimatorReset(animator, option);
+}
+
+ArkUI_Int32 AnimatorPlay(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPlay(animator);
+}
+
+ArkUI_Int32 AnimatorFinish(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorFinish(animator);
+}
+
+ArkUI_Int32 AnimatorPause(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPause(animator);
+}
+
+ArkUI_Int32 AnimatorCancel(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorCancel(animator);
+}
+
+ArkUI_Int32 AnimatorReverse(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorReverse(animator);
+}
+
+ArkUICurveHandle CreateCurve(ArkUI_Int32 curve)
+{
+    return ViewAnimate::CreateCurve(curve);
+}
+
+ArkUICurveHandle CreateStepsCurve(ArkUI_Int32 count, ArkUI_Bool end)
+{
+    return ViewAnimate::CreateStepsCurve(count, end);
+}
+
+ArkUICurveHandle CreateCubicBezierCurve(ArkUI_Float32 x1, ArkUI_Float32 y1, ArkUI_Float32 x2, ArkUI_Float32 y2)
+{
+    return ViewAnimate::CreateCubicBezierCurve(x1, y1, x2, y2);
+}
+
+ArkUICurveHandle CreateSpringCurve(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateSpringCurve(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateResponsiveSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateResponsiveSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateInterpolatingSpring(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateInterpolatingSpring(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateCustomCurve(ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userData), void* userData)
+{
+    return ViewAnimate::CreateCustomCurve(interpolate, userData);
+}
+
+void DisposeCurve(ArkUICurveHandle curve)
+{
+    return ViewAnimate::DisposeCurve(curve);
+}
+
 const ArkUIAnimation* GetAnimationAPI()
 {
     static const ArkUIAnimation modifier = {
@@ -1197,6 +1295,24 @@ const ArkUIAnimation* GetAnimationAPI()
         nullptr,
         nullptr,
         AnimateTo,
+        KeyframeAnimateTo,
+        CreateAnimator,
+        DisposeAnimator,
+        AnimatorReset,
+        AnimatorPlay,
+        AnimatorFinish,
+        AnimatorPause,
+        AnimatorCancel,
+        AnimatorReverse,
+        CreateCurve,
+        CreateStepsCurve,
+        CreateCubicBezierCurve,
+        CreateSpringCurve,
+        CreateSpringMotion,
+        CreateResponsiveSpringMotion,
+        CreateInterpolatingSpring,
+        CreateCustomCurve,
+        DisposeCurve,
     };
     return &modifier;
 }

@@ -91,6 +91,9 @@ typedef ArkUI_ListItemSwipeActionOption* ArkUIListItemSwipeActionOptionHandle;
 typedef ArkUI_ListItemSwipeActionItem* ArkUIListItemSwipeActionItemHandle;
 typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
+struct _ArkUICurve;
+typedef _ArkUICurve* ArkUICurveHandle;
+
 struct ArkUIRect {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
@@ -554,6 +557,15 @@ struct ArkUIScrollerAnimationType {
 struct ArkUISwiperMarginOptions {
     ArkUI_Float32 margin;
     ArkUI_Bool ignoreBlank;
+};
+
+struct ArkUI_AnimatorEvent {
+    void* userData;
+};
+
+struct ArkUI_AnimatorOnFrameEvent {
+    float progress;
+    void* userData;
 };
 
 struct ArkUIPopupParam {
@@ -1024,6 +1036,8 @@ struct ArkUIAnimateOption {
     void* onFinishCallback;
     void* user;
     ArkUI_Int32 finishCallbackType;
+    ArkUICurveHandle iCurve;
+    ArkUI_Int32 curveType;
 };
 
 struct ArkUIContext {
@@ -1097,6 +1111,62 @@ struct ArkUISliderValidSlideRange {
     ArkUI_Float32 from;
     ArkUI_Float32 to;
 };
+
+struct ArkUIKeyframeState {
+    ArkUI_Int32 duration;
+    ArkUICurveHandle curve;
+    ArkUI_Int32 curveType;
+    void (*event)(void* userData);
+    void* userData;
+};
+
+struct ArkUIKeyframeAnimateOption {
+    ArkUI_Int32 delay;
+    ArkUI_Int32 iterations;
+    void (*onFinish)(void* userData);
+    void* userData;
+    ArkUIKeyframeState* keyframes;
+    ArkUI_Int32 keyframeSize;
+};
+
+struct ArkUIKeyframe {
+    ArkUI_Float32 keyTime;
+    ArkUI_Float32 keyValue;
+    ArkUICurveHandle curve;
+    ArkUI_Int32 curveType;
+};
+
+struct ArkUIAnimatorOption {
+    ArkUI_Int32 duration;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 iterations;
+    ArkUI_Float32 begin;
+    ArkUI_Float32 end;
+    ArkUI_Int32 fill;
+    ArkUI_Int32 direction;
+    ArkUICurveHandle easing;
+    ArkUI_Int32 curveType;
+    ArkUI_Bool isHasExpectedFrameRateRange;
+    ArkUIExpectedFrameRateRange expectedFrameRateRange;
+    ArkUIKeyframe* keyframes;
+    ArkUI_Int32 keyframeSize;
+    void (*onFrame)(ArkUI_AnimatorOnFrameEvent* event);
+    void* frameUserData;
+    void (*onFinish)(ArkUI_AnimatorEvent* event);
+    void* finishUserData;
+    void (*onCancel)(ArkUI_AnimatorEvent* event);
+    void* cancelUserData;
+    void (*onRepeat)(ArkUI_AnimatorEvent* event);
+    void* repeatUserData;
+};
+
+struct ArkUIAnimator {
+    void* animator;
+    void* context;
+    void* animatorOption;
+};
+
+typedef ArkUIAnimator* ArkUIAnimatorHandle;
 
 struct ArkUIImageFrameInfo {
     ArkUI_CharPtr src;
@@ -4101,8 +4171,30 @@ struct ArkUIAnimation {
         ArkUIVMContext vmContext, ArkUI_Int32 curve, ArkUI_Float32* options, ArkUI_Int32 callbackId);
     void (*closeImplicitAnimation)();
     void (*animateTo)(ArkUIContext* context, ArkUIAnimateOption option, void* event, void* userData);
+    void (*keyframeAnimateTo)(ArkUIContext* context, ArkUIKeyframeAnimateOption* option);
+    ArkUIAnimatorHandle (*createAnimator)(ArkUIContext* context, ArkUIAnimatorOption* option);
+    void (*disposeAnimator)(ArkUIAnimatorHandle animator);
+    ArkUI_Int32 (*animatorReset)(ArkUIAnimatorHandle animator, ArkUIAnimatorOption* option);
+    ArkUI_Int32 (*animatorPlay)(ArkUIAnimatorHandle animator);
+    ArkUI_Int32 (*animatorFinish)(ArkUIAnimatorHandle animator);
+    ArkUI_Int32 (*animatorPause)(ArkUIAnimatorHandle animator);
+    ArkUI_Int32 (*animatorCancel)(ArkUIAnimatorHandle animator);
+    ArkUI_Int32 (*animatorReverse)(ArkUIAnimatorHandle animator);
+    ArkUICurveHandle (*initCurve)(ArkUI_Int32 curve);
+    ArkUICurveHandle (*stepsCurve)(ArkUI_Int32 count, ArkUI_Bool end);
+    ArkUICurveHandle (*cubicBezierCurve)(ArkUI_Float32 x1, ArkUI_Float32 y1, ArkUI_Float32 x2, ArkUI_Float32 y2);
+    ArkUICurveHandle (*springCurve)(
+        ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping);
+    ArkUICurveHandle (*springMotion)(
+        ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration);
+    ArkUICurveHandle (*responsiveSpringMotion)(
+        ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration);
+    ArkUICurveHandle (*interpolatingSpring)(
+        ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping);
+    ArkUICurveHandle (*customCurve)(
+        ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userdata), void* userdata);
+    void (*disposeCurve)(ArkUICurveHandle curve);
 };
-
 struct ArkUINavigation {
     void (*popPageToIndex)(ArkUI_Int32 index);
     void (*setNavDestinationBackPressed)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
