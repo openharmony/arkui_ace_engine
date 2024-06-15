@@ -2771,7 +2771,12 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    AddTextFireOnChange();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool hasPreviewTextOption = pipeline->GetHasPreviewTextOption();
+    if (!GetIsPreviewText() || hasPreviewTextOption) {
+        AddTextFireOnChange();
+    }
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
