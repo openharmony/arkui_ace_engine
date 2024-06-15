@@ -2568,6 +2568,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
+    auto lpxScale = pipeline->GetLogicScale();
 
     CHECK_NULL_VOID(bdImage_);
 #ifndef USE_ROSEN_DRAWING
@@ -2583,7 +2584,8 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     }
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
+    BorderImagePainter borderImagePainter(
+        *GetBdImage(), widthProp, paintRect.GetSize(), rsImage, { dipScale, lpxScale });
 #else
     std::shared_ptr<RSImage> image;
     if (InstanceOf<DrawingImage>(bdImage_)) {
@@ -2596,7 +2598,8 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
         return;
     }
     CHECK_NULL_VOID(image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), *image, dipScale);
+    BorderImagePainter borderImagePainter(
+        *GetBdImage(), widthProp, paintRect.GetSize(), *image, { dipScale, lpxScale });
 #endif
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
@@ -2756,14 +2759,21 @@ void RosenRenderContext::PaintBorderImageGradient()
 
     auto borderImageProperty = *GetBdImage();
     auto&& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
-    auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient](RSCanvas& rsCanvas) mutable {
+    auto paintTask = [weak = WeakClaim(this), paintSize, borderImageProperty, &borderWidthProperty, gradient](
+                         RSCanvas& rsCanvas) mutable {
 #ifndef USE_ROSEN_DRAWING
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
 #else
         auto rsImage = DrawingDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
 #endif
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
         BorderImagePainter borderImagePainter(borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale());
+            { pipeline->GetDipScale(), pipeline->GetLogicScale() });
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
