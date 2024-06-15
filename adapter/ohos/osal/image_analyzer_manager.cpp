@@ -31,7 +31,7 @@
 namespace OHOS::Ace {
 
 ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNode, ImageAnalyzerHolder holder)
-    : frameNode_(AceType::WeakClaim(AceType::RawPtr(frameNode))), holder_(holder)
+    : frameNode_(frameNode), holder_(holder)
 {
     imageAnalyzerAdapter_ = std::shared_ptr<ImageAnalyzerAdapter>(CreateImageAnalyzerAdapter());
 }
