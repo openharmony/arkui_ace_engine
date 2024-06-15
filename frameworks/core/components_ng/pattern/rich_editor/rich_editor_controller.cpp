@@ -28,6 +28,8 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, 0);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "textLength=%{public}d, offset=%{public}d",
+        static_cast<int32_t>(options.value.length()), options.offset.value_or(-1));
     return richEditorPattern->AddTextSpan(options);
 }
 
@@ -72,27 +74,28 @@ void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanS
 
 SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
 {
-    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
-    }
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSpans, start, range=[%{public}d,%{public}d]", start, end);
+    SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSpans end");
     return value;
 }
 
 SelectionInfo RichEditorController::GetSelectionSpansInfo()
 {
-    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);
-        auto end = std::max(richEditorPattern->GetTextSelector().GetTextEnd(), 0);
-        if (start == end) {
-            start = richEditorPattern->GetCaretPosition();
-            end = richEditorPattern->GetCaretPosition();
-        }
-        value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
+    CHECK_NULL_RETURN(richEditorPattern, {});
+
+    auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);
+    auto end = std::max(richEditorPattern->GetTextSelector().GetTextEnd(), 0);
+    if (start == end) {
+        start = richEditorPattern->GetCaretPosition();
+        end = richEditorPattern->GetCaretPosition();
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection, start, range=%[%{public}d,%{public}d]", start, end);
+    SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection end");
     return value;
 }
 
@@ -113,7 +116,10 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetParagraphInfo(start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetParagraphsInfo, start, range=%[%{public}d,%{public}d]", start, end);
+    auto paragraphInfo = pattern->GetParagraphInfo(start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetParagraphsInfo, end");
+    return paragraphInfo;
 }
 
 RefPtr<SpanStringBase> RichEditorController::ToStyledString(int32_t start, int32_t end)
