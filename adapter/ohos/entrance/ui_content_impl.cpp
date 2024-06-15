@@ -1656,6 +1656,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "can_preview_text";
+        });
+    pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
             return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
         });
