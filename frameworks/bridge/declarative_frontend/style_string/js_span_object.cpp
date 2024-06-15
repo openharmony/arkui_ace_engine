@@ -1241,7 +1241,7 @@ void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanPara
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("wordBreak");
-    uint32_t index = WORD_BREAK_TYPES_DEFAULT;
+    int32_t index = WORD_BREAK_TYPES_DEFAULT;
     if (args->IsNumber()) {
         index = args->ToNumber<int32_t>();
     }

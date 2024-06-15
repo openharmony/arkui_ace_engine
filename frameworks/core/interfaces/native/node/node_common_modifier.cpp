@@ -3519,7 +3519,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     if (!dragPreviewOptions.isModeArray) {
         ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
     } else {
-        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+        for (int32_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
             ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
             if (isAuto) {
                 break;
