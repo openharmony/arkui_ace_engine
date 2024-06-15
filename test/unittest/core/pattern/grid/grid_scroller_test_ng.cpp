@@ -1853,4 +1853,91 @@ HWTEST_F(GridScrollerTestNg, MultiLineItemScroll001, TestSize.Level1)
     EXPECT_TRUE(info.reachEnd_);
     EXPECT_FALSE(info.offsetEnd_);
 }
+
+/**
+ * @tc.name: VerticalGridScrollToIndexWithLargeLineHeight001
+ * @tc.desc: Test Grid(Axis::VERTICAL) ScrollToIndex With line height Greater than main size Item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    CreateGridItem(ITEM_WIDTH, 1350);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateGridItems(20, ITEM_WIDTH, 390);
+    CreateDone(frameNode_);
+
+    // cache all line in Grid
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushLayoutTask(frameNode_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -950.0f);
+
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -1350.0f);
+
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -390.0f);
+}
+
+/**
+ * @tc.name: VerticalGridScrollToIndexWithLargeLineHeight002
+ * @tc.desc: Test Grid(Axis::VERTICAL) ScrollToIndex With line height Greater than main size Item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, VerticalGridScrollToIndexWithLargeLineHeight002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    CreateGridItems(3, ITEM_WIDTH, 250);
+
+    CreateGridItem(ITEM_WIDTH, 1350);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    CreateGridItems(20, ITEM_WIDTH, 390);
+    CreateDone(frameNode_);
+
+    // cache all line in Grid
+    auto controller = pattern_->positionController_;
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    FlushLayoutTask(frameNode_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(5, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -550.0f);
+
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(7, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -950.0f);
+
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    FlushLayoutTask(frameNode_);
+
+    controller->ScrollToIndex(9, false, ScrollAlign::AUTO, std::nullopt);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -1350.0f);
+}
 } // namespace OHOS::Ace::NG

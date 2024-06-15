@@ -237,7 +237,7 @@ public:
         int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) = 0;
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric,
         const OffsetF& lastTouchOffset, TextAffinity& textAffinity) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;

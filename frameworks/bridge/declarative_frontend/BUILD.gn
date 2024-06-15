@@ -117,7 +117,7 @@ gen_obj("ark_component") {
   snapshot_dep = []
 }
 
-if (!is_arkui_x) {
+if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
   gen_obj("js_mock_system_plugin") {
     input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
     if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
@@ -154,6 +154,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
+      ":statemanagement",
       ":uicontext",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -673,6 +674,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":shape",
+      ":statemanagement",
       ":uicontext",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
@@ -1078,6 +1080,15 @@ foreach(item, ace_platforms) {
       }
     }
   }
+}
+
+ohos_abc("statemanagement") {
+  sources = [ "engine/jsStateManagement.js" ]
+  output_name = "statemanagement"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }
 
 ohos_abc("x_node") {

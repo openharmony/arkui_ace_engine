@@ -122,8 +122,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d", event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, long press recognizer receives %{public}d,"
+        " state: %{public}d", event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -162,6 +162,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -183,11 +186,14 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event", event.touchEventId,
-        event.id);
+        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }

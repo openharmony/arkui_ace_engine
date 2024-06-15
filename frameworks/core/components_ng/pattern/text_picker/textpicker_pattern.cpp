@@ -58,6 +58,24 @@ void TextPickerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
+{
+    auto textPickerNode = GetHost();
+    std::function<void (decltype(textPickerNode))> updateDirectionFunc = [&](decltype(textPickerNode) node) {
+        CHECK_NULL_VOID(node);
+        auto updateProperty = node->GetLayoutProperty();
+        updateProperty->UpdateLayoutDirection(textDirection);
+        for (auto child : node->GetAllChildrenWithBuild()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode) {
+                continue;
+            }
+            updateDirectionFunc(frameNode);
+        }
+    };
+    updateDirectionFunc(textPickerNode);
+}
+
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -131,7 +149,12 @@ void TextPickerPattern::OnModifyDone()
         isFiredSelectsChange_ = false;
         return;
     }
-
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    SetLayoutDirection(layoutDirection);
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -148,8 +171,6 @@ void TextPickerPattern::OnModifyDone()
         CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -979,6 +1000,7 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
+    canloop_ = isLoop;
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);

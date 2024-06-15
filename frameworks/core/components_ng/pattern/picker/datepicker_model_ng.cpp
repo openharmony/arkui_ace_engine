@@ -517,6 +517,33 @@ void DatePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
 }
 
+void DatePickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedDisappearFontFamily(isUserDefined);
+}
+
+void DatePickerModelNG::HasUserDefinedNormalFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedNormalFontFamily(isUserDefined);
+}
+
+void DatePickerModelNG::HasUserDefinedSelectedFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->HasUserDefinedSelectedFontFamily(isUserDefined);
+}
+
 void DatePickerModelNG::SetBackgroundColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

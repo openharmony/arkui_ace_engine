@@ -594,6 +594,8 @@ template("ace_core_source_set") {
         "common/rosen/rosen_asset_manager.cpp",
         "common/rosen/rosen_window.cpp",
       ]
+      include_dirs +=
+          [ "//foundation/window/window_manager/interfaces/innerkits/wm" ]
       external_deps += [ "libuv:uv" ]
     }
 

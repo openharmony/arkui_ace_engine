@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -74,6 +75,15 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
 
 bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    auto handleRadius = theme->GetHandleDiameter().ConvertToPx();
+    // If the handle is incomplete at the top, not show.
+    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
+        return false;
+    }
+
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();

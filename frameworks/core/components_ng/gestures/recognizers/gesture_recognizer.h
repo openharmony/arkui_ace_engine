@@ -333,18 +333,11 @@ public:
     virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
-    virtual bool AboutToAddCurrentFingers(int32_t touchId)
-    {
-        currentFingers_++;
-        return true;
-    }
+    bool AboutToAddCurrentFingers(int32_t touchId);
 
-    virtual bool AboutToMinusCurrentFingers(int32_t touchId)
-    {
-        return true;
-    }
+    bool AboutToMinusCurrentFingers(int32_t touchId);
 
-    bool IsInAttachedNode(const TouchEvent& event);
+    bool IsInAttachedNode(const TouchEvent& event, bool isRealTime = true);
 
     
     void SetUserData(void* userData)
@@ -451,6 +444,7 @@ protected:
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
+    std::set<int32_t> fingersId_;
     RefPtr<GestureInfo> gestureInfo_;
     GestureJudgeFunc sysJudge_ = nullptr;
     bool isTouchEventFinished_ = false;

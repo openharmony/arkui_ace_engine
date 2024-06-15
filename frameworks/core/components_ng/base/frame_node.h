@@ -457,7 +457,7 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void MarkNeedRenderOnly();
 
@@ -727,6 +727,7 @@ public:
     void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
+    bool SelfExpansiveToKeyboard();
     bool ParentExpansive();
 
     bool IsActive() const override
@@ -881,8 +882,19 @@ public:
 
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
     static std::pair<float, float> ContextPositionConvertToPX(
@@ -1117,7 +1129,7 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
-
+    bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;

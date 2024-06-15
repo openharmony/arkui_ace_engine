@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 
 #include <cstdint>
+#include <memory>
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -126,7 +127,7 @@ JSCanvasRenderer::~JSCanvasRenderer()
 }
 
 // A helper fucntion to create GradientObj
-JSRef<JSObject> JSCanvasRenderer::createGradientObj(Gradient* gradient)
+JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradient>& gradient)
 {
     JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
     pasteObj->SetProperty("__type", "gradient");
@@ -144,7 +145,7 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
     double y1 = 0.0;
     if (info.GetDoubleArg(0, x0) && info.GetDoubleArg(1, y0) && info.GetDoubleArg(2, x1) && info.GetDoubleArg(3, y1)) {
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::LINEAR);
         gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
         gradient->SetEndOffset(Offset(x1 * density, y1 * density));
@@ -165,7 +166,7 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
     if (info.GetDoubleArg(0, startX) && info.GetDoubleArg(1, startY) && info.GetDoubleArg(2, startRadial) &&
         info.GetDoubleArg(3, endX) && info.GetDoubleArg(4, endY) && info.GetDoubleArg(5, endRadial)) {
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::RADIAL);
         gradient->SetBeginOffset(Offset(startX * density, startY * density));
         gradient->SetEndOffset(Offset(endX * density, endY * density));
@@ -190,7 +191,7 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     info.GetDoubleArg(1, x);
     info.GetDoubleArg(2, y);
     double density = GetDensity();
-    Gradient* gradient = new Gradient();
+    auto gradient = std::make_shared<Gradient>();
     gradient->SetType(GradientType::CONIC);
     gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
@@ -326,9 +327,9 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetFillGradient(*gradient);
+        renderingContext2DModel_->SetFillGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
@@ -363,9 +364,9 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetStrokeGradient(*gradient);
+        renderingContext2DModel_->SetStrokeGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);

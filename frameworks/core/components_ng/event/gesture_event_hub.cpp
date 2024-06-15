@@ -550,8 +550,9 @@ void GestureEventHub::StartDragTaskForWeb()
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
+            CHECK_NULL_VOID(gestureHub->gestureInfoForWeb_);
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
-            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+            dragEventActuator->StartDragTaskForWeb(*gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
 }
@@ -665,7 +666,7 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        gestureInfoForWeb_ = info;
+        gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
         isReceivedDragGestureInfo_ = true;
     }
 }
@@ -905,7 +906,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
-        imageNode = overlayManager->GetPixelMapContentNode(hasContextMenu);
+        imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
@@ -978,10 +979,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
+    auto dragNodeGrayscale = dragDropManager->GetDragNodeGrayscale();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary, dragNodeGrayscale };
     std::string summarys;
     for (const auto& [udkey, recordSize] : summary) {
         std::string str = udkey + "-" + std::to_string(recordSize) + ";";
@@ -1101,7 +1103,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
-    gestureInfoForWeb_ = info;
+    gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
     CHECK_NULL_VOID(dragDropProxy_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1427,7 +1429,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                         const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
+            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
                 dragDropManager->SetIsDragged(false);
@@ -1435,6 +1437,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
+                dragDropManager->HideDragPreviewWindow(id);
                 dragEvent->SetPressedKeyCodes(dragDropManager->GetDragDropPointerEvent().pressedKeyCodes_);
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
@@ -1684,8 +1687,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow() const
     auto frameNode = GetFrameNode();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
-    if (IsPixelMapNeedScale() || hasContextMenu) {
+    if (IsPixelMapNeedScale()) {
         return true;
     }
     CHECK_NULL_RETURN(dragEventActuator_, false);

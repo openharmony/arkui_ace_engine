@@ -46,7 +46,7 @@ private:
     static std::mutex mtx_;
 
     std::optional<bool> windowFocus_;
-    RefPtr<NG::FrameNode> curFocusNode_;
+    WeakPtr<NG::FrameNode> curFocusNode_;
 };
 } // namespace OHOS::Ace
 

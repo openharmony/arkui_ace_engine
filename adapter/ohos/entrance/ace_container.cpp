@@ -361,11 +361,7 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(aceView_);
-    auto aceView = static_cast<AceViewOhos*>(aceView_);
-    if (aceView) {
-        aceView->DecRefCount();
-    }
+    std::lock_guard<std::mutex> lock(viewMutex_);
     aceView_ = nullptr;
 }
 
@@ -428,6 +424,16 @@ void AceContainer::InitializeFrontend()
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
             jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            auto pageUrlCheckFunc = [id = instanceId_](const std::string& url, const std::function<void()>& callback,
+                const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) {
+                ContainerScope scope(id);
+                auto container = Container::Current();
+                CHECK_NULL_VOID(container);
+                auto pageUrlChecker = container->GetPageUrlChecker();
+                CHECK_NULL_VOID(pageUrlChecker);
+                pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
+            };
+            jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
             EngineHelper::AddEngine(instanceId_, jsEngine);
             declarativeFrontend->SetJsEngine(jsEngine);
             declarativeFrontend->SetPageProfile(pageProfile_);
@@ -1052,7 +1058,7 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     }
 }
 
-void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
+void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
     sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback)
 {
     CHECK_NULL_VOID(view);
@@ -1072,7 +1078,7 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
 }
 
 UIContentErrorCode AceContainer::SetViewNew(
-    AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
+    const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
@@ -1146,7 +1152,7 @@ UIContentErrorCode AceContainer::RunPage(
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content);
+        return front->RunPageByNamedRouter(content, params);
     }
 
     return front->RunPage(content, params);
@@ -1694,14 +1700,14 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
     auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
     if (!isSubContainer_) {
-        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        auto aceView = AceType::DynamicCast<AceViewOhos>(aceView_);
         ACE_DCHECK(aceView != nullptr);
         taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     }
@@ -1881,7 +1887,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 #endif
     if (declarativeFrontend) {
         auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(declarativeFrontend->GetJsEngine());
-        if (jsEngine) {
+        if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
         }
@@ -2009,25 +2015,25 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-std::pair<std::string, UIContentErrorCode> AceContainer::RestoreRouterStack(
-    int32_t instanceId, const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> AceContainer::RestoreRouterStack(
+    int32_t instanceId, const std::string& contentInfo, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
+    CHECK_NULL_RETURN(container, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, std::make_pair("", UIContentErrorCode::NULL_POINTER));
-    return front->RestoreRouterStack(contentInfo);
+    CHECK_NULL_RETURN(front, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
+    return front->RestoreRouterStack(contentInfo, type);
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo();
+    return front->GetContentInfo(type);
 }
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
@@ -2144,7 +2150,17 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     CHECK_NULL_RETURN(context, nullptr);
     if (!isFormRender_ && !bundle.empty() && !module.empty()) {
         std::string encode = EncodeBundleAndModule(bundle, module);
-        resAdapterRecord_.emplace(encode);
+        if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            RecordResAdapter(encode);
+        } else {
+            taskExecutor_->PostTask(
+                [encode, instanceId = instanceId_]() -> void {
+                    auto container = AceContainer::GetContainer(instanceId);
+                    CHECK_NULL_VOID(container);
+                    container->RecordResAdapter(encode);
+                },
+                TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
+        }
     }
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }

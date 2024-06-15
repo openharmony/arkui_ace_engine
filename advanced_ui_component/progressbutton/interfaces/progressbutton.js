@@ -47,6 +47,7 @@ export class ProgressButton extends ViewPU {
     this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
     this.setInitiallyProvidedValue(g1);
     this.declareWatch("progress", this.getProgressContext);
+    this.declareWatch("isLoading", this.getLoadingProgress);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(e1) {
@@ -178,11 +179,25 @@ export class ProgressButton extends ViewPU {
     }
     else {
       this.isLoading = true;
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + "%";
+      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
+    }
+  }
+  getLoadingProgress() {
+    if (this.isLoading) {
+      if (this.progress < 0) {
+        this.textProgress = MIN_PERCENTAGE;
+      }
+      else if (this.progress >= MAX_PROGRESS) {
+        this.textProgress = MAX_PERCENTAGE;
+      }
+      else {
+        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
+      }
     }
   }
   initialRender() {
-    this.observeComponentCreation2((q, r) => {
+    this.observeComponentCreation((q, r) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(q);
       Button.createWithChild();
       Button.borderRadius(BUTTON_BORDER_RADIUS);
       Button.clip(false);
@@ -202,11 +217,21 @@ export class ProgressButton extends ViewPU {
         }
         this.clickCallback && this.clickCallback();
       });
-    }, Button);
-    this.observeComponentCreation2((o, p) => {
+      if (!r) {
+        Button.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((o, p) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(o);
       Stack.create();
-    }, Stack);
-    this.observeComponentCreation2((m, n) => {
+      if (!p) {
+        Stack.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((m, n) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(m);
       Progress.create({ value: this.getButtonProgress(), total: MAX_PROGRESS,
         style: ProgressStyle.Capsule });
       Progress.height(BUTTON_NORMARL_HEIGHT);
@@ -217,11 +242,21 @@ export class ProgressButton extends ViewPU {
       Progress.enabled(this.enable);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
       Progress.color(ObservedObject.GetRawObject(this.progressColor));
-    }, Progress);
-    this.observeComponentCreation2((k, l) => {
+      if (!n) {
+        Progress.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((k, l) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(k);
       Row.create();
-    }, Row);
-    this.observeComponentCreation2((i, j) => {
+      if (!l) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
+    this.observeComponentCreation((i, j) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(i);
       Text.create(this.isLoading ? this.textProgress : this.content);
       Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
@@ -230,10 +265,15 @@ export class ProgressButton extends ViewPU {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.padding({ left: 8, right: 8 });
       Text.opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY);
-    }, Text);
+      if (!j) {
+        Text.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Text.pop();
     Row.pop();
-    this.observeComponentCreation2((g, h) => {
+    this.observeComponentCreation((g, h) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(g);
       Row.create();
       Row.key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY);
       Row.backgroundColor(Color.Transparent);
@@ -241,7 +281,11 @@ export class ProgressButton extends ViewPU {
       Row.height(BUTTON_NORMARL_HEIGHT);
       Row.borderRadius(BUTTON_BORDER_RADIUS);
       Row.width('100%');
-    }, Row);
+      if (!h) {
+        Row.pop();
+      }
+      ViewStackProcessor.StopGetAccessRecording();
+    });
     Row.pop();
     Stack.pop();
     Button.pop();

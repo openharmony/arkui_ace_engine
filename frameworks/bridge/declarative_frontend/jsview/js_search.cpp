@@ -139,6 +139,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onDidInsert", &JSSearch::OnDidInsertValue);
     JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
+    JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -162,6 +163,9 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
+        return;
+    }
     std::string fontFeatureSettings = info[0]->ToString();
     SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
@@ -588,7 +592,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     auto themeFontWeight = theme->GetFontWeight();
-    Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
+    Font font {.fontWeight = themeFontWeight, .fontSize = themeFontSize, .fontStyle = Ace::FontStyle::NORMAL};
     if (info.Length() < 1 || !info[0]->IsObject()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             SearchModel::GetInstance()->SetTextFont(font);
@@ -687,11 +691,27 @@ void JSSearch::OnSubmit(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
+JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const TextRange& textRange)
+{
+    JSRef<JSObject> range = JSRef<JSObject>::New();
+    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
+    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
+    return JSRef<JSVal>::Cast(range);
+}
+
 void JSSearch::OnChange(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnChange(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const std::string& val, TextRange& range) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onChange");
+        func->Execute(val, range);
+    };
+    SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSSearch::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -1064,5 +1084,15 @@ void JSSearch::SelectionMenuOptions(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+}
+
+void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        SearchModel::GetInstance()->SetEnablePreviewText(true);
+        return;
+    }
+    SearchModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

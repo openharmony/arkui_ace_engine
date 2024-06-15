@@ -339,10 +339,13 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.", GetFrameName().c_str(), GetFrameId());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.",
+            GetFrameName().c_str(), GetFrameId());
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
+    auto focusView = frameNode->GetPattern<FocusView>();
     auto* pipeline = frameNode->GetContext();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;

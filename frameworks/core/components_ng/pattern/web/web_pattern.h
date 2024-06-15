@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -53,6 +54,7 @@
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
@@ -532,6 +534,21 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
+    void CreateOverlay(
+        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight,
+        int pointX,
+        int pointY);
+    void OnOverlayStateChanged(
+        int offsetX,
+        int offsetY,
+        int rectWidth,
+        int rectHeight);
+    void OnTextSelected();
+    void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
@@ -566,6 +583,7 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -746,6 +764,7 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
+    void UpdateBackgroundColorForSurface();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
@@ -780,11 +799,23 @@ private:
     double GetNewScale(double& scale) const;
     void UpdateSlideOffset(bool isNeedReset = false);
     void ClearKeyEventByKeyCode(int32_t keyCode);
+    void SetRotation(uint32_t rotation);
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId()
+    {
+        return transformHintChangedCallbackId_.has_value();
+    }
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
@@ -892,9 +923,13 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
+    bool overlayCreating_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
+    std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
+    double lastKeyboardHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

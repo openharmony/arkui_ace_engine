@@ -87,6 +87,27 @@ void SheetPresentationPattern::OnModifyDone()
     InitPageHeight();
 }
 
+// check device is phone, fold status, screen's height less than width
+bool SheetPresentationPattern::IsPhoneOrFold()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto containerId = Container::CurrentId();
+    auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
+    CHECK_NULL_RETURN(foldWindow, false);
+    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, false);
+    auto sheetThemeType = sheetTheme->GetSheetType();
+    if (sheetThemeType == "auto" && !foldWindow->IsFoldExpand() &&
+        LessNotEqual(windowGlobalRect.Height(), windowGlobalRect.Width())) {
+        return true;
+    }
+    return false;
+}
+
 void SheetPresentationPattern::InitPageHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -99,6 +120,14 @@ void SheetPresentationPattern::InitPageHeight()
     auto overlay = GetOverlayManager();
     if (overlay && overlay->IsRootExpansive() && showInPage) {
         statusBarHeight_ = .0f;
+    }
+
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
+        IsPhoneOrFold()) {
+        statusBarHeight_ = 0.0f;
     }
     auto windowManager = pipelineContext->GetWindowManager();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
@@ -380,8 +409,8 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
 
     //record the drag position
-    int32_t detentsLowerPos = 0;
-    int32_t detentsUpperPos = 0;
+    uint32_t detentsLowerPos = 0;
+    uint32_t detentsUpperPos = 0;
     if (lowerIter == sheetDetentHeight_.end()) {
         //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];

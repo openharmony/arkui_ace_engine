@@ -289,6 +289,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
+    void SetNeedHideAfterTouch(bool needHideAfterTouch)
+    {
+        needHideAfterTouch_ = needHideAfterTouch;
+    }
+
     void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
@@ -358,12 +363,14 @@ public:
         isExtensionMenuShow_ = true;
     }
 
-    void SetHasDisappearAnimation(bool hasAnimation)
+    void SetDisappearAnimation(bool hasAnimation)
     {
+        // false：exit from BOTTOM to TOP
+        // true：exit from LEFT_BOTTOM to RIGHT_TOP
         hasAnimation_ = hasAnimation;
     }
 
-    bool HasDisappearAnimation() const
+    bool GetDisappearAnimation() const
     {
         return hasAnimation_;
     }
@@ -489,6 +496,14 @@ public:
         lastSelectedItem_ = lastSelectedItem;
     }
 
+    void SetIsEmbedded()
+    {
+        isEmbedded_ = true;
+    }
+    bool IsEmbedded()
+    {
+        return isEmbedded_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -558,6 +573,7 @@ private:
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
+    bool needHideAfterTouch_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;
@@ -572,6 +588,7 @@ private:
     bool expandDisplay_ = false;
     bool canExpand_ = true;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
+    bool isEmbedded_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

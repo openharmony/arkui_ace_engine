@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -180,6 +181,11 @@ const std::string MULTIPLE_SPAN3 = "Span3\n";
 const std::string MULTIPLE_SPAN4 = "Span4";
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+constexpr uint32_t CODE1 = 6;
+constexpr uint32_t CODE2 = 10000;
+constexpr uint32_t CODE3 = 111888;
+const char TEXT_CONTENT1[] = "hi";
+const char TEXT_CONTENT2[] = "hello1";
 
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;

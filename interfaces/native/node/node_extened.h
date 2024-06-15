@@ -171,4 +171,5 @@ ArkUI_NodeHandle GetLastChild(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetPreviousSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node);
+int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode);
 } // namespace OHOS::Ace::NodeModel

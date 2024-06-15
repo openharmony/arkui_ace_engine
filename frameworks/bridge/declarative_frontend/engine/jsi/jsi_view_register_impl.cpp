@@ -1070,6 +1070,7 @@ void JsBindFormViews(
             RegisterFormModuleByName(globalObj, module, nativeEngine);
         }
     } else {
+        TAG_LOGI(AceLogTag::ACE_FORM, "register all form components, isReload:%{public}d", isReload);
         RegisterAllFormModule(globalObj, nativeEngine);
     }
 }

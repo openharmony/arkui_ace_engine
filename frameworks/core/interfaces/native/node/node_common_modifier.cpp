@@ -3519,7 +3519,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     if (!dragPreviewOptions.isModeArray) {
         ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
     } else {
-        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+        for (int32_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
             ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
             if (isAuto) {
                 break;
@@ -4447,14 +4447,14 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands, ArkUI_Int32 unit)
+    ArkUI_Float32 strokeWidth, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     CHECK_NULL_VOID(frameNode);
     auto path = AceType::MakeRefPtr<Path>();
-    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
-    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
     std::string pathCommands(commands);
     path->SetWidth(width);
     path->SetHeight(height);
@@ -5377,10 +5377,10 @@ void GetPadding(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 le
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto padding = ViewAbstract::GetPadding(frameNode);
-    (*values)[NUM_0] = padding.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_1] = padding.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] = padding.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_3] = padding.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_0] = padding.top->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = padding.right->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = padding.bottom->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = padding.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
 
@@ -5430,10 +5430,10 @@ void GetMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 len
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto margin = ViewAbstract::GetMargin(frameNode);
-    (*values)[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    (*values)[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_0] = margin.top->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = margin.right->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = margin.bottom->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = margin.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
 
@@ -5578,21 +5578,22 @@ void ResetAreaChange(ArkUINodeHandle node)
     ViewAbstract::ResetAreaChanged(frameNode);
 }
 
-void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto rect = NG::RectF(values[0], values[1], values[2], values[3]); // 2:index of width, 3:index of height
+    auto rect =
+        NG::RectF((*values)[0], (*values)[1], (*values)[2], (*values)[3]); // 2:index of width, 3:index of height
     ViewAbstract::SetLayoutRect(frameNode, rect);
 }
 
-void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto rect = ViewAbstract::GetLayoutRect(frameNode);
-    values[0] = rect.GetX();
-    values[1] = rect.GetY();
-    values[2] = rect.Width(); // 2:index of width
-    values[3] = rect.Height(); // 3:index of height
+    (*values)[0] = rect.GetX();
+    (*values)[1] = rect.GetY();
+    (*values)[2] = rect.Width(); // 2:index of width
+    (*values)[3] = rect.Height(); // 3:index of height
 }
 
 void ResetLayoutRect(ArkUINodeHandle node)

@@ -153,10 +153,10 @@ public:
     void UpdateFontFamilies(const std::vector<std::string>& families);
     void UpdateFontSize(const Dimension& size);
     void UpdateLineJoin(LineJoinStyle join);
-    void UpdateFillGradient(const Ace::Gradient& gradient);
+    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
     void UpdateShadowColor(const Color& color);
-    void UpdateStrokeGradient(const Ace::Gradient& grad);
+    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
@@ -165,7 +165,7 @@ public:
     void RestoreLayer();
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     void Reset();
 

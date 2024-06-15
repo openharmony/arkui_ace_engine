@@ -191,20 +191,14 @@ void TextFieldManagerNG::NavContentToSafeAreaHelper()
     auto node = onFocusTextField_.Upgrade();
     if (!node) {
         auto navNode = weakNavNode_.Upgrade();
-        if (!navNode) {
-            // if navNode is nullptr means TextField's parent
-            // dont't have navBar or navDestination
-            return;
-        }
+        CHECK_NULL_VOID(navNode);
         SetNavContentKeyboardOffset(navNode);
         return;
     }
     auto frameNode = node->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto navNode = FindNavNode(frameNode);
-    if (!navNode) {
-        return;
-    }
+    CHECK_NULL_VOID(navNode);
     weakNavNode_ = navNode;
     SetNavContentKeyboardOffset(navNode);
 }
@@ -231,6 +225,20 @@ void TextFieldManagerNG::SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto keyboardOffset =  manager ? manager->GetKeyboardOffset() : 0.0f;
+    auto navigationNode = navNode->GetAncestorNodeOfFrame();
+    while (navigationNode) {
+        if (navigationNode->GetHostTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            break;
+        }
+        navigationNode = navigationNode->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(navigationNode);
+    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& opts = layoutProperty->GetSafeAreaExpandOpts();
+    if (opts && (!(opts->type & SAFE_AREA_TYPE_KEYBOARD) || (!(opts->edges & SAFE_AREA_EDGE_BOTTOM)))) {
+        keyboardOffset = 0.0f;
+    }
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
         auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();

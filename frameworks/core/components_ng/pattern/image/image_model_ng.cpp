@@ -186,7 +186,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     if (draggable && !frameNode->IsDraggable()) {
@@ -574,6 +574,28 @@ void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src, frameNode);
 }
 
+void ImageModelNG::SetAltResource(FrameNode* frameNode, void* resource)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto res = reinterpret_cast<ArkUI_Resource*>(resource);
+    CHECK_NULL_VOID(res);
+    RefPtr<PixelMap> pixMapPtr = nullptr;
+    auto srcInfo = CreateSourceInfo(res->src, pixMapPtr, res->bundleName, res->moduleName);
+    srcInfo.SetIsUriPureNumber(res->resId == -1);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pixelMap);
+    #ifndef ACE_UNITTEST
+    RefPtr<PixelMap> pixelMapPtr = PixelMap::GetFromDrawable(pixelMap);
+    auto srcInfo = CreateSourceInfo("", pixelMapPtr, "", "");
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, srcInfo, frameNode);
+    #endif
+}
+
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
@@ -796,11 +818,11 @@ bool ImageModelNG::GetIsAnimation()
     return pattern->GetIsAnimation();
 }
 
-RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
+ImagePattern* ImageModelNG::GetImagePattern()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
+    return frameNode->GetPatternPtr<ImagePattern>();
 }
 
 ImageResizableSlice ImageModelNG::GetResizableSlice(FrameNode *frameNode)

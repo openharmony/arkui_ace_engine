@@ -39,10 +39,10 @@ public:
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;
-    void SetFillGradient(const Ace::Gradient& gradient) override;
+    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetFillColor(const Color& color, bool colorFlag) override;
-    void SetStrokeGradient(const Ace::Gradient& gradient) override;
+    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;

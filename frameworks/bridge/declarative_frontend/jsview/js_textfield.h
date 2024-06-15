@@ -70,6 +70,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
@@ -123,6 +124,7 @@ public:
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

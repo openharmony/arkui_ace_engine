@@ -702,7 +702,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId, nullptr);
     context_->safeAreaManager_->AddGeoRestoreNode(frameNode);
-    context_->SyncSafeArea(false);
+    context_->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_NONE);
     EXPECT_TRUE(frameNode->isLayoutDirtyMarked_);
 }
 

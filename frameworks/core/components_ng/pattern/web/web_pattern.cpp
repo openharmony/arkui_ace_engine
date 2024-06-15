@@ -32,6 +32,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
@@ -48,7 +49,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -56,6 +56,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
+#include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/rect.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
@@ -171,7 +172,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
-constexpr Dimension TOOLTIP_FONT_SIZE = 10.0_vp;
+constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_MARGIN = 10.0f;
@@ -236,6 +237,9 @@ WebPattern::~WebPattern()
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         OnInActive();
     }
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->ReleaseImageAnalyzer();
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -286,12 +290,23 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    SetRotation(pipeline->GetTransformHint());
+
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
+
+    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "OnAttach to frame node, set transform:%{public}u", transform);
+            pattern->SetRotation(transform);
+        }
+    });
+    UpdateTransformHintChangedCallbackId(callbackId);
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -307,6 +322,20 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
+
+    if (HasTransformHintChangedCallbackId()) {
+        pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
+    }
+}
+
+void WebPattern::SetRotation(uint32_t rotation)
+{
+    if (renderMode_ == RenderMode::SYNC_RENDER || rotation_ == rotation) {
+        return;
+    }
+    rotation_ = rotation;
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(rotation);
 }
 
 void WebPattern::OnAttachToMainTree()
@@ -723,7 +752,10 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
-    OnTooltip("");
+    auto localLocation = info.GetLocalLocation();
+    if ((mouseHoveredX_ != localLocation.GetX()) || (mouseHoveredY_ != localLocation.GetY())) {
+        OnTooltip("");
+    }
     if (info.GetAction() == MouseAction::PRESS) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
@@ -744,7 +776,6 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
 
-    auto localLocation = info.GetLocalLocation();
     if (!HandleDoubleClickEvent(info)) {
         delegate_->OnMouseEvent(
             localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
@@ -1303,6 +1334,15 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
         }
+        // spanstring
+        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringRecord(aceData);
+        if (!spanString.empty()) {
+            std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
+            delegate_->dragData_->SetFragmentHtml(htmlStr);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragDropId, spanstring to html success, html size:%{public}zu",
+                htmlStr.size());
+        }
         // link
         HandleOnDragDropLink(aceData);
         // file
@@ -1449,6 +1489,14 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         keyEventCallback(info);
     }
 
+    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
+    if (preKeyEventCallback) {
+        ret = preKeyEventCallback(info);
+        if (ret) {
+            return ret;
+        }
+    }
+
     ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
@@ -1593,6 +1641,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         TAG_LOGE(AceLogTag::ACE_WEB,
             "OnDirtyLayoutWrapperSwap; WebPattern is Offline Mode, WebId:%{public}d", GetWebId());
         isOfflineMode_ = false;
+        isVisible_ = true;
         OnWindowShow();
     }
 
@@ -1610,6 +1659,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
+    lastKeyboardHeight_ = keyboard;
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         return;
     }
@@ -1622,15 +1672,7 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         return;
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipelineContext = host->GetContextRefPtr();
-        CHECK_NULL_VOID(pipelineContext);
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto bottomArea = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
-        double newHeight = height - keyboard - bottomArea - topArea;
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
         if (GreatOrEqual(newHeight, oldWebHeight)) {
             newHeight = oldWebHeight;
         }
@@ -2164,6 +2206,19 @@ void WebPattern::InitEnhanceSurfaceFlag()
     }
 }
 
+void WebPattern::UpdateBackgroundColorForSurface()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (renderContext->GetBackgroundColor().has_value() &&
+        renderContext->GetBackgroundColor().value() != Color::TRANSPARENT) {
+        renderContextForSurface_->UpdateBackgroundColor(Color::WHITE);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2203,10 +2258,10 @@ void WebPattern::OnModifyDone()
             CHECK_NULL_VOID(renderSurface_);
             renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                "RosenWeb" };
-            renderContextForSurface_->InitContext(false, param);
-            renderContextForSurface_->UpdateBackgroundColor(renderContext->GetBackgroundColor().value_or(Color::WHITE));
+            if (renderMode_ == RenderMode::ASYNC_RENDER) {
+                static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
+                renderContextForSurface_->InitContext(false, param);
+            }
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2214,12 +2269,15 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
+                UpdateBackgroundColorForSurface();
                 renderSurface_->SetIsTexture(false);
                 renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
                 renderSurface_->SetRenderContext(renderContextForSurface_);
+                renderContext->AddChild(renderContextForSurface_, 0);
             }
-            renderContext->AddChild(renderContextForSurface_, 0);
             renderSurface_->InitSurface();
+            renderSurface_->SetTransformHint(rotation_);
+            TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
             if (renderMode_ == RenderMode::ASYNC_RENDER) {
@@ -2328,13 +2386,6 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
-    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->InitTouchEventListener();
-    };
-    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
-
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2352,6 +2403,7 @@ void WebPattern::OnModifyDone()
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
+        isVisible_ = false;
     }
 }
 
@@ -2409,7 +2461,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateWebLayoutSize(width, height, false);
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
-    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
         drawSizeCache_.SetSize(drawSize_);
         if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -2472,6 +2524,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = false;
+    InitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2487,6 +2540,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchOverlayInfo_.push_back(touchPoint);
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
+        }
     }
     if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
@@ -2496,6 +2552,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
+    UninitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -2511,6 +2568,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             DelTouchOverlayInfoByTouchId(touchPoint.id);
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
+            overlayCreating_ = false;
+        }
     }
 }
 
@@ -2555,18 +2616,28 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
             std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
         touch_point_infos.emplace_back(touch_point_info);
+        if (overlayCreating_) {
+            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::MOVE);
+        }
     }
 
-    delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+    if (!overlayCreating_) {
+        delegate_->HandleTouchMove(touch_point_infos, fromOverlay);
+    }
 }
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    UninitTouchEventListener();
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleTouchCancel();
+    if (overlayCreating_) {
+        imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
+        overlayCreating_ = false;
+    }
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
@@ -3201,6 +3272,7 @@ void WebPattern::OnTooltip(const std::string& tooltip)
 
     if (tooltipId_ != -1) {
         overlayManager->RemoveIndexerPopupById(tooltipId_);
+        tooltipId_ = -1;
     }
 
     if (tooltip == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
@@ -3238,7 +3310,7 @@ void WebPattern::CloseCustomKeyboard()
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
 {
-    if (tooltipTimestamp_ != tooltipTimestamp) {
+    if ((tooltipTimestamp_ != tooltipTimestamp) || (tooltip == "")) {
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -3397,26 +3469,29 @@ void WebPattern::NotifyForNextTouchEvent()
 void WebPattern::InitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
-    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
+    if (touchEventListener_) {
+        return;
+    }
+    touchEventListener_ = std::make_shared<TouchEventListener>();
+    touchEventListener_->SetPatternToListener(AceType::WeakClaim(this));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
-    context->RegisterTouchEventListener(listener);
+    context->RegisterTouchEventListener(touchEventListener_);
 }
 
 void WebPattern::UninitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+    touchEventListener_ = nullptr;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
     context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 
@@ -3745,7 +3820,7 @@ void WebPattern::OnWindowShow()
         delegate_->OnOnlineRenderToForeground();
     }
 
-    if (isWindowShow_ || !isVisible_ || !isAttachedToMainTree_) {
+    if (isWindowShow_ || !isVisible_) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
@@ -4025,6 +4100,7 @@ void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
+        isVisible_ = false;
     }
 }
 
@@ -4097,6 +4173,13 @@ void WebPattern::OnScrollState(bool scrollState)
     scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
+    } else if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            false,
+            0,
+            0,
+            0,
+            0);
     }
 }
 
@@ -4743,6 +4826,92 @@ WebInfoType WebPattern::GetWebInfoType()
 void WebPattern::RequestFocus()
 {
     WebRequestFocus();
+}
+
+void WebPattern::OnRebuildFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContext->AddChild(renderContextForSurface_, 0);
+}
+
+void WebPattern::CreateOverlay(
+    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight,
+    int pointX,
+    int pointY)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(
+            GetHost(),
+            ImageAnalyzerHolder::WEB);
+    }
+    TAG_LOGI(
+        AceLogTag::ACE_WEB,
+        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight);
+    auto callback = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnTextSelected();
+    };
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    imageAnalyzerManager_->UpdatePressOverlay(
+        pixelMap,
+        offsetX,
+        offsetY,
+        rectWidth,
+        rectHeight,
+        pointX,
+        pointY,
+        std::move(callback));
+    imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
+}
+
+void WebPattern::OnOverlayStateChanged(
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight)
+{
+    if (imageAnalyzerManager_) {
+        TAG_LOGI(
+            AceLogTag::ACE_WEB,
+            "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
+            offsetX,
+            offsetY,
+            rectWidth,
+            rectHeight);
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            true,
+            offsetX,
+            offsetY,
+            rectWidth,
+            rectHeight);
+    }
+}
+
+void WebPattern::OnTextSelected()
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnTextSelected();
+    overlayCreating_ = true;
+}
+
+void WebPattern::DestroyAnalyzerOverlay()
+{
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    }
 }
 
 } // namespace OHOS::Ace::NG

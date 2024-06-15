@@ -310,7 +310,7 @@ public:
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
-    void UpdatePixelMapPosition(const Point& point, const Rect& rect, bool isSubwindowOverlay = false);
+    void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
@@ -458,6 +458,9 @@ public:
 
     void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
+    void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode,
+        uint32_t& statusBarHeight);
+
     void SetSheetHeight(float height)
     {
         sheetHeight_ = height;
@@ -534,15 +537,9 @@ public:
     }
 
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
-    bool IsProhibitedAddToRootNode();
     void DeleteUIExtensionNode(int32_t sessionId);
-    void SetCurSessionId(int32_t curSessionId);
+    bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
-
-    void SetCalendarDialogDirection(TextDirection textDirection)
-    {
-        calendarDialogDirection_ = textDirection;
-    }
     void OnUIExtensionWindowSizeChange();
 
 private:
@@ -575,7 +572,7 @@ private:
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
+    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
@@ -661,6 +658,10 @@ private:
     void DumpModalListInfo() const;
     void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
     std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
+    void SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
+    RefPtr<FrameNode> GetOverlayFrameNode();
+    void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -724,8 +725,7 @@ private:
     // No thread safety issue due to they are all run in UI thread
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
-    int32_t curSessionId_ = -1;
-    TextDirection calendarDialogDirection_ = TextDirection::AUTO;
+    std::set<int32_t> curSessionIds_;
 };
 } // namespace OHOS::Ace::NG
 

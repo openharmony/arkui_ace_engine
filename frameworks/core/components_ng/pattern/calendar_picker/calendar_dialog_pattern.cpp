@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 
+#include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +54,8 @@ constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();
+    UpdateCalendarLayout();
+
     InitClickEvent();
     InitOnKeyEvent();
     InitOnTouchEvent();
@@ -60,11 +64,35 @@ void CalendarDialogPattern::OnModifyDone()
     InitEntryChangeEvent();
 
     UpdateTitleArrowsImage();
+    UpdateOptionsButton();
     UpdateDialogBackgroundColor();
     UpdateTitleArrowsColor();
     UpdateOptionsButtonColor();
 }
 
+void CalendarDialogPattern::UpdateCalendarLayout()
+{
+    auto entryNode = entryNode_.Upgrade();
+    CHECK_NULL_VOID(entryNode);
+    auto textDirection = entryNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_VOID(calendarNode);
+    const auto& calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+    calendarLayoutProperty->UpdateLayoutDirection(textDirection);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
+    CHECK_NULL_VOID(title);
+    auto titleNode = AceType::DynamicCast<FrameNode>(title);
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    titleLayoutProperty->UpdateLayoutDirection(textDirection);
+}
 void CalendarDialogPattern::UpdateDialogBackgroundColor()
 {
     auto host = GetHost();
@@ -119,7 +147,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto titleNode = AceType::DynamicCast<FrameNode>(title);
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    auto textDirection = titleLayoutProperty->GetNonAutoLayoutDirection();
 
     auto lastYearNode = AceType::DynamicCast<FrameNode>(title->GetChildAtIndex(TITLE_LAST_YEAR_BUTTON_NODE_INDEX));
     CHECK_NULL_VOID(lastYearNode);
@@ -156,6 +188,32 @@ void CalendarDialogPattern::UpdateImage(
     imageSourceInfo.SetResourceId(resourceId);
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
+}
+
+void CalendarDialogPattern::UpdateOptionsButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
+    CHECK_NULL_VOID(options);
+
+    size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
+    for (const auto& child : options->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+            auto button = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(button);
+            auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+            } else {
+                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+            }
+            button->MarkDirtyNode();
+            buttonIndex++;
+        }
+    }
 }
 
 void CalendarDialogPattern::UpdateOptionsButtonColor()
@@ -868,10 +926,15 @@ void CalendarDialogPattern::InitTitleArrowsEvent()
                 pattern->HandleTitleArrowsClickEvent(childIndex);
             }
         };
-        auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
-        auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(event));
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->AddClickEvent(clickEvent);
+
+        auto buttonNodeId = buttonNode->GetId();
+        if (clickEvents_.find(buttonNodeId) == clickEvents_.end()) {
+            auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(event));
+            clickEvents_[buttonNodeId] = clickEvent;
+            gestureHub->AddClickEvent(clickEvent);
+        }
     }
 }
 
@@ -886,6 +949,7 @@ void CalendarDialogPattern::HandleTitleArrowsClickEvent(int32_t nodeIndex)
     ObtainedMonth currentObtainedMonth = calendarPattern->GetCurrentMonthData();
     CalendarMonth currentMonth { .year = currentObtainedMonth.year, .month = currentObtainedMonth.month };
 
+    calendarPattern->SetDialogClickEventState(true);
     switch (nodeIndex) {
         case TITLE_LAST_YEAR_BUTTON_NODE_INDEX: {
             currentMonth.year = currentMonth.year == MIN_YEAR ? MAX_YEAR : currentMonth.year - 1;

@@ -212,7 +212,8 @@ void FormPattern::HandleUnTrustForm()
     isUnTrust_ = true;
     isLoaded_ = true;
     if (!isJsCard_) {
-        LoadFormSkeleton();
+        RequestFormInfo info;
+        LoadFormSkeleton(false, info, true);
     }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -278,7 +279,8 @@ void FormPattern::HandleEnableForm(const bool enable)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::HandleEnableForm, enable = %{public}d", enable);
     if (enable) {
-        RemoveDisableFormStyle();
+        RemoveFormChildNode(FormChildNodeType::FORM_DISABLE_TEXT_NODE);
+        RemoveFormChildNode(FormChildNodeType::FORM_DISABLE_ROOT_NODE);
     } else {
         LoadDisableFormStyle();
     }
@@ -384,20 +386,6 @@ void FormPattern::UpdateStaticCard()
     ReleaseRenderer();
 }
 
-void FormPattern::DeleteImageNode()
-{
-    ContainerScope scope(scopeId_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto child = host->GetLastChild();
-    CHECK_NULL_VOID(child);
-
-    std::list<RefPtr<UINode>> children = host->GetChildren();
-    if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
-        host->RemoveChildAtIndex(children.size() - 1);
-    }
-}
-
 void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
 {
     // delete image rs node
@@ -405,13 +393,8 @@ void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto imageNode = GetImageNode();
-    if (imageNode) {
-        renderContext->RemoveChild(imageNode->GetRenderContext());
-
-        // delete image frame node
-        DeleteImageNode();
-    }
+    // delete image frame node
+    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
 
     // set frs node non transparent
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
@@ -439,29 +422,21 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_RETURN(formNode, nullptr);
     auto imageId = formNode->GetImageId();
-    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
+    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId,
+        AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
+    AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, imageNode);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_RETURN(imagePattern, nullptr);
     imagePattern->SetSyncLoad(true);
-    host->AddChild(imageNode);
+    RefPtr<FrameNode> disableStyleRootNode = GetFormChildNode(FormChildNodeType::FORM_DISABLE_ROOT_NODE);
+    disableStyleRootNode == nullptr ? host->AddChild(imageNode) :
+        host->AddChildBefore(imageNode, disableStyleRootNode);
     auto eventHub = imageNode->GetOrCreateGestureEventHub();
     if (eventHub != nullptr) {
         eventHub->RemoveDragEvent();
     }
     return imageNode;
-}
-
-RefPtr<FrameNode> FormPattern::GetImageNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto child = host->GetLastChild();
-    CHECK_NULL_RETURN(child, nullptr);
-    if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-        return AceType::DynamicCast<FrameNode>(child);
-    }
-    return nullptr;
 }
 
 void FormPattern::UpdateImageNode()
@@ -470,7 +445,7 @@ void FormPattern::UpdateImageNode()
     CHECK_NULL_VOID(pixelMap_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    DeleteImageNode();
+    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     auto imageNode = CreateImageNode();
     CHECK_NULL_VOID(imageNode);
     auto pixelLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -656,16 +631,23 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         EnableDrag();
     }
 
-    if (!isJsCard_) {
-        LoadFormSkeleton();
-    }
-
-    if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
-#else
-        formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+    if (!isJsCard_) {
+        LoadFormSkeleton(formInfo.transparencyEnabled, info);
+    }
 #endif
+
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
+        return;
+    }
+#if OHOS_STANDARD_SYSTEM
+    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+#else
+    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+#endif
+    if (formManagerBridge_->CheckFormBundleForbidden(info.bundleName)) {
+        LoadDisableFormStyle();
     }
 }
 
@@ -725,7 +707,7 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
             cardInfo_.id);
     }
     if (isSnapshot_) {
-        auto imageNode = GetImageNode();
+        auto imageNode = GetFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
         if (imageNode != nullptr) {
             auto width = static_cast<float>(info.width.Value()) - info.borderWidth * DOUBLE;
             auto height = static_cast<float>(info.height.Value()) - info.borderWidth * DOUBLE;
@@ -749,38 +731,25 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     }
 }
 
-void FormPattern::RemoveDisableFormStyle()
+void FormPattern::LoadDisableFormStyle(bool isRefresh)
 {
-    ContainerScope scope(scopeId_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    RefPtr<UINode> findText = FindUINodeByTag(V2::TEXT_ETS_TAG);
-    RefPtr<UINode> findColumn = FindUINodeByTag(V2::COLUMN_ETS_TAG);
-    if (findText && findColumn) {
-        host->RemoveChild(findText);
-        host->RemoveChild(findColumn);
-    }
-    // FormNode节点标脏;
-    host->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void FormPattern::LoadDisableFormStyle()
-{
-    auto findColumnNode = FindUINodeByTag(V2::COLUMN_ETS_TAG);
-    auto findTextNode = FindUINodeByTag(V2::TEXT_ETS_TAG);
-    if (findColumnNode && findTextNode) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "findColumnNode && findTextNode ready exit");
+    if (!isRefresh && GetFormChildNode(FormChildNodeType::FORM_DISABLE_ROOT_NODE) != nullptr &&
+        GetFormChildNode(FormChildNodeType::FORM_DISABLE_TEXT_NODE) != nullptr) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "Form disable style node already exist.");
         return;
     }
+
     TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::LoadDisableFormStyle");
+    RemoveFormChildNode(FormChildNodeType::FORM_DISABLE_TEXT_NODE);
+    RemoveFormChildNode(FormChildNodeType::FORM_DISABLE_ROOT_NODE);
     int32_t dimension = cardInfo_.dimension;
     int32_t dimensionHeight = GetFormDimensionHeight(dimension);
     if (dimensionHeight <= 0) {
         TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, invalid dimensionHeight!");
         return;
     }
-    auto columnNode = CreateColumnNode();
+
+    auto columnNode = CreateColumnNode(FormChildNodeType::FORM_DISABLE_ROOT_NODE);
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext == nullptr) {
@@ -813,9 +782,18 @@ void FormPattern::LoadDisableFormStyle()
     layoutProperty->UpdateVisibility(visible);
 }
 
-void FormPattern::LoadFormSkeleton()
+void FormPattern::LoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info, bool isRefresh)
 {
+    if (!ShouldLoadFormSkeleton(isTransparencyEnabled, info)) {
+        return;
+    }
+
     TAG_LOGI(AceLogTag::ACE_FORM, "LoadFormSkeleton");
+    if (!isRefresh && GetFormChildNode(FormChildNodeType::FORM_SKELETON_NODE) != nullptr) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "LoadFormSkeleton failed, repeat load!");
+        return;
+    }
+
     int32_t dimension = cardInfo_.dimension;
     int32_t dimensionHeight = GetFormDimensionHeight(dimension);
     if (dimensionHeight <= 0) {
@@ -823,11 +801,9 @@ void FormPattern::LoadFormSkeleton()
         return;
     }
 
-    RemoveFormSkeleton();
-
-    auto columnNode = CreateColumnNode();
+    RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
+    auto columnNode = CreateColumnNode(FormChildNodeType::FORM_SKELETON_NODE);
     CHECK_NULL_VOID(columnNode);
-
     double cardWidth = cardInfo_.width.Value();
     double cardHeight = cardInfo_.height.Value();
     auto colorMode = SystemProperties::GetColorMode();
@@ -856,6 +832,36 @@ void FormPattern::LoadFormSkeleton()
     layoutProperty->UpdateVisibility(visible);
 }
 
+bool FormPattern::ShouldLoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info)
+{
+    auto wantWrap = info.wantWrap;
+    if (isUnTrust_) {
+        return true;
+    }
+
+    if (!wantWrap ||
+        !wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, not enable.");
+        return false;
+    }
+
+    if (isTransparencyEnabled) {
+        auto color = wantWrap->GetWant().GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+        Color bgColor;
+        if (Color::ParseColorString(color, bgColor) && bgColor == Color::TRANSPARENT) {
+            TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, bgColor: %{public}s", color.c_str());
+            return false;
+        }
+    }
+
+    if (info.renderingMode ==
+        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "LoadFormSkeleton ignored, single mode.");
+        return false;
+    }
+    return true;
+}
+
 int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
 {
     auto iter = OHOS::AppExecFwk::Constants::DIMENSION_MAP.
@@ -865,6 +871,7 @@ int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
             dimension);
         return 0;
     }
+
     std::string formDimensionStr = iter->second;
     std::stringstream streamDimension(formDimensionStr);
     std::string dimensionHeightStr;
@@ -884,10 +891,11 @@ RefPtr<FrameNode> FormPattern::CreateTimeLimitNode()
     GetTimeLimitResource(content);
     TAG_LOGI(AceLogTag::ACE_FORM, "GetTimeLimitContent, content = %{public}s", content.c_str());
 
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
-     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    AddFormChildNode(FormChildNodeType::FORM_DISABLE_TEXT_NODE, textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
 
     auto width = static_cast<float>(cardInfo_.width.Value()) - cardInfo_.borderWidth * DOUBLE;
@@ -949,44 +957,14 @@ void FormPattern::CreateSkeletonView(const RefPtr<FrameNode>& parent,
     }
 }
 
-void FormPattern::RemoveFormSkeleton()
-{
-    ContainerScope scope(scopeId_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto child = host->GetLastChild();
-    CHECK_NULL_VOID(child);
-
-    std::list<RefPtr<UINode>> children = host->GetChildren();
-    if (children.size() > 0 && child->GetTag() == V2::COLUMN_ETS_TAG) {
-        host->RemoveChildAtIndex(children.size() - 1);
-    }
-}
-
-RefPtr<UINode> FormPattern::FindUINodeByTag(const std::string &tag)
+RefPtr<FrameNode> FormPattern::CreateColumnNode(FormChildNodeType formChildNodeType)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-     std::list<RefPtr<UINode>> children = host->GetChildren();
-     for (auto child : children) {
-        if (child->GetTag() == tag) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "FindUINodeByTag Sucessful, child->GetTag() = %{public}s,",
-                child->GetTag().c_str());
-            return child;
-        }
-    }
-    return nullptr;
-}
-
-RefPtr<FrameNode> FormPattern::CreateColumnNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
-
+    AddFormChildNode(formChildNodeType, columnNode);
     auto width = static_cast<float>(cardInfo_.width.Value());
     auto height = static_cast<float>(cardInfo_.height.Value());
     CalcSize idealSize = { CalcLength(width), CalcLength(height) };
@@ -1243,7 +1221,7 @@ void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
         DelayDeleteImageNode(want.GetBoolParam(
             OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false));
     } else {
-        DeleteImageNode();
+        RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     }
 }
 
@@ -1266,7 +1244,6 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
     externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
     bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
-    bool isDynamic = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, false);
     if (isRecover) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
@@ -1274,9 +1251,6 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isDynamic && !isRecover) {
-        renderContext->ClearChildren();
-    }
     renderContext->AddChild(externalRenderContext, 0);
 }
 
@@ -1287,8 +1261,8 @@ void FormPattern::FireFormSurfaceNodeCallback(
     CHECK_NULL_VOID(node);
     node->CreateNodeInRenderThread();
 
-    RemoveFormSkeleton();
     AttachRSNode(node, want);
+    RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1663,10 +1637,17 @@ void FormPattern::UpdateConfiguration()
 
 void FormPattern::OnLanguageConfigurationUpdate()
 {
+    RefPtr<FrameNode> textNode = GetFormChildNode(FormChildNodeType::FORM_DISABLE_TEXT_NODE);
+    CHECK_NULL_VOID(textNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
     std::string content;
     GetTimeLimitResource(content);
     TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnLanguageConfigurationUpdate, %{public}s", content.c_str());
-    UpdateTimeLimitResource(content);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(content);
 }
 
 void FormPattern::GetTimeLimitResource(std::string &content)
@@ -1700,18 +1681,46 @@ void FormPattern::GetTimeLimitResource(std::string &content)
     sysResMgr->GetStringByName(TIME_LIMIT_RESOURCE_NAME, content);
 }
 
-void FormPattern::UpdateTimeLimitResource(std::string &content)
+void FormPattern::AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "UpdateTimeLimitResource");
+    auto iter = formChildrenNodeMap_.find(formChildNodeType);
+    if (iter == formChildrenNodeMap_.end()) {
+        formChildrenNodeMap_.insert(std::make_pair(formChildNodeType, child));
+    } else {
+        formChildrenNodeMap_[formChildNodeType] = child;
+    }
+}
+
+void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
+{
+    RefPtr<FrameNode> childNode = GetFormChildNode(formChildNodeType);
+    CHECK_NULL_VOID(childNode);
+
+    ContainerScope scope(scopeId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto findTextNode = FindUINodeByTag(V2::TEXT_ETS_TAG);
-    if (findTextNode == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "Not find TimeLimitTextNode");
+    auto renderContext = host->GetRenderContext();
+    if (renderContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Remove child node: %{public}d failed, null context.",
+            formChildNodeType);
         return;
     }
-    auto textNode = AceType::DynamicCast<FrameNode>(findTextNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(content);
+    renderContext->RemoveChild(childNode->GetRenderContext());
+    host->RemoveChild(childNode);
+    TAG_LOGI(AceLogTag::ACE_FORM, "Remove child node: %{public}d sucessfully.",
+        formChildNodeType);
+    formChildrenNodeMap_.erase(formChildNodeType);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> FormPattern::GetFormChildNode(FormChildNodeType formChildNodeType) const
+{
+    auto iter = formChildrenNodeMap_.find(formChildNodeType);
+    if (iter == formChildrenNodeMap_.end()) {
+        return nullptr;
+    }
+
+    return iter->second;
 }
 } // namespace OHOS::Ace::NG

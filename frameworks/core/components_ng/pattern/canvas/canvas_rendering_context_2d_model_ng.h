@@ -38,10 +38,10 @@ public:
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
     std::vector<double> GetLineDash() override;
-    void SetFillGradient(const Ace::Gradient& gradient) override;
+    void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetFillColor(const Color& color, bool colorFlag) override;
-    void SetStrokeGradient(const Ace::Gradient& gradient) override;
+    void SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;
@@ -109,7 +109,7 @@ public:
     // All interfaces that only the 'CanvasRenderingContext2D' has.
     void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
     void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) override;
+    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;

@@ -757,12 +757,18 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
     fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
-void TextContentModifier::SetFontSize(const Dimension& value)
+void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
     } else {
         fontSizeValue = value.Value();
     }
@@ -771,12 +777,18 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     fontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMinFontSize(const Dimension& value)
+void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
     } else {
         fontSizeValue = value.Value();
     }
@@ -785,12 +797,18 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value)
     adaptMinFontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
     } else {
         fontSizeValue = value.Value();
     }

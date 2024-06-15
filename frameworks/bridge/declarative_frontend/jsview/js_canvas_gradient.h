@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_GRADIENT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CANVAS_GRADIENT_H
 
+#include <memory>
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 
@@ -32,18 +33,18 @@ public:
 
     void addColorStop(const JSCallbackInfo& args);
 
-    Gradient* GetGradient() const
+    std::shared_ptr<Gradient> GetGradient() const
     {
         return gradient_;
     }
-    void SetGradient(Gradient* gradient)
+    void SetGradient(const std::shared_ptr<Gradient>& gradient)
     {
         gradient_ = gradient;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSCanvasGradient);
 private:
-    Gradient* gradient_ = nullptr;
+    std::shared_ptr<Gradient> gradient_;
     bool isColorStopValid_ = false;
 };
 

@@ -24,7 +24,7 @@ namespace NG {
 class AccessibilitySessionAdapterForm : public AccessibilitySessionAdapter {
     DECLARE_ACE_TYPE(AccessibilitySessionAdapterForm, AceType);
 public:
-    explicit AccessibilitySessionAdapterForm(const WeakPtr<FormManagerDelegate> formManagerDelegate)
+    explicit AccessibilitySessionAdapterForm(const WeakPtr<FormManagerDelegate> &formManagerDelegate)
         : formManagerDelegate_(formManagerDelegate)
     {}
 

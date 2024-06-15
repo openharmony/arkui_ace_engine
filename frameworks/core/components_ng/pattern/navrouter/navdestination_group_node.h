@@ -172,7 +172,7 @@ private:
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
-    bool isAnimated_ = false;
+    bool isAnimated_ = true;
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;

@@ -486,11 +486,12 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsNumber()) {
+    if (arg.IsEmpty()) {
         return false;
     }
-    value = arg->ToNumber(info_->GetVM())->Value();
-    return true;
+    bool ret = false;
+    value = arg->GetValueDouble(ret);
+    return ret;
 }
 
 bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
@@ -510,7 +511,7 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
         return false;
     }
     auto arrayRef = Local<ArrayRef>(arg);
-    int32_t length = arrayRef->Length(info_->GetVM());
+    uint32_t length = arrayRef->Length(info_->GetVM());
     valueArr.reserve(length);
     for (int32_t i = 0; i < length; ++i) {
         auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);

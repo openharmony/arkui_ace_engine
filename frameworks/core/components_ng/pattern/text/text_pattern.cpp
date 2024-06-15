@@ -546,7 +546,6 @@ void TextPattern::HandleOnCopySpanString()
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
     clipboard_->SetData(pasteData, copyOption_);
 }
 
@@ -2706,7 +2705,7 @@ void TextPattern::DumpInfo()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
         DumpLog::GetInstance().AddDesc(
             std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
     }
@@ -2746,6 +2745,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::FONTFAMILY:
                 if (textLayoutProp->HasFontFamily()) {
                     child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
+                }
+                break;
+            case PropertyInfo::FONTFEATURE:
+                if (textLayoutProp->HasFontFeature()) {
+                    child->UpdateFontFeatureWithoutFlushDirty(textLayoutProp->GetFontFeature().value());
                 }
                 break;
             case PropertyInfo::TEXTDECORATION:
@@ -3147,7 +3151,7 @@ void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsPara
                 auto end = textPattern->textSelector_.GetTextEnd();
                 actionRange(start, end);
             }
-            textPattern->CloseSelectOverlay();
+            textPattern->HiddenMenu();
         };
     }
 }
@@ -3455,7 +3459,7 @@ bool TextPattern::DidExceedMaxLines() const
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
     CHECK_NULL_RETURN(pManager_, TextLineMetrics());
-    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();

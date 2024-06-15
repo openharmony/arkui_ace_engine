@@ -274,7 +274,7 @@ public:
         if (inUse_) {
             LOGF("[%{public}d:%{public}s] reset children while in use",
                 hostNode_->GetId(), hostNode_->GetTag().c_str());
-            if (SystemProperties::GetDebugEnabled()) {
+            if (SystemProperties::GetLayoutDetectEnabled()) {
                 abort();
             } else {
                 LogBacktrace();
@@ -1920,7 +1920,7 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         if (isPropertyDiffMarked_) {
             return;
         }
-        auto context = GetContext();
+        auto context = GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->AddDirtyPropertyNode(Claim(this));
         isPropertyDiffMarked_ = true;
@@ -2239,7 +2239,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
     auto param = renderContext_->GetTrans();
-    localMat_ = localMat;
+    if (!touchRestrict.touchEvent.isMouseTouchTest) {
+        localMat_ = localMat;
+    }
     if (param.empty()) {
         translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
     } else {
@@ -2890,7 +2892,7 @@ void FrameNode::OnAccessibilityEvent(
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const
+    AccessibilityEventType eventType, std::string beforeText, std::string latestContent)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
@@ -2898,9 +2900,9 @@ void FrameNode::OnAccessibilityEvent(
         event.nodeId = GetAccessibilityId();
         event.beforeText = beforeText;
         event.latestContent = latestContent;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
     }
 }
 
@@ -3413,9 +3415,12 @@ void FrameNode::Layout()
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        if (!IsRootMeasureNode() && geometryTransition->IsNodeInAndActive(Claim(this))) {
-            SetGeometryTransitionInRecursive(true);
-            SetSkipSyncGeometryNode();
+        if (geometryTransition->IsNodeInAndActive(Claim(this))) {
+            if (IsRootMeasureNode()) {
+                UINode::SetGeometryTransitionInRecursive(true);
+            } else {
+                SetSkipSyncGeometryNode();
+            }
         }
     }
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
@@ -3460,8 +3465,12 @@ void FrameNode::Layout()
     DirtySwapConfig config;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
     needSyncRsNode |= AvoidKeyboard(isFocusOnPage);
+    if (GetIsGeometryTransitionIn()) {
+        renderContext_->SetFrameWithoutAnimation(renderContext_->GetPaintRectWithoutTransform());
+        SetIsGeometryTransitionIn(false);
+    }
     // skip wrapping task if node will not sync
-    CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties || GetIsGeometryTransitionIn());
+    CHECK_NULL_VOID_LAYOUT_TRACE_END(willSyncGeoProperties);
     auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -3491,6 +3500,12 @@ bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     return opts && opts->Expansive();
+}
+
+bool FrameNode::SelfExpansiveToKeyboard()
+{
+    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    return opts && opts->ExpansiveToKeyboard();
 }
 
 bool FrameNode::ParentExpansive()
@@ -3551,7 +3566,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     layoutProperty_->CleanDirty();
     needSyncRsNode = frameSizeChange || frameOffsetChange ||
                      (pattern_->GetContextParam().has_value() && contentSizeChange) || HasPositionProp() ||
-                     SelfOrParentExpansive() || GetIsGeometryTransitionIn();
+                     SelfOrParentExpansive();
     if (hasTransition) {
         geometryTransition->DidLayout(Claim(this));
         if (geometryTransition->IsNodeOutAndActive(WeakClaim(this))) {
@@ -3627,13 +3642,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     }
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
-        if (GetIsGeometryTransitionIn()) {
-            renderContext_->SyncGeometryPropertiesWithoutAnimation(
-                RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
-            SetIsGeometryTransitionIn(false);
-        } else {
-            renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
-        }
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
         TriggerOnSizeChangeCallback();
     }
 

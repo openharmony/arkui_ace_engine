@@ -254,7 +254,7 @@ struct ContentItemStruct {
       LengthMetrics.vp(0) : LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH)
     })
     .constraintSize({ minWidth: this.leftWidth })
-    .flexShrink(1)
+    .flexShrink(this.parentDirection === FlexDirection.Column ? 0 : 1)
   }
 }
 
@@ -671,7 +671,7 @@ struct OperateItemStruct {
         if (this.parentDirection === FlexDirection.Column) {
           Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
             this.createText();
-            this.createIcon({icon: this.arrow});
+            this.createArrow();
           }.flexShrink(0);
         } else {
           this.createTextArrow();
@@ -811,7 +811,7 @@ export struct ComposeListItem {
   }
 
   decideContainerDirection(): FlexDirection {
-    if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1) {
+    if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1 || !this.contentItem) {
       return FlexDirection.Row;
     }
     if (this.operateItem?.button) {
@@ -954,6 +954,7 @@ export struct ComposeListItem {
             isParentCanTouch: this.isCanTouch,
             parentDirection: this.containerDirection,
           })
+            .flexShrink(this.containerDirection === FLexDirection.Column ? 0 : 1)
             .align(Alignment.End)
             .onFocus(() => {
               this.canFocus = false;

@@ -72,10 +72,10 @@ public:
 void GaugeBuilderTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
 }
 

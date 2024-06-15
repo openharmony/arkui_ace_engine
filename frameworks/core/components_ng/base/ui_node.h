@@ -76,7 +76,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -85,7 +85,7 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
@@ -108,14 +108,13 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
-    bool IsProhibitedAddChildNode()
+    void UpdateModalUiextensionCount(bool addNode)
     {
-        return isProhibitedAddChildNode_;
-    }
-
-    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
-    {
-        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
     }
 
     int32_t TotalChildCount() const;
@@ -175,6 +174,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
@@ -635,19 +635,8 @@ public:
         return instanceId_;
     }
 
-    bool GetIsGeometryTransitionIn() const
-    {
-        return isGeometryTransitionIn_;
-    }
-
-    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
-    {
-        isGeometryTransitionIn_ = isGeometryTransitionIn;
-    }
-
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
-        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         for (const auto& child : GetChildren()) {
             child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
         }
@@ -785,7 +774,6 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
-    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
@@ -805,7 +793,10 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
-    bool isProhibitedAddChildNode_ = false;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

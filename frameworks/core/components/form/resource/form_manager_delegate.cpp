@@ -662,12 +662,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (formRendererDispatcher_ == nullptr) {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         if (recycleStatus_ == RecycleStatus::RECYCLED) {
-            auto pipelineContext = context_.Upgrade();
-            if (pipelineContext && pipelineContext->GetEventManager()) {
-                // avoid context dispatch mocked cancel event
-                pipelineContext->GetEventManager()->SetInnerFlag(true);
-                TAG_LOGI(AceLogTag::ACE_FORM, "set event manager inner flag");
-            }
+            SetGestureInnerFlag();
             TAG_LOGI(AceLogTag::ACE_FORM,
                 "form is recycled, recover it first, action=%{public}d, formId=%{public}" PRId64 "",
                 pointerEvent->GetPointerAction(), runningCardId_);
@@ -687,10 +682,35 @@ void FormManagerDelegate::DispatchPointerEvent(const
         }
         return;
     }
+
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
+    auto disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+    if (!disablePanGesture) {
+        formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
+        return;
+    }
+
+    // pan gesture disabled, not dispatch move event, not concat serialized gesture
+    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
+        pointerEvent->GetPointerAction());
+    SerializedGesture ignoredGesture;
+    formRendererDispatcher_->DispatchPointerEvent(pointerEvent, ignoredGesture);
+    SetGestureInnerFlag();
+}
+
+void FormManagerDelegate::SetGestureInnerFlag()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext && pipelineContext->GetEventManager()) {
+        // avoid context dispatch mocked cancel event
+        pipelineContext->GetEventManager()->SetInnerFlag(true);
+        TAG_LOGI(AceLogTag::ACE_FORM, "set event manager inner flag");
+    }
 }
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
@@ -868,6 +888,11 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
 {
     CHECK_NULL_VOID(formRendererDispatcher_);
     formRendererDispatcher_->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

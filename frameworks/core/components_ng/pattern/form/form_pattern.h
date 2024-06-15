@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 
+#include <unordered_map>
+
 #include "transaction/rs_interfaces.h"
 
 #include "core/common/ace_application_info.h"
@@ -37,6 +39,32 @@ class SubContainer;
 class FormManagerDelegate;
 
 namespace NG {
+enum class FormChildNodeType : int32_t {
+    /**
+     * Arkts card node type
+    */
+    FORM_SURFACE_NODE,
+
+    /**
+     * static form image node type
+    */
+    FORM_STATIC_IMAGE_NODE,
+
+    /**
+     * form skeleton node type
+    */
+    FORM_SKELETON_NODE,
+
+    /**
+     * forbidden form root node
+    */
+    FORM_DISABLE_ROOT_NODE,
+
+    /**
+     * forbidden form text node
+    */
+    FORM_DISABLE_TEXT_NODE,
+};
 
 class FormPattern : public Pattern {
     DECLARE_ACE_TYPE(FormPattern, Pattern);
@@ -95,8 +123,6 @@ public:
         return isJsCard_;
     }
 
-    RefPtr<UINode> FindUINodeByTag(const std::string &tag);
-
     void SetObscured(bool isObscured)
     {
         isFormObscured_ = isObscured;
@@ -113,8 +139,6 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void GetTimeLimitResource(std::string &content);
-
-    void UpdateTimeLimitResource(std::string &content);
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -151,10 +175,8 @@ private:
     void UpdateImageNode();
     void RemoveFrsNode();
     void ReleaseRenderer();
-    void DeleteImageNode();
     void DelayDeleteImageNode(bool needHandleCachedClick);
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
-    RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
     void AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
@@ -164,17 +186,19 @@ private:
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
 
-    void LoadFormSkeleton();
-    void LoadDisableFormStyle();
-    void RemoveDisableFormStyle();
+    void LoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info, bool isRefresh = false);
+    bool ShouldLoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info);
+    void LoadDisableFormStyle(bool isRefresh = false);
+    void RemoveFormChildNode(FormChildNodeType formChildNodeType);
     int32_t GetFormDimensionHeight(int32_t dimension);
-    void RemoveFormSkeleton();
-    RefPtr<FrameNode> CreateColumnNode();
+    RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateTimeLimitNode();
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
+    void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
+    RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -204,8 +228,8 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
+    std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
 };
-
 } // namespace NG
 } // namespace Ace
 } // namespace OHOS

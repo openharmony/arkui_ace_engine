@@ -20,6 +20,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
@@ -63,10 +64,8 @@ public:
 
 private:
     void OnModifyDone() override;
-    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& imageNode,
-        const RefPtr<FrameNode>& textNode, bool isMoreItemNode = false);
-    void HandleLongPressEvent(const RefPtr<FrameNode>& imageNode,
-        const RefPtr<FrameNode>& textNode, bool isMoreItemNode);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<BarItemNode>& barItemNode);
+    void HandleLongPressEvent(const RefPtr<BarItemNode>& barItemNode);
     void HandleLongPressActionEnd();
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);

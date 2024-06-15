@@ -834,7 +834,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1
 
 /**
  * @tc.name: HandleOnEditChanged003
- * @tc.desc: test Long press edit status is true
+ * @tc.desc: test Long press edit status is keep false
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1)
@@ -855,18 +855,18 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1
 
     GestureEvent info;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     richEditorModel.SetOnEditingChange([](bool value) {});
 
     /* *
-     * @tc.steps: step3. Long press to trigger the callback function and modify the editing status
+     * @tc.steps: step3. Long press to trigger the callback function and keep preview state
      */
 
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 }
 
 /**
@@ -1145,6 +1145,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
      */
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1199,6 +1200,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete003, TestSize.Level1)
      * @tc.steps: step3. add text span
      */
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     for (const auto& pair : textStyle1.fontFeature) {
         EXPECT_EQ(pair.first, "subs");
@@ -1286,6 +1288,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(textStyle1.letterSpacing, LETTER_SPACING.ConvertToVp());
@@ -1329,6 +1332,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect2, TestSize.Level1)
     options.style = style;
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1374,6 +1378,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     richEditorController->AddTextSpan(options);
     AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
@@ -1411,6 +1416,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect004, TestSize.Level1)
     options.style = style;
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetSpansInfo(1, 5);
+    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();

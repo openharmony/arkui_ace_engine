@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Chip, ChipSize, SymbolOptions } from '@ohos.arkui.advanced.Chip';
+import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -47,7 +47,8 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   normalBackgroundSize: 36,
   marginLeft: 8,
   marginRight: 16,
-  fillColor: $r('sys.color.ohos_id_color_primary')
+  fillColor: $r('sys.color.ohos_id_color_primary'),
+  defaultEffect: -1
 }
 
 enum ChipGroupHeight {
@@ -83,10 +84,10 @@ interface LabelOptions {
 
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
 }
 
@@ -119,6 +120,7 @@ interface IconGroupSuffixTheme {
   marginLeft: number;
   marginRight: number;
   fillColor: ResourceColor;
+  defaultEffect: number;
 }
 
 function parseDimension<T>(
@@ -175,6 +177,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier> = [];
+  symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
@@ -207,6 +210,9 @@ export struct IconGroupSuffix {
               .fontSize(this.getIconSize())
               .attributeModifier(suffixItem)
               .focusable(true)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(this.symbolEffect, false)
+              .symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect)
           } else {
             Image(suffixItem.icon.src)
               .fillColor(iconGroupSuffixTheme.fillColor)
@@ -236,7 +242,7 @@ export struct IconGroupSuffix {
 
 @Component
 export struct ChipGroup {
-  @Prop items: ChipGroupItemOptions[] = [];
+  @Prop @Watch('onItemsChange') items: ChipGroupItemOptions[] = [];
   @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
   @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
   @Prop selectedIndexes: Array<number> = [0];
@@ -247,6 +253,11 @@ export struct ChipGroup {
   private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
   @Prop chipGroupPadding: ChipGroupPaddingOptions = defaultTheme.chipGroupPadding;
+  @State isRefresh: boolean = true;
+
+  onItemsChange() {
+    this.isRefresh = !this.isRefresh;
+  }
 
   onMultipleChange() {
     this.selectedIndexes = this.getSelectedIndexes();
@@ -268,35 +279,33 @@ export struct ChipGroup {
   }
 
   private getFontColor(): ResourceColor {
-    if (typeof this.itemStyle.fontColor == 'object') {
-      let temp: Resource = this.itemStyle.fontColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      if (typeof this.itemStyle.fontColor == 'object') {
+        let temp: Resource = this.itemStyle.fontColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.fontColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.fontColor
+        }
         return defaultTheme.itemStyle.fontColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.fontColor
-      }
-      return defaultTheme.itemStyle.fontColor;
-    }
-    if (this.itemStyle && this.itemStyle.fontColor) {
-      return this.itemStyle.fontColor;
     }
     return defaultTheme.itemStyle.fontColor;
   }
 
   private getSelectedFontColor(): ResourceColor {
-    if (typeof this.itemStyle.selectedFontColor == 'object') {
-      let temp: Resource = this.itemStyle.selectedFontColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      if (typeof this.itemStyle.selectedFontColor == 'object') {
+        let temp: Resource = this.itemStyle.selectedFontColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.selectedFontColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.selectedFontColor
+        }
         return defaultTheme.itemStyle.selectedFontColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.selectedFontColor
-      }
-      return defaultTheme.itemStyle.selectedFontColor;
-    }
-    if (this.itemStyle && this.itemStyle.selectedFontColor) {
-      return this.itemStyle.selectedFontColor;
     }
     return defaultTheme.itemStyle.selectedFontColor;
   }
@@ -316,35 +325,33 @@ export struct ChipGroup {
   }
 
   private getBackgroundColor(): ResourceColor {
-    if (typeof this.itemStyle.backgroundColor == 'object') {
-      let temp: Resource = this.itemStyle.backgroundColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.backgroundColor) {
+      if (typeof this.itemStyle.backgroundColor == 'object') {
+        let temp: Resource = this.itemStyle.backgroundColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.backgroundColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.backgroundColor
+        }
         return defaultTheme.itemStyle.backgroundColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.backgroundColor
-      }
-      return defaultTheme.itemStyle.backgroundColor;
-    }
-    if (this.itemStyle && this.itemStyle.backgroundColor) {
-      return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
 
   private getSelectedBackgroundColor(): ResourceColor {
-    if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
-      let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
-      if (temp == undefined || temp == null) {
+    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
+      if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+        let temp: Resource = this.itemStyle.selectedBackgroundColor as Resource;
+        if (temp == undefined || temp == null) {
+          return defaultTheme.itemStyle.selectedBackgroundColor;
+        }
+        if (temp.type === 10001) {
+          return this.itemStyle.selectedBackgroundColor
+        }
         return defaultTheme.itemStyle.selectedBackgroundColor;
       }
-      if (temp.type === 10001) {
-        return this.itemStyle.selectedBackgroundColor
-      }
-      return defaultTheme.itemStyle.selectedBackgroundColor;
-    }
-    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-      return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
   }
@@ -372,6 +379,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupItemSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.itemSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.itemSpace,
@@ -381,6 +391,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupStartSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.startSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.startSpace,
@@ -390,6 +403,9 @@ export struct ChipGroup {
   }
 
   private getChipGroupEndSpace() {
+    if (this.chipGroupSpace == undefined) {
+      return defaultTheme.chipGroupSpace.endSpace
+    }
     return parseDimension(
       this.getUIContext(),
       this.chipGroupSpace.endSpace,
@@ -427,7 +443,7 @@ export struct ChipGroup {
   }
 
   private getIconGroupSuffixHeight() {
-    if(typeof this.chipSize === 'string'){
+    if (typeof this.chipSize === 'string') {
       if (this.chipSize === ChipSize.SMALL) {
         return iconGroupSuffixTheme.smallBackgroundSize;
       } else {
@@ -508,6 +524,8 @@ export struct ChipGroup {
                   }
                 })
               }
+            }, () => {
+              return JSON.stringify(this.isRefresh);
             });
           }
           .padding({ left: this.getChipGroupStartSpace(),

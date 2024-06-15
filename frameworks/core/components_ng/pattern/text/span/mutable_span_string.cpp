@@ -27,6 +27,12 @@
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
+namespace {
+int32_t GetWStringLength(const std::string& str)
+{
+    return static_cast<int32_t>(StringUtils::ToWstring(str).length());
+}
+} // namespace
 
 const std::vector<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
 
@@ -132,12 +138,12 @@ std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation
             auto newSpan = MakeRefPtr<NG::SpanItem>();
             newSpan->content = other;
             newSpan->interval.first = spanItemStart;
-            newSpan->interval.second = StringUtils::ToWstring(newSpan->content).length() + spanItemStart;
+            newSpan->interval.second = GetWStringLength(newSpan->content) + spanItemStart;
             it = spans_.erase(it);
             it = spans_.insert(it, newSpan);
         } else {
             (*it)->content = StringUtils::ToString(wOther + GetWideStringSubstr(wContent, length));
-            (*it)->interval.second = StringUtils::ToWstring((*it)->content).length() + spanItemStart;
+            (*it)->interval.second = GetWStringLength((*it)->content) + spanItemStart;
         }
         ++it;
         return it;
@@ -558,7 +564,7 @@ void MutableSpanString::InsertStringAroundSpecialNode(
     } else if (aroundMode == AroundSpecialNode::AFTER && iter != spans_.end()) {
         spanItem = (*iter)->GetSameStyleSpanItem();
     }
-    int32_t length = StringUtils::ToWstring(str).length();
+    int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     spanItem->content = str;
     spanItem->interval.first = start;
     spanItem->interval.second = start + length;

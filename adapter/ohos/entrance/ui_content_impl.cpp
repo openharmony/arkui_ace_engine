@@ -428,7 +428,8 @@ public:
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
+        auto aceView =
+            AceType::DynamicCast<Platform::AceViewOhos>(Platform::AceContainer::GetContainer(instanceId)->GetAceView());
         CHECK_NULL_VOID(aceView);
         DragEventAction action;
         switch (event) {
@@ -770,24 +771,29 @@ napi_value UIContentImpl::GetUINapiContext()
 UIContentErrorCode UIContentImpl::Restore(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
 {
+    LOGI("UIContent Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
+        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
-    std::tie(startUrl_, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    RouterRecoverRecord record;
+    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
+    startUrl_ = record.url;
     CHECK_ERROR_CODE_RETURN(errorCode);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
-    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl = %{public}s, isNamedRouter: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
+        (record.isNamedRouter ? "yes" : "no"));
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
 }
 
 std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo", bundleName_.c_str(), moduleName_.c_str(),
-        instanceId_);
-    return Platform::AceContainer::GetContentInfo(instanceId_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UIContent GetContentInfo, ContentInfoType: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, type);
+    return Platform::AceContainer::GetContentInfo(instanceId_, type);
 }
 
 // ArkTSCard start
@@ -1102,7 +1108,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
 
     // create ace_view
-    Platform::AceViewOhos* aceView = nullptr;
+    RefPtr<Platform::AceViewOhos> aceView = nullptr;
     if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
@@ -1650,6 +1656,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
+    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "can_preview_text";
+        });
+    pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
             return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
         });
@@ -1962,7 +1972,7 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
 }
@@ -1980,7 +1990,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
     return true;
 }
@@ -1994,7 +2004,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent, isPreIme);
 }
 
@@ -2092,7 +2102,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                 pipelineContext->StartWindowAnimation();
             }
         }
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
@@ -2109,9 +2119,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     };
 
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-    if ((container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-                                             reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
-        taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
@@ -2338,6 +2347,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
+    } else {
+        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        container->SetApiTargetVersion(apiTargetVersion);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2506,7 +2518,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::ChangeViewSize(aceView, width, height);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -3278,6 +3290,9 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

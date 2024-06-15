@@ -56,6 +56,20 @@ void PaintCustomDivider(SizeF optionSize, float horInterval, float iconHorInterv
         startMargin = horInterval + iconHorInterval;
         endMargin = horInterval;
     }
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto optionNode = renderContext->GetHost();
+    CHECK_NULL_VOID(optionNode);
+    auto layoutProperty = optionNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto dividerRtl = static_cast<float>(props->GetDividerValue().isRtl);
+    dividerRtl = (textDirection == TextDirection::RTL) ? true : false;
+    if (dividerRtl) {
+        auto rtlStartMargin = startMargin;
+        startMargin = endMargin;
+        endMargin = rtlStartMargin;
+    }
     path.AddRect(startMargin, -dividerWidth, optionSize.Width() - endMargin, dividerWidth);
 }
 

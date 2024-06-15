@@ -1781,6 +1781,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getSelection", &JSRichEditorController::GetSelection);
     JSClass<JSRichEditorController>::CustomMethod("getLayoutManager", &JSRichEditorController::GetLayoutManager);
     JSClass<JSRichEditorController>::CustomMethod("isEditing", &JSRichEditorController::IsEditing);
+    JSClass<JSRichEditorController>::CustomMethod("toStyledString", &JSRichEditorController::ToStyledString);
+    JSClass<JSRichEditorController>::CustomMethod("fromStyledString", &JSRichEditorController::FromStyledString);
     JSClass<JSRichEditorController>::Method("stopEditing", &JSRichEditorController::StopEditing);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
@@ -2296,6 +2298,52 @@ void JSRichEditorBaseController::IsEditing(const JSCallbackInfo& args)
     args.SetReturnValue(JsiRef<JsiValue>::Make(panda::BooleanRef::New(runtime->GetEcmaVm(), value)));
 }
 
+void JSRichEditorController::ToStyledString(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    int32_t end = -1;
+    int32_t start = -1;
+    if (args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> startVal = obj->GetProperty("start");
+        JSRef<JSVal> endVal = obj->GetProperty("end");
+
+        if (!startVal->IsNull() && startVal->IsNumber()) {
+            start = startVal->ToNumber<int32_t>();
+        }
+
+        if (!endVal->IsNull() && endVal->IsNumber()) {
+            end = endVal->ToNumber<int32_t>();
+        }
+    }
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controllerWeak_.Upgrade());
+    CHECK_NULL_VOID(richEditorController);
+    auto spanStringBase = richEditorController->ToStyledString(start, end);
+    auto spanString = AceType::DynamicCast<SpanString>(spanStringBase);
+    CHECK_NULL_VOID(spanString);
+    JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
+    auto jsSpanString = Referenced::Claim(obj->Unwrap<JSSpanString>());
+    jsSpanString->SetController(spanString);
+    args.SetReturnValue(obj);
+}
+
+void JSRichEditorController::FromStyledString(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    if ((args.Length() != 1) || !args[0]->IsObject()) {
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(args[0])->Unwrap<JSSpanString>();
+    CHECK_NULL_VOID(spanString);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    auto controller = controllerWeak_.Upgrade();
+    auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+    CHECK_NULL_VOID(richEditorController);
+    SelectionInfo value = richEditorController->FromStyledString(spanStringController);
+    args.SetReturnValue(CreateJSSpansInfo(value));
+}
+
 void JSRichEditorBaseController::StopEditing()
 {
     auto controller = controllerWeak_.Upgrade();
@@ -2419,6 +2467,9 @@ void JSRichEditorStyledStringController::OnContentChanged(const JSCallbackInfo& 
 
 void JSRichEditorStyledStringController::SetOnWillChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto onWillChangeFunc = paramObject->GetProperty("onWillChange");
     if (onWillChangeFunc->IsNull() || !onWillChangeFunc->IsFunction()) {
@@ -2443,6 +2494,9 @@ void JSRichEditorStyledStringController::SetOnWillChange(const JSCallbackInfo& a
 
 void JSRichEditorStyledStringController::SetOnDidChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto onDidChangeFunc = paramObject->GetProperty("onDidChange");
     if (onDidChangeFunc->IsNull() || !onDidChangeFunc->IsFunction()) {

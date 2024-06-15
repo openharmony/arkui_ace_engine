@@ -146,6 +146,7 @@ export const defaultTheme = {
             "moduleName": "__harDefaultModuleName__"
         }],
         fontSize: 16,
+        defaultEffect: -1,
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -233,7 +234,7 @@ export function Chip(r5, s5 = null) {
     {
         (s5 ? s5 : this).observeComponentCreation2((v5, w5, x5 = t5) => {
             if (w5) {
-                let y5 = new ChipComponent(typeof PUV2ViewBase !== "undefined" && s5 instanceof PUV2ViewBase ? s5 : this, {
+                let y5 = new ChipComponent(ViewPU.__proto__ !== NativeViewPartialUpdate && s5 instanceof PUV2ViewBase ? s5 : this, {
                     chipSize: x5.size,
                     prefixIcon: x5.prefixIcon,
                     prefixSymbol: x5.prefixSymbol,
@@ -250,7 +251,7 @@ export function Chip(r5, s5 = null) {
                     onClose: x5.onClose,
                     onClicked: x5.onClicked,
                 }, undefined, v5, () => {
-                }, { page: "library/src/main/ets/components/chip/chip.ets", line: 250, col: 3 });
+                }, { page: "library/src/main/ets/components/chip/chip.ets", line: 252, col: 3 });
                 ViewPU.create(y5);
                 let z5 = () => {
                     return {
@@ -343,6 +344,7 @@ export class ChipComponent extends ViewPU {
         this.callbackId = undefined;
         this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width), this, "prefixSymbolWidth");
         this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width), this, "suffixSymbolWidth");
+        this.__symbolEffect = new ObservedPropertyObjectPU(new SymbolEffect(), this, "symbolEffect");
         this.setInitiallyProvidedValue(l5);
         this.finalizeConstruction();
     }
@@ -450,6 +452,9 @@ export class ChipComponent extends ViewPU {
         if (j5.suffixSymbolWidth !== undefined) {
             this.suffixSymbolWidth = j5.suffixSymbolWidth;
         }
+        if (j5.symbolEffect !== undefined) {
+            this.symbolEffect = j5.symbolEffect;
+        }
     }
 
     updateStateVars(i5) {
@@ -496,6 +501,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.purgeDependencyOnElmtId(h5);
         this.__prefixSymbolWidth.purgeDependencyOnElmtId(h5);
         this.__suffixSymbolWidth.purgeDependencyOnElmtId(h5);
+        this.__symbolEffect.purgeDependencyOnElmtId(h5);
     }
 
     aboutToBeDeleted() {
@@ -526,6 +532,7 @@ export class ChipComponent extends ViewPU {
         this.__fontWeightScale.aboutToBeDeleted();
         this.__prefixSymbolWidth.aboutToBeDeleted();
         this.__suffixSymbolWidth.aboutToBeDeleted();
+        this.__symbolEffect.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -746,6 +753,14 @@ export class ChipComponent extends ViewPU {
         this.__suffixSymbolWidth.set(g4);
     }
 
+    get symbolEffect() {
+        return this.__symbolEffect.get();
+    }
+
+    set symbolEffect(f4) {
+        this.__symbolEffect.set(f4);
+    }
+
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
@@ -761,7 +776,7 @@ export class ChipComponent extends ViewPU {
                         .getNumberByName((this.theme.label.smallFontSize.params[0]).split('.')[2]);
                     return this.theme.label.smallFontSize;
                 }
-                catch (f4) {
+                catch (e4) {
                     return this.theme.label.defaultFontSize;
                 }
             }
@@ -771,7 +786,7 @@ export class ChipComponent extends ViewPU {
                         .getNumberByName((this.theme.label.normalFontSize.params[0]).split('.')[2]);
                     return this.theme.label.normalFontSize;
                 }
-                catch (e4) {
+                catch (d4) {
                     return this.theme.label.defaultFontSize;
                 }
             }
@@ -796,160 +811,159 @@ export class ChipComponent extends ViewPU {
         return FontWeight.Regular;
     }
 
-    lengthMetricsToVp(c4) {
-        let d4 = 0;
-        if (c4) {
-            switch (c4.unit) {
+    lengthMetricsToVp(b4) {
+        let c4 = 0;
+        if (b4) {
+            switch (b4.unit) {
                 case LengthUnit.PX:
-                    return px2vp(c4.value);
+                    return px2vp(b4.value);
                 case LengthUnit.VP:
-                    return c4.value;
+                    return b4.value;
                 case LengthUnit.FP:
-                    px2vp(fp2px(c4.value));
+                    px2vp(fp2px(b4.value));
                     break;
                 case LengthUnit.PERCENT:
                     return Number.NEGATIVE_INFINITY;
                 case LengthUnit.LPX:
-                    return px2vp(lpx2px(c4.value));
+                    return px2vp(lpx2px(b4.value));
             }
         }
-        return d4;
+        return c4;
     }
 
-    toVp(w3) {
-        if (w3 === void (0)) {
+    toVp(v3) {
+        if (v3 === void (0)) {
             return Number.NEGATIVE_INFINITY;
         }
-        switch (typeof (w3)) {
+        switch (typeof (v3)) {
             case 'number':
-                return w3;
+                return v3;
             case 'object':
                 try {
-                    if (w3.id !== -1) {
-                        return px2vp(getContext(this).resourceManager.getNumber(w3.id));
+                    if (v3.id !== -1) {
+                        return px2vp(getContext(this).resourceManager.getNumber(v3.id));
                     }
                     else {
                         return px2vp(getContext(this)
                             .resourceManager
-                            .getNumberByName((w3.params[0]).split('.')[2]));
+                            .getNumberByName((v3.params[0]).split('.')[2]));
                     }
                 }
-                catch (b4) {
+                catch (a4) {
                     return Number.NEGATIVE_INFINITY;
                 }
             case 'string':
-                let x3 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-                let y3 = w3.match(x3);
-                if (!y3) {
+                let w3 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+                let x3 = v3.match(w3);
+                if (!x3) {
                     return Number.NEGATIVE_INFINITY;
                 }
-                let z3 = Number(y3?.[1] ?? 0);
-                let a4 = y3?.[2] ?? 'vp';
-                switch (a4.toLowerCase()) {
+                let y3 = Number(x3?.[1] ?? 0);
+                let z3 = x3?.[2] ?? 'vp';
+                switch (z3.toLowerCase()) {
                     case 'px':
-                        z3 = px2vp(z3);
+                        y3 = px2vp(y3);
                         break;
                     case 'fp':
-                        z3 = px2vp(fp2px(z3));
+                        y3 = px2vp(fp2px(y3));
                         break;
                     case 'lpx':
-                        z3 = px2vp(lpx2px(z3));
+                        y3 = px2vp(lpx2px(y3));
                         break;
                     case '%':
-                        z3 = Number.NEGATIVE_INFINITY;
+                        y3 = Number.NEGATIVE_INFINITY;
                         break;
                     case 'vp':
                         break;
                     default:
                         break;
                 }
-                return z3;
+                return y3;
             default:
                 return Number.NEGATIVE_INFINITY;
         }
     }
 
     getLabelMargin() {
-        let v3 = { left: 0, right: 0 };
+        let u3 = { left: 0, right: 0 };
         if (this.label?.labelMargin?.left !== void (0) && this.toVp(this.label.labelMargin.left) >= 0) {
-            v3.left = this.label?.labelMargin?.left;
+            u3.left = this.label?.labelMargin?.left;
         }
         else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                v3.left = this.theme.label.smallMargin.left;
+                u3.left = this.theme.label.smallMargin.left;
             }
             else {
-                v3.left = this.theme.label.normalMargin.left;
+                u3.left = this.theme.label.normalMargin.left;
             }
         }
         if (this.label?.labelMargin?.right !== void (0) && this.toVp(this.label.labelMargin.right) >= 0) {
-            v3.right = this.label?.labelMargin?.right;
+            u3.right = this.label?.labelMargin?.right;
         }
         else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
             this.suffixIcon?.src || this.useDefaultSuffixIcon) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                v3.right = this.theme.label.smallMargin.right;
+                u3.right = this.theme.label.smallMargin.right;
             }
             else {
-                v3.right = this.theme.label.normalMargin.right;
-            }
-        }
-        return v3;
-    }
-
-    getLocalizedLabelMargin() {
-        let u3 = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) };
-        if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
-            this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
-            u3.start = this.label?.localizedLabelMargin?.start;
-        }
-        else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                u3.start = this.theme.label.localizedSmallMargin.start;
-            }
-            else {
-                u3.start = this.theme.label.localizedNormalMargin.start;
-            }
-        }
-        if (this.label?.localizedLabelMargin?.end.value !== void (0) &&
-            this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
-            u3.end = this.label?.localizedLabelMargin?.end;
-        }
-        else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
-            this.suffixIcon?.src || this.useDefaultSuffixIcon) {
-            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
-                u3.end = this.theme.label.localizedSmallMargin.end;
-            }
-            else {
-                u3.end = this.theme.label.localizedNormalMargin.end;
+                u3.right = this.theme.label.normalMargin.right;
             }
         }
         return u3;
     }
 
-    getLabelStartEndVp() {
-        let r3 = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) };
-        if (this.label && this.label.labelMargin) {
-            let t3 = this.getLabelMargin();
-            return { start: LengthMetrics.vp(this.toVp(t3.left)), end: LengthMetrics.vp(this.toVp(t3.right)) };
+    getLocalizedLabelMargin() {
+        let t3 = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) };
+        if (this.label?.localizedLabelMargin?.start?.value !== void (0) &&
+            this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
+            t3.start = this.label?.localizedLabelMargin?.start;
         }
-        if (this.label && this.label.localizedLabelMargin) {
-            let s3 = this.getLocalizedLabelMargin();
+        else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
+            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
+                t3.start = this.theme.label.localizedSmallMargin.start;
+            }
+            else {
+                t3.start = this.theme.label.localizedNormalMargin.start;
+            }
+        }
+        if (this.label?.localizedLabelMargin?.end?.value !== void (0) &&
+            this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
+            t3.end = this.label?.localizedLabelMargin?.end;
+        }
+        else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
+            this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+            if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
+                t3.end = this.theme.label.localizedSmallMargin.end;
+            }
+            else {
+                t3.end = this.theme.label.localizedNormalMargin.end;
+            }
+        }
+        return t3;
+    }
+
+    getLabelStartEndVp() {
+        let r3 = this.getLocalizedLabelMargin();
+        if (this.label && (this.label.labelMargin !== void (0)) && (this.label.localizedLabelMargin === void (0))) {
+            let s3 = this.getLabelMargin();
             return {
-                start: LengthMetrics.vp(this.lengthMetricsToVp(s3.start)),
-                end: LengthMetrics.vp(this.lengthMetricsToVp(s3.end))
+                start: LengthMetrics.vp(this.toVp(s3.left)),
+                end: LengthMetrics.vp(this.toVp(s3.right))
             };
         }
-        return r3;
+        return {
+            start: LengthMetrics.vp(this.lengthMetricsToVp(r3.start)),
+            end: LengthMetrics.vp(this.lengthMetricsToVp(r3.end))
+        };
     }
 
     getActualLabelMargin() {
-        let q3 = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) };
-        if (this.label && this.label.labelMargin) {
-            return this.getLabelMargin();
+        let q3 = this.getLocalizedLabelMargin();
+        if (this.label && this.label.localizedLabelMargin !== void (0)) {
+            return q3;
         }
-        if (this.label && this.label.localizedLabelMargin) {
-            return this.getLocalizedLabelMargin();
+        if (this.label && this.label.labelMargin !== void (0)) {
+            return this.getLabelMargin();
         }
         return q3;
     }
@@ -1069,9 +1083,6 @@ export class ChipComponent extends ViewPU {
         else {
             l3 = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor;
         }
-        if (!this.isShowPressedBackGroundColor) {
-            return l3;
-        }
         let m3;
         try {
             m3 = ColorMetrics.resourceColor(l3);
@@ -1084,6 +1095,12 @@ export class ChipComponent extends ViewPU {
             else {
                 m3 = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
             }
+            if (!this.isShowPressedBackGroundColor) {
+                return Color.Transparent;
+            }
+        }
+        if (!this.isShowPressedBackGroundColor) {
+            return m3.color;
         }
         return m3.blendColor(ColorMetrics.resourceColor("#19000000"))
             .color;
@@ -1115,13 +1132,13 @@ export class ChipComponent extends ViewPU {
     getCalculateChipNodeWidth() {
         let j3 = 0;
         let k3 = this.getLabelStartEndVp();
-        j3 += this.getChipNodePadding().start.value;
+        j3 += this.getChipNodePadding().start?.value ?? 0;
         j3 += this.toVp(this.getPrefixChipWidth());
-        j3 += this.toVp(k3.start.value);
+        j3 += this.toVp(k3.start?.value ?? 0);
         j3 += this.getLabelWidth();
-        j3 += this.toVp(k3.end.value);
+        j3 += this.toVp(k3.end?.value ?? 0);
         j3 += this.toVp(this.getSuffixChipWidth());
-        j3 += this.getChipNodePadding().end.value;
+        j3 += this.getChipNodePadding().end?.value ?? 0;
         return j3;
     }
 
@@ -1413,6 +1430,9 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
                         SymbolGlyph.attributeModifier.bind(this)(this.getPrefixSymbolModifier());
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), this.theme.defaultSymbol.defaultEffect);
                         SymbolGlyph.onSizeChange((v1, w1) => {
                             this.prefixSymbolWidth = w1?.width;
                         });
@@ -1472,6 +1492,9 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
                         SymbolGlyph.attributeModifier.bind(this)(this.getSuffixSymbolModifier());
+                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
+                        SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), this.theme.defaultSymbol.defaultEffect);
                         SymbolGlyph.onSizeChange((f1, g1) => {
                             this.suffixSymbolWidth = g1?.width;
                         });

@@ -78,7 +78,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (contentModifier) {
-        SetPropertyToModifier(textLayoutProperty, contentModifier);
+        SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
@@ -248,7 +248,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
-    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
+    const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier, TextStyle& textStyle)
 {
     auto fontFamily = layoutProperty->GetFontFamily();
     if (fontFamily.has_value()) {
@@ -256,15 +256,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
     }
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
-        modifier->SetFontSize(fontSize.value());
+        modifier->SetFontSize(fontSize.value(), textStyle);
     }
     auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
     if (adaptMinFontSize.has_value()) {
-        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value(), textStyle);
     }
     auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
     if (adaptMaxFontSize.has_value()) {
-        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value(), textStyle);
     }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {
@@ -513,7 +513,7 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    spanTextLength += StringUtils::ToWstring(child->content).length();
+    spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
 }

@@ -39,12 +39,14 @@ ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNod
 void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
     const NG::OffsetF& offset)
 {
-    CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
-    auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    void* pixelmapNapiVal = nullptr;
+    if (pixelMap) {
+        pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    }
 
     analyzerUIConfig_.holder = holder_;
-    if (holder_ != ImageAnalyzerHolder::IMAGE) {
+    if (holder_ != ImageAnalyzerHolder::IMAGE && holder_ != ImageAnalyzerHolder::WEB) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();
     }
@@ -65,9 +67,10 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     }
     auto overlayNode = AceType::DynamicCast<NG::FrameNode>(customNode);
     CHECK_NULL_VOID(overlayNode);
-    CHECK_NULL_VOID(frameNode_);
-    frameNode_->SetOverlayNode(overlayNode);
-    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode_)));
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    node->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(node)));
     overlayNode->SetActive(true);
     UpdateAnalyzerOverlayLayout();
 
@@ -91,8 +94,10 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
         return;
     }
 
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        auto imagePattern = AceType::DynamicCast<NG::ImagePattern>(frameNode_->GetPattern());
+        auto imagePattern = AceType::DynamicCast<NG::ImagePattern>(node->GetPattern());
         CHECK_NULL_VOID(imagePattern);
         if (!imagePattern->hasSceneChanged()) {
             return;
@@ -107,7 +112,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
-    auto overlayNode = frameNode_->GetOverlayNode();
+    auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
@@ -119,10 +124,11 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
     if (!isAnalyzerOverlayBuild_) {
         return;
     }
-    CHECK_NULL_VOID(frameNode_);
-    auto overlayNode = frameNode_->GetOverlayNode();
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
-    frameNode_->SetOverlayNode(RefPtr<NG::FrameNode>());
+    node->SetOverlayNode(RefPtr<NG::FrameNode>());
 
     isAnalyzerOverlayBuild_ = false;
     CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
@@ -136,16 +142,17 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
 {
-    CHECK_NULL_RETURN(frameNode_, false);
-    auto eventHub = frameNode_->GetEventHub<NG::EventHub>();
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    auto eventHub = node->GetEventHub<NG::EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (!eventHub->IsEnabled()) {
         return false;
     }
 
     bool hasObscured = false;
-    if (frameNode_->GetRenderContext()->GetObscured().has_value()) {
-        auto obscuredReasons = frameNode_->GetRenderContext()->GetObscured().value();
+    if (node->GetRenderContext()->GetObscured().has_value()) {
+        auto obscuredReasons = node->GetRenderContext()->GetObscured().value();
         hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
         if (hasObscured) {
@@ -154,7 +161,7 @@ bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
     }
 
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        auto imageRenderProperty = frameNode_->GetPaintProperty<NG::ImageRenderProperty>();
+        auto imageRenderProperty = node->GetPaintProperty<NG::ImageRenderProperty>();
         CHECK_NULL_RETURN(imageRenderProperty, false);
         ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
         if (repeat != ImageRepeat::NO_REPEAT) {
@@ -172,11 +179,12 @@ bool ImageAnalyzerManager::IsOverlayCreated()
 
 void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 {
-    CHECK_NULL_VOID(frameNode_);
-    auto layoutProperty = frameNode_->GetLayoutProperty();
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto overlayNode = frameNode_->GetOverlayNode();
+    auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     auto overlayLayoutProperty = overlayNode->GetLayoutProperty();
     CHECK_NULL_VOID(overlayLayoutProperty);
@@ -197,10 +205,11 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     CHECK_NULL_VOID(geometryNode);
-    CHECK_NULL_VOID(frameNode_);
+    auto node = frameNode_.Upgrade();
+    CHECK_NULL_VOID(node);
     bool isUIConfigUpdate = false;
 
-    auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
+    auto layoutProps = node->GetLayoutProperty<NG::ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
@@ -224,7 +233,7 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
         }
     }
 
-    auto renderContext = frameNode_->GetRenderContext();
+    auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
     if (!(analyzerUIConfig_.transformMat == transformMat)) {
@@ -241,9 +250,10 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 {
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
     bool hasConfig = imageAnalyzerAdapter_->HasImageAnalyzerConfig();
-    if ((holder_ != ImageAnalyzerHolder::XCOMPONENT && holder_ != ImageAnalyzerHolder::VIDEO_CUSTOM) || !hasConfig) {
-        imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
+    if (hasConfig) {
+        return;
     }
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
@@ -252,10 +262,15 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
 
 void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
-    SetImageAnalyzerConfig(options);
+    CHECK_NULL_VOID(imageAnalyzerAdapter_);
+    imageAnalyzerAdapter_->SetImageAnalyzerConfig(options, true);
+    auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
+    if (isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
+    }
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
     analyzerUIConfig_.onAnalyzed = callback;
 }
@@ -265,5 +280,69 @@ void ImageAnalyzerManager::ReleaseImageAnalyzer()
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().Release(&overlayData_);
     }
+}
+
+void ImageAnalyzerManager::UpdatePressOverlay(
+    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight,
+    int pointX,
+    int pointY,
+    OnTextSelectedCallback callback)
+{
+    analyzerUIConfig_.overlayOffset.SetX(offsetX);
+    analyzerUIConfig_.overlayOffset.SetY(offsetY);
+    analyzerUIConfig_.touchInfo.touchPoint.x = pointX;
+    analyzerUIConfig_.touchInfo.touchPoint.y = pointY;
+    analyzerUIConfig_.touchInfo.touchType = TouchType::DOWN;
+    analyzerUIConfig_.selectedStatus = Status::SELECTED;
+    analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
+    if (!analyzerUIConfig_.onTextSelected) {
+        analyzerUIConfig_.onTextSelected = std::move(callback);
+    }
+    if (pixelMap && imageAnalyzerAdapter_) {
+        analyzerUIConfig_.contentWidth = rectWidth;
+        analyzerUIConfig_.contentHeight = rectHeight;
+        analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+        analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+        analyzerUIConfig_.pixelmapNapiVal =
+            imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+    }
+    ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
+    analyzerUIConfig_.pixelmapNapiVal = nullptr;
+}
+
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(
+    int touchPointX,
+    int touchPointY,
+    TouchType touchType)
+{
+    analyzerUIConfig_.touchInfo.touchPoint.x = touchPointX - analyzerUIConfig_.overlayOffset.GetX();
+    analyzerUIConfig_.touchInfo.touchPoint.y = touchPointY - analyzerUIConfig_.overlayOffset.GetY();
+    analyzerUIConfig_.touchInfo.touchType = touchType;
+    ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
+}
+
+void ImageAnalyzerManager::UpdateOverlayStatus(
+    bool status,
+    int offsetX,
+    int offsetY,
+    int rectWidth,
+    int rectHeight)
+{
+    if (status) {
+        analyzerUIConfig_.overlayOffset.SetX(offsetX);
+        analyzerUIConfig_.overlayOffset.SetY(offsetY);
+        analyzerUIConfig_.contentWidth = rectWidth;
+        analyzerUIConfig_.contentHeight = rectHeight;
+        analyzerUIConfig_.selectedStatus = Status::SELECTED;
+        analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
+    } else {
+        analyzerUIConfig_.selectedStatus = Status::UNSELECTED;
+        analyzerUIConfig_.menuStatus = Status::MENU_HIDE;
+    }
+    ImageAnalyzerMgr::GetInstance().UpdateOverlayStatus(&overlayData_, &analyzerUIConfig_);
 }
 } // namespace OHOS::Ace

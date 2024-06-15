@@ -180,7 +180,7 @@ std::string ViewFunctions::ExecuteOnDumpInfo()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, "")
     std::string res;
-    auto func = jsOnDumpInspetor_.Lock();
+    auto func = jsOnDumpInspector_.Lock();
     if (!func->IsEmpty()) {
         auto result = func->Call(jsObject_.Lock());
         if (result->IsString()) {
@@ -266,9 +266,9 @@ void ViewFunctions::InitViewFunctions(
             jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
         }
 
-        JSRef<JSVal> jsOnDumpInspetor = jsObject->GetProperty("onDumpInspetor");
-        if (jsOnDumpInspetor->IsFunction()) {
-            jsOnDumpInspetor_ = JSRef<JSFunc>::Cast(jsOnDumpInspetor);
+        JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
+        if (jsOnDumpInspector->IsFunction()) {
+            jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
         }
     }
 

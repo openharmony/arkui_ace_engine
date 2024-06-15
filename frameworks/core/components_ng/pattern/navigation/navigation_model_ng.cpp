@@ -1186,7 +1186,7 @@ void NavigationModelNG::SetHideToolBar(bool hideToolBar)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    auto navBarLayoutProperty = navBarNode->GetLayoutPropertyPtr<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
 }
@@ -1687,8 +1687,6 @@ void NavigationModelNG::SetHideNavBarInner(
         pattern->SetNavBarVisibilityChange(true);
     }
     auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-    auto layoutProperty = navBarNode->GetLayoutProperty();
-    layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
     navBarNode->SetJSViewActive(!hideNavBar);
     if (pattern->GetNavBarVisibilityChange()) {
         navBarNode->MarkDirtyNode();
@@ -1864,6 +1862,9 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
 
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();

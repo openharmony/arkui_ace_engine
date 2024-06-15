@@ -447,8 +447,9 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
-    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
-        MAX_COLOR_FILTER_SIZE;
+    colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE
+                                  ? static_cast<int32_t>(filterFloatArray.size())
+                                  : static_cast<int32_t>(MAX_COLOR_FILTER_SIZE);
     for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
@@ -679,6 +680,28 @@ void SetResourceSrc(ArkUINodeHandle node, void* resource)
     ImageModelNG::SetResource(frameNode, resource);
 }
 
+void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(sourceInfo);
+    if (sourceInfo->url) {
+        if (ImageSourceInfo::ResolveURIType(sourceInfo->url) == SrcType::NETWORK) {
+            return;
+        }
+        ImageModelNG::SetAlt(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
+        return;
+    }
+    if (sourceInfo->resource) {
+        ImageModelNG::SetAltResource(frameNode, sourceInfo->resource);
+        return;
+    }
+    if (sourceInfo->pixelMap) {
+        ImageModelNG::SetAltPixelMap(frameNode, sourceInfo->pixelMap);
+        return;
+    }
+}
+
 void ResetDynamicRangeMode(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -770,6 +793,56 @@ void SetInitialPixelMap(ArkUINodeHandle node, ArkUI_Int64 pixelMap)
     RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(rawPtr);
     ImageModelNG::SetInitialPixelMap(frameNode, pixelMapRef);
 }
+
+void SetOnComplete(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onComplete = reinterpret_cast<std::function<void(const LoadImageSuccessEvent&)>*>(callback);
+        ImageModelNG::SetOnComplete(frameNode, std::move(*onComplete));
+    } else {
+        ImageModelNG::SetOnComplete(frameNode, nullptr);
+    }
+}
+
+void SetOnError(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onError = reinterpret_cast<std::function<void(const LoadImageFailEvent&)>*>(callback);
+        ImageModelNG::SetOnError(frameNode, std::move(*onError));
+    } else {
+        ImageModelNG::SetOnError(frameNode, nullptr);
+    }
+}
+
+void ResetOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnError(frameNode, nullptr);
+}
+
+void SetImageOnFinish(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFinish = reinterpret_cast<std::function<void()>*>(callback);
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(*onFinish));
+    } else {
+        ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+    }
+}
+
+void ResetImageOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -789,7 +862,8 @@ const ArkUIImageModifier* GetImageModifier()
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
         EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
-        SetInitialPixelMap };
+        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
+        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 

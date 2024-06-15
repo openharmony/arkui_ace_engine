@@ -355,7 +355,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), dimensionValue);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), childDimensionValue);
 
     /**
      * @tc.steps: step4. Creat child node and set font size.

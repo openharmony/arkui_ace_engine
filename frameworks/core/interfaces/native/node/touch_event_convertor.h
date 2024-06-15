@@ -17,7 +17,10 @@
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_TOUCH_EVENT_CONVERTOR_H
 
 #include "frameworks/core/event/touch_event.h"
+#include "frameworks/core/event/mouse_event.h"
+
 namespace OHOS::Ace::NG {
     TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
+    void ConvertToMouseEvent(MouseEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
 }
 #endif

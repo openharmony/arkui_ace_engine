@@ -168,6 +168,8 @@ public:
         return scrollEffect_;
     }
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    void HandleFadeEffect(float offset, int32_t source, const SizeF& size,
+        bool isNotPositiveScrollableDistance);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
     {
@@ -612,6 +614,11 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -854,6 +861,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool useTotalOffset_ = true;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

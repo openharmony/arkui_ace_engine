@@ -570,6 +570,14 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
+void ScrollablePattern::HandleFadeEffect(float offset, int32_t source, const SizeF& size,
+    bool isNotPositiveScrollableDistance)
+{
+    auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
+    scrollEffect_->HandleOverScroll(GetAxis(), IsReverse() ? offset : -offset,
+        size, isScrollFromUpdate, isNotPositiveScrollableDistance);
+}
+
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
@@ -579,9 +587,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
-            auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), -offset,
-                size, isScrollFromUpdate, isNotPositiveScrollableDistance);
+            HandleFadeEffect(offset, source, size, isNotPositiveScrollableDistance);
         }
     }
     if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() &&
@@ -1039,6 +1045,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             SetUiDvsyncSwitch(false);
+            pattern->useTotalOffset_ = true;
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
@@ -1112,9 +1119,10 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (stopAnimation) {
             offset = pattern->finalPosition_;
         }
+        auto delta = pattern->useTotalOffset_ ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
+        if (!pattern->UpdateCurrentOffset(delta,
             SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
@@ -1278,6 +1286,7 @@ void ScrollablePattern::InitMouseEvent()
 
 void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
     SuggestOpIncGroup(true);
@@ -1320,6 +1329,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
 
 void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
 {
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select end");
     mouseStartOffset_.Reset();
     lastMouseStart_.Reset();
     mouseEndOffset_.Reset();
@@ -2051,6 +2061,9 @@ void ScrollablePattern::Fling(double flingVelocity)
     } else {
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
@@ -2665,7 +2678,7 @@ void ScrollablePattern::AddScrollableFrameInfo(int32_t scrollSource)
     if (scrollableFrameInfos_.size() >= SCROLLABLE_FRAME_INFO_COUNT) {
         scrollableFrameInfos_.pop_front();
     }
-    int32_t canOverScrollInfo = IsScrollableSpringEffect();
+    uint32_t canOverScrollInfo = IsScrollableSpringEffect();
     canOverScrollInfo = (canOverScrollInfo << 1) | IsScrollable();
     canOverScrollInfo = (canOverScrollInfo << 1) | ScrollableIdle();
     canOverScrollInfo = (canOverScrollInfo << 1) | animateOverScroll_;

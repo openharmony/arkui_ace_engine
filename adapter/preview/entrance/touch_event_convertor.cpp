@@ -20,4 +20,6 @@ TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPoin
 {
     return {};
 }
+
+void ConvertToMouseEvent(MouseEvent& mouseEvent, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent) {}
 }

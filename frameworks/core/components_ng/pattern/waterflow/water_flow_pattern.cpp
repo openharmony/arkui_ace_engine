@@ -262,6 +262,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     prevOffset_ = layoutInfo_->Offset();
     layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
     layoutInfo_->targetIndex_.reset();
+    layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
 
@@ -270,6 +271,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
+
+    GetHost()->ChildrenUpdatedFrom(-1);
+
     return NeedRender();
 }
 
@@ -496,6 +500,9 @@ void WaterFlowPattern::OnSectionChangedNow(int32_t start)
 
 void WaterFlowPattern::ResetSections()
 {
+    if (!sections_) {
+        return;
+    }
     sections_.Reset();
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;

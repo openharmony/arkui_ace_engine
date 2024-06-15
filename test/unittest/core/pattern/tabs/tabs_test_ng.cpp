@@ -23,7 +23,9 @@ void TabsTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto tabTheme = AceType::MakeRefPtr<TabTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_TAB);
+    auto tabTheme = TabTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
     tabTheme->defaultTabBarName_ = "tabBarItemName";
     tabTheme->tabBarDefaultWidth_ = Dimension(TABBAR_DEFAULT_WIDTH);
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
@@ -31,7 +33,6 @@ void TabsTestNg::SetUpTestSuite()
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
     tabTheme->bottomTabSymbolOn_ = Color::BLUE;
     tabTheme->bottomTabIconOff_ = Color::BLACK;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 
 void TabsTestNg::TearDownTestSuite()

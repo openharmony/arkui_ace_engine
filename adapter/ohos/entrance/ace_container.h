@@ -41,6 +41,7 @@
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 #include "interfaces/inner_api/ace/constants.h"
@@ -205,14 +206,16 @@ public:
         return aceView_ ? aceView_->GetPosY() : 0;
     }
 
-    AceView* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
+        std::lock_guard<std::mutex> lock(viewMutex_);
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        std::lock_guard<std::mutex> lock(viewMutex_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -428,10 +431,10 @@ public:
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
         const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
-    static void SetView(AceView* view, double density, int32_t width, int32_t height,
+    static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static UIContentErrorCode SetViewNew(
-        AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
+        const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -439,9 +442,9 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
-        int32_t instanceId, const std::string& contentInfo);
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
@@ -620,6 +623,11 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    void RecordResAdapter(const std::string& key)
+    {
+        resAdapterRecord_.emplace(key);
+    }
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(
@@ -640,8 +648,8 @@ private:
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width, float height,
-        uint32_t windowId, UIEnvCallback callback = nullptr);
+    void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
+        float height, uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
@@ -655,7 +663,7 @@ private:
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     int32_t instanceId_ = 0;
-    AceView* aceView_ = nullptr;
+    RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
@@ -704,6 +712,7 @@ private:
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;
+    mutable std::mutex viewMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;

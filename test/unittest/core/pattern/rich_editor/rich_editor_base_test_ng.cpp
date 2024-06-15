@@ -545,6 +545,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
     textOptions.value = INIT_VALUE_1;
     richEditorController->AddTextSpan(textOptions);
     auto info1 = richEditorController->GetSpansInfo(1, 3);
+    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle1.fontSize, 16);
     EXPECT_EQ(Color::FromString(textStyle1.fontColor), DEFAULT_TEXT_COLOR_VALUE);
@@ -553,6 +554,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
     ClearSpan();
     richEditorPattern->InsertValue(INIT_VALUE_2);
     auto info2 = richEditorController->GetSpansInfo(1, 2);
+    ASSERT_NE(info2.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle2 = info2.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(Color::FromString(textStyle2.fontColor), DEFAULT_TEXT_COLOR_VALUE);
     EXPECT_EQ(Color::FromString(textStyle2.decorationColor), DEFAULT_TEXT_COLOR_VALUE);

@@ -74,6 +74,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 FrameReport::GetInstance().FlushEnd();
             }
             ArkUIPerfMonitor::GetInstance().FinishPerf();
+            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -111,12 +112,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
+void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
+    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
 }
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)

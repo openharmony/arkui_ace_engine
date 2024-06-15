@@ -123,6 +123,7 @@ public:
     void OnAccessibilityChildTreeDeregister();
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     void OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable);
+    bool CheckFormBundleForbidden(const std::string& bundleName);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -156,6 +157,7 @@ private:
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
     void HandleEnableFormCallback(const bool enable);
+    void SetGestureInnerFlag();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;

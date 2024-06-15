@@ -420,6 +420,10 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         // not click hide menu for select and bindMenu default option
         return;
     }
+    if (!needHideAfterTouch_) {
+        // not click hide menu if needn't hide after touch
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
@@ -499,8 +503,7 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             CHECK_NULL_VOID(itemPattern);
 
             auto expandingMode = layoutProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-            if (expandingMode != itemProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE)) {
-                itemProperty->UpdateExpandingMode(expandingMode);
+            if (expandingMode != itemPattern->GetExpandingMode() || IsEmbedded()) {
                 auto expandNode = itemPattern->GetHost();
                 CHECK_NULL_VOID(expandNode);
                 expandNode->MarkModifyDone();
@@ -1099,6 +1102,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
     });
+    SetEndOffset(menuPosition);
     isFirstShow_ = false;
 }
 

@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -47,6 +48,8 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
@@ -343,7 +346,13 @@ void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
+
 void TextFieldModelNG::ResetMaxLength()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -439,7 +448,7 @@ void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldComm
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnChange(std::function<void(const std::string&, TextRange&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1054,6 +1063,10 @@ void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
 
 void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
@@ -1197,7 +1210,7 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 
-void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1777,6 +1790,13 @@ void TextFieldModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueI
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
+void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(enablePreviewText);
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -1844,7 +1864,7 @@ void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
 
 int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
 {
-    uint32_t value = -1;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
     return value;
 }
@@ -1958,5 +1978,12 @@ void TextFieldModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsPara
     auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+}
+void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(enablePreviewText);
 }
 } // namespace OHOS::Ace::NG

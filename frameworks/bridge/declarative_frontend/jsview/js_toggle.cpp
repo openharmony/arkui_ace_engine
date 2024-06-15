@@ -226,10 +226,11 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    auto jsVal = args[0];
+    if (!jsVal->IsFunction()) {
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(jsVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

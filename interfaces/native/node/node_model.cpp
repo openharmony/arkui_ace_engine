@@ -660,37 +660,37 @@ void* GetParseJsMedia()
 extern "C" {
 #endif
 
-int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node)
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
     return impl->getNodeModifiers()->getNodeContentModifier()->addChild(
-        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
 }
 
-int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position)
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node, int32_t position)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
     return impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
-        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle, position);
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position);
 }
 
-int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node)
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
     return impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
-        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
 }
 
-int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback)
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, ArkUI_NodeContentCallback callback)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
     auto innerCallback = reinterpret_cast<void (*)(ArkUINodeContentEvent* event)>(callback);
     return impl->getNodeModifiers()->getNodeContentModifier()->registerEvent(
-        reinterpret_cast<ArkUINodeContentHandle>(handle), nullptr, innerCallback);
+        reinterpret_cast<ArkUINodeContentHandle>(content), nullptr, innerCallback);
 }
 
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event)
@@ -698,6 +698,29 @@ ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeCont
     CHECK_NULL_RETURN(event, static_cast<ArkUI_NodeContentEventType>(-1));
     auto* innerEvent = reinterpret_cast<ArkUINodeContentEvent*>(event);
     return static_cast<ArkUI_NodeContentEventType>(innerEvent->type);
+}
+
+ArkUI_NodeContentHandle OH_ArkUI_NodeContentEvent_GetNodeContentHandle(ArkUI_NodeContentEvent* event)
+{
+    CHECK_NULL_RETURN(event, nullptr);
+    auto* innerEvent = reinterpret_cast<ArkUINodeContentEvent*>(event);
+    return reinterpret_cast<ArkUI_NodeContentHandle>(innerEvent->nodeContent);
+}
+
+int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* userData)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    return impl->getNodeModifiers()->getNodeContentModifier()->setUserData(
+        reinterpret_cast<ArkUINodeContentHandle>(content), userData);
+}
+
+void* OH_ArkUI_NodeContent_GetUserData(ArkUI_NodeContentHandle content)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, nullptr);
+    return impl->getNodeModifiers()->getNodeContentModifier()->getUserData(
+        reinterpret_cast<ArkUINodeContentHandle>(content));
 }
 
 #ifdef __cplusplus

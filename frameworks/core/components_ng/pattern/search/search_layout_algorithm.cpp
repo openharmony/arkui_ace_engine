@@ -715,6 +715,10 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
 {
     auto searchIconLeftSpace = params.searchTheme->GetSearchIconLeftSpace().ConvertToPx();
     auto searchIconRightSpace = params.searchTheme->GetSearchIconRightSpace().ConvertToPx();
+    auto searchIconWidth = searchIconSizeMeasure_.Width();
+    auto layoutProperty = DynamicCast<SearchLayoutProperty>(params.layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
     auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
 
@@ -735,8 +739,7 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
 
-    auto searchButtonNode = searchButtonWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = searchButtonWrapper->GetHostNode()->GetEventHub<ButtonEventHub>();
 
     auto style = params.layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if (params.isRTL) {
@@ -757,7 +760,8 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
             }
         }
     } else {
-        textFieldHorizontalOffset = searchIconLeftSpace + searchIconRightSpace + searchIconRightSpace;
+        textFieldHorizontalOffset = searchIconWidth + searchIconLeftSpace
+            + searchIconRightSpace + padding.left.value_or(0.0f);
     }
 
     auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;

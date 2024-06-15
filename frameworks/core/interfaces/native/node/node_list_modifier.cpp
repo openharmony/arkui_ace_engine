@@ -573,7 +573,7 @@ void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize opt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (int i = 0; i < option->mainSize.size(); i++) {
+    for (uint32_t i = 0; i < option->mainSize.size(); i++) {
         if (option->mainSize[i] > 0) {
             option->mainSize[i] =
                 Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();

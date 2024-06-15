@@ -2018,6 +2018,7 @@ typedef enum {
      *
      */
     NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT,
+    NODE_IMAGE_SPAN_ALT,
     /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -6773,6 +6774,15 @@ typedef struct {
      * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 从父组件上卸载所有子节点。
+     *
+     * @param parent 目标节点对象。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*removeAllChildren)(ArkUI_NodeHandle parent);
 } ArkUI_NativeNodeAPI_1;
 
 /**
@@ -6842,35 +6852,35 @@ ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustom
 /**
  * @brief Adds a component to a node content.
  *
- * @param handle Indicates the pointer to the node content instance.
+ * @param content Indicates the pointer to the node content instance.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node);
 
 /**
  * @brief Adds a component to a node content.
  *
- * @param handle Indicates the pointer to the node content instance.
+ * @param content Indicates the pointer to the node content instance.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position);
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node, int32_t position);
 
 /**
  * @brief Removes a component from a node content.
  *
- * @param handle Indicates the pointer to the node content.
+ * @param content Indicates the pointer to the node content.
  * @param node Indicates the pointer to the node.
  * @return Returns 0 if success.
  *         Returns 401 if a parameter exception occurs.
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_NodeHandle node);
 
 /**
  * @brief Defines the node content event type.
@@ -6901,12 +6911,12 @@ typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
 /**
  * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
  *
- * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
+ * @param content Indicates the <b>ArkUI_NodeContentHandle</b> instance.
  * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b>
  * @return Returns the status code
  * @since 12
  */
-int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, ArkUI_NodeContentCallback callback);
 
 /**
  * @brief Obtains the type of a node content.
@@ -6916,6 +6926,36 @@ int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, Ar
  * @since 12
  */
 ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Obtains the node content object that triggers a node content event.
+ *
+ * @param event Indicates the pointer to the node content event.
+ * @return Returns the node content object that triggers the node content event.
+ * @since 12
+ */
+ArkUI_NodeContentHandle OH_ArkUI_NodeContentEvent_GetNodeContentHandle(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Saves custom data on the specified node content.
+ *
+ * @param content Indicates the node content on which the custom data will be saved.
+ * @param userData Indicates the custom data to be saved.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* userData);
+
+/**
+ * @brief Obtains the custom data saved on the specified node content.
+ *
+ * @param content Indicates the target node content.
+ * @return Returns the custom data.
+ * @since 12
+ */
+void* OH_ArkUI_NodeContent_GetUserData(ArkUI_NodeContentHandle content);
 
 /**
  * @brief Get the size of the component layout area.

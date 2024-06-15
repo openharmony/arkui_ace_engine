@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/dialog_container.h"
 
+#include <mutex>
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -282,16 +284,12 @@ void DialogContainer::DestroyView()
 {
     TAG_LOGI(AceLogTag::ACE_DIALOG, "DialogContainer DestroyView begin");
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(aceView_);
-    auto* aceView = static_cast<AceViewOhos*>(aceView_);
-    if (aceView) {
-        aceView->DecRefCount();
-    }
+    std::lock_guard<std::mutex> lock(viewMutex_);
     aceView_ = nullptr;
 }
 
 void DialogContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
+    const RefPtr<AceView>& view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
 {
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
@@ -310,7 +308,7 @@ void DialogContainer::SetView(
 }
 
 void DialogContainer::SetViewNew(
-    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
+    const RefPtr<AceView>& view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
@@ -324,13 +322,13 @@ void DialogContainer::SetViewNew(
 #endif
 }
 
-void DialogContainer::AttachView(
-    std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height, uint32_t windowId)
+void DialogContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density,
+    int32_t width, int32_t height, uint32_t windowId)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
     auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
-    auto* aceView = static_cast<AceViewOhos*>(aceView_);
+    auto aceView = AceType::DynamicCast<AceViewOhos>(aceView_);
     ACE_DCHECK(aceView != nullptr);
     taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     ContainerScope scope(instanceId);

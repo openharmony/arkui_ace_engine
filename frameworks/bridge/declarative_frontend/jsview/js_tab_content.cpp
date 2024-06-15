@@ -386,6 +386,20 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     return true;
 }
 
+bool ParseTabsIsRtl()
+{
+    auto tabContentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(tabContentNode, false);
+    auto swiperNode = tabContentNode->GetParent();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto tabsNode = AceType::DynamicCast<NG::TabsNode>(swiperNode->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto layoutProperty = tabsNode->GetLayoutProperty<NG::TabsLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    return isRTL;
+}
+
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
@@ -438,15 +452,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     }
     if (info->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
-        auto tabContentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(tabContentNode);
-        auto swiperNode = tabContentNode->GetParent();
-        CHECK_NULL_VOID(swiperNode);
-        auto tabsNode = AceType::DynamicCast<NG::TabsNode>(swiperNode->GetParent());
-        CHECK_NULL_VOID(tabsNode);
-        auto layoutProperty = tabsNode->GetLayoutProperty<NG::TabsLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        bool isRTL = ParseTabsIsRtl();
         CalcDimension start;
         CalcDimension end;
         CalcDimension top;

@@ -128,6 +128,8 @@ public:
         return false;
     }
 
+    virtual RefPtr<AceView> GetAceView() const = 0;
+
     virtual void* GetView() const = 0;
 
     // Trigger garbage collection
@@ -292,15 +294,19 @@ public:
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
 
+    static int32_t SafelyId();
     static int32_t CurrentId();
     static int32_t CurrentIdSafely();
     static RefPtr<Container> Current();
     static RefPtr<Container> CurrentSafely();
+    static RefPtr<Container> CurrentSafelyWithCheck();
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
+    static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
+    static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
 
     void SetUseNewPipeline()

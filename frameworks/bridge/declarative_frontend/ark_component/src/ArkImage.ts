@@ -546,6 +546,34 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
   }
 }
 
+class ImageOnErrorModifier extends ModifierWithKey<(result: {componentWidth: number; componentHeight: number; message: string}) => void> {
+    constructor(value: (event: {componentWidth: number; componentHeight: number; message: string}) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageOnError');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnError(node);
+    } else {
+      getUINativeModule().image.setOnError(node, this.value);
+    }
+  }
+}
+
+class ImageOnFinishModifier extends ModifierWithKey<VoidCallback> {
+    constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageOnFinish');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnFinish(node);
+    } else {
+      getUINativeModule().image.setOnFinish(node, this.value);
+    }
+  }
+}
+
 class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
   constructor(value: PointLightStyle) {
     super(value);
@@ -585,7 +613,39 @@ class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
     !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
-
+class ImageOnCompleteModifier extends ModifierWithKey<(event?: {
+  width: number;
+  height: number;
+  componentWidth: number;
+  componentHeight: number;
+  loadingStatus: number;
+  contentWidth: number;
+  contentHeight: number;
+  contentOffsetX: number;
+  contentOffsetY: number;
+}) => void> {
+  constructor(value: (event?: {
+    width: number;
+    height: number;
+    componentWidth: number;
+    componentHeight: number;
+    loadingStatus: number;
+    contentWidth: number;
+    contentHeight: number;
+    contentOffsetX: number;
+    contentOffsetY: number;
+  }) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageOnComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnComplete(node);
+    } else {
+      getUINativeModule().image.setOnComplete(node, this.value);
+    }
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -689,18 +749,20 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       contentOffsetY: number;
     }) => void,
   ): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, value);
+    return this;
   }
-
   onError(callback: (event: {
     componentWidth: number;
     componentHeight: number;
     message: string
   }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnErrorModifier.identity, ImageOnErrorModifier, callback);
+    return this;
   }
   onFinish(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnFinishModifier.identity, ImageOnFinishModifier, event);
+    return this;
   }
   border(value: BorderOptions): this {
     modifierWithKey(this._modifiersWithKeys, ImageBorderModifier.identity, ImageBorderModifier, value);

@@ -38,6 +38,7 @@ constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int YEAR_1900 = 1900;
+constexpr int YEAR_1970 = 1970;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
@@ -63,11 +64,11 @@ ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -140,11 +141,11 @@ ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -217,11 +218,11 @@ ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -331,7 +332,13 @@ void SetStartDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    DatePickerModelNG::SetStartDate(frameNode, PickerDate(year, month, day));
+    auto pickerDate = PickerDate(year, month, day);
+    if (pickerDate.GetYear() < YEAR_1900) {
+        pickerDate.SetYear(YEAR_1970);
+        pickerDate.SetMonth(1);
+        pickerDate.SetDay(1);
+    }
+    DatePickerModelNG::SetStartDate(frameNode, pickerDate);
 }
 
 void ResetStartDate(ArkUINodeHandle node)

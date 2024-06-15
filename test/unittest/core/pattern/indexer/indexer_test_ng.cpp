@@ -29,13 +29,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -93,8 +93,10 @@ void IndexerTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_INDEXER);
+    auto indexerTheme = IndexerTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(indexerTheme));
 }
 
 void IndexerTestNg::TearDownTestSuite()

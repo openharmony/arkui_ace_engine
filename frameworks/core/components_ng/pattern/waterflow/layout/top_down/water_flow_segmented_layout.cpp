@@ -22,8 +22,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/calc_length.h"
@@ -124,7 +124,7 @@ namespace {
  */
 float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
 {
-    if (info->endIndex_ == -1) {
+    if (info->endIndex_ == -1 || info->jumpIndex_ != EMPTY_JUMP_INDEX) {
         // implies that LayoutInfo has already been reset, no need to jump
         return 0.0f;
     }
@@ -177,6 +177,10 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 
     if (!wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
+    }
+
+    if (info_->extraOffset_) {
+        postJumpOffset_ += *info_->extraOffset_;
     }
 }
 
@@ -334,10 +338,6 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
         info_->align_ = TransformAutoScroll(item);
     }
     info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
-    if (info_->extraOffset_.has_value()) {
-        info_->currentOffset_ += info_->extraOffset_.value();
-        info_->extraOffset_.reset();
-    }
 
     Fill(jumpIdx);
     info_->Sync(mainSize_, false);

@@ -135,6 +135,7 @@ private:
     void FireMediaPlayerError();
     void OnResolutionChange();
     void OnStartRenderFrame();
+    void OnStartedStatusCallback();
 
     void Start();
     void Pause();
