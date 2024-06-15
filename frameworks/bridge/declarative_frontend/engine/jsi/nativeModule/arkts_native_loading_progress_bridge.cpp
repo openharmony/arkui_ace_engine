@@ -114,7 +114,7 @@ ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRun
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         LoadingProgressModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -137,11 +137,11 @@ ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRun
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, 2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, LOADINGPROGRESS_NODEPTR_OF_UINODE));

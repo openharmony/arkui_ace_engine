@@ -114,17 +114,17 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string backgroundUri;
-    if (backgroundUriArg->IsString()) {
+    if (backgroundUriArg->IsString(vm)) {
         backgroundUri = backgroundUriArg->ToString(vm)->ToString();
     }
 
     std::string foregroundUri;
-    if (foregroundUriArg->IsString()) {
+    if (foregroundUriArg->IsString(vm)) {
         foregroundUri = foregroundUriArg->ToString(vm)->ToString();
     }
 
     std::string secondaryUri;
-    if (secondaryUriArg->IsString()) {
+    if (secondaryUriArg->IsString(vm)) {
         secondaryUri = secondaryUriArg->ToString(vm)->ToString();
     }
 
@@ -154,7 +154,7 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         RatingModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -180,11 +180,11 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto makeFunc = obj.ToLocal()->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, obj.ToLocal(), params, 2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             panda::Local<panda::JSValueRef> nodeptr =
                 result->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, NODEPTR_OF_UINODE));
             CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);

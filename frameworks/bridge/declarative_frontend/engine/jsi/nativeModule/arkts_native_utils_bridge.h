@@ -64,7 +64,7 @@ T* GetPointerField(ArkUIRuntimeCallInfo* runtimeCallInfo)
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, nullptr);
     Local<JSValueRef> thisRef = runtimeCallInfo->GetThisRef();
-    if (!thisRef->IsObject()) {
+    if (!thisRef->IsObject(vm)) {
         return nullptr;
     }
     Local<panda::ObjectRef> thisObj = thisRef->ToObject(vm);

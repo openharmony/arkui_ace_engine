@@ -427,7 +427,7 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
     JSRenderImage* jsImage = nullptr;
     Local<panda::StringRef> keyObj = panda::StringRef::GetNapiWrapperString(vm);
     Local<panda::JSValueRef> valObj = nativeObject->Get(vm, keyObj);
-    if (valObj->IsObject()) {
+    if (valObj->IsObject(vm)) {
         Local<panda::ObjectRef> ext(valObj);
         auto ref = reinterpret_cast<NativeReference*>(ext->GetNativePointerField(0));
         jsImage = ref != nullptr ? reinterpret_cast<JSRenderImage*>(ref->GetData()) : nullptr;

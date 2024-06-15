@@ -245,7 +245,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -277,7 +277,7 @@ panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* 
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -296,7 +296,7 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsFunction()) {
+    if (!firstArg->IsFunction(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 #ifdef DYNAMIC_COMPONENT_SUPPORT
@@ -311,11 +311,11 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     }
 #endif
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (!secondArg->IsString()) {
+    if (!secondArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
-    if (!thirdArg->IsObject()) {
+    if (!thirdArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -336,13 +336,13 @@ panda::Local<panda::JSValueRef> JsNavigationRegister(panda::JsiRuntimeCallInfo* 
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> nameProp = runtimeCallInfo->GetCallArgRef(0);
-    if (!nameProp->IsString()) {
+    if (!nameProp->IsString(vm)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "name is invalid");
         return panda::JSValueRef::Undefined(vm);
     }
     std::string name = nameProp->ToString(vm)->ToString();
     Local<JSValueRef> builderProp = runtimeCallInfo->GetCallArgRef(1);
-    if (!builderProp->IsObject()) {
+    if (!builderProp->IsObject(vm)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get builder object failed: %{public}s", name.c_str());
         return panda::JSValueRef::Undefined(vm);
     }
@@ -364,12 +364,12 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -380,7 +380,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     auto value = panda::JSON::Stringify(vm, secondArg);
-    if (!value->IsString()) {
+    if (!value->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto valueStr = panda::Local<panda::StringRef>(value);
@@ -416,7 +416,7 @@ panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -470,7 +470,7 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
     uint32_t numOfComponent = componentNum->Value();
     for (uint32_t index = 1; index <= numOfComponent * 2; index++) { // 2: each component pass two args, name and itself
         Local<JSValueRef> componentName = runtimeCallInfo->GetCallArgRef(index);
-        if (!componentName->IsString()) {
+        if (!componentName->IsString(vm)) {
             return panda::JSValueRef::Undefined(vm);
         }
         std::string name = componentName->ToString(vm)->ToString();
@@ -510,7 +510,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsString()) {
+    if (!firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -534,7 +534,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
             std::vector<std::string> arrayResult;
             for (auto i = 0U; i < len; i++) {
                 auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
-                if (!subItemVal->IsString()) {
+                if (!subItemVal->IsString(vm)) {
                     arrayResult.emplace_back(std::string());
                     continue;
                 }
@@ -542,9 +542,9 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
                 arrayResult.emplace_back(itemVal->ToString());
             }
             ReplacePlaceHolderArray(resultStr, arrayResult);
-        } else if (secondArg->IsObject()) {
+        } else if (secondArg->IsObject(vm)) {
             auto value = panda::JSON::Stringify(vm, secondArg);
-            if (value->IsString()) {
+            if (value->IsString(vm)) {
                 auto valueStr = panda::Local<panda::StringRef>(value);
                 std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString());
                 ReplacePlaceHolder(resultStr, argsPtr);
@@ -569,7 +569,7 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsString()) {
+    if (!firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -688,7 +688,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
         auto len = arrayVal->Length(vm);
         for (auto i = 0U; i < len; i++) {
             auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
-            if (!subItemVal->IsString()) {
+            if (!subItemVal->IsString(vm)) {
                 JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
@@ -725,7 +725,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
     NG::InspectorFilter filter;
     // get component id
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsString()) {
+    if (!firstArg->IsString(vm)) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
@@ -756,7 +756,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
         auto len = arrayVal->Length(vm);
         for (auto i = 0U; i < len; i++) {
             auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
-            if (!subItemVal->IsString()) {
+            if (!subItemVal->IsString(vm)) {
                 JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
@@ -782,7 +782,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 1 || !firstArg->IsString()) {
+    if (argc < 1 || !firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
@@ -815,7 +815,7 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 3 || !firstArg->IsString()) { // 3: arg numbers
+    if (argc < 3 || !firstArg->IsString(vm)) { // 3: arg numbers
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
@@ -872,7 +872,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 1 || !firstArg->IsObject()) {
+    if (argc < 1 || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -927,7 +927,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 1 || !firstArg->IsObject()) {
+    if (argc < 1 || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -979,7 +979,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 1 || !firstArg->IsObject()) {
+    if (argc < 1 || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -1178,7 +1178,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsString()) {
+    if (!firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     std::string backgroundColorStr = firstArg->ToString(vm)->ToString();
@@ -1202,7 +1202,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (argc < 1 || !firstArg->IsString()) {
+    if (argc < 1 || !firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     std::string inspectorKey = firstArg->ToString(vm)->ToString();

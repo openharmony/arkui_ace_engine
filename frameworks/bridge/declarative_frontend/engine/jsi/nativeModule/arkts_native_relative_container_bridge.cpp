@@ -57,7 +57,7 @@ void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
 {
     for (int32_t i = 0; i < referenceSize; i++) {
         Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
-        if (referencedId->IsString()) {
+        if (referencedId->IsString(vm)) {
             std::string str = referencedId->ToString(vm)->ToString();
             referencedIds.push_back(ParseStringToCharPtr(str));
         }
@@ -86,7 +86,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
     for (int32_t i = 0; i < size; i++) {
         ArkUIGuidelineStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
-        if (idVal->IsString()) {
+        if (idVal->IsString(vm)) {
             std::string str = idVal->ToString(vm)->ToString();
             info.id = ParseStringToCharPtr(str);
         }
@@ -149,7 +149,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
         Local<JSValueRef> directionVal = panda::ArrayRef::GetValueAt(vm, directionsArr, i);
         Local<JSValueRef> referencedIdVal = panda::ArrayRef::GetValueAt(vm, referenceIdsArr, i);
-        if (idVal->IsString()) {
+        if (idVal->IsString(vm)) {
             std::string str = idVal->ToString(vm)->ToString();
             info.id = ParseStringToCharPtr(str);
         }

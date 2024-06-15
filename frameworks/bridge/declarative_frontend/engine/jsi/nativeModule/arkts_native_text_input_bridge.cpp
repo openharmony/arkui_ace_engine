@@ -328,7 +328,7 @@ ArkUINativeModuleValue TextInputBridge::SetStyle(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "Inline") {
+    if (secondArg->IsString(vm) && secondArg->ToString(vm)->ToString() == "Inline") {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStyle(nativeNode,
             static_cast<int32_t>(InputStyle::INLINE));
     } else {
@@ -410,7 +410,7 @@ ArkUINativeModuleValue TextInputBridge::SetPasswordRules(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPasswordRules(nativeNode, value.c_str());
     } else {
@@ -591,7 +591,7 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputFontWeight(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string weight;
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         weight = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(nativeNode, weight.c_str());
     } else if (secondArg->IsNumber()) {
@@ -764,7 +764,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     
     std::string weight = DEFAULT_FONT_WEIGHT;
     if (!jsWeight->IsNull()) {
-        if (jsWeight->IsString()) {
+        if (jsWeight->IsString(vm)) {
             weight = jsWeight->ToString(vm)->ToString();
         }
         if (jsWeight->IsNumber()) {
@@ -1120,7 +1120,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontFeature(nativeNode, value.c_str());
     } else {
@@ -1317,7 +1317,7 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     int32_t style = static_cast<int32_t>(theme->GetCancelButtonStyle());
-    if (styleArg->IsString()) {
+    if (styleArg->IsString(vm)) {
         CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(styleArg->ToString(vm)->ToString());
         style = static_cast<int32_t>(cancelButtonStyle);
     }
@@ -1442,7 +1442,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnEditChange(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnEditChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1481,13 +1481,13 @@ ArkUINativeModuleValue TextInputBridge::SetInputFilter(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (inputFilterArg->IsUndefined() || inputFilterArg->IsNull() || !inputFilterArg->IsString()) {
+    if (inputFilterArg->IsUndefined() || inputFilterArg->IsNull() || !inputFilterArg->IsString(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFilter(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     std::string inputFilter = inputFilterArg->ToString(vm)->ToString();
     if (errorCallbackArg->IsUndefined() || errorCallbackArg->IsNull() ||
-        !errorCallbackArg->IsFunction()) {
+        !errorCallbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFilter(nativeNode, inputFilter.c_str(), nullptr);
     } else {
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
@@ -1525,7 +1525,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnSubmitWithEvent(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1569,7 +1569,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1611,7 +1611,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnTextSelectionChange(ArkUIRuntimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnTextSelectionChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1650,7 +1650,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnContentScroll(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnContentScroll(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1688,7 +1688,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnCopy(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1725,7 +1725,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnCut(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1762,7 +1762,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputOnPaste(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1924,7 +1924,7 @@ ArkUINativeModuleValue TextInputBridge::SetText(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputTextString(nativeNode, secondArg->ToString(vm)->
         ToString().c_str());
     } else {
@@ -1949,7 +1949,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholder(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderString(nativeNode, secondArg->
         ToString(vm)->ToString().c_str());
     } else {

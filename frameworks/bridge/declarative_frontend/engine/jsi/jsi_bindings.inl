@@ -412,7 +412,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    if (thisObj->IsProxy()) {
+    if (thisObj->IsProxy(vm)) {
         panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(thisObj);
         ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))->GetNativePointerField(0));
     }
@@ -555,10 +555,10 @@ template<typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (!newTarget->IsFunction()) {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    if (!newTarget->IsFunction(vm)) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(runtimeCallInfo->GetVM()));
     }
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     C* instance = FunctionUtils::ConstructFromTuple<C>(tuple);
@@ -578,7 +578,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::ConstructorInterceptor(panda::JsiRu
 {
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    if (!newTarget->IsFunction()) {
+    if (!newTarget->IsFunction(vm)) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     return constructor_(runtimeCallInfo);
@@ -589,7 +589,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (newTarget->IsFunction() && jsConstructor_) {
+    if (newTarget->IsFunction(vm) && jsConstructor_) {
         JsiCallbackInfo info(runtimeCallInfo);
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();

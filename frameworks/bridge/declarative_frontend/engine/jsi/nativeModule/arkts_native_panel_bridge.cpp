@@ -201,7 +201,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
         GetArkUINodeModifiers()->getPanelModifier()->resetPanelCustomHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().find("wrapContent") != std::string::npos) {
+    if (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString().find("wrapContent") != std::string::npos) {
         GetArkUINodeModifiers()->getPanelModifier()->setPanelCustomHeightByString(
             nativeNode, jsValue->ToString(vm)->ToString().c_str());
         return panda::JSValueRef::Undefined(vm);

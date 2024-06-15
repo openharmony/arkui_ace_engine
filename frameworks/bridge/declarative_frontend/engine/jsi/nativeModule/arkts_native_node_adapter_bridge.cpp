@@ -42,7 +42,7 @@ void SetAttachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pa
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto attachObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> attachFunc = attachObj;
     auto onAttachToNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, attachFunc)),
@@ -51,7 +51,7 @@ void SetAttachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pa
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
-        CHECK_NULL_VOID(function->IsFunction());
+        CHECK_NULL_VOID(function->IsFunction(vm));
         panda::Local<panda::JSValueRef> params[1] = { FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
         function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
     };
@@ -63,7 +63,7 @@ void SetDetachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pa
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto detachObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> detachFunc = detachObj;
     auto onDetachFromNode = [vm, func = JsWeak(panda::CopyableGlobal(vm, detachFunc)),
@@ -72,7 +72,7 @@ void SetDetachCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pa
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
-        CHECK_NULL_VOID(function->IsFunction());
+        CHECK_NULL_VOID(function->IsFunction(vm));
         function->Call(vm, thisRef.Lock().ToLocal(), {}, 0);
     };
     adapter->SetOnDetachFromNodeFunc(std::move(onDetachFromNode));
@@ -83,7 +83,7 @@ void SetGetIdCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pan
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto getIdObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> getIdFunc = getIdObj;
     auto onGetId = [vm, func = JsWeak(panda::CopyableGlobal(vm, getIdFunc)),
@@ -92,7 +92,7 @@ void SetGetIdCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Local<pan
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_RETURN(!function.IsEmpty(), index);
-        CHECK_NULL_RETURN(function->IsFunction(), index);
+        CHECK_NULL_RETURN(function->IsFunction(vm), index);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
         auto result = function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
         CHECK_NULL_RETURN(result->IsNumber(), index);
@@ -106,7 +106,7 @@ void SetCreateNewChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto createChildObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> createChildFunc = createChildObj;
     auto onCreateChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, createChildFunc)),
@@ -115,10 +115,10 @@ void SetCreateNewChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_RETURN(!function.IsEmpty(), nullptr);
-        CHECK_NULL_RETURN(function->IsFunction(), nullptr);
+        CHECK_NULL_RETURN(function->IsFunction(vm), nullptr);
         panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
         auto result = function->Call(vm, thisRef.Lock().ToLocal(), params, 1);
-        CHECK_NULL_RETURN(result->IsNativePointer(), nullptr);
+        CHECK_NULL_RETURN(result->IsNativePointer(vm), nullptr);
         return nodePtr(result->ToNativePointer(vm)->Value());
     };
     adapter->SetOnCreateNewChild(std::move(onCreateChild));
@@ -129,7 +129,7 @@ void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Lo
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto disposeChildObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> disposeChildFunc = disposeChildObj;
     auto onDisposeChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, disposeChildFunc)),
@@ -138,7 +138,7 @@ void SetDisposeChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Lo
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
-        CHECK_NULL_VOID(function->IsFunction());
+        CHECK_NULL_VOID(function->IsFunction(vm));
         panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, id),
             FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
         function->Call(vm, thisRef.Lock().ToLocal(), params, 2);
@@ -151,7 +151,7 @@ void SetUpdateChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Loc
 {
     CHECK_NULL_VOID(adapter);
     CHECK_NULL_VOID(!argRef->IsUndefined());
-    CHECK_NULL_VOID(argRef->IsFunction());
+    CHECK_NULL_VOID(argRef->IsFunction(vm));
     auto updateChildObj = argRef->ToObject(vm);
     panda::Local<panda::FunctionRef> updateChildFunc = updateChildObj;
     auto onUpdateChild = [vm, func = JsWeak(panda::CopyableGlobal(vm, updateChildFunc)),
@@ -160,7 +160,7 @@ void SetUpdateChildCallback(EcmaVM* vm, UINodeAdapter* adapter, const panda::Loc
         panda::TryCatch trycatch(vm);
         auto function = func.Lock();
         CHECK_NULL_VOID(!function.IsEmpty());
-        CHECK_NULL_VOID(function->IsFunction());
+        CHECK_NULL_VOID(function->IsFunction(vm));
         panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, id),
             FrameNodeBridge::MakeFrameNodeInfo(vm, node) };
         function->Call(vm, thisRef.Lock().ToLocal(), params, 2);

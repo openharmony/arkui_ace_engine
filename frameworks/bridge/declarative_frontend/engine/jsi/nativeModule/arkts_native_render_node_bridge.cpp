@@ -52,9 +52,9 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
 {
     auto obj = object.Lock();
     CHECK_NULL_VOID(!obj.IsEmpty());
-    CHECK_NULL_VOID(obj->IsObject());
+    CHECK_NULL_VOID(obj->IsObject(vm));
     auto funcObj = obj->Get(vm, funcName);
-    CHECK_NULL_VOID(funcObj->IsFunction());
+    CHECK_NULL_VOID(funcObj->IsFunction(vm));
     panda::Local<panda::FunctionRef> func = funcObj;
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
@@ -98,11 +98,11 @@ void RenderNodeBridge::SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_VOID(firstArg->IsObject());
+    CHECK_NULL_VOID(firstArg->IsObject(vm));
     auto obj = Local<panda::ObjectRef>(firstArg);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "draw");
     auto funcObj = obj->Get(vm, funcName);
-    CHECK_NULL_VOID(funcObj->IsFunction());
+    CHECK_NULL_VOID(funcObj->IsFunction(vm));
     auto drawCallback = [vm, object = JsWeak(panda::CopyableGlobal(vm, obj))](NG::DrawingContext& context) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -672,7 +672,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetCommandPathMask(ArkUIRuntimeCallInfo
 
     Local<JSValueRef> path = runtimeCallInfo->GetCallArgRef(1);
     std::string pathValue;
-    if (path->IsString()) {
+    if (path->IsString(vm)) {
         pathValue = path->ToString(vm)->ToString();
     }
 

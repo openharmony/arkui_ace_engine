@@ -161,7 +161,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString()) {
+        } else if (fontWeightArg->IsString(vm)) {
             fontWeight = fontWeightArg->ToString(vm)->ToString();
         }
     }
@@ -214,7 +214,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
     } else {
@@ -298,7 +298,7 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         TextClockModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -322,11 +322,11 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, NUM_2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, TEXTCLOCK_NODEPTR_OF_UINODE));

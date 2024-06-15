@@ -106,7 +106,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "none") {
+    if (secondArg->IsString(vm) && secondArg->ToString(vm)->ToString() == "none") {
         GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(nativeNode, TRANSPARENT_COLOR);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -315,7 +315,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeWidth(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension strokeWidth = CalcDimension(1.0, DimensionUnit::VP);
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         const std::string& value = secondArg->ToString(vm)->ToString();
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
     } else {

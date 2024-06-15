@@ -84,7 +84,7 @@ bool ConvertProgressRResourceColor(const EcmaVM* vm, const Local<JSValueRef>& it
 bool ConvertProgressResourceColor(
     const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
 {
-    if (!itemParam->IsObject()) {
+    if (!itemParam->IsObject(vm)) {
         return ConvertProgressRResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
@@ -201,7 +201,7 @@ void ParseStrokeWidth(
     CalcDimension strokeWidth = CalcDimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP);
     auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
 
-    if (strokeWidthArg->IsString()) {
+    if (strokeWidthArg->IsString(vm)) {
         const std::string& value = strokeWidthArg->ToString(vm)->ToString();
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_STROKE_WIDTH);
     } else {
@@ -226,7 +226,7 @@ void ParseBorderWidth(
     Local<JSValueRef> borderWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension borderWidth = CalcDimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
 
-    if (borderWidthArg->IsString()) {
+    if (borderWidthArg->IsString(vm)) {
         const std::string& value = borderWidthArg->ToString(vm)->ToString();
         borderWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_BORDER_WIDTH);
     } else {
@@ -286,7 +286,7 @@ void ParseScaleWidth(
     Local<JSValueRef> scaleWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension scaleWidth = CalcDimension(DEFAULT_SCALE_WIDTH, DimensionUnit::VP);
 
-    if (scaleWidthArg->IsString()) {
+    if (scaleWidthArg->IsString(vm)) {
         const std::string& value = scaleWidthArg->ToString(vm)->ToString();
         scaleWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_SCALE_WIDTH);
     } else {
@@ -353,7 +353,7 @@ void ParseContent(
 {
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(index);
     std::string content = contentArg->ToString(vm)->ToString();
-    progressStyle.content = (contentArg->IsString()) ? content.c_str() : nullptr;
+    progressStyle.content = (contentArg->IsString(vm)) ? content.c_str() : nullptr;
 }
 
 void ParseEnableScanEffect(
@@ -406,7 +406,7 @@ void ParseCapsuleFontWeight(
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString()) {
+        } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString();
         }
         progressStyle.fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
@@ -578,7 +578,7 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         ProgressModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -600,11 +600,11 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
         panda::TryCatch trycatch(vm);
         auto jsObject = obj.ToLocal();
         auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-        CHECK_NULL_RETURN(makeFunc->IsFunction(), nullptr);
+        CHECK_NULL_RETURN(makeFunc->IsFunction(vm), nullptr);
         panda::Local<panda::FunctionRef> func = makeFunc;
         auto result = func->Call(vm, jsObject, params, 2);
         JSNApi::ExecutePendingJob(vm);
-        if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject()) {
+        if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm)) {
             return nullptr;
         }
         auto resultObj = result->ToObject(vm);

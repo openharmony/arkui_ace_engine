@@ -65,7 +65,7 @@ panda::Local<panda::JSValueRef> JsSelectChangeCallback(panda::JsiRuntimeCallInfo
     auto obj = ref->ToObject(vm);
     FrameNode* frameNode = nullptr;
     if (obj->GetNativePointerFieldCount() < 1) {
-        if (!ref->IsProxy()) {
+        if (!ref->IsProxy(vm)) {
             return panda::JSValueRef::Undefined(vm);
         }
         auto frameNodeIdValue = obj->Get(vm, "frameNodeId_");
@@ -539,7 +539,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionWidth(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> optionWidthArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension width;
-    if (optionWidthArg->IsString()) {
+    if (optionWidthArg->IsString(vm)) {
         std::string modeFlag = optionWidthArg->ToString(vm)->ToString();
         if (modeFlag.compare("fit_content") == 0) {
             GetArkUINodeModifiers()->getSelectModifier()->setOptionWidthFitTrigger(nativeNode, false);
@@ -585,7 +585,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionHeight(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> optionHeightArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension height;
-    if (optionHeightArg->IsString()) {
+    if (optionHeightArg->IsString(vm)) {
         std::string modeFlag = optionHeightArg->ToString(vm)->ToString();
         if (ArkTSUtils::IsPercentStr(modeFlag)) {
             return panda::JSValueRef::Undefined(vm);
@@ -769,7 +769,7 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         SelectModelNG::ResetBuilderFunc(frameNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -788,11 +788,11 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, 2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, SELECT_NODEPTR_OF_UINODE));

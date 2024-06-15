@@ -303,7 +303,7 @@ void JSXComponent::RegisterOnCreate(const JsiExecutionContext& execCtx, const Lo
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 
@@ -328,7 +328,7 @@ void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const L
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 

@@ -10106,7 +10106,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     CHECK_NULL_VOID(vm);
     auto global = JSNApi::GetGlobalObject(vm);
     auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
-    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction()) {
+    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
         return;
     }
     auto obj = setCustomProperty->ToObject(vm);
@@ -10125,7 +10125,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
             auto global = JSNApi::GetGlobalObject(vm);
             auto removeCustomProperty = global->Get(vm,
                 panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
-            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction()) {
+            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
                 return;
             }
 
@@ -10143,7 +10143,7 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
     CHECK_NULL_VOID(vm);
     auto global = JSNApi::GetGlobalObject(vm);
     auto gestureModifier = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__gestureModifier__"));
-    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction()) {
+    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction(vm)) {
         return;
     }
     auto obj = gestureModifier->ToObject(vm);

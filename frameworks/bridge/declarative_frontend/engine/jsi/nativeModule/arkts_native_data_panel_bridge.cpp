@@ -72,7 +72,7 @@ bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS:
 
 bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
 {
-    if (!itemParam->IsObject()) {
+    if (!itemParam->IsObject(vm)) {
         return ConvertResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
@@ -180,7 +180,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getDataPanelModifier()->setNullTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getDataPanelModifier()->resetTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -298,7 +298,8 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
         strokeWidth = theme->GetThickness();
     }
 
-    if (jsValue->IsString() && (jsValue->ToString(vm)->ToString().empty()|| !StringUtils::StringToDimensionWithUnitNG(
+    if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString().empty() ||
+        !StringUtils::StringToDimensionWithUnitNG(
         jsValue->ToString(vm)->ToString(), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
@@ -330,7 +331,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         DataPanelModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -357,11 +358,11 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             panda::TryCatch trycatch(vm);
             auto jsObject = globalObj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            if (!makeFunc->IsFunction()) { return nullptr; }
+            if (!makeFunc->IsFunction(vm)) { return nullptr; }
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, 2);
             JSNApi::ExecutePendingJob(vm);
-            if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject()) { return nullptr; }
+            if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm)) { return nullptr; }
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr = resultObj->Get(vm,
                 panda::StringRef::NewFromUtf8(vm, DATA_PANEL_NODEPTR_OF_UINODE));

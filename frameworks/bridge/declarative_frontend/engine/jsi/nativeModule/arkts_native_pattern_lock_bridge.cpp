@@ -240,7 +240,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActivateCircleStyle(ArkU
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleColor(nativeNode);
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockActiveCircleRadius(nativeNode);
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockEnableWaveEffect(nativeNode);
@@ -257,7 +257,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActivateCircleStyle(ArkU
                 nativeNode, color.GetValue());
         }
         CalcDimension circleRadius;
-        if (jsRadius->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, jsRadius, circleRadius) &&
+        if (jsRadius->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, jsRadius, circleRadius) &&
             !(circleRadius.IsNonPositive())) {
             GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockActiveCircleRadius(
                 nativeNode, circleRadius.Value(), static_cast<int8_t>(circleRadius.Unit()));

@@ -48,7 +48,7 @@ void BindFunc(const Framework::JSCallbackInfo& info, const RefPtr<NG::FrameNode>
     auto global = JSNApi::GetGlobalObject(vm);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "__RemoveFromNodeControllerMap__");
     auto obj = global->Get(vm, funcName);
-    if (obj->IsFunction()) {
+    if (obj->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> detachFunc = obj;
         frameNode->SetOnNodeDestroyCallback([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
             panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
@@ -62,7 +62,7 @@ void AddToNodeControllerMap(EcmaVM* vm, int32_t nodeId, const Framework::JSRef<F
     auto global = JSNApi::GetGlobalObject(vm);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "__AddToNodeControllerMap__");
     auto obj = global->Get(vm, funcName);
-    if (obj->IsFunction()) {
+    if (obj->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> attachFunc = obj;
         panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId),
             panda::CopyableGlobal(vm, object->GetLocalHandle()).ToLocal() };

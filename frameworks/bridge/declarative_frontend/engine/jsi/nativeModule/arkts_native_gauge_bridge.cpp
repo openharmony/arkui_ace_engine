@@ -71,7 +71,7 @@ void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::
 void ConvertGradientColor(
     const EcmaVM* vm, const Local<JSValueRef>& itemParam, std::vector<NG::ColorStopArray>& colors, NG::GaugeType& type)
 {
-    if (!itemParam->IsObject()) {
+    if (!itemParam->IsObject(vm)) {
         type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
         return ConvertResourceColor(vm, itemParam, colors);
     }
@@ -370,7 +370,7 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeTrackShadow(ArkUIRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
 
-    if (!jsValue->IsObject()) {
+    if (!jsValue->IsObject(vm)) {
         GetArkUINodeModifiers()->getGaugeModifier()->resetShadowOptions(nativeNode);
         GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
@@ -449,7 +449,7 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeIndicator(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (valueArg->IsNull()) {
         GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, false);
-    } else if (valueArg->IsUndefined() || (!valueArg->IsObject())) {
+    } else if (valueArg->IsUndefined() || (!valueArg->IsObject(vm))) {
         GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorIconPath(nativeNode);
         GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorSpace(nativeNode);
         GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
@@ -464,7 +464,7 @@ ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         GaugeModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -487,11 +487,11 @@ ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, NUM_2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, GAUGE_NODEPTR_OF_UINODE));
