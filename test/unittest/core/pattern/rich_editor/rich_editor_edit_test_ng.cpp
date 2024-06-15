@@ -206,23 +206,21 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
     AddSpan("test1");
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    TextInsertValueInfo info;
-
     it->content = "test";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->moveLength_ = 2;
+    TextInsertValueInfo info;
+    richEditorPattern->UpdateSpanPosition();
 
+    richEditorPattern->caretPosition_ = 0;
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.spanIndex_, 0);
 
-    richEditorPattern->moveLength_ = -1;
+    richEditorPattern->caretPosition_ = 3;
     richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 2);
+    EXPECT_EQ(info.spanIndex_, 0);
 
-    richEditorPattern->moveLength_ = 5;
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 2);
+    EXPECT_EQ(info.spanIndex_, 1);
 }
 
 /**
@@ -461,6 +459,9 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCut002, TestSize.Level1)
      * @tc.steps: step2. call the callback function
      * @tc.expected: UpdateType_ and isEventCalled is valid
      */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
     richEditorPattern->copyOption_ = CopyOptions::InApp;
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->textSelector_.baseOffset = 0;

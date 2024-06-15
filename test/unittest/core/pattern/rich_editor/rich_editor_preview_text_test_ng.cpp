@@ -177,38 +177,46 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level1)
      * @tc.steps: step1. set typingStyle
      */
     TextStyle textStyle;
-    textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textStyle.SetTextShadows(SHADOWS);
-    textStyle.SetFontSize(FONT_SIZE_VALUE);
-    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
-    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
-    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
-    textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
-    textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     UpdateSpanStyle typingStyle;
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    typingStyle.updateTextColor = std::make_optional<Color>();
+    textStyle.SetTextShadows(SHADOWS);
+    typingStyle.updateTextShadows = std::make_optional<std::vector<Shadow>>();
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    typingStyle.updateFontSize = std::make_optional<double>();
+    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+    typingStyle.updateItalicFontStyle = std::make_optional<Ace::FontStyle>();
+    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
+    typingStyle.updateFontWeight = std::make_optional<FontWeight>();
+    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
+    typingStyle.updateFontFamily = std::make_optional<std::vector<std::string>>();
+    textStyle.SetTextDecoration(TEXT_DECORATION_VALUE);
+    typingStyle.updateTextDecoration = std::make_optional<TextDecoration>();
+    textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    typingStyle.updateTextDecorationColor = std::make_optional<Color>();
+
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
     /**
      * @tc.steps: step2. set previewText
      */
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
+    PreviewRange previewRange = { .start = -1, .end = -1 };
     richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
     /**
      * @tc.steps: step3. test previewText span textStyle
      */
-    auto previewTextRecord = richEditorPattern->previewTextRecord_;
+    auto& previewTextRecord = richEditorPattern->previewTextRecord_;
     auto previewTextSpan = previewTextRecord.previewTextSpan;
     ASSERT_NE(previewTextSpan, nullptr);
-    auto style = previewTextSpan->GetTextStyle();
-    EXPECT_EQ(style->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(style->GetTextShadows(), SHADOWS);
-    EXPECT_EQ(style->GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(style->GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(style->GetFontWeight(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(style->GetFontFamilies(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(style->GetTextDecoration(), TEXT_DECORATION_VALUE);
-    EXPECT_EQ(style->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    auto& style = previewTextSpan->fontStyle;
+    ASSERT_TRUE(style->HasTextColor());
+    EXPECT_EQ(style->GetTextColorValue(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(style->GetTextShadowValue(), SHADOWS);
+    EXPECT_EQ(style->GetFontSizeValue(), FONT_SIZE_VALUE);
+    EXPECT_EQ(style->GetItalicFontStyleValue(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(style->GetFontWeightValue(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(style->GetFontFamilyValue(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(style->GetTextDecorationValue(), TEXT_DECORATION_VALUE);
+    EXPECT_EQ(style->GetTextDecorationColorValue(), TEXT_DECORATION_COLOR_VALUE);
 }
 
 /**
