@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +28,7 @@ extern const char _binary_atomicserviceweb_abc_end[];
 namespace HMS::AtomicServiceWeb {
     static napi_value CheckUrl(napi_env env, napi_callback_info info)
     {
+        const int indexTwo = 2;
         size_t requireArgc = 3;
         size_t argc = 3;
         napi_value args[3] = { nullptr };
@@ -43,9 +43,9 @@ namespace HMS::AtomicServiceWeb {
         NAPI_CALL(env, napi_typeof(env, args[1], &domainTypeType));
         
         napi_valuetype urlType;
-        NAPI_CALL(env, napi_typeof(env, args[2], &urlType));
+        NAPI_CALL(env, napi_typeof(env, args[indexTwo], &urlType));
     
-        NAPI_ASSERT(env, bundleNameType == napi_string && domainTypeType == napi_string && urlType == napi_string, 
+        NAPI_ASSERT(env, bundleNameType == napi_string && domainTypeType == napi_string && urlType == napi_string,
             "Wrong argument type. String expected.");
     
         size_t maxValueLen = 1024;
@@ -61,7 +61,7 @@ namespace HMS::AtomicServiceWeb {
 
         char urlValue[maxValueLen];
         size_t urlLength = 0;
-        napi_get_value_string_utf8(env, args[2], urlValue, maxValueLen, &urlLength);
+        napi_get_value_string_utf8(env, args[indexTwo], urlValue, maxValueLen, &urlLength);
         std::string url = urlValue;
 
         auto apiPolicyAdapter = new ApiPolicyAdapter();

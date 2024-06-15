@@ -202,7 +202,8 @@ export class AtomicServiceWeb extends ViewPU {
 
     registerJavaScriptProxy() {
         try {
-            this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME, JAVA_SCRIPT_PROXY_API_NAME_LIST);
+            this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME,
+                JAVA_SCRIPT_PROXY_API_NAME_LIST);
         } catch (y9) {
             let z9 = y9;
             console.error(`AtomicServiceWeb registerJavaScriptProxy failed, code is ${z9.code}, message is ${z9.message}`);
@@ -285,7 +286,8 @@ class AtomicService {
     }
 
     error(e9, f9) {
-        f9?.callback && f9?.callback(new Error(e9.code ? e9.code : SYSTEM_INTERNAL_ERROR.code, e9.message ? e9.message : SYSTEM_INTERNAL_ERROR.message));
+        f9?.callback && f9?.callback(new Error(e9.code ? e9.code : SYSTEM_INTERNAL_ERROR.code,
+            e9.message ? e9.message : SYSTEM_INTERNAL_ERROR.message));
     }
 
     errorWithCodeAndMsg(c9, d9) {
@@ -318,7 +320,8 @@ class AtomicService {
 
     checkNumberParamPositive(s8, t8, u8) {
         if (t8 <= 0) {
-            this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE, `Param ${s8} must be a positive number.`), u8);
+            this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE,
+                `Param ${s8} must be a positive number.`), u8);
             return false;
         }
         return true;
@@ -381,7 +384,8 @@ class AtomicService {
 
     checkNavPathStack(y7, z7) {
         if (!this.navPathStack) {
-            this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE, `Current page is not NavDestination, not support ${y7}().`), z7);
+            this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
+                `Current page is not NavDestination, not support ${y7}().`), z7);
             return false;
         }
         return true;
@@ -404,8 +408,8 @@ class AtomicService {
 
     getCurrentNavPathInfo() {
         let s7 = this.navPathStack?.getAllPathName();
-        let t7 = (s7 && s7.length > 0) ? new NavPathInfo(s7[s7.length - 1], s7.length - 1) :
-            new NavPathInfo(undefined, -1);
+        let t7 = (s7 && s7.length > 0) ?
+            new NavPathInfo(s7[s7.length - 1], s7.length - 1) : new NavPathInfo(undefined, -1);
         if (t7.index >= 0) {
             t7.param = this.navPathStack?.getParamByIndex(t7.index);
         }
@@ -473,7 +477,8 @@ class AtomicService {
                 return new CheckUploadFileResult(false);
             }
             if (!z6.uri.startsWith('file://') && !fs.accessSync(z6.uri, fs.AccessModeType.EXIST)) {
-                this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE, `File uri ${z6.uri} is not exist.`), w6);
+                this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
+                    `File uri ${z6.uri} is not exist.`), w6);
                 return new CheckUploadFileResult(false);
             }
             let a7 = z6.uri;
@@ -853,7 +858,8 @@ class AtomicServiceApi extends AtomicService {
                 return;
             }
             connection.getNetCapabilities(z1).then(n2 => {
-                let t2 = new GetNetworkTypeResult(n2.bearerTypes, n2.networkCap, n2.linkUpBandwidthKbps, n2.linkDownBandwidthKbps);
+                let t2 = new GetNetworkTypeResult(n2.bearerTypes, n2.networkCap, n2.linkUpBandwidthKbps,
+                    n2.linkDownBandwidthKbps);
                 this.success(t2, v1);
             }).catch((j2) => {
                 this.error(j2, v1);
@@ -875,8 +881,9 @@ class AtomicServiceApi extends AtomicService {
                 maxAccuracy: n1.maxAccuracy,
                 timeoutMs: n1.timeoutMs
             }).then(t1 => {
-                let u1 = new GetLocationResult(t1.latitude, t1.longitude, t1.altitude, t1.accuracy, t1.speed, t1.timeStamp, t1.direction, t1.timeSinceBoot,
-                    t1.additions, t1.additionSize);
+                let u1 =
+                    new GetLocationResult(t1.latitude, t1.longitude, t1.altitude, t1.accuracy, t1.speed, t1.timeStamp,
+                        t1.direction, t1.timeSinceBoot, t1.additions, t1.additionSize);
                 this.success(u1, n1);
             }).catch((s1) => {
                 this.error(s1, n1);

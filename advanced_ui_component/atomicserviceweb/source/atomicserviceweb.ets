@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 import web_webview from '@ohos.web.webview';
 import router from '@ohos.router';
 import deviceInfo from '@ohos.deviceInfo';
@@ -61,7 +61,8 @@ const UPLOAD_IMAGE_CACHE_DIR: string = '/cache/';
 const JAVA_SCRIPT_PROXY_OBJECT_NAME: string = 'atomicServiceProxy';
 const JAVA_SCRIPT_PROXY_API_NAME_LIST: string[] = ['invokeJsApi'];
 const ATOMIC_SERVICE_JS_API_MAP = new Map<string, JsApiConfig>();
-const registerJsApi = (apiNameAlias: string, apiName: string, minVersion: string, maxVersion: string, requiredFieldNames: string[]): void => {
+const registerJsApi = (apiNameAlias: string, apiName: string, minVersion: string, maxVersion: string,
+  requiredFieldNames: string[]): void => {
   ATOMIC_SERVICE_JS_API_MAP.set(apiNameAlias, new JsApiConfig(apiName, minVersion, maxVersion, requiredFieldNames));
 };
 const MAX_VERSION = '99.99.99';
@@ -109,8 +110,8 @@ const NETWORK_NO_ACTIVE_ERROR: Error = new Error(200015, 'The network is not act
 @Component
 export struct AtomicServiceWeb {
   @Prop src: ResourceStr;
-  navPathStack?: NavPathStack;
-  onMessage?: (event?: OnMessageEvent) => void = () => {
+  public navPathStack?: NavPathStack;
+  public onMessage?: (event?: OnMessageEvent) => void = () => {
   };
   private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   private controller: web_webview.WebviewController = new web_webview.WebviewController();
@@ -154,7 +155,8 @@ export struct AtomicServiceWeb {
 
   registerJavaScriptProxy(): void {
     try {
-      this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME, JAVA_SCRIPT_PROXY_API_NAME_LIST);
+      this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME,
+        JAVA_SCRIPT_PROXY_API_NAME_LIST);
     } catch (error) {
       let e: BusinessError = error as BusinessError;
       console.error(`AtomicServiceWeb registerJavaScriptProxy failed, code is ${e.code}, message is ${e.message}`);
@@ -212,13 +214,14 @@ class AtomicServiceProxy {
 }
 
 class AtomicService {
-  context: common.UIAbilityContext;
-  navPathStack?: NavPathStack;
-  messageDataList: object[] = [];
-  onMessage: (event?: OnMessageEvent) => void = () => {
+  protected context: common.UIAbilityContext;
+  protected navPathStack?: NavPathStack;
+  protected messageDataList: object[] = [];
+  protected onMessage: (event?: OnMessageEvent) => void = () => {
   };
 
-  constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack, onMessage?: (event?: OnMessageEvent) => void) {
+  constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack,
+    onMessage?: (event?: OnMessageEvent) => void) {
     this.context = context;
     this.navPathStack = navPathStack;
     this.onMessage = onMessage ? onMessage : this.onMessage;
@@ -263,7 +266,8 @@ class AtomicService {
 
   checkNumberParamPositive<T>(paramKey: string, paramValue: number, options: BaseOptions<T>): boolean {
     if (paramValue <= 0) {
-      this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE, `Param ${paramKey} must be a positive number.`), options);
+      this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE,
+        `Param ${paramKey} must be a positive number.`), options);
       return false;
     }
     return true;
@@ -326,7 +330,8 @@ class AtomicService {
 
   checkNavPathStack<T>(apiName: string, options: BaseOptions<T>): boolean {
     if (!this.navPathStack) {
-      this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE, `Current page is not NavDestination, not support ${apiName}().`), options);
+      this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
+        `Current page is not NavDestination, not support ${apiName}().`), options);
       return false;
     }
     return true;
@@ -349,8 +354,8 @@ class AtomicService {
 
   getCurrentNavPathInfo(): NavPathInfo {
     let navPathStack: Array<string> | undefined = this.navPathStack?.getAllPathName();
-    let navPathInfo: NavPathInfo = (navPathStack && navPathStack.length > 0) ? new NavPathInfo(navPathStack[navPathStack.length - 1], navPathStack.length - 1) :
-      new NavPathInfo(undefined, -1);
+    let navPathInfo: NavPathInfo = (navPathStack && navPathStack.length > 0) ?
+      new NavPathInfo(navPathStack[navPathStack.length - 1], navPathStack.length - 1) : new NavPathInfo(undefined, -1);
     if (navPathInfo.index >= 0) {
       navPathInfo.param = this.navPathStack?.getParamByIndex(navPathInfo.index) as object;
     }
@@ -418,7 +423,8 @@ class AtomicService {
         return new CheckUploadFileResult(false);
       }
       if (!file.uri.startsWith('file://') && !fs.accessSync(file.uri, fs.AccessModeType.EXIST)) {
-        this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE, `File uri ${file.uri} is not exist.`), options);
+        this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
+          `File uri ${file.uri} is not exist.`), options);
         return new CheckUploadFileResult(false);
       }
       let originUri: string = file.uri;
@@ -470,12 +476,14 @@ class AtomicService {
     return requestFiles;
   }
 
-  handleUploadFileResult(taskStateArray: Array<request.TaskState>, uriMap: Map<string, string>, options: UploadFileOptions): void {
+  handleUploadFileResult(taskStateArray: Array<request.TaskState>, uriMap: Map<string, string>,
+    options: UploadFileOptions): void {
     let taskStates: UploadFileTaskState[] = [];
     if (taskStateArray) {
       taskStateArray.forEach(taskState => {
         let path: (string | undefined) = taskState.path ? uriMap.get(taskState.path) : taskState.path;
-        taskStates.push(new UploadFileTaskState(path ? path : taskState.path, taskState.responseCode, taskState.message));
+        taskStates.push(new UploadFileTaskState(path ? path : taskState.path, taskState.responseCode,
+          taskState.message));
       });
     }
     this.success(new UploadFileResult(taskStates), options);
@@ -496,7 +504,8 @@ class AtomicService {
     return http.substring(index + 1);
   }
 
-  saveDownloadFile(filePath: string, fileName: string, options: DownloadFileOptions, callback: (uri: string) => void): void {
+  saveDownloadFile(filePath: string, fileName: string, options: DownloadFileOptions,
+    callback: (uri: string) => void): void {
     let documentPicker = new filePicker.DocumentViewPicker();
     documentPicker.save({
       newFileNames: [fileName]
@@ -513,7 +522,8 @@ class AtomicService {
   }
 
   checkAccessToken(permissionName: Permissions): Promise<abilityAccessCtrl.GrantStatus> {
-    let bundleInfo: bundleManager.BundleInfo = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+    let bundleInfo: bundleManager.BundleInfo = bundleManager.getBundleInfoForSelfSync(
+      bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
     let tokenId: number = bundleInfo.appInfo.accessTokenId;
     let atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
     return atManager.checkAccessToken(tokenId, permissionName);
@@ -543,7 +553,8 @@ class AtomicService {
 }
 
 class AtomicServiceApi extends AtomicService {
-  constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack, onMessage?: (event?: OnMessageEvent) => void) {
+  constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack,
+    onMessage?: (event?: OnMessageEvent) => void) {
     super(context, navPathStack, onMessage);
   }
 
@@ -691,7 +702,8 @@ class AtomicServiceApi extends AtomicService {
       saveUri: options.saveUri,
       videoDuration: options.videoDuration
     }).then((pickerResult: picker.PickerResult) => {
-      this.success(new PickCameraResult(pickerResult.resultCode, pickerResult.resultUri, pickerResult.mediaType), options);
+      this.success(new PickCameraResult(pickerResult.resultCode, pickerResult.resultUri, pickerResult.mediaType),
+        options);
     }).catch((err: BusinessError) => {
       this.error(err, options);
     });
@@ -798,8 +810,8 @@ class AtomicServiceApi extends AtomicService {
         return;
       }
       connection.getNetCapabilities(netHandle).then(netCapabilities => {
-        let res: GetNetworkTypeResult = new GetNetworkTypeResult(netCapabilities.bearerTypes, netCapabilities.networkCap,
-          netCapabilities.linkUpBandwidthKbps, netCapabilities.linkDownBandwidthKbps);
+        let res: GetNetworkTypeResult = new GetNetworkTypeResult(netCapabilities.bearerTypes,
+          netCapabilities.networkCap, netCapabilities.linkUpBandwidthKbps, netCapabilities.linkDownBandwidthKbps);
         this.success(res, options);
       }).catch((err: BusinessError) => {
         this.error(err, options);
@@ -821,8 +833,9 @@ class AtomicServiceApi extends AtomicService {
         maxAccuracy: options.maxAccuracy,
         timeoutMs: options.timeoutMs
       }).then(location => {
-        let res: GetLocationResult = new GetLocationResult(location.latitude, location.longitude, location.altitude, location.accuracy, location.speed,
-          location.timeStamp, location.direction, location.timeSinceBoot, location.additions, location.additionSize);
+        let res: GetLocationResult = new GetLocationResult(location.latitude, location.longitude, location.altitude,
+          location.accuracy, location.speed, location.timeStamp, location.direction, location.timeSinceBoot,
+          location.additions, location.additionSize);
         this.success(res, options);
       }).catch((err: BusinessError) => {
         this.error(err, options);
@@ -832,9 +845,9 @@ class AtomicServiceApi extends AtomicService {
 }
 
 class NavPathInfo {
-  name: string | undefined;
-  index: number;
-  param?: object;
+  public name: string | undefined;
+  public index: number;
+  public param?: object;
 
   constructor(name: string | undefined, index: number) {
     this.name = name;
@@ -843,8 +856,8 @@ class NavPathInfo {
 }
 
 class CheckUploadFileResult {
-  checkResult: boolean;
-  uriMap?: Map<string, string>;
+  public checkResult: boolean;
+  public uriMap?: Map<string, string>;
 
   constructor(checkResult: boolean, uriMap?: Map<string, string>) {
     this.checkResult = checkResult;
@@ -853,32 +866,32 @@ class CheckUploadFileResult {
 }
 
 class BaseOptions<T> {
-  callback?: (err: Error | undefined, res?: T) => void;
+  public callback?: (err: Error | undefined, res?: T) => void;
 }
 
 class PushUrlOptions extends BaseOptions<PushUrlResult> {
-  url?: string;
-  params?: object;
-  mode?: string;
+  public url?: string;
+  public params?: object;
+  public mode?: string;
 }
 
 class PushUrlResult {
 }
 
 class ReplaceUrlOptions extends BaseOptions<ReplaceUrlResult> {
-  url?: string;
-  params?: object;
-  mode?: string;
+  public url?: string;
+  public params?: object;
+  public mode?: string;
 }
 
 class ReplaceUrlResult {
 }
 
 class BackUrlOptions extends BaseOptions<BackUrlResult> {
-  url?: string;
-  index?: number;
-  delta?: number;
-  params?: object;
+  public url?: string;
+  public index?: number;
+  public delta?: number;
+  public params?: object;
 }
 
 class BackUrlResult {
@@ -891,9 +904,9 @@ class ClearUrlResult {
 }
 
 class OnPopEvent {
-  name?: string;
-  param?: object;
-  result?: object;
+  public name?: string;
+  public param?: object;
+  public result?: object;
 
   constructor(name?: string, param?: object, result?: object) {
     this.name = name;
@@ -903,37 +916,37 @@ class OnPopEvent {
 }
 
 class PushPathOptions extends BaseOptions<PushPathResult> {
-  name?: string;
-  param?: object;
-  animated?: boolean;
-  onPop?: (event: OnPopEvent) => void;
+  public name?: string;
+  public param?: object;
+  public animated?: boolean;
+  public onPop?: (event: OnPopEvent) => void;
 }
 
 class PushPathResult {
 }
 
 class ReplacePathOptions extends BaseOptions<ReplacePathResult> {
-  name?: string;
-  param?: object;
-  animated?: boolean;
-  onPop?: (event: OnPopEvent) => void;
+  public name?: string;
+  public param?: object;
+  public animated?: boolean;
+  public onPop?: (event: OnPopEvent) => void;
 }
 
 class ReplacePathResult {
 }
 
 class PopPathOptions extends BaseOptions<PopPathResult> {
-  name?: string;
-  index?: number;
-  delta?: number;
-  result?: object;
-  animated?: boolean;
+  public name?: string;
+  public index?: number;
+  public delta?: number;
+  public result?: object;
+  public animated?: boolean;
 }
 
 class PopPathResult {
-  name: string | undefined;
-  index: number;
-  param?: object;
+  public name: string | undefined;
+  public index: number;
+  public param?: object;
 
   constructor(name: string | undefined, index: number, param?: object) {
     this.name = name;
@@ -943,39 +956,39 @@ class PopPathResult {
 }
 
 class ClearPathOptions extends BaseOptions<ClearPathResult> {
-  animated?: boolean;
+  public animated?: boolean;
 }
 
 class ClearPathResult {
 }
 
 class PostMessageOptions extends BaseOptions<PostMessageResult> {
-  data?: object;
+  public data?: object;
 }
 
 class PostMessageResult {
 }
 
 export class OnMessageEvent {
-  data?: object[];
+  public data?: object[];
 }
 
 class GetEnvOptions extends BaseOptions<GetEnvResult> {
 }
 
 class GetEnvResult {
-  deviceType?: string;
-  brand?: string;
-  productModel?: string;
-  osFullName?: string;
+  public deviceType?: string;
+  public brand?: string;
+  public productModel?: string;
+  public osFullName?: string;
 }
 
 class CheckJsApiOptions extends BaseOptions<CheckJsApiResult> {
-  jsApiList?: string[];
+  public jsApiList?: string[];
 }
 
 class CheckJsApiResult {
-  checkResult?: Map<string, boolean>;
+  public checkResult?: Map<string, boolean>;
 
   constructor(checkResult?: Map<string, boolean>) {
     this.checkResult = checkResult;
@@ -983,16 +996,16 @@ class CheckJsApiResult {
 }
 
 class PickCameraOptions extends BaseOptions<PickCameraResult> {
-  mediaTypes?: string[];
-  cameraPosition?: number;
-  saveUri?: string;
-  videoDuration?: number;
+  public mediaTypes?: string[];
+  public cameraPosition?: number;
+  public saveUri?: string;
+  public videoDuration?: number;
 }
 
 class PickCameraResult {
-  resultCode?: number;
-  resultUri?: string;
-  mediaType?: string;
+  public resultCode?: number;
+  public resultUri?: string;
+  public mediaType?: string;
 
   constructor(resultCode?: number, resultUri?: string, mediaType?: string) {
     this.resultCode = resultCode;
@@ -1002,18 +1015,18 @@ class PickCameraResult {
 }
 
 class SelectPhotoOptions extends BaseOptions<SelectPhotoResult> {
-  mimeType?: string;
-  maxSelectNumber?: number;
-  isPhotoTakingSupported?: boolean;
-  isEditSupported?: boolean;
-  isSearchSupported?: boolean;
-  recommendationType?: number;
-  preselectedUris?: string[];
+  public mimeType?: string;
+  public maxSelectNumber?: number;
+  public isPhotoTakingSupported?: boolean;
+  public isEditSupported?: boolean;
+  public isSearchSupported?: boolean;
+  public recommendationType?: number;
+  public preselectedUris?: string[];
 }
 
 class SelectPhotoResult {
-  photoUris?: string[];
-  isOriginalPhoto?: boolean;
+  public photoUris?: string[];
+  public isOriginalPhoto?: boolean;
 
   constructor(photoUris?: string[], isOriginalPhoto?: boolean) {
     this.photoUris = photoUris;
@@ -1022,27 +1035,27 @@ class SelectPhotoResult {
 }
 
 class OpenPreviewOptions extends BaseOptions<OpenPreviewResult> {
-  title?: string;
-  uri?: string;
-  mimeType?: string;
+  public title?: string;
+  public uri?: string;
+  public mimeType?: string;
 }
 
 class OpenPreviewResult {
 }
 
 class UploadFileOptions extends BaseOptions<UploadFileResult> {
-  url?: string;
-  header?: object;
-  method?: string;
-  files?: UploadFile[];
-  data?: UploadRequestData[];
+  public url?: string;
+  public header?: object;
+  public method?: string;
+  public files?: UploadFile[];
+  public data?: UploadRequestData[];
 }
 
 class UploadFile {
-  filename: string;
-  name: string;
-  uri: string;
-  type: string;
+  public filename: string;
+  public name: string;
+  public uri: string;
+  public type: string;
 
   constructor(filename: string, name: string, uri: string, type: string) {
     this.filename = filename;
@@ -1053,12 +1066,12 @@ class UploadFile {
 }
 
 class UploadRequestData {
-  name?: string;
-  value?: string;
+  public name?: string;
+  public value?: string;
 }
 
 class UploadFileResult {
-  taskStates?: UploadFileTaskState[];
+  public taskStates?: UploadFileTaskState[];
 
   constructor(taskStates?: UploadFileTaskState[]) {
     this.taskStates = taskStates;
@@ -1066,9 +1079,9 @@ class UploadFileResult {
 }
 
 class UploadFileTaskState {
-  path?: string;
-  responseCode?: number;
-  message?: string;
+  public path?: string;
+  public responseCode?: number;
+  public message?: string;
 
   constructor(path?: string, responseCode?: number, message?: string) {
     this.path = path;
@@ -1078,16 +1091,16 @@ class UploadFileTaskState {
 }
 
 class DownloadFileOptions extends BaseOptions<DownloadFileResult> {
-  url?: string;
-  header?: object;
-  fileName?: string;
-  enableMetered?: boolean;
-  enableRoaming?: boolean;
-  networkType?: number;
+  public url?: string;
+  public header?: object;
+  public fileName?: string;
+  public enableMetered?: boolean;
+  public enableRoaming?: boolean;
+  public networkType?: number;
 }
 
 class DownloadFileResult {
-  uri?: string;
+  public uri?: string;
 
   constructor(uri?: string) {
     this.uri = uri;
@@ -1098,12 +1111,13 @@ class GetNetworkTypeOptions extends BaseOptions<GetNetworkTypeResult> {
 }
 
 class GetNetworkTypeResult {
-  bearerTypes: number[];
-  networkCap?: number[];
-  linkUpBandwidthKbps?: number;
-  linkDownBandwidthKbps?: number;
+  public bearerTypes: number[];
+  public networkCap?: number[];
+  public linkUpBandwidthKbps?: number;
+  public linkDownBandwidthKbps?: number;
 
-  constructor(bearerTypes: number[], networkCap?: number[], linkUpBandwidthKbps?: number, linkDownBandwidthKbps?: number) {
+  constructor(bearerTypes: number[], networkCap?: number[], linkUpBandwidthKbps?: number,
+    linkDownBandwidthKbps?: number) {
     this.bearerTypes = bearerTypes;
     this.networkCap = networkCap;
     this.linkUpBandwidthKbps = linkUpBandwidthKbps;
@@ -1112,23 +1126,23 @@ class GetNetworkTypeResult {
 }
 
 class GetLocationOptions extends BaseOptions<GetLocationResult> {
-  priority?: number;
-  scenario?: number;
-  maxAccuracy?: number;
-  timeoutMs?: number;
+  public priority?: number;
+  public scenario?: number;
+  public maxAccuracy?: number;
+  public timeoutMs?: number;
 }
 
 class GetLocationResult {
-  latitude: number;
-  longitude: number;
-  altitude: number;
-  accuracy: number;
-  speed: number;
-  timeStamp: number;
-  direction: number;
-  timeSinceBoot: number;
-  additions?: string[] | undefined;
-  additionSize?: number;
+  public latitude: number;
+  public longitude: number;
+  public altitude: number;
+  public accuracy: number;
+  public speed: number;
+  public timeStamp: number;
+  public direction: number;
+  public timeSinceBoot: number;
+  public additions?: string[] | undefined;
+  public additionSize?: number;
 
   constructor(latitude: number, longitude: number, altitude: number, accuracy: number, speed: number,
     timeStamp: number, direction: number, timeSinceBoot: number, additions?: string[], additionSize?: number) {

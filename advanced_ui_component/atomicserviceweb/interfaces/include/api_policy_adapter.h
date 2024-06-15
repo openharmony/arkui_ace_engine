@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef API_POLICY_ADAPTER_H
+#define API_POLICY_ADAPTER_H
+
 #include "string"
 
 class ApiPolicyAdapter {
@@ -25,3 +28,5 @@ public:
 private:
     void *handle = nullptr;
 };
+
+#endif
