@@ -114,6 +114,7 @@ public:
         int32_t spanIndex = INVALID_VALUE;
         int32_t currentClickedPosition = INVALID_VALUE;
         bool isPreviewTextInputting = false;
+        bool exitPreviewBySelf = false;
         std::string deltaStr;
         RefPtr<SpanItem> previewTextSpan;
         RefPtr<SpanNode> beforeSpanNode = nullptr;
@@ -142,6 +143,7 @@ public:
             spanIndex = INVALID_VALUE;
             currentClickedPosition = INVALID_VALUE;
             isPreviewTextInputting = false;
+            exitPreviewBySelf = false;
             deltaStr.clear();
             previewTextSpan = nullptr;
             beforeSpanNode = nullptr;
@@ -402,6 +404,7 @@ public:
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
     void DeleteSpans(const RangeOptions& options);
+    void DeleteSpansOperation(int32_t start, int32_t end);
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
@@ -1046,6 +1049,7 @@ private:
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
+    void NotifyExitTextPreview();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
