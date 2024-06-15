@@ -2206,19 +2206,6 @@ void WebPattern::InitEnhanceSurfaceFlag()
     }
 }
 
-void WebPattern::UpdateBackgroundColorForSurface()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (renderContext->GetBackgroundColor().has_value() &&
-        renderContext->GetBackgroundColor().value() != Color::TRANSPARENT) {
-        renderContextForSurface_->UpdateBackgroundColor(Color::WHITE);
-    }
-}
-
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2258,10 +2245,9 @@ void WebPattern::OnModifyDone()
             CHECK_NULL_VOID(renderSurface_);
             renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            if (renderMode_ == RenderMode::ASYNC_RENDER) {
-                static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
-                renderContextForSurface_->InitContext(false, param);
-            }
+            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                "RosenWeb" };
+            renderContextForSurface_->InitContext(false, param);
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2269,12 +2255,11 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
-                UpdateBackgroundColorForSurface();
                 renderSurface_->SetIsTexture(false);
                 renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
                 renderSurface_->SetRenderContext(renderContextForSurface_);
-                renderContext->AddChild(renderContextForSurface_, 0);
             }
+            renderContext->AddChild(renderContextForSurface_, 0);
             renderSurface_->InitSurface();
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
