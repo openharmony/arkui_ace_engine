@@ -511,7 +511,7 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
         return false;
     }
     auto arrayRef = Local<ArrayRef>(arg);
-    int32_t length = arrayRef->Length(info_->GetVM());
+    uint32_t length = arrayRef->Length(info_->GetVM());
     valueArr.reserve(length);
     for (int32_t i = 0; i < length; ++i) {
         auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);

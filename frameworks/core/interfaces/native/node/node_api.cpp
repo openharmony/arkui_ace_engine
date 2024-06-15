@@ -16,8 +16,10 @@
 #include "core/interfaces/native/node/node_api.h"
 
 #include <deque>
+#include <securec.h>
 
 #include "base/error/error_code.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
@@ -1333,13 +1335,17 @@ __attribute__((constructor)) static void provideEntryPoint(void)
 #ifdef WINDOWS_PLATFORM
     // mingw has no setenv :(.
     static char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "__LIBACE_ENTRY_POINT=%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     putenv(entryPointString);
 #else
     char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
 #endif
 }

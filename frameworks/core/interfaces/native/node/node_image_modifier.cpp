@@ -449,7 +449,7 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     auto filterFloatArray = ImageModelNG::GetColorFilter(frameNode);
     colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE ? filterFloatArray.size() :
         MAX_COLOR_FILTER_SIZE;
-    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
+    for (uint32_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
 }
