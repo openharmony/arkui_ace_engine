@@ -1401,35 +1401,36 @@ void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonC
     }
 }
 
-void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notPercent,
+    bool notNegative, CalcDimension defaultValue)
 {
     CalcDimension left;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, true)) {
-        CheckDimensionUnit(left, false, true);
+        CheckDimensionUnit(left, notPercent, notNegative);
         commonCalcDimension.left = left;
     } else {
-        commonCalcDimension.left = 0.0_vp;
+        commonCalcDimension.left = defaultValue;
     }
     CalcDimension right;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, true)) {
-        CheckDimensionUnit(right, false, true);
+        CheckDimensionUnit(right, notPercent, notNegative);
         commonCalcDimension.right = right;
     } else {
-        commonCalcDimension.right = 0.0_vp;
+        commonCalcDimension.right = defaultValue;
     }
     CalcDimension top;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, true)) {
-        CheckDimensionUnit(top, false, true);
+        CheckDimensionUnit(top, notPercent, notNegative);
         commonCalcDimension.top = top;
     } else {
-        commonCalcDimension.top = 0.0_vp;
+        commonCalcDimension.top = defaultValue;
     }
     CalcDimension bottom;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, true)) {
         CheckDimensionUnit(bottom, false, true);
         commonCalcDimension.bottom = bottom;
     } else {
-        commonCalcDimension.bottom = 0.0_vp;
+        commonCalcDimension.bottom = defaultValue;
     }
 }
 
@@ -1525,6 +1526,21 @@ void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
     ParseEdgeWidths(object, commonCalcDimension, notNegative);
 }
 
+void ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+{
+    if (CheckLengthMetrics(object)) {
+        LocalizedCalcDimension localizedCalcDimension;
+        ParseLocalizedEdgeWidths(object, localizedCalcDimension, false);
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        commonCalcDimension.top = localizedCalcDimension.top;
+        commonCalcDimension.bottom = localizedCalcDimension.bottom;
+        commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
+        commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
+        return;
+    }
+    ParseEdgeWidthsProps(object, commonCalcDimension, true, false, static_cast<CalcDimension>(-1));
+}
+
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
@@ -1537,7 +1553,7 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
         return;
     }
-    ParseEdgeWidthsProps(object, commonCalcDimension);
+    ParseEdgeWidthsProps(object, commonCalcDimension, false, true, 0.0_vp);
 }
 } // namespace
 
@@ -3864,7 +3880,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
 {
     CalcDimension dashGap;
-    if (ParseJsDimensionVp(args, dashGap)) {
+    if (ParseLengthMetricsToDimension(args, dashGap)) {
         if (dashGap.Unit() == DimensionUnit::PERCENT) {
             dashGap.Reset();
         }
@@ -3872,18 +3888,19 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
         ViewAbstractModel::GetInstance()->SetDashGap(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
-        return;
+        dashGap.Reset();
+        ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
     }
 }
 
 void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
 {
     CalcDimension dashWidth;
-    if (ParseJsDimensionVp(args, dashWidth)) {
+    if (ParseLengthMetricsToDimension(args, dashWidth)) {
         if (dashWidth.Unit() == DimensionUnit::PERCENT) {
             dashWidth.Reset();
         }
@@ -3891,11 +3908,12 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
         ViewAbstractModel::GetInstance()->SetDashWidth(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
-        return;
+        dashWidth.Reset();
+        ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
     }
 }
 

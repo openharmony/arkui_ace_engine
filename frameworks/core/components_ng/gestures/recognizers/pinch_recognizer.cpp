@@ -102,6 +102,9 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -140,6 +143,9 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }

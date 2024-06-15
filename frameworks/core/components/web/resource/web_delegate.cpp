@@ -2764,6 +2764,8 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
         cutoutSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT);
         navigationIndicatorSafeArea_ =
             container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        OnSafeInsetsChange();
+
         avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
         OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
@@ -6782,21 +6784,21 @@ void WebDelegate::OnSafeInsetsChange()
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = resultSafeArea.left_.start + resultSafeArea.left_.end;
+        left = static_cast<int>(resultSafeArea.left_.start + resultSafeArea.left_.end);
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = resultSafeArea.top_.end - resultSafeArea.top_.start;
+        top = static_cast<int>(resultSafeArea.top_.end - resultSafeArea.top_.start);
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
         constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
-        right = resultSafeArea.right_.end - resultSafeArea.right_.start +
-                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR;
+        right = static_cast<int>(resultSafeArea.right_.end - resultSafeArea.right_.start +
+                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = resultSafeArea.bottom_.end - resultSafeArea.bottom_.start;
+        bottom = static_cast<int>(resultSafeArea.bottom_.end - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {

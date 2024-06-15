@@ -121,6 +121,9 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     touchPoints_[event.id] = event;
     downEvents_[event.id] = event;
     time_ = event.time;
@@ -161,6 +164,9 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     TAG_LOGI(AceLogTag::ACE_GESTURE,
         "InputTracking id:%{public}d, swipe recognizer receives %{public}d touch up event, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     time_ = event.time;

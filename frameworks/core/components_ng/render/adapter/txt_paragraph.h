@@ -128,8 +128,8 @@ public:
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
-    bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity,
+        bool needLineHighest = true) override;
     bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset,
         TextAffinity& textAffinity) override;
     void SetIndents(const std::vector<float>& indents) override;

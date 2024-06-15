@@ -92,6 +92,9 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
 
@@ -124,6 +127,9 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }

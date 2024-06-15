@@ -929,6 +929,7 @@ private:
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
     std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
+    double lastKeyboardHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

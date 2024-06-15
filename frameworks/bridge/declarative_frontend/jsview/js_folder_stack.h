@@ -28,6 +28,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JSOnFolderStateChange(const JSCallbackInfo& info);
     static void JSOnHoverStatusChange(const JSCallbackInfo& info);
+    static WindowStatus NotifyWindowStatusChange(WindowMode mode);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_FOLDER_STACK_H

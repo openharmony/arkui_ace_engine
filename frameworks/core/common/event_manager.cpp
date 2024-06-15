@@ -102,6 +102,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
     }
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
+        MockCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
         CleanGestureEventHub();
     }
@@ -152,6 +153,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
                 TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
             eventTree_.eventTreeList.clear();
+            MockCancelEventAndDispatch(touchPoint);
             refereeNG_->CleanAll();
 
             TouchTestResult reHitTestResult;
@@ -583,6 +585,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
                 "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d",
                 touchEvent.touchEventId, touchEvent.id);
+            MockCancelEventAndDispatch(touchEvent);
             refereeNG_->ForceCleanGestureReferee();
             touchTestResults_.clear();
             downFingerIds_.clear();
@@ -593,6 +596,9 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
 
 void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
 {
+    if (touchEvent.isMocked) {
+        return;
+    }
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
@@ -600,6 +606,7 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
                 "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
                 "without receive DOWN event, touchEvent id is %{public}d",
                 touchEvent.touchEventId, touchEvent.id);
+            MockCancelEventAndDispatch(touchEvent);
             refereeNG_->ForceCleanGestureReferee();
             downFingerIds_.clear();
         } else {
@@ -1913,4 +1920,14 @@ void EventManager::SetResponseLinkRecognizers(
     }
 }
 
+void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
+{
+    TouchEvent mockedEvent = touchPoint;
+    mockedEvent.isMocked = true;
+    mockedEvent.type = TouchType::CANCEL;
+    for (const auto& iter : downFingerIds_) {
+        mockedEvent.id = iter;
+        DispatchTouchEvent(mockedEvent);
+    }
+}
 } // namespace OHOS::Ace
