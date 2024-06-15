@@ -491,6 +491,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     }
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Transform to MSDP DragWindow.");
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(windowContainerId);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
@@ -523,7 +524,7 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
     }
-    if (IsNeedDisplayInSubwindow()) {
+    if (IsNeedDisplayInSubwindow() || isDragWithContextMenu_) {
         TransDragWindowToDragFwk(Container::CurrentId());
     }
 }
