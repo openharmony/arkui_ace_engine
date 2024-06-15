@@ -1644,7 +1644,7 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
     animationController->SetDatePickerButtonHide(false);
     auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
     if (switchFlag_) {
-        if (NeedadaptForAging()) {
+        if (NeedadaptForAging() && (!useMilitary)) {
             switchTimePickerFlag_ = true;
             SwitchTimePickerPage(monthDaysNode, timeNode, contentRow);
         }
