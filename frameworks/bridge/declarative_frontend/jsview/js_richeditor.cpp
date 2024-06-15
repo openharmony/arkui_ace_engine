@@ -2467,6 +2467,9 @@ void JSRichEditorStyledStringController::OnContentChanged(const JSCallbackInfo& 
 
 void JSRichEditorStyledStringController::SetOnWillChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto onWillChangeFunc = paramObject->GetProperty("onWillChange");
     if (onWillChangeFunc->IsNull() || !onWillChangeFunc->IsFunction()) {
@@ -2491,6 +2494,9 @@ void JSRichEditorStyledStringController::SetOnWillChange(const JSCallbackInfo& a
 
 void JSRichEditorStyledStringController::SetOnDidChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto onDidChangeFunc = paramObject->GetProperty("onDidChange");
     if (onDidChangeFunc->IsNull() || !onDidChangeFunc->IsFunction()) {

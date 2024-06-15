@@ -193,7 +193,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
     if (params[PARAM_KEY_GENERATOR]->IsUndefined()) {
         keyGenFunc = [viewId](const JSRef<JSVal>&, size_t index) { return viewId + "-" + std::to_string(index); };
-    } else {
+    } else if (params[PARAM_KEY_GENERATOR]->IsFunction()) {
         keyGenFunc = [viewId, keyGenerator = JSRef<JSFunc>::Cast(params[PARAM_KEY_GENERATOR])](
                          const JSRef<JSVal>& jsVal, size_t index) {
             JSRef<JSVal> params[] = { jsVal, JSRef<JSVal>::Make(ToJSValue(index)) };
