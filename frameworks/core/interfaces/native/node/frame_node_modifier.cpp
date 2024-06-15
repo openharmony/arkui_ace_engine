@@ -412,7 +412,8 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto size =
-        isExpanded ? frameNode->GetAllChildrenWithBuild(false).size() : frameNode->GetTotalChildCountWithoutExpanded();
+        isExpanded ? static_cast<uint32_t>(frameNode->GetAllChildrenWithBuild(false).size()) :
+        frameNode->GetTotalChildCountWithoutExpanded();
     CHECK_NULL_RETURN(size > 0, nullptr);
     auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);

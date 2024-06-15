@@ -4066,7 +4066,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
-    int32_t windowId = GetWindowId();
+    uint32_t windowId = GetWindowId();
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     Accessibility::Registration registration {
@@ -4097,13 +4097,13 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
-    int32_t windowId = GetWindowId();
+    uint32_t windowId = GetWindowId();
     Register(false);
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
-    parentWindowId_ = -1;
+    parentWindowId_ = 0;
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(

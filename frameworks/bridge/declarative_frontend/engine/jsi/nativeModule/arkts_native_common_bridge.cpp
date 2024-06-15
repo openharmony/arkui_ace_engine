@@ -4640,7 +4640,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.mode = mode->Int32Value(vm);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> modeArray = static_cast<Local<panda::ArrayRef>>(mode);
-        auto arrLength = modeArray->Length(vm);
+        int32_t arrLength = modeArray->Length(vm);
         if (arrLength > NUM_4) {
             arrLength = NUM_4;
         }
