@@ -246,6 +246,25 @@ public:
         return PostSyncTask(CancelableTask(task), type, name);
     }
 
+    /**
+     * Post a delayed task without traceId to the specified thread.
+     * Never allow to post a background delayed task.
+     *
+     * @param task Task which need execution.
+     * @param type FrontendType of task, used to specify the thread.
+     * @param delayTime Wait a period of time in milliseconds before execution.
+     * @param name Name of the task.
+     * @return Returns 'true' if task has been posted successfully.
+     */
+    bool PostDelayedTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
+    {
+        if (delayTime > 0 && type == TaskType::BACKGROUND) {
+            return false;
+        }
+        return OnPostTaskWithoutTraceId(std::move(task), type, delayTime, name, priorityType);
+    }
+
     virtual void AddTaskObserver(Task&& callback) = 0;
     virtual void RemoveTaskObserver() = 0;
     virtual bool WillRunOnCurrentThread(TaskType type) const = 0;
@@ -267,6 +286,8 @@ protected:
     virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const = 0;
     virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
+    virtual bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const = 0;
 
 #ifdef ACE_DEBUG
     virtual bool OnPreSyncTask(TaskType type) const
