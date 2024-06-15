@@ -2115,7 +2115,7 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
-    auto childSize = badgeNumber.has_value() ? badgeNumber.value()
+    int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
                                              : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
     auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
     CHECK_NULL_VOID(textNode);
