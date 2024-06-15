@@ -457,7 +457,7 @@ export struct ChipComponent {
 
   private getLocalizedLabelMargin(): LocalizedMargin {
     let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.start?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start
     } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
@@ -467,7 +467,7 @@ export struct ChipComponent {
         localizedLabelMargin.start = this.theme.label.localizedNormalMargin.start
       }
     }
-    if (this.label?.localizedLabelMargin?.end.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.end?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
       localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
@@ -482,27 +482,26 @@ export struct ChipComponent {
   }
 
   private getLabelStartEndVp(): LocalizedMargin {
-    let labelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label && this.label.labelMargin) {
+    let labelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && (this.label.labelMargin !== void (0)) && (this.label.localizedLabelMargin === void (0))) {
       let margin: Margin = this.getLabelMargin()
-      return { start: LengthMetrics.vp(this.toVp(margin.left)), end: LengthMetrics.vp(this.toVp(margin.right)) }
-    }
-    if (this.label && this.label.localizedLabelMargin) {
-      let localizedMargin: LocalizedMargin = this.getLocalizedLabelMargin()
       return {
-        start: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.start)),
-        end: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.end))
+        start: LengthMetrics.vp(this.toVp(margin.left)),
+        end: LengthMetrics.vp(this.toVp(margin.right))
       }
     }
-    return labelMargin
+    return {
+      start: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.start)),
+      end: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.end))
+    }
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
     let localizedLabelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
-    if (this.label && this.label.localizedLabelMargin) {
+    if (this.label && this.label.localizedLabelMargin !== void (0)) {
       return localizedLabelMargin
     }
-    if (this.label && this.label.labelMargin) {
+    if (this.label && this.label.labelMargin !== void (0)) {
       return this.getLabelMargin()
     }
     return localizedLabelMargin
@@ -664,13 +663,13 @@ export struct ChipComponent {
   private getCalculateChipNodeWidth(): number {
     let calWidth: number = 0
     let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += this.getChipNodePadding().start.value
+    calWidth += this.getChipNodePadding().start?.value ?? 0
     calWidth += this.toVp(this.getPrefixChipWidth())
-    calWidth += this.toVp(startEndVp.start.value)
+    calWidth += this.toVp(startEndVp.start?.value ?? 0)
     calWidth += this.getLabelWidth()
-    calWidth += this.toVp(startEndVp.end.value)
+    calWidth += this.toVp(startEndVp.end?.value ?? 0)
     calWidth += this.toVp(this.getSuffixChipWidth())
-    calWidth += this.getChipNodePadding().end.value
+    calWidth += this.getChipNodePadding().end?.value ?? 0
     return calWidth
   }
 
