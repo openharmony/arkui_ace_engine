@@ -34,7 +34,7 @@ private:
     static bool ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
     static bool ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
     static void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors);
-    static int32_t dataPanelType_;
+    static uint32_t dataPanelType_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATA_PANEL_H

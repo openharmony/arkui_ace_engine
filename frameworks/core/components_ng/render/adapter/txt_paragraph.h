@@ -183,7 +183,7 @@ private:
 #endif
     std::u16string text_;
     int32_t placeholderCnt_ = 0;
-    TextAlign textAlign_;
+    TextAlign textAlign_ = TextAlign::START;
     static uint32_t destructCount;
     std::list<size_t> placeholderPosition_;
     bool hasExternalParagraph_ = false;
