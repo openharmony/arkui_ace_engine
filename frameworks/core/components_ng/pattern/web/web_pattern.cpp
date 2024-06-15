@@ -4578,6 +4578,14 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     renderContext->UpdateAccessibilityFocus(true);
 }
 
+std::shared_ptr<Rosen::RSNode> WebPattern::GetSurfaceRSNode() const
+{
+    CHECK_NULL_RETURN(renderContextForSurface_, nullptr);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_RETURN(rosenRenderContext, nullptr);
+    return rosenRenderContext->GetRSNode();
+}
+
 bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const
 {
     CHECK_NULL_RETURN(delegate_, false);

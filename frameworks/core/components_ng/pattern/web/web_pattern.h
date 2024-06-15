@@ -571,6 +571,7 @@ public:
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
+    std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
 private:
     friend class WebContextSelectOverlay;
