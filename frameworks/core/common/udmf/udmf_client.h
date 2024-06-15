@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace {
 const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";
+const std::string DROP_TYPE_HYPERLINK = "general.hyperlink";
 struct PixelMapRecordDetails {
     int32_t width = 0;
     int32_t height = 0;
