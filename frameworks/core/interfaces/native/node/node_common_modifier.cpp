@@ -1825,6 +1825,8 @@ void ResetBorder(ArkUINodeHandle node)
     ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     ViewAbstract::SetBorderRadius(frameNode, borderWidth);
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
+    ViewAbstract::SetDashGap(frameNode, Dimension(-1));
+    ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
 }
 
 void SetBackgroundImagePosition(
@@ -5879,6 +5881,38 @@ void ResetPixelRound(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
+
+void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesSize != NUM_24)) {
+        return;
+    }
+
+    int32_t offset = NUM_0;
+    NG::BorderWidthProperty borderDashGap;
+    SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.bottomDimen, values, valuesSize, offset);
+    borderDashGap.multiValued = true;
+    if (borderDashGap.leftDimen.has_value() || borderDashGap.rightDimen.has_value() ||
+        borderDashGap.topDimen.has_value() || borderDashGap.bottomDimen.has_value()) {
+        ViewAbstract::SetDashGap(frameNode, borderDashGap);
+    }
+
+    NG::BorderWidthProperty borderDashWidth;
+    SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.bottomDimen, values, valuesSize, offset);
+    borderDashWidth.multiValued = true;
+    if (borderDashWidth.leftDimen.has_value() || borderDashWidth.rightDimen.has_value() ||
+        borderDashWidth.topDimen.has_value() || borderDashWidth.bottomDimen.has_value()) {
+        ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5957,7 +5991,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityActions, ResetAccessibilityActions, GetAccessibilityActions,
         SetAccessibilityRole, ResetAccessibilityRole, GetAccessibilityRole,
         SetFocusScopeId, ResetFocusScopeId,
-        SetFocusScopePriority, ResetFocusScopePriority, SetPixelRound, ResetPixelRound };
+        SetFocusScopePriority, ResetFocusScopePriority, SetPixelRound, ResetPixelRound, SetBorderDashParams };
 
     return &modifier;
 }

@@ -862,14 +862,17 @@ class BorderModifier extends ModifierWithKey {
       getUINativeModule().common.resetBorder(node);
     }
     else {
-      getUINativeModule().common.setBorder(node, this.value.arkWidth.left,
+      getUINativeModule().common.setBorderWithDashParams(node, this.value.arkWidth.left,
         this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor,
         this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight,
         this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom,
-        this.value.arkStyle.left);
+        this.value.arkStyle.left, this.value.arkDashGap.left,
+        this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right,
+        this.value.arkDashWidth.top, this.value.arkDashWidth.bottom);
     }
   }
   checkObjectDiff() {
@@ -3257,6 +3260,34 @@ class ArkComponent {
           arkBorder.arkStyle.bottom = arkBorderStyle.bottom;
           arkBorder.arkStyle.right = arkBorderStyle.right;
         }
+      }
+    }
+    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashGap) && (value === null || value === void 0 ? void 0 : value.dashGap) !== null) {
+      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) || isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+        arkBorder.arkDashGap.left = value.dashGap;
+        arkBorder.arkDashGap.right = value.dashGap;
+        arkBorder.arkDashGap.top = value.dashGap;
+        arkBorder.arkDashGap.bottom = value.dashGap;
+      }
+      else {
+        arkBorder.arkDashGap.left = value.dashGap.hasOwnProperty("value");
+        arkBorder.arkDashGap.right = value.dashGap.right;
+        arkBorder.arkDashGap.top = value.dashGap.top;
+        arkBorder.arkDashGap.bottom = value.dashGap.bottom;
+      }
+    }
+    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashWidth) && (value === null || value === void 0 ? void 0 : value.dashWidth) !== null) {
+      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) || isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+        arkBorder.arkDashWidth.left = value.dashWidth;
+        arkBorder.arkDashWidth.right = value.dashWidth;
+        arkBorder.arkDashWidth.top = value.dashWidth;
+        arkBorder.arkDashWidth.bottom = value.dashWidth;
+      }
+      else {
+        arkBorder.arkDashWidth.left = value.dashWidth.left;
+        arkBorder.arkDashWidth.right = value.dashWidth.right;
+        arkBorder.arkDashWidth.top = value.dashWidth.top;
+        arkBorder.arkDashWidth.bottom = value.dashWidth.bottom;
       }
     }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
@@ -13965,18 +13996,50 @@ class ArkBackgroundBlurStyle {
       this.blurOptions === another.blurOptions);
   }
 }
+class ArkBorderDashGap {
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+  isEqual(another) {
+    return (this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom);
+  }
+}
+class ArkBorderDashWidth {
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+  isEqual(another) {
+    return (this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom);
+  }
+}
 class ArkBorder {
   constructor() {
     this.arkWidth = new ArkBorderWidth();
     this.arkColor = new ArkBorderColor();
     this.arkRadius = new ArkBorderRadius();
     this.arkStyle = new ArkBorderStyle();
+    this.arkDashGap = new ArkBorderDashGap();
+    this.arkDashWidth = new ArkBorderDashWidth();
   }
   isEqual(another) {
     return (this.arkWidth.isEqual(another.arkWidth) &&
       this.arkColor.isEqual(another.arkColor) &&
       this.arkRadius.isEqual(another.arkRadius) &&
-      this.arkStyle.isEqual(another.arkStyle));
+      this.arkStyle.isEqual(another.arkStyle) &&
+      this.arkDashGap.isEqual(another.arkDashGap) &&
+      this.arkDashWidth.isEqual(another.arkDashWidth));
   }
   checkObjectDiff(another) {
     return !this.isEqual(another);

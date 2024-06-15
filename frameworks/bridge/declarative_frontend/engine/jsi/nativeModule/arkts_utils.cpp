@@ -1424,6 +1424,25 @@ void ArkTSUtils::ParseOuterBorder(
     }
 }
 
+void ArkTSUtils::ParseOuterBorderForDashParams(
+    EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
+{
+    CalcDimension valueDim;
+    if (!args->IsUndefined()) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, args, valueDim)) {
+            if (valueDim.Unit() == DimensionUnit::PERCENT) {
+                valueDim.Reset();
+            }
+            optionalDimension = valueDim;
+        } else if (ArkTSUtils::ParseJsDimensionVpNG(vm, args, valueDim, false)) {
+            if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
+                valueDim.Reset();
+            }
+            optionalDimension = valueDim;
+        }
+    }
+}
+
 void ArkTSUtils::PushOuterBorderDimensionVector(
     const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units)
 {

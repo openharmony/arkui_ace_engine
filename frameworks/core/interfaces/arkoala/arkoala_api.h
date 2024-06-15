@@ -1637,6 +1637,7 @@ struct ArkUICommonModifier {
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
     void (*resetPixelRound)(ArkUINodeHandle node);
+    void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
 };
 
 struct ArkUICommonShapeModifier {
