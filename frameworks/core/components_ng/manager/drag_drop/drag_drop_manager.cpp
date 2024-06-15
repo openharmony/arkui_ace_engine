@@ -1712,7 +1712,7 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     if (cnt > 1) {
         props[cnt - SECOND_GATHER_PIXEL_MAP] = { SECOND_PIXELMAP_ANGLE, SECOND_PIXELMAP_OPACITY };
     }
-    for (uint32_t i = 0; i < cnt; ++i) {
+    for (int32_t i = 0; i < cnt; ++i) {
         auto imageNode = gatherNodeChildrenInfo[i].imageNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
