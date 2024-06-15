@@ -47,12 +47,18 @@ gen_obj("atomicserviceweb_abc_preview") {
 ohos_shared_library("atomicserviceweb") {
   include_dirs = [ "include" ]
 
-  sources = [ "atomicserviceweb.cpp", "api_policy_adapter.cpp" ]
+  sources = [
+    "api_policy_adapter.cpp",
+    "atomicserviceweb.cpp",
+  ]
 
   if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_atomicserviceweb_abc_preview" ]
   } else {
-    deps = [ ":atomicserviceweb_js", ":atomicserviceweb_abc" ]
+    deps = [
+      ":atomicserviceweb_abc",
+      ":atomicserviceweb_js",
+    ]
   }
 
   external_deps = [
