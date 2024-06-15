@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,35 +36,36 @@ namespace HMS::AtomicServiceWeb {
     
         NAPI_ASSERT(env, argc >= requireArgc, "Wrong number of arguments");
     
-        napi_valuetype valuetype0;
-        NAPI_CALL(env, napi_typeof(env, args[0], &valuetype0));
+        napi_valuetype bundleNameType;
+        NAPI_CALL(env, napi_typeof(env, args[0], &bundleNameType));
     
-        napi_valuetype valuetype1;
-        NAPI_CALL(env, napi_typeof(env, args[1], &valuetype1));
+        napi_valuetype domainTypeType;
+        NAPI_CALL(env, napi_typeof(env, args[1], &domainTypeType));
         
-        napi_valuetype valuetype2;
-        NAPI_CALL(env, napi_typeof(env, args[2], &valuetype2));
+        napi_valuetype urlType;
+        NAPI_CALL(env, napi_typeof(env, args[2], &urlType));
     
-        NAPI_ASSERT(env, valuetype0 == napi_string && valuetype1 == napi_string && valuetype2 == napi_string, "Wrong argument type. String expected.");
+        NAPI_ASSERT(env, bundleNameType == napi_string && domainTypeType == napi_string && urlType == napi_string, 
+            "Wrong argument type. String expected.");
     
         size_t maxValueLen = 1024;
-        char value0[maxValueLen];
-        size_t length0 = 0;
-        napi_get_value_string_utf8(env, args[0], value0, maxValueLen, &length0);
-        std::string strValue0 = value0;
+        char bundleNameValue[maxValueLen];
+        size_t bundleNameLength = 0;
+        napi_get_value_string_utf8(env, args[0], bundleNameValue, maxValueLen, &bundleNameLength);
+        std::string bundleName = bundleNameValue;
 
-        char value1[maxValueLen];
-        size_t length1 = 0;
-        napi_get_value_string_utf8(env, args[1], value1, maxValueLen, &length1);
-        std::string strValue1 = value1;
+        char domainTypeValue[maxValueLen];
+        size_t domainTypeLength = 0;
+        napi_get_value_string_utf8(env, args[1], domainTypeValue, maxValueLen, &domainTypeLength);
+        std::string domainType = domainTypeValue;
 
-        char value2[maxValueLen];
-        size_t length2 = 0;
-        napi_get_value_string_utf8(env, args[2], value2, maxValueLen, &length2);
-        std::string strValue2 = value2;
+        char urlValue[maxValueLen];
+        size_t urlLength = 0;
+        napi_get_value_string_utf8(env, args[2], urlValue, maxValueLen, &urlLength);
+        std::string url = urlValue;
 
         auto apiPolicyAdapter = new ApiPolicyAdapter();
-        int32_t res = apiPolicyAdapter->CheckUrl(strValue0, strValue1, strValue2);
+        int32_t res = apiPolicyAdapter->CheckUrl(bundleName, domainType, url);
         
         napi_value result;
         NAPI_CALL(env, napi_create_double(env, res, &result));
