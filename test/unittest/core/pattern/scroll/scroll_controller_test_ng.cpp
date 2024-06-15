@@ -130,7 +130,7 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController001, TestSize.Level1)
      * @tc.steps: step13. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_ITEM_NUMBER - SCROLL_HEIGHT));
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_TRUE(controller->IsAtEnd());
 }
 
@@ -238,7 +238,7 @@ HWTEST_F(ScrolleControllerTestNg, ScrollPositionController002, TestSize.Level1)
      * @tc.steps: step12. Test IsAtEnd
      */
     EXPECT_FALSE(controller->IsAtEnd());
-    UpdateCurrentOffset(-(ITEM_WIDTH * TOTAL_ITEM_NUMBER - SCROLL_WIDTH));
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_TRUE(controller->IsAtEnd());
 }
 

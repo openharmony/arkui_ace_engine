@@ -31,6 +31,7 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessScrollOver(0.0);
+    EXPECT_EQ(springEffect->scrollable_, nullptr);
 
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -40,13 +41,32 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
     springEffect->ProcessScrollOver(0.0);
+    EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
 
+    springEffect->scrollable_->springOffsetProperty_ = nullptr;
     scrollable->MarkAvailable(false);
     springEffect->ProcessScrollOver(0.0);
+    EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
 
+    springEffect->scrollable_->springOffsetProperty_ = nullptr;
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     springEffect->ProcessScrollOver(0.0);
+    EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
+
+    springEffect->SetScrollable(nullptr);
+    springEffect->ProcessScrollOver(0.0);
+    springEffect->initTrailingCallback_ = nullptr;
+    springEffect->ProcessScrollOver(0.0);
+    springEffect->initLeadingCallback_ = nullptr;
+    springEffect->ProcessScrollOver(0.0);
+    springEffect->trailingCallback_ = nullptr;
+    springEffect->ProcessScrollOver(0.0);
+    springEffect->initTrailingCallback_ = nullptr;
+    springEffect->ProcessScrollOver(0.0);
+    springEffect->currentPositionCallback_ = nullptr;
+    springEffect->ProcessScrollOver(0.0);
+    EXPECT_EQ(springEffect->scrollable_, nullptr);
 }
 
 /**
@@ -58,6 +78,7 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessSpringUpdate();
+    EXPECT_EQ(springEffect->scrollable_, nullptr);
 
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -67,14 +88,30 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
     springEffect->ProcessSpringUpdate();
+    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
 
     scrollable->MarkAvailable(false);
     springEffect->ProcessSpringUpdate();
+    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
 
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     springEffect->ProcessSpringUpdate();
     EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+
+    springEffect->SetScrollable(nullptr);
+    springEffect->ProcessSpringUpdate();
+    springEffect->initTrailingCallback_ = nullptr;
+    springEffect->ProcessSpringUpdate();
+    springEffect->initLeadingCallback_ = nullptr;
+    springEffect->ProcessSpringUpdate();
+    springEffect->trailingCallback_ = nullptr;
+    springEffect->ProcessSpringUpdate();
+    springEffect->initTrailingCallback_ = nullptr;
+    springEffect->ProcessSpringUpdate();
+    springEffect->currentPositionCallback_ = nullptr;
+    springEffect->ProcessSpringUpdate();
+    EXPECT_EQ(springEffect->scrollable_, nullptr);
 }
 
 /**
@@ -143,12 +180,12 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
 
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT * 1);
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT * 2, true), 0.0));
 
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
@@ -178,14 +215,14 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
 
 /**
  * @tc.name: ScrollFadeEffect002
- * @tc.desc: Test
+ * @tc.desc: Test Paint
  * @tc.type: FUNC
  */
 HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateContent(1);
     CreateDone(frameNode_);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
@@ -205,10 +242,14 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
     scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::DOWN;
     scrollFadeEffect->Paint(rsCanvas, SizeF(0, 1), offset);
     scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::LEFT;
-    scrollFadeEffect->Paint(rsCanvas, SizeF(1, 0), offset);
+    scrollFadeEffect->Paint(rsCanvas, SizeF(0, 1), offset);
+    EXPECT_CALL(rsCanvas, DetachPen).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, ClipRect).Times(1);
+    EXPECT_CALL(rsCanvas, DrawCircle).Times(1);
     scrollFadeEffect->fadePainter_->direction_ = OverScrollDirection::RIGHT;
-    scrollFadeEffect->Paint(rsCanvas, SizeF(0, 0), offset);
-    SUCCEED();
+    scrollFadeEffect->Paint(rsCanvas, SizeF(1, 1), offset);
 }
 
 /**

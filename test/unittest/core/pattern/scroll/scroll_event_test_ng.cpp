@@ -266,10 +266,10 @@ HWTEST_F(ScrolleEventTestNg, Event005, TestSize.Level1)
     EXPECT_TRUE(pattern_->isInitialized_);
 
     /**
-     * @tc.steps: step2. Trigger event by UpdateCurrentOffset
+     * @tc.steps: step2. Trigger event by ScrollTo
      * @tc.expected: reachEnd is true
      */
-    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_ITEM_NUMBER - SCROLL_HEIGHT));
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_TRUE(reachEnd);
 
     /**

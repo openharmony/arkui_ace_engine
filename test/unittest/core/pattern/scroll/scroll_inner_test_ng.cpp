@@ -132,29 +132,24 @@ HWTEST_F(ScrolleInnerTestNg, GetHoverOffset001, TestSize.Level1)
     auto hight = 1.0;
     ScrollBarOverlayModifier modifer;
     modifer.SetPositionMode(PositionMode::RIGHT);
-    auto result = modifer.GetHoverOffset(Size(width, hight));
     auto offsetResult = width - modifer.barWidth_->Get();
-    EXPECT_EQ(result, Offset(offsetResult, 0.f));
-}
+    EXPECT_EQ(modifer.GetHoverOffset(Size(width, hight)), Offset(offsetResult, 0.f));
 
-/**
- * @tc.name: GetHoverOffset002
- * @tc.desc: Test GetHoverOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ScrolleInnerTestNg, GetHoverOffset002, TestSize.Level1)
-{
     /**
-     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.steps: step2. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
      * @tc.expected: modifer's Offset is assigned a correlation value
      */
-    auto width = 1.0;
-    auto hight = 1.0;
-    ScrollBarOverlayModifier modifer;
     modifer.SetPositionMode(PositionMode::BOTTOM);
     modifer.GetHoverOffset(Size(width, hight));
-    auto result = modifer.GetHoverOffset(Size(width, hight));
-    auto offsetResult = hight - modifer.barHeight_->Get();
-    EXPECT_EQ(result, Offset(0.f, offsetResult));
+    offsetResult = hight - modifer.barHeight_->Get();
+    EXPECT_EQ(modifer.GetHoverOffset(Size(width, hight)), Offset(0.f, offsetResult));
+
+    /**
+     * @tc.steps: step3. Create scrollBarOverlayModifier, set positionMode_ is LEFT
+     * @tc.expected: modifer's Offset is assigned a correlation value
+     */
+    modifer.SetPositionMode(PositionMode::LEFT);
+    modifer.GetHoverOffset(Size(width, hight));
+    EXPECT_EQ(modifer.GetHoverOffset(Size(width, hight)), Offset::Zero());
 }
 } // namespace OHOS::Ace::NG
