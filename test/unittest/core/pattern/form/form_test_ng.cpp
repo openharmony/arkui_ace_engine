@@ -1075,8 +1075,10 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
     ASSERT_NE(property, nullptr);
     auto info = property->GetRequestFormInfo().value_or(RequestFormInfo());
+    pattern->isUnTrust_ = true;
     pattern->LoadFormSkeleton(false, info);
     ASSERT_NE(host->GetLastChild(), nullptr);
+    pattern->isUnTrust_ = false;
 
     /**
      * @tc.steps: step4. Test when form RSSurfaceNode created.

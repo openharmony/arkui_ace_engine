@@ -436,6 +436,16 @@ int32_t ListLanesLayoutAlgorithm::GetLanesCeil(LayoutWrapper* layoutWrapper, int
     return index;
 }
 
+void ListLanesLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper,
+    std::pair<const int, ListItemInfo>& pos, int32_t startIndex, float crossSize)
+{
+    auto wrapper = layoutWrapper->GetChildByIndex(pos.first, true);
+    CHECK_NULL_VOID(wrapper);
+    LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
+    SyncGeometry(wrapper);
+    wrapper->SetActive(false);
+}
+
 std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrapper* layoutWrapper,
     int32_t& index, float& startPos, float crossSize)
 {
@@ -447,37 +457,37 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index + i <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetChildByIndex(index + i, true);
-        if (!wrapper || CheckNeedMeasure(wrapper)) {
+        if (!wrapper) {
             predictBuildList.emplace_back(index + i);
-            continue;
+            break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (isGroup && cnt > 0) {
             isGroup = false;
             break;
         }
+        if (CheckNeedMeasure(wrapper)) {
+            if (!isGroup) {
+                predictBuildList.emplace_back(index + i);
+                continue;
+            }
+            break;
+        }
         cnt++;
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        auto id = wrapper->GetHostNode()->GetId();
+        posMap[index + i] = { id, startPos, startPos + mainLen, isGroup };
         if (isGroup) {
             break;
         }
     }
     if (cnt > 0) {
         auto endPos = startPos + mainLen;
-        for (int32_t i = 0; i < cnt; i++) {
-            posMap[index + i] = { 0, startPos, endPos, isGroup };
-        }
         startPos = endPos + GetSpaceWidth();
         auto startIndex = index;
         for (auto& pos: posMap) {
-            auto wrapper = layoutWrapper->GetChildByIndex(pos.first, true);
-            if (!wrapper) {
-                break;
-            }
-            pos.second.id = wrapper->GetHostNode()->GetId();
-            LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-            SyncGeometry(wrapper);
-            wrapper->SetActive(false);
+            pos.second.endPos = endPos;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
     }
     index += cnt + static_cast<int32_t>(predictBuildList.size());
@@ -496,38 +506,37 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     for (int32_t i = 0; i < lanes && index >= 0; i++) {
         auto idx = index - i;
         auto wrapper = layoutWrapper->GetChildByIndex(idx, true);
-        if (!wrapper || CheckNeedMeasure(wrapper)) {
+        if (!wrapper) {
             predictBuildList.emplace_back(idx);
-            continue;
+            break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (isGroup && cnt > 0) {
             isGroup = false;
             break;
         }
-
+        if (CheckNeedMeasure(wrapper)) {
+            if (!isGroup) {
+                predictBuildList.emplace_back(idx);
+                continue;
+            }
+            break;
+        }
         cnt++;
         mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        auto id = wrapper->GetHostNode()->GetId();
+        posMap[idx] = { id, endPos - mainLen, endPos, isGroup };
         if (CheckCurRowMeasureFinished(layoutWrapper, idx, isGroup)) {
             break;
         }
     }
     if (cnt > 0) {
         auto startPos = endPos - mainLen;
-        for (int32_t i = 0; i < cnt; i++) {
-            posMap[index - i] = { 0, startPos, endPos, isGroup };
-        }
         endPos = startPos - GetSpaceWidth();
         auto startIndex = index - cnt + 1;
         for (auto& pos: posMap) {
-            auto wrapper = layoutWrapper->GetChildByIndex(pos.first, true);
-            if (!wrapper) {
-                break;
-            }
-            pos.second.id = wrapper->GetHostNode()->GetId();
-            LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-            SyncGeometry(wrapper);
-            wrapper->SetActive(false);
+            pos.second.startPos = startPos;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
     }
     index -= cnt + static_cast<int32_t>(predictBuildList.size());

@@ -72,11 +72,15 @@
     "src/lib/v2/v2_computed.ts",
     "src/lib/v2/v2_view.ts",
     "src/lib/v2/v2_decorators.ts",
+    "src/lib/v2/v2_json_coder.ts",
     
     // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
     "src/lib/partial_update/pu_repeat_impl.ts",
     "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
+
+    // sdk
+    "src/lib/sdk/v2_persistence.ts",
 
     // unit testing
     "src/utest/common/helpers_for_test.ts",

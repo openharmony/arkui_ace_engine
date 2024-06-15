@@ -582,7 +582,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction) {
-            transaction->SetHostPid(AceApplicationInfo::GetInstance().GetPid());
+            transaction->SetParentPid(transaction->GetChildPid());
+            transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
             if (parentSession) {
                 transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
             }

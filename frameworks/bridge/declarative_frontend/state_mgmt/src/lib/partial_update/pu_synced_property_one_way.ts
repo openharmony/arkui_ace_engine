@@ -414,7 +414,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       const alreadyCopiedObject = copiedObjects.get(obj);
       if (alreadyCopiedObject) {
         let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
-        stack.forEach(stackItem => msg += ` - ${stackItem.name}`)
         stateMgmtConsole.debug(msg);
         return alreadyCopiedObject;
       }

@@ -1107,6 +1107,16 @@ public:
         return halfLeading_;
     }
 
+    void SetHasPreviewTextOption(bool hasOption)
+    {
+        hasPreviewTextOption_ = hasOption;
+    }
+
+    bool GetHasPreviewTextOption() const
+    {
+        return hasPreviewTextOption_;
+    }
+
     void SetSupportPreviewText(bool changeSupported)
     {
         hasSupportedPreviewText_ = !changeSupported;
@@ -1404,6 +1414,7 @@ private:
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
+    bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 

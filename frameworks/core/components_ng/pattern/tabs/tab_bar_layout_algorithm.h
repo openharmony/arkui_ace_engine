@@ -80,9 +80,14 @@ public:
         tabBarStyle_ = tabBarStyle;
     }
 
-    void SetNeedSetCentered()
+    void SetNeedSetCentered(bool needSetCentered)
     {
-        needSetCentered_ = true;
+        needSetCentered_ = needSetCentered;
+    }
+
+    bool GetNeedSetCentered()
+    {
+        return needSetCentered_;
     }
 
     void SetScrollMargin(float scrollMargin)

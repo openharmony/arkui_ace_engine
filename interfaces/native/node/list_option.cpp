@@ -255,7 +255,7 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
 float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize* option, int32_t index)
 {
     CHECK_NULL_RETURN(option, -1);
-    if (index < 0 || option->mainSize.size() - 1 < index) {
+    if (index < 0 || option->mainSize.size() - 1 < static_cast<uint32_t>(index)) {
         return -1;
     }
     return option->mainSize[index];

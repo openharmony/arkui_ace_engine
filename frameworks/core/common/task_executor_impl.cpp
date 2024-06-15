@@ -355,6 +355,30 @@ void TaskExecutorImpl::FillTaskTypeTable(const WeakPtr<TaskExecutorImpl>& weak, 
     }
 }
 
+bool TaskExecutorImpl::OnPostTaskWithoutTraceId(
+    Task&& task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType) const
+{
+    TaskExecutor::Task wrappedTask = std::move(task);
+
+    switch (type) {
+        case TaskType::PLATFORM:
+            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name);
+        case TaskType::UI:
+            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name, priorityType);
+        case TaskType::IO:
+            return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime, name);
+        case TaskType::GPU:
+            return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime, name);
+        case TaskType::JS:
+            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime, name);
+        case TaskType::BACKGROUND:
+            // Ignore delay time
+            return BackgroundTaskExecutor::GetInstance().PostTask(std::move(wrappedTask));
+        default:
+            return false;
+    }
+}
+
 void TaskExecutorImpl::RemoveTask(TaskType type, const std::string &name)
 {
     switch (type) {

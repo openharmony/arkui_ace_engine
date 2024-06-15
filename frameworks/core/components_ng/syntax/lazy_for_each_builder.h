@@ -149,7 +149,7 @@ public:
 
             auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
             if (frameNode && !frameNode->IsActive()) {
-                frameNode->SetJSViewActive(false);
+                frameNode->SetJSViewActive(false, true);
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 continue;
             }
@@ -307,7 +307,7 @@ public:
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
         context->ResetPredictNode();
-        itemInfo.second->SetJSViewActive(false);
+        itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
 
         return itemInfo.second;
@@ -508,10 +508,10 @@ public:
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
     }
 

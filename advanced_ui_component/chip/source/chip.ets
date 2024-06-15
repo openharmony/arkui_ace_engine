@@ -47,7 +47,7 @@ export interface SuffixIconOptions extends IconCommonOptions {
 
 export interface PrefixIconOptions extends IconCommonOptions {}
 
-export interface SymbolOptions {
+export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
 }
@@ -89,6 +89,7 @@ interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
   fontSize: Length;
+  defaultEffect: number;
 }
 
 interface LabelTheme {
@@ -186,6 +187,7 @@ export const defaultTheme: ChipTheme = {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
     fontSize: 16,
+    defaultEffect: -1,
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -229,10 +231,10 @@ const noop = () => {
 
 interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: SuffixIconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
   enabled?: boolean;
   activated?: boolean;
@@ -273,10 +275,10 @@ export struct ChipComponent {
   @Prop allowClose: boolean = true
   @Prop chipDirection: Direction = Direction.Auto
   @Prop prefixIcon: PrefixIconOptions = { src: "" }
-  @Prop prefixSymbol: SymbolOptions
+  @Prop prefixSymbol: ChipSymbolGlyphOptions
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: SymbolOptions
+  @Prop suffixSymbol: ChipSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
@@ -310,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -454,7 +457,7 @@ export struct ChipComponent {
 
   private getLocalizedLabelMargin(): LocalizedMargin {
     let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.start?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start
     } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
@@ -464,7 +467,7 @@ export struct ChipComponent {
         localizedLabelMargin.start = this.theme.label.localizedNormalMargin.start
       }
     }
-    if (this.label?.localizedLabelMargin?.end.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.end?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
       localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
@@ -479,27 +482,26 @@ export struct ChipComponent {
   }
 
   private getLabelStartEndVp(): LocalizedMargin {
-    let labelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label && this.label.labelMargin) {
+    let labelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && (this.label.labelMargin !== void (0)) && (this.label.localizedLabelMargin === void (0))) {
       let margin: Margin = this.getLabelMargin()
-      return { start: LengthMetrics.vp(this.toVp(margin.left)), end: LengthMetrics.vp(this.toVp(margin.right)) }
-    }
-    if (this.label && this.label.localizedLabelMargin) {
-      let localizedMargin: LocalizedMargin = this.getLocalizedLabelMargin()
       return {
-        start: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.start)),
-        end: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.end))
+        start: LengthMetrics.vp(this.toVp(margin.left)),
+        end: LengthMetrics.vp(this.toVp(margin.right))
       }
     }
-    return labelMargin
+    return {
+      start: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.start)),
+      end: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.end))
+    }
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
     let localizedLabelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
-    if (this.label && this.label.localizedLabelMargin) {
+    if (this.label && this.label.localizedLabelMargin !== void (0)) {
       return localizedLabelMargin
     }
-    if (this.label && this.label.labelMargin) {
+    if (this.label && this.label.labelMargin !== void (0)) {
       return this.getLabelMargin()
     }
     return localizedLabelMargin
@@ -623,6 +625,9 @@ export struct ChipComponent {
       } else {
         sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
       }
+      if (!this.isShowPressedBackGroundColor) {
+        return Color.Transparent
+      }
     }
     if (!this.isShowPressedBackGroundColor) {
       return sourceColor.color
@@ -658,13 +663,13 @@ export struct ChipComponent {
   private getCalculateChipNodeWidth(): number {
     let calWidth: number = 0
     let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += this.getChipNodePadding().start.value
+    calWidth += this.getChipNodePadding().start?.value ?? 0
     calWidth += this.toVp(this.getPrefixChipWidth())
-    calWidth += this.toVp(startEndVp.start.value)
+    calWidth += this.toVp(startEndVp.start?.value ?? 0)
     calWidth += this.getLabelWidth()
-    calWidth += this.toVp(startEndVp.end.value)
+    calWidth += this.toVp(startEndVp.end?.value ?? 0)
     calWidth += this.toVp(this.getSuffixChipWidth())
-    calWidth += this.getChipNodePadding().end.value
+    calWidth += this.getChipNodePadding().end?.value ?? 0
     return calWidth
   }
 
@@ -906,6 +911,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getPrefixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
             })
@@ -947,6 +955,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getSuffixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width
             })

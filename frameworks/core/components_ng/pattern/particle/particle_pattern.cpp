@@ -52,7 +52,7 @@ void ParticlePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
 {
     auto array = JsonUtil::CreateArray(true);
     auto props = GetEmitterProperty();
-    for (auto i = 0; i < props.size(); i++) {
+    for (size_t i = 0; i < props.size(); i++) {
         auto object = JsonUtil::Create(true);
         object->Put("index", std::to_string(props[i].index).c_str());
         if (props[i].emitRate.has_value()) {

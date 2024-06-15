@@ -1049,6 +1049,7 @@ class FrameNode {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(this.nodePtr_);
+        this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonAttribute;
     }
     get commonEvent() {
@@ -1167,6 +1168,7 @@ class TypedFrameNode extends FrameNode {
             this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this.attribute_.setNodePtr(this.nodePtr_);
+        this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this.attribute_;
     }
     checkValid(node) {

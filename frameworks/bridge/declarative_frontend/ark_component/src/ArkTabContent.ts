@@ -18,10 +18,9 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  tabBar(value: any): this;
-  tabBar(value: SubTabBarStyle | BottomTabBarStyle): this;
-  tabBar(value: unknown): this {
-    throw new Error('Method not implemented.');
+  tabBar(value: SubTabBarStyle | BottomTabBarStyle): this {
+    modifierWithKey(this._modifiersWithKeys, TabContentTabBarModifier.identity, TabContentTabBarModifier, value);
+    return this;
   }
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, TabContentSizeModifier.identity, TabContentSizeModifier, value);
@@ -34,6 +33,24 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
   height(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, TabContentHeightModifier.identity, TabContentHeightModifier, value);
     return this;
+  }
+}
+
+class TabContentTabBarModifier extends ModifierWithKey<SubTabBarStyle | BottomTabBarStyle> {
+  constructor(value: SubTabBarStyle | BottomTabBarStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabContentTabBar');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabContent.resetTabBar(node);
+    } else {
+      getUINativeModule().tabContent.setTabBar(this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

@@ -101,7 +101,6 @@ protected:
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
     std::list<int32_t> activeFingers_;
-    std::set<int32_t> fingersId_;
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
 };

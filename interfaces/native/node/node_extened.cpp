@@ -443,4 +443,12 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
     }
     return nullptr;
 }
+
+int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode)
+{
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    auto* impl = GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->clearChildren(parentNode->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace OHOS::Ace::NodeModel

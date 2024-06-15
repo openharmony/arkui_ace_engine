@@ -32,6 +32,11 @@ public:
 
     bool IsChecked() const override;
 
+    std::string GetHintText() const override
+    {
+        return V2::BUTTON_ETS_TAG;
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonAccessibilityProperty);
 };

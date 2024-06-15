@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_DECLARATIVE_MODULE_PRELOADER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_DECLARATIVE_MODULE_PRELOADER_H
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -30,8 +31,10 @@ public:
     static void Preload(NativeEngine& runtime);
 
     // ArkTsCard start
-    static void PreloadCard(NativeEngine& runtime, const std::string &bundleName);
-    static void ReloadCard(NativeEngine& runtime, const std::string &bundleName); // For card upgrade condition
+    static void PreloadCard(NativeEngine& runtime, const std::string &bundleName,
+        const std::map<std::string, std::string>& hapPathMap);
+    static void ReloadCard(NativeEngine& runtime, const std::string &bundleName,
+        const std::map<std::string, std::string>& hapPathMap); // For card upgrade condition
     // ArkTsCard end
 
     static void PreloadWorker(NativeEngine& runtime);

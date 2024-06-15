@@ -18,6 +18,7 @@
 
 #include <unordered_set>
 #include <vector>
+#include <map>
 #include "core/common/asset_manager_impl.h"
 
 namespace OHOS::Ace {
@@ -29,23 +30,23 @@ public:
      * @param formModuleList Output, the list of components.
      * @return Returns TRUE on success, FALSE on failure.
      */
-    static bool CreateFormModuleList(const std::string& bundleName, std::unordered_set<std::string>& formModuleList);
+    static bool CreateFormModuleList(const std::string& bundleName, std::unordered_set<std::string>& formModuleList,
+        const std::map<std::string, std::string>* hapPathMap);
     /**
      * @brief In the card bundle upgrade condition, get the list of newly added components.
      * @param bundleName The name of target bundle.
      * @param formModuleList Output, the list of newly added components.
      * @return Returns TRUE on success, FALSE on failure.
      */
-    static bool GetNewFormModuleList(const std::string& bundleName, std::unordered_set<std::string>& formModuleList);
+    static bool GetNewFormModuleList(const std::string& bundleName, std::unordered_set<std::string>& formModuleList,
+        const std::map<std::string, std::string>* hapPathMap);
 
 private:
     FormModulePreloader() = default;
     ~FormModulePreloader() = default;
 
-    static bool ReadFormModuleList(
-        const std::string& bundleName, std::unordered_set<std::string>& formModuleList, bool isReloadCondition);
-
-    static void GetHapPathsByBundleName(const std::string& bundleName, std::vector<std::string>& hapPaths);
+    static bool ReadFormModuleList(const std::string& bundleName, std::unordered_set<std::string>& formModuleList,
+     const std::map<std::string, std::string>* hapPathMap, bool isReloadCondition);
 
     static bool ReadFileFromAssetManager(
         const RefPtr<AssetManager>& assetManager, const std::string& fileName, std::string& content);

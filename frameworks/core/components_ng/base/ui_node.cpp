@@ -292,10 +292,11 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
     MarkNeedSyncRenderTree(true);
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently, bool addDefaultTransition)
+void UINode::MountToParent(const RefPtr<UINode>& parent,
+    int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition);
+    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
@@ -1002,14 +1003,17 @@ void UINode::SetActive(bool active)
     }
 }
 
-void UINode::SetJSViewActive(bool active)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
         // do not need to recursive here, stateMgmt will recursive all children when set active
+        if (customNode && customNode->GetIsV2() && isLazyForEachNode) {
+            return;
+        }
         if (customNode) {
             customNode->SetJSViewActive(active);
-            return;
+            continue;
         }
         child->SetJSViewActive(active);
     }

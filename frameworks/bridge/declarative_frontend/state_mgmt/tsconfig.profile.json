@@ -86,10 +86,14 @@
     "src/lib/v2/v2_computed.ts",
     "src/lib/v2/v2_view.ts",
     "src/lib/v2/v2_decorators.ts",
+    "src/lib/v2/v2_json_coder.ts",
 
     // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
 
+    // sdk
+    "src/lib/sdk/v2_persistence.ts",
+  
     // init
     "src/index.ts",
   ],
