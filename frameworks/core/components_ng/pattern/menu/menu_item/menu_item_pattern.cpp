@@ -848,7 +848,7 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     CHECK_NULL_VOID(menuPattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto parent = AceType::DynamicCast<UINode>(host->GetParent());
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
 
@@ -915,7 +915,7 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(menuPattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto parent = AceType::DynamicCast<UINode>(host->GetParent());
 
     if (isHover || isSubMenuShowed_) {
         // keep hover color when subMenu showed
@@ -1726,6 +1726,8 @@ void MenuItemPattern::ModifyDivider()
         paintProperty->UpdateStartMargin(divider->startMargin);
         paintProperty->UpdateEndMargin(divider->endMargin);
         paintProperty->UpdateDividerColor(divider->color);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 

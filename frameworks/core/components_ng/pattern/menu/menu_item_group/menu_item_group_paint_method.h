@@ -22,9 +22,11 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 struct GroupDividerInfo {
@@ -45,6 +47,8 @@ public:
 
 private:
     void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, GroupDividerInfo info);
+    GroupDividerInfo PreparePaintData(RefPtr<PipelineBase>& pipeline,
+        RefPtr<MenuItemGroupPaintProperty>& props, PaintWrapper* paintWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintMethod);
 };
