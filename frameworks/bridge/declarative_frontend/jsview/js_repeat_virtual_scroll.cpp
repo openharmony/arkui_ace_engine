@@ -46,12 +46,12 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 
     // arg 1
     auto templateOptsArray = JSRef<JSArray>::Cast(info[1]);
-    std::map<std::string, uint32_t> templateCacheCountMap;
+    std::map<std::string, uint32_t> templateCachedCountMap;
     for (size_t i = 0; i < templateOptsArray->Length(); i++) {
         JSRef<JSArray> pair = templateOptsArray->GetValueAt(i);
         auto type = pair->GetValueAt(0)->ToString();
         auto opts = JSRef<JSObject>::Cast(pair->GetValueAt(1));
-        templateCacheCountMap[type] = opts->GetProperty("cacheCount")->ToNumber<uint32_t>();
+        templateCachedCountMap[type] = opts->GetProperty("cachedCount")->ToNumber<uint32_t>();
     }
 
     // arg 2
@@ -104,7 +104,12 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     };
 
     RepeatVirtualScrollModel::GetInstance()->Create(
-        totalCount, templateCacheCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
+        totalCount, templateCachedCountMap,
+        onCreateNode,
+        onUpdateNode,
+        onGetKeys4Range,
+        onGetTypes4Range
+    );
 }
 
 void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)

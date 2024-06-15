@@ -29,7 +29,9 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RepeatVirtualScrollModelNG : public RepeatVirtualScrollModel {
 public:
-    void Create(uint32_t totalCount, const std::map<std::string, uint32_t>& templateCacheCountMap,
+    void Create(
+        uint32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCachedCountMap,
         const std::function<void(uint32_t forIndex)>& onCreateNode,
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,

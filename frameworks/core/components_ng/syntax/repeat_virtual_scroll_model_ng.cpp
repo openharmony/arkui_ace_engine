@@ -23,8 +23,9 @@
 
 namespace OHOS::Ace::NG {
 
-void RepeatVirtualScrollModelNG::Create(uint32_t totalCount,
-    const std::map<std::string, uint32_t>& templateCacheCountMap,
+void RepeatVirtualScrollModelNG::Create(
+    uint32_t totalCount,
+    const std::map<std::string, uint32_t>& templateCachedCountMap,
     const std::function<void(uint32_t forIndex)>& onCreateNode,
     const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
@@ -34,7 +35,14 @@ void RepeatVirtualScrollModelNG::Create(uint32_t totalCount,
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
-        nodeId, totalCount, templateCacheCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
+        nodeId,
+        totalCount,
+        templateCachedCountMap,
+        onCreateNode,
+        onUpdateNode,
+        onGetKeys4Range,
+        onGetTypes4Range
+    );
     stack->Push(repeatNode);
     stack->PopContainer();
 }

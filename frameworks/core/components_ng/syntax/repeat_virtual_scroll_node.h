@@ -38,14 +38,18 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScrollNode, ForEachBaseNode);
 
 public:
-    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
+    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId,
+        uint32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
 
-    explicit RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
-        const std::map<std::string, uint32_t>& templateCacheCountMap, const std::function<void(uint32_t)>& onCreateNode,
+    explicit RepeatVirtualScrollNode(int32_t nodeId,
+        int32_t totalCount,
+        const std::map<std::string, uint32_t>& templateCachedCountMap,
+        const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);

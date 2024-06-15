@@ -25,7 +25,7 @@ interface RepeatItem<T> {
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
-type RepeatTemplateOptions =  { cacheCount?: number };
+type RepeatTemplateOptions =  { cachedCount?: number };
 type OnMoveHandler = (from: number, to: number) => void;
 
 /*

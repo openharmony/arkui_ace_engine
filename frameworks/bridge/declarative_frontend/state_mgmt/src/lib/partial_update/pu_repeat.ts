@@ -231,7 +231,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     }
 
     private defaultTemplateOptions (): RepeatTemplateOptions {
-        return { cacheCount: 1 };
+        return { cachedCount: 1 };
     }
 
     protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {

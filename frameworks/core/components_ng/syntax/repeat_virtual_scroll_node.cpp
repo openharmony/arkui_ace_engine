@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 // REPEAT
 RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(int32_t nodeId,
     uint32_t totalCount,
-    const std::map<std::string, uint32_t>& templateCacheCountMap,
+    const std::map<std::string, uint32_t>& templateCachedCountMap,
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
@@ -43,7 +43,7 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
         return node;
     }
     node = MakeRefPtr<RepeatVirtualScrollNode>(
-        nodeId, totalCount, templateCacheCountMap, onCreateNode, onUpdateNode,
+        nodeId, totalCount, templateCachedCountMap, onCreateNode, onUpdateNode,
         onGetKeys4Range, onGetTypes4Range);
 
     ElementRegister::GetInstance()->AddUINode(node);
@@ -52,13 +52,13 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
 
 RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId,
     int32_t totalCount,
-    const std::map<std::string, uint32_t>& templateCacheCountMap,
+    const std::map<std::string, uint32_t>& templateCachedCountMap,
     const std::function<void(uint32_t)>& onCreateNode,
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
-          caches_(templateCacheCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range)
+          caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range)
     {
         // no precut task scheduled
         postUpdateTaskHasBeenScheduled_ = false;

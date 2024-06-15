@@ -139,7 +139,7 @@ class __RepeatVirtualScrollImpl<T> {
         };
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: initialRenderVirtualScroll`);
-        // FIXME templateOptions_  cacheCount for each ttype need to passed to C++ side as well
+
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
             onUpdateNode,
