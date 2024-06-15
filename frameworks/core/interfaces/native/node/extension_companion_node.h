@@ -44,12 +44,12 @@ public:
         return alignment_;
     }
 
-    void SetFlags(ArkUI_Int32 flags)
+    void SetFlags(ArkUI_Uint32 flags)
     {
         flags_ = flags;
     }
 
-    ArkUI_Int32 GetFlags() const
+    ArkUI_Uint32 GetFlags() const
     {
         return flags_;
     }

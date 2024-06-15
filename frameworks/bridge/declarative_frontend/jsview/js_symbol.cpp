@@ -181,8 +181,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto commonSubTypeProperty = symbolEffectObj->GetProperty("direction");
     if (commonSubTypeProperty->IsNumber()) {
         auto commonSubTypeNum = commonSubTypeProperty->ToNumber<uint32_t>();
-        if (commonSubTypeNum >= static_cast<int>(CommonSubType::DOWN) &&
-            commonSubTypeNum <= static_cast<int>(CommonSubType::UP)) {
+        if (commonSubTypeNum >= static_cast<uint32_t>(CommonSubType::DOWN) &&
+            commonSubTypeNum <= static_cast<uint32_t>(CommonSubType::UP)) {
             symbolEffectOptions.SetCommonSubType(static_cast<CommonSubType>(commonSubTypeNum));
         }
     }
