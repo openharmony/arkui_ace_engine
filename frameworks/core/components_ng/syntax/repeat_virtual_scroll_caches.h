@@ -94,6 +94,8 @@ public:
     // iterate over L1 keys, not allowed to modify L1
     void forEachL1IndexUINode(std::function<void(uint32_t index, RefPtr<UINode> node)> cbFunc);
 
+    void RecycleItemsByIndex(int32_t index);
+
 private:
     /**
          * intended scenario: scroll

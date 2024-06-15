@@ -85,6 +85,7 @@ public:
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated
     void RecycleItems(int32_t from, int32_t to) override;
+    void SetNodeIndexOffset(int32_t start, int32_t count) override;
 
     /** Called by Layout to request ListItem and child subtree
      for given index
@@ -158,6 +159,8 @@ private:
     bool postUpdateTaskHasBeenScheduled_;
 
     OffscreenItems offscreenItems_;
+    int32_t startIndex_ = 0;
+    int32_t count_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };

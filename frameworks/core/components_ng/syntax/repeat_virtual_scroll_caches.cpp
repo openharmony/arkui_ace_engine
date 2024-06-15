@@ -267,6 +267,14 @@ void RepeatVirtualScrollCaches::forEachL1IndexUINode(std::function<void(uint32_t
     }
 }
 
+void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
+{
+    if (key4index_.find(index) != key4index_.end()) {
+        auto key = key4index_[index];
+        l1_activeNodeKeys_.erase(key);
+    }
+}
+
 /**
  * iterate over all entries of L1 and call function for each entry
  * if function returns true, entry is added to rebuild L1
