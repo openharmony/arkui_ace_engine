@@ -58,12 +58,12 @@ enum class FormChildNodeType : int32_t {
     /**
      * forbidden form root node
     */
-    FORM_DISABLE_ROOT_NODE,
+    FORM_FORBIDDEN_ROOT_NODE,
 
     /**
      * forbidden form text node
     */
-    FORM_DISABLE_TEXT_NODE,
+    FORM_FORBIDDEN_TEXT_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -167,6 +167,7 @@ private:
     void AddFormComponent(const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
+    void UpdateTimeLimitFontCfg();
 
     void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
@@ -186,9 +187,10 @@ private:
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
 
-    void LoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info, bool isRefresh = false);
+    void LoadFormSkeleton(bool isRefresh = false);
     bool ShouldLoadFormSkeleton(bool isTransparencyEnabled, const RequestFormInfo &info);
-    void LoadDisableFormStyle(bool isRefresh = false);
+    void LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh = false);
+    void RemoveDisableFormStyle(const RequestFormInfo& info);
     void RemoveFormChildNode(FormChildNodeType formChildNodeType);
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
@@ -199,6 +201,7 @@ private:
         int32_t dimensionHeight);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
+    double GetTimeLimitFontSize();
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -228,6 +231,7 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
+    bool isFormBundleForbidden_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
 };
 } // namespace NG

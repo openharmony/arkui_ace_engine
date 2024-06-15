@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/form_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -1072,11 +1073,8 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.
      */
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    auto info = property->GetRequestFormInfo().value_or(RequestFormInfo());
     pattern->isUnTrust_ = true;
-    pattern->LoadFormSkeleton(false, info);
+    pattern->LoadFormSkeleton();
     ASSERT_NE(host->GetLastChild(), nullptr);
     pattern->isUnTrust_ = false;
 
