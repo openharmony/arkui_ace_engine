@@ -283,12 +283,12 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
 
     UnicodeString simpleStr;
     simpleDateFormat->format(1000.0 * duration, simpleStr, status);
+    delete(timeZone);
     CHECK_RETURN(status, "");
 
     std::string ret;
     UnicodeString2String(simpleStr, ret);
 
-    delete(timeZone);
     return ret;
 }
 
