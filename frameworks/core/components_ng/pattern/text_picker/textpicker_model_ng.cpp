@@ -1166,4 +1166,20 @@ std::vector<uint32_t> TextPickerModelNG::getTextPickerSelecteds(FrameNode* frame
     CHECK_NULL_RETURN(textPickerPattern, defaultValue);
     return textPickerPattern->GetSelecteds();
 }
+
+void TextPickerModelNG::SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetRangeType(rangeType);
+}
+
+int32_t TextPickerModelNG::GetTextPickerRangeType(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetRangeType();
+}
 } // namespace OHOS::Ace::NG

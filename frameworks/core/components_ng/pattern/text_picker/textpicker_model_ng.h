@@ -120,16 +120,14 @@ public:
     static std::string getTextPickerRange(FrameNode* frameNode);
     static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
     static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
-    static int32_t isSingleRange()
-    {
-        return isSingleRange_;
-    }
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static int32_t GetSelectedSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);
     static std::vector<uint32_t> getTextPickerSelecteds(FrameNode* frameNode);
     static int32_t GetCanLoop(FrameNode* frameNode);
     static Dimension GetDefaultPickerItemHeight(FrameNode* frameNode);
+    static void SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType);
+    static int32_t GetTextPickerRangeType(FrameNode* frameNode);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
