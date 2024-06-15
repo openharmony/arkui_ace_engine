@@ -4618,20 +4618,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             var _a, _b;
             if ('debugInfo' in subscriber) {
                 const observedProp = subscriber;
-                let isCircleReference = false;
-                let errorMsg = '';
-                try {
-                    JSON.stringify(observedProp.getRawObjectValue());
-                }
-                catch (error) {
-                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-                    errorMsg = error.message;
-                    isCircleReference = true;
-                }
+                let rawValue = observedProp.getRawObjectValue();
                 let syncPeer = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
                     changedTrackPropertyName: changedTrackPropertyName,
-                    value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
                     inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
                     dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
                     owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
@@ -4644,19 +4635,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     onDumpProfiler(changedTrackPropertyName) {
         var _a, _b, _c, _d;
         let res = new DumpInfo();
-        let isCircleReference = false;
-        let errorMsg = '';
-        try {
-            JSON.stringify(this.getRawObjectValue());
-        }
-        catch (error) {
-            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-            errorMsg = error.message;
-            isCircleReference = true;
-        }
+        let rawValue = this.getRawObjectValue();
         let observedPropertyInfo = {
             decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-            value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : this.getRawObjectValue(),
+            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
             inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
             dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
             owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
@@ -7052,19 +7034,10 @@ class ViewPU extends PUV2ViewBase {
             const prop = Reflect.get(this, varName);
             if ('debugInfoDecorator' in prop) {
                 const observedProp = prop;
-                let isCircleReference = false;
-                let errorMsg = '';
-                try {
-                    JSON.stringify(observedProp.getRawObjectValue());
-                }
-                catch (error) {
-                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-                    errorMsg = error.message;
-                    isCircleReference = true;
-                }
+                let rawValue = observedProp.getRawObjectValue();
                 let observedPropertyInfo = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
                     dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
                     owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
                 };

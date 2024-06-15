@@ -4009,6 +4009,7 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
         auto beforeCallbackSucess = CallbackBeforeSetPreviewText(delta, previewTextValue, range, true);
         CHECK_NULL_RETURN(beforeCallbackSucess, false);
         previewTextSpan->content = previewTextValue;
+        UpdateSpanPosition();
         auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
         auto afterCallbackSucess = CallbackAfterSetPreviewText(delta);
         CHECK_NULL_RETURN(afterCallbackSucess, false);
@@ -4029,12 +4030,12 @@ bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, c
         }
         content = StringUtils::ToString(StringUtils::ToWstring(content).replace(
             replaceIndex, replaceLength, StringUtils::ToWstring(previewTextValue)));
+        UpdateSpanPosition();
         auto afterCallbackSucess = CallbackAfterSetPreviewText(delta);
         CHECK_NULL_RETURN(afterCallbackSucess, false);
         auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextSpan->content).length());
         previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     }
-    UpdateSpanPosition();
     return true;
 }
 

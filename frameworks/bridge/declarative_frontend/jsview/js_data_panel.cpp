@@ -176,7 +176,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }
-    dataPanelType_ =  dataPanelType;
+    dataPanelType_ =  static_cast<int32_t>(dataPanelType);
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
     JSDataPanelTheme::ApplyTheme();
 }

@@ -225,11 +225,11 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_Splice(
     ArkUI_ListChildrenMainSize* option, int32_t index, int32_t deleteCount, int32_t addCount)
 {
     CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || deleteCount < 0 || addCount < 0 || option->mainSize.size() - 1 < index) {
+    if (index < 0 || deleteCount < 0 || addCount < 0 || option->mainSize.size() - 1 < static_cast<size_t>(index)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     while (deleteCount > 0) {
-        if (index < option->mainSize.size()) {
+        if (static_cast<size_t>(index) < option->mainSize.size()) {
             option->mainSize.erase(option->mainSize.begin() + index);
         }
         deleteCount--;
@@ -245,7 +245,7 @@ int32_t OH_ArkUI_ListChildrenMainSizeOption_UpdateSize(
     ArkUI_ListChildrenMainSize* option, int32_t index, float mainSize)
 {
     CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
-    if (index < 0 || mainSize < 0 || option->mainSize.size() - 1 < index) {
+    if (index < 0 || mainSize < 0 || option->mainSize.size() - 1 < static_cast<size_t>(index)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     option->mainSize[index] = mainSize;
