@@ -32,6 +32,8 @@ public:
 
     bool IsChecked() const override;
 
+    std::string GetHintText() const override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SwitchAccessibilityProperty);
 };
