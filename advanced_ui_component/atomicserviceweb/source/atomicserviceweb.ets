@@ -32,8 +32,8 @@ import filePicker from '@ohos.file.picker';
 import { BusinessError } from '@ohos.base';
 
 class Error {
-  code: number;
-  message: string;
+  public code: number;
+  public message: string;
 
   constructor(code: number, message: string) {
     this.code = code;
