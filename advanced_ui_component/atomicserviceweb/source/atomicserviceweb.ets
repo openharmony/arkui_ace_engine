@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import web_webview from '@ohos.web.webview';
 import router from '@ohos.router';
 import deviceInfo from '@ohos.deviceInfo';
@@ -42,10 +42,10 @@ class Error {
 }
 
 class JsApiConfig {
-  apiName: string;
-  minVersion: string;
-  maxVersion: string;
-  requiredFieldNames?: string[];
+  public apiName: string;
+  public minVersion: string;
+  public maxVersion: string;
+  public requiredFieldNames?: string[];
 
   constructor(apiName: string, minVersion: string, maxVersion: string, requiredFieldNames?: string[]) {
     this.apiName = apiName;
