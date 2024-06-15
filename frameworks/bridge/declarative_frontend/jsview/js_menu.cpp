@@ -213,34 +213,42 @@ void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
 
 void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
 {
-    V2::ItemDivider divider;
+    auto divider = V2::ItemDivider{
+        .strokeWidth = Dimension(0.0f, DimensionUnit::INVALID),
+        .color = Color::FOREGROUND,
+    };
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         CalcDimension value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
-        if (value.IsNegative()) {
+        if (value.IsNegative() || value.Unit() < DimensionUnit::PX || value.Unit() > DimensionUnit::LPX) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
         divider.strokeWidth = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
-        if (value.IsNegative()) {
+        if (value.IsNegative() || value.Unit() < DimensionUnit::PX || value.Unit() > DimensionUnit::LPX) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
         divider.startMargin = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
-        if (value.IsNegative()) {
+        if (value.IsNegative() || value.Unit() < DimensionUnit::PX || value.Unit() > DimensionUnit::LPX) {
             value.Reset();
+            value.SetUnit(DimensionUnit::INVALID);
         }
         divider.endMargin = value;
-
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            divider.color = Color::TRANSPARENT;
+            divider.color = Color::FOREGROUND;
         }
     }
     MenuModel::GetInstance()->SetItemGroupDivider(divider);
