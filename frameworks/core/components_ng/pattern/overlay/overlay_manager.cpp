@@ -3237,8 +3237,8 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
-    modalNode->MountToParent(rootNode);
-    modalNode->AddChild(builder, DEFAULT_NODE_SLOT, false, false, true);
+    modalNode->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
+    modalNode->AddChild(builder);
     if (!isAllowedBeCovered_ && rootNode) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "RootNode %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d.",
