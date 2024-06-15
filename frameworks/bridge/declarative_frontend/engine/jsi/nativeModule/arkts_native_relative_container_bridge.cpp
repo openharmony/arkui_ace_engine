@@ -82,7 +82,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetGuideLine(ArkUIRuntimeCallInf
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto positionsArr = panda::Local<panda::ArrayRef>(positionsArg);
-    int32_t size = idsArr->Length(vm);
+    int32_t size = static_cast<int32_t>(idsArr->Length(vm));
     for (int32_t i = 0; i < size; i++) {
         ArkUIGuidelineStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
@@ -143,7 +143,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
     auto idsArr = panda::Local<panda::ArrayRef>(idsArg);
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto referenceIdsArr = panda::Local<panda::ArrayRef>(referenceIdsArg);
-    int32_t size = idsArr->Length(vm);
+    int32_t size = static_cast<int32_t>(idsArr->Length(vm));
     for (int32_t i = 0; i < size; i++) {
         ArkUIBarrierStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);

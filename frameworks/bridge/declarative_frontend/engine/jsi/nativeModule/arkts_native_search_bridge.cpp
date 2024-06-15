@@ -1413,7 +1413,7 @@ ArkUINativeModuleValue SearchBridge::SetShowCounter(ArkUIRuntimeCallInfo* runtim
     }
     auto thresholdValue = DEFAULT_MODE;
     if (thresholdArg->IsNumber()) {
-        thresholdValue = thresholdArg->Int32Value(vm);
+        thresholdValue = static_cast<uint32_t>(thresholdArg->Int32Value(vm));
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
             thresholdValue = ILLEGAL_VALUE;
             showCounter = false;
