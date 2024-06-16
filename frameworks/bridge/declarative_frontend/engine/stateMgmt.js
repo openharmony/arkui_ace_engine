@@ -4113,21 +4113,15 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
-            this.childrenWeakrefMap_.forEach((weakRefChild) => {
-                const child = weakRefChild.deref();
-                if (child) {
-                    if (child instanceof ViewPU) {
-                        if (!child.hasBeenRecycled_) {
-                            child.forceCompleteRerender(true);
-                        } else {
-                            child.delayCompleteRerender(deep);
-                        }
-                    }
-                } else {
-                    throw new Error('forceCompleteRender not implemented for ViewV2, yet');
+            for (const child of this.childrenWeakrefMap_.values()) {
+                const childView = child.deref();
+                if (childView) {
+                    childView.forceCompleteRerender(true);
                 }
-            });
+            }
         }
+        
+        
     }
     /**
     * force a complete rerender / update on specific node by executing update function.
@@ -9642,6 +9636,7 @@ __RepeatDefaultKeyGen.lastKey_ = 0;
 class __RepeatV2 {
     constructor(arr) {
         this.config = {};
+        this.isVirtualScroll = false;
         //console.log('__RepeatV2 ctor')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         this.config.itemGenFuncs = {};
@@ -9654,6 +9649,7 @@ class __RepeatV2 {
     each(itemGenFunc) {
         //console.log('__RepeatV2.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
+        this.config.templateOptions[''] = Object.assign({}, this.defaultTemplateOptions());
         return this;
     }
     key(keyGenFunc) {
@@ -9662,10 +9658,10 @@ class __RepeatV2 {
         return this;
     }
     virtualScroll(options) {
-        var _a, _b;
+        var _a;
         //console.log('__RepeatV2.virtualScroll()')
         this.config.totalCount = (_a = options === null || options === void 0 ? void 0 : options.totalCount) !== null && _a !== void 0 ? _a : this.config.arr.length;
-        this.config.onLazyLoading = (_b = options === null || options === void 0 ? void 0 : options.onLazyLoading) !== null && _b !== void 0 ? _b : (() => { });
+        this.isVirtualScroll = true;
         return this;
     }
     // function to decide which template to use, each template has an id
@@ -9676,15 +9672,13 @@ class __RepeatV2 {
     }
     // template: id + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
-        var _a;
-        var _b;
         //console.log('__RepeatV2.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = options !== null && options !== void 0 ? options : {};
-        (_a = (_b = this.config.templateOptions[type]).cacheCount) !== null && _a !== void 0 ? _a : (_b.cacheCount = 0);
+        this.config.templateOptions[type] = Object.assign(Object.assign({}, this.defaultTemplateOptions()), options);
         return this;
     }
     updateArr(arr) {
+        //console.log('__RepeatV2.updateArr()')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         return this;
     }
@@ -9694,20 +9688,23 @@ class __RepeatV2 {
         if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
             throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
         }
-        if (!this.config.onLazyLoading) {
+        if (!this.isVirtualScroll) {
             // Repeat
-            (_b = this.impl) !== null && _b !== void 0 ? _b : (this.impl = new __RepeatImpl(this.config));
-            this.impl.render(isInitialRender);
+            (_b = this.impl) !== null && _b !== void 0 ? _b : (this.impl = new __RepeatImpl());
+            this.impl.render(this.config, isInitialRender);
         }
         else {
             // RepeatVirtualScroll
-            (_c = this.impl) !== null && _c !== void 0 ? _c : (this.impl = new __RepeatVirtualScrollImpl(this.config));
-            this.impl.render(isInitialRender);
+            (_c = this.impl) !== null && _c !== void 0 ? _c : (this.impl = new __RepeatVirtualScrollImpl());
+            this.impl.render(this.config, isInitialRender);
         }
     }
     onMove(handler) {
         this.config.onMoveHandler = handler;
         return this;
+    }
+    defaultTemplateOptions() {
+        return { cachedCount: 1 };
     }
     mkRepeatItem(item, index) {
         return new __RepeatItemV2(item, index);
@@ -9743,18 +9740,17 @@ class __RepeatPU extends __RepeatV2 {
 */
 class __RepeatImpl {
     /**/
-    constructor(config) {
+    constructor() {
         this.key2Item_ = new Map();
-        //console.log('__RepeatImpl ctor')
+    }
+    /**/
+    render(config, isInitialRender) {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.typeGenFunc_ = config.typeGenFunc;
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
-    }
-    /**/
-    render(isInitialRender) {
         isInitialRender ? this.initialRender() : this.reRender();
     }
     genKeys() {
@@ -9814,6 +9810,15 @@ class __RepeatImpl {
                 itemInfo.repeatItem.updateIndex(index);
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
+                // TBD moveChild() only when item types are same
+                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
+                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
+                //if (type0 == type1) {
+                //    // C++ mv from tempChildren[oldIndex] to end of children_
+                //    RepeatNative.moveChild(oldIndex);
+                //} else {
+                //    this.initialRenderItem(key, itemInfo.repeatItem);
+                //}
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:
@@ -9829,6 +9834,7 @@ class __RepeatImpl {
                 itemInfo.repeatItem.updateIndex(index);
                 // update key2item_ Map
                 this.key2Item_.set(key, itemInfo);
+                // TBD moveChild() only when item types are same
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
             }
@@ -9890,18 +9896,17 @@ class __RepeatImpl {
 // deep observation. For virtual-scroll code paths
 class __RepeatVirtualScrollImpl {
     /**/
-    constructor(config) {
+    constructor() {
+    }
+    render(config, isInitialRender) {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
         this.typeGenFunc_ = config.typeGenFunc;
         this.totalCount_ = config.totalCount;
-        this.onLazyLoading_ = config.onLazyLoading;
         this.templateOptions_ = config.templateOptions;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
-    }
-    render(isInitialRender) {
         if (isInitialRender) {
             this.initialRender(ObserveV2.getCurrentRecordedId());
         }
@@ -9960,10 +9965,6 @@ class __RepeatVirtualScrollImpl {
         };
         const onGetKeys4Range = (from, to) => {
             
-            // when c++ requests not yet existing item(s), invoke onLazyLoading_()
-            for (let i = this.arr_.length; i <= to && i < this.totalCount_; i++) {
-                this.onLazyLoading_(i, "Down");
-            }
             const result = new Array();
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 // create dependency array item [i] -> Repeat
@@ -9988,7 +9989,6 @@ class __RepeatVirtualScrollImpl {
             return result;
         };
         
-        // FIXME templateOptions_  cacheCount for each ttype need to passed to C++ side as well
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
             onUpdateNode,
