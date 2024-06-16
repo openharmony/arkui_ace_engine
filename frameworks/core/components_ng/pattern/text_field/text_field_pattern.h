@@ -173,7 +173,7 @@ public:
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
-        return true;
+        return needToRequestKeyboardOnFocus_;
     }
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
@@ -1209,7 +1209,7 @@ public:
     {
         autoFillUserName_ = userName;
     }
-    
+
     std::string GetAutoFillUserName()
     {
         return autoFillUserName_;
@@ -1290,7 +1290,7 @@ public:
     {
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
-    
+
     int32_t GetPreviewTextStart() const
     {
         return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
