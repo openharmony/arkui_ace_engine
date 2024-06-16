@@ -484,7 +484,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
             ++iter;
         }
     } else {
-        auto magicNodeSize= magicNodes_.size();
+        auto magicNodeSize = magicNodes_.size();
         auto iter = magicNodes_.rbegin();
         while (iter != magicNodes_.rend()) {
             auto childList = iter->second;
