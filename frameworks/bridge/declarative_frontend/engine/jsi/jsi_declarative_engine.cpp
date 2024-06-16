@@ -285,7 +285,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
     auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
     auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!jsBundleName->IsString() || !jsModuleName->IsString() || !jsPagePath->IsString()) {
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
         return false;
     }
     bundleName = jsBundleName->ToString(vm)->ToString();
@@ -294,7 +294,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     bool ohmUrlValid = false;
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
-        if (jsOhmUrl->IsString()) {
+        if (jsOhmUrl->IsString(vm)) {
             ohmUrl = jsOhmUrl->ToString(vm)->ToString();
             if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
                 ohmUrl = OHMURL_START_TAG + ohmUrl;
@@ -312,7 +312,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     // Integrated hsp adaptation
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
         auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString()) {
+        if (integratedHsp->IsString(vm)) {
             integratedHspName = integratedHsp->ToString(vm)->ToString();
         }
     }
@@ -323,7 +323,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
 
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
         auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString()) {
+        if (pageFullPathInfo->IsString(vm)) {
             pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
         }
     }
@@ -1756,7 +1756,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     LocalScope scope(vm);
     JSViewStackProcessor::JsStartGetAccessRecordingFor(JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent());
     auto ret = iter->second.pageGenerator->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
-    if (!ret->IsObject()) {
+    if (!ret->IsObject(vm)) {
         return false;
     }
 #if defined(PREVIEW)

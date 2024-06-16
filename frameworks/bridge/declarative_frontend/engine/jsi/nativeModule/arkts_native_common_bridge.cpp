@@ -107,7 +107,7 @@ bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &res
         result = value->ToNumber(vm)->Value();
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         return StringUtils::StringToDouble(value->ToString(vm)->ToString(), result);
     }
 
@@ -120,7 +120,7 @@ bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &res
         result = value->Int32Value(vm);
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         result = StringUtils::StringToInt(value->ToString(vm)->ToString());
         return true;
     }
@@ -134,7 +134,7 @@ void ParseJsAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::optiona
         angle = static_cast<float>(value->ToNumber(vm)->Value());
         return;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString()));
         return;
     }
@@ -190,7 +190,7 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
 
 bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
 {
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         std::string colorStr = value->ToString(vm)->ToString();
         if (colorStr.compare("average") == 0) {
             strategy = ShadowColorStrategy::AVERAGE;
@@ -321,7 +321,7 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
     }
     auto vm = runtimeCallInfo->GetVM();
     auto repeatArg = runtimeCallInfo->GetCallArgRef(offset);
-    auto repeatHasValue = repeatArg->IsString();
+    auto repeatHasValue = repeatArg->IsString(vm);
     auto repeatValue = BorderImageRepeat::STRETCH;
     if (repeatHasValue) {
         auto repeatStr = repeatArg->ToString(vm)->ToString();
@@ -419,7 +419,7 @@ bool ParseBorderImageSource(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
     auto sourceArg = runtimeCallInfo->GetCallArgRef(offset); // use 1 args
     offset += NUM_1;
     auto vm = runtimeCallInfo->GetVM();
-    if (sourceArg->IsString()) {
+    if (sourceArg->IsString(vm)) {
         src = sourceArg->ToString(vm)->ToString();
         bitsets |= BorderImage::SOURCE_BIT;
     } else {
@@ -1036,7 +1036,7 @@ bool ParseAxisDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Ca
         result = Dimension(jsValue->ToNumber(vm)->Value(), DimensionUnit::VP);
         return true;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         if (checkIllegal) {
             return StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(vm)->ToString(), result,
                 DimensionUnit::VP);
@@ -1056,7 +1056,7 @@ void ParseDirection(EcmaVM *vm, const Local<JSValueRef> &directionArg, float &va
 
 void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::optional<float>& angle)
 {
-    if (angleArg->IsString()) {
+    if (angleArg->IsString(vm)) {
         angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString()));
     } else if (angleArg->IsNumber()) {
         angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
@@ -1245,7 +1245,7 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
 
 bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::string& anchor, ArkUI_Int32 &direction)
 {
-    if (arg->IsString()) {
+    if (arg->IsString(vm)) {
         std::string directionString = arg->ToString(vm)->ToString();
         if (directionString.empty()) {
             return false;
@@ -2020,7 +2020,7 @@ ArkUINativeModuleValue CommonBridge::SetHueRotate(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::optional<float> degree;
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         degree = static_cast<float>(StringUtils::StringToDegree(secondArg->ToString(vm)->ToString()));
     } else if (secondArg->IsNumber()) {
         degree = static_cast<float>(secondArg->ToNumber(vm)->Value());
@@ -2408,7 +2408,7 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::optional<std::string> text;
-    if (valueArg->IsString()) {
+    if (valueArg->IsString(vm)) {
         text = valueArg->ToString(vm)->ToString();
     }
     int32_t align = ALIGNMENT_TOP_LEFT;
@@ -2859,8 +2859,8 @@ ArkUINativeModuleValue CommonBridge::SetTranslate(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> yArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> zArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!xArg->IsNumber() && !xArg->IsString() && !yArg->IsNumber() && !yArg->IsString() && !zArg->IsNumber() &&
-        !zArg->IsString()) {
+    if (!xArg->IsNumber() && !xArg->IsString(vm) && !yArg->IsNumber() && !yArg->IsString(vm) && !zArg->IsNumber() &&
+        !zArg->IsString(vm)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetTranslate(nativeNode);
     } else {
         auto translateX = CalcDimension(0.0);
@@ -2926,10 +2926,10 @@ ArkUINativeModuleValue CommonBridge::SetScale(ArkUIRuntimeCallInfo *runtimeCallI
         if (zArg->IsNumber()) {
             scaleZ = zArg->ToNumber(vm)->Value();
         }
-        if (centerXArg->IsNumber() || centerXArg->IsString()) {
+        if (centerXArg->IsNumber() || centerXArg->IsString(vm)) {
             ParseAxisDimensionVp(vm, centerXArg, centerX, true);
         }
-        if (centerYArg->IsNumber() || centerYArg->IsString()) {
+        if (centerYArg->IsNumber() || centerYArg->IsString(vm)) {
             ParseAxisDimensionVp(vm, centerYArg, centerY, true);
         }
 
@@ -2998,7 +2998,7 @@ ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo 
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (idArg->IsUndefined() || idArg->IsNull() || !idArg->IsString()) {
+    if (idArg->IsUndefined() || idArg->IsNull() || !idArg->IsString(vm)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -3258,7 +3258,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (colorArg->IsString()) {
+    if (colorArg->IsString(vm)) {
         std::string colorStr = colorArg->ToString(vm)->ToString();
         colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
         std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
@@ -3297,7 +3297,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionPath(ArkUIRuntimeCallInfo *runtime
     auto toArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto rotatableArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     std::string pathStringValue;
-    if (pathArg->IsString()) {
+    if (pathArg->IsString(vm)) {
         pathStringValue = pathArg->ToString(vm)->ToString();
     }
     float fromValue = (fromArg->IsNumber()) ? fromArg->ToNumber(vm)->Value() : 0.0f;
@@ -3525,7 +3525,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityLevel(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string stringValue = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityLevel(nativeNode, stringValue.c_str());
     } else {
@@ -3551,7 +3551,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityDescription(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string stringValue = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityDescription(nativeNode, stringValue.c_str());
     } else {
@@ -3788,7 +3788,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityText(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string stringValue = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityText(nativeNode, stringValue.c_str());
     } else {
@@ -3899,7 +3899,7 @@ ArkUINativeModuleValue CommonBridge::SetDirection(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string dir;
     int32_t direction = NUM_3;
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         dir = secondArg->ToString(vm)->ToString();
         if (dir == "Ltr") {
             direction = NUM_0;
@@ -3939,7 +3939,7 @@ ArkUINativeModuleValue CommonBridge::SetLayoutWeight(ArkUIRuntimeCallInfo* runti
         } else {
             layoutWeight = secondArg->Int32Value(vm);
         }
-    } else if (secondArg->IsString()) {
+    } else if (secondArg->IsString(vm)) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             layoutWeight = StringUtils::StringToFloat(secondArg->ToString(vm)->ToString());
         } else {
@@ -4158,13 +4158,13 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string typeCppStr = "";
     std::string edgesCppStr = "";
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString();
     } else {
         typeCppStr = "1|2|4";
     }
 
-    if (thirdArg->IsString()) {
+    if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString();
     } else {
         edgesCppStr = "1|2|4|8";
@@ -4246,7 +4246,7 @@ ArkUINativeModuleValue CommonBridge::SetFlexBasis(ArkUIRuntimeCallInfo* runtimeC
     if (secondArg->IsNumber()) {
         flexBasis.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->setFlexBasis(nativeNode, &flexBasis);
-    } else if (secondArg->IsString()) {
+    } else if (secondArg->IsString(vm)) {
         tempValueStr = secondArg->ToString(vm)->ToString();
         flexBasis.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getCommonModifier()->setFlexBasis(nativeNode, &flexBasis);
@@ -4311,7 +4311,7 @@ ArkUINativeModuleValue CommonBridge::SetId(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string stringValue = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getCommonModifier()->setId(nativeNode, stringValue.c_str());
     } else {
@@ -4337,7 +4337,7 @@ ArkUINativeModuleValue CommonBridge::SetKey(ArkUIRuntimeCallInfo* runtimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string stringValue = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getCommonModifier()->setKey(nativeNode, stringValue.c_str());
     } else {
@@ -5219,7 +5219,7 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> keysArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if ((!valueArg->IsString() && !valueArg->IsNumber()) || !keysArg->IsArray(vm)) {
+    if ((!valueArg->IsString(vm) && !valueArg->IsNumber()) || !keysArg->IsArray(vm)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetKeyBoardShortCut(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -5778,7 +5778,7 @@ void CommonBridge::SetOnGestureEvent(
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
     Local<JSValueRef> eventArg = runtimeCallInfo->GetCallArgRef(argNumber);
-    if (eventArg.IsNull() || eventArg->IsUndefined() || !eventArg->IsFunction()) {
+    if (eventArg.IsNull() || eventArg->IsUndefined() || !eventArg->IsFunction(vm)) {
         return;
     }
     auto obj = eventArg->ToObject(vm);
@@ -5906,7 +5906,7 @@ ArkUINativeModuleValue CommonBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -5941,7 +5941,7 @@ ArkUINativeModuleValue CommonBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6006,7 +6006,7 @@ ArkUINativeModuleValue CommonBridge::SetOnAppear(ArkUIRuntimeCallInfo* runtimeCa
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6038,7 +6038,7 @@ ArkUINativeModuleValue CommonBridge::SetOnDisappear(ArkUIRuntimeCallInfo* runtim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6071,7 +6071,7 @@ ArkUINativeModuleValue CommonBridge::SetOnAttach(ArkUIRuntimeCallInfo* runtimeCa
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6103,7 +6103,7 @@ ArkUINativeModuleValue CommonBridge::SetOnDetach(ArkUIRuntimeCallInfo* runtimeCa
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6136,7 +6136,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6184,7 +6184,7 @@ ArkUINativeModuleValue CommonBridge::SetOnFocus(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6216,7 +6216,7 @@ ArkUINativeModuleValue CommonBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeCall
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6248,7 +6248,7 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6298,7 +6298,7 @@ ArkUINativeModuleValue CommonBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6333,7 +6333,7 @@ ArkUINativeModuleValue CommonBridge::SetOnSizeChange(ArkUIRuntimeCallInfo* runti
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6375,7 +6375,7 @@ ArkUINativeModuleValue CommonBridge::SetOnAreaChange(ArkUIRuntimeCallInfo* runti
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6411,7 +6411,7 @@ ArkUINativeModuleValue CommonBridge::SetOnGestureJudgeBegin(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(), panda::JSValueRef::Undefined(vm));
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -6798,7 +6798,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0); // frameCallback
-    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsObject()) {
+    if (firstArg->IsNull() || firstArg->IsUndefined() || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto frameCallback = firstArg->ToObject(vm);
@@ -6811,11 +6811,11 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
 
     FrameCallbackFunc frameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
                                               delayMillis](int64_t nanoTimestamp) -> void {
-        if (frameCallbackObj->IsNull() || frameCallbackObj->IsUndefined() || !frameCallbackObj->IsObject()) {
+        if (frameCallbackObj->IsNull() || frameCallbackObj->IsUndefined() || !frameCallbackObj->IsObject(vm)) {
             return;
         }
         Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
-        if (!onFrameFunc->IsFunction()) {
+        if (!onFrameFunc->IsFunction(vm)) {
             return;
         }
 
@@ -6863,7 +6863,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopeId(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> isGroupArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    if (!idArg->IsString()) {
+    if (!idArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto id = idArg->ToString(vm)->ToString();
@@ -6897,7 +6897,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopePriority(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> scopeIdArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> priorityArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    if (!scopeIdArg->IsString()) {
+    if (!scopeIdArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto scopeId = scopeIdArg->ToString(vm)->ToString();

@@ -26,7 +26,7 @@ namespace OHOS::Ace::Framework {
 namespace JsiValueConvertor {
 
 template<typename T>
-bool Validate(panda::Local<panda::JSValueRef> val)
+bool Validate(const EcmaVM* vm, panda::Local<panda::JSValueRef> val)
 {
     if constexpr (std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value) {
         return val->IsInt();
@@ -35,7 +35,7 @@ bool Validate(panda::Local<panda::JSValueRef> val)
     } else if constexpr (std::is_floating_point_v<T>) {
         return val->IsNumber();
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return val->IsString();
+        return val->IsString(vm);
     } else {
         return false;
     }
