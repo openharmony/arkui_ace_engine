@@ -596,13 +596,12 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
             host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
     }
     SyncGeometryFrame(paintRect);
-    if (!isSynced_) {
-        isSynced_ = true;
-        auto borderRadius = GetBorderRadius();
-        if (borderRadius.has_value()) {
-            OnBorderRadiusUpdate(borderRadius.value());
-        }
+
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        OnBorderRadiusUpdate(borderRadius.value());
     }
+
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
@@ -2317,7 +2316,6 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
 
