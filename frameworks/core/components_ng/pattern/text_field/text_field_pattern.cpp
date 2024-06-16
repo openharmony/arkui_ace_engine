@@ -1185,16 +1185,6 @@ void TextFieldPattern::InitFocusEvent()
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-    auto windowFocusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->HasFocus()) {
-            pattern->HandleBlurEvent();
-        }
-    };
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    context->SetOnWindowFocused(windowFocusTask);
     focusEventInitialized_ = true;
 }
 
@@ -5981,7 +5971,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
-    
+
     ToJsonValueForOption(json, filter);
 }
 
