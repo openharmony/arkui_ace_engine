@@ -571,7 +571,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
     HILOGE("not support");
-    return true;
+    return false;
 }
 
 bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
