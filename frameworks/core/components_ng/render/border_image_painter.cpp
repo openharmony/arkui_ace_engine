@@ -22,10 +22,12 @@ constexpr double EXTRA_OFFSET = 1.0;
 namespace OHOS::Ace::NG {
 BorderImagePainter::BorderImagePainter(BorderImageProperty bdImageProps,
     const std::unique_ptr<BorderWidthProperty>& widthProp, const SizeF& paintSize, const RSImage& image,
-    double dipScale)
+    const DisplayScaleInfo& dipscaleInfo)
     : hasWidthProp_(widthProp != nullptr), borderImageProperty_(std::move(bdImageProps)), paintSize_(paintSize),
-      image_(image), dipScale_(dipScale)
+      image_(image)
 {
+    dipScale_ = dipscaleInfo.vpScale;
+    lpxScale_ = dipscaleInfo.lpxScale;
     if (hasWidthProp_) {
         widthProp_ = *widthProp;
     }
@@ -67,16 +69,16 @@ void BorderImagePainter::InitBorderImageSlice()
     }
 
     if (GreatNotEqual(imageLeft.GetBorderImageSlice().Value(), 0.0)) {
-        imageLeft.GetBorderImageSlice().NormalizeToPx(dipScale_, 0, 0, imageWidth_, leftSlice_);
+        imageLeft.GetBorderImageSlice().NormalizeToPx(dipScale_, 0.0, lpxScale_, imageWidth_, leftSlice_);
     }
     if (GreatNotEqual(imageRight.GetBorderImageSlice().Value(), 0.0)) {
-        imageRight.GetBorderImageSlice().NormalizeToPx(dipScale_, 0, 0, imageWidth_, rightSlice_);
+        imageRight.GetBorderImageSlice().NormalizeToPx(dipScale_, 0.0, lpxScale_, imageWidth_, rightSlice_);
     }
     if (GreatNotEqual(imageTop.GetBorderImageSlice().Value(), 0.0)) {
-        imageTop.GetBorderImageSlice().NormalizeToPx(dipScale_, 0, 0, imageHeight_, topSlice_);
+        imageTop.GetBorderImageSlice().NormalizeToPx(dipScale_, 0.0, lpxScale_, imageHeight_, topSlice_);
     }
     if (GreatNotEqual(imageBottom.GetBorderImageSlice().Value(), 0.0)) {
-        imageBottom.GetBorderImageSlice().NormalizeToPx(dipScale_, 0, 0, imageHeight_, bottomSlice_);
+        imageBottom.GetBorderImageSlice().NormalizeToPx(dipScale_, 0.0, lpxScale_, imageHeight_, bottomSlice_);
     }
     if (GreatNotEqual(leftSlice_, imageWidth_)) {
         leftSlice_ = imageWidth_;
@@ -109,24 +111,25 @@ void BorderImagePainter::InitBorderImageWidth()
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
     if (GreatNotEqual(imageLeft.GetBorderImageWidth().Value(), 0.0)) {
-        imageLeft.GetBorderImageWidth().NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), leftWidth_);
+        imageLeft.GetBorderImageWidth().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), leftWidth_);
     } else if (hasWidthProp_) {
-        widthProp_.leftDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), leftWidth_);
+        widthProp_.leftDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), leftWidth_);
     }
     if (GreatNotEqual(imageRight.GetBorderImageWidth().Value(), 0.0)) {
-        imageRight.GetBorderImageWidth().NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), rightWidth_);
+        imageRight.GetBorderImageWidth().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), rightWidth_);
     } else if (hasWidthProp_) {
-        widthProp_.rightDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), rightWidth_);
+        widthProp_.rightDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), rightWidth_);
     }
     if (GreatNotEqual(imageTop.GetBorderImageWidth().Value(), 0.0)) {
-        imageTop.GetBorderImageWidth().NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), topWidth_);
+        imageTop.GetBorderImageWidth().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), topWidth_);
     } else if (hasWidthProp_) {
-        widthProp_.topDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), topWidth_);
+        widthProp_.topDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), topWidth_);
     }
     if (GreatNotEqual(imageBottom.GetBorderImageWidth().Value(), 0.0)) {
-        imageBottom.GetBorderImageWidth().NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), bottomWidth_);
+        imageBottom.GetBorderImageWidth().NormalizeToPx(
+            dipScale_, 0.0, lpxScale_, paintSize_.Height(), bottomWidth_);
     } else if (hasWidthProp_) {
-        widthProp_.bottomDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), bottomWidth_);
+        widthProp_.bottomDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), bottomWidth_);
     }
 
     ParseNegativeNumberToZeroOrCeil(leftWidth_);
@@ -147,24 +150,26 @@ void BorderImagePainter::InitBorderImageOutset()
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
     if (GreatNotEqual(imageLeft.GetBorderImageOutset().Value(), 0.0)) {
-        imageLeft.GetBorderImageOutset().NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), leftOutset_);
+        imageLeft.GetBorderImageOutset().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), leftOutset_);
     } else if (hasWidthProp_) {
-        widthProp_.leftDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), leftOutset_);
+        widthProp_.leftDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), leftOutset_);
     }
     if (GreatNotEqual(imageRight.GetBorderImageOutset().Value(), 0.0)) {
-        imageRight.GetBorderImageOutset().NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), rightOutset_);
+        imageRight.GetBorderImageOutset().NormalizeToPx(
+            0.0, 0.0, lpxScale_, paintSize_.Width(), rightOutset_);
     } else if (hasWidthProp_) {
-        widthProp_.rightDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Width(), rightOutset_);
+        widthProp_.rightDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Width(), rightOutset_);
     }
     if (GreatNotEqual(imageTop.GetBorderImageOutset().Value(), 0.0)) {
-        imageTop.GetBorderImageOutset().NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), topOutset_);
+        imageTop.GetBorderImageOutset().NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), topOutset_);
     } else if (hasWidthProp_) {
-        widthProp_.topDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), topOutset_);
+        widthProp_.topDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), topOutset_);
     }
     if (GreatNotEqual(imageBottom.GetBorderImageOutset().Value(), 0.0)) {
-        imageBottom.GetBorderImageOutset().NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), bottomOutset_);
+        imageBottom.GetBorderImageOutset().NormalizeToPx(
+            dipScale_, 0.0, lpxScale_, paintSize_.Height(), bottomOutset_);
     } else if (hasWidthProp_) {
-        widthProp_.bottomDimen->NormalizeToPx(dipScale_, 0, 0, paintSize_.Height(), bottomOutset_);
+        widthProp_.bottomDimen->NormalizeToPx(dipScale_, 0.0, lpxScale_, paintSize_.Height(), bottomOutset_);
     }
 
     ParseNegativeNumberToZeroOrCeil(leftOutset_);
