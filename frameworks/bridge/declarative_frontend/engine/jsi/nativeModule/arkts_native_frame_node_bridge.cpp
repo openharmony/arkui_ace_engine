@@ -1455,7 +1455,7 @@ ArkUINativeModuleValue FrameNodeBridge::RegisterFrameCallback(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsFunction(), panda::JSValueRef::Undefined(vm));
     auto obj = firstArg->ToObject(vm);
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafely();
     panda::Local<panda::FunctionRef> func = obj;
     auto getVsyncFunc = [vm, func = panda::CopyableGlobal(vm, func), containerId]() {
         panda::LocalScope pandaScope(vm);
