@@ -669,13 +669,16 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
     property_->Set(start_);
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), renderContext, offset, scrollSizeMode = scrollSizeMode_]() {
+        [weak = AceType::WeakClaim(this), renderContext, offset, scrollSizeMode = scrollSizeMode_
+            isDirectionUp_ = isDirectionUp]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {
                 renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
-                if (scrollSizeMode == ScrollSizeMode::CONTINUOUS) {
+                bool isNeedChangeScrollHeight =
+                    scrollSizeMode == ScrollSizeMode::CONTINUOUS && isDirectionUp;
+                if (isNeedChangeScrollHeight) {
                     ref->ChangeScrollHeight(ref->height_);
                 }
             }
