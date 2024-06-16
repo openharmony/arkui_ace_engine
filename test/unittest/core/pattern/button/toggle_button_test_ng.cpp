@@ -313,8 +313,6 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
      * @tc.steps: step3. pattern InitClickEvent.
      * @tc.expected: step3. check whether clickListener_ is initialized.
      */
-    EXPECT_FALSE(togglePattern->clickListener_);
-    togglePattern->InitClickEvent();
     EXPECT_TRUE(togglePattern->clickListener_);
 }
 

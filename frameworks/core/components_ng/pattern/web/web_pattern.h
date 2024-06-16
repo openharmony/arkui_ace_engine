@@ -534,19 +534,9 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
-    void CreateOverlay(
-        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
-        int offsetX,
-        int offsetY,
-        int rectWidth,
-        int rectHeight,
-        int pointX,
-        int pointY);
-    void OnOverlayStateChanged(
-        int offsetX,
-        int offsetY,
-        int rectWidth,
-        int rectHeight);
+    void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
     void OnTextSelected();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
@@ -764,7 +754,6 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
-    void UpdateBackgroundColorForSurface();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);

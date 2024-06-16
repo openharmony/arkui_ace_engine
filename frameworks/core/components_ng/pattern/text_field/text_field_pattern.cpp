@@ -119,6 +119,7 @@ constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
+constexpr float ERROR_TEXT_MAX_FONT_SCALE = 2.0f;
 constexpr Dimension DOUBLECLICK_DISTANCE = 15.0_vp;
 constexpr double VELOCITY = -1000;
 constexpr double MASS = 1.0;
@@ -1184,16 +1185,6 @@ void TextFieldPattern::InitFocusEvent()
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-    auto windowFocusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->HasFocus()) {
-            pattern->HandleBlurEvent();
-        }
-    };
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    context->SetOnWindowFocused(windowFocusTask);
     focusEventInitialized_ = true;
 }
 
@@ -5615,6 +5606,7 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     CHECK_NULL_VOID(theme);
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string errorText = content;
+    errorTextStyle.SetMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
     ParagraphStyle paraStyle {
         .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
         .align = TextAlign::START,
@@ -5979,7 +5971,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
-    
+
     ToJsonValueForOption(json, filter);
 }
 
