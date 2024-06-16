@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_WRAPPER_H
 
+#include <cstdint>
 #include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -48,9 +50,19 @@ public:
 
 class RecursionGuard final {
 public:
-    RecursionGuard(RecursiveLock& lock) : lock_(lock) { lock_.Lock(); }
-    ~RecursionGuard() { lock_.Unlock(); }
-    RecursionGuard(const RecursionGuard& rhs) : lock_(rhs.lock_) { lock_.Lock(); }
+    RecursionGuard(RecursiveLock& lock) : lock_(lock)
+    {
+        lock_.Lock();
+    }
+    ~RecursionGuard()
+    {
+        lock_.Unlock();
+    }
+    RecursionGuard(const RecursionGuard& rhs) : lock_(rhs.lock_)
+    {
+        lock_.Lock();
+    }
+
 private:
     RecursiveLock& lock_;
 };
@@ -58,16 +70,45 @@ private:
 class ChildrenListWithGuard final {
 public:
     ChildrenListWithGuard(const std::list<RefPtr<LayoutWrapper>>& children, RecursiveLock& lock)
-        : children_(children), guard_(lock) {}
-    auto begin() const { return children_.begin(); }
-    auto end() const { return children_.end(); }
-    auto rbegin() const { return children_.rbegin(); }
-    auto rend() const { return children_.rend(); }
-    auto empty() const { return children_.empty(); }
-    auto size() const { return children_.size(); }
-    auto& front() const { return children_.front(); }
-    auto& back() const { return children_.back(); }
-    operator std::list<RefPtr<LayoutWrapper>>() const { return children_; }
+        : children_(children), guard_(lock)
+    {}
+    auto begin() const
+    {
+        return children_.begin();
+    }
+    auto end() const
+    {
+        return children_.end();
+    }
+    auto rbegin() const
+    {
+        return children_.rbegin();
+    }
+    auto rend() const
+    {
+        return children_.rend();
+    }
+    auto empty() const
+    {
+        return children_.empty();
+    }
+    auto size() const
+    {
+        return children_.size();
+    }
+    auto& front() const
+    {
+        return children_.front();
+    }
+    auto& back() const
+    {
+        return children_.back();
+    }
+    operator std::list<RefPtr<LayoutWrapper>>() const
+    {
+        return children_;
+    }
+
 private:
     const std::list<RefPtr<LayoutWrapper>>& children_;
     RecursionGuard guard_;
@@ -96,8 +137,11 @@ public:
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
-    virtual void SetActiveChildRange(int32_t start, int32_t end) = 0;
+    virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
     virtual void RecycleItemsByIndex(int32_t start, int32_t end) = 0;
+
+    virtual void SetActiveChildRange(const std::set<int32_t>& activeIndexes, const std::set<int32_t>& cachedIndexes) {}
+    virtual void RecycleItemsByIndex(const std::set<int32_t>& indexes) {}
 
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;

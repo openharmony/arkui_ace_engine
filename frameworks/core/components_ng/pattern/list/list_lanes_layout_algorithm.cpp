@@ -348,9 +348,18 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
 int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_RETURN(host, -1);
-    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(host->GetParent());
-    CHECK_NULL_RETURN(lazyForEach, -1);
-    return lazyForEach->GetIndexByUINode(host);
+    auto parent = host->GetParent();
+    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(parent);
+    if (lazyForEach) {
+        return lazyForEach->GetIndexByUINode(host);
+    }
+    while (parent && !AceType::InstanceOf<FrameNode>(parent)) {
+        if (AceType::InstanceOf<RepeatVirtualScrollNode>(parent)) {
+            return parent->GetFrameNodeIndex(host);
+        }
+        parent = parent->GetParent();
+    }
+    return -1;
 }
 
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)

@@ -33,18 +33,24 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
-        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
-        ScopedViewStackProcessor scopedViewStackProcessor;
-        deepRenderFunc(nodeId);
-        return ViewStackProcessor::GetInstance()->Finish();
-    };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
-        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
-        });
-    stack->Push(frameNode);
+    if (deepRenderFunc) {
+        auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+            CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+            ScopedViewStackProcessor scopedViewStackProcessor;
+            deepRenderFunc(nodeId);
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
+        auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+                return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
+            });
+        stack->Push(frameNode);
+    } else {
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
+        stack->Push(frameNode);
+    }
 }
 
 void ListItemModelNG::Create()

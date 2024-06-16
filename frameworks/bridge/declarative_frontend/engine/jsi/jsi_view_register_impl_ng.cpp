@@ -123,6 +123,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
@@ -451,6 +452,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabsController::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
+    JSRepeatVirtualScroll::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
