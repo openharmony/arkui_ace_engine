@@ -266,6 +266,10 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
 
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->ClearUserDefinedIdealSize(false, true);
+    }
+
     // searchButton Measure
     auto buttonLayoutConstraint = layoutProperty->CreateChildConstraint();
     buttonWrapper->Measure(buttonLayoutConstraint);
