@@ -141,6 +141,11 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
     onHoverEvent(false);
     EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
 
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RectF paintRect = { 0.0f, 0.0f, 1.0f, 1.0f };
+    renderContext->UpdatePaintRect(paintRect);
+
     MouseInfo mouseInfo;
     onMouseEvent(mouseInfo);
     EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
