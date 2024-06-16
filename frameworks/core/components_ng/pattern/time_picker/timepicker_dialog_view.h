@@ -90,6 +90,9 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
         const RefPtr<FrameNode>& nextConfirmDividerNode);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
+    static std::function<void(const GestureEvent&)> UpdateTimePickerSwitchEvent(
+        const RefPtr<FrameNode>& timeNode, const RefPtr<FrameNode>& textNode, const RefPtr<DialogTheme>& dialogTheme,
+        const RefPtr<FrameNode>& buttonNode, const std::function<void()>& timePickerSwitchEvent);
     static bool switchFlag_;
 };
 } // namespace OHOS::Ace::NG
