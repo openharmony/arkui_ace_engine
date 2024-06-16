@@ -717,7 +717,7 @@ void WrapLayoutAlgorithm::UpdateStartPositionByAlign(
             // space between will not affect start position, update space between only
             float crossSpace =
                 contentNum > 1 ? (crossLengthLimit_ - totalCrossLength_) / static_cast<float>(contentNum - 1) : 0.0f;
-            spaceBetweenContentsOnCrossAxis = isHorizontal_ ? OffsetF(0.0f, crossSpace) : OffsetF(crossSpace, 0.0f);
+            spaceBetweenContentsOnCrossAxis = OffsetF(crossSpace, 0.0f);
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
@@ -730,8 +730,7 @@ void WrapLayoutAlgorithm::UpdateStartPositionByAlign(
         case WrapAlignment::SPACE_AROUND: {
             float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum);
             startPosition.AddX(crossSpace / 2.0f);
-            spaceBetweenContentsOnCrossAxis =
-                isHorizontal_ ? OffsetF(0.0f, std::abs(crossSpace)) : OffsetF(std::abs(crossSpace), 0.0);
+            spaceBetweenContentsOnCrossAxis = OffsetF(std::abs(crossSpace), 0.0);
             break;
         }
         default: {
@@ -764,7 +763,7 @@ void WrapLayoutAlgorithm::LayoutWholeColumnWrap(
         return;
     }
     auto crossAxisRemainSpace = crossLengthLimit_ - totalCrossLength_;
-    if (isColumnReverse_) {
+    if (isRightDirection_) {
         crossAxisRemainSpace = -crossAxisRemainSpace;
     }
     UpdateStartPositionByAlign(startPosition, crossAxisRemainSpace, spaceBetweenContentsOnCrossAxis, contentNum);
