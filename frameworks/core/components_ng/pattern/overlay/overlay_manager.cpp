@@ -1873,6 +1873,7 @@ void OverlayManager::CleanPreviewInSubWindow()
                 if (frameNode &&
                     (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
                     node->RemoveChild(frameNode);
+                    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     break;
                 }
             }
