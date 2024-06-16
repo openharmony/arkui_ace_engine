@@ -1834,6 +1834,9 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
     auto initOffset = offset;
     float backOverOffset = (offset > 0) ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
+        if (!NearEqual(offset, backOverOffset)) {
+            SetCanOverScroll(false);
+        }
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
     } else if (parent && !IsScrollSnap() &&
@@ -1891,7 +1894,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
     auto isOutOfBoundary = IsOutOfBoundary();
     ACE_SCOPED_TRACE("HandleOverScroll, IsOutOfBoundary:%u, id:%d, tag:%s", isOutOfBoundary,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    if (!parent || !nestedScroll.NeedParent(velocity < 0)) {
+    if (!parent || !nestedScroll.NeedParent(velocity < 0) || isOutOfBoundary) {
         if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity);
