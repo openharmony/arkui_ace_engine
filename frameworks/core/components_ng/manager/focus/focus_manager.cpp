@@ -354,15 +354,26 @@ void FocusManager::WindowFocusMoveEnd()
     }
 }
 
-FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub)
+FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub, const RefPtr<PipelineContext>& context)
 {
     CHECK_NULL_VOID(focusHub);
     auto mng = focusHub->GetFocusManager();
+    bool useContext = false;
+    if (!mng && context) {
+        auto focusManager = context->GetOrCreateFocusManager();
+        CHECK_NULL_VOID(focusManager);
+        mng = focusManager;
+        useContext = true;
+    }
     CHECK_NULL_VOID(mng);
     if (mng->isSwitchingFocus_.value_or(false)) {
         return;
     }
-    mng->FocusSwitchingStart(focusHub);
+    if (useContext && context && context->GetRootElement()) {
+        mng->FocusSwitchingStart(context->GetRootElement()->GetFocusHub());
+    } else {
+        mng->FocusSwitchingStart(focusHub);
+    }
     focusMng_ = mng;
 }
 
