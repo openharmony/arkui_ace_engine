@@ -132,6 +132,14 @@ struct ExtraData {
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
 
+bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
+{
+    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
+        return false;
+    }
+    return true;
+}
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,

@@ -167,7 +167,7 @@ void HandleInnerCustomEvent(ArkUICustomNodeEvent* origin)
         return;
     }
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-    if (!nodePtr->extraCustomData) {
+    if (!IsValidArkUINode(nodePtr) || !nodePtr->extraCustomData) {
         return;
     }
 
