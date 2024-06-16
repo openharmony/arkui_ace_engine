@@ -4823,27 +4823,15 @@ void WebPattern::OnRebuildFrame()
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
-void WebPattern::CreateOverlay(
-    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight,
-    int pointX,
-    int pointY)
+void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+    int rectHeight, int pointX, int pointY)
 {
     if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(
-            GetHost(),
-            ImageAnalyzerHolder::WEB);
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::WEB);
     }
-    TAG_LOGI(
-        AceLogTag::ACE_WEB,
-        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d", offsetX, offsetY,
+        rectWidth, rectHeight);
     auto callback = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4851,37 +4839,17 @@ void WebPattern::CreateOverlay(
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
     imageAnalyzerManager_->UpdatePressOverlay(
-        pixelMap,
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight,
-        pointX,
-        pointY,
-        std::move(callback));
+        pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(callback));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
 }
 
-void WebPattern::OnOverlayStateChanged(
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight)
+void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
     if (imageAnalyzerManager_) {
-        TAG_LOGI(
-            AceLogTag::ACE_WEB,
+        TAG_LOGI(AceLogTag::ACE_WEB,
             "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
-            offsetX,
-            offsetY,
-            rectWidth,
-            rectHeight);
-        imageAnalyzerManager_->UpdateOverlayStatus(
-            true,
-            offsetX,
-            offsetY,
-            rectWidth,
-            rectHeight);
+            offsetX, offsetY, rectWidth, rectHeight);
+        imageAnalyzerManager_->UpdateOverlayStatus(true, offsetX, offsetY, rectWidth, rectHeight);
     }
 }
 

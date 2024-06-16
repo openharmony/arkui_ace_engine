@@ -1167,48 +1167,21 @@ void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
     delegate->OnViewportFitChange(viewportFit);
 }
 
-void WebClientImpl::CreateOverlay(
-    void* data,
-    size_t len,
-    int width,
-    int height,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight,
-    int pointX,
-    int pointY)
+void WebClientImpl::CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY,
+    int rectWidth, int rectHeight, int pointX, int pointY)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->CreateOverlay(
-        data,
-        len,
-        width,
-        height,
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight,
-        pointX,
-        pointY);
+    delegate->CreateOverlay(data, len, width, height, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
 }
 
-void WebClientImpl::OnOverlayStateChanged(
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight)
+void WebClientImpl::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnOverlayStateChanged(
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight);
+    delegate->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
 }
 
 void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)

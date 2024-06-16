@@ -282,15 +282,8 @@ void ImageAnalyzerManager::ReleaseImageAnalyzer()
     }
 }
 
-void ImageAnalyzerManager::UpdatePressOverlay(
-    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight,
-    int pointX,
-    int pointY,
-    OnTextSelectedCallback callback)
+void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY,
+    int rectWidth, int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback)
 {
     analyzerUIConfig_.overlayOffset.SetX(offsetX);
     analyzerUIConfig_.overlayOffset.SetY(offsetY);
@@ -307,17 +300,13 @@ void ImageAnalyzerManager::UpdatePressOverlay(
         analyzerUIConfig_.contentHeight = rectHeight;
         analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
         analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
-        analyzerUIConfig_.pixelmapNapiVal =
-            imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
+        analyzerUIConfig_.pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     }
     ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
     analyzerUIConfig_.pixelmapNapiVal = nullptr;
 }
 
-void ImageAnalyzerManager::UpdateOverlayTouchInfo(
-    int touchPointX,
-    int touchPointY,
-    TouchType touchType)
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType)
 {
     analyzerUIConfig_.touchInfo.touchPoint.x = touchPointX - analyzerUIConfig_.overlayOffset.GetX();
     analyzerUIConfig_.touchInfo.touchPoint.y = touchPointY - analyzerUIConfig_.overlayOffset.GetY();
@@ -325,12 +314,7 @@ void ImageAnalyzerManager::UpdateOverlayTouchInfo(
     ImageAnalyzerMgr::GetInstance().UpdatePressOverlay(&overlayData_, &analyzerUIConfig_);
 }
 
-void ImageAnalyzerManager::UpdateOverlayStatus(
-    bool status,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight)
+void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
     if (status) {
         analyzerUIConfig_.overlayOffset.SetX(offsetX);

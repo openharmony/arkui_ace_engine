@@ -5408,9 +5408,9 @@ void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoa
             type, details->IsMainFrame(), details->IsSameDocument(),
             details->DidReplaceEntry()));
     }
-    auto pattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->DestroyAnalyzerOverlay();
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
 }
 
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
@@ -6829,47 +6829,20 @@ void WebDelegate::OnSafeInsetsChange()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
 }
 
-void WebDelegate::CreateOverlay(
-    void* data,
-    size_t len,
-    int width,
-    int height,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight,
-    int pointX,
-    int pointY)
+void WebDelegate::CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+    int rectHeight, int pointX, int pointY)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->CreateOverlay(
-        PixelMap::ConvertSkImageToPixmap(
-            static_cast<const uint32_t*>(data),
-            len,
-            width,
-            height),
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight,
-        pointX,
-        pointY);
+    webPattern->CreateOverlay(PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height),
+        offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
 }
 
-void WebDelegate::OnOverlayStateChanged(
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight)
+void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->OnOverlayStateChanged(
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight);
+    webPattern->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
 }
 
 void WebDelegate::OnTextSelected()
