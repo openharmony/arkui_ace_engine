@@ -93,7 +93,7 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
         start = richEditorPattern->GetCaretPosition();
         end = richEditorPattern->GetCaretPosition();
     }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection, start, range=%[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection, start, range=[%{public}d,%{public}d]", start, end);
     SelectionInfo value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::ONSELECT);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetSelection end");
     return value;
@@ -116,7 +116,7 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetParagraphsInfo, start, range=%[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetParagraphsInfo, start, range=[%{public}d,%{public}d]", start, end);
     auto paragraphInfo = pattern->GetParagraphInfo(start, end);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetParagraphsInfo, end");
     return paragraphInfo;
