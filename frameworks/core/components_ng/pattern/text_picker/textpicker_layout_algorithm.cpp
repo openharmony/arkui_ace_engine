@@ -211,6 +211,7 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
 void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
 {
     SizeF frameSize = size;
+    CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
     auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
