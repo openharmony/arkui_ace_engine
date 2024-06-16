@@ -49,6 +49,9 @@ void TextBases::SuppressMockParagraph()
 
 std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> TextBases::Init()
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto pattern = AceType::MakeRefPtr<TextPattern>();
