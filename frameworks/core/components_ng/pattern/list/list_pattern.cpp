@@ -1445,7 +1445,7 @@ void ListPattern::ScrollTo(float position)
     isScrollEnd_ = true;
 }
 
-void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
@@ -1455,11 +1455,15 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
+            SetExtraOffset(extraOffset);
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
             }
         } else {
+            if (extraOffset.has_value()) {
+                currentDelta_ = extraOffset.value();
+            }
             jumpIndex_ = index;
             scrollAlign_ = align;
         }
@@ -1667,6 +1671,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
             return false;
         }
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+    }
+    auto extraOffset = GetExtraOffset();
+    if (extraOffset.has_value()) {
+        SetUseTotalOffset(false);
+        targetPos += extraOffset.value();
+        ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true);

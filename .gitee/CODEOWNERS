@@ -84,6 +84,7 @@ frameworks/core/components_ng/pattern/form/  @arondave @arcticsun
 frameworks/core/components_ng/pattern/gauge/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/gesture/  @zheng-qiyi
 frameworks/core/components_ng/pattern/grid/  @zcdqs
+frameworks/core/components_ng/pattern/grid/irregular/  @zhoutianer
 frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun

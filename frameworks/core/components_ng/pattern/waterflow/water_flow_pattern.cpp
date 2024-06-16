@@ -265,6 +265,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_.UpdateStartIndex();
     prevOffset_ = layoutInfo_.currentOffset_;
+    layoutInfo_.extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
 
@@ -287,6 +288,11 @@ bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
     }
     auto item = layoutInfo_.items_[layoutInfo_.GetSegment(index)].at(crossIndex).at(index);
     float targetPosition = -layoutInfo_.JumpToTargetAlign(item);
+    auto extraOffset = GetExtraOffset();
+    if (extraOffset.has_value()) {
+        targetPosition += extraOffset.value();
+        ResetExtraOffset();
+    }
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
 }
@@ -475,13 +481,14 @@ void WaterFlowPattern::ResetSections()
     MarkDirtyNodeSelf();
 }
 
-void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();
     if ((index >= 0) || (index == LAST_ITEM)) {
         if (smooth) {
+            SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
                 auto host = GetHost();
@@ -490,6 +497,9 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
             }
         } else {
             UpdateStartIndex(index);
+            if (extraOffset.has_value()) {
+                layoutInfo_.extraOffset_ = -extraOffset.value();
+            }
         }
     }
     FireAndCleanScrollingListener();

@@ -187,6 +187,10 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     if (!wrapper_->IsContraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
     }
+
+    if (info_.extraOffset_) {
+        postJumpOffset_ += *info_.extraOffset_;
+    }
 }
 
 void WaterFlowSegmentedLayout::SegmentInit(

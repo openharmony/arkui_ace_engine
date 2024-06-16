@@ -196,7 +196,8 @@ public:
 
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
+        std::optional<float> extraOffset = std::nullopt) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     /**
