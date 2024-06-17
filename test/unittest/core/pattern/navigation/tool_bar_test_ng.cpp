@@ -245,7 +245,7 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
     barItemNode->SetIconNode(imageNode);
     barItemNode->SetTextNode(textNode);
 
-    navToolbarPattern->InitLongPressEvent(gestureHub, barItemNode);
+    navToolbarPattern->InitLongPressEvent(gestureHub);
     auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_NE(longPressRecognizer->onActionEnd_, nullptr);

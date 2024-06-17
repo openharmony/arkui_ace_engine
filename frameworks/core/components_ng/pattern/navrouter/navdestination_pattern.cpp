@@ -350,8 +350,8 @@ void NavDestinationPattern::HandleLongPress()
         if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
             return ;
         }
         auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
