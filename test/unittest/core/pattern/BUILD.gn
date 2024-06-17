@@ -74,9 +74,8 @@ group("core_pattern_unittest") {
     "scroll:scroll_test_ng",
     "scroll_bar:scroll_bar_test_ng",
     "scrollable:scrollable_test_ng",
-
-    # "search:search_test_ng",
-    # "security_component:security_component_test_ng",
+    "search:search_test_ng",
+    "security_component:security_component_test_ng",
     "select:select_test_ng",
     "select_overlay:select_overlay_test_ng",
     "shape:shape_test_ng",
@@ -88,12 +87,10 @@ group("core_pattern_unittest") {
     "swiper:swiper_test_ng",
     "symbol:symbol_test_ng",
     "tabs:tabs_test_ng",
-
-    # "text:text_test_ng",
+    "text:text_test_ng",
     "text_clock:text_clock_test_ng",
     "text_drag:text_drag_test_ng",
-
-    # "text_input:TextInputTest",
+    "text_input:TextInputTest",
     "text_picker:text_picker_test_ng",
     "text_timer:text_timer_test_ng",
     "time_picker:time_picker_test_ng",
