@@ -76,6 +76,9 @@ private:
         LayoutWrapper* layoutWrapper, int32_t& index, float& endPos, float crossSize);
     void LayoutCachedALine(LayoutWrapper* layoutWrapper, std::pair<const int, ListItemInfo>& pos,
         int32_t startIndex, float crossSize);
+    float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
+    int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached) override;
+    int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached) override;
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,

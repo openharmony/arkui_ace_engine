@@ -231,7 +231,7 @@ bool ListLanesLayoutAlgorithm::CheckCurRowMeasureFinished(LayoutWrapper* layoutW
 void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
     bool hasGroup = false;
-    auto itemPosition = GetItemPosition();
+    auto& itemPosition = GetItemPosition();
     for (auto &pos : itemPosition) {
         if (pos.second.isGroup) {
             hasGroup = true;
@@ -537,12 +537,9 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
 std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
     std::list<int32_t> predictBuildList;
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    float crossSize = GetCrossAxisSize(size, axis_);
+    float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
 
-    auto itemPosition = GetItemPosition();
+    auto& itemPosition = GetItemPosition();
     auto currIndex = itemPosition.rbegin()->first + 1;
     auto currPos = itemPosition.rbegin()->second.endPos + GetSpaceWidth();
     for (int32_t i = 0; i < cacheCount && currIndex <= GetMaxListItemIndex(); i++) {
@@ -556,5 +553,115 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* lay
         predictBuildList.merge(tmpList);
     }
     return predictBuildList;
+}
+
+float ListLanesLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
+{
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    return GetCrossAxisSize(size, axis_);
+}
+
+int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+{
+    ACE_SCOPED_TRACE("LayoutCachedForward:%d,%d", cacheCount, cached);
+    float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
+    RefPtr<LayoutWrapper> wrapper;
+    int32_t currIndex = GetItemPosition().rbegin()->first + 1;
+    auto startPos = GetItemPosition().rbegin()->second.endPos + GetSpaceWidth();
+    while (cached < cacheCount && currIndex <= GetMaxListItemIndex()) {
+        ListLayoutAlgorithm::PositionMap posMap;
+        float mainLen = 0.0f;
+        bool isGroup = false;
+        int32_t cnt = 0;
+        for (int32_t i = 0; i < lanes_ && currIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
+            wrapper = layoutWrapper->GetChildByIndex(currIndex + i, true);
+            if (!wrapper) {
+                return currIndex + i;
+            }
+            isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+            if (isGroup && cnt > 0) {
+                isGroup = false;
+                break;
+            }
+            if (!isGroup && CheckNeedMeasure(wrapper)) {
+                return currIndex + i;
+            }
+            cnt++;
+            mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+            auto id = wrapper->GetHostNode()->GetId();
+            posMap[currIndex + i] = { id, startPos, startPos + mainLen, isGroup };
+        }
+        auto startIndex = currIndex;
+        for (auto& pos: posMap) {
+            pos.second.endPos = startPos + mainLen;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
+        }
+        startPos = startPos + mainLen + GetSpaceWidth();
+        if (isGroup) {
+            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            if (res.first < res.second && res.first < cacheCount - cached) {
+                return currIndex;
+            }
+            cached += std::max(res.second, 1);
+        } else {
+            cached++;
+        }
+        currIndex += cnt;
+    }
+    return -1;
+}
+
+int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+{
+    ACE_SCOPED_TRACE("LayoutCachedBackward:%d,%d", cacheCount, cached);
+    float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
+    RefPtr<LayoutWrapper> wrapper;
+    int32_t currIndex = GetItemPosition().begin()->first - 1;
+    auto endPos = GetItemPosition().begin()->second.startPos - GetSpaceWidth();
+    while (cached < cacheCount && currIndex >= 0) {
+        ListLayoutAlgorithm::PositionMap posMap;
+        float mainLen = 0.0f;
+        bool isGroup = false;
+        int32_t cnt = 0;
+        for (int32_t i = 0; i < lanes_ && currIndex >= 0; i++) {
+            auto idx = currIndex - i;
+            wrapper = layoutWrapper->GetChildByIndex(idx, true);
+            if (!wrapper) {
+                return idx;
+            }
+            isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+            if (isGroup && cnt > 0) {
+                isGroup = false;
+                break;
+            }
+            if (!isGroup && CheckNeedMeasure(wrapper)) {
+                return idx;
+            }
+            cnt++;
+            mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+            posMap[idx] = { wrapper->GetHostNode()->GetId(), endPos - mainLen, endPos, isGroup };
+            if (CheckCurRowMeasureFinished(layoutWrapper, idx, isGroup)) {
+                break;
+            }
+        }
+        auto startIndex = currIndex - cnt + 1;
+        for (auto& pos: posMap) {
+            pos.second.startPos = endPos - mainLen;
+            LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
+        }
+        endPos = endPos - mainLen - GetSpaceWidth();
+        cached++;
+        if (isGroup) {
+            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            if (res.first < res.second && res.first < cacheCount - cached) {
+                return currIndex;
+            }
+            cached += std::max(res.second, 1) - 1;
+        }
+        currIndex -= cnt;
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NG
