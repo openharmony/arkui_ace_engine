@@ -141,18 +141,17 @@ private:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(
         const RefPtr<FrameNode>& monthAndDayPickerNode, const RefPtr<FrameNode>& timePickerNode,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
+        const RefPtr<FrameNode>& contentRow);
     static std::function<void(const GestureEvent&)> CreateNextPrevClickEvent(
         const RefPtr<FrameNode>& textNextPrevNode, const RefPtr<FrameNode>& nextPrevButtonNode,
         const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dateNode,
         std::function<void()>& switchEvent, const RefPtr<FrameNode>& contentRow);
     static void SwitchTimePickerPage(
         const RefPtr<FrameNode> &monthAndDayPickerNode, const RefPtr<FrameNode> &timePickerNode,
-        const RefPtr<FrameNode> &buttonCancelNode, const RefPtr<FrameNode> &buttonConfirmNode,
-        const RefPtr<FrameNode>& datePickerNode, const RefPtr<FrameNode>& contentRow);
+        const RefPtr<FrameNode> &contentRow);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
-
+    static void SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,
+        const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool hasSwitchContentRow_;
