@@ -378,16 +378,6 @@ void CanvasPattern::StrokeText(const std::string& text, double x, double y, std:
 #endif
 }
 
-double CanvasPattern::MeasureText(const std::string& text, const PaintState& state)
-{
-    return paintMethod_->MeasureText(text, state);
-}
-
-double CanvasPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-    return paintMethod_->MeasureTextHeight(text, state);
-}
-
 TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     return paintMethod_->MeasureTextMetrics(text, state);
