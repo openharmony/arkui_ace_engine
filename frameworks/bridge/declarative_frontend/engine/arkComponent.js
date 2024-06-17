@@ -24843,6 +24843,14 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
     return this;
   }
+  customContentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperCustomContentTransitionModifier.identity, SwiperCustomContentTransitionModifier, value);
+    return this;
+  }
+  onContentDidScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -25388,6 +25396,38 @@ class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   }
 }
 SwiperIndicatorInteractiveModifier.identity = Symbol('indicatorInteractive');
+class SwiperCustomContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperCustomContentTransition(node);
+    } else {
+      getUINativeModule().swiper.setSwiperCustomContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperCustomContentTransitionModifier.identity = Symbol('swiperCustomContentTransition');
+class SwiperOnContentDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnContentDidScrollModifier.identity = Symbol('swiperOnContentDidScroll');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {

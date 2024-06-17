@@ -1098,6 +1098,25 @@ void ResetSwiperOnGestureSwipe(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetOnGestureSwipe(frameNode, nullptr);
 }
+
+void SetOnContentDidScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(int32_t, int32_t, float, float)>*>(callback);
+        SwiperModelNG::SetOnContentDidScroll(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnContentDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentDidScroll(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1118,7 +1137,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
         GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
         SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
-        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe };
+        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
+        SetOnContentDidScroll, ResetOnContentDidScroll };
     return &modifier;
 }
 
