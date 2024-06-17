@@ -67,7 +67,7 @@ constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()
 {
-    if (HasLoadingText()) {
+    if (hasLoadingText_) {
         return TRIGGER_REFRESH_WITH_TEXT_DISTANCE;
     } else {
         return TRIGGER_REFRESH_DISTANCE;
@@ -96,6 +96,7 @@ void RefreshPattern::OnModifyDone()
     refreshOffset_ = layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()).Value() > 0 ?
         layoutProperty->GetRefreshOffset().value_or(GetTriggerRefreshDisTance()) : GetTriggerRefreshDisTance();
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
+    hasLoadingText_ = layoutProperty->HasLoadingText();
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
@@ -209,19 +210,10 @@ void RefreshPattern::InitProgressNode()
     }
     layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     host->AddChild(progressChild_, -1);
-    if (HasLoadingText()) {
+    if (hasLoadingText_) {
         InitProgressColumn();
     }
     progressChild_->MarkDirtyNode();
-}
-bool RefreshPattern::HasLoadingText()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->HasLoadingText() &&
-           AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
@@ -292,7 +284,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     } else {
         progressPaintProperty->UpdateColor(theme->GetProgressColor());
     }
-    if (HasLoadingText()) {
+    if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
@@ -312,7 +304,7 @@ void RefreshPattern::InitChildNode()
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (isCustomBuilderExist_) {
         if (progressChild_) {
-            if (HasLoadingText()) {
+            if (hasLoadingText_) {
                 CHECK_NULL_VOID(columnNode_);
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
@@ -321,23 +313,24 @@ void RefreshPattern::InitChildNode()
             host->RemoveChild(progressChild_);
             progressChild_ = nullptr;
         }
-    } else if (!progressChild_) {
-        InitProgressNode();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            auto progressContext = progressChild_->GetRenderContext();
-            CHECK_NULL_VOID(progressContext);
-            progressContext->UpdateOpacity(0.0);
-            UpdateLoadingTextOpacity(0.0f);
-        } else {
-            UpdateLoadingProgress();
-        }
     } else {
+        if (!progressChild_) {
+            InitProgressNode();
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                auto progressContext = progressChild_->GetRenderContext();
+                CHECK_NULL_VOID(progressContext);
+                progressContext->UpdateOpacity(0.0);
+                UpdateLoadingTextOpacity(0.0f);
+            } else {
+                UpdateLoadingProgress();
+            }
+        }
         auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(progressAccessibilityProperty);
         progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
     }
 
-    if (HasLoadingText() && loadingTextNode_) {
+    if (hasLoadingText_ && loadingTextNode_) {
         auto loadingTextLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(loadingTextLayoutProperty);
         auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
@@ -754,7 +747,7 @@ float RefreshPattern::GetLoadingVisibleHeight()
     CHECK_NULL_RETURN(renderContext, 0.0f);
     auto geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
-    if (HasLoadingText()) {
+    if (hasLoadingText_) {
         auto loadingTextGeometryNode = loadingTextNode_->GetGeometryNode();
         CHECK_NULL_RETURN(loadingTextGeometryNode, 0.0f);
         loadingHeight = geometryNode->GetFrameSize().Height() + loadingTextGeometryNode->GetFrameSize().Height() +
