@@ -123,11 +123,14 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f,
+        float startPercent = 0.0f, float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
         percentFading_ = percentFading;
+        startPercent_ = startPercent;
+        endPercent_ = endPercent;
     }
 
     void UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext);
@@ -150,6 +153,8 @@ private:
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
     float percentFading_ = 0.0f;
+    float startPercent_ = 0.0f;
+    float endPercent_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

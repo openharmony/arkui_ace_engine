@@ -280,6 +280,12 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
+
+    bool IsFadingEdge() const
+    {
+        return isFadingEdge_;
+    }
+
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -349,11 +355,15 @@ private:
 
     void ReadThemeToFadingEdge();
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
-    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom,
+        float fadeFrameSize, const RefPtr<ListPaintMethod> paint);
+    bool UpdateFadingForPadding(float fadeFrameSize);
     bool isFadingEdge_ = false;
     bool isTopEdgeFading_ = false;
     bool isLowerEdgeFading_ = false;
     Axis fadingAxis_ = Axis::VERTICAL;
+    float startPercent_ = 0.0f;
+    float endPercent_ = 1.0f;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

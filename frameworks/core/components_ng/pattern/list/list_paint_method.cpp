@@ -210,12 +210,12 @@ void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRend
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     if (isFadingTop_) {
-        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
     }
     if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     if (axis == Axis::HORIZONTAL) {
