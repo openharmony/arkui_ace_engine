@@ -253,18 +253,25 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 
 void JSImage::Create(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
     CreateImage(info);
+}
+
+bool JSImage::CheckIsCard()
+{
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "Container is null in CreateImage.");
+        return false;
+    }
+    return container->IsFormRender() && !container->IsDynamicRender();
 }
 
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    bool isCard = container->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = CheckIsCard();
 
     // Interim programme
     std::string bundleName;
