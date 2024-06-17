@@ -785,8 +785,8 @@ private:
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
-    // use 14px for normal font size.
-    Dimension fontSize_ { 14, DimensionUnit::PX };
+    // use 16vp for normal font size.
+    Dimension fontSize_ { 16, DimensionUnit::VP };
     Dimension adaptMinFontSize_;
     Dimension adaptMaxFontSize_;
     Dimension adaptFontSizeStep_;
