@@ -693,7 +693,7 @@ public:
 
     bool operator==(const ParticleColorPropertyOption& other) const
     {
-        return (range_ == other.GetRange()) && (updater_ == other.GetUpdater());
+        return (range_ == other.GetRange()) && (updater_ == other.GetUpdater()) && (distribution_ == other.GetDistribution());
     }
 
     std::string ToString() const
