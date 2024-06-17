@@ -590,7 +590,7 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     }
     animateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && (isAtTop || isAtBottom);
     isAnimateOverScroll_ = (source == SCROLL_FROM_ANIMATION_CONTROLLER) && animateCanOverScroll_ &&
-                           ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)) || IsOutOfBoundary());
+                            ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset)));
     return true;
 }
 
