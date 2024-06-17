@@ -188,6 +188,8 @@ const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
+const char* DEBUG_LINE_INFO_LINE = "$line";
+const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
@@ -7202,13 +7204,30 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
 
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
+    std::string debugLine;
+    uint32_t length = info.Length();
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
-    auto jsVal = info[0];
-    if (!CheckJSCallbackInfo("JsDebugLine", jsVal, checkList)) {
-        return;
+
+    if (length == 1) { // deprecated version of debug line
+        auto jsVal = info[0];
+        if (!CheckJSCallbackInfo("JsDebugLine", jsVal, checkList)) {
+            return;
+        }
+        debugLine = jsVal->ToString();
+    } else if (length == 2) { // debug line with extra package name
+        auto line = info[0];
+        auto packageName = info[1];
+        if (!CheckJSCallbackInfo("JsDebugLine", line, checkList) ||
+            !CheckJSCallbackInfo("JsDebugLine", packageName, checkList)) {
+            return;
+        }
+        auto json = JsonUtil::Create(true);
+        json->Put(DEBUG_LINE_INFO_LINE, line->ToString().c_str());
+        json->Put(DEBUG_LINE_INFO_PACKAGE_NAME, packageName->ToString().c_str());
+        debugLine = json->ToString();
     }
 
-    ViewAbstractModel::GetInstance()->SetDebugLine(jsVal->ToString());
+    ViewAbstractModel::GetInstance()->SetDebugLine(debugLine);
 }
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
