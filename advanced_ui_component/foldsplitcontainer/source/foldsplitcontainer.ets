@@ -284,8 +284,8 @@ export interface HoverModeStatus {
 /**
  * The handler of onHoverStatusChange event
  *
- * @param { HoverStatus } status - The status of hover mode
- * @returns { void }
+ * @typedef { function } OnHoverStatusChangeHandler
+ * @param { HoverModeStatus } status - The status of hover mode
  * @syscap SystemCapability.ArkUI.ArkUI.Full
  * @crossplatform
  * @atomicservice
@@ -395,7 +395,7 @@ export struct FoldSplitContainer {
   /**
    * The layout options for the container when the foldable screen is in hover mode.
    *
-   * @type { SemiFoldedRegionLayoutOptions }
+   * @type { HoverModeRegionLayoutOptions  }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
    * @crossplatform
    * @atomicservice
@@ -405,7 +405,7 @@ export struct FoldSplitContainer {
   @Watch('updateLayout')
   hoverModeLayoutOptions: HoverModeRegionLayoutOptions = {
     horizontalSplitRatio: PresetSplitRatio.LAYOUT_3V2,
-    showExtraRegion: true,
+    showExtraRegion: false,
     extraRegionPosition: ExtraRegionPosition.TOP
   };
   /**
@@ -511,7 +511,9 @@ export struct FoldSplitContainer {
   build() {
     Stack() {
       Column() {
-        this.primary();
+        if (this.primary) {
+          this.primary();
+        }
       }
       .size(this.primaryLayout.size)
       .position({
@@ -521,7 +523,9 @@ export struct FoldSplitContainer {
       .clip(true)
 
       Column() {
-        this.secondary();
+        if (this.secondary) {
+          this.secondary();
+        }
       }
       .size(this.secondaryLayout.size)
       .position({
@@ -533,7 +537,7 @@ export struct FoldSplitContainer {
       if (this.extra) {
         if (this.extraLayout.size.width > 0 && this.extraLayout.size.height > 0) {
           Column() {
-            this.extra();
+            this.extra?.();
           }
           .size(this.extraLayout.size)
           .position({
@@ -558,12 +562,14 @@ export struct FoldSplitContainer {
   }
 
   private dispatchHoverStatusChange(isHoverMode: boolean) {
-    this.onHoverStatusChange?.({
-      foldStatus: this.foldStatus,
-      isHoverMode: isHoverMode,
-      appRotation: display.getDefaultDisplaySync().rotation,
-      windowStatusType: this.windowStatusType,
-    });
+    if (this.onHoverStatusChange) {
+      this.onHoverStatusChange({
+        foldStatus: this.foldStatus,
+        isHoverMode: isHoverMode,
+        appRotation: display.getDefaultDisplaySync().rotation,
+        windowStatusType: this.windowStatusType,
+      });
+    }
   }
 
   private hasExtraRegion(): boolean {
@@ -666,18 +672,18 @@ export struct FoldSplitContainer {
     } else {
       const extraRegionPosition =
         withDefaultValue(this.expandedLayoutOptions.extraRegionPosition, ExtraRegionPosition.TOP);
-      if (extraRegionPosition === ExtraRegionPosition.TOP) {
-        primaryLayout.size.width = width - extraLayout.size.width;
-        secondaryLayout.size.width = width;
-        extraLayout.size.height = primaryLayout.size.height;
-        extraLayout.position.x = primaryLayout.size.width;
-        extraLayout.position.y = 0;
-      } else {
+      if (extraRegionPosition === ExtraRegionPosition.BOTTOM) {
         primaryLayout.size.width = width;
         secondaryLayout.size.width = width - extraLayout.size.width;
         extraLayout.size.height = secondaryLayout.size.height;
         extraLayout.position.x = secondaryLayout.size.width;
         extraLayout.position.y = primaryLayout.size.height;
+      } else {
+        primaryLayout.size.width = width - extraLayout.size.width;
+        secondaryLayout.size.width = width;
+        extraLayout.size.height = primaryLayout.size.height;
+        extraLayout.position.x = primaryLayout.size.width;
+        extraLayout.position.y = 0;
       }
     }
 
@@ -709,12 +715,7 @@ export struct FoldSplitContainer {
       primaryLayout.size.width = width;
       secondaryLayout.size.width = width;
       extraLayout.position.x = width;
-      if (!this.expandedLayoutOptions.isExtraRegionPerpendicular &&
-        this.expandedLayoutOptions.extraRegionPosition === ExtraRegionPosition.BOTTOM) {
-        extraLayout.position.y = primaryLayout.size.height;
-      } else {
-        extraLayout.position.y = 0;
-      }
+      extraLayout.position.y = 0;
     } else {
       const horizontalSplitRatio =
         getSplitRatio(this.hoverModeLayoutOptions.horizontalSplitRatio, PresetSplitRatio.LAYOUT_3V2);
@@ -725,18 +726,18 @@ export struct FoldSplitContainer {
       } else {
         extraLayout.size.width = 0;
       }
-      if (extraRegionPosition === ExtraRegionPosition.TOP) {
-        extraLayout.size.height = primaryLayout.size.height;
-        primaryLayout.size.width = width - extraLayout.size.width;
-        secondaryLayout.size.width = width;
-        extraLayout.position.x = primaryLayout.position.x + primaryLayout.size.width;
-        extraLayout.position.y = 0;
-      } else {
+      if (extraRegionPosition === ExtraRegionPosition.BOTTOM) {
         primaryLayout.size.width = width;
         secondaryLayout.size.width = width - extraLayout.size.width;
         extraLayout.size.height = secondaryLayout.size.height;
         extraLayout.position.x = secondaryLayout.size.width;
         extraLayout.position.y = secondaryLayout.position.y;
+      } else {
+        extraLayout.size.height = primaryLayout.size.height;
+        primaryLayout.size.width = width - extraLayout.size.width;
+        secondaryLayout.size.width = width;
+        extraLayout.position.x = primaryLayout.position.x + primaryLayout.size.width;
+        extraLayout.position.y = 0;
       }
     }
 
