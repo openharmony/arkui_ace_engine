@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,7 @@
 #include "native_engine/native_engine.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "../include/api_policy_adapter.h"
+#include "api_policy_adapter.h"
 
 using namespace std;
 

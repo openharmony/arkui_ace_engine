@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "../include/api_policy_adapter.h"
+#include "api_policy_adapter.h"
 #include <dlfcn.h>
 
 ApiPolicyAdapter::ApiPolicyAdapter()
@@ -22,6 +23,7 @@ ApiPolicyAdapter::ApiPolicyAdapter()
     if (!handle) {
         return;
     }
+    func = reinterpret_cast<CheckUrlFunc>(dlsym(handle, "CheckUrl"));
 }
 
 ApiPolicyAdapter::~ApiPolicyAdapter()
@@ -32,11 +34,9 @@ ApiPolicyAdapter::~ApiPolicyAdapter()
     }
 }
 
-int32_t ApiPolicyAdapter::CheckUrl(std::string bundleName, std::string domainType, std::string url)
+int32_t ApiPolicyAdapter::CheckUrl(const std::string& bundleName, const std::string& domainType, const std::string& url)
 {
     int32_t res = -1;
-    using CheckUrl = int32_t (*)(std::string, std::string, std::string);
-    auto func = reinterpret_cast<CheckUrl>(dlsym(handle, "CheckUrl"));
     if (func == nullptr) {
         return res;
     }

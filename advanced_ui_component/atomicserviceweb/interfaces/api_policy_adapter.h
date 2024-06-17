@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +24,14 @@ public:
     ApiPolicyAdapter();
     ~ApiPolicyAdapter();
 
-    int32_t CheckUrl(std::string bundleName, std::string domainType, std::string url);
+    int32_t CheckUrl(const std::string& bundleName, const std::string& domainType, const std::string& url);
+
+    using CheckUrlFunc = int32_t (*)(const std::string&, const std::string&, const std::string&);
+    void SetCheckUrlFunc(CheckUrlFunc& func);
 
 private:
     void *handle = nullptr;
+    CheckUrlFunc func = nullptr;
 };
 
 #endif
