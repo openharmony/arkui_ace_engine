@@ -269,6 +269,7 @@ public:
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
+    static PaddingProperty GetPadding(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

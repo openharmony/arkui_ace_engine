@@ -1592,6 +1592,18 @@ void ResetTextAreaEnablePreviewText(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
 }
+
+void GetTextAreaPadding(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = TextFieldModelNG::GetPadding(frameNode);
+    (*values)[NUM_0] = padding.top->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = padding.right->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = padding.bottom->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = padding.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    length = NUM_4;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1639,7 +1651,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
         SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete,
-        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText };
+        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText, GetTextAreaPadding };
     return &modifier;
 }
 
