@@ -899,6 +899,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag with contextMenu.");
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
