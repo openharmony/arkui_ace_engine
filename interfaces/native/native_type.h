@@ -1910,6 +1910,36 @@ typedef enum {
 } ArkUI_ErrorCode;
 
 /**
+ * @brief defines the enumerated value of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** The default security zone includes the status bar and navigation bar. */
+    ARKUI_SAFE_AREA_TYPE_SYSTEM = 1,
+    /** Non-secure areas of the device, such as bangs or hole holes. */
+    ARKUI_SAFE_AREA_TYPE_CUTOUT = 1 << 1,
+    /** Soft keyboard area. */
+    ARKUI_SAFE_AREA_TYPE_KEYBOARD = 1 << 2,
+} ArkUI_SafeAreaType;
+
+/**
+ * @brief defines the enumerated value of the direction of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** Upper area. */
+    ARKUI_SAFE_AREA_EDGE_TOP = 1,
+    /** Lower area. */
+    ARKUI_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Front area. */
+    ARKUI_SAFE_AREA_EDGE_START = 1 << 2,
+    /** Tail area. */
+    ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
+} ArkUI_SafeAreaEdge;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12

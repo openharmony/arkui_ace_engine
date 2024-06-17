@@ -3080,17 +3080,17 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPt
     std::string edges;
     while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
         type = safeAreaTypeStr.substr(0, pos);
-        safeAreaType |= (1 << StringUtils::StringToUint(type));
+        safeAreaType |= (StringUtils::StringToUint(type));
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
+    safeAreaType |= (StringUtils::StringToUint(safeAreaTypeStr));
     pos = 0;
     while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
         edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= (1 << StringUtils::StringToUint(edges));
+        safeAreaEdge |= (StringUtils::StringToUint(edges));
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaEdge |= (1 << StringUtils::StringToUint(safeAreaEdgeStr));
+    safeAreaEdge |= (StringUtils::StringToUint(safeAreaEdgeStr));
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
@@ -5772,6 +5772,15 @@ void ResetPixelRound(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
+
+void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[NUM_0] = ViewAbstract::GetSafeAreaExpandType(frameNode);
+    (*values)[NUM_1] = ViewAbstract::GetSafeAreaExpandEdges(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -5849,7 +5858,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityActions, ResetAccessibilityActions, GetAccessibilityActions,
         SetAccessibilityRole, ResetAccessibilityRole, GetAccessibilityRole,
         SetFocusScopeId, ResetFocusScopeId,
-        SetFocusScopePriority, ResetFocusScopePriority, SetPixelRound, ResetPixelRound };
+        SetFocusScopePriority, ResetFocusScopePriority, SetPixelRound, ResetPixelRound, GetExpandSafeArea };
 
     return &modifier;
 }
