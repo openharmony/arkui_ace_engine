@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,16 +227,31 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
-    // 2：parameters count, 1: parameter index
-    if (args.Length() >= 2 && args[1]->IsBoolean()) {
-        smooth = args[1]->ToBoolean();
+    // 2: parameters count, 1: parameter index
+    auto smoothArg = args[1];
+    if (args.Length() >= 2 && smoothArg->IsBoolean()) {
+        smooth = smoothArg->ToBoolean();
     }
-    // 3：parameters count, 2: parameter index
-    if (args.Length() == 3) {
+    // 3: parameters count, 2: parameter index
+    if (args.Length() >= 3) {
         ConvertFromJSValue(args[2], ALIGN_TABLE, align);
     }
+
+    // 4: parameters count, 3: parameter index
+    std::optional<float> extraOffset = std::nullopt;
+    auto optionArg = args[3];
+    if (args.Length() == 4 && optionArg->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(optionArg);
+        CalcDimension offset;
+        if (JSViewAbstract::ParseLengthMetricsToDimension(obj->GetProperty("extraOffset"), offset)) {
+            auto offsetPx = offset.ConvertToPx();
+            if (!std::isnan(offsetPx)) {
+                extraOffset = offsetPx;
+            }
+        }
+    }
     ContainerScope scope(instanceId_);
-    scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
+    scrollController->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
 void JSScroller::ScrollPage(const JSCallbackInfo& args)

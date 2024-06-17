@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,7 +187,7 @@ void RenderGridScroll::CheckJumpToIndex(double offset)
         currentOffset_ += offset;
         return;
     }
-    ScrollToIndex(rankIndex, SCROLL_FROM_BAR);
+    ScrollToIndex(rankIndex);
     currentOffset_ = remainOffset + (index - rankIndex) * estimateAverageHeight_;
 }
 
@@ -1317,7 +1317,7 @@ void RenderGridScroll::SetScrollBarCallback()
     scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
 }
 
-void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
+void RenderGridScroll::ScrollToIndex(int32_t index)
 {
     if (useScrollable_ == SCROLLABLE::NO_SCROLL || index < 0) {
         LOGW("Not supported.");

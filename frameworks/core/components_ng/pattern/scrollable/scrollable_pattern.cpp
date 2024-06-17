@@ -1067,6 +1067,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->useTotalOffset_ = true;
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
             pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
@@ -1134,9 +1135,10 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (stopAnimation) {
             offset = pattern->finalPosition_;
         }
+        auto delta = pattern->useTotalOffset_ ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
+        if (!pattern->UpdateCurrentOffset(delta,
             SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,8 +67,9 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
-        int32_t source = 3) {}
+    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
+        std::optional<float> extraOffset = std::nullopt)
+    {}
 
     virtual void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::NONE, int32_t source = 3) {} // 3 is SCROLL_FROM_JUMP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,14 @@
 #include "core/components_v2/water_flow/water_flow_scroll_controller.h"
 
 namespace OHOS::Ace::V2 {
-void WaterFlowPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
+void WaterFlowPositionController::ScrollToIndex(
+    int32_t index, bool /* smooth */, ScrollAlign /* align */, std::optional<float> /* extraOffset */)
 {
     auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
     if (!waterFlow) {
         return;
     }
-    waterFlow->ScrollToIndex(index, source);
+    waterFlow->ScrollToIndex(index);
 }
 
 Axis WaterFlowPositionController::GetScrollDirection() const
