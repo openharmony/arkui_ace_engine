@@ -5626,7 +5626,13 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             }
             Object.keys(obj).forEach((objKey) => {
                 stack.push({ name: objKey });
-                Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                try {
+                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                }
+                catch (error) {
+                    stateMgmtConsole.error('DeepCopy failed, will use shallow copy instead. Error message is:', error);
+                    copy[objKey] = obj[objKey];
+                }
                 stack.pop();
             });
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
