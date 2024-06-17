@@ -3280,7 +3280,7 @@ void RichEditorPattern::AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData
     if (isSpanStringMode_) {
         selectInfo = styledString_->GetSubSpanString(selectStart, selectEnd - selectStart);
     } else {
-        selectInfo = ToStyledString(selectStart, selectEnd);
+        selectInfo = ToStyledString(selectStart, selectEnd - selectStart);
     }
     CHECK_NULL_VOID(selectInfo);
     std::vector<uint8_t> arr;
@@ -3340,7 +3340,7 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
         auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
         auto spanStartPos = spanEndPos - spanLength;
 
-        if (spanEndPos >= start && spanStartPos <= start +length) {
+        if (spanEndPos > start && spanStartPos < start +length) {
             int32_t oldStart = spanStartPos;
             int32_t oldEnd = spanEndPos;
             auto spanStart = oldStart <= start ? 0 : oldStart - start;
@@ -6299,14 +6299,17 @@ void RichEditorPattern::HandleOnPaste()
         return;
     }
     CHECK_NULL_VOID(clipboard_);
-    auto pasteCallback = [weak = WeakClaim(this)](std::vector<uint8_t>& arr) {
+    auto pasteCallback = [weak = WeakClaim(this)](std::vector<uint8_t>& arr, const std::string& text) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback");
-        auto str = SpanString::DecodeTlv(arr);
-        CHECK_NULL_VOID(str);
         auto richEditor = weak.Upgrade();
         CHECK_NULL_VOID(richEditor);
+        auto str = SpanString::DecodeTlv(arr);
         auto spanItems = str->GetSpanItems();
-        if (spanItems.empty()) {
+        if (!spanItems.empty()) {
+            richEditor->AddSpanByPasteData(str);
+            return;
+        }
+        if (text.empty()) {
             richEditor->ResetSelection();
             richEditor->StartTwinkling();
             richEditor->CloseSelectOverlay();
@@ -6317,7 +6320,8 @@ void RichEditorPattern::HandleOnPaste()
             }
             return;
         }
-        richEditor->AddSpanByPasteData(str);
+        richEditor->AddPasteStr(text);
+        richEditor->ResetAfterPaste();
     };
     clipboard_->GetSpanStringData(pasteCallback);
 }
@@ -7942,11 +7946,31 @@ void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::Dra
     CHECK_NULL_VOID(event);
     auto data = event->GetData();
     CHECK_NULL_VOID(data);
-    std::string str;
     auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
     if (!arr.empty()) {
         auto spanStr = SpanString::DecodeTlv(arr);
-        AddSpanByPasteData(spanStr);
+        if (!spanStr->GetSpanItems().empty()) {
+            AddSpanByPasteData(spanStr);
+            return;
+        }
+    }
+
+    auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
+    if (records.empty()) {
+        return;
+    }
+    std::string str;
+    for (const auto& record : records) {
+        str += record;
+    }
+    if (str.empty()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "text is empty.");
+        return;
+    }
+    if (isSpanStringMode_) {
+        InsertValueInStyledString(str);
+    } else {
+        HandleOnDragDropTextOperation(str, isDragSponsor_);
     }
 }
 
