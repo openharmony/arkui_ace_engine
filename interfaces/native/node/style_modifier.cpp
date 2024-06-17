@@ -965,7 +965,12 @@ const ArkUI_AttributeItem* GetPadding(ArkUI_NodeHandle node)
     ArkUI_Float32 paddings[NUM_4];
     ArkUI_Int32 length = 0;
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, unit);
+    if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaPadding(
+            node->uiNodeHandle, &paddings, length, unit);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, unit);
+    }
     g_numberValues[NUM_0].f32 = paddings[NUM_0];
     g_numberValues[NUM_1].f32 = paddings[NUM_1];
     g_numberValues[NUM_2].f32 = paddings[NUM_2];
@@ -10369,6 +10374,7 @@ const ArkUI_AttributeItem* GetFontColor(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontColor(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10400,6 +10406,7 @@ const ArkUI_AttributeItem* GetFontSize(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontSize(node->uiNodeHandle, unit);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10430,6 +10437,7 @@ const ArkUI_AttributeItem* GetFontStyle(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontStyle(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10454,6 +10462,7 @@ const ArkUI_AttributeItem* GetFontWeight(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontWeight(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;

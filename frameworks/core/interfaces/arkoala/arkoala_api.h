@@ -2692,6 +2692,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnDidDelete)(ArkUINodeHandle node);
     void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
+    void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUITextInputModifier {
