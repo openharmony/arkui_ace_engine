@@ -149,7 +149,6 @@ public:
      * @param start the index of the first modified section.
      */
     void OnSectionChanged(int32_t start);
-    void OnSectionChangedNow(int32_t start);
 
     void DumpAdvanceInfo() override;
 

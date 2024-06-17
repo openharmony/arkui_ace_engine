@@ -20,16 +20,18 @@ namespace OHOS::Ace::NG {
 // update: start, 0, newSection
 // splice: start, deleteCount, newSections
 void WaterFlowSections::ChangeData(
-    size_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
+    size_t start, size_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
+    start = std::min(start, sections_.size());
+    deleteCount = std::min(deleteCount, sections_.size() - start);
     prevSections_ = sections_;
 
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-        "section changed, start:%{public}zu, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
+        "section changed, start:%{public}zu, deleteCount:%{public}zu, newSections:%{public}zu", start, deleteCount,
         newSections.size());
     if (start < sections_.size()) {
         auto it = sections_.begin() + static_cast<int32_t>(start);
-        sections_.erase(it, it + deleteCount);
+        sections_.erase(it, it + static_cast<int32_t>(deleteCount));
         sections_.insert(it, newSections.begin(), newSections.end());
     } else {
         sections_.insert(sections_.end(), newSections.begin(), newSections.end());
@@ -56,46 +58,9 @@ void WaterFlowSections::ChangeData(
     }
 }
 
-// for c-api, replace all
-void WaterFlowSections::ChangeDataCAPI(
-    int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
+// for c-api, replace all from start
+void WaterFlowSections::ChangeDataCAPI(size_t start, const std::vector<WaterFlowSections::Section>& newSections)
 {
-    prevSections_ = sections_;
-
-    TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-        "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
-        newSections.size());
-    if (static_cast<size_t>(start) < sections_.size()) {
-        auto it = sections_.begin() + start;
-        auto oldSize = sections_.size();
-        auto eraseCount = std::min(deleteCount, static_cast<int32_t>(oldSize) - start);
-        sections_.erase(it, it + eraseCount);
-        sections_.insert(sections_.begin() + start, newSections.begin(), newSections.end());
-    } else {
-        sections_.insert(sections_.end(), newSections.begin(), newSections.end());
-    }
-
-    if (onSectionDataChangeCAPI_) {
-        // push: start, 0, newSection
-        // update: start, 0, newSection
-        // splice: start, deleteCount, newSections
-        onSectionDataChangeCAPI_(start);
-    }
-}
-
-bool WaterFlowSections::IsSpecialUpdateCAPI(int32_t updateIndex) const
-{
-    if (sections_.empty()) {
-        return false;
-    }
-    if (prevSections_.size() != sections_.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < sections_.size(); ++i) {
-        if (!sections_[i].OnlyCountDiff(prevSections_[i])) {
-            return false;
-        }
-    }
-    return true;
+    ChangeData(start, sections_.size(), newSections);
 }
 } // namespace OHOS::Ace::NG

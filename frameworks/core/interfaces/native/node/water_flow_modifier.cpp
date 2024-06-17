@@ -457,7 +457,7 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         }
     }
 
-    waterFlowSections->ChangeDataCAPI(start, newSections.size(), newSections);
+    waterFlowSections->ChangeDataCAPI(start, newSections);
 }
 
 void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
