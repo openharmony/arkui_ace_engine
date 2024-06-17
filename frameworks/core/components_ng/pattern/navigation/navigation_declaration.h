@@ -116,6 +116,9 @@ constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
 constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
 constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
 
+// font scale
+constexpr float STANDARD_FONT_SCALE = 1.0f;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
