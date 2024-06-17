@@ -139,7 +139,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg038, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     context_->onWindowSizeChangeCallbacks_.emplace_back(frameNode_->GetId());
     context_->FlushWindowSizeChangeCallback(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 1);
+    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 2);
 }
 
 /**

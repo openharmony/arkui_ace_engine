@@ -384,6 +384,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      */
     context_->SetIsJsCard(true);
     context_->windowModal_ = WindowModal::NORMAL;
+    context_->GetContainerModalNode();
     context_->SetupRootElement();
     EXPECT_NE(context_->stageManager_, nullptr);
 
@@ -393,6 +394,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      */
     context_->SetIsJsCard(false);
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->GetContainerModalNode();
     context_->SetupRootElement();
     EXPECT_NE(context_->stageManager_, nullptr);
 }
@@ -1039,8 +1041,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     auto childNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, childNodeId, nullptr);
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
+    context_->ReDispatch(event);
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
+
+    event.isPreIme = 1;
+    EXPECT_FALSE(context_->OnKeyEvent(event));
 }
 
 /**
@@ -1802,6 +1808,174 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg061, TestSize.Level1)
     containerPattern->WindowFocus(false);
     containerPattern->OnWindowForceUnfocused();
     EXPECT_FALSE(containerPattern->isFocus_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg088
+ * @tc.desc: Test the function FlushRequestFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg088, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps2: Call the function FlushRequestFocus.
+     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
+     */
+    context_->FlushRequestFocus();
+    EXPECT_EQ(context_->dirtyRequestFocusNode_.Upgrade(), nullptr);
+    context_->dirtyRequestFocusNode_ = frameNode_;
+    EXPECT_NE(context_->dirtyRequestFocusNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg089
+ * @tc.desc: Test the function FlushFocusScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg089, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps2: Call the function FlushRequestFocus.
+     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
+     */
+    context_->focusManager_.Reset();
+    context_->FlushFocusScroll();
+    EXPECT_EQ(context_->focusManager_, nullptr);
+    context_->GetOrCreateFocusManager();
+    EXPECT_NE(context_->focusManager_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg090
+ * @tc.desc: Test the function FlushFocusView.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg090, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call FlushFocusView.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    context_->SetupSubRootElement();
+
+    context_->FlushFocusView();
+    EXPECT_NE(context_->focusManager_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg091
+ * @tc.desc: Test the function SendEventToAccessibilityWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg091, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps2: Call the function FlushRequestFocus.
+     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
+     */
+    AccessibilityEvent event;
+    event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
+    auto frameNodeId_091 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_091, nullptr);
+    CHECK_NULL_VOID(frameNode);
+    context_->SendEventToAccessibilityWithNode(event, frameNode);
+    bool accessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    EXPECT_FALSE(accessibilityEnabled);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    context_->SendEventToAccessibilityWithNode(event, frameNode);
+    accessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    EXPECT_TRUE(accessibilityEnabled);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg092
+ * @tc.desc: Test the function GetContainerModalButtonsRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg092, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<Ace::RectF> rects;
+    context_->TriggerOverlayNodePositionsUpdateCallback(rects);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    context_->windowModal_ = WindowModal::NORMAL;
+    NG::RectF containerModal;
+    NG::RectF buttons;
+    context_->GetCustomTitleHeight();
+    bool callbackTriggered = false;
+    auto callback = [&callbackTriggered](RectF&, RectF&) { callbackTriggered = true; };
+    context_->SubscribeContainerModalButtonsRectChange(std::move(callback));
+    EXPECT_FALSE(context_->GetContainerModalButtonsRect(containerModal, buttons));
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SubscribeContainerModalButtonsRectChange(std::move(callback));
+    EXPECT_FALSE(context_->GetContainerModalButtonsRect(containerModal, buttons));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg093
+ * @tc.desc: Test the function PrintVsyncInfoIfNeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg093, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    EXPECT_FALSE(context_->PrintVsyncInfoIfNeed());
+
+    std::list<FrameInfo> dumpFrameInfos_;
+    FrameInfo frameInfo;
+    dumpFrameInfos_.push_back(frameInfo);
+    EXPECT_FALSE(context_->PrintVsyncInfoIfNeed());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg094
+ * @tc.desc: Test the function ChangeDarkModeBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+
+    context_->ChangeDarkModeBrightness();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 } // namespace NG
 } // namespace OHOS::Ace
