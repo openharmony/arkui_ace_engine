@@ -167,6 +167,22 @@ void ResetFontFeature(ArkUINodeHandle node)
     std::string strValue = "";
     TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
+
+void SetDateTimeOptions(ArkUINodeHandle node, ArkUI_Int32 hourType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hour = static_cast<ZeroPrefixType>(hourType);
+    TextClockModelNG::SetDateTimeOptions(frameNode, hour);
+}
+
+void ResetDateTimeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -188,7 +204,9 @@ const ArkUITextClockModifier* GetTextClockModifier()
         TextClockModifier::SetTextShadow,
         TextClockModifier::ResetTextShadow,
         TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature
+        TextClockModifier::ResetFontFeature,
+        TextClockModifier::SetDateTimeOptions,
+        TextClockModifier::ResetDateTimeOptions
     };
 
     return &modifier;

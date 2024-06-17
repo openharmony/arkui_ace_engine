@@ -4649,6 +4649,10 @@ void ArkUINativeModule::RegisterTextClockAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFeature));
     textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetContentModifierBuilder));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDateTimeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::SetDateTimeOptions));
+    textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDateTimeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetDateTimeOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textClock"), textClock);
 }
 

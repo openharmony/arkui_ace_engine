@@ -37,7 +37,12 @@ constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
+constexpr int32_t STR_SIZE_ONE = 1;
+constexpr int32_t STR_SIZE_TWO = 2;
 constexpr bool ON_TIME_CHANGE = true;
+const char CHAR_0 = '0';
+const char CHAR_9 = '9';
+const std::string STR_0 = "0";
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
 const std::string DEFAULT_FORMAT_24HOUR = "HH:mm:ss";
 const std::string FORM_FORMAT = "hh:mm";
@@ -320,13 +325,12 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 
     // parse input format
     formatElementMap_.clear();
-    bool is24H = is24H_;
-    ParseInputFormat(is24H);
+    ParseInputFormat();
 
     // get date time from third party
     std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
     dateTimeFormat = "yyyyMMdd";
-    dateTimeFormat += is24H ? "HH" : "hh";
+    dateTimeFormat += is24H_ ? "HH" : "hh";
     dateTimeFormat += "mmss";
     dateTimeFormat += "SSS";
     std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
@@ -383,13 +387,13 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, in
     return outputDateTime;
 }
 
-void TextClockPattern::ParseInputFormat(bool& is24H)
+void TextClockPattern::ParseInputFormat()
 {
     std::string inputFormat = GetFormat();
     if (inputFormat.find('H') != std::string::npos) {
-        is24H = true;
+        is24H_ = true;
     } else if (inputFormat.find('h') != std::string::npos || inputFormat.find('a') != std::string::npos) {
-        is24H = false;
+        is24H_ = false;
     }
     std::vector<std::string> formatSplitter;
     auto i = 0;
@@ -499,6 +503,22 @@ std::string TextClockPattern::GetAmPm(const std::string& dateTimeValue)
     return curAmPm;
 }
 
+std::string TextClockPattern::AddZeroPrefix(const std::string& strTimeValue)
+{
+    if (strTimeValue.size() == STR_SIZE_ONE && CHAR_0 <= strTimeValue[0] && strTimeValue[0] <= CHAR_9) {
+        return std::string(STR_0) + strTimeValue;
+    }
+    return strTimeValue;
+}
+
+std::string TextClockPattern::RemoveZeroPrefix(const std::string& strTimeValue)
+{
+    if (strTimeValue.size() == STR_SIZE_TWO && strTimeValue[0] == CHAR_0) {
+        return strTimeValue.substr(1, 1);
+    }
+    return strTimeValue;
+}
+
 std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string& strDateTimeValue)
 {
     std::string dateTimeValue = strDateTimeValue;
@@ -563,7 +583,15 @@ std::vector<std::string> TextClockPattern::ParseDateTimeValue(const std::string&
         if ((timeFirstSplit != std::string::npos) && (timeSecondSplit != std::string::npos) &&
             (timeThirdSplit != std::string::npos) && (timeSecondSplit > timeFirstSplit) &&
             (timeThirdSplit > timeSecondSplit)) {
-            curDateTime[(int32_t)(TextClockElementIndex::CUR_HOUR_INDEX)] = dateTimeValue.substr(0, timeFirstSplit);
+            if (GetPrefixHour() == ZeroPrefixType::SHOW && !is24H_) {
+                curDateTime[(int32_t)(TextClockElementIndex::CUR_HOUR_INDEX)] =
+                    AddZeroPrefix((dateTimeValue.substr(0, timeFirstSplit)));
+            } else if (GetPrefixHour() == ZeroPrefixType::HIDE && is24H_) {
+                curDateTime[(int32_t)(TextClockElementIndex::CUR_HOUR_INDEX)] =
+                    RemoveZeroPrefix((dateTimeValue.substr(0, timeFirstSplit)));
+            } else {
+                curDateTime[(int32_t)(TextClockElementIndex::CUR_HOUR_INDEX)] = dateTimeValue.substr(0, timeFirstSplit);
+            }
             curDateTime[(int32_t)(TextClockElementIndex::CUR_MINUTE_INDEX)] =
                 dateTimeValue.substr(timeFirstSplit + 1, timeSecondSplit - timeFirstSplit - 1);
             curDateTime[(int32_t)(TextClockElementIndex::CUR_SECOND_INDEX)] =
@@ -692,7 +720,7 @@ std::string TextClockPattern::GetFormat() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     if (isForm_) {
-        std::string defaultFormFormat = is24H_ ? FORM_FORMAT_24HOUR : FORM_FORMAT;
+        std::string defaultFormFormat = SystemProperties::Is24HourClock() ? FORM_FORMAT_24HOUR : FORM_FORMAT;
         CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormFormat);
         std::string result = textClockLayoutProperty->GetFormat().value_or(defaultFormFormat);
         if (result.find("s") != std::string::npos || result.find("S") != std::string::npos) {
@@ -700,7 +728,7 @@ std::string TextClockPattern::GetFormat() const
         }
         return result;
     }
-    std::string defaultFormat = is24H_ ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
+    std::string defaultFormat = SystemProperties::Is24HourClock() ? DEFAULT_FORMAT_24HOUR : DEFAULT_FORMAT;
     CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormat);
     return textClockLayoutProperty->GetFormat().value_or(defaultFormat);
 }
