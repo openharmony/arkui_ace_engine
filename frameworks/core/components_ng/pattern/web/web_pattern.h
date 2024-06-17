@@ -848,6 +848,7 @@ private:
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
+    bool isShowAutofillPopup_ = false;
     OffsetF webOffset_;
     RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
