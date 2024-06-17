@@ -54,7 +54,6 @@ constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
-constexpr int32_t READD_FORM_DELAY_TIME = 50;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 constexpr int DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT = 10000;
 } // namespace
@@ -795,7 +794,6 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
-            std::this_thread::sleep_for(std::chrono::milliseconds(READD_FORM_DELAY_TIME));
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
