@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -44,6 +45,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+} // namespace
 
 void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
@@ -1416,9 +1421,11 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textField);
     auto textFieldHost = textField->GetHost();
     CHECK_NULL_VOID(textFieldHost);
-    auto position = textFieldHost->GetTransformRelativeOffset().GetY() + textField->GetHostFrameSize()->Height();
+    auto textBase = DynamicCast<TextBase>(textField);
+    CHECK_NULL_VOID(textBase);
+    auto caretPos = textFieldHost->GetTransformRelativeOffset().GetY() + textBase->GetCaretRect().Bottom();
     auto globalOffset = host->GetTransformRelativeOffset();
-    auto offset = contentMainSize_ + globalOffset.GetY() - position;
+    auto offset = contentMainSize_ + globalOffset.GetY() - caretPos - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     if (LessOrEqual(offset, 0.0)) {
         // negative offset to scroll down
         currentDelta_ -= static_cast<float>(offset);
