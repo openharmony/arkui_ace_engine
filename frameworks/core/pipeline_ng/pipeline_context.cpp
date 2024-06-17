@@ -316,6 +316,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     if (!ViewStackProcessor::GetInstance()->IsEmpty()) {
+        ACE_SCOPED_TRACE("Error update, node stack non-empty");
         LOGW("stack is not empty when call FlushDirtyNodeUpdate, node may be mounted to incorrect pos!");
     }
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
@@ -514,8 +515,8 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_SCOPED_TRACE_COMMERCIAL(
-        "UIVsyncTask[timestamp:%" PRIu64"][vsyncID:%" PRIu64"]", nanoTimestamp, static_cast<uint64_t>(frameCount));
+    ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
+        static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
