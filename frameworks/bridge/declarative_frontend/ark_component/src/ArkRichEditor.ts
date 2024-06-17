@@ -82,6 +82,48 @@ class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class RichEditorOnReadyModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnReady');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnReady(node);
+    } else {
+      getUINativeModule().richEditor.setOnReady(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnDeleteCompleteModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnDeleteComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDeleteComplete(node);
+    } else {
+      getUINativeModule().richEditor.setOnDeleteComplete(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnEditingChangeModifier extends ModifierWithKey<(value: boolean) => void> {
+  constructor(value: (value: boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnEditingChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEditingChange(node);
+    } else {
+      getUINativeModule().richEditor.setEditingChange(node, this.value);
+    }
+  }
+}
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey<EnterKeyType> {
   constructor(value: EnterKeyType) {
     super(value);
@@ -131,7 +173,8 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     throw new Error('Method not implemented.');
   }
   onReady(callback: () => void): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnReadyModifier.identity, RichEditorOnReadyModifier, callback);
+    return this;
   }
   onSelect(callback: (value: RichEditorSelection) => void): RichEditorAttribute {
     throw new Error('Method not implemented.');
@@ -146,13 +189,18 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     throw new Error('Method not implemented.');
   }
   onDeleteComplete(callback: () => void): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDeleteCompleteModifier.identity, RichEditorOnDeleteCompleteModifier, callback);
+    return this;
   }
   bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }
   customKeyboard(value: CustomBuilder): RichEditorAttribute {
     throw new Error('Method not implemented.');
+  }
+  onEditingChange(callback: (value: boolean) => void): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
+    return this;
   }
   enterKeyType(value: EnterKeyType): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
