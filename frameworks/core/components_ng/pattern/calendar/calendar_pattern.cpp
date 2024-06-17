@@ -421,16 +421,15 @@ void CalendarPattern::UpdateTitleNode()
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
+    auto fontSize = theme->GetCalendarTitleFontSize();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
-        textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);
-        if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
-            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargerFontSize());
-        } else {
-            textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleLargeFontSize());
-        }
+        fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale() ? theme->GetCalendarPickerLargerScale()
+                                                                              : fontSizeScale;
+        textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
     }
 
     textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
