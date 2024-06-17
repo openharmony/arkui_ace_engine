@@ -567,7 +567,7 @@ double ProgressModelNG::GetTotal(FrameNode* frameNode)
 NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
 {
     NG::ProgressType value = ProgressType::LINEAR;
-    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, ProgressType, value, frameNode, value);
     return value;
 }
 

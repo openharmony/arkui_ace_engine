@@ -29,6 +29,8 @@ void ProgressTestNg::SetUpTestSuite()
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    progressTheme = ProgressTheme::Builder().Build(themeConstants);
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackThickness_ = TEST_PROGRESS_THICKNESS;
     progressTheme->scaleLength_ = TEST_PROGRESS_STROKE_WIDTH;

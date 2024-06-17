@@ -92,6 +92,7 @@ public:
     virtual void DeleteForward(int32_t length) {};
     virtual void SetInputMethodStatus(bool keyboardShown) {}
     virtual void NotifyKeyboardClosedByUser() {}
+    virtual void NotifyKeyboardClosed() {}
     virtual std::u16string GetLeftTextOfCursor(int32_t number)
     {
         return StringUtils::DEFAULT_USTRING;
@@ -191,6 +192,11 @@ public:
 
     virtual void FinishTextPreview() {}
     virtual void ReceivePreviewTextStyle (const std::string& style) {}
+
+    virtual int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range)
+    {
+        return 0;
+    }
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 

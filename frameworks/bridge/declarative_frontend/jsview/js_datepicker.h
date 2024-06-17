@@ -38,10 +38,11 @@ public:
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
-    static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
+    static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
+    static void IsUserDefinedFontFamily(const std::string& pos);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

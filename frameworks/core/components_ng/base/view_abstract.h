@@ -689,7 +689,7 @@ public:
     static bool GetFocusOnTouch(FrameNode* frameNode);
     static void SetPixelRound(FrameNode* frameNode, uint8_t value);
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
-    static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);    
+    static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
 };

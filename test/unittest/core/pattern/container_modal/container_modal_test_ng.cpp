@@ -75,8 +75,9 @@ void ContainerModelTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_CONTAINER_MODAL);
+    auto containerModalTheme = ContainerModalTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(containerModalTheme));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
@@ -566,7 +567,7 @@ HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
 
     pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     pattern_->SetContainerModalTitleVisible(true, true);
-    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), std::nullopt);
     pattern_->SetContainerModalTitleVisible(false, false);
     EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::GONE);
 

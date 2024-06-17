@@ -274,6 +274,15 @@ RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
     return textNode;
 }
 
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
 {
     auto theme = NavigationGetTheme();
@@ -284,10 +293,10 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
         CHECK_NULL_RETURN(iconNode, nullptr);
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(symbolProperty, nullptr);
-        symbolProperty->UpdateFontSize(theme->GetToolbarIconSize());
         symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
         barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
-
+        symbolProperty->UpdateFontSize(theme->GetToolbarIconSize());
+        UpdateSymbolEffect(symbolProperty, false);
         iconNode->MarkModifyDone();
         return iconNode;
     }
@@ -965,7 +974,6 @@ void CreateSymbolBackIcon(const RefPtr<FrameNode>& backButtonNode, NavigationGro
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    symbolProperty->UpdateFontSize(theme->GetIconWidth());
     auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navigationEventHub);
     if (!navigationEventHub->IsEnabled()) {
@@ -1178,7 +1186,7 @@ void NavigationModelNG::SetHideToolBar(bool hideToolBar)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    auto navBarLayoutProperty = navBarNode->GetLayoutPropertyPtr<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
 }
@@ -1679,8 +1687,6 @@ void NavigationModelNG::SetHideNavBarInner(
         pattern->SetNavBarVisibilityChange(true);
     }
     auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-    auto layoutProperty = navBarNode->GetLayoutProperty();
-    layoutProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE, true);
     navBarNode->SetJSViewActive(!hideNavBar);
     if (pattern->GetNavBarVisibilityChange()) {
         navBarNode->MarkDirtyNode();
@@ -1856,6 +1862,9 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
 
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();

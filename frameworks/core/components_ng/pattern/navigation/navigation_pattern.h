@@ -72,6 +72,7 @@ public:
     void OnModifyDone() override;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -316,6 +317,8 @@ public:
 
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
+    static void NotifyPerfMonitorPageMsg(const std::string& pageName);
+
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
@@ -410,6 +413,7 @@ private:
     void DoAnimation(NavigationMode usrNavigationMode);
     void RecoveryToLastStack();
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -418,6 +422,12 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
+    float GetPaintRectHeight(const RefPtr<FrameNode>& node)
+    {
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, 0.0f);
+        return renderContext->GetPaintRectWithoutTransform().Height();
+    }
     void AddDividerHotZoneRect();
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
@@ -449,7 +459,8 @@ private:
         bool isPopPage, bool isNeedInVisible = false);
     bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
-        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
+        bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
+        NavigationTransition navigationTransition);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

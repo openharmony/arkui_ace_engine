@@ -53,6 +53,23 @@ void ListItemPattern::OnAttachToFrameNode()
     }
 }
 
+void ListItemPattern::OnColorConfigurationUpdate()
+{
+    if (listItemStyle_ != V2::ListItemStyle::CARD) {
+        return;
+    }
+    auto listItemNode = GetHost();
+    CHECK_NULL_VOID(listItemNode);
+    auto renderContext = listItemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = listItemNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemTheme);
+
+    renderContext->UpdateBackgroundColor(listItemTheme->GetItemDefaultColor());
+}
+
 void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode)
 {
     auto renderContext = listItemNode->GetRenderContext();
@@ -238,9 +255,7 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
     CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
-    if (offsetChangeCallback) {
-        listItemEventHub->SetOnOffsetChangeOffset(std::move(offsetChangeCallback));
-    }
+    listItemEventHub->SetOnOffsetChangeOffset(std::move(offsetChangeCallback));
 }
 
 void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
@@ -315,7 +330,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto actionStartTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            auto frameNode = pattern->GetListFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
             if (!listPattern->CanReplaceSwiperItem()) {
                 return;
@@ -326,7 +343,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto actionUpdateTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            auto frameNode = pattern->GetListFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
             if (!listPattern->IsCurrentSwiperItem(weak)) {
                 return;
@@ -337,7 +356,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto actionEndTask = [weak](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            auto frameNode = pattern->GetListFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
             if (!listPattern->IsCurrentSwiperItem(weak)) {
                 return;
@@ -348,7 +369,9 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
         auto actionCancelTask = [weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto listPattern = pattern->GetListFrameNode()->GetPattern<ListPattern>();
+            auto frameNode = pattern->GetListFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto listPattern = frameNode->GetPattern<ListPattern>();
             CHECK_NULL_VOID(listPattern);
             if (!listPattern->IsCurrentSwiperItem(weak)) {
                 return;

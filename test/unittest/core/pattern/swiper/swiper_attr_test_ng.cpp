@@ -572,7 +572,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAutoFill());
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
-    EXPECT_GE(GetChildWidth(frameNode_, 1), 0.f);
+    EXPECT_GT(GetChildWidth(frameNode_, 1), 0.f); // item size > 0
     EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
 }
 

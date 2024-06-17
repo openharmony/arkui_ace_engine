@@ -169,6 +169,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
 };
 
 struct TextLineStyle {

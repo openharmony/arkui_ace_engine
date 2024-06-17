@@ -339,23 +339,23 @@ void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, con
     auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();
     if (info_->axis_ == Axis::VERTICAL) {
         pattern->SetIrregularItemInfo({ .mainIndex = row,
-            .mainStart = row,
-            .mainSpan = size.rows,
-            .mainEnd = row + size.rows - 1,
             .crossIndex = col,
-            .crossStart = col,
+            .mainSpan = size.rows,
             .crossSpan = size.columns,
+            .mainStart = row,
+            .mainEnd = row + size.rows - 1,
+            .crossStart = col,
             .crossEnd = col + size.columns - 1 });
         props->UpdateMainIndex(row);
         props->UpdateCrossIndex(col);
     } else {
         pattern->SetIrregularItemInfo({ .mainIndex = col,
-            .mainStart = col,
-            .mainSpan = size.columns,
-            .mainEnd = col + size.columns - 1,
             .crossIndex = row,
-            .crossStart = row,
+            .mainSpan = size.columns,
             .crossSpan = size.rows,
+            .mainStart = col,
+            .mainEnd = col + size.columns - 1,
+            .crossStart = row,
             .crossEnd = row + size.rows - 1 });
         props->UpdateMainIndex(col);
         props->UpdateCrossIndex(row);

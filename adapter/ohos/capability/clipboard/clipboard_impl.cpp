@@ -451,6 +451,43 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync");
 }
 
+void ClipboardImpl::GetSpanStringData(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    if (!taskExecutor_ || !callback) {
+        return;
+    }
+
+    GetSpanStringDataHelper(callback, syncMode);
+#endif
+}
+
+void ClipboardImpl::GetSpanStringDataHelper(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode)
+{
+    auto task = [callback]() {
+        auto hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+        CHECK_NULL_VOID(hasData);
+        OHOS::MiscServices::PasteData pasteData;
+        auto getDataRes = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
+        CHECK_NULL_VOID(getDataRes);
+
+        for (const auto& pasteDataRecord : pasteData.AllRecords()) {
+            if (pasteDataRecord == nullptr || pasteDataRecord->GetCustomData() == nullptr) {
+                continue;
+            }
+            auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
+            if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
+                callback(itemData[SPAN_STRING_TAG]);
+            }
+        }
+    };
+    if (syncMode) {
+        taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetSpanStringDataSync");
+    } else {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetSpanStringDataAsync");
+    }
+}
+
 void ClipboardImpl::GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback)
 {
     RefPtr<PixelMap> pixmap;

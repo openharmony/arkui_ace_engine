@@ -88,14 +88,11 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
     return res;
 }
 
-size_t ParagraphManager::GetLineCount(bool isSkipEmptyParagraphs) const
+size_t ParagraphManager::GetLineCount() const
 {
     size_t count = 0;
     for (auto &&info : paragraphs_) {
-        if (!isSkipEmptyParagraphs ||
-            (!NonPositive(info.paragraph->GetLongestLine()) && !NonPositive(info.paragraph->GetHeight()))) {
-            count += info.paragraph->GetLineCount();
-        }
+        count += info.paragraph->GetLineCount();
     }
     return count;
 }
@@ -134,7 +131,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
             (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-            finalResult.position_ = result.position_ + info.start;
+            finalResult.position_ = result.position_ + static_cast<size_t>(info.start);
             TAG_LOGI(AceLogTag::ACE_TEXT,
                 "Current paragraph, originPos = %{public}zu, finalPos =%{public}zu and affinity = %{public}d",
                 result.position_, finalResult.position_, result.affinity_);

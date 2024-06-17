@@ -1572,6 +1572,12 @@ var SheetMode;
   SheetMode[SheetMode["EMBEDDED"] = 1] = "EMBEDDED";
 })(SheetMode || (SheetMode = {}));
 
+var ScrollSizeMode ;
+(function (ScrollSizeMode ) {
+  ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
+  ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
+})(ScrollSizeMode || (ScrollSizeMode = {}));
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -1810,6 +1816,10 @@ class DotIndicator extends Indicator {
   }
   selectedColor(value) {
     this.selectedColorValue = value;
+    return this;
+  }
+  maxDisplayCount(value) {
+    this.maxDisplayCountValue = value;
     return this;
   }
 }

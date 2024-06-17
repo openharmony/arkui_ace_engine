@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
@@ -57,7 +58,9 @@ void SetFillColorOp::Draw(CanvasPaintMethod* method) const
 
 void SetFillGradientOp::Draw(CanvasPaintMethod* method) const
 {
-    method->SetFillGradient(gradient);
+    auto ptr = gradient.lock();
+    CHECK_NULL_VOID(ptr);
+    method->SetFillGradient(*ptr);
 }
 
 void SetFillPatternNGOp::Draw(CanvasPaintMethod* method) const
@@ -122,7 +125,9 @@ void SetStrokeColorOp::Draw(CanvasPaintMethod* method) const
 
 void SetStrokeGradientOp::Draw(CanvasPaintMethod* method) const
 {
-    method->SetStrokeGradient(gradient);
+    auto ptr = gradient.lock();
+    CHECK_NULL_VOID(ptr);
+    method->SetStrokeGradient(*ptr);
 }
 
 void SetStrokePatternNGOp::Draw(CanvasPaintMethod* method) const

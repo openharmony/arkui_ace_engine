@@ -50,7 +50,7 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
@@ -321,7 +321,8 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
     int32_t x = offset.GetX() < (dayWidth + colSpace / 2)
                     ? 0
                     : (offset.GetX() - dayWidth - colSpace / 2) / (dayWidth + colSpace) + 1;
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (textDirection == TextDirection::RTL) {
         x = columnsOfData - x - 1;
     }
     return (y * columnsOfData + x);

@@ -451,9 +451,6 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> selectedItemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_WIDTH_VALUE));
     JSRef<JSVal> selectedItemHeightValue =
         obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
-    JSRef<JSVal> maskValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MASK_VALUE));
-    JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
-    JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -485,6 +482,16 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
+    SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
+    return swiperParameters;
+}
+void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
+    const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme)
+{
+    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
+    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
+    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
+    JSRef<JSVal> maxDisplayCountVal = obj->GetProperty("maxDisplayCountValue");
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -494,9 +501,10 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
-    return swiperParameters;
+    uint32_t result = 0;
+    auto setMaxDisplayCountVal = ParseJsInteger(maxDisplayCountVal, result);
+    swiperParameters.maxDisplayCountVal = setMaxDisplayCountVal && result > 0 ? result : 0;
 }
-
 bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     if (jsValue->IsNumber()) {

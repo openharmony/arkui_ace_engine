@@ -47,7 +47,7 @@ public:
     UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
     UIContentErrorCode RunPage(
         const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
-    UIContentErrorCode RunPageByNamedRouter(const std::string& name) override;
+    UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -113,6 +113,7 @@ public:
     std::string GetPagePath() const override;
     void TriggerGarbageCollection() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    void NotifyUIIdle() override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
@@ -136,9 +137,10 @@ public:
     // navigator component call router
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
-    std::string GetContentInfo() const override;
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
 
     int32_t GetRouterSize() const override;
 

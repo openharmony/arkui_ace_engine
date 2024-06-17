@@ -609,10 +609,13 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     napi_create_reference(env, onfinish, 1, &onfinishRef);
     animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator set finish callback, id:%{public}d", animator->GetId());
     animator->AddStopListener([env, onfinishRef, id = animator->GetId()] {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "ohos.animator call finish callback failed, scope is null, id:%{public}d", id);
             return;
         }
         napi_value ret = nullptr;
@@ -620,6 +623,8 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
         auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
         if (result != napi_ok || onfinish == nullptr) {
             napi_close_handle_scope(env, scope);
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "ohos.animator call finish callback failed, get onFinish failed, id:%{public}d", id);
             return;
         }
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback, id:%{public}d", id);

@@ -123,16 +123,16 @@ export struct ExceptionPrompt {
         }
         .width('100%')
         .borderRadius(BORDER_RADIUS)
-        .backgroundColor('#fdd9d9')
+        .backgroundColor($r('sys.color.comp_background_warning_secondary'))
         .zIndex(ZINDEX_NUM)
       }
       .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
-                                                                         left: $r('sys.float.ohos_id_card_margin_start'),
-                                                                         right: $r('sys.float.ohos_id_card_margin_end')
-                                                                       } : {
-                                                                             left: $r('sys.float.ohos_id_max_padding_start'),
-                                                                             right: $r('sys.float.ohos_id_max_padding_end')
-                                                                           })
+        left: $r('sys.float.ohos_id_card_margin_start'),
+        right: $r('sys.float.ohos_id_card_margin_end')
+      } : {
+        left: $r('sys.float.ohos_id_max_padding_start'),
+        right: $r('sys.float.ohos_id_max_padding_end')
+      })
       .transition(
         TransitionEffect.OPACITY.animation({
           curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),

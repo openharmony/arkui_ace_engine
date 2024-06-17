@@ -17,6 +17,7 @@
 
 #include "video_node.h"
 
+#include "base/background_task_helper/background_task_helper.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
@@ -340,7 +341,7 @@ void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, nullptr);
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     CHECK_NULL_RETURN(nativeView, nullptr);
     return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
 }
@@ -727,6 +728,9 @@ void VideoPattern::OnAttachToFrameNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -749,6 +753,15 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
+}
+
+void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void VideoPattern::OnDetachFromMainTree()
@@ -1810,4 +1823,16 @@ bool VideoPattern::GetAnalyzerState()
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return imageAnalyzerManager_->IsOverlayCreated();
 }
+
+void VideoPattern::OnWindowHide()
+{
+#if defined(OHOS_PLATFORM)
+    if (!BackgroundTaskHelper::GetInstance().HasBackgroundTask()) {
+        Pause();
+    }
+#else
+    Pause();
+#endif
+}
+
 } // namespace OHOS::Ace::NG

@@ -30,7 +30,12 @@ class ArkThemeScopeManager {
     /**
      * Temporary link to the theme scope for If container branches update
      */
-    private ifElseScope: ArkThemeScope = undefined;
+    private ifElseLastScope: ArkThemeScope = undefined;
+
+    /**
+     * Stack of ifElse Scopes
+     */
+    private ifElseScopes: ArkThemeScope[] = [];
 
     /**
      * Last handled CustomComponent
@@ -79,21 +84,27 @@ class ArkThemeScopeManager {
             return;
         }
 
-        const scopesLength = this.localThemeScopes.length;
+    
         let scope: ArkThemeScope = undefined;
 
         // we need to keep component to the theme scope before first render
         if (isFirstRender) {
-            if (scopesLength > 0) {
-                // keep component to the top of constructed scopes
-                scope = this.localThemeScopes[scopesLength - 1];
+            const currentLocalScope = this.localThemeScopes[this.localThemeScopes.length - 1];
+            const currentIfElseScope = this.ifElseScopes[this.ifElseScopes.length - 1];
+            if (currentLocalScope) {
+                // keep component to the current constructed scope
+                scope = currentLocalScope;
+                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
+            } else if (currentIfElseScope) {
+                // keep component to the current ifElse scope
+                scope = currentIfElseScope;
                 scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
             } else {
                 // keep component to the same scope as is used by CustomComponen that defines component
                 const parentScope = ownerComponent.themeScope_;
                 if (parentScope) {
-                    parentScope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
                     scope = parentScope;
+                    scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName)
                 }
             }
             // if component didn`t hit any theme scope then we have to use SystemTheme
@@ -110,8 +121,8 @@ class ArkThemeScopeManager {
         }
 
         if (componentName === 'If') {
-            // If container branch update happened. Keep temporary scope
-            this.ifElseScope = isFirstRender === true ? undefined : scope;
+            // keep last ifElse scope
+            this.ifElseLastScope = scope;
         }
     }
 
@@ -200,10 +211,7 @@ class ArkThemeScopeManager {
      * Start for IfElse branch update
      */
     onIfElseBranchUpdateEnter() {
-        if (!this.ifElseScope) {
-            return;
-        }
-        this.localThemeScopes.push(this.ifElseScope);
+        this.ifElseScopes.push(this.ifElseLastScope);
     }
 
     /**
@@ -212,15 +220,10 @@ class ArkThemeScopeManager {
      * @param removedElmtIds elmtIds of the removed components
      */
     onIfElseBranchUpdateExit(removedElmtIds: number[]) {
-        if (!this.ifElseScope) {
-            return;
+        const scope = this.ifElseScopes.pop();
+        if (removedElmtIds && scope) {
+            removedElmtIds.forEach(elmtId => scope.removeComponentFromScope(elmtId));
         }
-        if (removedElmtIds && this.ifElseScope) {
-            removedElmtIds.forEach(elmtId => this.ifElseScope.removeComponentFromScope(elmtId));
-        }
-
-        this.ifElseScope = undefined;
-        this.localThemeScopes.pop();
     }
 
     /**

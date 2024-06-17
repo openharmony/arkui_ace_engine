@@ -328,6 +328,8 @@ private:
     void SetAccessibilityAction();
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
+    void InitTextFontFamily();
+
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
@@ -369,6 +371,11 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+
+    bool hasAppCustomFont_ = false;
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

@@ -285,11 +285,11 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     }
 }
 
-void SubwindowManager::UpdatePreviewPosition(const NG::OffsetF& offset, const Rect& rect)
+void SubwindowManager::UpdatePreviewPosition()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdatePreviewPosition(offset, rect);
+        subwindow->UpdatePreviewPosition();
     }
 }
 
@@ -540,9 +540,9 @@ void SubwindowManager::UpdateCustomDialogNG(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialog ng enter");
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();

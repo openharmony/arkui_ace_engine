@@ -57,7 +57,7 @@ private:
     void DisposeSnapShotAndBlankNode();
 
     bool destroyed_ = false;
-    OHOS::Rosen::WindowMode initWindowMode_;
+    OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     Rosen::WSRect lastWindowRect_;
     CancelableCallback<void()> deleteBlankTask_;
 

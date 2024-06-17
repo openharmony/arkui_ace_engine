@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <optional>
-#include <securec.h>
 
 #include "gtest/gtest.h"
 
@@ -274,7 +273,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -314,7 +313,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -340,7 +339,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -368,7 +366,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -396,7 +393,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = ICON;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -424,7 +420,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = 0;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
@@ -467,7 +462,7 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level1)
     TextPickerSettingData settingData;
     settingData.columnKind = MIXTURE;
     settingData.height = Dimension(FONT_SIZE_10);
-    memcpy_s(&settingData.properties, sizeof(PickerTextProperties), &properties, sizeof(PickerTextProperties));
+    settingData.properties = properties;
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
     settingData.selected = 0;
 
@@ -493,7 +488,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0, 0 };
@@ -536,7 +530,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0 };
@@ -588,7 +581,6 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
     dialogCancelEvent["cancelId"] = cancelFunc;
 
     TextPickerSettingData settingData;
-    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
     settingData.columnKind = TEXT;
     settingData.height = Dimension(FONT_SIZE_10);
     settingData.selectedValues = { 0, 0, 0 };

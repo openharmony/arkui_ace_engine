@@ -629,6 +629,17 @@ public:
         externalExclusiveRecognizer_.clear();
     }
 
+    void CleanInnerRecognizer()
+    {
+        innerExclusiveRecognizer_ = nullptr;
+    }
+
+    void CleanNodeRecognizer()
+    {
+        nodeParallelRecognizer_ = nullptr;
+        nodeExclusiveRecognizer_ = nullptr;
+    }
+
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
@@ -722,7 +733,7 @@ private:
 
     OffsetF frameNodeOffset_;
     SizeF frameNodeSize_;
-    GestureEvent gestureInfoForWeb_;
+    std::shared_ptr<GestureEvent> gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;

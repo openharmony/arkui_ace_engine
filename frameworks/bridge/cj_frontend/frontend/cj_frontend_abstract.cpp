@@ -27,6 +27,7 @@
 #include "core/components/navigator/navigator_component.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/font_manager.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;
@@ -41,7 +42,7 @@ constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
@@ -53,7 +54,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, "CJFroentendMainWindowOverlay");
+        TaskExecutor::TaskType::UI, name);
 }
 } // namespace
 
@@ -93,6 +94,15 @@ bool CJFrontendAbstract::Initialize(FrontendType type, const RefPtr<OHOS::Ace::T
         return false;
     }
     return true;
+}
+
+void CJFrontendAbstract::FlushReload()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGW("not support old pipeline");
+        return;
+    }
+    pageRouterManager_->FlushReload();
 }
 
 void CJFrontendAbstract::RebuildAllPages()
@@ -223,7 +233,7 @@ void CJFrontendAbstract::ShowToast(
         ContainerScope scope(containerId);
         overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
-    MainWindowOverlay(std::move(task));
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
 }
 
 void CJFrontendAbstract::ShowDialog(const std::string& title, const std::string& message,
@@ -266,7 +276,7 @@ void CJFrontendAbstract::ShowDialogInner(DialogProperties& dialogProperties,
             CHECK_NULL_VOID(dialog);
         }
     };
-    MainWindowOverlay(std::move(task));
+    MainWindowOverlay(std::move(task), "ArkUIShowDialogInner");
 }
 
 void CJFrontendAbstract::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
@@ -359,7 +369,7 @@ void CJFrontendAbstract::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
             overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
         }
     };
-    MainWindowOverlay(std::move(task));
+    MainWindowOverlay(std::move(task), "ArkUIOpenCustomDialog");
     return;
 }
 
@@ -371,8 +381,46 @@ void CJFrontendAbstract::CloseCustomDialog(int32_t id)
         overlayManager->CloseCustomDialog(id);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(id);
     };
-    MainWindowOverlay(std::move(task));
+    MainWindowOverlay(std::move(task), "ArkUICloseCustomDialog");
     return;
 }
 
+void CJFrontendAbstract::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc, bundleName, moduleName);
+}
+
+VectorStringHandle CJFrontendAbstract::GetSystemFontList()
+{
+    auto fontList = new std::vector<std::string>;
+    pipelineContextHolder_.Get()->GetSystemFontList(*fontList);
+    return fontList;
+}
+
+NativeOptionFontInfo CJFrontendAbstract::GetSystemFont(const std::string& fontName)
+{
+    auto fontInfo = new FontInfo;
+    if (!pipelineContextHolder_.Get()->GetSystemFont(fontName, *fontInfo)) {
+        return NativeOptionFontInfo {
+            .hasValue = false,
+            .info = nullptr
+        };
+    }
+    return NativeOptionFontInfo {
+        .hasValue = true,
+        .info = new NativeFontInfo {
+            .path = fontInfo->path.c_str(),
+            .postScriptName = fontInfo->postScriptName.c_str(),
+            .fullName = fontInfo->fullName.c_str(),
+            .family = fontInfo->family.c_str(),
+            .subfamily = fontInfo->subfamily.c_str(),
+            .weight = fontInfo->weight,
+            .width = fontInfo->width,
+            .italic = fontInfo->italic,
+            .monoSpace = fontInfo->monoSpace,
+            .symbolic =  fontInfo->symbolic
+        }
+    };
+}
 } // namespace OHOS::Ace

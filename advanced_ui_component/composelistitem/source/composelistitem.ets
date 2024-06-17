@@ -254,7 +254,7 @@ struct ContentItemStruct {
       LengthMetrics.vp(0) : LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH)
     })
     .constraintSize({ minWidth: this.leftWidth })
-    .flexShrink(1)
+    .flexShrink(this.parentDirection === FlexDirection.Column ? 0 : 1)
   }
 }
 
@@ -406,6 +406,7 @@ struct OperateItemStruct {
       this.isParentCanTouch = true;
     })
     .onClick(param.icon?.action)
+    .flexShrink(0)
   }
 
   @Builder
@@ -670,7 +671,7 @@ struct OperateItemStruct {
         if (this.parentDirection === FlexDirection.Column) {
           Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
             this.createText();
-            this.createIcon({icon: this.arrow});
+            this.createArrow();
           }.flexShrink(0);
         } else {
           this.createTextArrow();
@@ -810,7 +811,7 @@ export struct ComposeListItem {
   }
 
   decideContainerDirection(): FlexDirection {
-    if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1) {
+    if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1 || !this.contentItem) {
       return FlexDirection.Row;
     }
     if (this.operateItem?.button) {
@@ -877,16 +878,6 @@ export struct ComposeListItem {
       return LengthMetrics.vp(this.isSingleLine() ? 2 : 16);
     }
     return LengthMetrics.vp(this.itemSpace ?? DEFAULT_ITEM_SPACE_WIDTH);
-  }
-
-  getComposeItemLeftPadding(): LengthMetrics {
-    return this.composeItemPadding?.start !== undefined ?
-      this.composeItemPadding?.start : LengthMetrics.vp(STACK_PADDING);
-  }
-
-  getComposeItemRightPadding(): LengthMetrics {
-    return this.composeItemPadding?.end !== undefined ?
-      this.composeItemPadding?.end : LengthMetrics.vp(STACK_PADDING);
   }
 
   getFlexOptions(): FlexOptions {
@@ -963,6 +954,7 @@ export struct ComposeListItem {
             isParentCanTouch: this.isCanTouch,
             parentDirection: this.containerDirection,
           })
+            .flexShrink(this.containerDirection === FLexDirection.Column ? 0 : 1)
             .align(Alignment.End)
             .onFocus(() => {
               this.canFocus = false;
@@ -1003,22 +995,68 @@ export struct ComposeListItem {
         focused: {
           .border({
             radius: $r('sys.float.corner_radius_level8'),
+            width: { left: this.getFlexLeftOutlineWidth(), right:this.getFlexRightOutlineWidth() },
+            color: Color.Transparent
+          })
+          .outline({
+            radius: $r('sys.float.corner_radius_level8'),
             width: ITEM_BORDER_SHOWN,
             color: this.focusOutlineColor,
-            style: BorderStyle.Solid
+            style: OutlineStyle.SOLID
           })
         },
         normal: {
           .border({
             radius: $r('sys.float.corner_radius_level8'),
+            width: { left: this.getFlexLeftOutlineWidth(), right:this.getFlexRightOutlineWidth() },
             color: Color.Transparent
+          })
+          .outline({
+            radius: $r('sys.float.corner_radius_level8'),
+            width: 0,
+            color: Color.Transparent,
+            style: OutlineStyle.SOLID
           })
         }
       }).padding(this.containerPadding)
     }
+    .clip(true)
     .padding({
       start: this.getComposeItemLeftPadding(),
       end: this.getComposeItemRightPadding()
     });
+  }
+
+  getFlexLeftOutlineWidth(): number {
+    return (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 12) ?
+      (this.composeItemPadding?.start?.value - 4) :
+      (this.composeItemPadding === null || this.composeItemPadding?.start === undefined ||
+        (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 8 &&
+          this.composeItemPadding?.start?.value < 12)) ? 8 : this.composeItemPadding?.start?.value;
+  }
+
+  getFlexRightOutlineWidth(): number {
+    return (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 12) ?
+      (this.composeItemPadding?.end?.value - 4) :
+      (this.composeItemPadding === null || this.composeItemPadding?.end === undefined ||
+        (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 8 &&
+          this.composeItemPadding?.end?.value < 12)) ? 8 : this.composeItemPadding?.end?.value;
+  }
+
+  getComposeItemLeftPadding(): LengthMetrics {
+    return this.composeItemPadding === null || this.composeItemPadding?.start === undefined ||
+      (this.composeItemPadding?.start !== undefined && this.composeItemPadding?.start?.value >= 12) ?
+    LengthMetrics.vp(4) :
+      (this.composeItemPadding?.start !== undefined &&
+        this.composeItemPadding?.start?.value >= 8 && this.composeItemPadding?.start?.value < 12) ?
+      LengthMetrics.vp(this.composeItemPadding?.start?.value - 8) : LengthMetrics.vp(0);
+  }
+
+  getComposeItemRightPadding(): LengthMetrics {
+    return this.composeItemPadding === null || this.composeItemPadding?.end === undefined ||
+      (this.composeItemPadding?.end !== undefined && this.composeItemPadding?.end?.value >= 12) ?
+    LengthMetrics.vp(4) : (this.composeItemPadding?.end !== undefined &&
+        this.composeItemPadding?.end?.value >= 8 && this.composeItemPadding?.end?.value < 12) ?
+      LengthMetrics.vp(this.composeItemPadding?.end?.value - 8) : LengthMetrics.vp(0);
   }
 }

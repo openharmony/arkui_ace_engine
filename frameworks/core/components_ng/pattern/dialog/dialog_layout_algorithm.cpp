@@ -193,17 +193,19 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll)
 {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
     auto text = scroll->GetAllChildrenWithBuild().front();
     CHECK_NULL_VOID(text);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
+    textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -218,8 +220,6 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
             scrollPropery->UpdateAlignment(Alignment::CENTER);
         }
     } else {
-        auto dialogPattern = hostNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
         if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
                 GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
@@ -524,9 +524,16 @@ std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<Fra
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, maskRect);
     maskRect = dialogPattern->GetDialogProperties().maskRect;
-    if (isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
+    if (!isUIExtensionSubWindow_) {
+        return maskRect;
+    }
+
+    if (expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
         auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
         maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    } else {
+        maskRect = DimensionRect(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT),
+            DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
     }
     return maskRect;
 }

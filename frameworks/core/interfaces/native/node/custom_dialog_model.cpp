@@ -99,8 +99,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     CHECK_NULL_VOID(controllerHandler);
     dialogProperties.autoCancel = controllerHandler->autoCancel;
     dialogProperties.alignment = GetDialogAlignment(controllerHandler->alignment);
-    dialogProperties.offset = DimensionOffset(Dimension(controllerHandler->offsetX),
-        Dimension(controllerHandler->offsetY));
+    dialogProperties.offset = DimensionOffset(Dimension(controllerHandler->offsetX, DimensionUnit::VP),
+        Dimension(controllerHandler->offsetY, DimensionUnit::VP));
     dialogProperties.maskColor = Color(controllerHandler->maskColor);
     if (controllerHandler->maskRect) {
         DimensionRect maskRect;
@@ -171,7 +171,7 @@ ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle controllerHandler,
     ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    if (alignment < 0 || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
+    if (alignment < DEFAULT_DIALOG_ALIGNMENT || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
         return ERROR_CODE_PARAM_INVALID;
     }
     controllerHandler->alignment = alignment;

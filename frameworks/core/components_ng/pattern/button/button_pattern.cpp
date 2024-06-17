@@ -71,12 +71,15 @@ bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProp
     CHECK_NULL_RETURN(buttonTheme, false);
     auto fontScale = pipeline->GetFontScale();
 
+    if (layoutProperty->HasLabel() && layoutProperty->GetLabel()->empty()) {
+        return false;
+    }
+
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
         return false;
     }
-    auto layoutContraint = layoutProperty->GetLayoutConstraint();
-    CHECK_NULL_RETURN(layoutContraint, false);
-    if (layoutContraint->selfIdealSize.Width().has_value() || layoutContraint->selfIdealSize.Height().has_value()) {
+    const auto& calcConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
         return false;
     }
     if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||

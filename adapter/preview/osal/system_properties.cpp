@@ -202,6 +202,11 @@ bool SystemProperties::GetDebugEnabled()
     return false;
 }
 
+bool SystemProperties::GetLayoutDetectEnabled()
+{
+    return false;
+}
+
 std::string SystemProperties::GetLanguage()
 {
     return UNDEFINED_PARAM;

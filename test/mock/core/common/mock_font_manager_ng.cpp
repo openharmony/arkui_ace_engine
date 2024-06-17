@@ -52,6 +52,11 @@ void FontManager::RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void FontManager::RebuildFontNodeNG() {}
 
+bool FontManager::IsUseAppCustomFont() const
+{
+    return false;
+}
+
 const std::string& FontManager::GetAppCustomFont() const
 {
     const static std::string empty;

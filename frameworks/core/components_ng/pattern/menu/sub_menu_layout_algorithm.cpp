@@ -45,9 +45,9 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CheckMenuPadding(layoutWrapper);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto parentItemProps = parentMenuItem->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_VOID(parentItemProps);
-    auto expandingMode = parentItemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(parentItemPattern);
+    auto expandingMode = parentItemPattern->GetExpandingMode();
     OffsetF position = GetSubMenuLayoutOffset(layoutWrapper, parentMenuItem, size,
         expandingMode == SubMenuExpandingMode::STACK);
     geometryNode->SetMarginFrameOffset(position);

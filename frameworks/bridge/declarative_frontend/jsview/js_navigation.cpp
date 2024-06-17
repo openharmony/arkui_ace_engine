@@ -284,7 +284,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
         } else {
             newObj = JSRef<JSObject>::Cast(info[0]);
         }
-    } else if (info.Length() > 1) {
+    } else if (info.Length() == 2) {
         if (!info[0]->IsObject() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
             return;

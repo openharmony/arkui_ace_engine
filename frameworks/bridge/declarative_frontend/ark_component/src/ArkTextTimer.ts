@@ -57,7 +57,7 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
   }
 
   contentModifier(value: ContentModifier<TextTimerConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, TextTimerContentModifier.identity, TextTimerContentModifier, value);
     return this;
   }
 
@@ -164,6 +164,17 @@ class TextTimerFormatModifier extends ModifierWithKey<string> {
     } else {
       getUINativeModule().textTimer.setFormat(node, this.value);
     }
+  }
+}
+
+class TextTimerContentModifier extends ModifierWithKey<ContentModifier<TextTimerConfiguration>> {
+  constructor(value: ContentModifier<TextTimerConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTimerContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let textTimerComponent = component as ArkTextTimerComponent;
+    textTimerComponent.setContentModifier(this.value);
   }
 }
 

@@ -363,6 +363,8 @@ private:
     void SetAccessibilityAction();
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
+    void InitTextFontFamily();
+
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -407,6 +409,12 @@ private:
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::vector<TimeTextProperties> animationProperties_;
     float dividerSpacing_ = 0.0f;
+
+    bool hasAppCustomFont_ = false;
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };
 } // namespace OHOS::Ace::NG

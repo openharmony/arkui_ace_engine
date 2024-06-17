@@ -45,6 +45,7 @@ struct ArkUI_Node {
     void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
+    void* altDrawableDescriptor = nullptr;
 };
 
 struct ArkUI_Context {
@@ -116,6 +117,7 @@ bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
+bool IsValidArkUINode(ArkUI_NodeHandle nodePtr);
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode);

@@ -124,6 +124,13 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return currentContainer->GetPipelineContext();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -226,14 +233,15 @@ void PipelineBase::SetRootSize(double density, float width, float height)
         }
         context->SetRootRect(width, height);
     };
-
-    auto container = Container::GetContainer(instanceId_);
-    auto settings = container->GetSettings();
-    if (settings.usePlatformAsUIThread && settings.useUIAsJSThread) {
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)

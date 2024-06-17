@@ -77,6 +77,16 @@ public:
         return axis_;
     }
 
+    TextDirection GetLayoutDirection() const
+    {
+        return layoutDirection_;
+    }
+
+    float GetMainSize() const
+    {
+        return totalMainSize_;
+    }
+
     int32_t GetLanes() const
     {
         return lanes_;
@@ -342,6 +352,7 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
+    TextDirection layoutDirection_;
 };
 } // namespace OHOS::Ace::NG
 

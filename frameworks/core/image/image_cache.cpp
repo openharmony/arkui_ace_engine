@@ -217,7 +217,7 @@ void ImageCache::DumpCacheInfo()
     if (cacheSize == 0) {
         return;
     }
-    uint32_t totalCount = 0;
+    auto totalCount = 0;
     for (const auto& item : dataCacheList_) {
         auto imageObj = item.cacheObj;
         auto key = item.cacheKey;

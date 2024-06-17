@@ -65,7 +65,7 @@ RefPtr<Component> SlidingPanelComponent::Create(const RefPtr<PanelComponent>& co
     focusCollaboration->InsertChild(0, box);
     auto dropFilter = AceType::MakeRefPtr<DropFilterComponent>(focusCollaboration, 0, 0);
     if (component->GetPanelType() == PanelType::TEMP_DISPLAY) {
-        dropFilter->SetSigmaX(0.5);
+        dropFilter->SetSigmaX(0.5); // 0.5: gaussian standard deviation of temp display
         dropFilter->SetSigmaY(0.5);
         dropFilter->SetInterceptEvent(true);
     }

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_DIALOG_CONTAINER_H
 
 #include <memory>
+#include <mutex>
 
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -103,14 +104,16 @@ public:
         return aceView_ ? aceView_->GetHeight() : 0;
     }
 
-    AceView* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
+        std::lock_guard<std::mutex> lock(viewMutex_);
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        std::lock_guard<std::mutex> lock(viewMutex_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     RefPtr<TaskExecutor> GetTaskExecutor() const override
@@ -177,10 +180,10 @@ public:
 
     static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static RefPtr<DialogContainer> GetContainer(int32_t instanceId);
-    static void SetView(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow);
-    static void SetViewNew(
-        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window>& rsWindow);
+    static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
+        sptr<OHOS::Rosen::Window>& rsWindow);
+    static void SetViewNew(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
+        sptr<OHOS::Rosen::Window>& rsWindow);
     static bool OnBackPressed(int32_t instanceId);
 
 private:
@@ -199,14 +202,14 @@ private:
     void InitializeSurfaceDestroyCallback();
     void InitializeDragEventCallback();
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-        uint32_t windowId);
+    void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, int32_t width,
+        int32_t height, uint32_t windowId);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
 
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
     int32_t instanceId_ = -1;
-    AceView* aceView_ = nullptr;
+    RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
@@ -218,6 +221,7 @@ private:
     std::string windowName_;
     WindowModal windowModal_ { WindowModal::NORMAL };
     ColorScheme colorScheme_ { ColorScheme::FIRST_VALUE };
+    mutable std::mutex viewMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogContainer);
 };

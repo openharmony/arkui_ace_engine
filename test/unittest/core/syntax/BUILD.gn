@@ -37,9 +37,19 @@ ace_unittest("if_else_syntax_test_ng") {
   sources = [ "if_else_syntax_test_ng.cpp" ]
 }
 
+ace_unittest("content_slot_syntax_test_ng") {
+  type = "new"
+  module_output = "syntaxs"
+  sources = [
+    "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
+    "content_slot_syntax_test_ng.cpp",
+  ]
+}
+
 group("core_syntax_unittest") {
   testonly = true
   deps = [
+    ":content_slot_syntax_test_ng",
     ":for_each_syntax_test_ng",
     ":if_else_syntax_test_ng",
     ":lazy_for_each_syntax_test_ng",

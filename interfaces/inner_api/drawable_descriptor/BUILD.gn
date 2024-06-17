@@ -27,12 +27,17 @@ config("drawable_config") {
   }
 }
 if (is_arkui_x) {
+  import("//foundation/graphic/graphic_2d/graphic_config.gni")
   import("//foundation/multimedia/image_framework/ide/image_decode_config.gni")
   import("//plugins/drawable_descriptor/drawable_descriptor.gni")
   ohos_source_set("native_drawabledescriptor_static") {
     configs = [
       "$ace_root:ace_config",
       "$ace_root:ace_coverage_config",
+    ]
+    cflags_cc = [
+      "-std=c++17",
+      "-fno-rtti",
     ]
     include_dirs = [
       "${ace_root}/interfaces/napi/kits/utils",
@@ -54,6 +59,9 @@ if (is_arkui_x) {
     }
     if (use_clang_ios) {
       defines = image_decode_ios_defines
+    }
+    if (ace_enable_gpu) {
+      defines += [ "ACE_ENABLE_GPU" ]
     }
   }
 } else {

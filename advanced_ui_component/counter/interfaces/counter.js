@@ -1064,42 +1064,30 @@ export class CounterComponent extends ViewPU {
             this.dateStyleOptions.year <= this.maxYear) {
             if (this.year === 0) {
                 this.year = this.dateStyleOptions.year;
-                let e19 = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(e19);
             }
         }
         else {
             this.year = CounterConstant.COUNTER_MIN_YEAR;
-            let d19 = new DateData(this.year, this.month, this.day);
-            this.onDateChange?.(d19);
         }
         if (this.dateStyleOptions.month !== undefined &&
             this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
             this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
             if (this.month === 0) {
                 this.month = this.dateStyleOptions.month;
-                let c19 = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(c19);
             }
         }
         else {
             this.month = CounterConstant.COUNTER_INITIAL_MONTH;
-            let b19 = new DateData(this.year, this.month, this.day);
-            this.onDateChange?.(b19);
         }
         if (this.dateStyleOptions.day !== undefined &&
             this.dateStyleOptions.day <= this.getDayNumber() &&
             this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
             if (this.day === 0) {
                 this.day = this.dateStyleOptions.day;
-                let a19 = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(a19);
             }
         }
         else {
             this.day = CounterConstant.COUNTER_INITIAL_DAY;
-            let z18 = new DateData(this.year, this.month, this.day);
-            this.onDateChange?.(z18);
         }
         if (this.dateStyleOptions.onDateChange !== undefined) {
             this.onDateChange = this.dateStyleOptions.onDateChange;
@@ -2480,7 +2468,6 @@ export class CounterComponent extends ViewPU {
                         Button.enabled(this.addBtnEnabled);
                         Button.onClick((a12) => {
                             this.addValue();
-                            this.onChange?.(ObservedObject.GetRawObject(this.value));
                             if (a12.source === SourceType.Mouse ||
                                 a12.source === SourceType.TouchScreen) {
                                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2491,7 +2478,6 @@ export class CounterComponent extends ViewPU {
                         LongPressGesture.onAction((z11) => {
                             if (z11.repeat) {
                                 this.addValue();
-                                this.onChange?.(ObservedObject.GetRawObject(this.value));
                             }
                             this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                         });
@@ -2558,7 +2544,6 @@ export class CounterComponent extends ViewPU {
                         Button.enabled(this.subBtnEnabled);
                         Button.onClick((k11) => {
                             this.subValue();
-                            this.onChange?.(ObservedObject.GetRawObject(this.value));
                             if (k11.source === SourceType.Mouse ||
                                 k11.source === SourceType.TouchScreen) {
                                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2569,7 +2554,6 @@ export class CounterComponent extends ViewPU {
                         LongPressGesture.onAction((j11) => {
                             if (j11.repeat) {
                                 this.subValue();
-                                this.onChange?.(ObservedObject.GetRawObject(this.value));
                             }
                             this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                         });
@@ -2692,10 +2676,12 @@ export class CounterComponent extends ViewPU {
                             }, 1500);
                             if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                                 this.year = this.inputYear;
-                                let j10 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(j10);
                                 this.updateDateEnableSate();
                                 this.updateDay();
+                            }
+                            if (h10.length === 4) {
+                                let j10 = new DateData(this.year, this.month, this.day);
+                                this.onDateChange?.(j10);
                             }
                         });
                         TextInput.onSubmit((f10) => {
@@ -2707,8 +2693,6 @@ export class CounterComponent extends ViewPU {
                             this.year -= 1;
                             if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                                 this.year = this.inputYear;
-                                let g10 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(g10);
                             }
                             else {
                                 this.year += 1;
@@ -2825,8 +2809,6 @@ export class CounterComponent extends ViewPU {
                                 this.month -= 1;
                                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                                     this.month = this.inputMoon;
-                                    let s9 = new DateData(this.year, this.month, this.day);
-                                    this.onDateChange?.(s9);
                                 }
                                 else {
                                     this.month += 1;
@@ -2858,8 +2840,6 @@ export class CounterComponent extends ViewPU {
                             this.month -= 1;
                             if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                                 this.month = this.inputMoon;
-                                let o9 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(o9);
                                 this.updateDay();
                             }
                             else {
@@ -2970,8 +2950,6 @@ export class CounterComponent extends ViewPU {
                                 this.day -= 1;
                                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                                     this.day = this.inputDay;
-                                    let a9 = new DateData(this.year, this.month, this.day);
-                                    this.onDateChange?.(a9);
                                 }
                                 else {
                                     this.day += 1;
@@ -3001,8 +2979,6 @@ export class CounterComponent extends ViewPU {
                             this.day -= 1;
                             if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                                 this.day = this.inputDay;
-                                let w8 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(w8);
                             }
                             else {
                                 this.day += 1;
@@ -3078,8 +3054,6 @@ export class CounterComponent extends ViewPU {
                         Button.enabled(this.addBtnEnabled);
                         Button.onClick((c8) => {
                             this.addDate();
-                            let d8 = new DateData(this.year, this.month, this.day);
-                            this.onDateChange?.(d8);
                             if (c8.source === SourceType.Mouse ||
                                 c8.source === SourceType.TouchScreen) {
                                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -3090,8 +3064,6 @@ export class CounterComponent extends ViewPU {
                         LongPressGesture.onAction((a8) => {
                             if (a8.repeat) {
                                 this.addDate();
-                                let b8 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(b8);
                             }
                             this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                         });
@@ -3157,8 +3129,6 @@ export class CounterComponent extends ViewPU {
                         Button.enabled(this.subBtnEnabled);
                         Button.onClick((k7) => {
                             this.subDate();
-                            let l7 = new DateData(this.year, this.month, this.day);
-                            this.onDateChange?.(l7);
                             if (k7.source === SourceType.Mouse ||
                                 k7.source === SourceType.TouchScreen) {
                                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -3169,8 +3139,6 @@ export class CounterComponent extends ViewPU {
                         LongPressGesture.onAction((i7) => {
                             if (i7.repeat) {
                                 this.subDate();
-                                let j7 = new DateData(this.year, this.month, this.day);
-                                this.onDateChange?.(j7);
                             }
                             this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                         });

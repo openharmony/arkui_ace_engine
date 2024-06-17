@@ -61,7 +61,7 @@ ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextModifier()->setFontWeightStr(nativeNode, weight.c_str());
     } else {
@@ -761,7 +761,7 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString()) {
+        } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString();
         }
     }
@@ -911,7 +911,7 @@ ArkUINativeModuleValue TextBridge::SetFontFeature(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getTextModifier()->setTextFontFeature(nativeNode, value.c_str());
     } else {
@@ -1028,7 +1028,7 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (!typesArg->IsArray(vm) || !callbackArg->IsFunction()) {
+    if (!typesArg->IsArray(vm) || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextModifier()->
             resetTextDataDetectorConfigWithEvent(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -1082,7 +1082,7 @@ ArkUINativeModuleValue TextBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCallIn
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextOnCopy(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1119,7 +1119,7 @@ ArkUINativeModuleValue TextBridge::SetOnTextSelectionChange(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction()) {
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextOnTextSelectionChange(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

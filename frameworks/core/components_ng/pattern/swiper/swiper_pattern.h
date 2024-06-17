@@ -154,6 +154,8 @@ public:
         jsonValue->Put(
             "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
         jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
+        jsonValue->Put("maxDisplayCount",
+            (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
         return jsonValue->ToString();
     }
 
@@ -665,7 +667,13 @@ public:
         frameRateRange_[type] = rateRange;
     }
     void UpdateNodeRate();
-
+    int32_t GetMaxDisplayCount() const
+    {
+        if ((swiperParameters_ != nullptr) && (swiperParameters_->maxDisplayCountVal.has_value())) {
+            return swiperParameters_->maxDisplayCountVal.value();
+        }
+        return 0;
+    }
 protected:
     void MarkDirtyNodeSelf();
 
@@ -1058,6 +1066,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
+    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
@@ -1117,6 +1126,7 @@ private:
     bool isCaptureReverse_ = false;
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
+    bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     std::optional<bool> isSwipeByGroup_;

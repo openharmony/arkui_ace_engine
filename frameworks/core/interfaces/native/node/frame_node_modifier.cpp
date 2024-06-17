@@ -101,9 +101,9 @@ ArkUI_Bool InsertChildAfterInFrameNode(ArkUINodeHandle node, ArkUINodeHandle chi
 
 void RemoveChildInFrameNode(ArkUINodeHandle node, ArkUINodeHandle child)
 {
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
-    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto* childNode = reinterpret_cast<UINode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -412,7 +412,8 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto size =
-        isExpanded ? frameNode->GetAllChildrenWithBuild(false).size() : frameNode->GetTotalChildCountWithoutExpanded();
+        isExpanded ? static_cast<uint32_t>(frameNode->GetAllChildrenWithBuild(false).size()) :
+        frameNode->GetTotalChildCountWithoutExpanded();
     CHECK_NULL_RETURN(size > 0, nullptr);
     auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
     return reinterpret_cast<ArkUINodeHandle>(child);

@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "at_manager_impl.h"
-#include "application_context.h"
 #include "cj_web_ffi.h"
 
+#include "application_context.h"
 #include "cj_lambda.h"
 #include "webview_controller_impl.h"
 
@@ -28,9 +27,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components/web/web_event.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -46,6 +45,8 @@ struct FfiWebEvent {
 
 namespace OHOS::Ace::Framework {
 bool g_cjWebDebuggingAccess = false;
+constexpr int32_t PARENT_FIRST_VALUE = 2;
+RequestResultCallback g_requestResultcb = nullptr;
 
 class CJWebWindowNewHandler : public Referenced {
 public:
@@ -111,8 +112,7 @@ public:
                 return;
             }
             controller_map_.insert(
-                std::pair<int32_t, ChildWindowInfo>(handler_->GetId(), { parentNWebId, controller })
-            );
+                std::pair<int32_t, ChildWindowInfo>(handler_->GetId(), { parentNWebId, controller }));
         }
     }
 
@@ -196,11 +196,11 @@ char* MallocCString(const std::string& origin)
     return std::char_traits<char>::copy(res, origin.c_str(), len);
 }
 
-void RequestPermissionsFromUserWeb(CJWebPermissionRequest &request)
+void RequestPermissionsFromUserWeb(CJWebPermissionRequest& request)
 {
     auto abilityContext = AbilityRuntime::Context::GetApplicationContext();
     std::string permission = "ohos.permission.READ_PASTEBOARD";
-    char *cPermission = MallocCString(permission);
+    char* cPermission = MallocCString(permission);
 
     auto callBack = [&request](RetDataCPermissionRequestResult infoRef) -> void {
         if (infoRef.code == 0) {
@@ -210,16 +210,21 @@ void RequestPermissionsFromUserWeb(CJWebPermissionRequest &request)
         }
     };
 
-    OHOS::CJSystemapi::AtManagerImpl::RequestPermissionsFromUser(
-        abilityContext.get(),
-        CArrString{.head = &cPermission, .size = 1},
-        callBack);
+    std::function<void(RetDataCPermissionRequestResult)> func = callBack;
+    g_requestResultcb(abilityContext.get(), CArrString { .head = &cPermission, .size = 1 }, &func);
 
     free(cPermission);
 }
-}
+} // namespace OHOS::Ace::Framework
 std::unordered_map<int32_t, CJWebWindowNewHandler::ChildWindowInfo> CJWebWindowNewHandler::controller_map_;
 extern "C" {
+void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb)
+{
+    if (g_requestResultcb == nullptr) {
+        g_requestResultcb = cb;
+    }
+}
+
 void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t type, bool mode)
 {
     std::string webSrc = src;
@@ -235,17 +240,12 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
     auto controller = FFIData::GetData<WebviewControllerImpl>(controllerId);
     if (controller) {
-        auto setIdCallback = [controller](int32_t webId) {
-                controller->SetWebId(webId);
-            };
+        auto setIdCallback = [controller](int32_t webId) { controller->SetWebId(webId); };
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
-        setHapPathCallback = [controller](const std::string& hapPath) {
-                controller->InnerSetHapPath(hapPath);
-            };
+        setHapPathCallback = [controller](const std::string& hapPath) { controller->InnerSetHapPath(hapPath); };
 
         std::function<void(const std::shared_ptr<BaseEventInfo>&)> requestPermissionsFromUserCallback = nullptr;
-        requestPermissionsFromUserCallback = [controller](
-                                                 const std::shared_ptr<BaseEventInfo>& info) {
+        requestPermissionsFromUserCallback = [controller](const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
             auto permissionObj = OHOS::Ace::Framework::CJWebPermissionRequest();
             permissionObj.SetEvent(*eventInfo);
@@ -254,9 +254,8 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
         int32_t parentNWebId = -1;
         bool isPopup = CJWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback),
-            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, mode);
+        WebModel::GetInstance()->Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback),
+            parentNWebId, isPopup, renderMode, mode);
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         if (!controller->customeSchemeCmdLine_.empty()) {
             WebModel::GetInstance()->SetCustomScheme(controller->customeSchemeCmdLine_);
@@ -350,6 +349,40 @@ void FfiOHOSAceFrameworkWebGeolocationAccessEnabled(bool isGeolocationAccessEnab
     WebModel::GetInstance()->SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
 }
 
+void FfiOHOSAceFrameworkWebVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccess)
+{
+    WebModel::GetInstance()->SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccess);
+}
+
+NestedScrollMode GetNestedScrollModeValue(int32_t value)
+{
+    auto ret = NestedScrollMode::SELF_ONLY;
+    switch (value) {
+        case 0:
+            ret = NestedScrollMode::SELF_ONLY;
+            break;
+        case 1:
+            ret = NestedScrollMode::SELF_FIRST;
+            break;
+        case PARENT_FIRST_VALUE:
+            ret = NestedScrollMode::PARENT_FIRST;
+            break;
+        default:
+            ret = NestedScrollMode::PARALLEL;
+            break;
+    }
+    return ret;
+}
+
+void FfiOHOSAceFrameworkNestedScroll(int32_t nestedScrollNum, int32_t scrollBackwardNum)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = GetNestedScrollModeValue(nestedScrollNum),
+        .backward = GetNestedScrollModeValue(scrollBackwardNum),
+    };
+    WebModel::GetInstance()->SetNestedScroll(nestedOpt);
+}
+
 void FfiOHOSAceFrameworkWebUserAgent(const std::string& userAgent)
 {
     WebModel::GetInstance()->SetUserAgent(userAgent);
@@ -392,6 +425,68 @@ void FfiOHOSAceFrameworkWebOnPageStart(void (*callback)(const char* url))
     WebModel::GetInstance()->SetOnPageStart(std::move(onStart));
 }
 
+bool WebRequestHeadersToMapToCFFIArray(const RefPtr<WebRequest>& webRequest, MapToCFFIArray& res)
+{
+    std::map<std::string, std::string> header = webRequest->GetHeaders();
+    auto key = (const char**)malloc(sizeof(const char*) * header.size());
+    auto value = (const char**)malloc(sizeof(const char*) * header.size());
+    if (key == NULL || value == NULL) {
+        if (key != NULL) {
+            free(key);
+        }
+        if (value != NULL) {
+            free(value);
+        }
+        LOGE("FfiOHOSAceFrameworkGetHeaders fail, malloc fail");
+        return false;
+    }
+    size_t i = 0;
+    res.size = header.size();
+    res.key = key;
+    res.value = value;
+    for (auto it = header.begin(); it != header.end(); ++it, ++i) {
+        res.key[i] = it->first.c_str();
+        res.value[i] = it->second.c_str();
+    }
+    return true;
+}
+
+void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
+{
+    for (size_t i = 0; i < mapToCFFIArray.size; ++i) {
+        free(&mapToCFFIArray.key[i]);
+        free(&mapToCFFIArray.value[i]);
+    }
+    free(mapToCFFIArray.key);
+    free(mapToCFFIArray.value);
+}
+
+void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
+{
+    auto instanceId = Container::CurrentId();
+    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId](const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        FfiWebResourceRequest cjWebResourceRequest {};
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
+        auto request = eventInfo->GetRequest();
+        MapToCFFIArray mapToCFFIArray;
+        auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
+        if (!wirteSuccess) {
+            return false;
+        }
+        cjWebResourceRequest.url = request->GetUrl().c_str();
+        cjWebResourceRequest.isMainFrame = request->IsMainFrame();
+        cjWebResourceRequest.isRedirect = request->IsRedirect();
+        cjWebResourceRequest.hasGesture = request->HasGesture();
+        cjWebResourceRequest.method = request->GetMethod().c_str();
+        cjWebResourceRequest.mapToCFFIArray = &mapToCFFIArray;
+        auto res = func(cjWebResourceRequest);
+        MapToCFFIArrayToFreeMemory(mapToCFFIArray);
+        return res;
+    };
+    WebModel::GetInstance()->SetOnLoadIntercept(std::move(onLoadIntercept));
+}
+
 void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url))
 {
     auto instanceId = Container::CurrentId();
@@ -412,10 +507,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
         auto& funcs = *reinterpret_cast<std::vector<int64_t>*>(funcList);
         std::vector<std::function<char*(const char*)>> cFuncs;
         for (int64_t i = 0; i < static_cast<int64_t>(funcs.size()); i++) {
-            auto cFunc = reinterpret_cast<char*(*)(const char*)>(funcs[i]);
-            auto wrapper = [lambda = CJLambda::Create(cFunc)](const char* str) -> char* {
-                return lambda(str);
-            };
+            auto cFunc = reinterpret_cast<char* (*)(const char*)>(funcs[i]);
+            auto wrapper = [lambda = CJLambda::Create(cFunc)](const char* str) -> char* { return lambda(str); };
             cFuncs.push_back(wrapper);
         }
         std::string cName = std::string(name);

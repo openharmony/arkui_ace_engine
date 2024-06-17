@@ -625,9 +625,9 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto itemProps = parentItem->GetLayoutProperty<MenuItemLayoutProperty>();
-        CHECK_NULL_VOID(itemProps);
-        auto expandingMode = itemProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(parentPattern);
+        auto expandingMode = parentPattern->GetExpandingMode();
         if (expandingMode == SubMenuExpandingMode::STACK) {
             auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(parentPattern);
@@ -1319,6 +1319,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position_ += offset;
         }
         auto menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow);
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
         if (menuPattern->IsSelectOverlayRightClickMenu()) {
@@ -1931,7 +1935,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
     } else {
-        targetSize_ = geometryNode->GetFrameSize();
+        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
         targetOffset_ = targetNode->GetPaintRectOffset();
     }
     dumpInfo_.targetSize = targetSize_;

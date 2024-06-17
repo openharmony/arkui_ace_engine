@@ -547,13 +547,8 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
         return false;
     }
     ++currentIndex;
-    {
-        auto host = wrapper->GetHostNode();
-        ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d][start:%f]", currentIndex, host->GetId(),
-            host->GetParent() ? host->GetParent()->GetId() : 0, startPos);
-        wrapper->Measure(layoutConstraint);
-        measuredItems_.insert(measureIndex);
-    }
+    wrapper->Measure(layoutConstraint);
+    measuredItems_.insert(measureIndex);
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
@@ -597,13 +592,8 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
         return false;
     }
     --currentIndex;
-    {
-        auto host = wrapper->GetHostNode();
-        ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][endPos:%f]", currentIndex, host->GetId(),
-            host->GetParent() ? host->GetParent()->GetId() : 0, endPos);
-        wrapper->Measure(layoutConstraint);
-        measuredItems_.insert(measureIndex);
-    }
+    wrapper->Measure(layoutConstraint);
+    measuredItems_.insert(measureIndex);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty, axis);
     startPos = endPos - mainAxisSize;

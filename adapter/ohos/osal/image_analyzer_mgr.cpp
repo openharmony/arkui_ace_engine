@@ -76,4 +76,16 @@ void ImageAnalyzerMgr::Release(void** overlayData)
         return engine_->Release(overlayData);
     }
 }
+void ImageAnalyzerMgr::UpdatePressOverlay(void** overlayData, ImageAnalyzerInnerConfig* config)
+{
+    if (engine_) {
+        return engine_->UpdatePressOverlay(overlayData, config);
+    }
+}
+void ImageAnalyzerMgr::UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config)
+{
+    if (engine_) {
+        return engine_->UpdateOverlayStatus(overlayData, config);
+    }
+}
 }

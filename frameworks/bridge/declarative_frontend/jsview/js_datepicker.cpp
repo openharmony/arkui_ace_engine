@@ -361,21 +361,39 @@ void JSDatePicker::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::Pick
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
-        JSDatePicker::ParseTextStyle(disappearObj, result.disappearTextStyle_);
+        JSDatePicker::ParseTextStyle(disappearObj, result.disappearTextStyle_, "disappearTextStyle");
     }
 
     if (!normalProperty->IsNull() && normalProperty->IsObject()) {
         JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
-        JSDatePicker::ParseTextStyle(noramlObj, result.normalTextStyle_);
+        JSDatePicker::ParseTextStyle(noramlObj, result.normalTextStyle_, "textStyle");
     }
 
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        JSDatePicker::ParseTextStyle(selectedObj, result.selectedTextStyle_);
+        JSDatePicker::ParseTextStyle(selectedObj, result.selectedTextStyle_, "selectedTextStyle");
     }
 }
 
-void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
+void JSDatePicker::IsUserDefinedFontFamily(const std::string& pos)
+{
+    if (pos == "disappearTextStyle") {
+        DatePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    } else if (pos == "textStyle") {
+        DatePickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+    } else if (pos == "selectedTextStyle") {
+        DatePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+    } else if (pos == "disappearTextStyleTime") {
+        TimePickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    } else if (pos == "textStyleTime") {
+        TimePickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+    } else if (pos == "selectedTextStyleTime") {
+        TimePickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+    }
+}
+
+void JSDatePicker::ParseTextStyle(
+    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
     auto fontColor = paramObj->GetProperty("color");
     auto fontOptions = paramObj->GetProperty("font");
@@ -418,6 +436,7 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
         std::vector<std::string> families;
         if (ParseJsFontFamilies(fontFamily, families)) {
             textStyle.fontFamily = families;
+            IsUserDefinedFontFamily(pos);
         }
     }
 
@@ -437,7 +456,7 @@ void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
     DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -449,7 +468,7 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSDatePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -461,7 +480,7 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSDatePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
@@ -1367,7 +1386,7 @@ void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "disappearTextStyleTime");
     }
     TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -1379,7 +1398,7 @@ void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTimePickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyleTime");
     }
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -1391,7 +1410,7 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSDatePicker::ParseTextStyle(info[0], textStyle);
+        JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }

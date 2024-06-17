@@ -90,7 +90,7 @@ public:
         auto temp = currentState_ | state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc();
+            FireStateFunc(false);
         }
     }
 
@@ -105,7 +105,7 @@ public:
         auto temp = currentState_ ^ state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc();
+            FireStateFunc(true);
         }
     }
 
@@ -118,8 +118,10 @@ public:
     void HandleTouchDown();
     void HandleTouchUp();
 
+    RefPtr<FrameNode> GetFrameNode() const;
+
 private:
-    void FireStateFunc();
+    void FireStateFunc(bool isReset);
 
     void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);

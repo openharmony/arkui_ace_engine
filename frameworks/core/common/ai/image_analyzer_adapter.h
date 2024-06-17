@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 class ImageAnalyzerAdapter : public AceType {
     DECLARE_ACE_TYPE(ImageAnalyzerAdapter, AceType);
 public:
-    virtual void SetImageAnalyzerConfig(void* config) = 0;
+    virtual void SetImageAnalyzerConfig(void* config, bool isOptions = false) = 0;
     virtual void* GetImageAnalyzerConfig() = 0;
     virtual void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) = 0;
     virtual bool HasImageAnalyzerConfig() = 0;

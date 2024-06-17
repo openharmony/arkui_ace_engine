@@ -236,4 +236,12 @@ void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
 }
 
+void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(selectCallback));
+}
+
 } // namespace OHOS::Ace::NG

@@ -61,7 +61,7 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<ProgressConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, ProgressContentModifier.identity, ProgressContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<ProgressConfiguration>): this {
@@ -184,6 +184,17 @@ class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ProgressContentModifier extends ModifierWithKey<ContentModifier<ProgressConfiguration>> {
+  constructor(value: ContentModifier<ProgressConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('progressContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let progressComponent = component as ArkProgressComponent;
+    progressComponent.setContentModifier(this.value);
   }
 }
 

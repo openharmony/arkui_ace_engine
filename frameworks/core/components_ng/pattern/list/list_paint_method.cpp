@@ -59,6 +59,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto frameSize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto& padding = geometryNode->GetPadding();
+    float size = paintWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
@@ -88,7 +89,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
         .color = divider_.color,
-        .laneGutter = laneGutter_
+        .laneGutter = laneGutter_,
+        .mainSize = size
     };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     if (NearZero(checkMargin)) return;
@@ -151,6 +153,10 @@ ListDivider ListPaintMethod::HandleDividerList(
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+    if (isReverse_ && dividerInfo.isVertical) {
+        float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+    }
     if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
         crossPos +=
             laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
@@ -173,6 +179,10 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
     float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).endPos + divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+    if (isReverse_ && dividerInfo.isVertical) {
+        float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+    }
     if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
         crossPos +=
             laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);

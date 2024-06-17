@@ -50,6 +50,9 @@ public:
     }
 
     virtual const RefPtr<FrameNode> GetFrameNode() = 0;
+
+    SizeF GetFrameSize(bool withSafeArea = false);
+
 protected:
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
@@ -185,6 +188,7 @@ public:
     void Refresh() override;
 
 private:
+    bool IsShowClean();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();

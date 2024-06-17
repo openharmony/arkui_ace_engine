@@ -48,6 +48,8 @@ public:
         spaceWidth_ = listItemGroupPaintInfo.spaceWidth;
         laneGutter_ = listItemGroupPaintInfo.laneGutter;
         totalItemCount_ = listItemGroupPaintInfo.totalItemCount;
+        layoutDirection_ = listItemGroupPaintInfo.layoutDirection;
+        mainSize_ = listItemGroupPaintInfo.mainSize;
         if (!pressedItem.empty()) {
             for (auto& child : itemPosition_) {
                 if (pressedItem.find(child.second.id) != pressedItem.end()) {
@@ -74,6 +76,8 @@ private:
     float fSpacingTotal_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     int32_t totalItemCount_ = 0;
+    TextDirection layoutDirection_ = TextDirection::LTR;
+    float mainSize_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

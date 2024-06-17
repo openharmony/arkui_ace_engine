@@ -325,6 +325,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
 }
 
 /**
+ * @tc.name: TimePickerModelNGSetDisappearTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(10);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
+}
+
+/**
  * @tc.name: TimePickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TimePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
@@ -386,6 +401,21 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetNormalTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**
@@ -454,6 +484,22 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+}
+
+/**
+ * @tc.name: TimePickerModelNGSetSelectedTextStyle004
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle004, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    auto isUserSet = TimePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**

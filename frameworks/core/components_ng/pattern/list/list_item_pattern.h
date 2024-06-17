@@ -236,6 +236,7 @@ private:
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
     void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
+    void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
     Color GetBlendGgColor();

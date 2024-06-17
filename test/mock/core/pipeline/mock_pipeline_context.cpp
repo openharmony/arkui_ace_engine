@@ -95,7 +95,18 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     return MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafelyWithCheck()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
 PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    return AceType::RawPtr(context);
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafelyWithCheck()
 {
     auto context = MockPipelineContext::GetCurrent();
     return AceType::RawPtr(context);
@@ -140,6 +151,9 @@ void PipelineContext::SetupRootElement()
     focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
+
+void PipelineContext::SendEventToAccessibilityWithNode(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 

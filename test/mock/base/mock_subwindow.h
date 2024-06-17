@@ -28,6 +28,7 @@ public:
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(GetRect, NG::RectF());
+    MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(ShowMenu, void(const RefPtr<Component>& newComponent));
     MOCK_METHOD4(ShowMenuNG, void(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
                                  const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
@@ -41,7 +42,6 @@ public:
     MOCK_METHOD1(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset));
     MOCK_METHOD2(ContextMenuSwitchDragPreviewAnimationtNG, void(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset));
-    MOCK_METHOD2(UpdatePreviewPosition, void(const NG::OffsetF& offset, const Rect& rect));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD4(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo,
                                   const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss));

@@ -150,6 +150,8 @@ private:
     FontWeight workStateFontWeight_ = FontWeight::W400;
     SizeF frameSize_;
 
+    std::vector<std::string> appFontFamilies_;
+
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPaintMethod);
 };
 } // namespace OHOS::Ace::NG

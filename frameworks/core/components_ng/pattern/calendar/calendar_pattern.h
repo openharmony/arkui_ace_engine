@@ -155,6 +155,10 @@ public:
         return currentMonthIndex_;
     }
 
+    void SetDialogClickEventState(bool isClickEvent)
+    {
+        isClickEvent_ = isClickEvent;
+    }
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -165,6 +169,7 @@ private:
     void FlushFocus(ObtainedMonth& obtainedMonth);
     void JumpTo(ObtainedMonth& obtainedMonth);
     void FlushDialogMonthData(ObtainedMonth& obtainedMonth);
+    void InitSwiperChangeDoneEvent();
 
     std::optional<int32_t> titleId_;
     RefPtr<CalendarControllerNg> calendarControllerNg_;
@@ -186,6 +191,7 @@ private:
     bool initialize_ = true;
     bool backToToday_ = false;
     bool goTo_ = false;
+    bool isClickEvent_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPattern);
 };
 } // namespace OHOS::Ace::NG

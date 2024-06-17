@@ -83,10 +83,12 @@ void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
     const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     // If height is not set, apply the default height.
     if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
-        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        auto defaultHeight = GetDefaultHeight(layoutWrapper);
         auto maxHeight = selfLayoutConstraint->maxSize.Height();
+        if (IsAging(layoutWrapper)) {
+            layoutConstraint.maxSize.SetHeight(maxHeight);
+            return;
+        }
+        auto defaultHeight = GetDefaultHeight(layoutWrapper);
         layoutConstraint.maxSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
     }
 }
@@ -315,27 +317,14 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
 
 bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
 {
+    if (!IsAging(layoutWrapper)) {
+        return false;
+    }
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(buttonLayoutProperty, false);
-    if (buttonLayoutProperty->HasFontSize() && buttonLayoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
-        return false;
-    }
-    auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_RETURN(layoutContraint, false);
-    if (layoutContraint->selfIdealSize.Width().has_value() || layoutContraint->selfIdealSize.Height().has_value()) {
-        return false;
-    }
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(buttonTheme, false);
-    auto fontScale = pipeline->GetFontScale();
-    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
-            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
-            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
-        return false;
-    }
-
     float agingPadding = buttonTheme->GetAgingNormalPadding().ConvertToPx() * 2.0f;
     if (buttonLayoutProperty->HasControlSize() && buttonLayoutProperty->GetControlSize() == ControlSize::SMALL) {
         agingPadding = buttonTheme->GetAgingSmallPadding().ConvertToPx() * 2.0f;
@@ -355,6 +344,35 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
     }
     geometryNode->SetFrameSize(frameSize);
     HandleBorderRadius(layoutWrapper);
+    return true;
+}
+
+bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
+{
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(buttonLayoutProperty, false);
+
+    if (buttonLayoutProperty->HasLabel() && buttonLayoutProperty->GetLabel()->empty()) {
+        return false;
+    }
+
+    if (buttonLayoutProperty->HasFontSize() && buttonLayoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
+        return false;
+    }
+    const auto& calcConstraint = buttonLayoutProperty->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+        return false;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
+        return false;
+    }
     return true;
 }
 } // namespace OHOS::Ace::NG

@@ -84,4 +84,125 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
     EXPECT_FALSE(paintMethod->IsPercentStr(nonPercentStr));
     EXPECT_STREQ(nonPercentStr.c_str(), exceptedresult.c_str());
 }
+
+/**
+ * @tc.name: CanvasPatternTest002
+ * @tc.desc: CanvasPattern::OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig config;
+
+    /**
+     * @tc.steps: step1. config.skipMeasure = false;
+     */
+    config.skipMeasure = false;
+    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+
+    /**
+     * @tc.steps: step2. config.skipMeasure = true;
+     */
+    config.skipMeasure = true;
+    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
+    auto step02 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(step02);
+
+    /**
+     * @tc.steps: step3. config.skipMeasure = false; dirty->SkipMeasureContent() = false;
+     */
+    config.skipMeasure = false;
+    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+
+    /**
+     * @tc.steps: step4. config.skipMeasure = false; dirty->SkipMeasureContent() = true;
+     */
+    config.skipMeasure = false;
+    layoutWrapper->skipMeasureContent_ = std::make_optional(true);
+    auto step04 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(step04);
+
+    /**
+     * @tc.steps: step5. isCanvasInit_ = false;
+     */
+    config.skipMeasure = false;
+    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
+    pattern->isCanvasInit_ = false;
+    config.frameSizeChange = false;
+    config.contentSizeChange = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+
+    /**
+     * @tc.steps: step6. isCanvasInit_ = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameSizeChange = false;
+    config.contentSizeChange = false;
+    auto step06 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(step06);
+
+    /**
+     * @tc.steps: step7. isCanvasInit_ = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameSizeChange = true;
+    config.contentSizeChange = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+
+    /**
+     * @tc.steps: step8. isCanvasInit_ = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameSizeChange = false;
+    config.contentSizeChange = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+    
+    /**
+     * @tc.steps: step9. isCanvasInit_ = true; config.frameOffsetChange = false; config.contentOffsetChange = false;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameSizeChange = false;
+    config.contentSizeChange = false;
+    config.frameOffsetChange = false;
+    config.contentOffsetChange = false;
+    auto step09 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(step09);
+
+    /**
+     * @tc.steps: step10. isCanvasInit_ = true; config.frameOffsetChange = true; config.contentOffsetChange = false;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameOffsetChange = true;
+    config.contentOffsetChange = false;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+
+    /**
+     * @tc.steps: step11. isCanvasInit_ = true; config.frameOffsetChange = false; config.contentOffsetChange = true;
+     */
+    pattern->isCanvasInit_ = true;
+    config.frameOffsetChange = false;
+    config.contentOffsetChange = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->isCanvasInit_);
+}
 } // namespace OHOS::Ace::NG

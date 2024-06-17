@@ -109,9 +109,6 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
-    JSClass<JSCheckbox>::StaticMethod("width", &JSCheckbox::JsWidth);
-    JSClass<JSCheckbox>::StaticMethod("height", &JSCheckbox::JsHeight);
-    JSClass<JSCheckbox>::StaticMethod("size", &JSCheckbox::JsSize);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
     JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -142,16 +139,18 @@ void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEve
 
 void JSCheckbox::SetSelect(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
+    auto length = info.Length();
+    if (length < 1 || length > 2) {
         return;
     }
     bool select = false;
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        select = info[0]->ToBoolean();
+    auto jsSelect = info[0];
+    if (length > 0 && jsSelect->IsBoolean()) {
+        select = jsSelect->ToBoolean();
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox set select %{public}d", select);
     CheckBoxModel::GetInstance()->SetSelect(select);
-    if (info.Length() > 1 && info[1]->IsFunction()) {
+    if (length > 1 && info[1]->IsFunction()) {
         ParseSelectObject(info, info[1]);
     }
 }

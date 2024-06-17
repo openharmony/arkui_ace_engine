@@ -75,7 +75,7 @@ public:
     float GetMaxWidth() const;
     float GetTextWidth() const;
     float GetTextWidthIncludeIndent() const;
-    size_t GetLineCount(bool isSkipEmptyParagraphs = false) const;
+    size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
     TextLineMetrics GetLineMetrics(size_t lineNumber);
 

@@ -1425,39 +1425,25 @@ void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edge
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
-void FfiOHOSAceFrameworkViewAbstractbindSheetParam2(bool isShow, void (*builder)())
-{
-    auto buildFunc = CJLambda::Create(builder);
-    NG::SheetStyle sheetStyle;
-    DoubleBindCallback callback = nullptr;
-    std::function<void()> onAppearCallback;
-    std::function<void()> onDisappearCallback;
-    std::function<void()> onWillAppearCallback;
-    std::function<void()> onWillDisappearCallback;
-    std::function<void()> shouldDismissFunc;
-    std::function<void(const int32_t)> onWillDismissCallback;
-    std::function<void(const float)> onHeightDidChangeCallback;
-    std::function<void(const float)> onDetentsDidChangeCallback;
-    std::function<void(const float)> onWidthDidChangeCallback;
-    std::function<void(const float)> onTypeDidChangeCallback;
-    std::function<void()> titleBuilderFunction;
-    std::function<void()> sheetSpringBackFunc;
-    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
-        std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
-        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
-        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
-        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
-}
-
 void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
-                        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss)
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onWillDisappear)
 {
-    onAppear = options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value)
-                                          : ([]() -> void {});
-    onDisappear = options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value)
-                                        : ([]() -> void {});
-    shouldDismiss = options.shouldDismiss.hasValue ? CJLambda::Create(options.shouldDismiss.value)
-                                        : ([]() -> void {});
+    if (options.onAppear.hasValue) {
+        onAppear =  CJLambda::Create(options.onAppear.value);
+    }
+    if (options.onDisappear.hasValue) {
+        onDisappear = CJLambda::Create(options.onDisappear.value);
+    }
+    if (options.shouldDismiss.hasValue) {
+        shouldDismiss = CJLambda::Create(options.shouldDismiss.value);
+    }
+    if (options.onWillAppear.hasValue) {
+        onWillAppear = CJLambda::Create(options.onWillAppear.value);
+    }
+    if (options.onWillDisappear.hasValue) {
+        onWillDisappear =  CJLambda::Create(options.onWillDisappear.value);
+    }
 }
 
 void ParseSheetDetentHeight(const int args, NG::SheetHeight& detent)
@@ -1552,13 +1538,14 @@ void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::fun
     titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value)
                                         : ([]() -> void {});
 }
-void FfiOHOSAceFrameworkViewAbstractbindSheetParam3(bool isShow, void (*builder)(), CJSheetOptions option)
+void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
 {
     auto buildFunc = CJLambda::Create(builder);
     NG::SheetStyle sheetStyle;
     DoubleBindCallback callback = nullptr;
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
     std::function<void()> onWillAppearCallback;
@@ -1571,14 +1558,16 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam3(bool isShow, void (*builder)
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc);
+    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc,
+        onWillAppearCallback, onWillDisappearCallback);
     ParseSheetStyle(option, sheetStyle);
     ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
         std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
-        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
-        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
+        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
+        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
     return;
 }
 

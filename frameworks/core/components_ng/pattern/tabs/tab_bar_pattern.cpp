@@ -939,6 +939,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
     indicator_ = tabBarLayoutAlgorithm->GetIndicator();
     scrollMargin_ = tabBarLayoutAlgorithm->GetScrollMargin();
+    needSetCentered_ = tabBarLayoutAlgorithm->GetNeedSetCentered();
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1074,7 +1075,6 @@ void TabBarPattern::CloseDialog()
 
 void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -1132,8 +1132,9 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
     } else {
-        if (GetAnimationDuration().has_value()
+        if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
         } else {
@@ -1492,7 +1493,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         TriggerTranslateAnimation(layoutProperty, index, swiperPattern->GetCurrentIndex());
     } else {
         TriggerTranslateAnimation(layoutProperty, index, indicator);
-        if (tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+        if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
+            && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
             swiperController_->SwipeTo(index);
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
@@ -1577,7 +1580,11 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     if (pos == tabItemOffsets_.end()) {
         return -1;
     }
-    if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, -1);
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, -1);
+    if (tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         return tabItemOffsets_.size() - std::distance(tabItemOffsets_.begin(), pos) - 1;
     }
     return isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
@@ -2024,9 +2031,12 @@ void TabBarPattern::TriggerTranslateAnimation(
     CHECK_NULL_VOID(host);
     auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
-    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(targetPaintRect);
+    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
+        static_cast<int32_t>(tabBarStyles_.size())) {
+        auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateIndicator(targetPaintRect);
+    }
     float targetOffset = 0.0f;
     if (host->GetGeometryNode()->GetPaddingSize().Width() < childrenMainSize_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -2143,7 +2153,9 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     StopTabBarTranslateAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetGeometryNode()->GetPaddingSize().Width() >= childrenMainSize_) {
+    auto mainSize = axis_ == Axis::HORIZONTAL ? host->GetGeometryNode()->GetPaddingSize().Width()
+                                              : host->GetGeometryNode()->GetPaddingSize().Height();
+    if (mainSize >= childrenMainSize_) {
         return;
     }
     auto space = GetSpace(targetIndex);
@@ -2152,7 +2164,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     auto targetOffset = space < 0.0f                    ? -frontChildrenMainSize
                         : frontChildrenMainSize < space ? 0.0f
                         : backChildrenMainSize < space
-                            ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
+                            ? mainSize - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
 
@@ -2228,9 +2240,7 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     GetIndicatorStyle(indicatorStyle, indicatorOffset);
     indicatorStyle.marginTop = Dimension(TAB_BAR_UNDER_LINE_DISTANCE);
     indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
-    auto hasIndicator = std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
-        static_cast<int32_t>(tabBarStyles_.size()) &&
-        std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
+    auto hasIndicator = std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
         static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height());
     return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, bgColor, indicatorStyle,
         indicatorOffset, hasIndicator);

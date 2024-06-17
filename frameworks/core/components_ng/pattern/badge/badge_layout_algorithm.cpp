@@ -334,9 +334,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto parentSize = geometryNode->GetFrameSize();
         auto width = parentSize.Width();
         auto childSize = childGeometryNode->GetFrameSize();
-        auto childOffset = childGeometryNode->GetFrameOffset();
-        childGeometryNode->SetMarginFrameOffset(OffsetF(
-            childOffset.GetX() + width - childSize.Width(), childOffset.GetY()));
+        childGeometryNode->SetMarginFrameOffset(OffsetF(width - childSize.Width(), 0.0f));
     } else {
         childGeometryNode->SetMarginFrameOffset(OffsetF());
     }

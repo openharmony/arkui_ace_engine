@@ -113,8 +113,8 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
     }
 }
 
-void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
-    RefPtr<ImagePattern> pattern, OffsetF offset)
+void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, const RefPtr<FrameNode>& imageNode,
+    const RefPtr<ImagePattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
     auto geometryNode = imageNode->GetGeometryNode();
@@ -155,11 +155,11 @@ void RichEditorDragOverlayModifier::PaintImageNode(DrawingContext& context, RefP
     canvas.Restore();
 }
 
-void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, RefPtr<FrameNode> imageNode,
-    RefPtr<Pattern> pattern, OffsetF offset)
+void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<Pattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
-    auto pixelMap = imageNode->GetRenderContext()->GetThumbnailPixelMap();
+    auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto canvasImage = CanvasImage::Create(pixelMap);
     auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();

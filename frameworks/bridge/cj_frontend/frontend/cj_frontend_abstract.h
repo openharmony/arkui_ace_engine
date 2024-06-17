@@ -22,6 +22,8 @@
 #include "base/utils/measure_util.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/pipeline_context_holder.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "cj_page_router_abstract.h"
 #include "core/common/frontend.h"
@@ -47,7 +49,7 @@ public:
     ~CJFrontendAbstract() override;
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
     void Destroy() override;
-
+    void FlushReload() override;
     bool LoadAppLibrary();
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
@@ -110,6 +112,14 @@ public:
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback);
 
+    // ----------------
+    // Font
+    // ----------------
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const std::string& bundleName = "",
+        const std::string& moduleName = "");
+
+    VectorStringHandle GetSystemFontList();
+    NativeOptionFontInfo GetSystemFont(const std::string& fontName);
 
 #if defined(PREVIEW)
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;

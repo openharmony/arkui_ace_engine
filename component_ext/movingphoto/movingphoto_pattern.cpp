@@ -322,6 +322,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -331,6 +332,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -340,6 +342,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -349,6 +352,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -358,6 +362,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -442,6 +447,11 @@ void MovingPhotoPattern::OnResolutionChange()
 void MovingPhotoPattern::OnStartRenderFrame()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartRenderFrame.");
+}
+
+void MovingPhotoPattern::OnStartedStatusCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartedStatusCallback.");
     ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -609,6 +619,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::STARTED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STARTED.");
+            OnStartedStatusCallback();
             FireMediaPlayerStart();
             break;
         case PlaybackStatus::PAUSED:
@@ -769,7 +780,7 @@ void MovingPhotoPattern::StopAnimation()
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
-        Seek(1);
+        Seek(0);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -839,7 +850,7 @@ void MovingPhotoPattern::Stop()
 
 void MovingPhotoPattern::Seek(int32_t position)
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }

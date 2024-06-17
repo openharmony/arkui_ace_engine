@@ -24,6 +24,8 @@
 #include "base/log/log.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -329,6 +331,42 @@ bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void DatePickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = datePickerPattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = datePickerPattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = datePickerPattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void DatePickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
 {
@@ -345,6 +383,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     CHECK_NULL_VOID(dataPickerLayoutProperty);
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
+
+    InitTextFontFamily();
 
     auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);

@@ -51,6 +51,7 @@ private:
     static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
     static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
 };
 } // namespace OHOS::Ace::NG
 

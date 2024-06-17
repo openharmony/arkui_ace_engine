@@ -63,6 +63,7 @@ constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr bool DEFAULT_SELECT_ALL = false;
+constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 std::string g_strValue;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -1435,7 +1436,7 @@ void SetTextInputOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onChange = reinterpret_cast<std::function<void(const std::string&, TextRange&)>*>(callback);
         TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         TextFieldModelNG::SetOnChange(frameNode, nullptr);
@@ -1708,16 +1709,30 @@ void SetTextInputCaret(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 un
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
 }
 
-void GetTextInputMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit)
+void GetTextInputMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto margin = TextFieldModelNG::GetMargin(frameNode);
-    values[CALL_ARG_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[CALL_ARG_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[CALL_ARG_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[CALL_ARG_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[CALL_ARG_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[CALL_ARG_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[CALL_ARG_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[CALL_ARG_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = DEFAULT_MARGIN_VALUES_COUNT;
+}
+
+void SetTextInputEnablePreviewText(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnablePreviewText(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextInputEnablePreviewText(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
 }
 } // namespace
 namespace NodeModifier {
@@ -1773,7 +1788,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputLineBreakStrategy,  SetTextInputShowKeyBoardOnFocus, GetTextInputShowKeyBoardOnFocus,
         ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, GetTextInputNumberOfLines,
         ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin, SetTextInputCaret,
-        GetTextInputController, GetTextInputMargin };
+        GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText };
     return &modifier;
 }
 
@@ -1781,7 +1796,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, extraParam](const std::string& str) {
+    auto onChange = [node, extraParam](const std::string& str, TextRange&) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

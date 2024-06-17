@@ -68,9 +68,10 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     OffsetF& returnNavBarOffset)
 {
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    bool isZeroNavbarWidth = false;
     if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
         navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        return 0.0f;
+        isZeroNavbarWidth = true;
     }
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
@@ -91,7 +92,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         geometryNode->SetMarginFrameOffset(navBarOffset);
         navBarWrapper->Layout();
         returnNavBarOffset = navBarOffset;
-        return geometryNode->GetFrameSize().Width();
+        return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
     }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
@@ -100,7 +101,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
-    return geometryNode->GetFrameSize().Width();
+    return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
 }
 
 float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
@@ -187,13 +188,31 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
     option.SetCurve(MODE_SWITCH_CURVE);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(MODE_SWITCH_ANIMATION_DURATION);
+    option.SetOnFinishEvent([weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
+        auto hostNode = weakHost.Upgrade();
+        CHECK_NULL_VOID(hostNode);
+        hostNode->ReduceModeSwitchAnimationCnt();
+        if (hostNode->GetModeSwitchAnimationCnt() == 0) {
+            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+            CHECK_NULL_VOID(dividerNode);
+            auto layoutProperty = dividerNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+    });
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
         auto hostNode = weakHost.Upgrade();
         CHECK_NULL_VOID(hostNode);
+        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+        CHECK_NULL_VOID(dividerNode);
+        auto layoutProperty = dividerNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        hostNode->IncreaseModeSwitchAnimationCnt();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();
         hostNode->SetDoingModeSwitchAnimationFlag(false);
-    });
+    }, option.GetOnFinishEvent());
 }
 
 } // namespace
@@ -359,13 +378,13 @@ void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
     contentSize_ = frameSize;
     dividerSize_ = SizeF(0.0f, frameSize.Height());
     if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        SizeCalculationSplit(navigationLayoutProperty, frameSize);
+        SizeCalculationSplit(hostNode, navigationLayoutProperty, frameSize);
     } else {
         SizeCalculationStack(hostNode, navigationLayoutProperty, frameSize);
     }
 }
 
-void NavigationLayoutAlgorithm::SizeCalculationSplit(
+void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
 {
     float frameWidth = frameSize.Width();
@@ -378,9 +397,15 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     auto minContentWidth = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     realContentWidth_ = minContentWidth;
 
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarSize_ = SizeF(0.0f, 0.0f);
-        dividerSize_ = SizeF(0.0f, 0.0f);
+    bool isHideNavbar = navigationLayoutProperty->GetHideNavBar().value_or(false);
+    if (isHideNavbar) {
+        CHECK_NULL_VOID(hostNode);
+        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto geometryNode = navBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        navBarSize_.SetWidth(geometryNode->GetFrameSize().Width());
+        dividerSize_.SetWidth(0.0f);
         realNavBarWidth_ = 0.0f;
         realContentWidth_ = frameWidth;
     } else {
@@ -396,8 +421,10 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     } else {
         realDividerWidth_ = dividerWidth;
     }
-    navBarSize_.SetWidth(realNavBarWidth_);
-    dividerSize_.SetWidth(realDividerWidth_);
+    if (!isHideNavbar) {
+        navBarSize_.SetWidth(realNavBarWidth_);
+        dividerSize_.SetWidth(realDividerWidth_);
+    }
     contentSize_.SetWidth(realContentWidth_);
 }
 

@@ -122,7 +122,7 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);

@@ -417,39 +417,27 @@ export struct CounterComponent {
       this.dateStyleOptions.year <= this.maxYear) {
       if (this.year === 0) {
         this.year = this.dateStyleOptions.year;
-        let date = new DateData(this.year, this.month, this.day);
-        this.onDateChange?.(date);
       }
     } else {
       this.year = CounterConstant.COUNTER_MIN_YEAR;
-      let date = new DateData(this.year, this.month, this.day);
-      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.month !== undefined &&
       this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
       this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
       if (this.month === 0) {
         this.month = this.dateStyleOptions.month;
-        let date = new DateData(this.year, this.month, this.day);
-        this.onDateChange?.(date);
       }
     } else {
       this.month = CounterConstant.COUNTER_INITIAL_MONTH;
-      let date = new DateData(this.year, this.month, this.day);
-      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.day !== undefined &&
       this.dateStyleOptions.day <= this.getDayNumber() &&
       this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
       if (this.day === 0) {
         this.day = this.dateStyleOptions.day;
-        let date = new DateData(this.year, this.month, this.day);
-        this.onDateChange?.(date);
       }
     } else {
       this.day = CounterConstant.COUNTER_INITIAL_DAY;
-      let date = new DateData(this.year, this.month, this.day);
-      this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.onDateChange !== undefined) {
       this.onDateChange = this.dateStyleOptions.onDateChange;
@@ -1679,7 +1667,6 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.addValue();
-                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1690,7 +1677,6 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.addValue();
-                      this.onChange?.(this.value);
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
@@ -1747,7 +1733,6 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.subValue();
-                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -1758,7 +1743,6 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.subValue();
-                      this.onChange?.(this.value);
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
@@ -1875,10 +1859,13 @@ export struct CounterComponent {
 
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
                 this.updateDateEnableSate();
                 this.updateDay();
+              }
+
+              if (value.length === 4) {
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
               }
             })
             .onSubmit((enterKey: EnterKeyType) => {
@@ -1890,8 +1877,6 @@ export struct CounterComponent {
               this.year -= 1;
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
               } else {
                 this.year += 1;
                 this.inputYear = this.year;
@@ -2004,8 +1989,6 @@ export struct CounterComponent {
                 this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                   this.month = this.inputMoon;
-                  let date = new DateData(this.year, this.month, this.day);
-                  this.onDateChange?.(date);
                 } else {
                   this.month += 1;
                   this.inputMoon = this.month;
@@ -2036,8 +2019,6 @@ export struct CounterComponent {
               this.month -= 1;
               if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                 this.month = this.inputMoon;
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
                 this.updateDay();
               } else {
                 this.month += 1;
@@ -2145,8 +2126,6 @@ export struct CounterComponent {
                 this.day -= 1;
                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                   this.day = this.inputDay;
-                  let date = new DateData(this.year, this.month, this.day);
-                  this.onDateChange?.(date);
                 } else {
                   this.day += 1;
                   this.inputDay = this.day;
@@ -2175,8 +2154,6 @@ export struct CounterComponent {
               this.day -= 1;
               if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
                 this.day = this.inputDay;
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
               } else {
                 this.day += 1;
               }
@@ -2237,8 +2214,6 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.addDate();
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2249,8 +2224,6 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.addDate();
-                      let date = new DateData(this.year, this.month, this.day);
-                      this.onDateChange?.(date);
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
@@ -2306,8 +2279,6 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.subDate();
-                let date = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(date);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2318,8 +2289,6 @@ export struct CounterComponent {
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
                       this.subDate();
-                      let date = new DateData(this.year, this.month, this.day);
-                      this.onDateChange?.(date);
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })

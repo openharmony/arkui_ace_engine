@@ -302,9 +302,9 @@ void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::
     auto jsRotateX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X));
     auto jsRotateY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
     auto jsRotateZ = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z));
-    if (!jsRotateX->IsUndefined()
-        && !jsRotateY->IsUndefined()
-        && !jsRotateZ->IsUndefined()) {
+    if (jsRotateX->IsUndefined()
+        && jsRotateY->IsUndefined()
+        && jsRotateZ->IsUndefined()) {
         GetDefaultRotateVector(dxVal, dyVal, dzVal);
     } else {
         JSViewAbstract::ParseJsDouble(jsRotateX, dxVal);
@@ -919,7 +919,8 @@ void ParsePopupCommonParam(
     auto arrowPointPosition = popupObj->GetProperty("arrowPointPosition");
     if (arrowPointPosition->IsString()) {
         char* pEnd = nullptr;
-        std::strtod(arrowPointPosition->ToString().c_str(), &pEnd);
+        auto arrowString = arrowPointPosition->ToString();
+        std::strtod(arrowString.c_str(), &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
                 offset = ARROW_ZERO_PERCENT_VALUE;
@@ -1400,35 +1401,36 @@ void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonC
     }
 }
 
-void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notPercent,
+    bool notNegative, CalcDimension defaultValue)
 {
     CalcDimension left;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, true)) {
-        CheckDimensionUnit(left, false, true);
+        CheckDimensionUnit(left, notPercent, notNegative);
         commonCalcDimension.left = left;
     } else {
-        commonCalcDimension.left = 0.0_vp;
+        commonCalcDimension.left = defaultValue;
     }
     CalcDimension right;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, true)) {
-        CheckDimensionUnit(right, false, true);
+        CheckDimensionUnit(right, notPercent, notNegative);
         commonCalcDimension.right = right;
     } else {
-        commonCalcDimension.right = 0.0_vp;
+        commonCalcDimension.right = defaultValue;
     }
     CalcDimension top;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, true)) {
-        CheckDimensionUnit(top, false, true);
+        CheckDimensionUnit(top, notPercent, notNegative);
         commonCalcDimension.top = top;
     } else {
-        commonCalcDimension.top = 0.0_vp;
+        commonCalcDimension.top = defaultValue;
     }
     CalcDimension bottom;
     if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, true)) {
         CheckDimensionUnit(bottom, false, true);
         commonCalcDimension.bottom = bottom;
     } else {
-        commonCalcDimension.bottom = 0.0_vp;
+        commonCalcDimension.bottom = defaultValue;
     }
 }
 
@@ -1524,6 +1526,21 @@ void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
     ParseEdgeWidths(object, commonCalcDimension, notNegative);
 }
 
+void ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
+{
+    if (CheckLengthMetrics(object)) {
+        LocalizedCalcDimension localizedCalcDimension;
+        ParseLocalizedEdgeWidths(object, localizedCalcDimension, false);
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        commonCalcDimension.top = localizedCalcDimension.top;
+        commonCalcDimension.bottom = localizedCalcDimension.bottom;
+        commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
+        commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
+        return;
+    }
+    ParseEdgeWidthsProps(object, commonCalcDimension, true, false, static_cast<CalcDimension>(-1));
+}
+
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
@@ -1536,7 +1553,7 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
         return;
     }
-    ParseEdgeWidthsProps(object, commonCalcDimension);
+    ParseEdgeWidthsProps(object, commonCalcDimension, false, true, 0.0_vp);
 }
 } // namespace
 
@@ -3804,6 +3821,10 @@ bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
     if (obj->IsUndefined()) {
         return true;
     }
+    // filter dynamic $r raw input
+    if (obj->HasProperty("id")) {
+        return false;
+    }
     if ((!obj->HasProperty(TOP_PROPERTY) || obj->GetProperty(TOP_PROPERTY)->IsUndefined()) &&
         (!obj->HasProperty(RIGHT_PROPERTY) || obj->GetProperty(RIGHT_PROPERTY)->IsUndefined()) &&
         (!obj->HasProperty(BOTTOM_PROPERTY) || obj->GetProperty(BOTTOM_PROPERTY)->IsUndefined()) &&
@@ -3826,11 +3847,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         return;
     }
 
-    if (IsBorderWidthObjUndefined(info[0])) {
-        ViewAbstractModel::GetInstance()->SetBorderWidth({});
-        return;
-    }
-
     ParseBorderWidth(jsVal);
 }
 
@@ -3846,6 +3862,10 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
+        if (IsBorderWidthObjUndefined(args)) {
+            ViewAbstractModel::GetInstance()->SetBorderWidth({});
+            return;
+        }
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
         ParseCommonEdgeWidths(obj, commonCalcDimension, true);
@@ -3859,7 +3879,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
 void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
 {
     CalcDimension dashGap;
-    if (ParseJsDimensionVp(args, dashGap)) {
+    if (ParseLengthMetricsToDimension(args, dashGap)) {
         if (dashGap.Unit() == DimensionUnit::PERCENT) {
             dashGap.Reset();
         }
@@ -3867,18 +3887,19 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
         ViewAbstractModel::GetInstance()->SetDashGap(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
-        return;
+        dashGap.Reset();
+        ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
     }
 }
 
 void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
 {
     CalcDimension dashWidth;
-    if (ParseJsDimensionVp(args, dashWidth)) {
+    if (ParseLengthMetricsToDimension(args, dashWidth)) {
         if (dashWidth.Unit() == DimensionUnit::PERCENT) {
             dashWidth.Reset();
         }
@@ -3886,11 +3907,12 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension, false);
+        ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension);
         ViewAbstractModel::GetInstance()->SetDashWidth(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
-        return;
+        dashWidth.Reset();
+        ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
     }
 }
 
@@ -7573,6 +7595,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
+    auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
@@ -7621,6 +7644,15 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
                 sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
             }
+        }
+    }
+    if (scrollSizeMode->IsNull() || scrollSizeMode->IsUndefined()) {
+        sheetStyle.scrollSizeMode.reset();
+    } else if (scrollSizeMode->IsNumber()) {
+        auto sheetScrollSizeMode = scrollSizeMode->ToNumber<int32_t>();
+        if (sheetScrollSizeMode >= static_cast<int>(NG::ScrollSizeMode::FOLLOW_DETENT) &&
+            sheetScrollSizeMode <= static_cast<int>(NG::ScrollSizeMode::CONTINUOUS)) {
+            sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(sheetScrollSizeMode);
         }
     }
     Color color;
@@ -10073,7 +10105,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     CHECK_NULL_VOID(vm);
     auto global = JSNApi::GetGlobalObject(vm);
     auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
-    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction()) {
+    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
         return;
     }
     auto obj = setCustomProperty->ToObject(vm);
@@ -10092,7 +10124,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
             auto global = JSNApi::GetGlobalObject(vm);
             auto removeCustomProperty = global->Get(vm,
                 panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
-            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction()) {
+            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
                 return;
             }
 
@@ -10110,7 +10142,7 @@ void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
     CHECK_NULL_VOID(vm);
     auto global = JSNApi::GetGlobalObject(vm);
     auto gestureModifier = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__gestureModifier__"));
-    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction()) {
+    if (gestureModifier->IsUndefined() || !gestureModifier->IsFunction(vm)) {
         return;
     }
     auto obj = gestureModifier->ToObject(vm);

@@ -329,6 +329,8 @@ public:
 
     static bool GetDebugEnabled();
 
+    static bool GetLayoutDetectEnabled();
+
     static bool GetGpuUploadEnabled()
     {
         return gpuUploadEnabled_;
@@ -562,6 +564,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool layoutDetectEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;

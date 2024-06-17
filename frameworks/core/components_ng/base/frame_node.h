@@ -134,6 +134,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void UpdateGeometryTransition() override;
+
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
@@ -455,7 +457,7 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void MarkNeedRenderOnly();
 
@@ -470,13 +472,17 @@ public:
         destroyCallbacks_.emplace_back(callback);
     }
 
+    std::list<std::function<void()>> GetDestroyCallback() const
+    {
+        return destroyCallbacks_;
+    }
+
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
     }
 
-    void ApplyGeometryTransition() override;
-    bool MarkRemoving(bool applyGeometryTransition = true) override;
+    bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
@@ -721,6 +727,7 @@ public:
     void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
+    bool SelfExpansiveToKeyboard();
     bool ParentExpansive();
 
     bool IsActive() const override
@@ -868,13 +875,26 @@ public:
         }
     }
 
+    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
     void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
     {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
     static std::pair<float, float> ContextPositionConvertToPX(
@@ -890,6 +910,18 @@ public:
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
     {
         predictLayoutNode_.emplace_back(node);
+    }
+
+    bool CheckAccessibilityLevelNo() const {
+        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (property) {
+            auto level = property->GetAccessibilityLevel();
+            if (level == NG::AccessibilityProperty::Level::NO ||
+                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,
@@ -1015,8 +1047,6 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -1099,7 +1129,7 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool isDisallowDropForcedly_ = false;
-
+    bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;

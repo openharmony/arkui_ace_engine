@@ -371,6 +371,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     auto buttonRole = para.buttonRole.value_or(ButtonRole::NORMAL);
     auto buttonStyleMode = para.buttonStyleMode.value_or(ButtonStyleMode::EMPHASIZE);
     JSButtonTheme::ApplyTheme(buttonRole, buttonStyleMode, isLabelButton_);
+    ButtonModel::GetInstance()->SetCreateWithLabel(true);
 }
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
@@ -381,6 +382,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
     auto buttonRole = para.buttonRole.value_or(ButtonRole::NORMAL);
     auto buttonStyleMode = para.buttonStyleMode.value_or(ButtonStyleMode::EMPHASIZE);
     JSButtonTheme::ApplyTheme(buttonRole, buttonStyleMode, isLabelButton_);
+    ButtonModel::GetInstance()->SetCreateWithLabel(false);
 }
 
 void JSButton::JsPadding(const JSCallbackInfo& info)

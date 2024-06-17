@@ -456,6 +456,16 @@ void SpanString::SetString(const std::string& text)
     text_ = text;
 }
 
+void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
+{
+    spans_ = spanItems;
+}
+
+void SpanString::SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap)
+{
+    spansMap_ = spansMap;
+}
+
 const std::string& SpanString::GetString() const
 {
     return text_;

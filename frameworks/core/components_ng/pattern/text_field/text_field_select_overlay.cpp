@@ -67,7 +67,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
+    bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
     selectController->CalculateHandleOffset();
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -469,6 +469,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     }
     overlayManager->ShowOptionMenu();
     pattern->ScheduleDisappearDelayTask();
+    pattern->UpdateCaretInfoToController();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

@@ -23,6 +23,7 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -36,7 +37,13 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width());
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, childConstraint.maxSize);
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsEmbedded()) {
+        MinusPaddingToSize(padding, childConstraint.maxSize);
+    }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         // when Menu is set self ideal width, make children node adaptively fill up.
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -64,7 +71,42 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
+    UpdateSelfSize(layoutWrapper, childConstraint, layoutConstraint);
+}
 
+void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    OffsetF translate(0.0f, 0.0f);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    if (!pattern->IsEmbedded()) {
+        translate.AddX(padding.left.value_or(outPadding));
+        translate.AddY(padding.top.value_or(outPadding));
+    }
+    // translate each option by the height of previous options
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
+        child->Layout();
+        translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
+    }
+}
+
+void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
+    LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
+{
     float contentHeight = 0.0f;
     float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -81,28 +123,6 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         idealSize.SetWidth(idealWidth);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    }
-}
-
-void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    // translate each option by the height of previous options
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-    const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    OffsetF translate(padding.left.value_or(outPadding), padding.top.value_or(outPadding));
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
-        child->Layout();
-        translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }
 }
 

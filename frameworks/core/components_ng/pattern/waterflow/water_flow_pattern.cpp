@@ -262,6 +262,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     prevOffset_ = layoutInfo_->Offset();
     layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
     layoutInfo_->targetIndex_.reset();
+    layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
 
@@ -270,6 +271,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
+
+    GetHost()->ChildrenUpdatedFrom(-1);
+
     return NeedRender();
 }
 
@@ -451,7 +455,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         pattern->OnSectionChangedNow(start);
     };
     sections_->SetOnDataChange(callback);
-    sections_->SetOnDataChangeNow(callbackNow);
+    sections_->SetOnDataChangeCAPI(callbackNow);
     return sections_;
 }
 
@@ -463,13 +467,6 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     }
     auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
     CHECK_NULL_VOID(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (childUpdateIdx > -1 && info->GetSegment(childUpdateIdx - 1) == start && sections_->IsSpecialUpdate()) {
-        // optimize adding or removing children in the last section. Prevent complete reset of that section.
-        ++start;
-    }
     info->InitSegments(sections_->GetSectionInfo(), start);
     info->margins_.clear();
 
@@ -496,6 +493,9 @@ void WaterFlowPattern::OnSectionChangedNow(int32_t start)
 
 void WaterFlowPattern::ResetSections()
 {
+    if (!sections_) {
+        return;
+    }
     sections_.Reset();
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;

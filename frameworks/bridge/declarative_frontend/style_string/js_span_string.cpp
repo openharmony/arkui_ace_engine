@@ -46,7 +46,7 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
                 auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
                 spanString->BindWithSpans(spanBases);
             }
-        } else if (args[0]->IsObject()) {
+        } else {
             auto* base = JSRef<JSObject>::Cast(args[0])->Unwrap<AceType>();
             auto* imageAttachment = AceType::DynamicCast<JSImageAttachment>(base);
             if (imageAttachment) {
@@ -458,7 +458,10 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
         return nullptr;
     }
     auto paramObj = args[0];
-    if (paramObj->IsUndefined() || !paramObj->IsObject()) {
+    if (paramObj->IsUndefined()) {
+        return nullptr;
+    }
+    if (!paramObj->IsObject()) {
         return nullptr;
     }
     auto styleStringValue = JSRef<JSObject>::Cast(JSRef<JSObject>::Cast(paramObj)->GetProperty("styledValue"));
@@ -500,7 +503,7 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JS
     auto arrays = JSRef<JSArray>::Cast(obj);
     for (size_t i = 0; i < arrays->Length(); i++) {
         JSRef<JSVal> value = arrays->GetValueAt(i);
-        if (value->IsNull() || value->IsUndefined() || !value->IsObject()) {
+        if (value->IsNull() || value->IsUndefined()) {
             continue;
         }
         auto valueObj = JSRef<JSObject>::Cast(value);
@@ -581,7 +584,10 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
                 auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
                 spanString->BindWithSpans(spanBases);
             }
-        } else if (args[0]->IsObject()) {
+        } else {
+            if (!args[0]->IsObject()) {
+                return;
+            }
             auto* base = JSRef<JSObject>::Cast(args[0])->Unwrap<AceType>();
             auto* imageAttachment = AceType::DynamicCast<JSImageAttachment>(base);
             if (imageAttachment) {
@@ -748,6 +754,9 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     if (type == SpanType::CustomSpan && !VerifyCustomSpanParameters(start, length)) {
         return;
     }
+    if (!styleValueObj->IsObject()) {
+        return;
+    }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);
     if (!spanBase) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
@@ -787,6 +796,9 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
         return;
     }
     if (type == SpanType::CustomSpan && !VerifyCustomSpanParameters(start, length)) {
+        return;
+    }
+    if (!styleValueObj->IsObject()) {
         return;
     }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);

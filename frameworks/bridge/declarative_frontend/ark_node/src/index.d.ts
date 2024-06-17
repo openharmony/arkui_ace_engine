@@ -119,6 +119,7 @@ declare class ArkComponent {
   nativePtr: NodePtr;
   constructor(nativePtr: NodePtr, classType?: ModifierType);
   setNodePtr(noed: NodePtr);
+  setInstanceId(instanceId: number): void;
   initialize(...args: Object[]);
   allowChildCount?(): number;
   allowChildTypes?(): string[];
@@ -160,6 +161,8 @@ declare class ArkDividerComponent extends ArkComponent {}
 declare class ArkLoadingProgressComponent extends ArkComponent {}
 
 declare class ArkSearchComponent extends ArkComponent {}
+
+declare class ArkButtonComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

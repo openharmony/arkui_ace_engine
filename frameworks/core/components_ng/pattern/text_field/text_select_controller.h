@@ -189,7 +189,6 @@ public:
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index);
     void UpdateSelectByOffset(const Offset& localOffset);
-    void AddSelectByOffset(const Offset& localOffset);
     void UpdateSelectPragraphByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectRangeByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectParagraphByOffset(const Offset& localOffset);

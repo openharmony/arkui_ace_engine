@@ -35,7 +35,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsNativePointer()) {
+    if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto* weak = new NativeWeakRef(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
@@ -71,7 +71,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeStrongRef(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsNativePointer()) {
+    if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto refPtr = AceType::Claim(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
@@ -139,7 +139,7 @@ ArkUINativeModuleValue NativeUtilsBridge::ParseResourceColor(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsObject()) {
+    if (firstArg.IsEmpty() || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     Color color;
@@ -183,7 +183,7 @@ ArkUINativeModuleValue NativeUtilsBridge::ResoureToLengthMetrics(ArkUIRuntimeCal
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
+    if (!firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     CalcDimension result;

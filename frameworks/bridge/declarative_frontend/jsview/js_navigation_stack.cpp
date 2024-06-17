@@ -956,7 +956,11 @@ void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
-    auto pathArray = JSRef<JSArray>::Cast(dataSourceObj_->GetProperty("pathArray"));
+    auto objArray = dataSourceObj_->GetProperty("pathArray");
+    if (!objArray->IsArray()) {
+        return;
+    }
+    auto pathArray = JSRef<JSArray>::Cast(objArray);
     if (pathArray->IsEmpty()) {
         return;
     }

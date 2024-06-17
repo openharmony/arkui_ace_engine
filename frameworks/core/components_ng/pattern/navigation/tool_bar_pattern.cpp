@@ -20,7 +20,6 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -78,28 +77,19 @@ void NavToolbarPattern::OnModifyDone()
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "current bar item node is empty, continue");
             continue;
         }
-        RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
-        RefPtr<FrameNode> textNode = AceType::DynamicCast<FrameNode>(barItemNode->GetTextNode());
-        if (!imageNode || !textNode) {
-            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "current image node or text node is empty, continue");
-            continue;
-        }
-        InitLongPressEvent(gestureHub, imageNode, textNode, barItemNode->IsMoreItemNode());
+        InitLongPressEvent(gestureHub, barItemNode);
     }
 }
 
-void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub,
-    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isMoreItemNode)
+void NavToolbarPattern::InitLongPressEvent(
+    const RefPtr<GestureEventHub>& gestureHub, const RefPtr<BarItemNode>& barItemNode)
 {
-    auto longPressTask = [weak = WeakClaim(this), weakImageNode = WeakPtr<FrameNode>(imageNode),
-                             weakTextNode = WeakPtr<FrameNode>(textNode), isMoreItemNode](GestureEvent& info) {
+    auto longPressTask = [weak = WeakClaim(this), weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)](
+                             GestureEvent& info) {
         auto toolBar = weak.Upgrade();
         CHECK_NULL_VOID(toolBar);
-        auto imageNode = weakImageNode.Upgrade();
-        CHECK_NULL_VOID(imageNode);
-        auto textNode = weakTextNode.Upgrade();
-        CHECK_NULL_VOID(textNode);
-        toolBar->HandleLongPressEvent(imageNode, textNode, isMoreItemNode);
+        auto barItemNode = weakBarItemNode.Upgrade();
+        toolBar->HandleLongPressEvent(barItemNode);
     };
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressTask));
     gestureHub->SetLongPressEvent(longPressEvent);
@@ -114,25 +104,15 @@ void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     longPressRecognizer->SetOnActionEnd(longPressActionEnd);
 }
 
-void NavToolbarPattern::HandleLongPressEvent(const RefPtr<FrameNode>& imageNode,
-    const RefPtr<FrameNode>& textNode, bool isMoreItemNode)
+void NavToolbarPattern::HandleLongPressEvent(const RefPtr<BarItemNode>& barItemNode)
 {
     HandleLongPressActionEnd();
-    CHECK_NULL_VOID(imageNode);
-    auto accessibilityProperty = imageNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_VOID(barItemNode);
     std::string message;
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textValue = textLayoutProperty->GetContent();
-    if (textValue.value().empty()) {
-        message = accessibilityProperty->GetAccessibilityText();
-    } else {
-        message = textValue.value();
-    }
-
-    if (isMoreItemNode) {
+    auto accessibilityProperty = barItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    message = accessibilityProperty->GetAccessibilityText();
+    if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
         message = Localization::GetInstance()->GetEntryLetters("common.more");
@@ -146,9 +126,31 @@ void NavToolbarPattern::HandleLongPressEvent(const RefPtr<FrameNode>& imageNode,
         dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, info);
         return;
     }
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+    RefPtr<FrameNode> textNode = AceType::DynamicCast<FrameNode>(barItemNode->GetTextNode());
+    RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    if (textNode != nullptr) {
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto textValue = textLayoutProperty->GetContent();
+        if (!textValue.value().empty()) {
+            message = textValue.value();
+        }
+    }
+    if (imageNode != nullptr) {
+        if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+            auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            dialogNode_ =
+                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            return;
+        }
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+        return;
+    }
+    auto imageSourceInfo = ImageSourceInfo("");
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
 }
 

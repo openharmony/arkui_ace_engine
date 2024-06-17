@@ -59,7 +59,7 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<TextClockConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<TextClockConfiguration>): this {
@@ -217,6 +217,17 @@ class TextClockFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextClockContentModifier extends ModifierWithKey<ContentModifier<TextClockConfiguration>> {
+  constructor(value: ContentModifier<TextClockConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let textClockComponent = component as ArkTextClockComponent;
+    textClockComponent.setContentModifier(this.value);
   }
 }
 

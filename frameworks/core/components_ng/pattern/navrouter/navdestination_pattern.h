@@ -172,6 +172,14 @@ public:
         return navigationNode_.Upgrade();
     }
 
+    NavDestinationState GetNavDestinationState() const
+    {
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
+        auto state = eventHub->GetState();
+        return state;
+    }
+
     void DumpInfo() override;
 
     uint64_t GetNavDestinationId() const

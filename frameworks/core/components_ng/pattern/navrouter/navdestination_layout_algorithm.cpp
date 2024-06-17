@@ -24,10 +24,22 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
 bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
     const RefPtr<NavDestinationGroupNode>& hostNode, SafeAreaExpandOpts opts)
 {
+    if (!navDestinationLayoutProperty || !hostNode) {
+        return false;
+    }
+    auto layoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto margin = layoutProperty->CreateMargin();
+    float topMargin = margin.top.value_or(0.0f);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+    float topPadding = padding.top.value_or(0.0f);
+    if (!NearEqual(topPadding, 0.0f) || !NearEqual(topMargin, 0.0f)) {
+        return false;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -37,9 +49,7 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
     CHECK_NULL_RETURN(NavDesGeometryNode, false);
     auto frame = NavDesGeometryNode->GetFrameRect() + parentGlobalOffset;
 
-    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
-    if ((opts.edges & SAFE_AREA_EDGE_TOP) && (opts.type & SAFE_AREA_TYPE_SYSTEM)
-        && NearEqual(padding.top.value(), 0.0f)) {
+    if ((opts.edges & SAFE_AREA_EDGE_TOP) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
         auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
 
@@ -60,6 +70,19 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
 bool CheckBottomEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
     const RefPtr<NavDestinationGroupNode>& hostNode, SafeAreaExpandOpts opts)
 {
+    if (!navDestinationLayoutProperty || !hostNode) {
+        return false;
+    }
+    auto layoutProperty = hostNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto margin = layoutProperty->CreateMargin();
+    float bottomMargin = margin.bottom.value_or(0.0f);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+    float bottomPadding = padding.bottom.value_or(0.0f);
+    if (!NearEqual(bottomPadding, 0.0f) || !NearEqual(bottomMargin, 0.0f)) {
+        return false;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -69,9 +92,7 @@ bool CheckBottomEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDesti
     CHECK_NULL_RETURN(NavBarGeometryNode, false);
     auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
 
-    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
-    if ((opts.edges & SAFE_AREA_EDGE_BOTTOM) && (opts.type & SAFE_AREA_TYPE_SYSTEM)
-        && NearEqual(padding.bottom.value(), 0.0f)) {
+    if ((opts.edges & SAFE_AREA_EDGE_BOTTOM) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
         auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
         if (safeAreaPos.bottom_.IsOverlapped(frame.Bottom())) {

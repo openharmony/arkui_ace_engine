@@ -32,9 +32,6 @@ void JSCanvasGradient::Constructor(const JSCallbackInfo& args)
 void JSCanvasGradient::Destructor(JSCanvasGradient* controller)
 {
     if (controller != nullptr) {
-        if (controller->GetGradient()) {
-            delete controller->GetGradient();
-        }
         controller->DecRefCount();
     }
 }

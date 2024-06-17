@@ -111,7 +111,16 @@ RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionA
 
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    if (!wantWrap) {
+        UIEXT_LOGW("wantWrap is nullptr");
+        return;
+    }
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    if (!wantWrapOhos) {
+        UIEXT_LOGW("DynamicCast failed, wantWrapOhos is nullptr");
+        return;
+    }
+    auto want = wantWrapOhos->GetWant();
     UpdateWant(want);
 }
 

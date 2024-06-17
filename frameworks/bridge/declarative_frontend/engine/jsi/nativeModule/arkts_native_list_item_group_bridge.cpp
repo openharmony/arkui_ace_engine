@@ -14,6 +14,8 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NODE_INDEX = 0;
@@ -91,6 +93,31 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::SetChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    // 2: argument count.
+    if (info.Length() != 2 || !(info[1]->IsObject())) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    JSListItemGroup::SetChildrenMainSize(Framework::JSRef<Framework::JSObject>::Cast(info[1]));
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListItemGroupBridge::ResetChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupChildrenMainSize(nativeNode);
+
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

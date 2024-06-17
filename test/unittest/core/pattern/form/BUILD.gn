@@ -30,6 +30,7 @@ ace_unittest("form_test_ng") {
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_rs_surface_mode.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_sub_container.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_system_properties.cpp",
     "form_test_ng.cpp",
   ]
 

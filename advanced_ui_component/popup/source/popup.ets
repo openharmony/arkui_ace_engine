@@ -247,7 +247,8 @@ export struct PopupComponent {
   }
 
   private getIconMargin(): LocalizedMargin {
-    return { start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+    return {
+      start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
       end: new LengthMetrics(this.theme.icon.margin.start.value - (this.theme.button.margin.end.value / 2)
         , this.theme.button.margin.start.unit)
     }
@@ -262,8 +263,10 @@ export struct PopupComponent {
   }
 
   private getTitlePadding(): LocalizedPadding {
-    return { start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
-      end: this.theme.closeButton.margin.end }
+    return {
+      start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+      end: this.theme.closeButton.margin.end
+    }
   }
 
   private getTitleMargin(): LocalizedMargin {
@@ -379,7 +382,8 @@ export struct PopupComponent {
   }
 
   private getButtonMargin(): LocalizedMargin {
-    return { top: LengthMetrics.vp(this.theme.button.textMargin.top.value / 2 - 4),
+    return {
+      top: LengthMetrics.vp(this.theme.button.textMargin.top.value / 2 - 4),
       bottom: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2 - 4),
       start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
       end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
@@ -668,6 +672,7 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
+        .direction(this.popupDirection)
         .layoutWeight(this.getLayoutWeight())
       }
       else {
@@ -787,6 +792,7 @@ export struct PopupComponent {
               })
             }
           }
+          .direction(this.popupDirection)
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {

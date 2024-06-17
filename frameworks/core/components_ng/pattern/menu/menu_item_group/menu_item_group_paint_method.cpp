@@ -37,24 +37,7 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            auto selectTheme = pipeline->GetTheme<SelectTheme>();
-            auto horInterval = Dimension(0.0f, DimensionUnit::PX);
-            auto strokeWidth = Dimension(1.0f, DimensionUnit::PX);
-            Color dividerColor = Color::TRANSPARENT;
-            GroupDividerInfo info;
-            if (selectTheme) {
-                float horIntervalF = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-                    static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
-                horInterval = Dimension(horIntervalF, DimensionUnit::PX);
-                strokeWidth = selectTheme->GetDefaultDividerWidth();
-                dividerColor =  selectTheme->GetLineColor();
-            }
-            info.strokeWidth = props->GetStrokeWidth().value_or(strokeWidth).ConvertToPx();
-            info.startMargin = props->GetStartMargin().value_or(horInterval).ConvertToPx();
-            info.endMargin = props->GetEndMargin().value_or(horInterval).ConvertToPx();
-            info.color = props->GetDividerColor().value_or(dividerColor);
-            auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-            info.width = groupSize.Width();
+            GroupDividerInfo info = group->PreparePaintData(pipeline, props, paintWrapper);
             bool needHeaderDivider = props->GetNeedHeaderDivider().value_or(true);
             bool needFooterDivider = props->GetNeedFooterDivider().value_or(true);
             if (needHeaderPadding & needHeaderDivider) {
@@ -62,11 +45,51 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
             }
             bool needFooterPadding = props->GetNeedFooterPadding().value_or(false);
             if (needFooterPadding && needFooterDivider) {
+                auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
                 info.topMargin = groupSize.Height() - info.strokeWidth;
                 group->PaintDivider(canvas, paintWrapper, info);
             }
         }
     };
+}
+
+GroupDividerInfo MenuItemGroupPaintMethod::PreparePaintData(
+    RefPtr<PipelineBase>& pipeline, RefPtr<MenuItemGroupPaintProperty>& props, PaintWrapper* paintWrapper)
+{
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto horInterval = Dimension(0.0f, DimensionUnit::PX);
+    auto strokeWidth = Dimension(1.0f, DimensionUnit::PX);
+    Color dividerColor = Color::TRANSPARENT;
+    GroupDividerInfo info;
+    if (selectTheme) {
+        float horIntervalF = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+            static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+        horInterval = Dimension(horIntervalF, DimensionUnit::PX);
+        strokeWidth = selectTheme->GetDefaultDividerWidth();
+        dividerColor =  selectTheme->GetLineColor();
+    }
+    auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    info.width = groupSize.Width();
+    if (props->GetStrokeWidth()->Unit() != DimensionUnit::INVALID) {
+        info.strokeWidth = props->GetStrokeWidth().value_or(strokeWidth).ConvertToPxWithSize(groupSize.Height());
+    } else {
+        info.strokeWidth = strokeWidth.ConvertToPx();
+    }
+    if (props->GetStartMargin()->Unit() != DimensionUnit::INVALID) {
+        info.startMargin = props->GetStartMargin().value_or(horInterval).ConvertToPxWithSize(groupSize.Width());
+    } else {
+        info.startMargin = horInterval.ConvertToPx();
+    }
+    if (props->GetEndMargin()->Unit() != DimensionUnit::INVALID) {
+        info.endMargin = props->GetEndMargin().value_or(horInterval).ConvertToPxWithSize(groupSize.Width());
+    } else {
+        info.endMargin = horInterval.ConvertToPx();
+    }
+    info.color = props->GetDividerColor().value_or(dividerColor);
+    if (info.color.GetValue() == Color::FOREGROUND.GetValue()) {
+        info.color = dividerColor;
+    }
+    return info;
 }
 
 void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, GroupDividerInfo info)

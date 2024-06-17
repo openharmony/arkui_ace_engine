@@ -381,9 +381,10 @@ std::string PerfMonitor::GetPageName()
     return baseInfo.pageName;
 }
 
-void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
+                                    const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName);
+    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)

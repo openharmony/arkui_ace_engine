@@ -84,7 +84,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string
     }
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
@@ -1014,7 +1014,7 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
             if (spanItem) {
                 auto wSpanContent = StringUtils::ToWstring(spanItem->content);
                 auto intervalStart = position;
-                position += wSpanContent.length();
+                position += static_cast<int32_t>(wSpanContent.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
                 spanItems.emplace_back(spanItem);

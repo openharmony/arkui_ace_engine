@@ -410,6 +410,12 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
+void ArkJSRuntime::NotifyUIIdle()
+{
+    LocalScope scope(vm_);
+    panda::JSNApi::NotifyUIIdle(vm_, 0);
+}
+
 #if !defined(PREVIEW) && !defined(IOS_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {

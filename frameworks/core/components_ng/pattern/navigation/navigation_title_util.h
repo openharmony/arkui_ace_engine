@@ -69,6 +69,7 @@ private:
         bool isMoreButton, const BarItem& menuItem);
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton);
+    static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
 };
 
 } // namespace OHOS::Ace::NG

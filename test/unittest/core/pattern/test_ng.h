@@ -50,6 +50,7 @@ public:
     void CreateDone(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
+    static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

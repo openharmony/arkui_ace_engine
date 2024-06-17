@@ -16,7 +16,7 @@
 #include "test/mock/core/common/mock_image_analyzer_adapter.h"
 
 namespace OHOS::Ace {
-void ImageAnalyzerAdapter::SetImageAnalyzerConfig(void* config) {};
+void ImageAnalyzerAdapter::SetImageAnalyzerConfig(void* config, bool isOptions) {};
 void* ImageAnalyzerAdapter::GetImageAnalyzerConfig()
 {
     return nullptr;

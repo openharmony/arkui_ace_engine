@@ -121,13 +121,9 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryPropertiesWithoutAnimation(
-        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0)
-    {}
-
     virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
-    virtual void SyncGeometryProperties(const RectF& rectF, bool isSkipFrameTransition = false) {}
+    virtual void SyncGeometryProperties(const RectF& rectF) {}
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 

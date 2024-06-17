@@ -165,12 +165,23 @@ void ImagePattern::OnCompleteInDataReady()
     imageEventHub->FireCompleteEvent(event);
 }
 
+void ImagePattern::TriggerFirstVisibleAreaChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    OnVisibleAreaChange(GreatNotEqual(visibleRect.Width(), 0.0) && GreatNotEqual(visibleRect.Height(), 0.0));
+}
+
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 {
     if (image->IsStatic()) {
         return;
     }
     RegisterVisibleAreaChange();
+    TriggerFirstVisibleAreaChange();
     SetOnFinishCallback(image);
     SetRedrawCallback(image);
     // GIF images are not played by default, but depend on OnVisibleAreaChange callback.
@@ -707,6 +718,16 @@ void ImagePattern::OnAnimatedModifyDone()
 
 void ImagePattern::ControlAnimation(int32_t index)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!animator_->HasScheduler()) {
+        auto context = host->GetContextRefPtr();
+        if (context) {
+            animator_->AttachScheduler(context);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+        }
+    }
     switch (status_) {
         case Animator::Status::IDLE:
             animator_->Cancel();
@@ -727,8 +748,6 @@ void ImagePattern::ControlAnimation(int32_t index)
                 ResetFormAnimationFlag();
                 return;
             }
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             if (host->IsVisible()) {
                 animator_->Forward();
             } else {
@@ -1573,7 +1592,7 @@ bool ImagePattern::hasSceneChanged()
 
 void ImagePattern::ImageAnimatorPattern()
 {
-    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    animator_ = CREATE_ANIMATOR();
     animator_->SetFillMode(FillMode::BACKWARDS);
     animator_->SetDuration(DEFAULT_DURATION);
     ResetFormAnimationFlag();

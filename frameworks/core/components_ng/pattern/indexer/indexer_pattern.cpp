@@ -526,6 +526,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     }
     childPressIndex_ = nextSelectIndex;
     selected_ = nextSelectIndex;
+    selectedChangedForHaptic_ = lastSelected_ != selected_;
     lastSelected_ = nextSelectIndex;
     FireOnSelect(selected_, true);
     if (isHover_ && childPressIndex_ >= 0) {
@@ -571,6 +572,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
     if (refreshBubble) {
         selected_ = nextSected;
+        selectedChangedForHaptic_ = lastSelected_ != selected_;
         lastSelected_ = nextSected;
     }
     childPressIndex_ = -1;
@@ -670,6 +672,7 @@ void IndexerPattern::OnSelect(bool changed)
         CHECK_NULL_VOID(lastFrameNode);
         ItemSelectedOutAnimation(lastFrameNode);
     }
+    selectedChangedForHaptic_ = lastSelected_ != selected_;
     lastSelected_ = selected_;
 }
 
@@ -808,7 +811,7 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
-        if (enableHapticFeedback_) {
+        if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
             VibratorImpl::StartVibraFeedback();
         }
     }
@@ -1860,6 +1863,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
             onSelected(actualIndex); // fire onSelected with an item's index from original array
         }
     }
+    selectedChangedForHaptic_ = lastFireSelectIndex_ != selected_;
     lastFireSelectIndex_ = selectIndex;
     lastIndexFromPress_ = fromPress;
 }

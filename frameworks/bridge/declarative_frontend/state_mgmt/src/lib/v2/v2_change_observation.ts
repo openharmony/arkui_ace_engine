@@ -31,16 +31,16 @@
 class StackOfRenderedComponents {
   private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
 
-  public push(id: number, cmp: IView | MonitorV2 | ComputedV2): void {
+  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl): void {
     this.stack_.push(new StackOfRenderedComponentsItem(id, cmp));
   }
 
-  public pop(): [id: number, cmp: IView | MonitorV2 | ComputedV2] | undefined {
+  public pop(): [id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl] | undefined {
     const item = this.stack_.pop();
     return item ? [item.id_, item.cmp_] : undefined;
   }
 
-  public top(): [id: number, cmp: IView | MonitorV2 | ComputedV2] | undefined {
+  public top(): [id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl] | undefined {
     if (this.stack_.length) {
       const item = this.stack_[this.stack_.length - 1];
       return [item.id_, item.cmp_];
@@ -52,9 +52,9 @@ class StackOfRenderedComponents {
 
 class StackOfRenderedComponentsItem {
   public id_ : number;
-  public cmp_ : IView | MonitorV2 | ComputedV2;
+  public cmp_ : IView | MonitorV2 | ComputedV2 | PersistenceV2Impl;
 
-  constructor(id : number, cmp : IView | MonitorV2 | ComputedV2) {
+  constructor(id : number, cmp : IView | MonitorV2 | ComputedV2 | PersistenceV2Impl) {
     this.id_ = id;
     this.cmp_ = cmp;
   }
@@ -99,7 +99,7 @@ class ObserveV2 {
   private elmtIdsChanged_: Set<number> = new Set();
   private computedPropIdsChanged_: Set<number> = new Set();
   private monitorIdsChanged_: Set<number> = new Set();
-
+  private persistenceChanged_: Set<number> = new Set();
   // avoid recursive execution of updateDirty
   // by state changes => fireChange while
   // UINode rerender or @monitor function execution
@@ -127,7 +127,7 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2, id: number): void {
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number): void {
     if (cmp != null) {
       this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
@@ -403,8 +403,10 @@ class ObserveV2 {
         this.elmtIdsChanged_.add(id);
       } else if (id < MonitorV2.MIN_WATCH_ID) {
         this.computedPropIdsChanged_.add(id);
-      } else {
+      } else if (id < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
         this.monitorIdsChanged_.add(id);
+      } else {
+        this.persistenceChanged_.add(id);
       }
     } // for
   }
@@ -438,12 +440,18 @@ class ObserveV2 {
           this.updateDirtyComputedProps(computedProps);
         }
 
+        if (this.persistenceChanged_.size) {
+          const persistKeys: Array<number> = Array.from(this.persistenceChanged_);
+          this.persistenceChanged_ = new Set<number>();
+          PersistenceV2Impl.instance().onChangeObserved(persistKeys);
+        }
+
         if (this.monitorIdsChanged_.size) {
           const monitors = this.monitorIdsChanged_;
           this.monitorIdsChanged_ = new Set<number>();
           this.updateDirtyMonitors(monitors);
         }
-      } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
 
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);

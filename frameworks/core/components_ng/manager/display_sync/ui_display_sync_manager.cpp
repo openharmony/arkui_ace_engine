@@ -44,6 +44,10 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
             if (rateRange->IsValid()) {
                 displaySyncRange_->Merge(*rateRange);
             }
+            TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "UIDisplaySyncMapSize:%{public}d Id:%{public}d"
+                "FrameRateRange: {%{public}d, %{public}d, %{public}d}",
+                static_cast<int32_t>(uiDisplaySyncMap_.size()), static_cast<int32_t>(displaySync->GetId()),
+                rateRange->min_, rateRange->max_, rateRange->preferred_);
         } else {
             uiDisplaySyncMap_.erase(Id);
         }
@@ -63,9 +67,14 @@ bool UIDisplaySyncManager::HasDisplaySync(const RefPtr<UIDisplaySync>& displaySy
 bool UIDisplaySyncManager::AddDisplaySync(const RefPtr<UIDisplaySync>& displaySync)
 {
     if (HasDisplaySync(displaySync)) {
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "DisplaySyncId[%{public}d] is existed.",
+            static_cast<int32_t>(displaySync->GetId()));
         return false;
     }
+    ACE_SCOPED_TRACE("AddDisplaySync Id:%d", static_cast<int32_t>(displaySync->GetId()));
     uiDisplaySyncMap_[displaySync->GetId()] = displaySync;
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "AddDisplaySync MapSize: %{public}d expected: %{public}d.",
+        static_cast<int32_t>(uiDisplaySyncMap_.size()), displaySync->GetDisplaySyncData()->rateRange_->preferred_);
     displaySync->JudgeWhetherRequestFrame();
     return true;
 }
@@ -73,7 +82,11 @@ bool UIDisplaySyncManager::AddDisplaySync(const RefPtr<UIDisplaySync>& displaySy
 bool UIDisplaySyncManager::RemoveDisplaySync(const RefPtr<UIDisplaySync>& displaySync)
 {
     if (HasDisplaySync(displaySync)) {
+        ACE_SCOPED_TRACE("RemoveDisplaySync Id:%d", static_cast<int32_t>(displaySync->GetId()));
         uiDisplaySyncMap_.erase(displaySync->GetId());
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "RemoveDisplaySync MapSize: %{public}d expected: %{public}d.",
+            static_cast<int32_t>(uiDisplaySyncMap_.size()),
+            displaySync->GetDisplaySyncData()->rateRange_->preferred_);
         return true;
     }
     return false;

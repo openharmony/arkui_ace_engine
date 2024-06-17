@@ -4618,7 +4618,7 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
 
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
 {
-    uint32_t value = 0;
+    uint32_t value = SAFE_AREA_TYPE_ALL;
     CHECK_NULL_RETURN(frameNode, value);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
@@ -4632,7 +4632,7 @@ uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
 
 uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
 {
-    uint32_t value = 0;
+    uint32_t value = SAFE_AREA_EDGE_ALL;
     CHECK_NULL_RETURN(frameNode, value);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
@@ -4641,7 +4641,6 @@ uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
     if (SafeAreaExpandOpts->edges > 0) {
         value = SafeAreaExpandOpts->edges;
     }
-
     return value;
 }
 } // namespace OHOS::Ace::NG

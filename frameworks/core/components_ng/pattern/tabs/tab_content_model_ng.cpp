@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -150,7 +151,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        []() { return AceType::MakeRefPtr<TabBarItemPattern>(); });
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -175,9 +176,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto boardStyle = tabContentPattern->GetBoardStyle();
     auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
     auto padding = tabContentPattern->GetPadding();
-
-    auto linearLayoutPattern = columnNode->GetPattern<LinearLayoutPattern>();
-    CHECK_NULL_VOID(linearLayoutPattern);
 
     if (tabBarParam.GetTabBarStyle() == TabBarStyle::BOTTOMTABBATSTYLE) {
         if (bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {

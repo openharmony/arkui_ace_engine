@@ -411,6 +411,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     ProcessEvent(indexChanged, gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_);
     gridLayoutInfo_.prevHeight_ = gridLayoutInfo_.currentHeight_;
+    gridLayoutInfo_.extraOffset_.reset();
     SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
@@ -1876,6 +1877,10 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
 {
     float mainGap = GetMainGap();
     float targetPos = 0.0f;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto extraOffset = GetExtraOffset();
+    auto success = true;
     if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -1889,16 +1894,26 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
             DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
         scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
         // Based on the index, align gets the position to scroll to
-        bool success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+        success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
             gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
-        CHECK_NULL_RETURN(success, false);
+        if (!success) {
+            if (extraOffset.has_value()) {
+                targetPos = GetTotalOffset();
+            } else {
+                return false;
+            }
+        }
     }
 
     isSmoothScrolling_ = true;
-    auto extraOffset = GetExtraOffset();
     if (extraOffset.has_value()) {
+        auto initPos = targetPos;
         targetPos += extraOffset.value();
+        ACE_SCOPED_TRACE("AnimateToTargetImpl, success:%u, initPos:%f, extraOffset:%f, targetPos:%f", success, initPos,
+            extraOffset.value(), targetPos);
         ResetExtraOffset();
+    } else {
+        ACE_SCOPED_TRACE("AnimateToTargetImpl, extraOffset is null, targetPos:%f", targetPos);
     }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;

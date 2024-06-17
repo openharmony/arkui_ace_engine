@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_OP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_PAINT_OP_H
 
+#include <memory>
 #include <optional>
 
 #include "core/components/common/properties/paint_state.h"
@@ -93,8 +94,8 @@ struct SetFillColorOp final : Op {
 
 struct SetFillGradientOp final : Op {
     static constexpr auto kType = Type::SetFillGradientOp;
-    explicit SetFillGradientOp(const Ace::Gradient& gradient): gradient(std::move(gradient)) {}
-    Ace::Gradient gradient;
+    explicit SetFillGradientOp(const std::shared_ptr<Ace::Gradient>& gradient): gradient(gradient) {}
+    std::weak_ptr<Ace::Gradient> gradient;
     void Draw(CanvasPaintMethod* method) const;
 };
 
@@ -178,8 +179,8 @@ struct SetStrokeColorOp final : Op {
 
 struct SetStrokeGradientOp final : Op {
     static constexpr auto kType = Type::SetStrokeGradientOp;
-    explicit SetStrokeGradientOp(const Ace::Gradient& gradient): gradient(std::move(gradient)) {}
-    Ace::Gradient gradient;
+    explicit SetStrokeGradientOp(const std::shared_ptr<Ace::Gradient>& gradient): gradient(gradient) {}
+    std::weak_ptr<Ace::Gradient> gradient;
     void Draw(CanvasPaintMethod* method) const;
 };
 

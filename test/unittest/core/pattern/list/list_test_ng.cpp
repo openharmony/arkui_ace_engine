@@ -23,11 +23,11 @@ void ListTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
-
-    auto listTheme = AceType::MakeRefPtr<ListTheme>();
+    auto listThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST);
+    auto listTheme = ListTheme::Builder().Build(listThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ListTheme::TypeId())).WillRepeatedly(Return(listTheme));
-
-    auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
+    auto listItemThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST_ITEM);
+    auto listItemTheme = ListItemTheme::Builder().Build(listItemThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = Color::WHITE;
     listItemTheme->hoverColor_ = Color::RED;
@@ -41,6 +41,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultColor_ = Color::WHITE;
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
+    listItemTheme->defaultPadding_ = Edge(0.0_vp);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }

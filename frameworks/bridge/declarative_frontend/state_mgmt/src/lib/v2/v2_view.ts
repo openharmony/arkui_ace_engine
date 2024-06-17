@@ -35,6 +35,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
+        this.setIsV2(true);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 

@@ -29,7 +29,7 @@ overrideMap.set('ArkTextComponent', new Map([
 
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
-  myMap.setOnChange((value: AttributeModifierWithKey) => {
+  myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
     modifier._changed = !modifier._changed;
   });
 
@@ -101,12 +101,17 @@ class ModifierUtils {
     newMap: Map<Symbol, AttributeModifierWithKey>,
     componentOverrideMap: Map<string, new (value: T0) => M0>): void {
       newMap.forEach((value, key) => {
-        if (componentOverrideMap.has(key.toString())) {
-          //@ts-ignore
-          const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
-          stageMap.set(key, newValue);
+        if (!key) {
+          ArkLogConsole.info("key of modifier map is undefined, ModifierWithKey is " +
+            (value ? value.constructor.name.toString() : "undefined"));
         } else {
-          stageMap.set(key, this.copyModifierWithKey(value));
+          if (componentOverrideMap.has(key.toString())) {
+            //@ts-ignore
+            const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
+            stageMap.set(key, newValue);
+          } else {
+            stageMap.set(key, this.copyModifierWithKey(value));
+          }
         }
       });
   }
@@ -126,11 +131,11 @@ class ModifierUtils {
   static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
-      myMap.setOnChange((value: AttributeModifierWithKey) => {
+      myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
         this.putDirtyModifier(modifier, value);
       });
     } else {
-      myMap.setOnChange((value: AttributeModifierWithKey) => {
+      myMap.setOnChange((key: Symbol, value: AttributeModifierWithKey) => {
         modifier._changed = !modifier._changed;
       });
     }
@@ -140,7 +145,7 @@ class ModifierUtils {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
-        (attributeModifierWithKey.stageValue === undefined || attributeModifierWithKey.stageValue === null));
+        (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -155,7 +160,8 @@ class ModifierUtils {
         const nativePtrValid = !item._weakPtr.invalid();
         if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
-            value.applyPeer(item.nativePtr, false);
+            value.applyPeer(item.nativePtr,
+              (value.value === undefined || value.value === null));
           });
           item._nativePtrChanged = false;
         }
@@ -173,7 +179,7 @@ class ModifierUtils {
 
 class ModifierMap {
   private map_: Map<Symbol, AttributeModifierWithKey>;
-  private changeCallback: ((value: AttributeModifierWithKey) => void) | undefined;
+  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
 
   constructor() {
     this.map_ = new Map();
@@ -221,7 +227,7 @@ class ModifierMap {
   public get [Symbol.toStringTag](): string {
     return 'ModifierMapTag';
   }
-  public setOnChange(callback: (value: AttributeModifierWithKey) => void): void {
+  public setOnChange(callback: (key: Symbol, value: AttributeModifierWithKey) => void): void {
     this.changeCallback = callback;
   }
 }

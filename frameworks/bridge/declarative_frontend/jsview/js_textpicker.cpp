@@ -851,7 +851,19 @@ bool JSTextPickerParser::ParseIconTextArray(
     return true;
 }
 
-void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
+void JSTextPickerParser::IsUserDefinedFontFamily(const std::string& pos)
+{
+    if (pos == "disappearTextStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    } else if (pos == "textStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+    } else if (pos == "selectedTextStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+    }
+}
+
+void JSTextPickerParser::ParseTextStyle(
+    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
     auto fontColor = paramObj->GetProperty("color");
     auto fontOptions = paramObj->GetProperty("font");
@@ -894,6 +906,7 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
         std::vector<std::string> families;
         if (ParseJsFontFamilies(fontFamily, families)) {
             textStyle.fontFamily = families;
+            IsUserDefinedFontFamily(pos);
         }
     }
 
@@ -965,7 +978,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -977,7 +990,7 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -989,7 +1002,7 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
@@ -1637,17 +1650,17 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
-        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_);
+        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_, "disappearTextStyle");
     }
 
     if (!normalProperty->IsNull() && normalProperty->IsObject()) {
         JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
-        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_);
+        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_, "textStyle");
     }
 
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_);
+        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_, "selectedTextStyle");
     }
 }
 

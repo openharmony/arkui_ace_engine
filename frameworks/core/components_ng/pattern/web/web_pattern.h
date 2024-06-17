@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -46,12 +47,14 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
@@ -531,6 +534,11 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
+    void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
+    void OnTextSelected();
+    void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
@@ -543,6 +551,16 @@ public:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
+    Rosen::NodeId GetWebSurfaceNodeId() const
+    {
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+        CHECK_NULL_RETURN(rosenRenderContext, 0);
+        auto rsNode = rosenRenderContext->GetRSNode();
+        CHECK_NULL_RETURN(rsNode, 0);
+        auto surfaceNodeId = rsNode->GetId();
+        TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
+        return surfaceNodeId;
+    }
 
 private:
     friend class WebContextSelectOverlay;
@@ -555,6 +573,7 @@ private:
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -768,13 +787,24 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
     void UpdateSlideOffset(bool isNeedReset = false);
-    void ClearKeyEventBeforeUp(
-        const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
+    void ClearKeyEventByKeyCode(int32_t keyCode);
+    void SetRotation(uint32_t rotation);
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId()
+    {
+        return transformHintChangedCallbackId_.has_value();
+    }
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
@@ -882,9 +912,13 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
+    bool overlayCreating_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
+    std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
+    double lastKeyboardHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

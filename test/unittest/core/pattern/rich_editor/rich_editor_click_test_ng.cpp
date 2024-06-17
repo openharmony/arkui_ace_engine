@@ -91,6 +91,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
 
     richEditorPattern->isMouseSelect_ = true;
     richEditorPattern->hasClicked_ = false;
+    richEditorPattern->clickInfo_.clear();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
@@ -99,6 +100,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
+    richEditorPattern->clickInfo_.clear();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
@@ -110,6 +112,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
 
     richEditorPattern->isMouseSelect_ = true;
     richEditorPattern->hasClicked_ = false;
+    richEditorPattern->clickInfo_.clear();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
@@ -118,6 +121,7 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->hasClicked_ = false;
+    richEditorPattern->clickInfo_.clear();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);

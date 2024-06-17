@@ -38,6 +38,7 @@ public:
     ~StageManager() override = default;
 
     bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     bool PopPage(bool needShowNext = true, bool needTransition = true);
     bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     bool CleanPageStack();

@@ -63,6 +63,9 @@ constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t argCount3 = 3;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TYPE_TOUCH = 2;
+constexpr int32_t PEN_POINTER_ID = 102;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using DragRet = OHOS::Ace::DragRet;
@@ -1471,10 +1474,14 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                 TaskExecutor::TaskType::JS, "ArkUIDragStop");
         }
     };
+    int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(
-        asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType, std::move(stopDragCallback));
+        asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
+        sourceTool, std::move(stopDragCallback));
     if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
         asyncCtx->pointerId = MOUSE_POINTER_ID;
+    } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
+        asyncCtx->pointerId = PEN_POINTER_ID;
     }
     return getPointSuccess;
 }

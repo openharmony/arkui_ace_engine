@@ -36,6 +36,7 @@ const Y_OFF_SET: string = '2.75vp'
 const Y_BOTTOM_OFF_SET: string = '-1.25vp'
 const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
 const COLOR_IMAGE_EDIT: string = '#FFFFFF'
+const COLOR_IMAGE_ROW: string = '#00000000'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
 const FLOOR_MIN_WIDTH: string = '128vp'
@@ -948,7 +949,7 @@ export struct TreeView {
             .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || item.getNodeItem()
               .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
         }
-        .backgroundColor(this.treeViewTheme.arrowIconColor)
+        .backgroundColor(COLOR_IMAGE_ROW)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
         .height(item.getNodeItem().imageNode?.itemHeight)
         .width(item.getNodeItem().imageNode?.itemWidth)
@@ -3179,7 +3180,7 @@ export struct TreeViewInner {
                       .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
-                .backgroundColor(this.treeViewTheme.arrowIconColor)
+                .backgroundColor(COLOR_IMAGE_ROW)
                 .margin({
                   end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                 })

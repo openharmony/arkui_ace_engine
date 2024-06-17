@@ -43,20 +43,23 @@ protected:
 
 private:
     struct UpdateContentPositionParams {
-        bool isRTL;
-        OffsetF offsetBase;
-        SizeT<float> size;
-        SizeT<float> contentSize;
-        Alignment align;
-        RefPtr<TextInputResponseArea> responseArea;
+        bool isRTL = false;
+        OffsetF offsetBase = OffsetF(0.0f, 0.0f);
+        SizeT<float> size = SizeT<float>(0.0f, 0.0f);
+        SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
+        Alignment align = Alignment::CENTER;
+        RefPtr<TextInputResponseArea> responseArea = nullptr;
+        RefPtr<TextInputResponseArea> cleanResponseArea = nullptr;
     };
+
     struct UpdateTextRectParams {
-        RefPtr<TextFieldLayoutProperty> layoutProperty;
-        RefPtr<TextFieldPattern> pattern;
-        SizeT<float> contentSize;
-        bool isRTL;
-        RefPtr<TextInputResponseArea> responseArea;
-        OffsetF offsetBase;
+        RefPtr<TextFieldLayoutProperty> layoutProperty = nullptr;
+        RefPtr<TextFieldPattern> pattern = nullptr;
+        SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
+        bool isRTL = false;
+        RefPtr<TextInputResponseArea> responseArea = nullptr;
+        RefPtr<TextInputResponseArea> cleanResponseArea = nullptr;
+        OffsetF offsetBase = OffsetF(0.0f, 0.0f);
     };
     void UpdateContentPosition(const UpdateContentPositionParams& params,
         const std::unique_ptr<GeometryProperty>& content);

@@ -346,6 +346,9 @@ private:
 
     const std::string PixelRoundToJsonValue() const;
 
+    void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;

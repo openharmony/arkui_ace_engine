@@ -47,6 +47,8 @@ public:
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) = 0;
     virtual RefPtr<PasteDataMix> CreatePasteDataMix() = 0;
     virtual void Clear() = 0;
+    virtual void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode = false) = 0;
 
 protected:
     explicit Clipboard(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}

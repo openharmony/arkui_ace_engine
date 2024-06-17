@@ -144,9 +144,29 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();
     }
+    if (layoutDirection == TextDirection::RTL && axis == Axis::VERTICAL) {
+        UpdateScrollAlignment(scrollAlignment);
+    }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
+}
+
+void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
+{
+    if (scrollAlignment == Alignment::TOP_LEFT) {
+        scrollAlignment = Alignment::TOP_RIGHT;
+    } else if (scrollAlignment == Alignment::TOP_RIGHT) {
+        scrollAlignment = Alignment::TOP_LEFT;
+    } else if (scrollAlignment == Alignment::BOTTOM_LEFT) {
+        scrollAlignment = Alignment::BOTTOM_RIGHT;
+    } else if (scrollAlignment == Alignment::BOTTOM_RIGHT) {
+        scrollAlignment = Alignment::BOTTOM_LEFT;
+    } else if (scrollAlignment == Alignment::CENTER_RIGHT) {
+        scrollAlignment = Alignment::CENTER_LEFT;
+    } else if (scrollAlignment == Alignment::CENTER_LEFT) {
+        scrollAlignment = Alignment::CENTER_RIGHT;
+    }
 }
 
 } // namespace OHOS::Ace::NG

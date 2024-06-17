@@ -96,21 +96,6 @@ public:
         return RectF(offset, size);
     }
 
-    RectF GetPixelGridRoundMarginFrameRect(bool withSafeArea = false) const
-    {
-        auto offset = pixelGridRoundOffset_;
-        auto size = pixelGridRoundSize_;
-        if (withSafeArea) {
-            offset += selfAdjust_.GetOffset();
-            size += selfAdjust_.GetSize();
-        }
-        if (margin_) {
-            offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
-            AddPaddingToSize(*margin_, size);
-        }
-        return RectF(offset, size);
-    }
-
     void SetMarginFrameOffset(const OffsetF& translate)
     {
         OffsetF offset;
@@ -268,6 +253,16 @@ public:
         return content_ ? content_->rect_.GetOffset() : OffsetF();
     }
 
+    const OffsetF& GetPixelRoundResult() const
+    {
+        return pixelRoundResult_;
+    }
+
+    void SetPixelRoundResult(const OffsetF& pixelRoundResult)
+    {
+        pixelRoundResult_ = pixelRoundResult;
+    }
+
     const std::unique_ptr<GeometryProperty>& GetContent() const
     {
         return content_;
@@ -393,10 +388,6 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
-    float OnePixelValueRounding(float value);
-    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
-    void OnePixelRounding();
-    void OnePixelRounding(bool isRound, uint8_t flag);
     RectF GetParentAdjust() const;
     void SetParentAdjust(RectF parentAdjust);
     RectF GetSelfAdjust() const;
@@ -427,6 +418,7 @@ private:
     OffsetF parentGlobalOffset_;
     OffsetF parentAbsoluteOffset_;
     OffsetF pixelGridRoundOffset_;
+    OffsetF pixelRoundResult_;
     SizeF pixelGridRoundSize_;
 };
 } // namespace OHOS::Ace::NG

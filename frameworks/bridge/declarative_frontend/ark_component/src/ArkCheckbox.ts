@@ -87,7 +87,7 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<CheckBoxConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, CheckBoxContentModifier.identity, CheckBoxContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<CheckBoxConfiguration>): this {
@@ -172,6 +172,17 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | 
     } else {
       return true;
     }
+  }
+}
+
+class CheckBoxContentModifier extends ModifierWithKey<ContentModifier<CheckBoxConfiguration>> {
+  constructor(value: ContentModifier<CheckBoxConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkBoxContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let checkboxComponent = component as ArkCheckboxComponent;
+    checkboxComponent.setContentModifier(this.value);
   }
 }
 

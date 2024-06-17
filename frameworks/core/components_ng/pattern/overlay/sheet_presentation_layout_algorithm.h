@@ -100,7 +100,7 @@ private:
     OffsetF GetOffsetWithBottomLeft(const SizeF&, const OffsetF&);
     OffsetF GetOffsetWithBottomRight(const SizeF&, const OffsetF&);
 
-    float GetWidthByScreenSizeType(const SizeF& maxSize) const;
+    float GetWidthByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const SizeF& maxSize) const;
     float GetHeightBySheetStyle() const;
     bool SheetInSplitWindow() const;

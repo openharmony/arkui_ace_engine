@@ -32,6 +32,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr int32_t DELAY_TIME_FIFTY = 50;
+constexpr int32_t DELAY_TIME_DEFAULT = 10;
 namespace {
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -167,7 +170,6 @@ void ComponentSnapshot::Create(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
-
     FrameNode::ProcessOffscreenNode(node);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
@@ -182,20 +184,29 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    if (flag) {
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
-    }
+
+    auto time = delayTime - DELAY_TIME_FIFTY <= 0 ? DELAY_TIME_DEFAULT : delayTime - DELAY_TIME_FIFTY;
     executor->PostDelayedTask(
-        [callback, node, enableInspector]() mutable {
-            auto rsNode = GetRsNode(node);
-            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Begin to take surfaceCapture for ui, rootNode = %{public}s", node->GetTag().c_str());
-            auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-            rsInterface.TakeSurfaceCaptureForUI(
-                rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
+        [callback, node, enableInspector, pipeline, flag]() mutable {
+            auto executor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(executor);
+            if (flag) {
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            }
+            executor->PostDelayedTask(
+                [callback, node, enableInspector]() mutable {
+                    auto rsNode = GetRsNode(node);
+                    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                        "Begin to take surfaceCapture for ui, rootNode = %{public}s", node->GetTag().c_str());
+                    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+                    rsInterface.TakeSurfaceCaptureForUI(
+                        rsNode,
+                        std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
+                },
+                TaskExecutor::TaskType::UI, DELAY_TIME_FIFTY, "ArkUIComponentSnapshotCreateCapture_1");
         },
-        TaskExecutor::TaskType::UI, delayTime, "ArkUIComponentSnapshotCreateCapture");
+        TaskExecutor::TaskType::UI, time, "ArkUIComponentSnapshotCreateCapture_0");
 }
 
 void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)

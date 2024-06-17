@@ -223,6 +223,7 @@ private:
     bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
+    bool selectedChangedForHaptic_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
     CancelableCallback<void()> delayTask_;
     CancelableCallback<void()> delayCollapseTask_;

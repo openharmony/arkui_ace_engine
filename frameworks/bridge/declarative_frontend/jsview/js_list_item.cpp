@@ -181,7 +181,7 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
     }
 }
 
-void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
+void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, bool isStartArea)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
 
@@ -195,7 +195,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
     if (onAction->IsFunction()) {
-        onActionCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onAction)]() {
+        onActionCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onAction)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
@@ -203,7 +203,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
     std::function<void()> onEnterActionAreaCallback;
     if (onEnterActionArea->IsFunction()) {
-        onEnterActionAreaCallback = [execCtx = args.GetExecutionContext(),
+        onEnterActionAreaCallback = [execCtx = context,
                                         func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
@@ -212,7 +212,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
     std::function<void()> onExitActionAreaCallback;
     if (onExitActionArea->IsFunction()) {
-        onExitActionAreaCallback = [execCtx = args.GetExecutionContext(),
+        onExitActionAreaCallback = [execCtx = context,
                                        func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
@@ -227,7 +227,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onStateChange = deleteAreaObj->GetProperty("onStateChange");
     std::function<void(SwipeActionState state)> onStateChangeCallback;
     if (onStateChange->IsFunction()) {
-        onStateChangeCallback = [execCtx = args.GetExecutionContext(),
+        onStateChangeCallback = [execCtx = context,
                                     func = JSRef<JSFunc>::Cast(onStateChange)](SwipeActionState state) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(state);
@@ -246,8 +246,12 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     if (!args[0]->IsObject()) {
         return;
     }
-
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    ParseSwiperAction(obj, args.GetExecutionContext());
+}
+
+void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context)
+{
     std::function<void()> startAction;
     auto startObject = obj->GetProperty("start");
     if (startObject->IsObject()) {
@@ -257,7 +261,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true);
         } else {
-            JsParseDeleteArea(args, startObject, true);
+            JsParseDeleteArea(context, startObject, true);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -273,7 +277,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false);
         } else {
-            JsParseDeleteArea(args, endObject, false);
+            JsParseDeleteArea(context, endObject, false);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -289,7 +293,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
     std::function<void(int32_t offset)> onOffsetChangeCallback;
     if (onOffsetChangeFunc->IsFunction()) {
-        onOffsetChangeCallback = [execCtx = args.GetExecutionContext(),
+        onOffsetChangeCallback = [execCtx = context,
                                      func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(offset);

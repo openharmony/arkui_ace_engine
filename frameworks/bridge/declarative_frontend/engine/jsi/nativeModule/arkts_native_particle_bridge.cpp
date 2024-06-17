@@ -50,9 +50,9 @@ ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo*
         ArkTSUtils::ParseJsInteger(vm, strength, strengthValue);
         dataVector[index * DISTURBANCE_FIELD_SIZE + STEP_0].f32 = static_cast<float>(strengthValue);
         Local<JSValueRef> shape = panda::ArrayRef::GetValueAt(vm, array, index * DISTURBANCE_FIELD_SIZE + STEP_1);
-        uint32_t shapeValue = 0;
+        int32_t shapeValue = 0;
         ArkTSUtils::ParseJsInteger(vm, shape, shapeValue);
-        dataVector[index * DISTURBANCE_FIELD_SIZE + STEP_1].i32 = shapeValue;
+        dataVector[index * DISTURBANCE_FIELD_SIZE + STEP_1].i32 = static_cast<int32_t>(shapeValue);
         Local<JSValueRef> sizeWidth = panda::ArrayRef::GetValueAt(vm, array, index * DISTURBANCE_FIELD_SIZE + STEP_2);
         int32_t sizeWidthValue = 0;
         ArkTSUtils::ParseJsInteger(vm, sizeWidth, sizeWidthValue);

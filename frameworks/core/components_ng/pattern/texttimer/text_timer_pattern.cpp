@@ -322,19 +322,14 @@ uint64_t TextTimerPattern::GetFormatDuration(uint64_t duration) const
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
     auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    char lastWord = format.back();
-    switch (lastWord) {
-        case 's':
-            duration = duration / SECONDS_OF_MILLISECOND;
-            break;
-        case 'm':
-            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            break;
-        case 'h':
-            duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            break;
-        default:
-            break;
+    if (format.find('S') != std::string::npos) {
+        return duration;
+    } else if (format.find('s') != std::string::npos) {
+        duration = duration / SECONDS_OF_MILLISECOND;
+    } else if (format.find('m') != std::string::npos) {
+        duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
+    } else if (format.find('H') != std::string::npos) {
+        duration = duration / (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
     }
     return duration;
 }
@@ -346,19 +341,14 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
     auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    char lastWord = format.back();
-    switch (lastWord) {
-        case 's':
-            duration = duration * SECONDS_OF_MILLISECOND;
-            break;
-        case 'm':
-            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
-            break;
-        case 'h':
-            duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
-            break;
-        default:
-            break;
+    if (format.find('S') != std::string::npos) {
+        return duration;
+    } else if (format.find('s') != std::string::npos) {
+        duration = duration * SECONDS_OF_MILLISECOND;
+    } else if (format.find('m') != std::string::npos) {
+        duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_MINUTE_OF_HOUR);
+    } else if (format.find('H') != std::string::npos) {
+        duration = duration * (SECONDS_OF_MILLISECOND * TOTAL_SECONDS_OF_HOUR);
     }
     return duration;
 }

@@ -177,5 +177,21 @@ void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
     };
     RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
 }
+
+void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& value) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REFRESH_CHANGE_EVENT;
+        bool newValue = value == "true";
+        event.componentAsyncEvent.data[0].u32 = newValue;
+        SendArkUIAsyncEvent(&event);
+    };
+    RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

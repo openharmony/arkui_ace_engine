@@ -269,7 +269,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
     }
-    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus());
+    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus(), context);
     auto parent = GetParentFocusHub();
     if (parent) {
         if (focusManager) {
@@ -339,10 +339,13 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.", GetFrameName().c_str(), GetFrameId());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.",
+            GetFrameName().c_str(), GetFrameId());
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
+    auto focusView = frameNode->GetPattern<FocusView>();
     auto* pipeline = frameNode->GetContext();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
@@ -683,8 +686,8 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
-        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG) {
+    if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
+        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG) && !IsCurrentFocus()) {
         isBypassInner = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
@@ -1655,6 +1658,9 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
         return false;
     }
     if (focusDepend_ == FocusDependence::SELF) {
+        return true;
+    }
+    if (AcceptFocusOfPriorityChild()) {
         return true;
     }
     std::list<RefPtr<FocusHub>> focusNodes;

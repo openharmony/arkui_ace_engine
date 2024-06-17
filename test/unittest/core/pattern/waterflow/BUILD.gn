@@ -32,6 +32,7 @@ ace_unittest("water_flow_test_segmented") {
   sources = [
     "water_flow_layout_info_test.cpp",
     "water_flow_scroller_test_ng.cpp",
+    "water_flow_section_test.cpp",
     "water_flow_segment_integrated.cpp",
     "water_flow_segment_layout_test.cpp",
     "water_flow_test_ng.cpp",

@@ -24,8 +24,10 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/render/paint_wrapper.h"
-
 namespace OHOS::Ace::NG {
+constexpr int32_t ITEM_SIZE = 4;
+constexpr float INIT_SIZE_RATE = 1.0f;
+
 enum class TouchBottomType {
     NONE = 0,
     START,
@@ -51,7 +53,7 @@ public:
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
-          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4))),
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZE))),
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
@@ -89,27 +91,44 @@ public:
         float longPointDilateRatio = 0;
         float indicatorPadding = 0;
         OffsetF indicatorMargin = { 0, 0 };
+        float theFirstPointMove = 0;
+        float theSecondPointMove = 0;
+        float theThirdPointMove = 0;
+        float fourthPointMove = 0;
+        float fifthPointMove = 0;
+        float sixthPointMove = 0;
+        float seventhPointMove = 0;
+        float eighthPointMove = 0;
+        float ninthPointMove = 0;
+        float newPointMove = 0;
+        float leftSecondPointSizeRate = INIT_SIZE_RATE;
+        float leftThirdPointSizeRate = INIT_SIZE_RATE;
+        float rightSecondPointSizeRate = INIT_SIZE_RATE;
+        float rightFirstPointSizeRate = INIT_SIZE_RATE;
+        Color firstPointColor = Color::TRANSPARENT;
+        Color newPointColor = Color::TRANSPARENT;
     };
 
     void onDraw(DrawingContext& context) override;
     // paint
-    void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes,
+    virtual void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
+    virtual void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
+        const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
-    LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
+    virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
-    void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    virtual void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateDilatePaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateBackgroundColor(const Color& backgroundColor);
 
-    void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    virtual void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
@@ -266,10 +285,10 @@ public:
     {
         animationDuration_ = duration;
     }
-    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+    virtual void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
         TouchBottomTypeLoop touchBottomTypeLoop);
-    void StopAnimation(bool ifImmediately = false);
+    virtual void StopAnimation(bool ifImmediately = false);
     void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
     {
         headCurve_ = curve;
@@ -286,7 +305,7 @@ public:
         return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
     }
 
-private:
+protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -296,7 +315,7 @@ private:
         return swiperTheme;
     }
 
-    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
+    virtual void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
     void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
         const LinearVector<float>& vectorBlackPointCenterX);

@@ -422,7 +422,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest009, TestSize.Level
     selectOverlayManager->MarkDirty(flag);
     const NG::PointF point { 0.0f, 0.0f };
     auto result = selectOverlayManager->IsInSelectedOrSelectOverlayArea(point);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 /**
  * @tc.name: SelectOverlayManagerTest010

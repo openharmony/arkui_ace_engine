@@ -188,6 +188,17 @@ inline std::string RestoreEscape(const std::string& src)
     return res;
 }
 
+inline std::string RestoreBackslash(const std::string& src)
+{
+    std::string res;
+    for (auto &c : src) {
+        if (c != '\\') {
+            res.push_back(c);
+        }
+    }
+    return res;
+}
+
 inline int32_t StringToInt(const std::string& value)
 {
     errno = 0;

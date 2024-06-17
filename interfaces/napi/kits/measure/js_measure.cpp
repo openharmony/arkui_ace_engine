@@ -128,6 +128,9 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         if (!ParseString(recv, ParameterStr)) {
             return std::nullopt;
         }
+        if (!ParseIntegerToString(recv, ParameterStr)) {
+            return std::nullopt;
+        }
         Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
     } else {
         return std::nullopt;

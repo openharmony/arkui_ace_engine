@@ -220,8 +220,8 @@ void WaterFlowLayoutSW::FillBack(float viewportBound, int32_t idx, int32_t maxCh
     }
     std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float endPos = info_->lanes_[i].endPos;
-        if (LessNotEqual(endPos + mainGap_, viewportBound)) {
+        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, i });
         }
     }
@@ -259,8 +259,8 @@ void WaterFlowLayoutSW::FillFront(float viewportBound, int32_t idx, int32_t minC
     }
     std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos;
-        if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
+        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, i });
         }
     }
@@ -305,7 +305,8 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
 {
     std::unordered_set<size_t> lanes;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        if (LessNotEqual(info_->lanes_[i].endPos + mainGap_, viewportBound)) {
+        float endPos = info_->lanes_[i].endPos + (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (LessNotEqual(endPos, viewportBound)) {
             lanes.insert(i);
         }
     }
@@ -324,8 +325,8 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
 {
     std::unordered_set<size_t> lanes;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
-        float startPos = info_->lanes_[i].startPos;
-        if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
+        float startPos = info_->lanes_[i].startPos - (info_->lanes_[i].items_.empty() ? 0.0f : mainGap_);
+        if (GreatNotEqual(startPos, viewportBound)) {
             lanes.insert(i);
         }
     }

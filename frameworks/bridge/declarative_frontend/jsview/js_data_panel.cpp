@@ -54,7 +54,7 @@ DataPanelModel* DataPanelModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {
-constexpr int32_t TYPE_CYCLE = 0;
+constexpr uint32_t TYPE_CYCLE = 0;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -105,7 +105,7 @@ bool CheckJSCallbackInfo(
 }
 
 constexpr size_t MAX_COUNT = 9;
-int32_t JSDataPanel::dataPanelType_ = 0;
+uint32_t JSDataPanel::dataPanelType_ = 0;
 
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
@@ -176,7 +176,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }
-    dataPanelType_ =  dataPanelType;
+    dataPanelType_ =  static_cast<int32_t>(dataPanelType);
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
     JSDataPanelTheme::ApplyTheme();
 }

@@ -266,10 +266,12 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
+    void OnWindowHide() override;
 
     // Set properties for media player.
     void PrepareMediaPlayer();

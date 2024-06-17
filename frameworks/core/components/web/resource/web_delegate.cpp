@@ -2738,11 +2738,16 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
         },
         partitionPoints);
     if (ret != Rosen::StatusCode::SUCCESS) {
-        TAG_LOGI(AceLogTag::ACE_WEB,
+        TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
             ", ret: %{public}" PRIu32 "",
             surfaceNodeId_, ret);
+        return;
     }
+    TAG_LOGI(AceLogTag::ACE_WEB,
+            "RegisterSurfaceOcclusionChangeCallback succeed, surfacenode id:%{public}" PRIu64 ""
+            ", ret: %{public}" PRIu32 "",
+            surfaceNodeId_, ret);
 }
 
 void WebDelegate::RegisterAvoidAreaChangeListener()
@@ -2759,6 +2764,8 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
         cutoutSafeArea_ = container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT);
         navigationIndicatorSafeArea_ =
             container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        OnSafeInsetsChange();
+
         avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
         OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
@@ -2978,6 +2985,9 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebResize");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
 }
 
 
@@ -4337,6 +4347,9 @@ void WebDelegate::OnPageStarted(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_BEGIN, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DestroyAnalyzerOverlay();
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
@@ -4493,8 +4506,8 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            uint32_t accessId = request->ResourceAcessId();
-            if (accessId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+            if (static_cast<uint32_t>(request->ResourceAcessId())
+                & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
                 auto clipboardCallback = webPattern->GetPermissionClipboardCallback();
@@ -5395,6 +5408,9 @@ void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoa
             type, details->IsMainFrame(), details->IsSameDocument(),
             details->DidReplaceEntry()));
     }
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
 }
 
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
@@ -5865,7 +5881,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode_);
-    surfaceNodeId_ = rsNode_->GetId() + 1;
+    surfaceNodeId_ = webPattern->GetWebSurfaceNodeId();
 }
 #endif
 
@@ -6715,6 +6731,7 @@ void WebDelegate::OnInterceptKeyboardAttach(
     CHECK_NULL_VOID(onInterceptKeyboardAttachV2_);
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
+    keyboardHandler_ = keyboardHandler;
     WebKeyboardOption keyboardOpt;
     std::function<void()> buildFunc = nullptr;
     context->GetTaskExecutor()->PostSyncTask(
@@ -6767,21 +6784,21 @@ void WebDelegate::OnSafeInsetsChange()
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = resultSafeArea.left_.start + resultSafeArea.left_.end;
+        left = static_cast<int>(resultSafeArea.left_.start + resultSafeArea.left_.end);
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = resultSafeArea.top_.end - resultSafeArea.top_.start;
+        top = static_cast<int>(resultSafeArea.top_.end - resultSafeArea.top_.start);
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
         constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
-        right = resultSafeArea.right_.end - resultSafeArea.right_.start +
-                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR;
+        right = static_cast<int>(resultSafeArea.right_.end - resultSafeArea.right_.start +
+                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = resultSafeArea.bottom_.end - resultSafeArea.bottom_.start;
+        bottom = static_cast<int>(resultSafeArea.bottom_.end - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -6810,6 +6827,31 @@ void WebDelegate::OnSafeInsetsChange()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSafeInsetsChange");
+}
+
+void WebDelegate::CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+    int rectHeight, int pointX, int pointY)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->CreateOverlay(PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height),
+        offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+}
+
+void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
+}
+
+void WebDelegate::OnTextSelected()
+{
+    auto delegate = WeakClaim(this).Upgrade();
+    CHECK_NULL_VOID(delegate);
+    if (delegate->nweb_) {
+        return delegate->nweb_->OnTextSelected();
+    }
 }
 
 NG::WebInfoType WebDelegate::GetWebInfoType()

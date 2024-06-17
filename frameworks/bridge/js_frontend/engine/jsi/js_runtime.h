@@ -91,6 +91,7 @@ public:
     virtual const panda::EcmaVM* GetEcmaVm() const { return nullptr; }
     virtual void DestroyHeapProfiler() {}
     virtual void ForceFullGC() {}
+    virtual void NotifyUIIdle() {}
     virtual void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 

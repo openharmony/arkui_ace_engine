@@ -267,4 +267,12 @@ bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullToRefresh, value, frameNode, value);
     return value;
 }
+
+void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
 } // namespace OHOS::Ace::NG

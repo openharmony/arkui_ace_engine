@@ -59,7 +59,7 @@ void CheckBoxModelNG::SetSelect(bool isSelected)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected, frameNode);
 }
 
 void CheckBoxModelNG::SetSelectedColor(const Color& color)

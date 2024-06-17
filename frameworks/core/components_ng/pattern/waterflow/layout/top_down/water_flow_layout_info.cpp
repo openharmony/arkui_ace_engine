@@ -272,7 +272,7 @@ void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
     }
     maxHeight_ = 0.0f;
     jumpIndex_ = EMPTY_JUMP_INDEX;
-    startIndex_ = resetFrom;
+    startIndex_ = 0;
     ClearCacheAfterIndex(resetFrom - 1);
 }
 

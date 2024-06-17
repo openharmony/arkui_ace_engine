@@ -182,6 +182,8 @@ public:
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
+    void ToStyledString(const JSCallbackInfo& args);
+    void FromStyledString(const JSCallbackInfo& args);
 
 private:
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);

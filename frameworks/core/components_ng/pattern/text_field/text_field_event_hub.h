@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/ime/text_range.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -126,17 +127,17 @@ public:
         }
     }
 
-    void SetOnChange(std::function<void(const std::string&)>&& func)
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func)
     {
         onChange_ = std::move(func);
     }
 
-    const std::function<void(const std::string&)>& GetOnChange() const
+    const std::function<void(const std::string&, TextRange&)>& GetOnChange() const
     {
         return onChange_;
     }
 
-    void FireOnChange(const std::string& value)
+    void FireOnChange(const std::string& value, TextRange& range)
     {
         if (lastValue_.has_value() && lastValue_.value() == value) {
             return;
@@ -147,7 +148,8 @@ public:
         }
         if (onChange_) {
             LOGI("On change %{private}s", value.c_str());
-            onChange_(value);
+            LOGI("On change %{private}d", range.start);
+            onChange_(value, range);
         }
         lastValue_ = value;
     }
@@ -375,7 +377,7 @@ private:
     std::function<void(bool)> onEditChanged_;
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
-    std::function<void(const std::string&)> onChange_;
+    std::function<void(const std::string&, TextRange&)> onChange_;
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 

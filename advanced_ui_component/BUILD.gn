@@ -15,6 +15,7 @@ group("advanced_ui_component") {
   deps = [
     "arcslider/interfaces:arcslider",
     "atomicservicenavigation/interfaces:atomicservicenavigation",
+    "atomicservicetabs/interfaces:atomicservicetabs",
     "chip/interfaces:chip",
     "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",
@@ -29,6 +30,7 @@ group("advanced_ui_component") {
     "formmenu/interfaces:formmenu",
     "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+    "interstitialdialogaction/interfaces:interstitialdialogaction",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
     "segmentbutton/interfaces:segmentbutton",

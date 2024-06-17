@@ -987,6 +987,7 @@ class ArkDotIndicator extends DotIndicator {
   maskValue: boolean | undefined;
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
+  maxDisplayCountValue: ResourceColor | undefined;
 
   constructor() {
     super();
@@ -1002,6 +1003,7 @@ class ArkDotIndicator extends DotIndicator {
     this.maskValue = undefined;
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
+    this.maxDisplayCountValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1017,7 +1019,8 @@ class ArkDotIndicator extends DotIndicator {
       this.selectedItemHeightValue === another.selectedItemHeightValue &&
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
-      this.selectedColorValue === another.selectedColorValue
+      this.selectedColorValue === another.selectedColorValue &&
+      this.maxDisplayCountValue === another.maxDisplayCountValue
     );
   }
 }

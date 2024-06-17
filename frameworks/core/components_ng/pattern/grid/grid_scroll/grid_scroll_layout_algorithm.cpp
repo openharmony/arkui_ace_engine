@@ -1211,6 +1211,20 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
     if (!GreatOrEqual(gridLayoutInfo_.prevOffset_ - gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
+
+    auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_, true);
+    auto needSkipHeight = totalViewHeight + gridLayoutInfo_.prevOffset_ + mainGap_;
+    if (GreatOrEqual(needSkipHeight, -gridLayoutInfo_.currentOffset_)) {
+        return;
+    }
+
+    auto endLine = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1);
+    if (endLine != gridLayoutInfo_.gridMatrix_.end() && !endLine->second.empty()) {
+        gridLayoutInfo_.currentOffset_ += needSkipHeight;
+        gridLayoutInfo_.endMainLineIndex_++;
+        gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_;
+    }
+
     // grid size change from big to small
     gridLayoutInfo_.UpdateEndLine(mainSize, mainGap_);
 

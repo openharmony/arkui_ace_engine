@@ -60,7 +60,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect()
     rect.SetHeight(textFiled->PreferredLineHeight());
     rect.SetWidth(caretInfo_.rect.Width());
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
-    auto direction = layoutProperty->GetLayoutDirection();
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
     textFiled->CheckTextAlignByDirection(textAlign, direction);
 
     switch (textAlign) {
@@ -206,25 +206,6 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     auto range = GetSelectRangeByOffset(localOffset);
     int32_t start = range.first;
     int32_t end = range.second;
-    UpdateHandleIndex(start, end);
-    if (IsSelected()) {
-        MoveFirstHandleToContentRect(GetFirstHandleIndex());
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
-    } else {
-        MoveCaretToContentRect(GetCaretIndex());
-    }
-}
-
-// Add more select content with new offset
-void TextSelectController::AddSelectByOffset(const Offset& localOffset)
-{
-    CHECK_NULL_VOID(paragraph_ && !contentController_->IsEmpty());
-    auto range = GetSelectRangeByOffset(localOffset);
-    int32_t start = GetFirstHandleIndex();
-    int32_t end = range.second;
-    if (range.first < start) {
-        end = range.first;
-    }
     UpdateHandleIndex(start, end);
     if (IsSelected()) {
         MoveFirstHandleToContentRect(GetFirstHandleIndex());

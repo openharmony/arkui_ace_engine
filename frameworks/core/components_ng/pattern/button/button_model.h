@@ -54,6 +54,7 @@ public:
     virtual void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) {}
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize) {}
     virtual void SetRole(const std::optional<ButtonRole>& buttonRole) {}
+    virtual void SetCreateWithLabel(bool isLabelButton) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

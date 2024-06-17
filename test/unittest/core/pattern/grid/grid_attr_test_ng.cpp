@@ -176,6 +176,48 @@ HWTEST_F(GridAttrTestNg, Property003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property004
+ * @tc.desc: Test all the properties of GridItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, Property004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(4);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. set invalid values.
+     * @tc.expected: default value
+     */
+    model.SetColumnsTemplate(AceType::RawPtr(frameNode_), "");
+    model.SetRowsTemplate(AceType::RawPtr(frameNode_), "");
+    model.SetColumnsGap(AceType::RawPtr(frameNode_), Dimension(-5));
+    model.SetRowsGap(AceType::RawPtr(frameNode_), Dimension(-5));
+    model.SetFriction(AceType::RawPtr(frameNode_), -1.0);
+    EXPECT_EQ(pattern_->GetFriction(), FRICTION);
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue(""), "1fr");
+    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue(""), "1fr");
+    EXPECT_FALSE(layoutProperty_->HasColumnsGap());
+    EXPECT_FALSE(layoutProperty_->HasRowsGap());
+
+    /**
+     * @tc.steps: step2. set invalid values.
+     * @tc.expected: the set value
+     */
+    model.SetColumnsTemplate(AceType::RawPtr(frameNode_), "1fr 1fr");
+    model.SetRowsTemplate(AceType::RawPtr(frameNode_), "1fr 1fr");
+    model.SetColumnsGap(AceType::RawPtr(frameNode_), Dimension(10));
+    model.SetRowsGap(AceType::RawPtr(frameNode_), Dimension(10));
+    model.SetFriction(AceType::RawPtr(frameNode_), 0.1);
+    EXPECT_EQ(pattern_->GetFriction(), 0.1);
+    EXPECT_EQ(layoutProperty_->GetColumnsTemplateValue(""), "1fr 1fr");
+    EXPECT_EQ(layoutProperty_->GetRowsTemplateValue(""), "1fr 1fr");
+    EXPECT_EQ(layoutProperty_->GetColumnsGapValue(Dimension(0)), Dimension(10));
+    EXPECT_EQ(layoutProperty_->GetColumnsGapValue(Dimension(0)), Dimension(10));
+}
+
+/**
  * @tc.name: ColumnsTemplate001
  * @tc.desc: Test property about columnsTemplate and Gap,
  * test normal condition that template is "1fr 1fr 1fr 1fr"

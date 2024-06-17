@@ -139,11 +139,13 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     CHECK_NULL_RETURN(host, nullptr);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_RETURN(pathInfo, nullptr);
-
+    NavDestinationState state = pattern->GetNavDestinationState();
+    if (state == NavDestinationState::NONE) {
+        return nullptr;
+    }
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
-        pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN,
-        host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
+        state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)

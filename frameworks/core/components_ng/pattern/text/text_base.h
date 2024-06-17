@@ -157,38 +157,6 @@ public:
 
     virtual void ScrollToSafeArea() const {}
 
-    static bool UpdateKeyboardOffset(double positionY, double height, bool foreChange = false)
-    {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        if (container->IsUIExtensionWindow()) {
-            return false;
-        }
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto keyboardArea = container->GetKeyboardSafeArea();
-        auto keyboardLength = keyboardArea.bottom_.Length();
-        Rect keyboardRect;
-        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
-        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, foreChange);
-        return true;
-    }
-
-    static bool AvoidKeyboard(float offsetY, float height)
-    {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto safeAreaManager = context->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, false);
-        auto keyboardInset = safeAreaManager->GetKeyboardInset();
-        CHECK_NULL_RETURN(keyboardInset.Length() != 0, false);
-        if (LessOrEqual(offsetY + height, keyboardInset.start)) {
-            return false;
-        }
-        auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-        return UpdateKeyboardOffset(offsetY - keyboardOffset, height, true);
-    }
-
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
     virtual void OnVirtualKeyboardAreaChanged() {}
@@ -241,13 +209,6 @@ public:
     TextSelector GetTextSelector() const
     {
         return textSelector_;
-    }
-
-    virtual bool CaretAvoidSoftKeyboard()
-    {
-        auto caretRect = GetCaretRect();
-        return AvoidKeyboard(caretRect.Top() + GetTextPaintOffset().GetY(),
-            caretRect.Height() + GetAvoidSoftKeyboardOffset().ConvertToPx());
     }
 
     virtual const Dimension& GetAvoidSoftKeyboardOffset() const

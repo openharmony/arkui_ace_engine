@@ -43,7 +43,7 @@ bool JsiValue::IsFunction() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsFunction();
+        return GetHandle()->IsFunction(GetEcmaVM());
     }
 }
 
@@ -61,7 +61,7 @@ bool JsiValue::IsString() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsString();
+        return GetHandle()->IsString(GetEcmaVM());
     }
 }
 
@@ -79,7 +79,7 @@ bool JsiValue::IsObject() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsObject();
+        return GetHandle()->IsObject(GetEcmaVM());
     }
 }
 
@@ -97,13 +97,13 @@ bool JsiValue::IsArrayBuffer() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsArrayBuffer();
+        return GetHandle()->IsArrayBuffer(GetEcmaVM());
     }
 }
 
 bool JsiValue::IsUint8ClampedArray() const
 {
-    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray());
+    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray(GetEcmaVM()));
 }
 
 bool JsiValue::IsUndefined() const
@@ -239,7 +239,7 @@ int32_t JsiArrayBuffer::ByteLength() const
 
 void* JsiArrayBuffer::GetBuffer() const
 {
-    return GetHandle()->GetBuffer();
+    return GetHandle()->GetBuffer(GetEcmaVM());
 }
 
 void JsiArrayBuffer::Detach() const
@@ -249,7 +249,7 @@ void JsiArrayBuffer::Detach() const
 
 bool JsiArrayBuffer::IsDetach() const
 {
-    return GetHandle()->IsDetach();
+    return GetHandle()->IsDetach(GetEcmaVM());
 }
 
 // -----------------------
@@ -343,7 +343,7 @@ void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
     auto vm = GetEcmaVM();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     auto valueRef = JsiValueConvertor::toJsiValueWithVM<std::string>(GetEcmaVM(), value);
-    if (valueRef->IsString()) {
+    if (valueRef->IsString(vm)) {
         GetHandle()->Set(vm, stringRef, JSON::Parse(vm, valueRef));
     }
 }
@@ -486,17 +486,18 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsNumber()) {
+    if (arg.IsEmpty()) {
         return false;
     }
-    value = arg->ToNumber(info_->GetVM())->Value();
-    return true;
+    bool ret = false;
+    value = arg->GetValueDouble(ret);
+    return ret;
 }
 
 bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsString()) {
+    if (arg.IsEmpty() || !arg->IsString(info_->GetVM())) {
         return false;
     }
     value = arg->ToString(info_->GetVM())->ToString();
@@ -510,7 +511,7 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
         return false;
     }
     auto arrayRef = Local<ArrayRef>(arg);
-    int32_t length = arrayRef->Length(info_->GetVM());
+    uint32_t length = arrayRef->Length(info_->GetVM());
     valueArr.reserve(length);
     for (int32_t i = 0; i < length; ++i) {
         auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);

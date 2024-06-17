@@ -72,14 +72,11 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
 
-    void SyncGeometryPropertiesWithoutAnimation(
-        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
-
     void SyncGeometryFrame(const RectF& paintRect);
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
-    void SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition = false) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -583,8 +580,12 @@ private:
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    float OnePixelValueRounding(float value);
+    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void OnePixelRounding();
+    void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;

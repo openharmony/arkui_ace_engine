@@ -203,6 +203,13 @@ void FfiOHOSAceFrameworkScrollScrollBarWidth(double width, int32_t unit)
     ScrollModel::GetInstance()->SetScrollBarWidth(value);
 }
 
+void FfiOHOSAceFrameworkScrollNestedScroll(int32_t scrollForward, int32_t scrollBackward)
+{
+    NestedScrollOptions localNestedScrollOptions = {.forward = NestedScrollMode(scrollForward),
+        .backward = NestedScrollMode(scrollBackward)};
+    ScrollModel::GetInstance()->SetNestedScroll(localNestedScrollOptions);
+}
+
 void FfiOHOSAceFrameworkScrollOnScroll(void (*callback)(CJOffset scrollInfo))
 {
     ScrollModel::GetInstance()->SetOnScroll(

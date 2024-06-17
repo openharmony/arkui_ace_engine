@@ -70,16 +70,24 @@ int32_t FrameRateManager::GetDisplaySyncRate() const
     return displaySyncRate_;
 }
 
-int32_t FrameRateManager::GetExpectedRate()
+std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
 {
     int32_t expectedRate = 0;
+    int32_t rateType = 0;
     if (!nodeRateMap_.empty()) {
         auto maxIter = std::max_element(
             nodeRateMap_.begin(), nodeRateMap_.end(), [](auto a, auto b) { return a.second < b.second; });
         expectedRate = maxIter->second;
+        rateType = ACE_COMPONENT_FRAME_RATE_TYPE;
     }
-    expectedRate = std::max(expectedRate, displaySyncRate_);
-    expectedRate = std::max(expectedRate, animateRate_);
-    return expectedRate;
+    if (displaySyncRate_ > expectedRate) {
+        expectedRate = displaySyncRate_;
+        rateType = DISPLAY_SYNC_FRAME_RATE_TYPE;
+    }
+    if (animateRate_ > expectedRate) {
+        expectedRate = animateRate_;
+        rateType = UI_ANIMATION_FRAME_RATE_TYPE;
+    }
+    return {expectedRate, rateType};
 }
 } // namespace OHOS::Ace::NG

@@ -296,4 +296,134 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     formRendererDispatcher->DispatchPointerEvent(event, serializedGesture);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
+
+/**
+ * @tc.name: FormRenderTest003
+ * @tc.type: FUNC
+ * Function: OnActionEvent,SetActionEventHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest003, TestSize.Level1)
+{
+    std::string action = "action";
+    auto fun = [](const std::string&) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetActionEventHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnActionEvent(action), ERR_INVALID_DATA);
+    renderDelegate->SetActionEventHandler(fun);
+    EXPECT_EQ(renderDelegate->OnActionEvent(action), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest004
+ * @tc.type: FUNC
+ * Function: OnError,SetErrorEventHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest004, TestSize.Level1)
+{
+    std::string code = "code";
+    std::string msg = "msg";
+    auto fun = [](const std::string&, const std::string&) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetErrorEventHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnError(code, msg), ERR_INVALID_DATA);
+    renderDelegate->SetErrorEventHandler(fun);
+    EXPECT_EQ(renderDelegate->OnError(code, msg), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest005
+ * @tc.type: FUNC
+ * Function: OnSurfaceChange,SetSurfaceChangeEventHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest005, TestSize.Level1)
+{
+    float width = 1.1;
+    float height = 2.2;
+    auto fun = [](float, float, float) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetSurfaceChangeEventHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnSurfaceChange(width, height), ERR_INVALID_DATA);
+    renderDelegate->SetSurfaceChangeEventHandler(fun);
+    EXPECT_EQ(renderDelegate->OnSurfaceChange(width, height), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest006
+ * @tc.type: FUNC
+ * Function: OnSurfaceDetach,SetSurfaceDetachEventHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest006, TestSize.Level1)
+{
+    uint64_t surfaceId = 1;
+    auto fun = []() {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetSurfaceDetachEventHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_INVALID_DATA);
+    renderDelegate->SetSurfaceDetachEventHandler(fun);
+    EXPECT_EQ(renderDelegate->OnSurfaceDetach(surfaceId), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest007
+ * @tc.type: FUNC
+ * Function: OnFormLinkInfoUpdate,SetFormLinkInfoUpdateHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest007, TestSize.Level1)
+{
+    std::vector<std::string> formLinkInfos;
+    auto fun = [](const std::vector<std::string>&) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetFormLinkInfoUpdateHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnFormLinkInfoUpdate(formLinkInfos), ERR_INVALID_DATA);
+    renderDelegate->SetFormLinkInfoUpdateHandler(fun);
+    EXPECT_EQ(renderDelegate->OnFormLinkInfoUpdate(formLinkInfos), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest008
+ * @tc.type: FUNC
+ * Function: OnGetRectRelativeToWindow,SetGetRectRelativeToWindowHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
+{
+    int32_t top = 50;
+    int32_t left = 50;
+    auto fun = [](int32_t&, int32_t&) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetGetRectRelativeToWindowHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_DATA);
+    renderDelegate->SetGetRectRelativeToWindowHandler(fun);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest009
+ * @tc.type: FUNC
+ * Function: OnEnableForm,SetEnableFormEventHandler
+ **@tc.desc: 1. system running normally
+ *           2. test FormRendererDelegateImpl
+ */
+HWTEST_F(FormRenderTest, FormRenderTest009, TestSize.Level1)
+{
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    bool enable = true;
+    auto fun = [](const OHOS::AppExecFwk::FormJsInfo&, const bool) {};
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    renderDelegate->SetEnableFormEventHandler(nullptr);
+    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, enable), ERR_INVALID_DATA);
+    renderDelegate->SetEnableFormEventHandler(fun);
+    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, enable), ERR_OK);
+}
 } // namespace OHOS::Ace

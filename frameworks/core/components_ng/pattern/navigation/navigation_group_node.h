@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 
+#include <atomic>
 #include <cstdint>
 #include <list>
 
@@ -182,6 +183,21 @@ public:
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    void ReduceModeSwitchAnimationCnt()
+    {
+        --modeSwitchAnimationCnt_;
+    }
+
+    void IncreaseModeSwitchAnimationCnt()
+    {
+        ++modeSwitchAnimationCnt_;
+    }
+
+    int32_t GetModeSwitchAnimationCnt()
+    {
+        return modeSwitchAnimationCnt_;
+    }
+
     float CheckLanguageDirection();
 
     void RemoveDialogDestination();
@@ -204,12 +220,13 @@ public:
 
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
+        const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
     bool FindNavigationParent(const std::string& parentName);
     bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
@@ -223,6 +240,7 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };

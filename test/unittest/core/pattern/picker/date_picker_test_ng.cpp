@@ -349,6 +349,21 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle003, TestSize.Lev
 }
 
 /**
+ * @tc.name: DatePickerModelSetDisappearTextStyle004
+ * @tc.desc: Test DatePickerTestNg SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetDisappearTextStyle004, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(10);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
+}
+
+/**
  * @tc.name: DatePickerModelSetNormalTextStyle001
  * @tc.desc: Test DatePickerModel SetNormalTextStyle.
  * @tc.type: FUNC
@@ -417,6 +432,21 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle003, TestSize.Level1
 }
 
 /**
+ * @tc.name: DatePickerModelSetNormalTextStyle004
+ * @tc.desc: Test DatePickerTestNg SetNormalTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetNormalTextStyle004, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
+}
+
+/**
  * @tc.name: DatePickerModelSetSelectedTextStyle001
  * @tc.desc: Test DatePickerModel SetSelectedTextStyle.
  * @tc.type: FUNC
@@ -482,6 +512,21 @@ HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle003, TestSize.Leve
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+}
+
+/**
+ * @tc.name: DatePickerModelSetSelectedTextStyle004
+ * @tc.desc: Test DatePickerTestNg SetSeletedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerModelSetSelectedTextStyle004, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(10);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, true);
 }
 
 /**

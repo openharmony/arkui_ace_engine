@@ -96,7 +96,9 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
     const auto& children = menuNode->GetChildren();
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
-            menuItem = AceType::DynamicCast<FrameNode>(child);
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            auto pattern = frameNode ? frameNode->GetPattern<MenuItemPattern>() : nullptr;
+            menuItem = pattern ? pattern->FindTouchedEmbeddedMenuItem(position) : nullptr;
         } else {
             menuItem = FindTouchedMenuItem(child, position);
         }
@@ -233,15 +235,25 @@ void MenuWrapperPattern::HideSubMenu()
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
     auto innerMenu = GetMenuChild(focusMenu);
+    if (!innerMenu) {
+        UpdateMenuAnimation(host);
+        host->RemoveChild(subMenu);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        return;
+    }
     CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    if (expandingMode == SubMenuExpandingMode::STACK) {
+    auto outterMenuPattern = focusMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(outterMenuPattern);
+    bool hasAnimation = outterMenuPattern->GetDisappearAnimation();
+    if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
     } else {
+        UpdateMenuAnimation(host);
         host->RemoveChild(subMenu);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
@@ -249,11 +261,9 @@ void MenuWrapperPattern::HideSubMenu()
 
 bool MenuWrapperPattern::HasStackSubMenu()
 {
-    auto menu = GetMenu();
-    CHECK_NULL_RETURN(menu, false);
-    auto scroll = menu->GetFirstChild();
-    CHECK_NULL_RETURN(scroll, false);
-    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    auto outterMenu = GetMenu();
+    CHECK_NULL_RETURN(outterMenu, false);
+    auto innerMenu = GetMenuChild(outterMenu);
     CHECK_NULL_RETURN(innerMenu, false);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(innerMenuPattern, false);
@@ -266,6 +276,20 @@ bool MenuWrapperPattern::HasStackSubMenu()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     return host->GetChildren().size() > 1;
+}
+
+bool MenuWrapperPattern::HasEmbeddedSubMenu()
+{
+    auto outterMenu = GetMenu();
+    CHECK_NULL_RETURN(outterMenu, false);
+    auto innerMenu = GetMenuChild(outterMenu);
+    CHECK_NULL_RETURN(innerMenu, false);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(innerMenuPattern, false);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, false);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    return expandingMode == SubMenuExpandingMode::EMBEDDED;
 }
 
 RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
@@ -318,6 +342,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     CHECK_NULL_VOID(menuNodePattern);
     menuNodePattern->ShowStackExpandDisappearAnimation(DynamicCast<FrameNode>(menuNode),
         DynamicCast<FrameNode>(subMenu), option);
+    menuNodePattern->SetDisappearAnimation(true);
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
@@ -372,11 +397,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             if (!menuPattern) {
                 continue;
             }
-            if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
-                HideSubMenu();
-            } else {
-                HideMenu(menuWrapperChildNode);
-            }
+            HideMenu(menuPattern, menuWrapperChildNode, position);
         }
     } else if (touch.GetTouchType() == TouchType::MOVE) {
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
@@ -392,6 +413,68 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         currentTouchItemPattern->PlayBgColorAnimation(false);
         currentTouchItem_ = nullptr;
     }
+}
+
+void MenuWrapperPattern::HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu,
+    const OffsetF& position)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mainMenu = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(mainMenu);
+    auto mainMenuZone = mainMenu->GetGeometryNode()->GetFrameRect();
+    bool isFindTargetId = false;
+    if (mainMenuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+        isFindTargetId = true;
+    }
+    if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
+        if (HasStackSubMenu() && !isFindTargetId) {
+            UpdateMenuAnimation(host);
+        }
+        HideSubMenu();
+    } else {
+        if (HasEmbeddedSubMenu() && embeddedSubMenuCount_ > 0 && !isFindTargetId) {
+            UpdateMenuAnimation(host);
+        }
+        HideMenu(menu);
+    }
+}
+
+void MenuWrapperPattern::UpdateMenuAnimation(const RefPtr<FrameNode>& host)
+{
+    // update Menu disappear animation direction
+    // change to LEFT_BOTTOM -> RIGHT_TOP by calling SetExitAnimation
+    // or keep BOTTOM -> TOP by default
+    CHECK_NULL_VOID(host);
+    auto outterMenu = host->GetFirstChild();
+    CHECK_NULL_VOID(outterMenu);
+    auto innerMenu = GetMenuChild(outterMenu);
+    if (!innerMenu && host->GetChildren().size() > 1) {
+        SetExitAnimation(host);
+        return;
+    }
+    CHECK_NULL_VOID(innerMenu);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(innerMenuPattern);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (host->GetChildren().size() > 1) {
+        SetExitAnimation(host);
+    }
+    if (expandingMode == SubMenuExpandingMode::EMBEDDED && embeddedSubMenuCount_ > 0) {
+        SetExitAnimation(host);
+    }
+}
+
+void MenuWrapperPattern::SetExitAnimation(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto outterMenu = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(outterMenu);
+    auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(outterMenuPattern);
+    outterMenuPattern->SetDisappearAnimation(false);
 }
 
 void MenuWrapperPattern::CheckAndShowAnimation()

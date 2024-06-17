@@ -97,7 +97,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<SliderConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, SliderContentModifier.identity, SliderContentModifier, value);
     return this;
   }
   slideRange(value: ValidSlideRange): this {
@@ -443,6 +443,17 @@ class MinResponsiveDistanceModifier extends ModifierWithKey<number> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SliderContentModifier extends ModifierWithKey<ContentModifier<SliderConfiguration>> {
+  constructor(value: ContentModifier<SliderConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let sliderComponent = component as ArkSliderComponent;
+    sliderComponent.setContentModifier(this.value);
   }
 }
 

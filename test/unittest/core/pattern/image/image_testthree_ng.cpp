@@ -1377,7 +1377,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternBetweenSelectedPosition, TestSize.Level1)
     imagePattern->BeforeCreatePaintWrapper();
     imagePattern->OnDirectionConfigurationUpdate();
     imagePattern->OnIconConfigurationUpdate();
-    EXPECT_TRUE(b);
+    EXPECT_FALSE(b);
 }
 
 /**

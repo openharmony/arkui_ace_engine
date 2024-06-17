@@ -971,6 +971,13 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
+
+    void OnTextSelected();
+
     void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
     void OnDetachContext();
 
@@ -983,6 +990,13 @@ public:
     void SetSurfaceId(const std::string& surfaceId);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+
+    void CloseCustomKeyboard()
+    {
+        if (keyboardHandler_) {
+            keyboardHandler_->Close();
+        }
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1181,6 +1195,7 @@ private:
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
+    std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
 #endif
 };
 

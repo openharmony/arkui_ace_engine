@@ -47,6 +47,7 @@ constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::layoutDetectEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
@@ -87,6 +88,11 @@ DeviceType SystemProperties::GetDeviceType()
 bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+bool SystemProperties::GetLayoutDetectEnabled()
+{
+    return layoutDetectEnabled_;
 }
 
 float SystemProperties::GetAnimationScale()

@@ -719,14 +719,17 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.L
      * @tc.steps: step3. delete backward
      */
     richEditorPattern->textSelector_.Update(0, 2);
+    richEditorPattern->caretPosition_ = 2;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
 
     richEditorPattern->textSelector_.Update(2, 5);
+    richEditorPattern->caretPosition_ = 5;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
 
     richEditorPattern->textSelector_.Update(1, 3);
+    richEditorPattern->caretPosition_ = 3;
     richEditorPattern->DeleteBackward(1);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 2);
 }

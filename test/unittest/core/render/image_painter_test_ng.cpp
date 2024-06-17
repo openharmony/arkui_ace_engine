@@ -702,4 +702,88 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
     EXPECT_EQ(testSize6.GetX(), 0);
     EXPECT_EQ(testSize6.GetY(), 0);
 }
+
+/**
+ * @tc.name: ImagePainterTestNg_DrawImage002
+ * @tc.desc: Test cast to DrawImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage002, TestSize.Level1)
+{
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::ImagePaintConfig imagePaintConfig;
+    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    EXPECT_EQ(imagePainter.canvasImage_, nullptr);
+
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
+    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    EXPECT_NE(imagePainter.canvasImage_, nullptr);
+
+    imagePaintConfig.isSvg_ = true;
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>(imagePaintConfig);
+    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    EXPECT_NE(imagePainter.canvasImage_->paintConfig_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_DrawObscuration002
+ * @tc.desc: Test cast to DrawObscuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration002, TestSize.Level1)
+{
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::ImagePaintConfig imagePaintConfig;
+    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    EXPECT_EQ(imagePainter.canvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_CalculateBgWidth001
+ * @tc.desc: Test cast to CalculateBgWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize001, TestSize.Level1)
+{
+    NG::SizeF boxPaintSize1 { 1, 1 };
+    NG::SizeF srcSize1 = { 0, 0 };
+    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::COVER, 1, BackgroundImageSizeType::COVER, 1);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt1 = backgroundImageSize1;
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize1, srcSize1, bgImageSizeOpt1);
+
+    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::CONTAIN, 1, BackgroundImageSizeType::CONTAIN, 1);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt2 = backgroundImageSize2;
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize1, srcSize1, bgImageSizeOpt2);
+    auto width = boxPaintSize1.Width();
+    EXPECT_EQ(width, 1);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_CalculateBgWidth002
+ * @tc.desc: Test cast to CalculateBgWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize002, TestSize.Level1)
+{
+    NG::SizeF boxPaintSize1 { 1, 1 };
+    NG::SizeF srcSize1 = { 0, 1 };
+    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::COVER, 1, BackgroundImageSizeType::COVER, 1);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt1 = backgroundImageSize1;
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize1, srcSize1, bgImageSizeOpt1);
+
+    BackgroundImageSize backgroundImageSize2(BackgroundImageSizeType::CONTAIN, 1, BackgroundImageSizeType::CONTAIN, 1);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt2 = backgroundImageSize2;
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize1, srcSize1, bgImageSizeOpt2);
+
+    NG::SizeF boxPaintSize2 { 0, 0 };
+    NG::SizeF srcSize2 = { 1, 0 };
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize2, srcSize2, bgImageSizeOpt1);
+
+    NG::ImagePainter::CalculateBgImageSize(boxPaintSize2, srcSize2, bgImageSizeOpt2);
+    auto width = boxPaintSize2.Width();
+    EXPECT_EQ(width, 0);
+}
 } // namespace OHOS::Ace

@@ -3,7 +3,9 @@
         "common":{
             "ok":"确定",
             "cancel":"取消",
-            "more":"更多"
+            "more":"更多",
+            "prev":"上一步",
+            "next":"下一步"
         },
         "refresh":{
             "last_updated":"上次更新时间：%s",
@@ -37,8 +39,7 @@
             "rightSide":"窗口显示在屏幕右侧"
         },
         "datepicker":{
-            "lunarSwitch":"显示农历",
-            "prev":"上一步"
+            "lunarSwitch":"显示农历"
         },
         "textclock":{
             "week":"周",

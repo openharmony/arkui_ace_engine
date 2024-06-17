@@ -14,58 +14,60 @@
  */
 
 // @ts-ignore
-globalThis.LazyForEach.create = function (
-    paramViewId: any,
-    paramParentView: any,
-    paramDataSource: any,
-    paramItemGenerator: (item: any) => void,
-    paramKeyGenerator: any,
-    paramUpdateChangedNode: any
-) {
-    // get actual theme scope
-    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
-
-    // if LazyForEach isn`t in theme scope we shouldn`t use any theme scope for deep render
-    if (themeScope === undefined) {
-        // paramUpdateChangedNode is optional and we need to know whether it set or not
-        if (paramUpdateChangedNode) {
+if (globalThis.LazyForEach !== undefined) {
+    globalThis.LazyForEach.create = function (
+        paramViewId: any,
+        paramParentView: any,
+        paramDataSource: any,
+        paramItemGenerator: (item: any) => void,
+        paramKeyGenerator: any,
+        paramUpdateChangedNode: any
+    ) {
+        // get actual theme scope
+        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+    
+        // if LazyForEach isn`t in theme scope we shouldn`t use any theme scope for deep render
+        if (themeScope === undefined) {
+            // paramUpdateChangedNode is optional and we need to know whether it set or not
+            if (paramUpdateChangedNode) {
+                // @ts-ignore
+                LazyForEach.createInternal(
+                    paramViewId, paramParentView, paramDataSource,
+                    paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode
+                );
+            } else {
+                // @ts-ignore
+                LazyForEach.createInternal(
+                    paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator
+                );
+            }
+            return;
+        }
+    
+        // create wrapper under original itemGenerator to add enter/exit callbacks for ThemeScopeManager
+        const itemGeneratorWrapper = _item => {
+            const item = _item
+            {
+                const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+                paramItemGenerator(item);
+                if (result === true) {
+                    ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+                }
+            }
+        }
+    
+        // pass itemGeneratorWrapper instead of original paramItemGenerator to LazyForEach
+        if (paramUpdateChangedNode) { // paramUpdateChangedNode is optional and we need to know whether it set or not
             // @ts-ignore
             LazyForEach.createInternal(
                 paramViewId, paramParentView, paramDataSource,
-                paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode
+                itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode
             );
         } else {
-            // @ts-ignore
+        // @ts-ignore
             LazyForEach.createInternal(
-                paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator
+                paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator
             );
         }
-        return;
-    }
-
-    // create wrapper under original itemGenerator to add enter/exit callbacks for ThemeScopeManager
-    const itemGeneratorWrapper = _item => {
-        const item = _item
-        {
-            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-            paramItemGenerator(item);
-            if (result === true) {
-                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
-            }
-        }
-    }
-
-    // pass itemGeneratorWrapper instead of original paramItemGenerator to LazyForEach
-    if (paramUpdateChangedNode) { // paramUpdateChangedNode is optional and we need to know whether it set or not
-        // @ts-ignore
-        LazyForEach.createInternal(
-            paramViewId, paramParentView, paramDataSource,
-            itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode
-        );
-    } else {
-    // @ts-ignore
-        LazyForEach.createInternal(
-            paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator
-        );
     }
 }

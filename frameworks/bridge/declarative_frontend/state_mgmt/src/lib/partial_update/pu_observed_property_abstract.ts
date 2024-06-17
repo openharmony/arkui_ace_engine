@@ -193,17 +193,18 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return rawObject;
   }
 
-  public dumpSyncPeers(changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
+  public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
     let res: ObservedPropertyInfo<T>[] = [];
     this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
       if ('debugInfo' in subscriber) {
         const observedProp = subscriber as ObservedPropertyAbstractPU<any>;
+        let rawValue: any = observedProp.getRawObjectValue();
         let syncPeer: ObservedPropertyInfo<T> = {
           decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
           changedTrackPropertyName: changedTrackPropertyName,
-          value: observedProp.getRawObjectValue(),
+          value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
           inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-          dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, true),
+          dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
           owningView: { componentName: observedProp.owningView_?.constructor.name, id: observedProp.owningView_?.id__() }
         };
         res.push(syncPeer);
@@ -214,13 +215,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   protected onDumpProfiler(changedTrackPropertyName?: string): void {
     let res: DumpInfo = new DumpInfo();
+    let rawValue: any = this.getRawObjectValue();
     let observedPropertyInfo: ObservedPropertyInfo<T> = {
       decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-      value: this.getRawObjectValue(),
+      value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
       inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
       dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
       owningView: { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() },
-      syncPeers: this.dumpSyncPeers()
+      syncPeers: this.dumpSyncPeers(true, changedTrackPropertyName)
     };
     res.viewInfo = { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
     res.observedPropertiesInfo.push(observedPropertyInfo);

@@ -115,4 +115,9 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     return true;
 }
 #endif
+
+bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
+{
+    return false;
+}
 } // namespace OHOS::Ace
