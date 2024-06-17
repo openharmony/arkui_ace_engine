@@ -106,7 +106,7 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     }
 
     if (!isLazy) {
-        ListItemModel::GetInstance()->Create();
+        ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
     } else {
         RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),

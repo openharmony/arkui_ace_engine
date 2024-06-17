@@ -162,10 +162,11 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
+    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) * GetLanes();
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
     } else {
-        layoutWrapper->SetActiveChildRange(itemPosition_.begin()->first, itemPosition_.rbegin()->first);
+        layoutWrapper->SetActiveChildRange(itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheCount, cacheCount);
     }
 
     auto crossSize = contentIdealSize.CrossSize(axis_);

@@ -1233,7 +1233,7 @@ RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
+int32_t UINode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {
@@ -1271,11 +1271,11 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::DoSetActiveChildRange(int32_t start, int32_t end)
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        child->DoSetActiveChildRange(start, end);
+        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd);
         start -= static_cast<int32_t>(count);
         end -= static_cast<int32_t>(count);
     }
