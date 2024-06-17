@@ -572,7 +572,7 @@ private:
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
+    void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
@@ -658,6 +658,10 @@ private:
     void DumpModalListInfo() const;
     void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
     std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
+    void SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
+    RefPtr<FrameNode> GetOverlayFrameNode();
+    void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
+    void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

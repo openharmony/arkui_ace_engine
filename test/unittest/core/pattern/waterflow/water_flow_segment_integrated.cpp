@@ -513,8 +513,9 @@ HWTEST_F(WaterFlowSegmentIntegratedTest, Replace005, TestSize.Level1)
     newSection[0].itemsCount = 10;
     secObj->ChangeData(2, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    EXPECT_EQ(info->endPosArray_.size(), 6);
-    EXPECT_EQ(info->segmentStartPos_.size(), 2);
+    // section 2 reset should be skipped
+    EXPECT_EQ(info->endPosArray_.size(), 16);
+    EXPECT_EQ(info->segmentStartPos_.size(), 3);
     EXPECT_EQ(info->segmentTails_.size(), 4);
     EXPECT_EQ(info->segmentTails_[2], 16);
 

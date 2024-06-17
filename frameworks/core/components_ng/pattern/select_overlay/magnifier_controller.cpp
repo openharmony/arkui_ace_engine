@@ -38,19 +38,20 @@ void MagnifierController::OpenMagnifier()
     CHECK_NULL_VOID(pattern);
     auto textBasePattern = DynamicCast<TextBase>(pattern);
     CHECK_NULL_VOID(textBasePattern);
-    if (!magnifierFrameNode_) {
-        CreateMagnifierChildNode();
-    }
-    CHECK_NULL_VOID(magnifierFrameNode_);
-    auto layoutProperty = magnifierFrameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto rootUINode = pipeline->GetRootElement();
     CHECK_NULL_VOID(rootUINode);
+    if ((!magnifierFrameNode_) || (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1)) {
+        CreateMagnifierChildNode();
+    }
+    CHECK_NULL_VOID(magnifierFrameNode_);
+    auto layoutProperty = magnifierFrameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+
     if (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) {
         magnifierFrameNode_->MountToParent(rootUINode);
     }

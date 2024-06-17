@@ -16,37 +16,48 @@
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace::NG {
+// push: start, 0, newSection
+// update: start, 0, newSection
+// splice: start, deleteCount, newSections
 void WaterFlowSections::ChangeData(
-    int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
+    size_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
-    if (deleteCount == 1 && newSections.size() == 1) {
-        // prepare for checking special case
-        prevSection_ = { sections_[start], start };
-    } else {
-        prevSection_ = std::nullopt;
-    }
+    prevSections_ = sections_;
 
     TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-        "section changed, start:%{public}d, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
+        "section changed, start:%{public}zu, deleteCount:%{public}d, newSections:%{public}zu", start, deleteCount,
         newSections.size());
-    if (static_cast<size_t>(start) < sections_.size()) {
-        auto it = sections_.begin() + start;
+    if (start < sections_.size()) {
+        auto it = sections_.begin() + static_cast<int32_t>(start);
         sections_.erase(it, it + deleteCount);
         sections_.insert(it, newSections.begin(), newSections.end());
     } else {
         sections_.insert(sections_.end(), newSections.begin(), newSections.end());
     }
 
+    // perform diff to get actual [start]
+    for (; start < sections_.size(); ++start) {
+        if (start >= prevSections_.size()) {
+            break;
+        }
+        if (sections_[start] != prevSections_[start]) {
+            // can skip re-init the first modified section with only an itemCount diff
+            // to optimize the common scenario when developers add/remove items at the end
+            if (sections_[start].OnlyCountDiff(prevSections_[start])) {
+                ++start;
+            }
+            break;
+        }
+    }
+    prevSections_.clear();
+
     if (onSectionDataChange_) {
-        // push: start, 0, newSection
-        // update: start, 0, newSection
-        // splice: start, deleteCount, newSections
-        onSectionDataChange_(start);
+        onSectionDataChange_(static_cast<int32_t>(start));
     }
 }
 
 // for c-api, replace all
-void WaterFlowSections::ChangeDataNow(
+void WaterFlowSections::ChangeDataCAPI(
     int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
     prevSections_ = sections_;
@@ -64,26 +75,12 @@ void WaterFlowSections::ChangeDataNow(
         sections_.insert(sections_.end(), newSections.begin(), newSections.end());
     }
 
-    if (onSectionDataChangeNow_) {
+    if (onSectionDataChangeCAPI_) {
         // push: start, 0, newSection
         // update: start, 0, newSection
         // splice: start, deleteCount, newSections
-        onSectionDataChangeNow_(start);
+        onSectionDataChangeCAPI_(start);
     }
-}
-
-bool WaterFlowSections::IsSpecialUpdate() const
-{
-    if (sections_.empty() || !prevSection_) {
-        return false;
-    }
-    const int32_t start = prevSection_->second;
-    if (start >= static_cast<int32_t>(sections_.size())) {
-        return false;
-    }
-    const auto& cur = sections_[start];
-    const auto& prev = prevSection_->first;
-    return cur.OnlyCountDiff(prev);
 }
 
 bool WaterFlowSections::IsSpecialUpdateCAPI(int32_t updateIndex) const

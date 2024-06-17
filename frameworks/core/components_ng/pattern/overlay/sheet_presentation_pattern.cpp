@@ -409,8 +409,8 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
 
     //record the drag position
-    int32_t detentsLowerPos = 0;
-    int32_t detentsUpperPos = 0;
+    uint32_t detentsLowerPos = 0;
+    uint32_t detentsUpperPos = 0;
     if (lowerIter == sheetDetentHeight_.end()) {
         //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];

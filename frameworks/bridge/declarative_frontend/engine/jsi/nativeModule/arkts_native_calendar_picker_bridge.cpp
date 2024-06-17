@@ -73,7 +73,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
         fontSize = fontSizeData.ToString();
     }
     std::string fontWeight = "regular";
-    if (fontWeightArg->IsString() || fontWeightArg->IsNumber()) {
+    if (fontWeightArg->IsString(vm) || fontWeightArg->IsNumber()) {
         fontWeight = fontWeightArg->ToString(vm)->ToString();
     }
     GetArkUINodeModifiers()->getCalendarPickerModifier()->setTextStyle(

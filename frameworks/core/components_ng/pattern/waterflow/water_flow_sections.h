@@ -60,12 +60,20 @@ public:
     {
         onSectionDataChange_ = func;
     }
-    void SetOnDataChangeNow(std::function<void(int32_t start)>&& func)
+    void SetOnDataChangeCAPI(std::function<void(int32_t start)>&& func)
     {
-        onSectionDataChangeNow_ = func;
+        onSectionDataChangeCAPI_ = func;
     }
-    void ChangeData(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
-    void ChangeDataNow(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
+
+    /**
+     * @brief Change section data.
+     *
+     * @param start index of the first modified section.
+     * @param deleteCount number of sections to delete at index [start].
+     * @param newSections to insert at index [start].
+     */
+    void ChangeData(size_t start, int32_t deleteCount, const std::vector<Section>& newSections);
+    void ChangeDataCAPI(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
     const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
@@ -76,17 +84,13 @@ public:
      *
      * @return true only if itemCount in the modified section has changed and everything else remains the same.
      */
-    bool IsSpecialUpdate() const;
     bool IsSpecialUpdateCAPI(int32_t updateIndex) const;
 private:
-    // {first changed section, index of that section}
-    // for comparing and handling special update case
-    std::optional<std::pair<Section, int32_t>> prevSection_;
     std::vector<Section> sections_;
     // for comparing and handling special case
     std::vector<Section> prevSections_;
     std::function<void(int32_t start)> onSectionDataChange_;
-    std::function<void(int32_t start)> onSectionDataChangeNow_;
+    std::function<void(int32_t start)> onSectionDataChangeCAPI_;
 };
 
 } // namespace OHOS::Ace::NG

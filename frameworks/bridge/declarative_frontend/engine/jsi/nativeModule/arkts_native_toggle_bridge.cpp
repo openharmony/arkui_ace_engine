@@ -108,7 +108,7 @@ ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         ToggleModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -132,11 +132,11 @@ ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         panda::TryCatch trycatch(vm);
         auto jsObject = obj.ToLocal();
         auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-        CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+        CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
         panda::Local<panda::FunctionRef> func = makeFunc;
         auto result = func->Call(vm, jsObject, params, 2);
         JSNApi::ExecutePendingJob(vm);
-        CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+        CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
         auto resultObj = result->ToObject(vm);
         panda::Local<panda::JSValueRef> nodeptr =
             resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, TOGGLE_NODEPTR_OF_UINODE));

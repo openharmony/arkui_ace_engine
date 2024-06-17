@@ -224,12 +224,12 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     std::string icon;
     if (inputArg->IsBoolean()) {
         isShow = inputArg->ToBoolean(vm)->Value();
-    } else if (inputArg->IsString()) {
+    } else if (inputArg->IsString(vm)) {
         icon = inputArg->ToString(vm)->ToString();
         isShow = true;
     } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon)) {
         isShow = true;
-    } else if (inputArg->IsObject()) {
+    } else if (inputArg->IsObject(vm)) {
         isShow = true;
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
         Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[1]);

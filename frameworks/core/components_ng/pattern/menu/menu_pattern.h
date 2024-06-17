@@ -363,12 +363,14 @@ public:
         isExtensionMenuShow_ = true;
     }
 
-    void SetHasDisappearAnimation(bool hasAnimation)
+    void SetDisappearAnimation(bool hasAnimation)
     {
+        // false：exit from BOTTOM to TOP
+        // true：exit from LEFT_BOTTOM to RIGHT_TOP
         hasAnimation_ = hasAnimation;
     }
 
-    bool HasDisappearAnimation() const
+    bool GetDisappearAnimation() const
     {
         return hasAnimation_;
     }
@@ -472,7 +474,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
     
     void BlockFurtherExpand()
     {
@@ -503,12 +505,16 @@ public:
         return isEmbedded_;
     }
 protected:
-    void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
+    void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
     {
         type_ = value;
+    }
+    void ResetNeedDivider()
+    {
+        isNeedDivider_ = false;
     }
     virtual void InitTheme(const RefPtr<FrameNode>& host);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
@@ -545,6 +551,8 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+    RefPtr<UINode> GetForEachMenuItem(const RefPtr<UINode>& parent, bool next);
+    RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     RefPtr<ClickEvent> onClick_;
@@ -587,6 +595,7 @@ private:
     bool canExpand_ = true;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    bool isNeedDivider_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

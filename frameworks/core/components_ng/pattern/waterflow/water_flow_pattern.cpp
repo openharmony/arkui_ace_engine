@@ -455,7 +455,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         pattern->OnSectionChangedNow(start);
     };
     sections_->SetOnDataChange(callback);
-    sections_->SetOnDataChangeNow(callbackNow);
+    sections_->SetOnDataChangeCAPI(callbackNow);
     return sections_;
 }
 
@@ -467,13 +467,6 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     }
     auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
     CHECK_NULL_VOID(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (childUpdateIdx > -1 && info->GetSegment(childUpdateIdx - 1) == start && sections_->IsSpecialUpdate()) {
-        // optimize adding or removing children in the last section. Prevent complete reset of that section.
-        ++start;
-    }
     info->InitSegments(sections_->GetSectionInfo(), start);
     info->margins_.clear();
 

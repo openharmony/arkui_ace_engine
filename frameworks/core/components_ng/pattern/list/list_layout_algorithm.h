@@ -428,6 +428,7 @@ private:
     void FixPredictSnapOffsetAlignCenter();
     void FixPredictSnapOffsetAlignEnd();
     bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
+    bool LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index, bool forward, float &currPos, float crossSize);
     virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);

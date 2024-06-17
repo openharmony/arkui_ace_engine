@@ -1832,7 +1832,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-
     auto nextPrevButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(nextPrevButtonNode, nullptr);
@@ -1845,20 +1844,15 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-
-    MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-
+    textNextPrevNode->MountToParent(nextPrevButtonNode);
+    auto nextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(nextPrevEventHub, nullptr);
+    nextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonNextPrevLayoutProperty->UpdateMargin(margin);
-    buttonNextPrevLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
-    buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
-    buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
     UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1869,12 +1863,24 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
     }
-    UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, true);
-
-    textNextPrevNode->MountToParent(nextPrevButtonNode);
     auto eventNextPrevmHub = nextPrevButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventNextPrevmHub, nullptr);
-    CHECK_NULL_RETURN(dateNode, nullptr);
+    auto onClickCallback = CreateNextPrevClickEvent(textNextPrevNode, nextPrevButtonNode, dialogTheme, dateNode,
+        switchEvent, contentRow);
+    eventNextPrevmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(onClickCallback));
+    auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
+    buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
+    nextPrevButtonNode->MarkModifyDone();
+    return nextPrevButtonNode;
+}
+
+std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevClickEvent(
+    const RefPtr<FrameNode>& textNextPrevNode, const RefPtr<FrameNode>& nextPrevButtonNode,
+    const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dateNode,
+    std::function<void()>& switchEvent, const RefPtr<FrameNode>& contentRow)
+{
     auto onClickCallback = [textWeak = WeakPtr<FrameNode>(textNextPrevNode),
                             nextPrevButtonNodeWeak = WeakPtr<FrameNode>(nextPrevButtonNode),
                             dialogThemeWeak = WeakPtr<DialogTheme>(dialogTheme),
@@ -1895,7 +1901,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         CHECK_NULL_VOID(dialogTheme);
         auto buttonNextPrevLayoutProperty
                                 = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-
         if (!switchFlag_ && isShowTime_) {
             func();
         } else {
@@ -1919,10 +1924,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         }
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     };
-    eventNextPrevmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(onClickCallback));
-    nextPrevButtonNode->MarkModifyDone();
-
-    return nextPrevButtonNode;
+    return onClickCallback;
 }
 
 bool DatePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties& properties)

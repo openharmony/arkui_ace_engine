@@ -194,6 +194,16 @@ public:
         extraInfo_ = std::move(extraInfo);
     }
 
+    bool GetIsV2()
+    {
+        return isV2_;
+    }
+
+    void SetIsV2(bool isV2)
+    {
+        isV2_ = isV2;
+    }
+
     const ExtraInfo& GetExtraInfo() const
     {
         return extraInfo_;
@@ -232,6 +242,7 @@ public:
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
+    bool isV2_ = false;
 
 private:
     std::function<void()> updateFunc_;

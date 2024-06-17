@@ -346,7 +346,13 @@ void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
+
 void TextFieldModelNG::ResetMaxLength()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1057,6 +1063,10 @@ void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
 
 void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
@@ -1854,7 +1864,7 @@ void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
 
 int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
 {
-    uint32_t value = -1;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
     return value;
 }

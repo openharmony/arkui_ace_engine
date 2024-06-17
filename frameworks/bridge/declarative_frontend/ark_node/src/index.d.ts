@@ -119,6 +119,7 @@ declare class ArkComponent {
   nativePtr: NodePtr;
   constructor(nativePtr: NodePtr, classType?: ModifierType);
   setNodePtr(noed: NodePtr);
+  setInstanceId(instanceId: number): void;
   initialize(...args: Object[]);
   allowChildCount?(): number;
   allowChildTypes?(): string[];

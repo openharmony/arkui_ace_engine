@@ -1497,7 +1497,7 @@ HWTEST_F(TextPickerExTestNg, GetOptionsMultiStr002, TestSize.Level1)
     options.emplace_back(options1);
     TextPickerModelNG::GetInstance()->SetColumns(options);
     std::string result = pickerPattern->GetOptionsMultiStr();
-    std::string expectResult = "[[\"11\"]]";
+    std::string expectResult = "[[\"11\",\"12\",\"13\"]]";
     EXPECT_EQ(result, expectResult);
 }
 

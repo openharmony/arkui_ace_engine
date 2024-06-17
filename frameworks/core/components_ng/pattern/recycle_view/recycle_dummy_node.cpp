@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId)
@@ -46,6 +47,9 @@ RecycleDummyNode::~RecycleDummyNode()
     }
     auto child = GetFirstChild();
     CHECK_NULL_VOID(child);
+    auto context = PipelineContext::GetContextByContainerId(child->GetInstanceId());
+    // If the pipeline is destroyed, no need for more actions.
+    CHECK_NULL_VOID(context);
     child->DetachFromMainTree();
     auto customNode = AceType::DynamicCast<CustomNodeBase>(child);
     CHECK_NULL_VOID(customNode);

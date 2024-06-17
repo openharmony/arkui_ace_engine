@@ -102,7 +102,7 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);

@@ -136,7 +136,7 @@ void RosenWindow::RequestFrame()
                 LOGE("ArkUI request vsync,but no vsync was received within 3 seconds");
                 EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
-            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::JS,
+            taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
                 VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
 #endif

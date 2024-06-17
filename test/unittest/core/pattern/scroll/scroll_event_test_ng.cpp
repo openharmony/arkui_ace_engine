@@ -31,10 +31,11 @@ HWTEST_F(ScrolleEventTestNg, Event001, TestSize.Level1)
 {
     auto event1 = [](Dimension, ScrollState) { return ScrollFrameResult(); };
     auto event2 = [](Dimension, Dimension) { return ScrollInfo(); };
-    CreateWithContent([event1, event2](ScrollModelNG model) {
-        model.SetOnScrollFrameBegin(event1);
-        model.SetOnScrollBegin(event2);
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollFrameBegin(event1);
+    model.SetOnScrollBegin(event2);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. When set event
@@ -56,16 +57,17 @@ HWTEST_F(ScrolleEventTestNg, Event002, TestSize.Level1)
      * @tc.steps: step1. Test event in VERTICAL
      */
     bool isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
-        model.SetOnScroll(std::move(event));
-    });
+    ScrollModelNG model = CreateScroll();
+    NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
+    model.SetOnScroll(std::move(event));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step2. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -79,19 +81,21 @@ HWTEST_F(ScrolleEventTestNg, Event002, TestSize.Level1)
     /**
      * @tc.steps: step4. Test event in HORIZONTAL
      */
+    ClearOldNodes();
     isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
-        model.SetAxis(Axis::HORIZONTAL);
-        model.SetOnScroll(std::move(event));
-    });
+    model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    NG::ScrollEvent event2 = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
+    model.SetOnScroll(std::move(event2));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step5. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
     isTrigger = false;
-    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -122,16 +126,17 @@ HWTEST_F(ScrolleEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step1. Test event in VERTICAL
      */
     bool isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        NG::ScrollEdgeEvent event = [&isTrigger](ScrollEdge) { isTrigger = true; };
-        model.SetOnScrollEdge(std::move(event));
-    });
+    ScrollModelNG model = CreateScroll();
+    NG::ScrollEdgeEvent event = [&isTrigger](ScrollEdge) { isTrigger = true; };
+    model.SetOnScrollEdge(std::move(event));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step2. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -145,18 +150,20 @@ HWTEST_F(ScrolleEventTestNg, Event003, TestSize.Level1)
     /**
      * @tc.steps: step4. Test event in HORIZONTAL
      */
+    ClearOldNodes();
     isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        NG::ScrollEdgeEvent event = [&isTrigger](ScrollEdge) { isTrigger = true; };
-        model.SetAxis(Axis::HORIZONTAL);
-        model.SetOnScrollEdge(std::move(event));
-    });
+    model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    NG::ScrollEdgeEvent event2 = [&isTrigger](ScrollEdge) { isTrigger = true; };
+    model.SetOnScrollEdge(std::move(event2));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step5. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -180,20 +187,21 @@ HWTEST_F(ScrolleEventTestNg, Event004, TestSize.Level1)
      * @tc.steps: step1. Test onScrollStart event in VERTICAL
      */
     bool isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        OnScrollStartEvent startEvent = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollStart(std::move(startEvent));
-        OnScrollStopEvent stopEvent = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollStop(std::move(stopEvent));
-        ScrollEndEvent endEvent = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollEnd(std::move(endEvent));
-    });
+    ScrollModelNG model = CreateScroll();
+    OnScrollStartEvent startEvent = [&isTrigger]() { isTrigger = true; };
+    model.SetOnScrollStart(std::move(startEvent));
+    OnScrollStopEvent stopEvent = [&isTrigger]() { isTrigger = true; };
+    model.SetOnScrollStop(std::move(stopEvent));
+    ScrollEndEvent endEvent = [&isTrigger]() { isTrigger = true; };
+    model.SetOnScrollEnd(std::move(endEvent));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step2. Trigger onScrollStart event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_START);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_ITEM_NUMBER, SCROLL_FROM_START);
     EXPECT_TRUE(isTrigger);
 
     /**
@@ -221,7 +229,7 @@ HWTEST_F(ScrolleEventTestNg, Event004, TestSize.Level1)
      */
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
-    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, false);
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_ITEM_NUMBER, 1.f, Curves::LINEAR, false);
     EXPECT_TRUE(pattern_->GetScrollAbort());
 
     isTrigger = false;
@@ -246,12 +254,13 @@ HWTEST_F(ScrolleEventTestNg, Event005, TestSize.Level1)
      */
     bool reachStart = false;
     bool reachEnd = false;
-    CreateWithContent([&reachStart, &reachEnd](ScrollModelNG model) {
-        auto reachStartEvent = [&reachStart]() { reachStart = true; };
-        model.SetOnReachStart(std::move(reachStartEvent));
-        auto reachEndEvent = [&reachEnd]() { reachEnd = true; };
-        model.SetOnReachEnd(std::move(reachEndEvent));
-    });
+    ScrollModelNG model = CreateScroll();
+    auto reachStartEvent = [&reachStart]() { reachStart = true; };
+    model.SetOnReachStart(std::move(reachStartEvent));
+    auto reachEndEvent = [&reachEnd]() { reachEnd = true; };
+    model.SetOnReachEnd(std::move(reachEndEvent));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(reachStart);
     EXPECT_TRUE(pattern_->isInitialized_);
@@ -260,7 +269,7 @@ HWTEST_F(ScrolleEventTestNg, Event005, TestSize.Level1)
      * @tc.steps: step2. Trigger event by UpdateCurrentOffset
      * @tc.expected: reachEnd is true
      */
-    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_LINE_NUMBER - SCROLL_HEIGHT));
+    UpdateCurrentOffset(-(ITEM_HEIGHT * TOTAL_ITEM_NUMBER - SCROLL_HEIGHT));
     EXPECT_TRUE(reachEnd);
 
     /**
@@ -282,12 +291,13 @@ HWTEST_F(ScrolleEventTestNg, Event006, TestSize.Level1)
 {
     bool isStartTrigger = false;
     bool isStopTrigger = false;
-    CreateWithContent([&isStartTrigger, &isStopTrigger](ScrollModelNG model) {
-        OnScrollStartEvent startEvent = [&isStartTrigger]() { isStartTrigger = true; };
-        OnScrollStopEvent stopEvent = [&isStopTrigger]() { isStopTrigger = true; };
-        model.SetOnScrollStart(std::move(startEvent));
-        model.SetOnScrollStop(std::move(stopEvent));
-    });
+    ScrollModelNG model = CreateScroll();
+    OnScrollStartEvent startEvent = [&isStartTrigger]() { isStartTrigger = true; };
+    OnScrollStopEvent stopEvent = [&isStopTrigger]() { isStopTrigger = true; };
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. Scroll with animate by run ScrollToEdge
@@ -322,7 +332,9 @@ HWTEST_F(ScrolleEventTestNg, SetGestureEvent001, TestSize.Level1)
      * @tc.steps: step1. Create scrollBar, touchEvent_
      * @tc.expected: touchEvent_ is initialized correctly
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     auto paint = pattern_->CreateNodePaintMethod();
     auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
     auto scrollBar = scrollPaint->scrollBar_.Upgrade();
@@ -343,7 +355,9 @@ HWTEST_F(ScrolleEventTestNg, SetMouseEvent001, TestSize.Level1)
      * @tc.steps: step1. Create scrollBar, mouseEvent_
      * @tc.expected: mouseEvent_ is initialized correctly
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     auto paint = pattern_->CreateNodePaintMethod();
     auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
     auto scrollBar = scrollPaint->scrollBar_.Upgrade();
@@ -387,10 +401,11 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
         didOffsetY = offsetY;
     };
     bool isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
-        model.SetOnScroll(std::move(event));
-    });
+    ScrollModelNG model = CreateScroll();
+    NG::ScrollEvent event = [&isTrigger](Dimension, Dimension) { isTrigger = true; };
+    model.SetOnScroll(std::move(event));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScrollEvent(std::move(willEvent));
     eventHub_->SetOnDidScrollEvent(std::move(didEvent));
 
@@ -398,7 +413,7 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1)
      * @tc.steps: step2. Trigger event by OnScrollCallback
      * @tc.expected: isTrigger is true
      */
-    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_HEIGHT * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
 
     EXPECT_TRUE(isTrigger);
@@ -457,9 +472,10 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
         didOffsetX = offsetX;
         didOffsetY = offsetY;
     };
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetAxis(Axis::HORIZONTAL);
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     eventHub_->SetOnWillScrollEvent(std::move(willEvent));
     eventHub_->SetOnDidScrollEvent(std::move(didEvent));
 
@@ -471,7 +487,7 @@ HWTEST_F(ScrolleEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1)
     isDidScrollTrigger = false;
     willOffsetX.Reset();
     didOffsetX.Reset();
-    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_LINE_NUMBER, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(-ITEM_WIDTH * TOTAL_ITEM_NUMBER, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isWillScrollTrigger);
     EXPECT_TRUE(isDidScrollTrigger);
@@ -505,14 +521,19 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback001, TestSize.Level1)
      * @tc.steps: step1. Axis::NONE and SCROLL_FROM_UPDATE
      * @tc.expected: Do nothing
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::NONE); });
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_FALSE(OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
 
     /**
      * @tc.steps: step2. animator_ is running and SCROLL_FROM_UPDATE
      * @tc.expected: Do nothing
      */
-    CreateWithContent();
+    CreateScroll();
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     pattern_->animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
     pattern_->animator_->Resume();
     EXPECT_FALSE(OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
@@ -530,10 +551,11 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback002, TestSize.Level1)
      * @tc.expected: Trigger FireOnScrollStart()
      */
     bool isTrigger = false;
-    CreateWithContent([&isTrigger](ScrollModelNG model) {
-        OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollStart(std::move(event));
-    });
+    ScrollModelNG model = CreateScroll();
+    OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
+    model.SetOnScrollStart(std::move(event));
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START);
     EXPECT_TRUE(isTrigger);
 
@@ -571,7 +593,10 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.steps: step1. Create the content that total size is bigger than Scroll Component
      * @tc.expected: The scrollableDistance_ is two of ITEM_HEIGHT
      */
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
     float scrollableDistance = ITEM_HEIGHT * 2;
     EXPECT_EQ(pattern_->scrollableDistance_, scrollableDistance);
 
@@ -658,10 +683,10 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.steps: step1. Create the content that total size is not bigger than Scroll Component
      * @tc.expected: The scrollableDistance_ is 0
      */
-    Create([](ScrollModelNG model) {
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateContent(VIEW_LINE_NUMBER);
-    });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollableDistance_, 0);
 
     /**
@@ -734,7 +759,10 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback004, TestSize.Level1)
  */
 HWTEST_F(ScrolleEventTestNg, OnScrollCallback005, TestSize.Level1)
 {
-    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
 
     /**
      * @tc.steps: step1. The delta is 0
@@ -761,11 +789,10 @@ HWTEST_F(ScrolleEventTestNg, OnScrollCallback005, TestSize.Level1)
      * @tc.steps: step4. The viewPortLength_ is 0
      * @tc.expected: AdjustOffset return
      */
-    ScrollModelNG model;
-    model.Create();
+    ClearOldNodes();
+    model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    CreateDone(frameNode_);
     OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     EXPECT_TRUE(IsEqualCurrentPosition(-ITEM_HEIGHT));
 }

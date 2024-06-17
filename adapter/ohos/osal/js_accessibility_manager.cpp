@@ -3244,12 +3244,8 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    nlohmann::json textJson;
-    if (!nlohmann::json::accept(text)) {
-        return;
-    }
-    textJson = nlohmann::json::parse(text, nullptr, false);
-    if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
+    nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+    if (textJson.is_null() || !textJson.contains("type")) {
         return;
     }
     if (textJson["type"] == "textType") {
@@ -3951,7 +3947,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     if (!IsRegister()) {
         return;
     }
-    int windowId = GetWindowId();
+    int windowId = static_cast<int>(GetWindowId());
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
@@ -4070,7 +4066,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
-    int32_t windowId = GetWindowId();
+    uint32_t windowId = GetWindowId();
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
     interactionOperation->SetHandler(WeakClaim(this));
     Accessibility::Registration registration {
@@ -4101,13 +4097,13 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
-    int32_t windowId = GetWindowId();
+    uint32_t windowId = GetWindowId();
     Register(false);
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
-    parentWindowId_ = -1;
+    parentWindowId_ = 0;
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
@@ -4832,23 +4828,14 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode && !frameNode->IsInternal()) {
         std::string text = searchParam.text;
-        nlohmann::json textJson;
-        if (!nlohmann::json::accept(text)) {
-            return;
-        }
-        textJson = nlohmann::json::parse(text, nullptr, false);
+        nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
         std::string value = "";
-        if (!textJson.is_null() && textJson.contains("value") && !textJson.is_discarded()) {
+        if (!textJson.is_null() && textJson.contains("value")) {
             value = textJson["value"];
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
-        nlohmann::json textTypeJson;
-        if (!nlohmann::json::accept(textType)) {
-            return;
-        }
-        textTypeJson = nlohmann::json::parse(textType, nullptr, false);
-        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value &&
-            !textJson.is_discarded()) {
+        nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
+        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
             infos.emplace_back(nodeInfo);

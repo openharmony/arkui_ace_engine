@@ -318,6 +318,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 idealSize, gridLayoutProperty, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutProperty));
             itemsPosition_.try_emplace(index,
                 ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutWrapper));
+
+            PrintConflictingPositionLog(itemIndex, rect, rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
 
         if (childLayoutProperty) {
@@ -378,4 +380,15 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+void GridLayoutAlgorithm::PrintConflictingPositionLog(
+    int32_t itemIndex, GridItemRect rect, int32_t rowIndex, int32_t colIndex, int32_t rowSpan, int32_t colSpan)
+{
+    if (!(rect.rowStart == -1 && rect.columnStart == -1 && rect.rowSpan == 1 && rect.columnSpan == 1)) {
+        TAG_LOGI(AceLogTag::ACE_GRID,
+            "item index:%{public}d has been set to a conflicting position row:%{public}d, col:%{public}d, "
+            "rowSpan:%{public}d, colSpan:%{public}d. reset to [%{public}d, %{public}d, %{public}d, %{public}d]",
+            itemIndex, rect.rowStart, rect.columnStart, rect.rowSpan, rect.columnSpan, rowIndex, colIndex, rowSpan,
+            colSpan);
+    }
+}
 } // namespace OHOS::Ace::NG

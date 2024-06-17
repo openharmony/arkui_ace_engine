@@ -513,7 +513,7 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    spanTextLength += StringUtils::ToWstring(child->content).length();
+    spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
 }

@@ -53,8 +53,9 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "current focus node info : (%{public}s/%{public}d).",
         curFocusNode->GetTag().c_str(), curFocusNode->GetId());
 
-    if (curFocusNode_ && curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG &&
-        curFocusNode_ != curFocusNode) {
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG &&
+        currentFocusNode != curFocusNode) {
         curFocusNode_ = curFocusNode;
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
         auto pattern = curFocusNode->GetPattern();
@@ -72,7 +73,7 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
         ProcessKeyboard(curFocusNode);
     }
 #else
-    CloseKeyboard(curFrameNode);
+    CloseKeyboard(curFocusNode);
 #endif
 }
 
@@ -133,18 +134,21 @@ void InputMethodManager::SetWindowFocus(bool windowFocus)
 
 bool InputMethodManager::NeedSoftKeyboard() const
 {
-    if (curFocusNode_ && (curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
-                             curFocusNode_->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    CHECK_NULL_RETURN(currentFocusNode, false);
+    if (currentFocusNode && (currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+                             currentFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG)) {
         return true;
     }
-    auto pattern = curFocusNode_->GetPattern();
+    auto pattern = currentFocusNode->GetPattern();
     return pattern->NeedSoftKeyboard();
 }
 
 void InputMethodManager::CloseKeyboard()
 {
-    CHECK_NULL_VOID(curFocusNode_);
-    auto pipeline = curFocusNode_->GetContext();
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    CHECK_NULL_VOID(currentFocusNode);
+    auto pipeline = currentFocusNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
@@ -193,7 +197,8 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 
 void InputMethodManager::ProcessModalPageScene()
 {
-    if (curFocusNode_ && curFocusNode_->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    auto currentFocusNode = curFocusNode_.Upgrade();
+    if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {
         CloseKeyboard();

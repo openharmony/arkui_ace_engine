@@ -378,13 +378,13 @@ void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
     contentSize_ = frameSize;
     dividerSize_ = SizeF(0.0f, frameSize.Height());
     if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        SizeCalculationSplit(navigationLayoutProperty, frameSize);
+        SizeCalculationSplit(hostNode, navigationLayoutProperty, frameSize);
     } else {
         SizeCalculationStack(hostNode, navigationLayoutProperty, frameSize);
     }
 }
 
-void NavigationLayoutAlgorithm::SizeCalculationSplit(
+void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
 {
     float frameWidth = frameSize.Width();
@@ -397,8 +397,14 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     auto minContentWidth = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     realContentWidth_ = minContentWidth;
 
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarSize_.SetWidth(0.0f);
+    bool isHideNavbar = navigationLayoutProperty->GetHideNavBar().value_or(false);
+    if (isHideNavbar) {
+        CHECK_NULL_VOID(hostNode);
+        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto geometryNode = navBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        navBarSize_.SetWidth(geometryNode->GetFrameSize().Width());
         dividerSize_.SetWidth(0.0f);
         realNavBarWidth_ = 0.0f;
         realContentWidth_ = frameWidth;
@@ -415,8 +421,10 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     } else {
         realDividerWidth_ = dividerWidth;
     }
-    navBarSize_.SetWidth(realNavBarWidth_);
-    dividerSize_.SetWidth(realDividerWidth_);
+    if (!isHideNavbar) {
+        navBarSize_.SetWidth(realNavBarWidth_);
+        dividerSize_.SetWidth(realDividerWidth_);
+    }
     contentSize_.SetWidth(realContentWidth_);
 }
 

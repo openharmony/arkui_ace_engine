@@ -15,6 +15,8 @@
 
 stateMgmtConsole.info("ACE State Management component is initiaizing ...")
 
+PersistenceV2Impl.configureBackend(new Storage());
+
 PersistentStorage.configureBackend(new Storage());
 
 Environment.configureBackend(new EnvironmentSetting());

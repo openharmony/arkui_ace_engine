@@ -2922,6 +2922,11 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   }
 }
 
+declare class __JSScopeUtil__ {
+  static syncInstanceId(instanceId: number): void;
+  static restoreInstanceId(): void;
+}
+
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -2930,19 +2935,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
   _gestureEvent: UIGestureEvent;
+  _instanceId: number;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._instanceId = -1;
     if (classType === ModifierType.FRAME_NODE) {
       this._modifiersWithKeys = new ObservedMap();
       (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
         if (this.nativePtr === undefined) {
           return;
         }
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.syncInstanceId(this._instanceId);
+        }
         value.applyStage(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.restoreInstanceId();
+        }
       })
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
@@ -2957,6 +2970,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   setNodePtr(nodePtr: KNode) {
     this.nativePtr = nodePtr;
+  }
+
+  setInstanceId(instanceId: number): void {
+    this._instanceId = instanceId;
   }
 
   getOrCreateGestureEvent() {

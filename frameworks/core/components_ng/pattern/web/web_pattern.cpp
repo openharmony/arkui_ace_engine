@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -1660,6 +1659,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
+    lastKeyboardHeight_ = keyboard;
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         return;
     }
@@ -1672,16 +1672,7 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         return;
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipelineContext = host->GetContextRefPtr();
-        CHECK_NULL_VOID(pipelineContext);
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto bottomArea = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto topArea = NearZero(GetCoordinatePoint()->GetY()) ? safeAreaManager->GetSystemSafeArea().top_.Length()
-                                                              : GetCoordinatePoint()->GetY();
-        double newHeight = height - keyboard - bottomArea - topArea;
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
         if (GreatOrEqual(newHeight, oldWebHeight)) {
             newHeight = oldWebHeight;
         }
@@ -2215,19 +2206,6 @@ void WebPattern::InitEnhanceSurfaceFlag()
     }
 }
 
-void WebPattern::UpdateBackgroundColorForSurface()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (renderContext->GetBackgroundColor().has_value() &&
-        renderContext->GetBackgroundColor().value() != Color::TRANSPARENT) {
-        renderContextForSurface_->UpdateBackgroundColor(Color::WHITE);
-    }
-}
-
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2267,10 +2245,9 @@ void WebPattern::OnModifyDone()
             CHECK_NULL_VOID(renderSurface_);
             renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            if (renderMode_ == RenderMode::ASYNC_RENDER) {
-                static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
-                renderContextForSurface_->InitContext(false, param);
-            }
+            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                "RosenWeb" };
+            renderContextForSurface_->InitContext(false, param);
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2278,12 +2255,11 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
-                UpdateBackgroundColorForSurface();
                 renderSurface_->SetIsTexture(false);
                 renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
                 renderSurface_->SetRenderContext(renderContextForSurface_);
-                renderContext->AddChild(renderContextForSurface_, 0);
             }
+            renderContext->AddChild(renderContextForSurface_, 0);
             renderSurface_->InitSurface();
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
@@ -2395,13 +2371,6 @@ void WebPattern::OnModifyDone()
         PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
-    auto touchMoveListenerTask = [weak = AceType::WeakClaim(this)]() {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->InitTouchEventListener();
-    };
-    PostTaskToUI(std::move(touchMoveListenerTask), "ArkUIWebInitTouchEventListener");
-
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2477,7 +2446,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateWebLayoutSize(width, height, false);
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
-    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+    } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
         drawSizeCache_.SetSize(drawSize_);
         if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -2540,6 +2509,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = false;
+    InitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
@@ -2567,6 +2537,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
+    UninitTouchEventListener();
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -2642,6 +2613,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
+    UninitTouchEventListener();
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -3482,26 +3454,29 @@ void WebPattern::NotifyForNextTouchEvent()
 void WebPattern::InitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitTouchEventListener");
-    std::shared_ptr<TouchEventListener> listener = std::make_shared<TouchEventListener>();
-    listener->SetPatternToListener(AceType::WeakClaim(this));
+    if (touchEventListener_) {
+        return;
+    }
+    touchEventListener_ = std::make_shared<TouchEventListener>();
+    touchEventListener_->SetPatternToListener(AceType::WeakClaim(this));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
-    context->RegisterTouchEventListener(listener);
+    context->RegisterTouchEventListener(touchEventListener_);
 }
 
 void WebPattern::UninitTouchEventListener()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitTouchEventListener");
+    touchEventListener_ = nullptr;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
     context->UnregisterTouchEventListener(AceType::WeakClaim(this));
 }
 
@@ -4848,27 +4823,15 @@ void WebPattern::OnRebuildFrame()
     renderContext->AddChild(renderContextForSurface_, 0);
 }
 
-void WebPattern::CreateOverlay(
-    const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight,
-    int pointX,
-    int pointY)
+void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+    int rectHeight, int pointX, int pointY)
 {
     if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(
-            GetHost(),
-            ImageAnalyzerHolder::WEB);
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::WEB);
     }
-    TAG_LOGI(
-        AceLogTag::ACE_WEB,
-        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "CreateOverlay, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d", offsetX, offsetY,
+        rectWidth, rectHeight);
     auto callback = [weak = AceType::WeakClaim(this)]() {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4876,37 +4839,17 @@ void WebPattern::CreateOverlay(
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
     imageAnalyzerManager_->UpdatePressOverlay(
-        pixelMap,
-        offsetX,
-        offsetY,
-        rectWidth,
-        rectHeight,
-        pointX,
-        pointY,
-        std::move(callback));
+        pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(callback));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
 }
 
-void WebPattern::OnOverlayStateChanged(
-    int offsetX,
-    int offsetY,
-    int rectWidth,
-    int rectHeight)
+void WebPattern::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
     if (imageAnalyzerManager_) {
-        TAG_LOGI(
-            AceLogTag::ACE_WEB,
+        TAG_LOGI(AceLogTag::ACE_WEB,
             "OnOverlayStateChanged, offsetX=%{public}d, offsetY=%{public}d, width=%{public}d, height=%{public}d",
-            offsetX,
-            offsetY,
-            rectWidth,
-            rectHeight);
-        imageAnalyzerManager_->UpdateOverlayStatus(
-            true,
-            offsetX,
-            offsetY,
-            rectWidth,
-            rectHeight);
+            offsetX, offsetY, rectWidth, rectHeight);
+        imageAnalyzerManager_->UpdateOverlayStatus(true, offsetX, offsetY, rectWidth, rectHeight);
     }
 }
 

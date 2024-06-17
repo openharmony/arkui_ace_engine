@@ -214,7 +214,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     auto pattern = GetPattern<NavigationPattern>();
     // record remove destination size
     int32_t removeSize = 0;
-    while (slot + removeSize < navigationContentNode->GetChildren().size()) {
+    while (static_cast<int32_t>(slot) + removeSize < navigationContentNode->GetChildren().size()) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
         if (!navDestination) {

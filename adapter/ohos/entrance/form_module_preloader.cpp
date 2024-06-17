@@ -32,19 +32,23 @@ namespace {
     std::mutex gMapLock_;
 }
 #ifdef FORM_SUPPORTED
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime, const char* bundleName)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime, const char* bundleName,
+    const void* hapPathMap)
 {
     std::unordered_set<std::string> formModuleList;
-    if (!FormModulePreloader::CreateFormModuleList(std::string(bundleName), formModuleList)) {
+    auto hapPathMapPtr = reinterpret_cast<const std::map<std::string, std::string>*>(hapPathMap);
+    if (!FormModulePreloader::CreateFormModuleList(std::string(bundleName), formModuleList, hapPathMapPtr)) {
         LOGW("CreateFormModuleList failed, will load all modules later.");
     }
     Framework::JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime, formModuleList);
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, const char* bundleName)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, const char* bundleName,
+    const void* hapPathMap)
 {
     std::unordered_set<std::string> formModuleList;
-    bool ret = FormModulePreloader::GetNewFormModuleList(std::string(bundleName), formModuleList);
+    auto hapPathMapPtr = reinterpret_cast<const std::map<std::string, std::string>*>(hapPathMap);
+    bool ret = FormModulePreloader::GetNewFormModuleList(std::string(bundleName), formModuleList, hapPathMapPtr);
     if (ret && formModuleList.empty()) {
         LOGI("There are no new components to load.");
         return;
@@ -56,10 +60,10 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, con
 }
 #endif
 
-bool FormModulePreloader::CreateFormModuleList(
-    const std::string& bundleName, std::unordered_set<std::string>& formModuleList)
+bool FormModulePreloader::CreateFormModuleList(const std::string& bundleName,
+    std::unordered_set<std::string>& formModuleList, const std::map<std::string, std::string>* hapPathMap)
 {
-    if (ReadFormModuleList(bundleName, formModuleList, false)) {
+    if (ReadFormModuleList(bundleName, formModuleList, hapPathMap, false)) {
         std::lock_guard<std::mutex> lock(gMapLock_);
         gFormModuleMap_.emplace(bundleName, formModuleList);
         LOGI("push formModuleList to map, bundleName: %{public}s.", bundleName.c_str());
@@ -68,8 +72,8 @@ bool FormModulePreloader::CreateFormModuleList(
     return false;
 }
 
-bool FormModulePreloader::GetNewFormModuleList(
-    const std::string& bundleName, std::unordered_set<std::string>& formModuleList)
+bool FormModulePreloader::GetNewFormModuleList(const std::string& bundleName,
+    std::unordered_set<std::string>& formModuleList, const std::map<std::string, std::string>* hapPathMap)
 {
     {
         std::lock_guard<std::mutex> lock(gMapLock_);
@@ -79,39 +83,41 @@ bool FormModulePreloader::GetNewFormModuleList(
             return true;
         }
     }
-    return ReadFormModuleList(bundleName, formModuleList, true);
+    return ReadFormModuleList(bundleName, formModuleList, hapPathMap, true);
 }
 
-bool FormModulePreloader::ReadFormModuleList(
-    const std::string& bundleName, std::unordered_set<std::string>& formModuleList, bool isReloadCondition)
+bool FormModulePreloader::ReadFormModuleList(const std::string& bundleName, std::unordered_set<std::string>&
+    formModuleList, const std::map<std::string, std::string>* hapPathMap, bool isReloadCondition)
 {
-    std::vector<std::string> hapPaths;
-    GetHapPathsByBundleName(bundleName, hapPaths);
-    if (hapPaths.empty()) {
-        LOGE("hapPath of bundle %{public}s is empty.", bundleName.c_str());
+    if (hapPathMap == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "hapPathMap of bundle %{public}s is null.", bundleName.c_str());
         return false;
     }
-    LOGI("hapPaths size of bundle %{public}s is %{public}zu", bundleName.c_str(), hapPaths.size());
-    for (const std::string& hapPath : hapPaths) {
+    TAG_LOGI(AceLogTag::ACE_FORM, "hapPaths size of bundle %{public}s is %{public}zu",
+        bundleName.c_str(), hapPathMap->size());
+    bool readSuccess = false;
+    for (auto hapPathPair: *hapPathMap) {
+        const std::string& hapPath = hapPathPair.second;
         // Create HapAssetProvider
         RefPtr<AssetManager> assetManager = CreateAssetManager(hapPath);
         if (assetManager == nullptr) {
             LOGE("CreateAssetManager failed, hapPath: %{private}s.", hapPath.c_str());
-            return false;
+            continue;
         }
         // Read component_collection.json
         std::string content;
         if (!ReadFileFromAssetManager(assetManager, "component_collection.json", content)) {
             LOGE("Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
-            return false;
+            continue;
         }
         // Parse component_collection.json
         if (!ParseComponentCollectionJson(bundleName, content, formModuleList, isReloadCondition)) {
             LOGE("Parse component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
-            return false;
+            continue;
         }
+        readSuccess = true;
     }
-    return true;
+    return readSuccess;
 }
 
 bool FormModulePreloader::ParseComponentCollectionJson(
@@ -151,28 +157,6 @@ bool FormModulePreloader::ParseComponentCollectionJson(
         }
     }
     return true;
-}
-
-void FormModulePreloader::GetHapPathsByBundleName(const std::string& bundleName, std::vector<std::string>& hapPaths)
-{
-    // Create AssetProvider and get all hap-paths of target bundle
-    std::string packagePath = "/data/bundles/" + bundleName + "/";
-    std::vector<std::string> basePaths;
-    basePaths.push_back("/");
-    auto assetProvider = CreateAssetProviderImpl(packagePath, basePaths, false);
-    if (assetProvider == nullptr) {
-        LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
-        return;
-    }
-    assetProvider->GetAssetList("", hapPaths);
-    for (auto iter = hapPaths.begin(); iter != hapPaths.end();) {
-        if (!std::regex_match(*iter, std::regex(".*\\.hap"))) {
-            iter = hapPaths.erase(iter);
-        } else {
-            *iter = packagePath + *iter;
-            ++iter;
-        }
-    }
 }
 
 bool FormModulePreloader::ReadFileFromAssetManager(

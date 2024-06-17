@@ -30,6 +30,7 @@ group("advanced_ui_component") {
     "formmenu/interfaces:formmenu",
     "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+    "interstitialdialogaction/interfaces:interstitialdialogaction",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
     "segmentbutton/interfaces:segmentbutton",

@@ -65,7 +65,7 @@ private:
         T value = defaultValue;
         if (jsValueRef->IsNumber()) {
             if (std::is_same<T, uint32_t>::value) {
-                value = jsValueRef->Uint32Value(vm);
+                value = static_cast<uint32_t>(jsValueRef->Uint32Value(vm));
             } else if (std::is_same<T, int32_t>::value) {
                 value = jsValueRef->Int32Value(vm);
             } else if (std::is_same<T, int64_t>::value) {

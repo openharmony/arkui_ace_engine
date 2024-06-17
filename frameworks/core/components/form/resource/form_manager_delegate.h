@@ -139,6 +139,7 @@ public:
     static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();
+    void ProcessEnableForm(bool enable);
 #endif
     void HandleCachedClickEvents();
 

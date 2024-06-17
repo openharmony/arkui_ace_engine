@@ -35,15 +35,20 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
-            // first create child node and wrapper.
-            auto* stack = ViewStackProcessor::GetInstance();
-            auto nodeId = stack->ClaimNodeId();
-            auto frameNode =
-                FrameNode::GetOrCreateFrameNode("dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-            stack->Push(frameNode);
-            auto child = renderFunction_();
-            renderFunction_ = nullptr;
-            stack->Pop();
+            RefPtr<UINode> child;
+            RefPtr<FrameNode> frameNode;
+            {
+                // first create child node and wrapper.
+                ScopedViewStackProcessor scopedViewStackProcessor;
+                auto* stack = ViewStackProcessor::GetInstance();
+                auto nodeId = stack->ClaimNodeId();
+                frameNode = FrameNode::GetOrCreateFrameNode(
+                    "dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+                stack->Push(frameNode);
+                child = renderFunction_();
+                renderFunction_ = nullptr;
+                stack->Pop();
+            }
             CHECK_NULL_VOID(child);
             auto layoutWrapperNode = DynamicCast<LayoutWrapperNode>(Claim(layoutWrapper));
             for (const auto& child : frameNode->GetChildren()) {

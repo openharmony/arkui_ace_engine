@@ -262,6 +262,8 @@ public:
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
+    void SetResponseRegionFull();
+    void ResetResponseRegion();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -298,11 +300,13 @@ private:
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
+    std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
+    bool isResponseRegionFull = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

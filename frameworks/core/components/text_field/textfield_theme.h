@@ -572,6 +572,11 @@ public:
         return cancelButton_;
     }
 
+    const Dimension& getInlinePaddingRight() const
+    {
+        return inlinePaddingRight_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -670,6 +675,8 @@ private:
     Color previewBoardColor_;
 
     std::string cancelButton_;
+
+    Dimension inlinePaddingRight_ = 12.0_vp;
 };
 
 } // namespace OHOS::Ace

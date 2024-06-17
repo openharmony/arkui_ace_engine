@@ -313,8 +313,6 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
      * @tc.steps: step3. pattern InitClickEvent.
      * @tc.expected: step3. check whether clickListener_ is initialized.
      */
-    EXPECT_FALSE(togglePattern->clickListener_);
-    togglePattern->InitClickEvent();
     EXPECT_TRUE(togglePattern->clickListener_);
 }
 
@@ -355,7 +353,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), dimensionValue);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), childDimensionValue);
 
     /**
      * @tc.steps: step4. Creat child node and set font size.

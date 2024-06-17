@@ -15,7 +15,6 @@
 
 const Chip = requireNapi('arkui.advanced.Chip').Chip;
 const ChipSize = requireNapi('arkui.advanced.Chip').ChipSize;
-const SymbolOptions = requireNapi('arkui.advanced.Chip').SymbolOptions;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 
 if (!("finalizeConstruction" in ViewPU.prototype)) {
@@ -47,7 +46,8 @@ const iconGroupSuffixTheme = {
     normalBackgroundSize: 36,
     marginLeft: 8,
     marginRight: 16,
-    fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+    fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    defaultEffect: -1
 };
 var ChipGroupHeight;
 (function (w4) {
@@ -108,12 +108,16 @@ export class IconGroupSuffix extends ViewPU {
         }
         this.__chipSize = this.initializeConsume("chipSize", "chipSize");
         this.__items = new SynchedPropertyObjectOneWayPU(f4.items, this, "items");
+        this.symbolEffect = new SymbolEffect();
         this.setInitiallyProvidedValue(f4);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(d4) {
         if (d4.items === undefined) {
             this.__items.set([]);
+        }
+        if (d4.symbolEffect !== undefined) {
+            this.symbolEffect = d4.symbolEffect;
         }
     }
     updateStateVars(c4) {
@@ -208,6 +212,9 @@ export class IconGroupSuffix extends ViewPU {
                                 SymbolGlyph.fontSize(this.getIconSize());
                                 SymbolGlyph.attributeModifier.bind(this)(f3);
                                 SymbolGlyph.focusable(true);
+                                SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                SymbolGlyph.symbolEffect(this.symbolEffect, false);
+                                SymbolGlyph.symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect);
                                 if (!r3) {
                                     SymbolGlyph.pop();
                                 }

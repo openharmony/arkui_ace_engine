@@ -165,6 +165,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEvent_GetNode"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_NativeXComponent_RegisterUIInputEventCallback"
     },
     {
@@ -1382,5 +1386,249 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_ListItemSwipeActionOption_SetOnOffsetChangeWithUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetICurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetICurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_SetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_SetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_SetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_SetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_GetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_GetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_GetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_KeyframeAnimateOption_GetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_ArkUI_AnimatorOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetFill"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetBegin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetKeyframe"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_SetKeyframeCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetFill"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetDirection"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetBegin"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetEnd"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetKeyframeTime"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetKeyframeValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_GetKeyframeCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOnFrameEvent_GetUserData"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOnFrameEvent_GetValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_RegisterOnFrameCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_RegisterOnFinishCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_RegisterOnCancelCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_ResetAnimatorOption"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_Play"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_Finish"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_Pause"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_Cancel"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Animator_Reverse"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_InitCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_StepsCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_CubicBezierCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_SpringCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_SpringMotion"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_ResponsiveSpringMotion"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_InterpolatingSpring"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_CustomCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_Curve_disposeCurve"
     }
 ]

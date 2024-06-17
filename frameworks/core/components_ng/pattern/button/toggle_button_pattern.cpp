@@ -109,6 +109,7 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     HandleBorderColorAndWidth();
+    InitClickEvent();
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
@@ -418,10 +419,6 @@ void ToggleButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
-    if (toggleButtonPattern) {
-        toggleButtonPattern->OnClick();
-    }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
@@ -572,9 +569,7 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (!textLayoutProperty->HasFontSize()) {
-        textLayoutProperty->UpdateFontSize(textFontSize_);
-    } else {
+    if (textLayoutProperty->HasFontSize()) {
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));

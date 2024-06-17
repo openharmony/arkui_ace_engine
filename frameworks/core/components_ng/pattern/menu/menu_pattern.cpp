@@ -230,7 +230,9 @@ void MenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateMenuItemChildren(host);
+    isNeedDivider_ = false;
+    auto uiNode = AceType::DynamicCast<UINode>(host);
+    UpdateMenuItemChildren(uiNode);
 
     auto innerMenuCount = GetInnerMenuCount();
     if (innerMenuCount == 1) {
@@ -368,7 +370,9 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateMenuItemChildren(host);
+    ResetNeedDivider();
+    auto uiNode = AceType::DynamicCast<UINode>(host);
+    UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
 
     auto renderContext = host->GetRenderContext();
@@ -486,12 +490,12 @@ void MenuPattern::RemoveParentHoverStyle()
     menuItemPattern->PlayBgColorAnimation();
 }
 
-void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
+void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     const auto& children = host->GetChildren();
-    bool needDivider = false;
     int32_t index = 0;
     for (auto child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
@@ -509,16 +513,23 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
                 expandNode->MarkModifyDone();
                 expandNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
-            itemPattern->UpdateNeedDivider(needDivider);
-            needDivider = true;
+            itemPattern->UpdateNeedDivider(isNeedDivider_);
+            isNeedDivider_ = true;
             itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
+            auto pattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemGroupPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->ModifyDivider();
+            auto itemGroupNode = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(itemGroupNode);
+            isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
-            needDivider = false;
+            isNeedDivider_ = false;
+        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+            auto nodesSet = AceType::DynamicCast<UINode>(child);
+            CHECK_NULL_VOID(nodesSet);
+            UpdateMenuItemChildren(nodesSet);
         } else {
             // do nothing
         }
@@ -1627,7 +1638,7 @@ float MenuPattern::GetSelectMenuWidth()
     return finalWidth;
 }
 
-void MenuPattern::OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press)
+void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press)
 {
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
@@ -1635,11 +1646,20 @@ void MenuPattern::OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, 
         CHECK_NULL_VOID(pattern);
         pattern->OnIntItemPressed(index, press);
     }
-    const auto& children = parent->GetChildren();
-    if (index >= children.size() - 1) {
-        return;
+    RefPtr<UINode> nextNode = nullptr;
+    if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        nextNode = GetForEachMenuItem(parent, true);
+    } else {
+        const auto& children = parent->GetChildren();
+        if (index >= children.size() - 1) {
+            return;
+        }
+        nextNode = parent->GetChildAtIndex(index + 1);
     }
-    auto nextNode = parent->GetChildAtIndex(index + 1);
+    CHECK_NULL_VOID(nextNode);
+    if (nextNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        nextNode = GetForEachMenuItem(nextNode, true);
+    }
     CHECK_NULL_VOID(nextNode);
     if (!InstanceOf<FrameNode>(nextNode)) {
         LOGW("next menuNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
@@ -1669,6 +1689,55 @@ void MenuPattern::OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, 
             pattern->OnExtItemPressed(press, false);
         }
     }
+}
+
+RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, bool next)
+{
+    CHECK_NULL_RETURN(parent, nullptr);
+    if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        auto forEachNode = AceType::DynamicCast<UINode>(parent->GetParent());
+        CHECK_NULL_RETURN(forEachNode, nullptr);
+        auto syntIndex = forEachNode->GetChildIndex(parent);
+        const auto& children = forEachNode->GetChildren();
+        if (next) {
+            if (syntIndex < children.size() - 1) { // next is inside forEach
+                auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
+                CHECK_NULL_RETURN(nextSyntax, nullptr);
+                return nextSyntax->GetFirstChild();
+            } else { // next is after forEach
+                return GetOutsideForEachMenuItem(forEachNode, true);
+            }
+        } else {
+            if (syntIndex > 0) { // prev is inside forEach
+                auto prevSyntax = forEachNode->GetChildAtIndex(syntIndex - 1);
+                CHECK_NULL_RETURN(prevSyntax, nullptr);
+                return prevSyntax->GetFirstChild();
+            } else { // prev is before forEach
+                return GetOutsideForEachMenuItem(forEachNode, false);
+            }
+        }
+    }
+    if (parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
+        auto nextSyntax = next? parent->GetFirstChild(): parent->GetLastChild();
+        CHECK_NULL_RETURN(nextSyntax, nullptr);
+        return nextSyntax->GetFirstChild();
+    }
+    return nullptr;
+}
+
+RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next)
+{
+    auto parentForEachNode = AceType::DynamicCast<UINode>(forEachNode->GetParent());
+    CHECK_NULL_RETURN(parentForEachNode, nullptr);
+    auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
+    int32_t shift = next ? 1 : -1;
+    const auto& children = parentForEachNode->GetChildren();
+    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= children.size() - 1) {
+        return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
+    } else {
+        return nullptr;
+    }
+
 }
 
 } // namespace OHOS::Ace::NG

@@ -270,6 +270,8 @@ ohos_source_set("ace_components_syntax") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components_ng/syntax/content_slot_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/content_slot_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/if_else_model_ng.cpp",
@@ -277,6 +279,7 @@ ohos_source_set("ace_components_syntax") {
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_builder.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/node_content.cpp",
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]

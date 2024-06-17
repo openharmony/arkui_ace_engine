@@ -136,6 +136,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "background_task_helper_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
@@ -150,7 +151,9 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
+      "ability_runtime:wantagent_innerkits",
       "app_file_service:fileuri_native",
+      "background_task_mgr:bgtaskmgr_innerkits",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
       "graphic_2d:drawing_napi_impl",

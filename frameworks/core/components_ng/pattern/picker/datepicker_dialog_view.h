@@ -142,6 +142,10 @@ private:
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(
         const RefPtr<FrameNode>& monthAndDayPickerNode, const RefPtr<FrameNode>& timePickerNode,
         const RefPtr<FrameNode>& contentRow);
+    static std::function<void(const GestureEvent&)> CreateNextPrevClickEvent(
+        const RefPtr<FrameNode>& textNextPrevNode, const RefPtr<FrameNode>& nextPrevButtonNode,
+        const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dateNode,
+        std::function<void()>& switchEvent, const RefPtr<FrameNode>& contentRow);
     static void SwitchTimePickerPage(
         const RefPtr<FrameNode> &monthAndDayPickerNode, const RefPtr<FrameNode> &timePickerNode,
         const RefPtr<FrameNode> &contentRow);

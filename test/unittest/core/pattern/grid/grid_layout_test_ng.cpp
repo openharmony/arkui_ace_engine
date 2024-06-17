@@ -1582,4 +1582,92 @@ HWTEST_F(GridLayoutTestNg, GetResetMode001, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 10), std::make_pair(true, false));
     EXPECT_EQ(layoutAlgorithm->GetResetMode(wrapper, 25), std::make_pair(false, true));
 }
+
+/**
+ * @tc.name: LayoutWithAutoStretch001
+ * @tc.desc: Test Grid Layout with auto-stretch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch001, TestSize.Level1)
+{
+    float itemWidth = 80.0f;
+    float itemHeight = 150.0f;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("repeat(auto-stretch, 80)");
+    model.SetRowsTemplate("repeat(auto-stretch, 150)");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateGridItems(25, itemWidth, itemHeight);
+    CreateDone(frameNode_);
+
+    int32_t rowsNumber = 5;
+    int32_t columnsNumber = 5;
+    float realColumnsGap = 20.f;
+    float realRowsGap = 12.5f;
+    for (int32_t index = 0; index < 25; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index % columnsNumber * (itemWidth + realColumnsGap);
+        float offsetY = index / rowsNumber * (itemHeight + realRowsGap);
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, itemHeight);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: LayoutWithAutoStretch002
+ * @tc.desc: Test Vertical Grid Layout with auto-stretch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch002, TestSize.Level1)
+{
+    float itemWidth = 80.0f;
+    float itemHeight = 150.0f;
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("repeat(auto-stretch, 150)");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateGridItems(25, itemWidth, itemHeight);
+    CreateDone(frameNode_);
+
+    int32_t rowsNumber = 5;
+    int32_t columnsNumber = 5;
+    float realColumnsGap = 10.f;
+    float realRowsGap = 12.5f;
+    for (int32_t index = 0; index < 25; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index / columnsNumber * (itemWidth + realColumnsGap);
+        float offsetY = index % rowsNumber * (itemHeight + realRowsGap);
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, itemHeight);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
+
+/**
+ * @tc.name: LayoutWithAutoStretch003
+ * @tc.desc: Test Horizental Grid Layout with auto-stretch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
+{
+    float itemWidth = 80.0f;
+    float itemHeight = 150.0f;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("repeat(auto-stretch, 80)");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateGridItems(25, itemWidth, itemHeight);
+    CreateDone(frameNode_);
+
+    int32_t rowsNumber = 5;
+    int32_t columnsNumber = 5;
+    float realColumnsGap = 20.f;
+    float realRowsGap = 10.f;
+    for (int32_t index = 0; index < 25; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index % columnsNumber * (itemWidth + realColumnsGap);
+        float offsetY = index / rowsNumber * (itemHeight + realRowsGap);
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, itemHeight);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
 } // namespace OHOS::Ace::NG

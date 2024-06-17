@@ -707,16 +707,16 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<RectF>& selectedRects)
 }
 
 bool TxtParagraph::CalcCaretMetricsByPosition(
-    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
+    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest)
 {
     CaretMetricsF metrics;
     bool computeSuccess = false;
     if (textAffinity == TextAffinity::DOWNSTREAM) {
-        computeSuccess =
-            ComputeOffsetForCaretDownstream(extent, metrics) || ComputeOffsetForCaretUpstream(extent, metrics);
+        computeSuccess = ComputeOffsetForCaretDownstream(extent, metrics, needLineHighest) ||
+                         ComputeOffsetForCaretUpstream(extent, metrics, needLineHighest);
     } else {
-        computeSuccess =
-            ComputeOffsetForCaretUpstream(extent, metrics) || ComputeOffsetForCaretDownstream(extent, metrics);
+        computeSuccess = ComputeOffsetForCaretUpstream(extent, metrics, needLineHighest) ||
+                         ComputeOffsetForCaretDownstream(extent, metrics, needLineHighest);
     }
     if (computeSuccess) {
         if (metrics.height <= 0 || std::isnan(metrics.height)) {
@@ -871,7 +871,7 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     OHOS::Rosen::LineMetrics resMetric;
     CHECK_NULL_RETURN(paragraphTxt, lineMetrics);
     paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
- 
+
     lineMetrics.ascender = resMetric.ascender;
     lineMetrics.descender = resMetric.descender;
     lineMetrics.capHeight = resMetric.capHeight;
@@ -884,12 +884,12 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     lineMetrics.endIndex = resMetric.endIndex;
     lineMetrics.baseline = resMetric.baseline;
     lineMetrics.lineNumber = resMetric.lineNumber;
- 
+
     if (resMetric.runMetrics.empty()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetLineMetrics runMetrics is empty.");
         return lineMetrics;
     }
- 
+
     auto runMetricsResMap = resMetric.runMetrics;
     for (const auto& it : runMetricsResMap) {
         RunMetrics runMetrics;
@@ -899,7 +899,7 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     }
     return lineMetrics;
 }
- 
+
 void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)
 {
     auto textStyleRes = runMetricsRes.textStyle;
@@ -925,7 +925,7 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
     }
     runMetrics.textStyle.SetEllipsisMode(static_cast<EllipsisMode>(textStyleRes->ellipsisModal));
     runMetrics.textStyle.SetLocale(textStyleRes->locale);
- 
+
     auto fontMetricsRes = runMetricsRes.fontMetrics;
     runMetrics.fontMetrics.fFlags = fontMetricsRes.fFlags;
     runMetrics.fontMetrics.fTop = fontMetricsRes.fTop;

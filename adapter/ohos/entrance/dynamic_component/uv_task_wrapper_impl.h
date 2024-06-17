@@ -31,7 +31,7 @@ public:
 
 private:
     uv_loop_t* loop_ = nullptr;
-    pthread_t threadId_;
+    pthread_t threadId_ = 0;
 };
 
 class UVWorkWrapper {

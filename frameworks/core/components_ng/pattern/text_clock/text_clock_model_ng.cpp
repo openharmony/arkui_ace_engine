@@ -45,7 +45,11 @@ RefPtr<TextClockController> TextClockModelNG::Create()
 
 void TextClockModelNG::SetFormat(const std::string& format)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
+    if (format.empty()) {
+        ACE_RESET_LAYOUT_PROPERTY(TextClockLayoutProperty, Format);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
+    }
 }
 
 void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -125,7 +129,11 @@ void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
 
 void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
+    if (format.empty()) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
+    }
 }
 
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)

@@ -501,6 +501,7 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
+      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
     return this._commonAttribute;
@@ -636,6 +637,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
       this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
     }
     this.attribute_.setNodePtr(this.nodePtr_);
+    this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this.attribute_;
   }
 

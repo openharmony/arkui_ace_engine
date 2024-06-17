@@ -59,6 +59,16 @@ typedef struct {
 */
 typedef struct ArkUI_AnimateOption ArkUI_AnimateOption;
 
+struct ArkUI_Curve;
+typedef struct ArkUI_Curve* ArkUI_CurveHandle;
+
+typedef struct ArkUI_KeyframeAnimateOption ArkUI_KeyframeAnimateOption;
+typedef struct ArkUI_AnimatorOption ArkUI_AnimatorOption;
+typedef struct ArkUI_Animator* ArkUI_AnimatorHandle;
+
+struct ArkUI_AnimatorEvent;
+struct ArkUI_AnimatorOnFrameEvent;
+
 /**
  * @brief Implements the native animation APIs provided by ArkUI.
  *
@@ -80,6 +90,10 @@ typedef struct {
     */
     int32_t (*animateTo)(ArkUI_ContextHandle context, ArkUI_AnimateOption* option, ArkUI_ContextCallback* update,
         ArkUI_AnimateCompleteCallback* complete);
+
+    int32_t (*keyframeAnimateTo)(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOption* option);
+    ArkUI_AnimatorHandle (*createAnimator)(ArkUI_ContextHandle context, ArkUI_AnimatorOption* option);
+    void (*disposeAnimator)(ArkUI_AnimatorHandle animator);
 } ArkUI_NativeAnimateAPI_1;
 
 /**
@@ -223,6 +237,76 @@ void OH_ArkUI_AnimateOption_SetPlayMode(ArkUI_AnimateOption* option, ArkUI_Anima
 */
 void OH_ArkUI_AnimateOption_SetExpectedFrameRateRange(ArkUI_AnimateOption* option, ArkUI_ExpectedFrameRateRange* value);
 
+void OH_ArkUI_AnimateOption_SetICurve(ArkUI_AnimateOption* option, ArkUI_CurveHandle value);
+ArkUI_CurveHandle OH_ArkUI_AnimateOption_GetICurve(ArkUI_AnimateOption* option);
+
+ArkUI_KeyframeAnimateOption* OH_ArkUI_KeyframeAnimateOption_Create(int32_t size);
+void OH_ArkUI_KeyframeAnimateOption_Dispose(ArkUI_KeyframeAnimateOption* option);
+int32_t OH_ArkUI_KeyframeAnimateOption_SetDelay(ArkUI_KeyframeAnimateOption* option, int32_t value);
+int32_t OH_ArkUI_KeyframeAnimateOption_SetIterations(ArkUI_KeyframeAnimateOption* option, int32_t value);
+int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(
+    ArkUI_KeyframeAnimateOption* option, void* userData, void (*onFinish)(void* userData));
+int32_t OH_ArkUI_KeyframeAnimateOption_SetDuration(ArkUI_KeyframeAnimateOption* option, int32_t value, int32_t index);
+int32_t OH_ArkUI_KeyframeAnimateOption_SetCurve(
+    ArkUI_KeyframeAnimateOption* option, ArkUI_CurveHandle value, int32_t index);
+int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnEventCallback(
+    ArkUI_KeyframeAnimateOption* option, void* userData, void (*event)(void* userData), int32_t index);
+int32_t OH_ArkUI_KeyframeAnimateOption_GetDelay(ArkUI_KeyframeAnimateOption* option);
+int32_t OH_ArkUI_KeyframeAnimateOption_GetIterations(ArkUI_KeyframeAnimateOption* option);
+int32_t OH_ArkUI_KeyframeAnimateOption_GetDuration(ArkUI_KeyframeAnimateOption* option, int32_t index);
+ArkUI_CurveHandle OH_ArkUI_KeyframeAnimateOption_GetCurve(ArkUI_KeyframeAnimateOption* option, int32_t index);
+ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize);
+void OH_ArkUI_ArkUI_AnimatorOption_Dispose(ArkUI_AnimatorOption* option);
+int32_t OH_ArkUI_AnimatorOption_SetDuration(ArkUI_AnimatorOption* option, int32_t value);
+int32_t OH_ArkUI_AnimatorOption_SetDelay(ArkUI_AnimatorOption* option, int32_t value);
+int32_t OH_ArkUI_AnimatorOption_SetIterations(ArkUI_AnimatorOption* option, int32_t value);
+int32_t OH_ArkUI_AnimatorOption_SetFill(ArkUI_AnimatorOption* option, ArkUI_AnimationFillMode value);
+int32_t OH_ArkUI_AnimatorOption_SetDirection(ArkUI_AnimatorOption* option, ArkUI_AnimationDirection value);
+int32_t OH_ArkUI_AnimatorOption_SetCurve(ArkUI_AnimatorOption* option, ArkUI_CurveHandle value);
+int32_t OH_ArkUI_AnimatorOption_SetBegin(ArkUI_AnimatorOption* option, float value);
+int32_t OH_ArkUI_AnimatorOption_SetEnd(ArkUI_AnimatorOption* option, float value);
+int32_t OH_ArkUI_AnimatorOption_SetExpectedFrameRateRange(
+    ArkUI_AnimatorOption* option, ArkUI_ExpectedFrameRateRange* value);
+int32_t OH_ArkUI_AnimatorOption_SetKeyframe(ArkUI_AnimatorOption* option, float time, float value, int32_t index);
+int32_t OH_ArkUI_AnimatorOption_SetKeyframeCurve(ArkUI_AnimatorOption* option, ArkUI_CurveHandle value, int32_t index);
+int32_t OH_ArkUI_AnimatorOption_GetDuration(ArkUI_AnimatorOption* option);
+int32_t OH_ArkUI_AnimatorOption_GetDelay(ArkUI_AnimatorOption* option);
+int32_t OH_ArkUI_AnimatorOption_GetIterations(ArkUI_AnimatorOption* option);
+ArkUI_AnimationFillMode OH_ArkUI_AnimatorOption_GetFill(ArkUI_AnimatorOption* option);
+ArkUI_AnimationDirection OH_ArkUI_AnimatorOption_GetDirection(ArkUI_AnimatorOption* option);
+ArkUI_CurveHandle OH_ArkUI_AnimatorOption_GetCurve(ArkUI_AnimatorOption* option);
+float OH_ArkUI_AnimatorOption_GetBegin(ArkUI_AnimatorOption* option);
+float OH_ArkUI_AnimatorOption_GetEnd(ArkUI_AnimatorOption* option);
+ArkUI_ExpectedFrameRateRange* OH_ArkUI_AnimatorOption_GetExpectedFrameRateRange(ArkUI_AnimatorOption* option);
+float OH_ArkUI_AnimatorOption_GetKeyframeTime(ArkUI_AnimatorOption* option, int32_t index);
+float OH_ArkUI_AnimatorOption_GetKeyframeValue(ArkUI_AnimatorOption* option, int32_t index);
+ArkUI_CurveHandle OH_ArkUI_AnimatorOption_GetKeyframeCurve(ArkUI_AnimatorOption* option, int32_t index);
+void* OH_ArkUI_AnimatorEvent_GetUserData(ArkUI_AnimatorEvent* event);
+void* OH_ArkUI_AnimatorOnFrameEvent_GetUserData(ArkUI_AnimatorOnFrameEvent* event);
+float OH_ArkUI_AnimatorOnFrameEvent_GetValue(ArkUI_AnimatorOnFrameEvent* event);
+int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
+    ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorOnFrameEvent* event));
+int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
+    ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event));
+int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
+    ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event));
+int32_t OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(
+    ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event));
+int32_t OH_ArkUI_Animator_ResetAnimatorOption(ArkUI_AnimatorHandle animator, ArkUI_AnimatorOption* option);
+int32_t OH_ArkUI_Animator_Play(ArkUI_AnimatorHandle animator);
+int32_t OH_ArkUI_Animator_Finish(ArkUI_AnimatorHandle animator);
+int32_t OH_ArkUI_Animator_Pause(ArkUI_AnimatorHandle animator);
+int32_t OH_ArkUI_Animator_Cancel(ArkUI_AnimatorHandle animator);
+int32_t OH_ArkUI_Animator_Reverse(ArkUI_AnimatorHandle animator);
+ArkUI_CurveHandle OH_ArkUI_Curve_InitCurve(ArkUI_AnimationCurve curve);
+ArkUI_CurveHandle OH_ArkUI_Curve_StepsCurve(int32_t count, bool end);
+ArkUI_CurveHandle OH_ArkUI_Curve_CubicBezierCurve(float x1, float y1, float x2, float y2);
+ArkUI_CurveHandle OH_ArkUI_Curve_SpringCurve(float velocity, float mass, float stiffness, float damping);
+ArkUI_CurveHandle OH_ArkUI_Curve_SpringMotion(float response, float dampingFraction, float overlapDuration);
+ArkUI_CurveHandle OH_ArkUI_Curve_ResponsiveSpringMotion(float response, float dampingFraction, float overlapDuration);
+ArkUI_CurveHandle OH_ArkUI_Curve_InterpolatingSpring(float velocity, float mass, float stiffness, float damping);
+ArkUI_CurveHandle OH_ArkUI_Curve_CustomCurve(void* userData, float (*interpolate)(float fraction, void* userdata));
+void OH_ArkUI_Curve_disposeCurve(ArkUI_CurveHandle curveHandle);
 #ifdef __cplusplus
 };
 #endif

@@ -85,7 +85,7 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
@@ -340,7 +340,7 @@ public:
 
     virtual void SetActive(bool active);
 
-    virtual void SetJSViewActive(bool active);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
     virtual void TryVisibleChangeOnDescendant(bool isVisible);
 

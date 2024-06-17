@@ -173,7 +173,7 @@ public:
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
-        return true;
+        return needToRequestKeyboardOnFocus_;
     }
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
@@ -222,6 +222,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
@@ -858,6 +859,7 @@ public:
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();
+    void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
@@ -1207,7 +1209,7 @@ public:
     {
         autoFillUserName_ = userName;
     }
-    
+
     std::string GetAutoFillUserName()
     {
         return autoFillUserName_;
@@ -1288,7 +1290,7 @@ public:
     {
         selectOverlay_->OnTouchTestHit(hitTestType);
     }
-    
+
     int32_t GetPreviewTextStart() const
     {
         return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();

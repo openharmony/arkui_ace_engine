@@ -100,6 +100,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest001, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
 
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -149,7 +152,10 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest002, TestSize.Level1)
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
     rootNode->isLayoutComplete_ = true;
-
+    
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -200,6 +206,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest003, TestSize.Level1)
 
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].markNeedUpdate = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -253,6 +262,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest004, TestSize.Level1)
 
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].isCurrentOnShow = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -306,6 +318,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest005, TestSize.Level1)
 
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -359,6 +374,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest006, TestSize.Level1)
 
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -413,6 +431,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest007, TestSize.Level1)
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].markNeedUpdate = true;
     popups[0].isCurrentOnShow = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -468,6 +489,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest008, TestSize.Level1)
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].markNeedUpdate = true;
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -523,6 +547,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest009, TestSize.Level1)
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].markNeedUpdate = true;
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -578,6 +605,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest010, TestSize.Level1)
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].isCurrentOnShow = true;
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -633,6 +663,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest011, TestSize.Level1)
     std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
     popups[0].isCurrentOnShow = true;
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], move(onWillDismiss1));
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -686,6 +719,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest012, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
 
     popups[0].markNeedUpdate = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -736,6 +772,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest013, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
 
     popups[0].isCurrentOnShow = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -786,6 +825,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest014, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
 
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -836,6 +878,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest015, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
 
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -887,6 +932,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest016, TestSize.Level1)
 
     popups[0].markNeedUpdate = true;
     popups[0].isCurrentOnShow = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -939,6 +987,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest017, TestSize.Level1)
 
     popups[0].markNeedUpdate = true;
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -991,6 +1042,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest018, TestSize.Level1)
 
     popups[0].markNeedUpdate = true;
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -1043,6 +1097,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest019, TestSize.Level1)
 
     popups[0].isCurrentOnShow = true;
     popups[0].isBlockEvent = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -1095,6 +1152,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest020, TestSize.Level1)
 
     popups[0].isCurrentOnShow = true;
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();
@@ -1148,6 +1208,9 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest021, TestSize.Level1)
     popups[0].markNeedUpdate = true;
     popups[0].isCurrentOnShow = true;
     popups[0].focusable = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
     overlayManager->ShowPopup(targetId1, popups[0], nullptr, true);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
     auto rootUINode = overlayManager->GetRootNode().Upgrade();

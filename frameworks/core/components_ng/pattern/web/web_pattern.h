@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -533,19 +534,9 @@ public:
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
-    void CreateOverlay(
-        const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
-        int offsetX,
-        int offsetY,
-        int rectWidth,
-        int rectHeight,
-        int pointX,
-        int pointY);
-    void OnOverlayStateChanged(
-        int offsetX,
-        int offsetY,
-        int rectWidth,
-        int rectHeight);
+    void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
     void OnTextSelected();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
@@ -763,7 +754,6 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
-    void UpdateBackgroundColorForSurface();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
@@ -927,6 +917,8 @@ private:
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
+    std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
+    double lastKeyboardHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

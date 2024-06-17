@@ -403,9 +403,6 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
         CHECK_NULL_VOID(paintProperty);
         auto eventHub = node->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !eventHub->IsEnabled()) {
-            continue;
-        }
         if (select) {
             vec.push_back(eventHub->GetName());
         }
@@ -676,15 +673,9 @@ void CheckBoxGroupPattern::UpdateCheckBoxStyle()
     auto list = groupManager->GetCheckboxList(group);
     CheckBoxStyle groupStyle;
     GetCheckBoxGroupStyle(host, groupStyle);
-    auto isEnabled = checkBoxGroupEventHub->IsEnabled();
     for (auto node : list) {
         if (!node) {
             continue;
-        }
-        const auto& checkboxEventHub = node->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(checkboxEventHub);
-        if (!isEnabled) {
-            checkboxEventHub->SetEnabled(false);
         }
         auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);

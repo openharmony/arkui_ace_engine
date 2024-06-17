@@ -220,6 +220,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
+        actuator->ResetResponseRegion();
         if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
@@ -372,6 +373,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        actuator->ResetResponseRegion();
         if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
@@ -641,6 +643,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->isOnBeforeLiftingAnimation = true;
                 DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
                 DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
+                actuator->SetResponseRegionFull();
             } else {
                 actuator->isOnBeforeLiftingAnimation = false;
             }
@@ -1939,6 +1942,7 @@ void DragEventActuator::HandleTouchUpEvent()
     dragDropManager->SetHasGatherNode(false);
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
     auto preDragStatus = dragDropManager->GetPreDragStatus();
+    ResetResponseRegion();
     if (preDragStatus >= PreDragStatus::ACTION_DETECTING_STATUS &&
         preDragStatus < PreDragStatus::PREVIEW_LIFT_FINISHED && IsNeedGather()) {
         SetGatherNode(nullptr);
@@ -1956,6 +1960,7 @@ void DragEventActuator::HandleTouchCancelEvent()
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetHasGatherNode(false);
+    ResetResponseRegion();
 }
 
 void DragEventActuator::HandleTouchMoveEvent()
@@ -1970,6 +1975,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         CHECK_NULL_VOID(manager);
         manager->RemoveGatherNode();
         isOnBeforeLiftingAnimation = false;
+        ResetResponseRegion();
     }
 }
 
@@ -2115,7 +2121,7 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
-    auto childSize = badgeNumber.has_value() ? badgeNumber.value()
+    int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
                                              : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
     auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
     CHECK_NULL_VOID(textNode);
@@ -2182,6 +2188,51 @@ void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>&
     CHECK_NULL_VOID(context);
     if (!context->CreateThumbnailPixelMapAsyncTask(true, std::move(callback))) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Create thumbnail pixelMap async task failed!");
+    }
+}
+
+void DragEventActuator::SetResponseRegionFull()
+{
+    if (!IsNeedGather()) {
+        return;
+    }
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    
+    responseRegion_ = gestureHub->GetResponseRegion();
+    DimensionRect hotZoneRegion;
+
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(-paintRect.GetOffset().GetX()),
+        Dimension(-paintRect.GetOffset().GetY())));
+    
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto geometryNode = rootNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto width = geometryNode->GetFrameSize().Width();
+    auto height = geometryNode->GetFrameSize().Height();
+    hotZoneRegion.SetSize(DimensionSize(Dimension(width), Dimension(height)));
+    gestureHub->SetResponseRegion(std::vector<DimensionRect>({ hotZoneRegion }));
+    isResponseRegionFull = true;
+}
+
+void DragEventActuator::ResetResponseRegion()
+{
+    if (!IsNeedGather()) {
+        return;
+    }
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    if (isResponseRegionFull) {
+        gestureHub->SetResponseRegion(responseRegion_);
+        isResponseRegionFull = false;
     }
 }
 } // namespace OHOS::Ace::NG

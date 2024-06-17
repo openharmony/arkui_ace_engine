@@ -119,6 +119,7 @@ constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
+constexpr float ERROR_TEXT_MAX_FONT_SCALE = 2.0f;
 constexpr Dimension DOUBLECLICK_DISTANCE = 15.0_vp;
 constexpr double VELOCITY = -1000;
 constexpr double MASS = 1.0;
@@ -1184,16 +1185,6 @@ void TextFieldPattern::InitFocusEvent()
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
-    auto windowFocusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->HasFocus()) {
-            pattern->HandleBlurEvent();
-        }
-    };
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    context->SetOnWindowFocused(windowFocusTask);
     focusEventInitialized_ = true;
 }
 
@@ -1437,6 +1428,22 @@ std::string TextFieldPattern::GetCancelButton()
     return theme->GetCancelButton();
 }
 
+void TextFieldPattern::UpdateShowCountBorderStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasMaxLength()) {
+        auto textLength = static_cast<int32_t>(contentController_->GetWideText().length());
+        auto maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        // if equal, the showCountBorderStyle_ is not changed
+        if (textLength != maxLength) {
+            showCountBorderStyle_ = textLength > maxLength;
+        }
+    }
+}
+
 void TextFieldPattern::HandleOnPaste()
 {
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
@@ -1662,8 +1669,11 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         return;
     }
     if (!HasFocus()) {
-        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-            isTouchDownRequestFocus_ = true;
+        if (!focusHub->IsFocusOnTouch().value_or(true)) {
+            return;
+        }
+        isTouchDownRequestFocus_ = true;
+        if (!focusHub->RequestFocusImmediately()) {
             return;
         }
     }
@@ -2556,6 +2566,25 @@ void TextFieldPattern::HandleCountStyle()
     }
 }
 
+void TextFieldPattern::ProcessUnderlineColorOnModifierDone()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    auto inputValue = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
+    if (inputValue == ILLEGAL_VALUE) {
+        return;
+    }
+    auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
+    if (inputValue != DEFAULT_MODE && !showBorder) {
+        return;
+    }
+    if (showCountBorderStyle_ && IsUnderlineMode()) {
+        auto theme = GetTheme();
+        CHECK_NULL_VOID(theme);
+        SetUnderlineColor(
+            userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor()));
+    }
+}
+
 void TextFieldPattern::ProcessCounter()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2603,6 +2632,7 @@ void TextFieldPattern::OnModifyDone()
     ProcessResponseArea();
     InitDragEvent();
     Register2DragDropManager();
+    ProcessUnderlineColorOnModifierDone();
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
@@ -2732,7 +2762,12 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
-    AddTextFireOnChange();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    bool hasPreviewTextOption = pipeline->GetHasPreviewTextOption();
+    if (!GetIsPreviewText() || hasPreviewTextOption) {
+        AddTextFireOnChange();
+    }
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -5571,6 +5606,7 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     CHECK_NULL_VOID(theme);
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string errorText = content;
+    errorTextStyle.SetMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
     ParagraphStyle paraStyle {
         .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
         .align = TextAlign::START,
@@ -5852,7 +5888,8 @@ void TextFieldPattern::ApplyInlineTheme()
     BorderColorProperty inlineBorderColor;
     inlineBorderColor.SetColor(theme->GetInlineBorderColor());
     renderContext->UpdateBorderColor(inlineBorderColor);
-    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) });
+    layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
+        CalcLength(0.0f) });
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
 }
@@ -5934,7 +5971,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
-    
+
     ToJsonValueForOption(json, filter);
 }
 

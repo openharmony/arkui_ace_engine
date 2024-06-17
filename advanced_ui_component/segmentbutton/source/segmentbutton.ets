@@ -467,11 +467,11 @@ struct SegmentButtonItem {
   @Prop index: number
   private groupId: string = ""
 
-  private getTextPadding() {
+  private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
       return this.options.localizedTextPadding
     }
-    if (this.options.textPadding) {
+    if (this.options.textPadding !== void (0)) {
       return this.options.textPadding
     }
     return 0
@@ -481,7 +481,7 @@ struct SegmentButtonItem {
     if (this.options.localizedButtonPadding) {
       return this.options.localizedButtonPadding
     }
-    if (this.options.buttonPadding) {
+    if (this.options.buttonPadding !== void (0)) {
       return this.options.buttonPadding
     }
     if (this.options.type === 'capsule' && this.options.showText && this.options.showIcon) {
@@ -693,10 +693,10 @@ struct SegmentButtonItemArrayComponent {
   private getBorderRadius(index: number): LocalizedBorderRadiuses {
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index]
     if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
-      borderRadius.topStart = LengthMetrics.vp(borderRadius.topStart.value + 4)
-      borderRadius.topEnd = LengthMetrics.vp(borderRadius.topEnd.value + 4)
-      borderRadius.bottomStart = LengthMetrics.vp(borderRadius.bottomStart.value + 4)
-      borderRadius.bottomEnd = LengthMetrics.vp(borderRadius.bottomEnd.value + 4)
+      borderRadius.topStart = LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4)
+      borderRadius.topEnd = LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4)
+      borderRadius.bottomStart = LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4)
+      borderRadius.bottomEnd = LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
     }
     return borderRadius
   }
@@ -1096,8 +1096,8 @@ export struct SegmentButton {
         .clip(true)
 
         SegmentButtonItemArrayComponent({
-          pressArray:this.pressArray,
-          hoverColorArray:this.hoverColorArray,
+          pressArray: this.pressArray,
+          hoverColorArray: this.hoverColorArray,
           optionsArray: this.options.buttons,
           options: this.options,
           selectedIndexes: $selectedIndexes,

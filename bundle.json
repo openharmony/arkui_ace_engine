@@ -89,7 +89,8 @@
                 "opengles",
                 "zlib",
                 "skia",
-                "libuv"
+                "libuv",
+                "background_task_mgr"
             ],
             "third_party": []
         },
