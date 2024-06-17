@@ -597,6 +597,9 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
     SyncGeometryFrame(paintRect);
 
+    if (!isSynced_) {
+        isSynced_ = true;
+    }
     auto borderRadius = GetBorderRadius();
     if (borderRadius.has_value()) {
         OnBorderRadiusUpdate(borderRadius.value());
