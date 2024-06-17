@@ -4080,7 +4080,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
-    parentWindowId_ = parentWindowId;
+    parentWindowId_ = static_cast<int32_t>(parentWindowId);
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4097,7 +4097,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
 
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
-    int32_t windowId = GetWindowId();
+    uint32_t windowId = GetWindowId();
     Register(false);
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId);
