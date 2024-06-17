@@ -1062,12 +1062,6 @@ void CanvasPattern::RestoreLayer()
 #endif
 }
 
-void CanvasPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
-{
-    CHECK_NULL_VOID(paintMethod_);
-    paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
-}
-
 void CanvasPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;

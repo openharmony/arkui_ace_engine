@@ -68,8 +68,6 @@ public:
         return false;
     }
 
-    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
-
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
