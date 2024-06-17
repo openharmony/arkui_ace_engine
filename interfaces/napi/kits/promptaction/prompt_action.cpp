@@ -1123,7 +1123,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     if (valueTypeOfThis == napi_undefined) {
         return nullptr;
     }
-
+    
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentIdSafely();
@@ -1183,8 +1183,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    auto onLanguageChange = [shadowProps, alignment, offset,
-        updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) mutable {
+    auto onLanguageChange = [shadowProps, alignment, offset, maskRect,
+        updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) {
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (shadowProps.has_value()) {
             std::optional<Shadow> shadow = shadowProps.value();
@@ -1199,10 +1199,17 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         }
         if (offset.has_value()) {
             std::optional<DimensionOffset> pmOffset = offset.value();
-            double xValue = isRtl ? pmOffset->GetX().Value() * (-1) : pmOffset->GetX().Value();
-            Dimension offsetX = Dimension(xValue);
+            Dimension offsetX = isRtl ? pmOffset->GetX() * (-1) : pmOffset->GetX();
             pmOffset->SetX(offsetX);
             dialogProps.offset = pmOffset.value();
+        }
+        if (maskRect.has_value()) {
+            std::optional<DimensionRect> pmMaskRect = maskRect.value();
+            auto offset = pmMaskRect->GetOffset();
+            Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+            offset.SetX(offsetX);
+            pmMaskRect->SetOffset(offset);
+            dialogProps.maskRect = pmMaskRect.value();
         }
     };
     napi_value result = nullptr;

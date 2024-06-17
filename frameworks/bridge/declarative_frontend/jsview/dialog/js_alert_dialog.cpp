@@ -325,8 +325,7 @@ void ParseAlertOffset(DialogProperties& properties, JSRef<JSObject> obj)
         JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        double xValue = isRtl ? properties.offset.GetX().Value() * (-1) : properties.offset.GetX().Value();
-        Dimension offsetX = Dimension(xValue);
+        Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
         properties.offset.SetX(offsetX);
     }
 }
@@ -347,6 +346,21 @@ void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
         index = 1;
     }
     properties.wordBreak = WORD_BREAK_TYPES[index];
+}
+
+void ParseAlertMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse maskRect.
+    auto maskRectValue = obj->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        properties.maskRect = maskRect;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        auto offset = maskRect.GetOffset();
+        Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+        offset.SetX(offsetX);
+        properties.maskRect->SetOffset(offset);
+    }
 }
 
 void JSAlertDialog::Show(const JSCallbackInfo& args)
@@ -372,12 +386,14 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertAlignment(properties, obj);
         ParseAlertOffset(properties, obj);
         ParseTextStyle(properties, obj);
+        ParseAlertMaskRect(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
                                     parseButton = ParseButtons, parseShadow = ParseAlertShadow,
                                     parseBorderProps = ParseAlertBorderWidthAndColor,
                                     parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
-                                    parseOffset = ParseAlertOffset, node = dialogNode](DialogProperties& dialogProps) {
+                                    parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
+                                    node = dialogNode](DialogProperties& dialogProps) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
             auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -390,6 +406,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             parseRadius(dialogProps, obj);
             parseAlignment(dialogProps, obj);
             parseOffset(dialogProps, obj);
+            parseMaskRect(dialogProps, obj);
         };
         properties.onLanguageChange = std::move(onLanguageChange);
 
@@ -423,13 +440,6 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
-
-        // Parse maskRect.
-        auto maskRectValue = obj->GetProperty("maskRect");
-        DimensionRect maskRect;
-        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
-            properties.maskRect = maskRect;
-        }
 
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");
