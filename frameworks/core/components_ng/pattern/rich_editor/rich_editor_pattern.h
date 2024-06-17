@@ -297,6 +297,7 @@ public:
         const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
+    void DeleteValueInStyledString(int32_t start, int32_t length, bool isIME = true);
 
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
     bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
