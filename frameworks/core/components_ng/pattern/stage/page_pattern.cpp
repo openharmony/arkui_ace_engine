@@ -73,12 +73,17 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
             firstBuildCallback_ = nullptr;
         }
     }
-    if (dynamicPageSizeCallback_) {
-        auto node = wrapper->GetGeometryNode();
-        CHECK_NULL_RETURN(node, false);
-        dynamicPageSizeCallback_(node->GetFrameSize());
-    }
     return false;
+}
+
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+{
+    CHECK_NULL_VOID(dynamicPageSizeCallback_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto node = host->GetGeometryNode();
+    CHECK_NULL_VOID(node);
+    dynamicPageSizeCallback_(node->GetFrameSize());
 }
 
 bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
@@ -122,16 +127,16 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
 }
 
-void PagePattern::ProcessAutoSave()
+bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     if (!host->NeedRequestAutoSave()) {
-        return;
+        return false;
     }
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    container->RequestAutoSave(host);
+    CHECK_NULL_RETURN(container, false);
+    return container->RequestAutoSave(host, onFinish);
 }
 
 void PagePattern::ProcessHideState()
@@ -181,9 +186,9 @@ void PagePattern::OnAttachToMainTree()
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        index = delegate->GetStackSize();
+        index = delegate->GetCurrentPageIndex();
+        GetPageInfo()->SetPageIndex(index);
     }
-    GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
@@ -201,13 +206,15 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), true);
-    }
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
         return;
+    }
+    std::string bundleName = container->GetBundleName();
+    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    if (pageInfo_) {
+        context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -216,10 +223,12 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
-    PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
+    }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(true);
     }
     if (onPageShow_) {
         onPageShow_();
@@ -260,6 +269,9 @@ void PagePattern::OnHide()
         if (pageUrlChecker != nullptr) {
             pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
         }
+    }
+    if (visibilityChangeCallback_) {
+        visibilityChangeCallback_(false);
     }
     if (onPageHide_) {
         onPageHide_();
@@ -416,11 +428,22 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
+    CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     return overlayManager_->RemoveOverlay(true);
+}
+
+void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
+{
+    if (PerfMonitor::GetPerfMonitor() != nullptr) {
+        PerfMonitor::GetPerfMonitor()->SetPageUrl(pageUrl);
+        // The page contains only page url but not the page name
+        PerfMonitor::GetPerfMonitor()->SetPageName("");
+        PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName, "");
+    }
 }
 
 void PagePattern::MarkDirtyOverlay()

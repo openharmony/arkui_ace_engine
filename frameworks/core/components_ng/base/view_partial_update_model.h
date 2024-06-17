@@ -48,6 +48,7 @@ struct NodeInfoPU {
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<void(bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
+    std::function<std::string()> onDumpInspectorFunc;
     std::function<void*()> getThisFunc;
 
     bool hasMeasureOrLayout = false;
@@ -57,12 +58,13 @@ struct NodeInfoPU {
     int32_t codeCol = -1;
 
     std::string jsViewName;
+    bool isV2 = false;
     NG::ExtraInfo extraInfo;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;
 
-class ACE_EXPORT ViewPartialUpdateModel {
+class ACE_FORCE_EXPORT ViewPartialUpdateModel {
 public:
     static ViewPartialUpdateModel* GetInstance();
     virtual ~ViewPartialUpdateModel() = default;

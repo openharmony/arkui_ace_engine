@@ -40,6 +40,7 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
       handleColor_(AceType::MakeRefPtr<PropertyColor>(Color::BLACK)),
       innerHandleColor_(AceType::MakeRefPtr<PropertyColor>(Color::BLACK)),
       handleRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0)),
+      handleStrokeWidth_(AceType::MakeRefPtr<PropertyFloat>(0.0)),
       innerHandleRadius_(AceType::MakeRefPtr<PropertyFloat>(0.0)),
       handleOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0))
 {
@@ -56,6 +57,7 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
     AttachProperty(handleColor_);
     AttachProperty(innerHandleColor_);
     AttachProperty(handleRadius_);
+    AttachProperty(handleStrokeWidth_);
     AttachProperty(innerHandleRadius_);
     AttachProperty(handleOpacity_);
 }
@@ -212,38 +214,68 @@ void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
     auto top = viewPort_->Get().Top();
     auto right = viewPort_->Get().Right();
     auto bottom = viewPort_->Get().Bottom();
-    auto upHandle = firstHandle_->Get();
+    auto upHandle = GetFirstPaintRect();
     auto upHandleIsShow = firstHandleIsShow_->Get();
-    auto downHandle = secondHandle_->Get();
+    auto downHandle = GetSecondPaintRect();
     auto downHandleIsShow = secondHandleIsShow_->Get();
     if (isSingleHandle_->Get()) {
         upHandleIsShow = false;
         downHandleIsShow = firstHandleIsShow_->Get() || secondHandleIsShow_->Get();
-        downHandle = firstHandleIsShow_->Get() ? firstHandle_->Get()
-                                               : (secondHandleIsShow_->Get() ? secondHandle_->Get() : downHandle);
+        downHandle = firstHandleIsShow_->Get() ? GetFirstPaintRect()
+                                               : (secondHandleIsShow_->Get() ? GetSecondPaintRect() : downHandle);
     } else if (handleReverse_->Get()) {
-        upHandle = secondHandle_->Get();
+        upHandle = GetSecondPaintRect();
         upHandleIsShow = secondHandleIsShow_->Get();
-        downHandle = firstHandle_->Get();
+        downHandle = GetFirstPaintRect();
         downHandleIsShow = firstHandleIsShow_->Get();
     }
     auto handleDiameter = handleRadius_->Get() * 2;
+    auto handleRadius = isPaintHandleUsePoints_ ? 0.0f : handleRadius_->Get();
     if (upHandleIsShow) {
-        auto halfWidth = upHandle.Width() / 2.0f;
-        left = std::min(upHandle.Left() + halfWidth - handleRadius_->Get(), left);
-        right = std::max(upHandle.Right() - halfWidth + handleRadius_->Get(), right);
+        auto halfWidth = isPaintHandleUsePoints_ ? 0.0f : upHandle.Width() / 2.0f;
+        left = std::min(upHandle.Left() + halfWidth - handleRadius, left);
+        right = std::max(upHandle.Right() - halfWidth + handleRadius, right);
         top = std::min(upHandle.Top() - handleDiameter, top);
         bottom = std::max(upHandle.Bottom(), bottom);
     }
     if (downHandleIsShow) {
-        auto halfWidth = downHandle.Width() / 2.0f;
-        left = std::min(downHandle.Left() + halfWidth - handleRadius_->Get(), left);
-        right = std::max(downHandle.Right() - halfWidth + handleRadius_->Get(), right);
+        auto halfWidth = isPaintHandleUsePoints_ ? 0 : downHandle.Width() / 2.0f;
+        left = std::min(downHandle.Left() + halfWidth - handleRadius, left);
+        right = std::max(downHandle.Right() - halfWidth + handleRadius, right);
         top = std::min(downHandle.Top(), top);
         bottom = std::max(downHandle.Bottom() + handleDiameter, bottom);
     }
-    RSRect clipInnerRect = RSRect(left, top, right, bottom);
+    auto strokeWidth = handleStrokeWidth_->Get();
+    RSRect clipInnerRect = RSRect(left - strokeWidth, top - strokeWidth, right + strokeWidth, bottom + strokeWidth);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+}
+
+RectF SelectOverlayContentModifier::ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const
+{
+    auto handleDiameter = handleRadius_->Get() * 2;
+    auto left = std::min(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX()) - handleDiameter;
+    auto right = std::max(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX()) + handleDiameter;
+    auto top = std::min(paintInfo.startPoint.GetY(), paintInfo.endPoint.GetY()) - handleDiameter;
+    auto bottom = std::max(paintInfo.startPoint.GetY(), paintInfo.endPoint.GetY()) + handleDiameter;
+    auto width = std::max(right - left, paintInfo.width);
+    auto height = std::max(bottom - top, paintInfo.width);
+    return RectF(OffsetF(left, top), SizeF(width, height));
+}
+
+RectF SelectOverlayContentModifier::GetFirstPaintRect() const
+{
+    if (isPaintHandleUsePoints_) {
+        return ConvertPointsToRect(firstHandlePaintInfo_);
+    }
+    return firstHandle_->Get();
+}
+
+RectF SelectOverlayContentModifier::GetSecondPaintRect() const
+{
+    if (isPaintHandleUsePoints_) {
+        return ConvertPointsToRect(secondHandlePaintInfo_);
+    }
+    return secondHandle_->Get();
 }
 
 void SelectOverlayContentModifier::PaintHandle(
@@ -255,11 +287,11 @@ void SelectOverlayContentModifier::PaintHandle(
     OffsetF endPoint(0.0, 0.0);
     if (handleOnTop) {
         centerOffset.SetY(handleRect.Top() - handleRadius_->Get());
-        startPoint.SetY(handleRadius_->Get() - 1.0);
+        startPoint.SetY(handleRadius_->Get());
         endPoint.SetY(handleRadius_->Get() + handleRect.Height());
     } else {
         centerOffset.SetY(handleRect.Bottom() + handleRadius_->Get());
-        startPoint.SetY(-handleRadius_->Get() + 1.0f);
+        startPoint.SetY(-handleRadius_->Get());
         endPoint.SetY(-handleRadius_->Get() - handleRect.Height());
     }
     HandleDrawInfo drawInfo = { .startPoint = startPoint,
@@ -276,13 +308,6 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Translate(handleInfo.centerOffset.GetX(), handleInfo.centerOffset.GetY());
-    // Paint outer circle.
-    Color handleColor = handleColor_->Get();
-    handleColor = handleColor.BlendOpacity(handleOpacity_->Get());
-    brush.SetColor(handleColor.GetValue());
-    canvas.AttachBrush(brush);
-    canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
-    canvas.DetachBrush();
     // Paint inner circle.
     Color innerHandleColor = innerHandleColor_->Get();
     innerHandleColor = innerHandleColor.BlendOpacity(handleOpacity_->Get());
@@ -290,6 +315,17 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(0.0, 0.0), innerHandleRadius_->Get());
     canvas.DetachBrush();
+    // Paint outer hollow circle.
+    Color handleColor = handleColor_->Get();
+    handleColor = handleColor.BlendOpacity(handleOpacity_->Get());
+    float strokeWidth = handleStrokeWidth_->Get();
+    RSPen strokePen;
+    strokePen.SetAntiAlias(true);
+    strokePen.SetColor(handleColor.GetValue());
+    strokePen.SetWidth(strokeWidth);
+    canvas.AttachPen(strokePen);
+    canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
+    canvas.DetachPen();
 
     if (handleInfo.isHandleLineShow) {
         RSPen pen;

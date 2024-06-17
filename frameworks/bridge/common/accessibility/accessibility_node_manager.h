@@ -39,7 +39,7 @@ struct WindowPos {
     int32_t top = 0;
 };
 
-class ACE_EXPORT AccessibilityNodeManager : public AccessibilityManager {
+class ACE_FORCE_EXPORT AccessibilityNodeManager : public AccessibilityManager {
     DECLARE_ACE_TYPE(AccessibilityNodeManager, AccessibilityManager);
 
 public:

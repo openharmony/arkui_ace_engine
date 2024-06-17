@@ -83,7 +83,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         LOGE("JsiXComponentBridge Current container null");
         return;
     }
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     if (!nativeView) {
         LOGE("JsiXComponentBridge nativeView null");
         return;

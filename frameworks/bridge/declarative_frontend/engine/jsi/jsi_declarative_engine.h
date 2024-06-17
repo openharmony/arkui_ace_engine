@@ -44,6 +44,7 @@ struct NamedRouterProperty {
     std::string bundleName;
     std::string moduleName;
     std::string pagePath;
+    std::string ohmUrl;
 };
 
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
@@ -162,6 +163,21 @@ public:
     }
 
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map)
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map)
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map)
+    {
+        pkgContextInfoMap_ = map;
+    }
+
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
         auto dispatcher = dispatcher_.Upgrade();
@@ -191,6 +207,9 @@ public:
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     // ArkTsCard end
     static bool IsPlugin();
+    static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);
+    static panda::Local<panda::StringRef> GetCachedString(const EcmaVM *vm, int32_t propertyIndex);
+    static void SetCachedString(const EcmaVM* vm);
 
 private:
     void InitGlobalObjectTemplate();
@@ -220,6 +239,11 @@ private:
     //   If the stagingPage_ render failed, it will reset to runningPage_. So in running stage, runningPage_
     //   and stagingPage_ point to the same page. But it's better to use runningPage_ in dom update tasks,
     //   such as removeElement, updateElementAttrs and updateElementStyles.
+#if defined(PREVIEW)
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+#endif
     RefPtr<JsAcePage> runningPage_;
     RefPtr<JsAcePage> stagingPage_;
 
@@ -335,11 +359,15 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void NotifyUIIdle() override;
+
     std::string GetStacktraceMessage() override;
 
     void GetStackTrace(std::string& trace) override;
 
     static std::string GetPagePath(const std::string& url);
+
+    static std::string GetFullPathInfo(const std::string& url);
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
@@ -395,6 +423,8 @@ public:
         return engineInstance_->GetFrameNodeValueByNodeId(nodeId);
     }
 
+    void JsStateProfilerResgiter();
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -409,7 +439,8 @@ public:
         isBundle_ = isBundle;
     }
     // Support the hsp on the previewer
-    void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
+    void SetHspBufferTrackerCallback(
+        std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
     bool IsComponentPreview() override;
@@ -419,6 +450,12 @@ public:
     static void AddToNavigationBuilderMap(std::string name,
         panda::Global<panda::ObjectRef> builderFunc);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
+    std::unique_ptr<JsonValue> GetFullPathInfo() override;
+    void RestoreFullPathInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    std::unique_ptr<JsonValue> GetNamedRouterInfo() override;
+    void RestoreNamedRouterInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    bool IsNamedRouterNeedPreload(const std::string& name) override;
+    void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
     bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
@@ -458,6 +495,25 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map) override
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map) override
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map) override
+    {
+        pkgContextInfoMap_ = map;
+    }
+
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+
     std::string assetPath_;
     std::string bundleName_;
     std::string moduleName_;
@@ -466,6 +522,7 @@ private:
     std::string pluginBundleName_;
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, std::string> routerPathInfoMap_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> builderMap_;
     bool isFirstCallShow_ = true;
     static thread_local panda::Global<panda::ObjectRef> obj_;

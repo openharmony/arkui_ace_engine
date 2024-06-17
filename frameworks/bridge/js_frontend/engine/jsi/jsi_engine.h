@@ -73,7 +73,7 @@ public:
         nativeEngine_ = nativeEngine;
     }
 
-    ArkNativeEngine const* GetArkNativeEngine() const
+    ArkNativeEngine const *GetArkNativeEngine() const
     {
         return static_cast<ArkNativeEngine*>(nativeEngine_);
     }
@@ -160,6 +160,8 @@ public:
     void DestroyHeapProfiler() override;
 
     void ForceFullGC() override;
+
+    void NotifyUIIdle() override;
 
     std::string GetStacktraceMessage() override;
 

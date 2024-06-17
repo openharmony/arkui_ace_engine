@@ -26,8 +26,8 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
 
   constructor(value: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
-    if (typeof value === "object") {
-      throw new SyntaxError("ObservedPropertySimple value must not be an object")!
+    if (typeof value === 'object') {
+      throw new SyntaxError('ObservedPropertySimple value must not be an object')!;
     }
     this.setValueInternal(value);
   }
@@ -40,7 +40,7 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
   }
 
   hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || 'unknown'}']: hasChanged`);
     this.notifyHasChanged(this.wrappedValue_);
   }
 
@@ -50,23 +50,23 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || 'unknown'}'] new value is of simple type`);
     this.wrappedValue_ = newValue;
   }
 
 
   public get(): T {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || 'unknown'}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
-    if (this.wrappedValue_ == newValue) {
-      stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
+    if (this.wrappedValue_ === newValue) {
+      stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || 'unknown'}']: set with unchanged value - ignoring.`);
       return;
     }
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || 'unknown'}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
     this.setValueInternal(newValue);
     this.notifyHasChanged(newValue);
   }

@@ -60,6 +60,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         ShapePaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (propCommands_.has_value()) {
             json->PutExtAttr("commands", propCommands_.value().c_str(), filter);
         }

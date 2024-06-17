@@ -34,7 +34,7 @@ public:
                 ToggleModel::GetInstance()->SetSelectedColor(themeColors->CompBackgroundEmphasize());
                 break;
             case NG::ToggleType::SWITCH:
-                ToggleModel::GetInstance()->SetSwitchPointColor(themeColors->CompBackgroundPrimary());
+                ToggleModel::GetInstance()->SetSwitchPointColor(themeColors->CompBackgroundPrimaryContrary());
                 ToggleModel::GetInstance()->SetSelectedColor(themeColors->CompBackgroundEmphasize());
                 break;
             case NG::ToggleType::BUTTON:

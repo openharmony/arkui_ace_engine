@@ -332,6 +332,65 @@ HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest007
+ * @tc.desc: Test basic function of CustomSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString007, TestSize.Level1)
+{
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 1);
+    auto span = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span->GetStartIndex(), 0);
+    EXPECT_EQ(span->GetEndIndex(), 1);
+    EXPECT_EQ(span->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span->GetOnDraw(), std::nullopt);
+
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 2);
+    auto span0 = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span0->GetStartIndex(), 0);
+    EXPECT_EQ(span0->GetEndIndex(), 1);
+    EXPECT_EQ(span0->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span0->GetOnDraw(), std::nullopt);
+    auto span1 = AceType::DynamicCast<CustomSpan>(spans[1]);
+    EXPECT_EQ(span1->GetStartIndex(), 1);
+    EXPECT_EQ(span1->GetEndIndex(), 2);
+    EXPECT_EQ(span1->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span1->GetOnDraw(), std::nullopt);
+    EXPECT_FALSE(span0->IsAttributesEqual(span1));
+    spanString->RemoveSpans(0, spanString->GetLength());
+    EXPECT_EQ(spanString->GetLength(), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest008
+ * @tc.desc: Test basic function of CustomSpan/Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString008, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+    auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    spanString->AppendSpanString(mutableStr);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 6);
+}
+
+/**
  * @tc.name: SpanStringTest001
  * @tc.desc: Test basic function of ReplaceString/InsertString/RemoveString
  * @tc.type: FUNC
@@ -1062,7 +1121,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString015, TestSize.Level1)
 
 /**
  * @tc.name: MutableSpanString016
- * @tc.desc: Test isAttributesEqual of LineHeightSpan/ParagraphStyleSpan
+ * @tc.desc: Test AppendSpanString/ReplaceSpanString of LineHeightSpan/ParagraphStyleSpan
  * @tc.type: FUNC
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
@@ -1076,14 +1135,19 @@ HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
     spanParagraphStyle.leadingMargin = LeadingMargin();
     spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
     auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
-    auto paraSpan2 = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
-    EXPECT_TRUE(paraSpan->IsAttributesEqual(paraSpan2));
-
     auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
-    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
-    auto lineHeightSpan3 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(25), 0, 3);
-    EXPECT_TRUE(lineHeightSpan->IsAttributesEqual(lineHeightSpan2));
-    EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(lineHeightSpan3));
+
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>("123456");
+    mutableStr->AddSpan(paraSpan);
+    mutableStr2->AddSpan(lineHeightSpan);
+    mutableStr->AppendSpanString(mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 123456");
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 3);
+    mutableStr->ReplaceSpanString(1, 1, mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 12345623456");
 }
 
 /**
@@ -1125,4 +1189,505 @@ HWTEST_F(SpanStringTestNg, MutableSpanString017, TestSize.Level1)
     EXPECT_EQ(spans.size(), 3);
 }
 
+/**
+ * @tc.name: MutableSpanString018
+ * @tc.desc: Test serialization and unserialization of SpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
+{
+    std::vector<uint8_t> buff;
+    Font testFont { OHOS::Ace::FontWeight::BOLD, Dimension(29.0, DimensionUnit::PX), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
+    Font testFont2 { OHOS::Ace::FontWeight::W300, Dimension(49.0, DimensionUnit::VP), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd当地经的123456");
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont, 1, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 4, 5));
+    spanStr->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(15), 8, 9));
+    spanStr->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(16), 9, 10));
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanStr->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 10, 11));
+    spanStr->EncodeTlv(buff);
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
+    
+    EXPECT_EQ(spans.size(), 10);
+    EXPECT_EQ(spanStr->GetString(), "dddd当地经的123456");
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 0);
+    EXPECT_EQ((*it)->interval.second, 1);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 1);
+    EXPECT_EQ((*it)->interval.second, 2);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(29));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::RED);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::BOLD);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 2);
+    EXPECT_EQ((*it)->interval.second, 3);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(30));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 3);
+    EXPECT_EQ((*it)->interval.second, 4);
+    ++it;
+    EXPECT_EQ((*it)->content, "当");
+    EXPECT_EQ((*it)->interval.first, 4);
+    EXPECT_EQ((*it)->interval.second, 5);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(49, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::BLUE);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::W300);
+    ++it;
+    EXPECT_EQ((*it)->content, "地经的");
+    EXPECT_EQ((*it)->interval.first, 5);
+    EXPECT_EQ((*it)->interval.second, 8);
+    ++it;
+    EXPECT_EQ((*it)->content, "1");
+    EXPECT_EQ((*it)->interval.first, 8);
+    EXPECT_EQ((*it)->interval.second, 9);
+    EXPECT_EQ((*it)->fontStyle->GetLetterSpacing().value(), Dimension(15));
+    ++it;
+    EXPECT_EQ((*it)->content, "2");
+    EXPECT_EQ((*it)->interval.first, 9);
+    EXPECT_EQ((*it)->interval.second, 10);
+    EXPECT_EQ((*it)->textLineStyle->GetBaselineOffset().value(), Dimension(16));
+    ++it;
+    EXPECT_EQ((*it)->content, "3");
+    EXPECT_EQ((*it)->interval.first, 10);
+    EXPECT_EQ((*it)->interval.second, 11);
+    EXPECT_EQ((*it)->textLineStyle->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ((*it)->textLineStyle->GetTextAlign().value(), TextAlign::END);
+    EXPECT_EQ((*it)->textLineStyle->GetMaxLines().value(), 4);
+    EXPECT_EQ((*it)->textLineStyle->GetTextIndent().value(), Dimension(23));
+    EXPECT_EQ((*it)->textLineStyle->GetWordBreak().value(), WordBreak::BREAK_ALL);
+    ++it;
+    EXPECT_EQ((*it)->content, "456");
+    EXPECT_EQ((*it)->interval.first, 11);
+    EXPECT_EQ((*it)->interval.second, 14);
+}
+
+/**
+ * @tc.name: SpanStringTest009
+ * @tc.desc: Test basic function of span object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
+{
+    std::string buffer;
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10);
+    buffer = fontSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("FontSpan"), 0);
+
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan =
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+    EXPECT_FALSE(decorationSpan->IsAttributesEqual(fontSpan));
+
+    auto baselineOffsetSpan = AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2);
+    EXPECT_FALSE(baselineOffsetSpan->IsAttributesEqual(decorationSpan));
+    baselineOffsetSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = baselineOffsetSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("BaselineOffsetSpan"), 0);
+
+    auto letterSpacingSpan = AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3);
+    EXPECT_FALSE(letterSpacingSpan->IsAttributesEqual(decorationSpan));
+    letterSpacingSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = letterSpacingSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
+   
+    Shadow textShadow;
+    textShadow.SetBlurRadius(1.0);
+    textShadow.SetColor(Color::BLACK);
+    textShadow.SetOffsetX(6.0);
+    textShadow.SetOffsetY(6.0);
+    vector<Shadow> textShadows { textShadow };
+    vector<Shadow> textShadows2;
+    textShadow.SetColor(Color::RED);
+    vector<Shadow> textShadows3 {textShadow};
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9);
+    auto textShadowSpan2 = AceType::MakeRefPtr<TextShadowSpan>(textShadows2, 7, 9);
+    auto textShadowSpan3 = AceType::MakeRefPtr<TextShadowSpan>(textShadows3, 7, 9);
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(decorationSpan));
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(textShadowSpan2));
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(textShadowSpan3));
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer = textShadowSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("TextShadowSpan"), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest010
+ * @tc.desc: Test basic function of span object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
+{
+    std::string buffer;
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    imageSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::ADD);
+    imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::REMOVE);
+    imageSpan->GetSubSpan(0, 3);
+    buffer = imageSpan->ToString();
+    EXPECT_TRUE(buffer.empty());
+
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    customSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::ADD);
+    customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::REMOVE);
+    buffer = customSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("CustomSpan"), 0);
+
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10);
+    auto paragraphStyleSpan = AceType::MakeRefPtr<ParagraphStyleSpan>();
+    paragraphStyleSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    EXPECT_FALSE(paragraphStyleSpan->IsAttributesEqual(fontSpan));
+    buffer = paragraphStyleSpan->ToString();
+    EXPECT_TRUE(buffer.empty());
+
+    auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>();
+    EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(fontSpan));
+    buffer = lineHeightSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("LineHeightSpan"), 0);
+
+    GestureStyle gestureInfo;
+    auto gestureSpan = AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3);
+    EXPECT_FALSE(gestureSpan->IsAttributesEqual(lineHeightSpan));
+    gestureSpan->AddSpanStyle(spanItem);
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureInfo.onClick = std::move(tmpClickFunc);
+    gestureSpan->AddSpanStyle(spanItem);
+}
+
+/**
+ * @tc.name: Tlv001
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv001, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    std::vector<std::string> writeFontFamily = { "f1", "f2" };
+    std::vector<uint8_t> result = { 0x25, 0x2, 0x20, 0x2, 0x66, 0x31, 0x20, 0x2, 0x66, 0x32 };
+    TLVUtil::WriteFontFamily(buffer, writeFontFamily);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    std::vector<std::string> readFontFamily = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(writeFontFamily == readFontFamily);
+    buffer.clear();
+    readFontFamily.clear();
+    cursor = 0;
+    readFontFamily = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(readFontFamily.empty());
+}
+
+/**
+ * @tc.name: Tlv002
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv002, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    Shadow textShadow1;
+    textShadow1.SetBlurRadius(2.0);
+    textShadow1.SetColor(Color::BLACK);
+    textShadow1.SetOffsetX(8.0);
+    textShadow1.SetOffsetY(8.0);
+    std::vector<uint8_t> result = { 0x23, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x22, 0xff, 0x0, 0x0, 0x0, 0x0,
+        0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40 };
+    TLVUtil::WriteTextShadow(buffer, textShadow1);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    Shadow readShadow = TLVUtil::ReadTextShadow(buffer, cursor);
+    EXPECT_TRUE(textShadow1 == readShadow);
+    buffer.clear();
+    Shadow errShadow = TLVUtil::ReadTextShadow(buffer, cursor);
+    EXPECT_FALSE(textShadow1 == errShadow);
+
+    std::vector<Shadow> writeShadows = { textShadow1 };
+    std::vector<uint8_t> result2 = { 0x26, 0x1, 0x23, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x22, 0xff, 0x0,
+        0x0, 0x0, 0x0, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40 };
+    buffer.clear();
+    TLVUtil::WriteTextShadows(buffer, writeShadows);
+    EXPECT_TRUE(buffer == result2);
+
+    cursor = 0;
+    std::vector<Shadow> readShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(writeShadows == readShadows);
+    buffer.clear();
+    cursor = 0;
+    std::vector<Shadow> errShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(errShadows.empty());
+}
+
+/**
+ * @tc.name: Tlv003
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv003, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    std::list<std::pair<std::string, int32_t>> writeFontFeature = { { "f1", 1 }, { "f2", 2 } };
+    std::vector<uint8_t> result = { 0x29, 0x2, 0x20, 0x2, 0x66, 0x31, 0x1, 0x20, 0x2, 0x66, 0x32, 0x2 };
+    TLVUtil::WriteFontFeature(buffer, writeFontFeature);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    std::list<std::pair<std::string, int32_t>> readFontFeature = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(writeFontFeature == readFontFeature);
+    buffer.clear();
+    readFontFeature.clear();
+    cursor = 0;
+    readFontFeature = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(readFontFeature.empty());
+}
+
+/**
+ * @tc.name: Tlv004
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv004, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::BorderRadiusProperty writeBorderRadiusProperty;
+    writeBorderRadiusProperty.SetRadius(2.0_vp);
+    std::vector<uint8_t> result = { 0x27, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1 };
+    TLVUtil::WriteBorderRadiusProperty(buffer, writeBorderRadiusProperty);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::BorderRadiusProperty readBorderRadiusProperty = TLVUtil::ReadBorderRadiusProperty(buffer, cursor);
+    EXPECT_TRUE(writeBorderRadiusProperty == readBorderRadiusProperty);
+    buffer.clear();
+    cursor = 0;
+    readBorderRadiusProperty = TLVUtil::ReadBorderRadiusProperty(buffer, cursor);
+    EXPECT_FALSE(writeBorderRadiusProperty == readBorderRadiusProperty);
+}
+
+/**
+ * @tc.name: Tlv005
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv005, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    RefPtr<Ace::PixelMap> writePixelMap = Ace::PixelMap::CreatePixelMap(nullptr);
+    std::vector<uint8_t> result = { 0x28, 0x0 };
+    TLVUtil::WritePixelMap(buffer, writePixelMap);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    RefPtr<Ace::PixelMap> readPixelMap = TLVUtil::ReadPixelMap(buffer, cursor);
+    EXPECT_FALSE(writePixelMap == readPixelMap);
+    buffer.clear();
+    cursor = 0;
+    readPixelMap = TLVUtil::ReadPixelMap(buffer, cursor);
+    EXPECT_FALSE(writePixelMap == readPixelMap);
+}
+
+/**
+ * @tc.name: Tlv006
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv006, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    Dimension dim(8);
+    CalcDimension writeCalcDimension = CalcDimension(dim);
+    std::vector<uint8_t> result = { 0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0 };
+    TLVUtil::WriteCalcDimension(buffer, writeCalcDimension);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    CalcDimension readCalcDimension = TLVUtil::ReadCalcDimension(buffer, cursor);
+    EXPECT_TRUE(writeCalcDimension == readCalcDimension);
+    buffer.clear();
+    cursor = 0;
+    readCalcDimension = TLVUtil::ReadCalcDimension(buffer, cursor);
+    EXPECT_FALSE(writeCalcDimension == readCalcDimension);
+}
+
+/**
+ * @tc.name: Tlv007
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv007, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::CalcLength writeCalcLength(8);
+    std::vector<uint8_t> result = { 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0 };
+    TLVUtil::WriteCalcLength(buffer, writeCalcLength);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::CalcLength readCalcLength = TLVUtil::ReadCalcLength(buffer, cursor);
+    EXPECT_TRUE(writeCalcLength == readCalcLength);
+    buffer.clear();
+    cursor = 0;
+    readCalcLength = TLVUtil::ReadCalcLength(buffer, cursor);
+    EXPECT_FALSE(writeCalcLength == readCalcLength);
+}
+
+/**
+ * @tc.name: Tlv008
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv008, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    ImageSpanSize writeImageSpanSize { .width = 60.0_vp, .height = 60.0_vp };
+    std::vector<uint8_t> result = { 0x42, 0x43, 0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4e, 0x40, 0x1, 0x44,
+        0x2a, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4e, 0x40, 0x1, 0x45 };
+    TLVUtil::WriteImageSpanSize(buffer, writeImageSpanSize);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    ImageSpanSize readImageSpanSize = TLVUtil::ReadImageSpanSize(buffer, cursor);
+    EXPECT_TRUE(writeImageSpanSize == readImageSpanSize);
+    buffer.clear();
+    cursor = 0;
+    readImageSpanSize = TLVUtil::ReadImageSpanSize(buffer, cursor);
+    EXPECT_FALSE(writeImageSpanSize == readImageSpanSize);
+}
+
+/**
+ * @tc.name: Tlv009
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv009, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::PaddingProperty writePaddingProperty;
+    writePaddingProperty.left = CalcLength(5);
+    writePaddingProperty.right = CalcLength(5);
+    writePaddingProperty.top = CalcLength(8);
+    writePaddingProperty.bottom = CalcLength(8);
+    std::vector<uint8_t> result = { 0x46, 0x49, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40,
+        0x0, 0x4a, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0,
+        0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x20, 0x40, 0x0, 0x48, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x20, 0x40, 0x0, 0x4b };
+    TLVUtil::WritePaddingProperty(buffer, writePaddingProperty);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::PaddingProperty readPaddingProperty = TLVUtil::ReadPaddingProperty(buffer, cursor);
+    EXPECT_TRUE(writePaddingProperty == readPaddingProperty);
+    buffer.clear();
+    cursor = 0;
+    readPaddingProperty = TLVUtil::ReadPaddingProperty(buffer, cursor);
+    EXPECT_FALSE(writePaddingProperty == readPaddingProperty);
+}
+
+/**
+ * @tc.name: Tlv010
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv010, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(10.0));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(5.0));
+    ImageSpanAttribute writeImageSpanAttribute { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM };
+    std::vector<uint8_t> result = { 0x3a, 0x3c, 0x2c, 0x3, 0x3d, 0x2d, 0x2, 0x3e, 0x46, 0x49, 0x2b, 0x20, 0x0, 0x24,
+        0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x4a, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0,
+        0x0, 0x24, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x48,
+        0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x24, 0x40, 0x0, 0x4b, 0x3f, 0x27, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x40, 0x1, 0x40,
+        0x46, 0x49, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x4a, 0x2b, 0x20, 0x0,
+        0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x47, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0,
+        0x0, 0x0, 0x0, 0x14, 0x40, 0x0, 0x48, 0x2b, 0x20, 0x0, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x14, 0x40,
+        0x0, 0x4b, 0x41 };
+    TLVUtil::WriteImageSpanAttribute(buffer, writeImageSpanAttribute);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    ImageSpanAttribute readImageSpanAttribute = TLVUtil::ReadImageSpanAttribute(buffer, cursor);
+    EXPECT_TRUE(writeImageSpanAttribute == readImageSpanAttribute);
+    buffer.clear();
+    cursor = 0;
+    readImageSpanAttribute = TLVUtil::ReadImageSpanAttribute(buffer, cursor);
+    EXPECT_FALSE(writeImageSpanAttribute == readImageSpanAttribute);
+}
+
+/**
+ * @tc.name: Tlv011
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    NG::LeadingMargin writeLeadingMargin;
+    writeLeadingMargin.size = LeadingMarginSize(Dimension(12.0), Dimension(48.0));
+    std::vector<uint8_t> result = { 0x4c, 0x24, 0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x28, 0x40, 0x0, 0x24, 0x21, 0x0,
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x48, 0x40, 0x0, 0x4e };
+    TLVUtil::WriteLeadingMargin(buffer, writeLeadingMargin);
+    EXPECT_TRUE(buffer == result);
+
+    int32_t cursor = 0;
+    NG::LeadingMargin readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
+    EXPECT_TRUE(writeLeadingMargin == readLeadingMargin);
+    buffer.clear();
+    cursor = 0;
+    readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
+    EXPECT_FALSE(writeLeadingMargin == readLeadingMargin);
+}
 } // namespace OHOS::Ace::NG

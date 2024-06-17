@@ -105,6 +105,7 @@ public:
     V2::SwipeEdgeEffect GetEdgeEffect();
     void MarkDirtyNode();
     void UpdatePostion(float delta);
+    void DumpAdvanceInfo() override;
 
     bool HasStartNode() const
     {
@@ -235,6 +236,7 @@ private:
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
     void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
+    void OnColorConfigurationUpdate() override;
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
     Color GetBlendGgColor();
@@ -248,11 +250,14 @@ private:
     void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
     void FireSwipeActionStateChange(SwipeActionState newState);
     void ResetToItemChild();
+    bool ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset);
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;
         endNodeSize_ = 0.0f;
     }
+    bool IsRTLAndVertical() const;
+    float SetReverseValue(float offset);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;

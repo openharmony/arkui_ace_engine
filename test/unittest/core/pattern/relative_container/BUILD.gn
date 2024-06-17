@@ -19,5 +19,6 @@ ace_unittest("relative_container_test_ng") {
     "relative_container_common_ng.cpp",
     "relative_container_guideline_test_ng.cpp",
     "relative_container_test_ng.cpp",
+    "relative_container_testtwo_ng.cpp",
   ]
 }

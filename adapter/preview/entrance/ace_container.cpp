@@ -159,7 +159,6 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     if (aceView_ != nullptr) {
-        delete aceView_;
         aceView_ = nullptr;
     }
 }
@@ -187,6 +186,11 @@ void AceContainer::InitializeFrontend()
         EngineHelper::AddEngine(instanceId_, jsEngine);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
+        if (PkgContextInfo_) {
+            declarativeFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            declarativeFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            declarativeFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -200,6 +204,11 @@ void AceContainer::InitializeFrontend()
         cardFrontend->SetRunningCardId(0);
         cardFrontend->SetIsFormRender(true);
         cardFrontend->SetTaskExecutor(taskExecutor_);
+        if (PkgContextInfo_) {
+            cardFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            cardFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            cardFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
         SetIsFRSCardContainer(true);
     }
     ACE_DCHECK(frontend_);
@@ -289,6 +298,11 @@ void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std:
         cardFront->SetFormSrc(selectUrl);
         cardFront->SetCardWindowConfig(stageCardParser->GetWindowConfig());
     }
+}
+
+void AceContainer::SetPkgContextInfo(const RefPtr<StagePkgContextInfo>& PkgContextInfo)
+{
+    PkgContextInfo_ = PkgContextInfo;
 }
 
 void AceContainer::InitializeCallback()
@@ -963,6 +977,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         pipelineContext_->SetAppLabelId(labelId_);
     }
     pipelineContext_->OnShow();
+    pipelineContext_->WindowFocus(true);
     InitializeCallback();
 
     auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
@@ -1045,14 +1060,14 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
     return container;
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo();
+    return front->GetContentInfo(type);
 }
 
 void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)

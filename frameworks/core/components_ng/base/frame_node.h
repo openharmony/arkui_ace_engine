@@ -81,20 +81,33 @@ public:
     static RefPtr<FrameNode> GetOrCreateFrameNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
+    static RefPtr<FrameNode> GetOrCreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    static RefPtr<FrameNode> CreateCommonNode(const std::string& tag, int32_t nodeId, bool isLayoutNode,
+        const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
+        bool isRoot = false, bool isLayoutNode = false);
 
     ~FrameNode() override;
 
     int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
+    int32_t CurrentFrameCount() const override
     {
         return 1;
     }
@@ -121,6 +134,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void UpdateGeometryTransition() override;
+
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
         {
@@ -143,11 +158,10 @@ public:
 
     virtual void MarkModifyDone();
 
-    void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false) override;
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary,
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void ProcessPropertyDiff()
     {
@@ -167,6 +181,16 @@ public:
     }
 
     void OnMountToParentDone();
+
+    bool GetIsLayoutNode();
+
+    bool GetIsFind();
+
+    void SetIsFind(bool isFind);
+
+    void GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children);
+
+    void GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset);
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
@@ -192,19 +216,21 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, true);
-        eventHub_->SetVisibleAreaCallback(callback, true);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback(bool isApproximate = false)
     {
-        eventHub_->CleanVisibleAreaCallback(true);
+        if (isApproximate) {
+            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        } else {
+            eventHub_->CleanVisibleAreaCallback(true, false);
+        }
     }
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, false);
-        eventHub_->SetVisibleAreaCallback(callback, false);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -312,7 +338,8 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -401,7 +428,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -430,19 +457,9 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
+        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void MarkNeedRenderOnly();
-
-    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
-    {
-        attachFunc_ = std::move(attachFunc);
-    }
-
-    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
-    {
-        detachFunc_ = std::move(detachFunc);
-    }
 
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
@@ -453,6 +470,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    std::list<std::function<void()>> GetDestroyCallback() const
+    {
+        return destroyCallbacks_;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -655,6 +677,11 @@ public:
         return UINode::TotalChildCount();
     }
 
+    int32_t GetTotalChildCountWithoutExpanded() const
+    {
+        return UINode::CurrentFrameCount();
+    }
+
     const RefPtr<GeometryNode>& GetGeometryNode() const override
     {
         return geometryNode_;
@@ -675,8 +702,7 @@ public:
         uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
-    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false);
-
+    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -690,8 +716,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
@@ -701,15 +727,8 @@ public:
     void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
+    bool SelfExpansiveToKeyboard();
     bool ParentExpansive();
-    void SetNeedRestoreSafeArea(bool needRestore)
-    {
-        needRestoreSafeArea_ = needRestore;
-    }
-    bool NeedRestoreSafeArea()
-    {
-        return needRestoreSafeArea_;
-    }
 
     bool IsActive() const override
     {
@@ -734,8 +753,9 @@ public:
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
     void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
-        bool addToRenderTree = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(
+        uint32_t index, bool needBuild, bool isCache = false, bool addToRenderTree = false) override;
+    RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
@@ -799,11 +819,14 @@ public:
     void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
     {
         extensionHandler_ = handler;
-        extensionHandler_->AttachFrameNode(this);
+        if (extensionHandler_) {
+            extensionHandler_->AttachFrameNode(this);
+        }
     }
 
-    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
-    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
@@ -832,6 +855,11 @@ public:
         isWindowBoundary_ = isWindowBoundary;
     }
 
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
+
     void InitLastArea();
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
@@ -847,16 +875,85 @@ public:
         }
     }
 
+    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
+
+    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+
+    bool GetIsGeometryTransitionIn() const
+    {
+        return isGeometryTransitionIn_;
+    }
+
+    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
+    {
+        isGeometryTransitionIn_ = isGeometryTransitionIn;
+    }
+
+    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
+    {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
+        UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
+    static std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference);
+
+    // Notified by render context when any transform attributes updated,
+    // this flag will be used to refresh the transform matrix cache if it's dirty
+    void NotifyTransformInfoChanged()
+    {
+        isLocalRevertMatrixAvailable_ = false;
+    }
+
+    void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
+    {
+        predictLayoutNode_.emplace_back(node);
+    }
+
+    bool CheckAccessibilityLevelNo() const {
+        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (property) {
+            auto level = property->GetAccessibilityLevel();
+            if (level == NG::AccessibilityProperty::Level::NO ||
+                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // this method will check the cache state and return the cached revert matrix preferentially,
+    // but the caller can pass in true to forcible refresh the cache
+    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+
+    // apply the matrix to the given point specified by dst
+    static void MapPointTo(PointF& dst, Matrix4& matrix);
+    void SetSuggestOpIncMarked(bool flag);
+    bool GetSuggestOpIncMarked();
+    void SetCanSuggestOpInc(bool flag);
+    bool GetCanSuggestOpInc();
+    void SetApplicationRenderGroupMarked(bool flag);
+    bool GetApplicationRenderGroupMarked();
+    void SetSuggestOpIncActivatedOnce();
+    bool GetSuggestOpIncActivatedOnce();
+    bool MarkSuggestOpIncGroup(bool suggest, bool calc);
+    void SetOpIncGroupCheckedThrough(bool flag);
+    bool GetOpIncGroupCheckedThrough();
+    void SetOpIncCheckedOnce();
+    bool GetOpIncCheckedOnce();
+    void MarkAndCheckNewOpIncNode();
+    ChildrenListWithGuard GetAllChildren();
+    OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
 
 protected:
     void DumpInfo() override;
 
 private:
+    OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
+    static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
-    std::pair<float, float> ContextPositionConvertToPX(
-        const RefPtr<RenderContext>& context, const SizeF& percentReference) const;
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
     void ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeFlag) override;
@@ -866,7 +963,7 @@ private:
      *
      * @return true if Parent is successfully marked dirty.
      */
-    virtual bool RequestParentDirty(bool childExpansiveAndMark = false);
+    virtual bool RequestParentDirty();
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
@@ -879,6 +976,8 @@ private:
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
@@ -892,6 +991,8 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
+    void DumpAlignRulesInfo();
+    void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
@@ -905,7 +1006,11 @@ private:
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
+        double lastVisibleRatio, bool isThrottled = false);
+    void ProcessThrottledVisibleCallback();
+    bool IsFrameDisappear();
+    void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -921,7 +1026,7 @@ private:
 
     int32_t GetNodeExpectedRate();
 
-    void RecordExposureIfNeed(const std::string& inspectorId);
+    void RecordExposureInner();
 
     OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 
@@ -935,11 +1040,12 @@ private:
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
+    void TriggerShouldParallelInnerWith(
+        const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
+
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
-
-    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -974,9 +1080,6 @@ private:
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
-    std::function<void(int32_t)> attachFunc_;
-    std::function<void(int32_t)> detachFunc_;
-
     bool needSyncRenderTree_ = false;
 
     bool isPropertyDiffMarked_ = false;
@@ -996,6 +1099,10 @@ private:
 
     double lastVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastThrottledVisibleRatio_ = 0.0;
+    double lastThrottledVisibleCbRatio_ = 0.0;
+    int64_t lastThrottledTriggerTime_ = 0;
+    bool throttledCallbackOnTheWay_ = false;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility
@@ -1007,14 +1114,23 @@ private:
     bool userSet_ = false;
     bool customerSet_ = false;
     bool isWindowBoundary_ = false;
+    uint8_t suggestOpIncByte_ = 0;
+    uint64_t getCacheNanoTime_ = 0;
+    RectF prePaintRect_;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
+    // this is just used for the hit test process of event handling, do not used for other purpose
+    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
+    bool isLocalRevertMatrixAvailable_ = false;
+    bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
-    bool needRestoreSafeArea_ = true;
     bool isDisallowDropForcedly_ = false;
+    bool isGeometryTransitionIn_ = false;
+    bool isLayoutNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
@@ -1033,6 +1149,7 @@ private:
         RectF currFrameRect;
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
+    std::list<WeakPtr<FrameNode>> predictLayoutNode_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

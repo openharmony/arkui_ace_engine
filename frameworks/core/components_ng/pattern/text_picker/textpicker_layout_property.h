@@ -72,7 +72,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
-
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("defaultPickerItemHeight",
             GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str(), filter);
         json->PutExtAttr("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str(), filter);

@@ -41,6 +41,12 @@ public:
     void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
 
     void SetObscured(bool isObscured) override;
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    void OnAccessibilityChildTreeDeregister() override;
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs) override;
+
 private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

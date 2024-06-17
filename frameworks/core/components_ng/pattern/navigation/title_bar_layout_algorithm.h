@@ -123,7 +123,7 @@ private:
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
 
     // set variables from theme
-    void InitializeTheme();
+    void InitializeTheme(const SizeF& titleBarSize);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
@@ -135,8 +135,6 @@ private:
     Dimension backButtonHeight_;
     Dimension backIconWidth_;
     Dimension backIconHeight_;
-    Dimension marginLeft_;
-    Dimension marginRight_;
     Dimension menuCompPadding_;
     Dimension paddingTopTwolines_;
     Dimension titleSpaceVertical_;
@@ -155,6 +153,7 @@ private:
     float doubleLineTitleBarHeight_ = 0.0f;
     float navTitleSpaceVertical_ = 0.0f;
     float navLeftMargin_ = 0.0f;
+    float navRightMargin_ = 0.0f;
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;

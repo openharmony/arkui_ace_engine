@@ -23,7 +23,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "frameworks/core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -65,7 +65,8 @@ public:
 
     double GetDensity()
     {
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
 protected:

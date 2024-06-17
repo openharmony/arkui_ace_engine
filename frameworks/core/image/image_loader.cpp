@@ -209,6 +209,7 @@ sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& s
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
 #endif
 {
+    ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
@@ -282,7 +283,7 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
 {
     return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src, Container::CurrentId())
                 : DownloadManager::GetInstance()->DownloadAsync(
-                      std::move(downloadCallback), src, Container::CurrentId());
+                    std::move(downloadCallback), src, Container::CurrentId());
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -496,19 +497,28 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
     }
-    std::vector<uint8_t> imageData;
-    if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
+    std::string result;
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [result](const std::string&& imageData, bool async, int32_t instanceId) mutable {
+        result = imageData;
+    };
+    downloadCallback.failCallback = [](std::string errorMessage, bool async, int32_t instanceId) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{public}s failed!", errorMessage.c_str());
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), uri, Container::CurrentId()) ||
+        result.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());
         return nullptr;
     }
 #ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
+    sk_sp<SkData> data = SkData::MakeWithCopy(result.data(), result.length());
 #else
     auto data = std::make_shared<RSData>();
-    data->BuildWithCopy(imageData.data(), imageData.size());
+    data->BuildWithCopy(result.data(), result.length());
 #endif
     // 3. write it into file cache.
-    WriteCacheToFile(uri, imageData);
+    WriteCacheToFile(uri, result);
     return data;
 }
 
@@ -568,6 +578,10 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
     if (error != SkBase64::Error::kNoError) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "error base64 image code!");
         return nullptr;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
+            imageSourceInfo.ToString().c_str());
     }
     return resData;
 }
@@ -670,18 +684,18 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     }
     uint32_t resId = 0;
     if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
-        if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+        if (resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+#ifndef USE_ROSEN_DRAWING
+            return SkData::MakeWithCopy(data.get(), dataLen);
+#else
+            auto drawingData = std::make_shared<RSData>();
+            drawingData->BuildWithCopy(data.get(), dataLen);
+            return drawingData;
+#endif
+        } else {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);
-            return nullptr;
         }
-#ifndef USE_ROSEN_DRAWING
-        return SkData::MakeWithCopy(data.get(), dataLen);
-#else
-        auto drawingData = std::make_shared<RSData>();
-        drawingData->BuildWithCopy(data.get(), dataLen);
-        return drawingData;
-#endif
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
@@ -759,6 +773,10 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     }
 
     auto cache = pipeline->GetImageCache();
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+            src.GetKey().c_str());
+    }
     if (cache) {
         cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
     }
@@ -870,6 +888,10 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     CHECK_NULL_RETURN(pixmap, nullptr);
 
     auto cache = pipeline->GetImageCache();
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+            src.GetKey().c_str());
+    }
     if (cache) {
         cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
     }

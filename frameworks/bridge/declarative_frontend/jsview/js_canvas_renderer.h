@@ -34,7 +34,7 @@ namespace OHOS::Ace::Framework {
 class JSCanvasRenderer : public Referenced {
 public:
     JSCanvasRenderer();
-    ~JSCanvasRenderer() override = default;
+    ~JSCanvasRenderer() override;
 
     enum class FunctionCode {
         FILL_RECT = 0,
@@ -49,8 +49,7 @@ public:
     static RefPtr<CanvasPath2D> JsMakePath2D(const JSCallbackInfo& info);
     void SetAntiAlias();
 
-    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array);
-    void ParseImageDataAsStr(const JSCallbackInfo& info, ImageData& imageData);
+    void ParseImageData(const JSCallbackInfo& info, ImageData& imageData);
     void JsCloseImageBitmap(const std::string& src);
 
     void JsFillRect(const JSCallbackInfo& info);
@@ -177,10 +176,9 @@ public:
         return unit_;
     }
 
-    double GetDensity()
+    inline double GetDensity()
     {
-        ContainerScope scope(instanceId_);
-        return (GetUnit() == CanvasUnit::DEFAULT) ? PipelineBase::GetCurrentDensity() : 1.0;
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
     }
 
     void SetInstanceId(int32_t id)
@@ -210,6 +208,7 @@ protected:
 
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
+    JSRef<JSObject> createGradientObj(const std::shared_ptr<Gradient>& gradient);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, std::shared_ptr<Pattern>> pattern_;
@@ -222,6 +221,8 @@ private:
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    double density_ = 1.0;
+    int32_t densityCallbackId_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework

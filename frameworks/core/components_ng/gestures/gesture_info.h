@@ -204,6 +204,13 @@ public:
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
 
+    void SetDisposeTag(bool tag)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetDisposeTag(tag);
+        }
+    }
+
 protected:
     int32_t fingers_ = 1;
     GesturePriority priority_ = GesturePriority::Low;
@@ -214,7 +221,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
     RefPtr<GestureInfo> gestureInfo_;
-    void* userData_;
+    void* userData_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

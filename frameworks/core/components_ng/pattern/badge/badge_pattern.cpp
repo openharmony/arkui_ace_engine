@@ -129,6 +129,15 @@ void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        if (!isShowBadge) {
+            textLayoutProperty->ResetContent();
+        }
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        renderContext->SetVisible(isShowBadge);
+        return;
+    }
+
     AnimationOption option;
     option.SetDuration(duration_);
     option.SetCurve(Curves::SHARP);
@@ -140,6 +149,10 @@ void BadgePattern::BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge
             renderContext->SetScale(0, 0);
         }
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        }, [textLayoutProperty, isShowBadge]() {
+            if (!isShowBadge) {
+                textLayoutProperty->ResetContent();
+            }
     });
 }
 } // namespace OHOS::Ace::NG

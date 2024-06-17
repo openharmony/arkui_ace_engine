@@ -35,6 +35,33 @@ public:
         RadioModel::GetInstance()->SetUncheckedBorderColor(themeColors->IconFourth());
         RadioModel::GetInstance()->SetIndicatorColor(themeColors->IconOnPrimary());
     }
+
+    static bool ObtainCheckedBackgroundColor(Color &color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->CompBackgroundEmphasize();
+            return true;
+        }
+        return false;
+    }
+
+    static bool ObtainUncheckedBorderColor(Color &color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->IconFourth();
+            return true;
+        }
+        return false;
+    }
+
+    static bool ObtainIndicatorColor(Color &color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->IconOnPrimary();
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_RADIO_THEME_H

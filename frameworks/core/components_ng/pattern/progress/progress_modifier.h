@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     void SetSmoothEffect(bool value);
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
+    void SetIsRightToLeft(bool value);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -72,7 +73,8 @@ private:
 
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintLinearSweeping(RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const;
+    void PaintLinearSweeping(
+        RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal, const SizeF& contentSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintRingProgressOrShadow(RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const;
@@ -144,6 +146,7 @@ private:
     RefPtr<PropertyBool> isItalic_;
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> isRightToLeft_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

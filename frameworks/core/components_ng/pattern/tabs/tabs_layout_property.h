@@ -68,6 +68,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("vertical", propAxis_.value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL ?
             "false" : "true", filter);
         json->PutExtAttr("barPosition", propTabBarPosition_.value_or(BarPosition::START) == BarPosition::START

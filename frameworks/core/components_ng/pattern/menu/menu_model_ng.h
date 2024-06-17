@@ -27,12 +27,15 @@ public:
     void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
     void SetFontFamily(const std::vector<std::string> &families) override;
+    void ResetFontFamily() override;
     void SetWidth(const Dimension& width) override;
     void SetBorderRadius(const Dimension& radius) override;
     void ResetBorderRadius() override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
+    void SetItemDivider(const V2::ItemDivider& divider) override;
+    void SetItemGroupDivider(const V2::ItemDivider& divider) override;
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
@@ -44,7 +47,13 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
+    void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
 
+private:
+    static Dimension CalculateBoundedWidth(const Dimension& inputWidth);
+    static Dimension CalculateBoundedWidthForPC(const Dimension& inputWidth);
+    static Dimension CalculateBoundedWidthForMobile(const Dimension& inputWidth);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

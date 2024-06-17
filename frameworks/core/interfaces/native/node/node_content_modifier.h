@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CONTENT_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CONTENT_MODIFIER_H
 
 #pragma once
 
@@ -20,3 +22,4 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUINodeContentModifier* GetNodeContentModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif

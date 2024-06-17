@@ -77,24 +77,22 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
-                "ffrt"
-            ],
-            "third_party": [
-                "json",
-                "skia",
-                "flutter",
-                "zlib",
-                "bounds_checking_function",
-                "curl",
+		        "libxml2",
+                "ffrt",
+                "icu",
+                "miscdevice",
                 "cJSON",
+                "curl",
                 "css-what",
                 "jsframework",
                 "opencl-headers",
-                "libuv",
-                "egl",
                 "opengles",
-                "icu"
-            ]
+                "zlib",
+                "skia",
+                "libuv",
+                "background_task_mgr"
+            ],
+            "third_party": []
         },
         "build": {
             "group_type": {
@@ -147,7 +145,7 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor",
                         "header_files": [
                             "drawable_descriptor.h"
                         ]
@@ -175,9 +173,14 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/native",
                         "header_files": [
-                            "interfaces/native/native_interface_xcomponent.h"
+                            "node/native_drawable_descriptor.h",
+                            "native_interface_xcomponent.h",
+                            "native_node.h",
+                            "native_interface.h",
+                            "native_type.h",
+                            "native_node_napi.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"
@@ -191,6 +194,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace_compatible"
+                },
+                {
+                    "header": {
+                      "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
+                      "header_files": [
+                          "container_scope.h"
+                      ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
                 },
                 {
                     "header": {

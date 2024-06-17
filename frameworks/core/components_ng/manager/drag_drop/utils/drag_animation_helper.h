@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_UTILS_DRAG_ANIMATION_HELPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_UTILS_DRAG_ANIMATION_HELPER_H
+
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
@@ -24,14 +25,17 @@ class FrameNode;
 class OverlayManager;
 class DragEventActuator;
 struct GatherNodeChildInfo;
+struct CalcResult {
+    float maxDistance = 0.0f;
+    float minDistance = 0.0f;
+    float maxTranslation = 0.0f;
+};
 
 class ACE_FORCE_EXPORT DragAnimationHelper {
 public:
-    static OffsetF CalcOffsetToTarget(OffsetF curPos, OffsetF targetrPos, float maxTranslation,
-        float maxDistance, float minDistance);
-    static void CalcDistanceBeforeLifting(bool isGrid, float& maxDistance,
-        float& maxTranslation, float& minTranslation, OffsetF gatherNodeCenter,
-        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
+    static OffsetF CalcOffsetToTarget(OffsetF curPos, OffsetF targetrPos, CalcResult& calcResult);
+    static void CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
+        const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void PlayGatherNodeTranslateAnimation(const RefPtr<DragEventActuator>& actuator,
         const RefPtr<OverlayManager>& overlayManager);
     static void PlayGatherAnimationBeforeLifting(const RefPtr<DragEventActuator>& actuator);

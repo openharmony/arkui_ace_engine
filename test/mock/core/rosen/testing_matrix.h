@@ -38,6 +38,10 @@ public:
 
     TestingMatrix() = default;
     ~TestingMatrix() = default;
+    void PreRotate(float degree, float px, float py) {}
+    void PreConcat(const TestingMatrix& other) {}
+    void PreTranslate(float dx, float dy) {}
+    void SetScale(float sx, float sy) {}
     void Rotate(float degree, float px, float py) {}
     void Translate(float dx, float dy) {}
     void Scale(float sx, float sy, float px, float py) {}
@@ -56,8 +60,7 @@ public:
         float scaleX, float skewX, float transX, float skewY, float scaleY, float transY, float p0, float p1, float p2)
     {}
 
-    void Set(Index index, float value)
-    {}
+    void Set(Index index, float value) {}
 
     void MapPoints(std::vector<TestingPoint>& dst, const std::vector<TestingPoint>& src, uint32_t count) const {}
 
@@ -65,6 +68,8 @@ public:
     {
         return 1.0f;
     }
+
+    void Reset() {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_MATRIX_H

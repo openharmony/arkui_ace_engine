@@ -30,7 +30,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -66,7 +65,6 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         userSelectedItemWidth = theme->GetSize().ConvertToPx();
         userSelectedItemHeight = theme->GetSize().ConvertToPx();
     }
-    auto indicatorPadding = INDICATOR_PADDING_HOVER;
     float scaleIndicator = theme->GetScaleSwiper();
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     userItemWidth *= scaleIndicator;
@@ -75,8 +73,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     userSelectedItemHeight *= scaleIndicator;
 
     // The width and height of the entire indicator.
+    Dimension indicatorHeightPadding = theme->GetIndicatorBgHeight();
     auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
-        userItemHeight : userSelectedItemHeight) + indicatorPadding.ConvertToPx() * 2);
+        userItemHeight : userSelectedItemHeight) + indicatorHeightPadding.ConvertToPx() * 2);
     auto allPointDiameterSum = userItemWidth * (itemCount + 1);
     if (paintProperty->GetIsCustomSizeValue(false)) {
         allPointDiameterSum = userItemWidth * (itemCount - 1) + userSelectedItemWidth;

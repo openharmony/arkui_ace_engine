@@ -35,7 +35,7 @@
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
-#include "core/interfaces/native/node/list_item_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -60,6 +60,7 @@
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
+#include "core/interfaces/native/node/node_folder_stack_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
@@ -85,6 +86,8 @@
 #include "core/interfaces/native/node/scroller_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/swiper_controller_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/shape_modifier.h"
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"
@@ -92,11 +95,18 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/interfaces/native/node/node_symbol_span_modifier.h"
+#include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_container_span_modifier.h"
+
+#ifdef MODEL_COMPONENT_SUPPORTED
+#include "core/interfaces/native/node/node_component3d_modifier.h"
+#endif
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/plugin_modifier.h"
@@ -134,6 +144,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetSliderModifier,
     NodeModifier::GetDividerModifier,
     NodeModifier::GetStackModifier,
+    NodeModifier::GetFolderStackModifier,
     NodeModifier::GetNavDestinationModifier,
     NodeModifier::GetGridModifier,
     NodeModifier::GetGridColModifier,
@@ -210,9 +221,9 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetFlexModifier, // FlexModifier
     nullptr, // ScrollBarModifier
     NodeModifier::GetScrollerModifier,
-    nullptr, // TabContentModifier
+    NodeModifier::GetTabContentModifier,
     nullptr, // TabsControllerModifier
-    nullptr, // SwiperControllerModifier
+    NodeModifier::GetSwiperControllerModifier,
     NodeModifier::GetGestureModifier, // GestureModifier
     nullptr, // BadgeModifier
     nullptr, // WebModifier
@@ -229,8 +240,16 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
     NodeModifier::GetSymbolGlyphModifier,
-};
+    NodeModifier::GetSymbolSpanModifier,
 
+#ifdef MODEL_COMPONENT_SUPPORTED
+    NodeModifier::GetComponent3DModifier,
+#else
+    nullptr,
+#endif
+
+    NodeModifier::GetContainerSpanModifier,
+};
 } // namespace
 
 } // namespace OHOS::Ace::NG

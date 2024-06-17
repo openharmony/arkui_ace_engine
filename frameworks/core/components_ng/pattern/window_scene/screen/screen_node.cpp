@@ -19,7 +19,7 @@
 namespace OHOS::Ace::NG {
 HitTestResult ScreenNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    bool isDispatch)
+    TouchTestResult& responseLinkResult, bool isDispatch)
 {
     auto testResult = HitTestResult::OUT_OF_REGION;
     auto pattern = GetPattern<ScreenPattern>();
@@ -30,8 +30,8 @@ HitTestResult ScreenNode::TouchTest(const PointF& globalPoint, const PointF& par
     if (screenSession->GetScreenId() != targetDisplayId) {
         return testResult;
     }
-    testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, parentRevertPoint,
-        touchRestrict, result, touchId);
+    testResult = FrameNode::TouchTest(
+        globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId, responseLinkResult);
     return testResult;
 }
 

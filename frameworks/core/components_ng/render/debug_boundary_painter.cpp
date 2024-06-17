@@ -96,14 +96,14 @@ void DebugBoundaryPainter::PaintDebugCorner(RSCanvas& canvas, const OffsetF& off
         RSPoint(
             startPointX + BOUNDARY_CORNER_LENGTH, startPointY + frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET));
     canvas.DrawLine(RSPoint(startPointX,
-                        startPointY + frameMarginSize_.Height() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET),
+        startPointY + frameMarginSize_.Height() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET),
         RSPoint(startPointX, startPointY + frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET));
     canvas.DrawLine(RSPoint(startPointX + frameMarginSize_.Width() - BOUNDARY_CORNER_LENGTH - HALF_STROKE_WIDTH_OFFSET,
-                        startPointY + frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET),
+        startPointY + frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET),
         RSPoint(startPointX + frameMarginSize_.Width() - HALF_STROKE_WIDTH_OFFSET,
             startPointY + frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET));
     canvas.DrawLine(RSPoint(startPointX + frameMarginSize_.Width() - HALF_STROKE_WIDTH_OFFSET,
-                        startPointY + frameMarginSize_.Height() - BOUNDARY_CORNER_LENGTH),
+        startPointY + frameMarginSize_.Height() - BOUNDARY_CORNER_LENGTH),
         RSPoint(startPointX + frameMarginSize_.Width() - HALF_STROKE_WIDTH_OFFSET,
             startPointY + frameMarginSize_.Height()));
     canvas.DetachPen();

@@ -75,7 +75,9 @@ ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
-// js if lese node
+// js repeat node
+ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
+// js if else node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
@@ -590,8 +592,8 @@ ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
 
 // DynamicComponent
-ACE_EXPORT extern const char DYNAMIC_COMPONENT_TAG[];
-ACE_EXPORT extern const char DYNAMIC_COMPONENT_ETS_TAG[];
+ACE_EXPORT extern const char ISOLATED_COMPONENT_TAG[];
+ACE_EXPORT extern const char ISOLATED_COMPONENT_ETS_TAG[];
 
 // ContainerSpan
 ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];
@@ -599,6 +601,9 @@ ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
 
 //RenderNode
 ACE_EXPORT extern const char RENDER_NODE_ETS_TAG[];
+
+//NodeContainer
+ACE_EXPORT extern const char NODE_CONTAINER_ETS_TAG[];
 
 //CustomFrameNode
 ACE_EXPORT extern const char CUSTOM_FRAME_NODE_ETS_TAG[];

@@ -35,12 +35,33 @@ class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
   }
 }
 
+class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
+  constructor(value: ChildrenMainSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemGroupChildrenMainSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupChildrenMainSize(node);
+    } else {
+      getUINativeModule().listItemGroup.setListItemGroupChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
+    return this;
+  }
+  childrenMainSize(value: ChildrenMainSize): this {
+    modifierWithKey(this._modifiersWithKeys, ListItemGroupChildrenMainSizeModifier.identity, ListItemGroupChildrenMainSizeModifier, value);
     return this;
   }
 }

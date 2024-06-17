@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT StackElement : public ComponentGroupElement, public FocusGroup {
+class ACE_FORCE_EXPORT StackElement : public ComponentGroupElement, public FocusGroup {
     DECLARE_ACE_TYPE(StackElement, ComponentGroupElement, FocusGroup);
 
     enum class Operation {

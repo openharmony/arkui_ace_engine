@@ -217,13 +217,13 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_VOID(node);
     bool isRoot = layoutWrapper->IsRootMeasureNode();
     std::optional<bool> direction;
-
     if (isRoot && IsNodeInAndActive(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         inNodeActiveFrameSize_ = geometryNode->GetFrameSize();
+        CHECK_NULL_VOID(layoutPropertyIn_);
         layoutPropertyIn_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
@@ -242,7 +242,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         hasOutAnim_ = false;
         direction = false;
     }
-
     if (direction.has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -475,6 +474,35 @@ void GeometryTransition::RecordAnimationOption(const WeakPtr<FrameNode>& trigger
     }
 }
 
+void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool inNodeParentHasScales,
+    const std::function<void()>& propertyCallback, const AnimationOption& option)
+{
+    auto inNode = inNode_.Upgrade();
+    CHECK_NULL_VOID(inNode);
+    auto inRenderContext = inNode->GetRenderContext();
+    CHECK_NULL_VOID(inRenderContext);
+    AnimationUtils::Animate(option, [&]() {
+        if (inRenderContext->HasSandBox()) {
+            auto parent = inNode->GetAncestorNodeOfFrame();
+            if (inNodeParentHasScales && parent) {
+                inRenderContext->SetSandBox(parent->GetTransformRectRelativeToWindow().GetOffset());
+            } else {
+                inRenderContext->SetSandBox(inNodeParentPos);
+            }
+        }
+        propertyCallback();
+    }, [nodeWeak = WeakClaim(RawPtr(inNode))]() {
+        auto node = nodeWeak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (renderContext->HasSandBox()) {
+            renderContext->SetSandBox(std::nullopt);
+        }
+        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
+    });
+}
+
 // during outNode animation is running target inNode's frame is changed, outNode needs to change as well to
 // match tightly.
 void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const AnimationOption& option)
@@ -506,13 +534,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
         GreatNotEqual(std::fabs(inNodeAbsRect.GetY() - inNodeAbsRectOld.GetY()), 1.0f);
     CHECK_NULL_VOID(sizeChanged || posChanged);
     auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, RESYNC_DURATION);
-    AnimationUtils::Animate(animOption, [&]() {
-        if (inRenderContext->HasSandBox()) {
-            auto parent = inNode->GetAncestorNodeOfFrame();
-            inNodeParentPos = inNodeParentHasScales && parent ?
-                parent->GetTransformRectRelativeToWindow().GetOffset() : inNodeParentPos;
-            inRenderContext->SetSandBox(inNodeParentPos, true);
-        }
+    auto propertyCallback = [&]() {
         if (!sizeChanged) {
             auto activeFrameRect = RectF(inNodeAbsRect.GetOffset() - outNodeParentPos_, inNodeAbsRect.GetSize());
             outRenderContext->SyncGeometryProperties(activeFrameRect);
@@ -525,7 +547,8 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
             MarkLayoutDirty(outNode);
             animationOption_ = animOption;
         }
-    }, nullptr);
+    };
+    AnimateWithSandBox(inNodeParentPos, inNodeParentHasScales, propertyCallback, animOption);
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "outNode: %{public}d %{public}s resyncs to inNode: %{public}d "
         "%{public}s, option: %{public}d, hasScales: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
         inNode->GetId(), inNodeAbsRect.ToString().c_str(), animOption.GetDuration(), inNodeParentHasScales);

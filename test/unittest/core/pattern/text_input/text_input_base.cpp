@@ -97,4 +97,12 @@ void TextInputBases::GetFocus()
     pattern_->HandleFocusEvent();
     FlushLayoutTask(frameNode_);
 }
+
+RefPtr<TextFieldTheme> TextInputBases::GetTheme()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto theme = context->GetTheme<TextFieldTheme>();
+    return theme;
+}
 } // namespace OHOS::Ace::NG

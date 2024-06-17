@@ -23,6 +23,7 @@
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "adapter/preview/entrance/ace_view_preview.h"
+#include "adapter/preview/external/ability/stage/stage_pkg_context_info.h"
 #include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -157,14 +158,14 @@ public:
         return true;
     }
 
-    AceViewPreview* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -215,6 +216,8 @@ public:
 
     void SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl);
 
+    void SetPkgContextInfo(const RefPtr<StagePkgContextInfo>& PkgContextInfo);
+
     void SetPageProfile(const std::string& pageProfile)
     {
         pageProfile_ = pageProfile;
@@ -260,7 +263,7 @@ public:
         return it->second;
     }
 
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
     void SetSharedRuntime(void* runtime) override
     {
         sharedRuntime_ = runtime;
@@ -317,7 +320,7 @@ private:
         UIEnvCallback callback);
 #endif
 
-    AceViewPreview* aceView_ = nullptr;
+    RefPtr<AceViewPreview> aceView_ = nullptr;
     int32_t instanceId_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -338,6 +341,7 @@ private:
     void* sharedRuntime_ = nullptr;
     std::string bundleName_;
     std::string moduleName_;
+    RefPtr<StagePkgContextInfo> PkgContextInfo_;
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;

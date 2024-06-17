@@ -122,7 +122,9 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
+std::function<void(bool)> LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 const char PNG_TAG[] = "png";
 
 void LayoutInspector::SupportInspector()
@@ -156,11 +158,35 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
-void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
+void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->setProfilerStatus(status);
+    if (jsStateProfilerStatusCallback_) {
+        auto taskExecutor = Container::CurrentTaskExecutorSafely();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([callback = jsStateProfilerStatusCallback_, status]() { callback(status); },
+            TaskExecutor::TaskType::UI, "ArkUITriggerJsStateProfilerStatusCallback");
+    }
+}
+
+void LayoutInspector::SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback)
+{
+    jsStateProfilerStatusCallback_ = callback;
+}
+
+bool LayoutInspector::GetStateProfilerStatus()
+{
+    return stateProfilerStatus_;
+}
+
+void LayoutInspector::SendStateProfilerMessage(const std::string& message)
+{
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+}
+
+void LayoutInspector::SetStateProfilerStatus(bool status)
+{
+    stateProfilerStatus_ = status;
+    TriggerJsStateProfilerStatusCallback(status);
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
@@ -178,13 +204,17 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     }
 
     OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetArkUIStateProfilerStatus(status); });
+        [](bool status) { return SetStateProfilerStatus(status); });
 }
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
     auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
     containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
@@ -234,21 +264,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
     jsonTree->Put("ProcessID", getpid());
     jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
     treeJsonStr = jsonTree->ToString();
-    if (SystemProperties::GetDebugEnabled()) {
-        auto vsyncId = jsonTree->GetValue("VsyncID");
-        auto processId = jsonTree->GetValue("ProcessID");
-        auto windowId = jsonTree->GetValue("WindowID");
-        auto content = jsonTree->GetValue("content");
-        auto children = content->GetValue("$children");
-        auto child = children->GetArrayItem(0);
-        auto type = child->GetValue("type");
-        TAG_LOGD(AceLogTag::ACE_STATE_MGMT,
-            "Json tree info : [type:%{public}s, vsyncId:%{public}d, processId:%{public}d, windowId:%{public}d]",
-            type->ToString().c_str(),
-            vsyncId->GetInt(),
-            processId->GetInt(),
-            windowId->GetInt());
-    }
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)

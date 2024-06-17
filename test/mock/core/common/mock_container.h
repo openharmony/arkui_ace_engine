@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/common/ace_view.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -40,6 +41,7 @@ public:
     static void SetUp();
     static void TearDown();
     static RefPtr<MockContainer> Current();
+    static RefPtr<MockContainer> GetContainer(int32_t containerId);
 
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
@@ -55,6 +57,7 @@ public:
     MOCK_METHOD(int32_t, GetViewPosY, (), (const, override));
     MOCK_METHOD(uint32_t, GetWindowId, (), (const, override));
     MOCK_METHOD(void*, GetView, (), (const, override));
+    MOCK_METHOD(RefPtr<AceView>, GetAceView, (), (const, override));
 
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));

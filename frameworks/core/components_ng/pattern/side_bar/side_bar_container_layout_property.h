@@ -88,7 +88,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
-
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
         constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
         constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;

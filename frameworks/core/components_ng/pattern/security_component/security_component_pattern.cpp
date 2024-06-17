@@ -59,7 +59,8 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if ((event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER)) {
+    if ((event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER) ||
+        (event.code == KeyCode::KEY_NUMPAD_ENTER)) {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, false);
         int32_t res = 1;
@@ -233,6 +234,11 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
 
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonValueRect(json, filter);
+        return;
+    }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
 
@@ -281,6 +287,10 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
 
 void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto node = GetHost();
     CHECK_NULL_VOID(node);
 
@@ -586,19 +596,25 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
-    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)](int32_t result) {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_RETURN(context, -1);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, -1);
-        taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result] {
-            ContainerScope scope(instanceId);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
-        return 0;
-    };
+    std::function<void (int32_t)> OnClickAfterFirstUseDialog;
+    if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+        OnClickAfterFirstUseDialog = [] (int32_t) {};
+    } else {
+        OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
+            node = frameNode](int32_t result) {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_RETURN(context, -1);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_RETURN(taskExecutor, -1);
+            taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                ContainerScope scope(instanceId);
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->DoTriggerOnclick(result);
+            }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+            return 0;
+        };
+    }
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));
@@ -625,19 +641,25 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
-    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)](int32_t result) {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_RETURN(context, -1);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, -1);
-        taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result] {
-            ContainerScope scope(instanceId);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->DoTriggerOnclick(result);
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
-        return 0;
-    };
+    std::function<void (int32_t)> OnClickAfterFirstUseDialog;
+    if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+        OnClickAfterFirstUseDialog = [] (int32_t) {};
+    } else {
+        OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
+            node = frameNode](int32_t result) {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_RETURN(context, -1);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_RETURN(taskExecutor, -1);
+            taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                ContainerScope scope(instanceId);
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->DoTriggerOnclick(result);
+            }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+            return 0;
+        };
+    }
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));

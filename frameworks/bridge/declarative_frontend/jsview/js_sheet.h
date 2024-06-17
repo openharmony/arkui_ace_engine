@@ -24,7 +24,6 @@ class JSSheet : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-
 };
 
 } // namespace OHOS::Ace::Framework

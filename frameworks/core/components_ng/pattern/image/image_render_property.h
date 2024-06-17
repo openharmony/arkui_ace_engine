@@ -37,6 +37,10 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicMode, DynamicRangeMode);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         static const char* OBJECTREPEATVALUE[] = { "ImageRepeat.NoRepeat", "ImageRepeat.X", "ImageRepeat.Y",
             "ImageRepeat.XY" };
         static const char* INTERPOLATIONVALUE[] = { "ImageInterpolation.None", "ImageInterpolation.Low",

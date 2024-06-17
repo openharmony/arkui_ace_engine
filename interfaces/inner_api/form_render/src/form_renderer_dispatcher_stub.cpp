@@ -31,6 +31,14 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED)] =
         &FormRendererDispatcherStub::HandleSetObscured;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_REGISTER)] =
+        &FormRendererDispatcherStub::HandleOnAccessibilityChildTreeRegister;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_DEREGISTER)] =
+        &FormRendererDispatcherStub::HandleOnAccessibilityChildTreeDeregister;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO)] =
+        &FormRendererDispatcherStub::HandleOnAccessibilityDumpChildInfo;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT)] =
+        &FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -103,6 +111,56 @@ int32_t FormRendererDispatcherStub::HandleSetObscured(MessageParcel &data, Messa
 {
     bool isObscured = data.ReadBool();
     SetObscured(isObscured);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnAccessibilityChildTreeRegister(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t windowId = data.ReadUint32();
+    int32_t treeId = data.ReadInt32();
+    int64_t accessibilityId = data.ReadInt64();
+    OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnAccessibilityChildTreeDeregister(MessageParcel &data, MessageParcel &reply)
+{
+    OnAccessibilityChildTreeDeregister();
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnAccessibilityDumpChildInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        HILOG_ERROR("%{public}s, Read params failed.", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> info;
+    OnAccessibilityDumpChildInfo(params, info);
+    reply.WriteStringVector(info);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent(MessageParcel &data, MessageParcel &reply)
+{
+    float pointX = 0;
+    float pointY = 0;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    if (!data.ReadFloat(pointX) ||
+        !data.ReadFloat(pointY) ||
+        !data.ReadInt32(sourceType) ||
+        !data.ReadInt32(eventType) ||
+        !data.ReadInt64(timeMs)) {
+        HILOG_ERROR("Read HandleTransferAccessibilityHoverEvent data failed!");
+        return ERR_INVALID_VALUE;
+    };
+    OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

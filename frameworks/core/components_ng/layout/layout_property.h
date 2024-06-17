@@ -236,15 +236,37 @@ public:
 
     bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
+    void SetLayoutRect(const NG::RectF& rect)
+    {
+        if (layoutRect_ != rect) {
+            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+            layoutRect_ = rect;
+        }
+    }
+
+    void ResetLayoutRect()
+    {
+        if (layoutRect_) {
+            propertyChangeFlag_ |= PROPERTY_UPDATE_MEASURE_SELF;
+            layoutRect_.reset();
+        }
+    }
+
+    std::optional<NG::RectF> GetLayoutRect() const
+    {
+        return layoutRect_;
+    }
+
     void BuildGridProperty(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
+    void UpdateLayoutConstraintWithLayoutRect();
 
     LayoutConstraintF CreateChildConstraint() const;
 
     LayoutConstraintF CreateContentConstraint() const;
 
-    PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true);
+    PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true, bool roundPixel = true);
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
@@ -324,6 +346,9 @@ private:
 
     const std::string PixelRoundToJsonValue() const;
 
+    void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
@@ -347,6 +372,7 @@ private:
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
+    std::optional<RectF> layoutRect_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 

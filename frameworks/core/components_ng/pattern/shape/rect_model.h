@@ -23,7 +23,7 @@
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
-class RectModel {
+class ACE_FORCE_EXPORT RectModel {
 public:
     static RectModel* GetInstance();
     virtual ~RectModel() = default;

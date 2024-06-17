@@ -160,6 +160,7 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
 void JSLazyForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyForEach>::Declare("LazyForEach");
+    JSClass<JSLazyForEach>::StaticMethod("createInternal", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("create", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("pop", &JSLazyForEach::Pop);
     JSClass<JSLazyForEach>::StaticMethod("onMove", &JSLazyForEach::OnMove);
@@ -179,6 +180,9 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         || !params[PARAM_ITEM_GENERATOR]->IsFunction()) {
             return;
     }
+    if (!params[PARAM_VIEW_ID]->IsString()) {
+        return;
+    }
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);
@@ -189,7 +193,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
     if (params[PARAM_KEY_GENERATOR]->IsUndefined()) {
         keyGenFunc = [viewId](const JSRef<JSVal>&, size_t index) { return viewId + "-" + std::to_string(index); };
-    } else {
+    } else if (params[PARAM_KEY_GENERATOR]->IsFunction()) {
         keyGenFunc = [viewId, keyGenerator = JSRef<JSFunc>::Cast(params[PARAM_KEY_GENERATOR])](
                          const JSRef<JSVal>& jsVal, size_t index) {
             JSRef<JSVal> params[] = { jsVal, JSRef<JSVal>::Make(ToJSValue(index)) };

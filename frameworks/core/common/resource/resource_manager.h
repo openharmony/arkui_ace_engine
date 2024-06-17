@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_RESOURCE_RESOURCE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_RESOURCE_RESOURCE_MANAGER_H
 
+#include <climits>
 #include <functional>
 #include <map>
 #include <mutex>
@@ -31,7 +32,9 @@
 #include "core/common/lru/count_limit_lru.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT ResourceManager : public AceType {
+constexpr char DEFAULT_RESOURCE_KEY[] = "";
+
+class ACE_FORCE_EXPORT ResourceManager final : public AceType {
     DECLARE_ACE_TYPE(ResourceManager, AceType);
 
 public:
@@ -43,6 +46,9 @@ public:
 
     std::string MakeCacheKey(const std::string& bundleName, const std::string& moduleName)
     {
+        if (bundleName.empty() && moduleName.empty()) {
+            return DEFAULT_RESOURCE_KEY;
+        }
         return bundleName + "." + moduleName;
     }
 
@@ -51,7 +57,7 @@ public:
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (bundleName.empty() && moduleName.empty()) {
-            resourceAdapters_[std::make_pair(bundleName, moduleName)] = resourceAdapter;
+            resourceAdapters_[DEFAULT_RESOURCE_KEY] = resourceAdapter;
         } else {
             auto key = MakeCacheKey(bundleName, moduleName);
             if (replace) {
@@ -66,31 +72,38 @@ public:
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey(bundleName, moduleName);
-        auto iter = cache_.find(key);
-        return iter != cache_.end();
+        if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+            return true;
+        }
+        return cache_.find(key) != cache_.end();
     }
 
     RefPtr<ResourceAdapter> GetResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        if (bundleName.empty() && moduleName.empty()) {
-            auto it = resourceAdapters_.find(std::make_pair(bundleName, moduleName));
-            if (it == resourceAdapters_.end()) {
-                TAG_LOGW(AceLogTag::ACE_RESOURCE,
-                    "Get default resourceAdapter failed, don't get resource while UIContent not initialized yet");
-                return ResourceAdapter::Create();
-            }
-            return it->second;
-        }
         auto key = MakeCacheKey(bundleName, moduleName);
-        return CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+        auto mapIter = resourceAdapters_.find(key);
+        if (mapIter != resourceAdapters_.end()) {
+            return mapIter->second;
+        } else if (key == DEFAULT_RESOURCE_KEY) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get default resourceAdapter failed, don't get resource while UIContent not initialized yet");
+            return ResourceAdapter::Create();
+        }
+
+        auto resAdapter = CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+        if (resAdapter != nullptr) {
+            return resAdapter;
+        }
+
+        return nullptr;
     }
 
     RefPtr<ResourceAdapter> GetResourceAdapter()
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        auto adaptId = std::make_pair("", "");
-        return resourceAdapters_.at(adaptId);
+        auto key = MakeCacheKey("", "");
+        return resourceAdapters_.at(key);
     }
 
     void UpdateResourceConfig(const ResourceConfiguration& config, bool themeFlag = false)
@@ -107,12 +120,11 @@ public:
     void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        auto mapKey = std::make_pair(bundleName, moduleName);
-        if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
-            resourceAdapters_.erase(mapKey);
+        std::string key = MakeCacheKey(bundleName, moduleName);
+        if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+            resourceAdapters_.erase(key);
         }
         if (!bundleName.empty() && !moduleName.empty()) {
-            std::string key = MakeCacheKey(bundleName, moduleName);
             CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
         }
     }
@@ -122,6 +134,7 @@ public:
         std::unique_lock<std::shared_mutex> lock(mutex_);
         cacheList_.clear();
         cache_.clear();
+        TAG_LOGI(AceLogTag::ACE_RESOURCE, "The cache of Resource has been released!");
     }
 
     void UpdateColorMode(ColorMode colorMode)
@@ -135,10 +148,13 @@ public:
         }
     }
 
+    void RegisterMainResourceAdapter(
+        const std::string& bundleName, const std::string& moduleName, const RefPtr<ResourceAdapter>& resAdapter);
+
 private:
     ResourceManager() = default;
 
-    std::map<std::pair<std::string, std::string>, RefPtr<ResourceAdapter>> resourceAdapters_;
+    std::unordered_map<std::string, RefPtr<ResourceAdapter>> resourceAdapters_;
     std::shared_mutex mutex_;
 
     std::atomic<size_t> capacity_ = 3;

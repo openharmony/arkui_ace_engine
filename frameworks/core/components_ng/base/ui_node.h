@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@ namespace OHOS::Ace::NG {
 struct ExtraInfo {
     std::string page;
     int32_t line = 0;
+    int32_t col = 0;
 };
 
 enum class NodeStatus : char {
@@ -70,12 +71,12 @@ public:
     virtual void DetachContext(bool recursive = false);
 
     virtual int32_t FrameCount() const;
-
+    virtual int32_t CurrentFrameCount() const;
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -84,11 +85,15 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
@@ -103,7 +108,17 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    void UpdateModalUiextensionCount(bool addNode)
+    {
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
+    }
+
     int32_t TotalChildCount() const;
+    virtual void UpdateGeometryTransition();
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -135,6 +150,8 @@ public:
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -149,7 +166,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
+    virtual void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -157,6 +174,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
@@ -270,7 +288,7 @@ public:
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-        bool isDispatch = false);
+        TouchTestResult& responseLinkResult, bool isDispatch = false);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -290,8 +308,7 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
-    virtual void MarkDirtyNode(
-        PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL, bool childExpansiveAndMark = false);
+    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
@@ -323,7 +340,7 @@ public:
 
     virtual void SetActive(bool active);
 
-    virtual void SetJSViewActive(bool active);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
     virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
@@ -401,8 +418,9 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false);
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
-
+    virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
+    // Get current frameNode index with or without expanded all LazyForEachNode;
+    virtual int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -506,10 +524,6 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
-    void AddAttachToMainTreeTask(std::function<void()>&& func)
-    {
-        attachToMainTreeTasks_.emplace_back(std::move(func));
-    }
 
     void* GetExternalData() const
     {
@@ -524,7 +538,7 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end);
+    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
     // return value: true if the node can be removed immediately.
@@ -577,6 +591,7 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     void AddFlag(uint32_t flag)
     {
@@ -620,6 +635,58 @@ public:
         return instanceId_;
     }
 
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+    {
+        for (const auto& child : GetChildren()) {
+            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+        }
+    }
+
+    virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
+    {
+        destroyCallback_ = std::move(destroyCallback);
+    }
+
+    virtual bool HasOnNodeDestroyCallback()
+    {
+        return destroyCallback_ != nullptr;
+    }
+
+    virtual void FireOnNodeDestroyCallback()
+    {
+        CHECK_NULL_VOID(destroyCallback_);
+        destroyCallback_(GetId());
+    }
+
+    void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
+    {
+        lazyBuilderFunc_ = lazyBuilderFunc;
+    }
+
+    std::function<void()> GetBuilderFunc() const
+    {
+        return lazyBuilderFunc_;
+    }
+
+    void SetUpdateNodeFunc(std::function<void(int32_t, RefPtr<UINode>&)>&& updateNodeFunc)
+    {
+        updateNodeFunc_ = updateNodeFunc;
+    }
+
+    std::function<void(int32_t, RefPtr<UINode>&)> GetUpdateNodeFunc()
+    {
+        return updateNodeFunc_;
+    }
+
+    void SetUpdateNodeConfig(std::function<void()>&& updateNodeConfig)
+    {
+        updateNodeConfig_ = updateNodeConfig;
+    }
+
+    std::function<void()> GetUpdateNodeConfig()
+    {
+        return updateNodeConfig_;
+    }
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -634,6 +701,9 @@ protected:
     }
 
     virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
+
+    virtual void OnGenerateOneDepthVisibleFrameWithOffset(
+        std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset);
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
@@ -662,6 +732,7 @@ protected:
 
     virtual bool RemoveImmediately() const;
     void ResetParent();
+    static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
     void UpdateChildrenVisible(bool isVisible) const;
@@ -713,13 +784,19 @@ private:
 
     bool useOffscreenProcess_ = false;
 
-    std::list<std::function<void()>> attachToMainTreeTasks_;
     std::function<void(int32_t)> updateJSInstanceCallback_;
+    std::function<void()> lazyBuilderFunc_;
+    std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
+    std::function<void()> updateNodeConfig_;
 
     std::string debugLine_;
     std::string viewId_;
     void* externalData_ = nullptr;
-
+    std::function<void(int32_t)> destroyCallback_;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

@@ -19,6 +19,8 @@
 #define protected public
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "interfaces/inner_api/drawable_descriptor/image_converter.h"
+#include "node_extened.h"
+#include "native_drawable_descriptor.h"
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -48,6 +50,9 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest001, TestSize.Level1)
     Napi::DrawableDescriptor drawableDescriptor;
     auto res = drawableDescriptor.GetPixelMap();
     EXPECT_EQ(res, nullptr);
+    ArkUI_DrawableDescriptor *drawDes = OH_ArkUI_CreateFromNapiDrawable(&drawableDescriptor);
+    EXPECT_EQ(drawDes->size, 0);
+    delete drawDes;
 }
 
 /**
@@ -468,5 +473,88 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0014, TestSize.Level1)
      * @tc.steps: step3. check layeredDrawable is customized 
      */
     EXPECT_TRUE(drawable.Customized());
+}
+
+/**
+ * @tc.name: DrawableDescTest0015
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::ANIMATED);
+
+    /**
+     * @tc.steps: step2. set value
+     */
+    animatedDrawable->SetDuration(1000);
+
+    /**
+     * @tc.steps: step3. check duration should be the value set.
+     */
+    EXPECT_EQ(animatedDrawable->GetDuration(), 1000);
+}
+
+/**
+ * @tc.name: DrawableDescTest0016
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetDrawableType();
+    EXPECT_EQ(res, Napi::DrawableDescriptor::DrawableType::ANIMATED);
+
+    /**
+     * @tc.steps: step2. set value
+     */
+    animatedDrawable->SetIterations(1);
+
+    /**
+     * @tc.steps: step3. check duration should be the value set.
+     */
+    EXPECT_EQ(animatedDrawable->GetIterations(), 1);
+}
+
+/**
+ * @tc.name: DrawableDescTest0017
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init layeredDrawable
+     */
+    auto drawable = Napi::LayeredDrawableDescriptor();
+
+    /**
+     * @tc.steps: step2. set param to layeredDrawable
+     */
+    std::shared_ptr<Media::PixelMap> layeredPixelMap;
+    std::shared_ptr<Media::PixelMap> badgedPixelMap;
+    std::shared_ptr<Media::PixelMap> compositePixelMap;
+    bool ret = drawable.GetCompositePixelMapWithBadge(layeredPixelMap, badgedPixelMap, compositePixelMap);
+    /**
+     * @tc.steps: step3. check layeredDrawable result
+     */
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace

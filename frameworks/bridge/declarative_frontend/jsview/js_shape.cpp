@@ -383,7 +383,9 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSShape>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSShape>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSShape>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSShape>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSShape>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSShape>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSShape>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSShape>::InheritAndBind<JSContainerBase>(globalObj);

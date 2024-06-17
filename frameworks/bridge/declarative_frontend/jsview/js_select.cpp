@@ -25,11 +25,14 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_select_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -77,11 +80,23 @@ void JSSelect::Create(const JSCallbackInfo& info)
             auto indexObject = JSRef<JSObject>::Cast(indexVal);
             auto selectValue = indexObject->GetProperty("value");
             auto selectIcon = indexObject->GetProperty("icon");
+            auto selectSymbolIcon = indexObject->GetProperty("symbolIcon");
+            RefPtr<JSSymbolGlyphModifier> selectSymbol = AceType::MakeRefPtr<JSSymbolGlyphModifier>();
+            selectSymbol->symbol_ = selectSymbolIcon;
+            params[i].symbolModifier = selectSymbol;
             ParseJsString(selectValue, value);
-            ParseJsMedia(selectIcon, icon);
-            params[i] = { value, icon };
+            params[i].text = value;
+            if (selectSymbolIcon->IsObject()) {
+                std::function<void(WeakPtr<NG::FrameNode>)> symbolApply = nullptr;
+                JSViewAbstract::SetSymbolOptionApply(info, symbolApply, selectSymbolIcon);
+                params[i].symbolIcon = symbolApply;
+            } else {
+                ParseJsMedia(selectIcon, icon);
+                params[i].icon = icon;
+            }
         }
         SelectModel::GetInstance()->Create(params);
+        JSSelectTheme::ApplyTheme();
     }
 }
 
@@ -119,13 +134,17 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionWidthFitTrigger", &JSSelect::SetOptionWidthFitTrigger, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundColor", &JSSelect::SetMenuBackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("menuBackgroundBlurStyle", &JSSelect::SetMenuBackgroundBlurStyle, opt);
+    JSClass<JSSelect>::StaticMethod("divider", &JSSelect::SetDivider);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
+    JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSelect>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSelect>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSSelect>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSelect>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSelect>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSelect>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSelect>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -818,5 +837,73 @@ void JSSelect::SetControlSize(const JSCallbackInfo& info)
     } else {
         LOGE("JSSelect::SetControlSize Is not Number.");
     }
+}
+
+void JSSelect::SetDivider(const JSCallbackInfo& info)
+{
+    NG::SelectDivider divider;
+    auto selectTheme = GetTheme<SelectTheme>();
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    // Set default strokeWidth and color
+    if (selectTheme) {
+        defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+       
+        Dimension strokeWidth = defaultStrokeWidth;
+        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
+            divider.strokeWidth = strokeWidth;
+        }
+        
+        Color color = defaultColor;
+        if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
+            divider.color = color;
+        }
+
+        Dimension startMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) && CheckDividerValue(startMargin)) {
+            divider.startMargin = startMargin;
+        }
+
+        Dimension endMargin = defaultMargin;
+        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) &&  CheckDividerValue(endMargin)) {
+            divider.endMargin = endMargin;
+        }
+    } else if (info.Length() >= 1 && info[0]->IsNull()) {
+        divider.strokeWidth = 0.0_vp;
+    }
+    SelectModel::GetInstance()->SetDivider(divider);
+}
+
+bool JSSelect::CheckDividerValue(const Dimension &dimension)
+{
+    if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
+        return true;
+    }
+    return false;
+}
+
+void JSSelect::SetDirection(const std::string& dir)
+{
+    TextDirection direction = TextDirection::AUTO;
+    if (dir == "Ltr") {
+        direction = TextDirection::LTR;
+    } else if (dir == "Rtl") {
+        direction = TextDirection::RTL;
+    } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        direction = TextDirection::AUTO;
+    }
+    SelectModel::GetInstance()->SetLayoutDirection(direction);
 }
 } // namespace OHOS::Ace::Framework

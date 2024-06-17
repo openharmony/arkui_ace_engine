@@ -40,6 +40,10 @@ static constexpr size_t ARGC_WITH_MODE_AND_CALLBACK = 3;
 static constexpr uint32_t STANDARD = 0;
 static constexpr uint32_t SINGLE = 1;
 static constexpr uint32_t INVALID = 2;
+static constexpr uint32_t RESULT_ARRAY_INDEX_INDEX = 0;
+static constexpr uint32_t RESULT_ARRAY_NAME_INDEX = 1;
+static constexpr uint32_t RESULT_ARRAY_PATH_INDEX = 2;
+static constexpr uint32_t RESULT_ARRAY_LENGTH = 3;
 
 static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 {
@@ -54,7 +58,6 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 
 static void ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
-    // TODO: Save the original data instead of making the serial number.
     if (params == nullptr) {
         return;
     }
@@ -98,6 +101,14 @@ static napi_value ParseJSONParams(napi_env env, const std::string& paramsStr)
     return result;
 }
 
+static void ParseRecoverable(napi_env env, napi_value recoverableNApi, bool& recoverable)
+{
+    if (recoverableNApi == nullptr) {
+        return;
+    }
+    napi_get_value_bool(env, recoverableNApi, &recoverable);
+}
+
 struct RouterAsyncContext {
     napi_env env = nullptr;
     napi_ref callbackSuccess = nullptr;
@@ -107,6 +118,7 @@ struct RouterAsyncContext {
     std::string keyForUrl;
     std::string paramsString;
     std::string uriString;
+    bool recoverable = true;
     uint32_t mode = STANDARD;
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
@@ -219,6 +231,7 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             }
             napi_value uriNApi = nullptr;
             napi_value params = nullptr;
+            napi_value recoverable = nullptr;
             napi_get_named_property(env, argv[i], asyncContext->keyForUrl.c_str(), &uriNApi);
             napi_typeof(env, uriNApi, &valueType);
             if (valueType != napi_string) {
@@ -228,6 +241,8 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             ParseUri(env, uriNApi, asyncContext->uriString);
             napi_get_named_property(env, argv[i], "params", &params);
             ParseParams(env, params, asyncContext->paramsString);
+            napi_get_named_property(env, argv[i], "recoverable", &recoverable);
+            ParseRecoverable(env, recoverable, asyncContext->recoverable);
         } else if (valueType == napi_number) {
             napi_get_value_uint32(env, argv[i], &asyncContext->mode);
         } else if (valueType == napi_function) {
@@ -342,9 +357,11 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
             return;
         }
         if (delegate) {
-            delegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            delegate->PushWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         } else {
-            defaultDelegate->PushWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            defaultDelegate->PushWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         }
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
@@ -360,10 +377,11 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
             return;
         }
         if (delegate) {
-            delegate->ReplaceWithCallback(context->uriString, context->paramsString, errorCallback, context->mode);
+            delegate->ReplaceWithCallback(context->uriString, context->paramsString,
+                context->recoverable, errorCallback, context->mode);
         } else {
             defaultDelegate->ReplaceWithCallback(context->uriString, context->paramsString,
-                errorCallback, context->mode);
+                context->recoverable, errorCallback, context->mode);
         }
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "url");
@@ -377,7 +395,8 @@ static napi_value JSPushNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        delegate->PushNamedRoute(context->uriString, context->paramsString, errorCallback, context->mode);
+        delegate->PushNamedRoute(context->uriString, context->paramsString,
+            context->recoverable, errorCallback, context->mode);
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
@@ -390,7 +409,8 @@ static napi_value JSReplaceNamedRoute(napi_env env, napi_callback_info info)
             NapiThrow(context->env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        delegate->ReplaceNamedRoute(context->uriString, context->paramsString, errorCallback, context->mode);
+        delegate->ReplaceNamedRoute(context->uriString, context->paramsString,
+            context->recoverable, errorCallback, context->mode);
     };
     return CommonRouterWithCallbackProcess(env, info, callback, "name");
 }
@@ -472,16 +492,11 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 {
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    auto defaultDelegate = EngineHelper::GetDefaultDelegate();
-    if (!delegate && !defaultDelegate) {
+    if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    if (delegate) {
-        delegate->Clear();
-    } else {
-        defaultDelegate->Clear();
-    }
+    delegate->Clear();
     return nullptr;
 }
 
@@ -514,16 +529,19 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
-    napi_value resultArray[3] = { 0 };
-    napi_create_int32(env, routeIndex, &resultArray[0]);
-    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
-    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
+    std::string paramsStr = delegate->GetParams();
+    napi_value params = paramsStr.empty() ? nullptr : ParseJSONParams(env, paramsStr);
+    napi_value resultArray[RESULT_ARRAY_LENGTH] = { 0 };
+    napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[RESULT_ARRAY_PATH_INDEX]);
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    napi_set_named_property(env, result, "index", resultArray[0]);
-    napi_set_named_property(env, result, "name", resultArray[1]);
-    napi_set_named_property(env, result, "path", resultArray[2]);
+    napi_set_named_property(env, result, "index", resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_set_named_property(env, result, "name", resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_set_named_property(env, result, "path", resultArray[RESULT_ARRAY_PATH_INDEX]);
+    napi_set_named_property(env, result, "params", params);
     return result;
 }
 
@@ -559,10 +577,10 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
 
-    napi_value resultArray[3] = { 0 };
-    napi_create_int32(env, routeIndex, &resultArray[0]);
-    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
-    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
+    napi_value resultArray[RESULT_ARRAY_LENGTH] = { 0 };
+    napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[RESULT_ARRAY_PATH_INDEX]);
     
     napi_value parsedParams = nullptr;
     if (!routeParams.empty()) {
@@ -573,9 +591,9 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
-    napi_set_named_property(env, result, "index", resultArray[0]);
-    napi_set_named_property(env, result, "name", resultArray[1]);
-    napi_set_named_property(env, result, "path", resultArray[2]);
+    napi_set_named_property(env, result, "index", resultArray[RESULT_ARRAY_INDEX_INDEX]);
+    napi_set_named_property(env, result, "name", resultArray[RESULT_ARRAY_NAME_INDEX]);
+    napi_set_named_property(env, result, "path", resultArray[RESULT_ARRAY_PATH_INDEX]);
     napi_set_named_property(env, result, "params", parsedParams);
     return result;
 }
@@ -810,12 +828,10 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    
     std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         return nullptr;
     }
-    
     napi_value result = ParseJSONParams(env, paramsStr);
     return result;
 }

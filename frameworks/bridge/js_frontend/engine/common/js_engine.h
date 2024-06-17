@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_COMMON_JS_ENGINE_H
 
+#include <functional>
 #include <set>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 #include "base/utils/macros.h"
@@ -78,6 +80,10 @@ public:
 private:
     InspectorFunc callback_;
 };
+
+using PageUrlCheckFunc = std::function<void(const std::string&, const std::function<void()>&,
+    const std::function<void(int32_t, const std::string&)>&)>;
+
 class ACE_FORCE_EXPORT JsEngine : public AceType {
     DECLARE_ACE_TYPE(JsEngine, AceType);
 
@@ -130,6 +136,32 @@ public:
     virtual bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
     {
         return false;
+    }
+
+    virtual std::unique_ptr<JsonValue> GetFullPathInfo()
+    {
+        return nullptr;
+    }
+
+    virtual void RestoreFullPathInfo(std::unique_ptr<JsonValue> namedRouterInfo) {}
+
+    virtual std::unique_ptr<JsonValue> GetNamedRouterInfo()
+    {
+        return nullptr;
+    }
+
+    virtual void RestoreNamedRouterInfo(std::unique_ptr<JsonValue> namedRouterInfo) {}
+
+    virtual bool IsNamedRouterNeedPreload(const std::string& name)
+    {
+        return false;
+    }
+
+    virtual void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) {}
+
+    virtual void SetPageUrlCheckFunc(PageUrlCheckFunc&& func)
+    {
+        pageUrlCheckFunc_ = func;
     }
 
     virtual std::string SearchRouterRegisterMap(const std::string& pageName)
@@ -265,6 +297,8 @@ public:
 
     virtual void ForceFullGC() {}
 
+    virtual void NotifyUIIdle() {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";
@@ -284,6 +318,12 @@ public:
     virtual void SetLocalStorage(int32_t instanceId, NativeReference* storage) {}
 
     virtual void SetContext(int32_t instanceId, NativeReference* context) {}
+
+    virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetPkgAliasList(const std::map<std::string, std::string>& map) {}
+
+    virtual void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map) {}
 
     bool IsDebugVersion() const
     {
@@ -381,6 +421,22 @@ public:
         }
     }
 
+    bool IsLayoutCallBackFuncExist(const std::string& componentId) const
+    {
+        if (layoutEvents_.find(componentId) != layoutEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDrawCallBackFuncExist(const std::string& componentId) const
+    {
+        if (drawEvents_.find(componentId) != drawEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
     virtual void RunNativeEngineLoop();
 
     virtual void SetPluginBundleName(const std::string& pluginBundleName) {}
@@ -436,6 +492,7 @@ protected:
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> layoutEvents_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawEvents_;
     bool needUpdate_ = false;
+    PageUrlCheckFunc pageUrlCheckFunc_;
 
 private:
     // weather the app has debugger.so.

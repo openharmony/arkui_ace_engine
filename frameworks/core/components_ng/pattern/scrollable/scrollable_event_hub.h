@@ -36,12 +36,12 @@ public:
         return onScrollEvent_;
     }
 
-    void SetOnWillScroll(OnScrollEvent&& onScroll)
+    void SetOnWillScroll(OnWillScrollEvent&& onScroll)
     {
         onWillScrollEvent_ = std::move(onScroll);
     }
 
-    const OnScrollEvent& GetOnWillScroll() const
+    const OnWillScrollEvent& GetOnWillScroll() const
     {
         return onWillScrollEvent_;
     }
@@ -108,7 +108,7 @@ public:
 
 private:
     OnScrollEvent onScrollEvent_;
-    OnScrollEvent onWillScrollEvent_;
+    OnWillScrollEvent onWillScrollEvent_;
     OnScrollEvent onDidScrollEvent_;
     OnScrollStartEvent onScrollStartEvent_;
     OnScrollStopEvent onScrollStopEvent_;

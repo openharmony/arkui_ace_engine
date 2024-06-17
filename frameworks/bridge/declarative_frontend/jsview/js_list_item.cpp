@@ -79,29 +79,36 @@ void JSListItem::Create(const JSCallbackInfo& args)
 
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
-    if (args.Length() < 2 || !args[0]->IsFunction()) {
+    const int32_t ARGS_LENGTH = 2;
+    auto len = args.Length();
+    if (len < ARGS_LENGTH) {
         ListItemModel::GetInstance()->Create();
         return;
     }
-    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
-
-    if (!args[1]->IsBoolean()) {
+    JSRef<JSVal> arg0 = args[0];
+    if (!arg0->IsFunction()) {
+        ListItemModel::GetInstance()->Create();
         return;
     }
-    const bool isLazy = args[1]->ToBoolean();
+
+    JSRef<JSVal> arg1 = args[1];
+    if (!arg1->IsBoolean()) {
+        return;
+    }
+    const bool isLazy = arg1->ToBoolean();
 
     V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE;
-    if (args[2]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
+    if (len > ARGS_LENGTH && args[ARGS_LENGTH]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[ARGS_LENGTH]);
         JSRef<JSVal> styleObj = obj->GetProperty("style");
         listItemStyle = styleObj->IsNumber() ? static_cast<V2::ListItemStyle>(styleObj->ToNumber<int32_t>())
                                              : V2::ListItemStyle::NONE;
     }
 
     if (!isLazy) {
-        ListItemModel::GetInstance()->Create();
+        ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
     } else {
-        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
                                           jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
@@ -114,7 +121,6 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         ListItemModel::GetInstance()->Create(std::move(listItemDeepRenderFunc), listItemStyle);
         ListItemModel::GetInstance()->SetIsLazyCreating(isLazy);
     }
-    args.ReturnSelf();
 }
 
 void JSListItem::SetSticky(int32_t sticky)
@@ -175,7 +181,7 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
     }
 }
 
-void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
+void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, bool isStartArea)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
 
@@ -189,7 +195,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
     if (onAction->IsFunction()) {
-        onActionCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onAction)]() {
+        onActionCallback = [execCtx = context, func = JSRef<JSFunc>::Cast(onAction)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
@@ -197,7 +203,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
     std::function<void()> onEnterActionAreaCallback;
     if (onEnterActionArea->IsFunction()) {
-        onEnterActionAreaCallback = [execCtx = args.GetExecutionContext(),
+        onEnterActionAreaCallback = [execCtx = context,
                                         func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
@@ -206,7 +212,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
     std::function<void()> onExitActionAreaCallback;
     if (onExitActionArea->IsFunction()) {
-        onExitActionAreaCallback = [execCtx = args.GetExecutionContext(),
+        onExitActionAreaCallback = [execCtx = context,
                                        func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
@@ -221,7 +227,7 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     auto onStateChange = deleteAreaObj->GetProperty("onStateChange");
     std::function<void(SwipeActionState state)> onStateChangeCallback;
     if (onStateChange->IsFunction()) {
-        onStateChangeCallback = [execCtx = args.GetExecutionContext(),
+        onStateChangeCallback = [execCtx = context,
                                     func = JSRef<JSFunc>::Cast(onStateChange)](SwipeActionState state) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(state);
@@ -240,8 +246,12 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     if (!args[0]->IsObject()) {
         return;
     }
-
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    ParseSwiperAction(obj, args.GetExecutionContext());
+}
+
+void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context)
+{
     std::function<void()> startAction;
     auto startObject = obj->GetProperty("start");
     if (startObject->IsObject()) {
@@ -251,7 +261,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true);
         } else {
-            JsParseDeleteArea(args, startObject, true);
+            JsParseDeleteArea(context, startObject, true);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -267,7 +277,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->SetDeleteArea(
                 std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false);
         } else {
-            JsParseDeleteArea(args, endObject, false);
+            JsParseDeleteArea(context, endObject, false);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
@@ -283,7 +293,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
     std::function<void(int32_t offset)> onOffsetChangeCallback;
     if (onOffsetChangeFunc->IsFunction()) {
-        onOffsetChangeCallback = [execCtx = args.GetExecutionContext(),
+        onOffsetChangeCallback = [execCtx = context,
                                      func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(offset);
@@ -368,6 +378,7 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
+    JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
 
     JSClass<JSListItem>::StaticMethod("sticky", &JSListItem::SetSticky);
@@ -379,7 +390,9 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSListItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSListItem>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSListItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSListItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSListItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

@@ -49,8 +49,10 @@ struct LoadNotifier {
 struct ImageDecoderOptions {
     bool forceResize = false;
     bool sync = false;
+    bool loadInVipChannel = false;
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality = AIImageQuality::NONE;
+    bool isHdrDecoderNeed = false;
 };
 
 class ImageObject;
@@ -121,7 +123,8 @@ private:
         const ImageDecoderOptions& imagedecoderOptions);
 
     // helper functions to end task and callback to LoadingContexts
-    static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);
+    static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false,
+        bool loadInVipChannel = false);
     static void FailCallback(const std::string& key, const std::string& errorMsg, bool sync = false);
 
     struct Task {

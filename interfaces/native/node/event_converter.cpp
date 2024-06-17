@@ -45,6 +45,33 @@ constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_BACK = 8;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_FORWARD = 16;
 
+void ConvertToOriginEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
+{
+    if (origin.sourceType == UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN) {
+        event.sourceType = NODE_SOURCE_TYPE_TOUCH_SCREEN;
+    } else {
+        event.sourceType = NODE_SOURCE_TYPE_UNKNOWN;
+    }
+    switch (origin.action) {
+        case static_cast<int32_t>(TouchType::DOWN):
+            event.action = NODE_ACTION_DOWN;
+            break;
+        // TouchType::UP
+        case static_cast<int32_t>(TouchType::UP):
+            event.action = NODE_ACTION_UP;
+            break;
+            // TouchType::MOVE
+        case static_cast<int32_t>(TouchType::MOVE):
+            event.action = NODE_ACTION_MOVE;
+            break;
+        case static_cast<int32_t>(TouchType::CANCEL):
+            event.action = NODE_ACTION_CANCEL;
+            break;
+        default:
+            event.action = static_cast<ArkUI_NodeTouchEventAction>(-1);
+    }
+}
+
 void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
 {
     memset_s(&event, sizeof(ArkUI_NodeTouchEvent), 0, sizeof(ArkUI_NodeTouchEvent));
@@ -67,30 +94,7 @@ void ConvertToTouchEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& ev
     event.actionTouch.rawY = origin.actionTouchPoint.rawY;
 
     event.timeStamp = origin.timeStamp;
-    if (origin.sourceType == UI_INPUT_EVENTT_SOURCE_TYPE_TOUCH_SCREEN) {
-        event.sourceType = NODE_SOURCE_TYPE_TOUCH_SCREEN;
-    } else {
-        event.sourceType = NODE_SOURCE_TYPE_UNKNOWN;
-    }
-
-    switch (origin.action) {
-        case static_cast<int32_t>(TouchType::DOWN):
-            event.action = NODE_ACTION_DOWN;
-            break;
-        // TouchType::UP
-        case static_cast<int32_t>(TouchType::UP):
-            event.action = NODE_ACTION_UP;
-            break;
-            // TouchType::MOVE
-        case static_cast<int32_t>(TouchType::MOVE):
-            event.action = NODE_ACTION_MOVE;
-            break;
-        case static_cast<int32_t>(TouchType::CANCEL):
-            event.action = NODE_ACTION_CANCEL;
-            break;
-        default:
-            event.action = static_cast<ArkUI_NodeTouchEventAction>(-1);
-    }
+    ConvertToOriginEvent(origin, event);
     static ArkUI_Uint32 touchPointSize = origin.touchPointSize;
     static ArkUITouchPoint* touchPoints = origin.touchPointes;
     auto getTouchPoints = [](ArkUI_NodeTouchPoint** points) -> ArkUI_Int32 {
@@ -274,8 +278,28 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RADIO_CHANGE;
         case NODE_LIST_ON_DID_SCROLL:
             return ON_LIST_DID_SCROLL;
+        case NODE_EVENT_ON_ATTACH:
+            return ON_ATTACH;
+        case NODE_EVENT_ON_DETACH:
+            return ON_DETACH;
         case NODE_LIST_ON_WILL_SCROLL:
             return ON_LIST_WILL_SCROLL;
+        case NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL:
+            return ON_SWIPER_DID_CONTENT_SCROLL;
+        case NODE_ON_ACCESSIBILITY_ACTIONS:
+            return ON_ACCESSIBILITY_ACTIONS;
+        case NODE_REFRESH_ON_OFFSET_CHANGE:
+            return ON_REFRESH_ON_OFFSET_CHANGE;
+        case NODE_IMAGE_ANIMATOR_EVENT_ON_START:
+            return ON_IMAGE_ANIMATOR_ON_START;
+        case NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL:
+            return ON_IMAGE_ANIMATOR_ON_CANCEL;
+        case NODE_IMAGE_ANIMATOR_EVENT_ON_PAUSE:
+            return ON_IMAGE_ANIMATOR_ON_PAUSE;
+        case NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT:
+            return ON_IMAGE_ANIMATOR_ON_REPEAT;
+        case NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH:
+            return ON_IMAGE_ANIMATOR_ON_FINISH;
         default:
             return -1;
     }
@@ -428,8 +452,28 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_REACH_START;
         case ON_DETECT_RESULT_UPDATE:
             return NODE_TEXT_ON_DETECT_RESULT_UPDATE;
+        case ON_ATTACH:
+            return NODE_EVENT_ON_ATTACH;
+        case ON_DETACH:
+            return NODE_EVENT_ON_DETACH;
         case ON_RADIO_CHANGE:
             return NODE_RADIO_EVENT_ON_CHANGE;
+        case ON_SWIPER_DID_CONTENT_SCROLL:
+            return NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL;
+        case ON_ACCESSIBILITY_ACTIONS:
+            return NODE_ON_ACCESSIBILITY_ACTIONS;
+        case ON_REFRESH_ON_OFFSET_CHANGE:
+            return NODE_REFRESH_ON_OFFSET_CHANGE;
+        case ON_IMAGE_ANIMATOR_ON_START:
+            return NODE_IMAGE_ANIMATOR_EVENT_ON_START;
+        case ON_IMAGE_ANIMATOR_ON_PAUSE:
+            return NODE_IMAGE_ANIMATOR_EVENT_ON_PAUSE;
+        case ON_IMAGE_ANIMATOR_ON_REPEAT:
+            return NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT;
+        case ON_IMAGE_ANIMATOR_ON_CANCEL:
+            return NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL;
+        case ON_IMAGE_ANIMATOR_ON_FINISH:
+            return NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH;
         default:
             return -1;
     }

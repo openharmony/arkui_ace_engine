@@ -23,14 +23,14 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
-class StagePattern;
 class OverlayManager;
 
 // StageManager is the base class for root render node to perform page switch.
-class ACE_EXPORT StageManager : public virtual AceType {
+class ACE_FORCE_EXPORT StageManager : public virtual AceType {
     DECLARE_ACE_TYPE(StageManager, AceType);
 
 public:
@@ -38,6 +38,7 @@ public:
     ~StageManager() override = default;
 
     bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     bool PopPage(bool needShowNext = true, bool needTransition = true);
     bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     bool CleanPageStack();
@@ -60,6 +61,7 @@ public:
     void ReloadStage();
 
     RefPtr<FrameNode> GetLastPageWithTransition() const;
+    RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
@@ -69,7 +71,8 @@ private:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
-    void FireAutoSave(const RefPtr<FrameNode>& pageNode);
+    void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
+    void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
 
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;

@@ -59,7 +59,7 @@ void UICastEventSubscribeProxy::SubscribeStartEvent(UIContent* context)
         matchingSkills.AddEvent(COMMON_EVENT_UICAST_START);
         matchingSkills.AddEvent(COMMON_EVENT_UICAST_STOP);
         CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-        subscribeInfo.SetPermission("ohos.permission.COMMONEVENT_STICKY");
+        subscribeInfo.SetPermission("ohos.permission.CAPTURE_SCREEN");
         subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::ThreadMode::HANDLER);
 
         // init Receiver

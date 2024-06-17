@@ -40,6 +40,8 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
 
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    layoutProperty->SetIsDefault(isDefaultFontSize_, isDefaultBadgeSize_);
+    
     if (badgeParameters.badgeValue.has_value()) {
         layoutProperty->UpdateBadgeValue(badgeParameters.badgeValue.value());
     }

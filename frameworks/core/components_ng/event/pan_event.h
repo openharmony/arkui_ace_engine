@@ -100,7 +100,8 @@ public:
     void SetPanEventType(GestureTypeName typeName);
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+        TouchTestResult& responseLinkResult) override;
 
     PanDirection GetDirection() const
     {

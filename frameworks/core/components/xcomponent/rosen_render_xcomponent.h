@@ -43,7 +43,6 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     OHOS::sptr<OHOS::Surface> GetSurface();
 #endif
-
 };
 } // namespace OHOS::Ace
 

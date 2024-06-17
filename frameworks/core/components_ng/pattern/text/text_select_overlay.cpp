@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/utils/utils.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -37,7 +38,8 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetUsingMouse(textPattern->IsUsingMouse());
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    pipeline->AddOnAreaChangeNode(host->GetId());
+    SetScrollableParentCallback();
+    SetkeyBoardChangeCallback();
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
     return true;
@@ -73,6 +75,15 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
 
 bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    auto handleRadius = theme->GetHandleDiameter().ConvertToPx();
+    // If the handle is incomplete at the top, not show.
+    if (LessNotEqual(paintRect.Top() - handleRadius, 0.0f)) {
+        return false;
+    }
+
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
@@ -132,18 +143,6 @@ void TextSelectOverlay::OnResetTextSelection()
     textPattern->ResetSelection();
 }
 
-void TextSelectOverlay::AfterCloseOverlay()
-{
-    RemoveAreaChangeInner();
-}
-
-void TextSelectOverlay::RemoveAreaChangeInner()
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->RemoveAreaChangeInner();
-}
-
 void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto textPattern = GetPattern<TextPattern>();
@@ -153,7 +152,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
+    auto contentOffset = GetPaintOffsetWithoutTransform() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
@@ -311,14 +310,15 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
     }
 }
 
-void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
+void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
     }
-    RemoveAreaChangeInner();
+    ResetScrollableParentCallback();
+    RemoveKeyboardChangeCallback();
 }
 
 void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)

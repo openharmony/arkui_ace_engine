@@ -20,12 +20,13 @@
 #include "core/components_ng/pattern/badge/badge_data.h"
 
 namespace OHOS::Ace {
-class BadgeModel {
+class ACE_FORCE_EXPORT BadgeModel {
 public:
     static BadgeModel* GetInstance();
     virtual ~BadgeModel() = default;
 
     virtual void Create(BadgeParameters& badgeParameters) = 0;
+    virtual void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) = 0;
 
 private:
     static std::unique_ptr<BadgeModel> instance_;

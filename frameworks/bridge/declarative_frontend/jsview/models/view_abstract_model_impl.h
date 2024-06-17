@@ -111,7 +111,8 @@ public:
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
     void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override {};
-    void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
+    void SetOverlay(
+        const std::string& text, std::function<void()> &&buildFunc, const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY, NG::OverlayType type) override;
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
@@ -165,13 +166,19 @@ public:
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
+    void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {}
+    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override {}
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override {}
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override;
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
@@ -223,6 +230,8 @@ public:
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
+    void DisableOnAttach() override {};
+    void DisableOnDetach() override {};
     void DisableOnAreaChange() override {};
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};

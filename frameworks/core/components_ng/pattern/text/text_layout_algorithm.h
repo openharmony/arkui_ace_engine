@@ -115,6 +115,7 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     void ResetAiSpanTextStyle(const RefPtr<FrameNode>& frameNode, TextStyle& aiSpanTextStyle);
+    float GetFontScaleValue(TextStyle& textStyle);
 
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;

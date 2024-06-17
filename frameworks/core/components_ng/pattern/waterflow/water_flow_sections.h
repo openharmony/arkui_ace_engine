@@ -29,7 +29,30 @@ using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 class WaterFlowSections : public virtual AceType {
     DECLARE_ACE_TYPE(WaterFlowSections, AceType)
 public:
-    struct Section;
+    struct Section {
+        bool operator==(const Section& other) const
+        {
+            return itemsCount == other.itemsCount && crossCount == other.crossCount && columnsGap == other.columnsGap &&
+                   rowsGap == other.rowsGap && margin == other.margin;
+        }
+        bool operator!=(const Section& other) const
+        {
+            return !(*this == other);
+        }
+
+        bool OnlyCountDiff(const Section& other) const
+        {
+            return crossCount == other.crossCount && columnsGap == other.columnsGap && rowsGap == other.rowsGap &&
+                   margin == other.margin;
+        }
+
+        int32_t itemsCount = 0;
+        std::optional<int32_t> crossCount;
+        GetItemMainSizeByIndex onGetItemMainSizeByIndex;
+        std::optional<Dimension> columnsGap;
+        std::optional<Dimension> rowsGap;
+        std::optional<MarginProperty> margin;
+    };
 
     WaterFlowSections() = default;
     ~WaterFlowSections() override = default;
@@ -37,9 +60,20 @@ public:
     {
         onSectionDataChange_ = func;
     }
+    void SetOnDataChangeCAPI(std::function<void(int32_t start)>&& func)
+    {
+        onSectionDataChangeCAPI_ = func;
+    }
 
-    void ChangeData(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
-
+    /**
+     * @brief Change section data.
+     *
+     * @param start index of the first modified section.
+     * @param deleteCount number of sections to delete at index [start].
+     * @param newSections to insert at index [start].
+     */
+    void ChangeData(size_t start, int32_t deleteCount, const std::vector<Section>& newSections);
+    void ChangeDataCAPI(int32_t start, int32_t deleteCount, const std::vector<Section>& newSections);
     const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
@@ -48,38 +82,15 @@ public:
     /**
      * @brief check if last update was a special case where only itemCount in the last section is modified.
      *
-     * @return true only if itemCount in the last section has changed and everything else remains the same.
+     * @return true only if itemCount in the modified section has changed and everything else remains the same.
      */
-    bool IsSpecialUpdate() const;
-
+    bool IsSpecialUpdateCAPI(int32_t updateIndex) const;
 private:
-    std::vector<Section> prevSections_; // for comparing and handling special cases
     std::vector<Section> sections_;
+    // for comparing and handling special case
+    std::vector<Section> prevSections_;
     std::function<void(int32_t start)> onSectionDataChange_;
-};
-
-struct WaterFlowSections::Section {
-    bool operator==(const Section& other) const
-    {
-        return itemsCount == other.itemsCount && crossCount == other.crossCount && columnsGap == other.columnsGap &&
-               rowsGap == other.rowsGap && margin == other.margin;
-    }
-    bool operator!=(const Section& other) const
-    {
-        return !(*this == other);
-    }
-
-    int32_t itemsCount = 0;
-
-    std::optional<int32_t> crossCount;
-
-    GetItemMainSizeByIndex onGetItemMainSizeByIndex;
-
-    std::optional<Dimension> columnsGap;
-
-    std::optional<Dimension> rowsGap;
-
-    std::optional<MarginProperty> margin;
+    std::function<void(int32_t start)> onSectionDataChangeCAPI_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -568,4 +568,44 @@ ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
     return value;
 }
+
+void ButtonModelNG::ApplyTheme(FrameNode* frameNode, ButtonStyleMode buttonStyle, ButtonRole buttonRole)
+{
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto bgColor = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    auto textColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+    BackgroundColor(frameNode, bgColor, true);
+    auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (!property->GetCreateWithLabelValue(false)) {
+        return;
+    }
+    SetFontColor(frameNode, textColor);
+}
+
+void ButtonModelNG::SetLabelWithCheck(FrameNode* frameNode, const char* label)
+{
+    auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (!property->GetCreateWithLabelValue(false)) {
+        return;
+    }
+    SetLabel(frameNode, label);
+}
+
+void ButtonModelNG::SetCreateWithLabel(bool createWithLabel)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, CreateWithLabel, createWithLabel);
+}
+
+void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel)
+{
+    auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (property->HasCreateWithLabel()) {
+        return;
+    }
+    property->UpdateCreateWithLabel(createWithLabel);
+}
 } // namespace OHOS::Ace::NG

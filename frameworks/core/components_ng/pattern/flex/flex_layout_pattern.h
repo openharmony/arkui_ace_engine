@@ -57,6 +57,11 @@ public:
         return true;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -98,6 +103,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto property = GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(property);
         auto jsonConstructor = JsonUtil::Create(true);
@@ -122,7 +131,7 @@ public:
             jsonConstructor->Put("justifyContent",
                 V2::ConvertWrapAlignmentToStirng(property->GetMainAlignment().value_or(WrapAlignment::START)).c_str());
             jsonConstructor->Put("alignItems",
-                V2::ConvertWrapAlignmentToStirng(property->GetCrossAlignment().value_or(WrapAlignment::START)).c_str());
+                V2::ConvertItemAlignToStirng(property->GetCrossAlignment().value_or(WrapAlignment::START)).c_str());
             jsonConstructor->Put("alignContent",
                 V2::ConvertWrapAlignmentToStirng(property->GetAlignment().value_or(WrapAlignment::START)).c_str());
         }

@@ -43,6 +43,8 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float SMALL_ITEM_WIDTH = 100.0f;
 constexpr float SMALL_ITEM_HEIGHT = 40.0f;
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
+
+const float HALF_PERCENT_WIDTH = 0.5f * FULL_SCREEN_WIDTH;
 } // namespace
 class StackTestNg : public testing::Test {
 public:
@@ -226,5 +228,87 @@ HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(FULL_SCREEN_WIDTH, STACK_HEIGHT));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
+}
+
+/**
+ * @tc.name: StackTestNgTest003
+ * @tc.desc: Test stack Layout with Alignment and TextDirection is RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackTestNg, StackTestNgTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create stack and get frameNode.
+    */
+    StackModelNG stackModelNG;
+    stackModelNG.Create();
+    stackModelNG.SetAlignment(Alignment::TOP_LEFT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto stackPattern = frameNode->GetPattern<StackPattern>();
+    ASSERT_NE(stackPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(STACK_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    layoutWrapper->GetLayoutProperty()->UpdateAlignment(Alignment::BOTTOM_LEFT);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = SizeF(HALF_PERCENT_WIDTH, STACK_HEIGHT);
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    
+    /**
+     * @tc.steps: step4. create child node
+     */
+    auto itemFrameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    itemGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+    itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(HALF_PERCENT_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    itemLayoutWrapper->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_CENTER);
+    auto textLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(textLayoutAlgorithm == nullptr);
+    itemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textLayoutAlgorithm));
+    frameNode->AddChild(itemFrameNode);
+    layoutWrapper->AppendChild(itemLayoutWrapper);
+
+    /**
+     * @tc.steps: step5. use layoutAlgorithm to layout.
+     * @tc.expected: check whether the value of geometry frameSize and frameOffset is correct.
+     */
+    auto layoutAlgorithm = stackPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step6. get child node
+     * @tc.expected: check whether the value of child frameOffset is correct when text direction is RTL.
+     */
+    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    EXPECT_EQ(firstChildWrapper->GetGeometryNode()->GetFrameOffset(),
+        OffsetF(HALF_PERCENT_WIDTH, STACK_HEIGHT - SMALL_ITEM_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

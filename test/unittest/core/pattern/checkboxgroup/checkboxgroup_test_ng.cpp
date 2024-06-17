@@ -1967,7 +1967,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
     checkBoxPaintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 

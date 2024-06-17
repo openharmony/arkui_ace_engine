@@ -112,4 +112,5 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
 
 void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId) {}
 void OverlayManager::CloseKeyboard(int32_t targetId) {}
+void OverlayManager::GetPixelMapContentNode(bool isSubwindowOverlay) {}
 } // namespace OHOS::Ace::NG

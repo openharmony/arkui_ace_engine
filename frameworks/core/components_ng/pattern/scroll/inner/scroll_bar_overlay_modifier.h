@@ -129,6 +129,11 @@ public:
         positionMode_ = positionMode;
     }
 
+    void SetScrollable(bool isScrollable)
+    {
+        isScrollable_ = isScrollable;
+    }
+
 private:
     Offset GetHoverOffset(const Size& size) const;
     // Animatable
@@ -148,6 +153,8 @@ private:
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
     PositionMode positionMode_ = PositionMode::RIGHT;
+
+    bool isScrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 

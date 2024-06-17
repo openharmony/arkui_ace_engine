@@ -54,9 +54,15 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(listContentModifier_);
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto frameSize = renderContext->GetPaintRectWithoutTransform().GetSize();
+    auto& padding = geometryNode->GetPadding();
+    float size = paintWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+    if (padding) {
+        frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
+    }
     UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     listContentModifier_->SetClipOffset(paddingOffset);
@@ -66,7 +72,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
-        ListDividerArithmetic::DividerMap dividerMap;
+        ListDividerMap dividerMap;
         listContentModifier_->SetDividerMap(std::move(dividerMap));
         return;
     }
@@ -83,7 +89,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
         .color = divider_.color,
-        .laneGutter = laneGutter_
+        .laneGutter = laneGutter_,
+        .mainSize = size
     };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     if (NearZero(checkMargin)) return;
@@ -103,7 +110,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool lastIsItemGroup = false;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::map<int32_t, int32_t> lastLineIndex;
-    ListDividerArithmetic::DividerMap dividerMap;
+    ListDividerMap dividerMap;
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;
@@ -146,6 +153,10 @@ ListDivider ListPaintMethod::HandleDividerList(
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+    if (isReverse_ && dividerInfo.isVertical) {
+        float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+    }
     if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
         crossPos +=
             laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
@@ -168,6 +179,10 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
     float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).endPos + divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+    if (isReverse_ && dividerInfo.isVertical) {
+        float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+    }
     if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
         crossPos +=
             laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
@@ -200,9 +215,6 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
 {
-    if (Negative(percentFading_)) {
-        return;
-    }
     CHECK_NULL_VOID(listRenderContext);
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;

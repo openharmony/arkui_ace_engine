@@ -53,10 +53,10 @@ void CheckBoxPattern::SetBuilderNodeHidden()
 
 void CheckBoxPattern::UpdateIndicator()
 {
-    if (builder_.has_value()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (builder_.has_value() && !UseContentModifier()) {
         LoadBuilder();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         bool isSelected = false;
@@ -68,6 +68,9 @@ void CheckBoxPattern::UpdateIndicator()
         } else {
             SetBuilderNodeHidden();
         }
+    } else if (builderNode_) {
+        host->RemoveChildAndReturnIndex(builderNode_);
+        builderNode_ = nullptr;
     }
 }
 
@@ -79,7 +82,7 @@ void CheckBoxPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -286,13 +289,43 @@ void CheckBoxPattern::InitFocusEvent()
 void CheckBoxPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void CheckBoxPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(checkboxModifier_);
-    checkboxModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void CheckBoxPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(checkboxModifier_);
+    checkboxModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void CheckBoxPattern::OnClick()
@@ -397,7 +430,7 @@ void CheckBoxPattern::CheckPageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prePageId = GetPrePageId();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -419,7 +452,7 @@ void CheckBoxPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
@@ -522,17 +555,16 @@ void CheckBoxPattern::LoadBuilder()
     if (builder_.has_value()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-        if (!childNode) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            builder_.value()();
-            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            CHECK_NULL_VOID(customNode);
-            childNode = AceType::DynamicCast<FrameNode>(customNode);
-            CHECK_NULL_VOID(childNode);
-            builderNode_ = childNode;
+        if (builderNode_) {
+            host->RemoveChildAndReturnIndex(builderNode_);
         }
-        childNode->MountToParent(host);
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builder_.value()();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(customNode);
+        builderNode_ = AceType::DynamicCast<FrameNode>(customNode);
+        CHECK_NULL_VOID(builderNode_);
+        builderNode_->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 }
@@ -869,9 +901,11 @@ void CheckBoxPattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
-    currentNavId_ = "";
-    groupManager->SetLastNavId(std::nullopt);
-    UpdateState();
+    if (!currentNavId_.value_or("").empty()) {
+        currentNavId_ = "";
+        groupManager->SetLastNavId(std::nullopt);
+        UpdateState();
+    }
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()

@@ -59,7 +59,7 @@ void CheckBoxModelNG::SetSelect(bool isSelected)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected, frameNode);
 }
 
 void CheckBoxModelNG::SetSelectedColor(const Color& color)
@@ -214,10 +214,11 @@ bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
 Color CheckBoxModelNG::GetSelectedColor(FrameNode* frameNode)
 {
     Color value;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<CheckboxTheme>();
-    CHECK_NULL_RETURN(pipelineContext, value);
+    CHECK_NULL_RETURN(theme, value);
     value = theme->GetActiveColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxSelectedColor, value, frameNode, value);
@@ -227,10 +228,11 @@ Color CheckBoxModelNG::GetSelectedColor(FrameNode* frameNode)
 Color CheckBoxModelNG::GetUnSelectedColor(FrameNode* frameNode)
 {
     Color value;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<CheckboxTheme>();
-    CHECK_NULL_RETURN(pipelineContext, value);
+    CHECK_NULL_RETURN(theme, value);
     value = theme->GetInactiveColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxUnSelectedColor, value, frameNode, value);
@@ -240,10 +242,11 @@ Color CheckBoxModelNG::GetUnSelectedColor(FrameNode* frameNode)
 Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
 {
     Color value;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<CheckboxTheme>();
-    CHECK_NULL_RETURN(pipelineContext, value);
+    CHECK_NULL_RETURN(theme, value);
     value = theme->GetPointColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxCheckMarkColor, value, frameNode, value);
@@ -261,10 +264,11 @@ Dimension CheckBoxModelNG::GetCheckMarkSize(FrameNode* frameNode)
 Dimension CheckBoxModelNG::GetCheckMarkWidth(FrameNode* frameNode)
 {
     Dimension value;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
     auto theme = pipelineContext->GetTheme<CheckboxTheme>();
-    CHECK_NULL_RETURN(pipelineContext, value);
+    CHECK_NULL_RETURN(theme, value);
     value = theme->GetCheckStroke();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxCheckMarkWidth, value, frameNode, value);

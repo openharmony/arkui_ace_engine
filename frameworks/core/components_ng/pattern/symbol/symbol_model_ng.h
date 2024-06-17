@@ -38,6 +38,7 @@ public:
     static void SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
+    static void SetSymbolEffectOptions(FrameNode* frameNode, NG::SymbolEffectOptions& symbolEffectOptions);
 };
 } // namespace OHOS::Ace::NG
 

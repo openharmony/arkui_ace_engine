@@ -18,6 +18,7 @@
 
 #include <chrono>
 
+#include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/container.h"
@@ -31,7 +32,9 @@ class RSTransaction;
 
 namespace OHOS::Ace {
 
-class AceView {
+class AceView : public AceType {
+    DECLARE_ACE_TYPE(AceView, AceType);
+
 public:
     enum class ViewType : int32_t {
         SURFACE_VIEW = 0,
@@ -70,6 +73,9 @@ public:
 
     using DensityChangeCallback = std::function<void(double density)>;
     virtual void RegisterDensityChangeCallback(DensityChangeCallback&& callback) = 0;
+
+    using TransformHintChangeCallback = std::function<void(uint32_t transform)>;
+    virtual void RegisterTransformHintChangeCallback(TransformHintChangeCallback&& callback) = 0;
 
     using SystemBarHeightChangeCallback = std::function<void(double statusBar, double navigationBar)>;
     virtual void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) = 0;
@@ -187,6 +193,7 @@ protected:
     int32_t height_ = 0;
     int32_t posX_ = 0;
     int32_t posY_ = 0;
+    uint32_t transform_ = 0;
 
 private:
     std::mutex backgroundColorMutex_;

@@ -57,8 +57,10 @@ public:
 
             InitializeTextStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
-            theme->lunarWidth_ = Dimension(36.0, DimensionUnit::VP);  // this width do not need setting by outer.
-            theme->lunarHeight_ = Dimension(18.0, DimensionUnit::VP); // this height do not need setting by outer.
+            theme->lunarWidth_ =
+                Dimension(36.0, DimensionUnit::VP); // 36.0: lunarWidth, this width do not need setting by outer.
+            theme->lunarHeight_ =
+                Dimension(18.0, DimensionUnit::VP); // 18.0: lunarHeight, this height do not need setting by outer.
             theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
@@ -388,7 +390,7 @@ public:
     Dimension GetColumnBottomTotalHeight(bool hasLunar) const
     {
         if (hasLunar) {
-            return buttonHeight_ + lunarHeight_ + buttonTopPadding_ * 2 + popupEdge_.Bottom();
+            return buttonHeight_ + lunarHeight_ + buttonTopPadding_ * 2 + popupEdge_.Bottom(); //2: double padding
         } else {
             return buttonHeight_ + buttonTopPadding_ + popupEdge_.Bottom();
         }

@@ -31,7 +31,8 @@ public:
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
-    void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
+    void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
+    void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
 };
 } // namespace OHOS::Ace

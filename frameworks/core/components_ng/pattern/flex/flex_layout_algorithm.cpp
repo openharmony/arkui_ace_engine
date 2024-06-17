@@ -359,7 +359,6 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 for (const auto& child : childList) {
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
-                    // TODO: reset size validity and baseline properties.
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
@@ -484,6 +483,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
             ++iter;
         }
     } else {
+        auto magicNodeSize = magicNodes_.size();
         auto iter = magicNodes_.rbegin();
         while (iter != magicNodes_.rend()) {
             auto childList = iter->second;
@@ -507,6 +507,11 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
+            }
+            if (magicNodeSize != magicNodes_.size()) {
+                LOGE("magicNodes changed during use. oldsize: %{public}zu ,newsize: %{public}zu ",
+                    magicNodeSize, magicNodes_.size());
+                break;
             }
             ++iter;
         }
@@ -676,6 +681,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
     }
 
     // child need to second show
+    int32_t childMeasureCount = 0;
     iter = secondaryMeasureList_.rbegin();
     while (iter != secondaryMeasureList_.rend()) {
         auto child = *iter;
@@ -688,6 +694,21 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
         crossAxisSize_ = std::max(crossAxisSize_, GetChildCrossAxisSize(childLayoutWrapper));
         CheckBaselineProperties(child.layoutWrapper);
         ++iter;
+        ++childMeasureCount;
+    }
+    // if child has secondary measure, calculate crossAxis again
+    if (childMeasureCount) {
+        float chilMaxHeight = -1.0f;
+        iter = secondaryMeasureList_.rbegin();
+        while (iter != secondaryMeasureList_.rend()) {
+            auto child = *iter;
+            auto childLayoutWrapper = child.layoutWrapper;
+            chilMaxHeight = std::max(GetChildCrossAxisSize(childLayoutWrapper), chilMaxHeight);
+            ++iter;
+        }
+        if (GreatNotEqual(chilMaxHeight, 0.0f)) {
+            crossAxisSize_ = chilMaxHeight;
+        }
     }
 }
 
@@ -798,6 +819,11 @@ bool FlexLayoutAlgorithm::MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper)
     return LessNotEqual(margin->top.value_or(0.0f) + margin->bottom.value_or(0.0f), 0.0f);
 }
 
+bool FlexLayoutAlgorithm::CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr)
+{
+    return propertyPtr && (propertyPtr->minSize || propertyPtr->maxSize);
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -805,11 +831,14 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * Obtain the main axis size and cross axis size based on user setting.
      */
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& rawConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    bool needToConstraint = CheckSetConstraint(rawConstraint) && children.empty();
     const auto& measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL
                                                                                                : Axis::VERTICAL;
-    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
+    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType, needToConstraint,
+        rawConstraint).ConvertToSizeT();
     if (children.empty()) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
         return;

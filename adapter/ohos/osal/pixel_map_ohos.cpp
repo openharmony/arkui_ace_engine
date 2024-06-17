@@ -101,6 +101,21 @@ RefPtr<PixelMap> PixelMap::CopyPixelMap(const RefPtr<PixelMap>& pixelMap)
     return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
 }
 
+RefPtr<PixelMap> PixelMap::DecodeTlv(std::vector<uint8_t>& buff)
+{
+    Media::PixelMap* pixelMapRelease = OHOS::Media::PixelMap::DecodeTlv(buff);
+    CHECK_NULL_RETURN(pixelMapRelease, nullptr);
+    std::shared_ptr<Media::PixelMap> newPixelMap(pixelMapRelease);
+    CHECK_NULL_RETURN(newPixelMap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
+}
+
+bool PixelMapOhos::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    return pixmap_->EncodeTlv(buff);
+}
+
 RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
     CHECK_NULL_RETURN(ptr, nullptr);
@@ -275,6 +290,8 @@ void PixelMapOhos::SavePixelMapToFile(const std::string& dst) const
                            "_rowStride" + std::to_string(rowStride) + "_byteCount" + std::to_string(totalSize) + dst +
                            ".dat";
     auto path = ImageFileCache::GetInstance().ConstructCacheFilePath(filename);
+    char realPath[PATH_MAX] = { 0x00 };
+    CHECK_NULL_VOID(realpath(path.c_str(), realPath));
     std::ofstream outFile(path, std::fstream::out);
     if (!outFile.is_open()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "write error, path=%{public}s", path.c_str());

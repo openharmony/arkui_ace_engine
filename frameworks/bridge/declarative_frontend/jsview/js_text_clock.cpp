@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -59,7 +60,6 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
 const std::string DEFAULT_FORMAT_API_TEN = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
@@ -72,7 +72,7 @@ bool HoursWestIsValid(int32_t hoursWest)
 
 float GetHoursWest(float hoursWest)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         for (float i : HOURS_WEST) {
             if (NearEqual(hoursWest, i)) {
                 return hoursWest;
@@ -89,8 +89,10 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         SetFontDefault();
+        JSTextClockTheme::ApplyTheme();
         return;
     }
+    JSTextClockTheme::ApplyTheme();
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
@@ -123,7 +125,9 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextClock>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextClock>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSTextClock>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTextClock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextClock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextClock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextClock>::StaticMethod("fontColor", &JSTextClock::SetTextColor, opt);
     JSClass<JSTextClock>::StaticMethod("fontSize", &JSTextClock::SetFontSize, opt);
@@ -147,7 +151,7 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
+    if (!ParseJsColor(info[0], textColor) && !JSTextClockTheme::ObtainTextColor(textColor)) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -235,8 +239,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsString()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            TextClockModel::GetInstance()->SetFormat("");
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
@@ -244,15 +248,10 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     }
 
     auto format = info[0]->ToString();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (format.length() == 0) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
-            return;
-        }
-    } else {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
-        if (format.length() == 0 || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
+        if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
             return;
         }

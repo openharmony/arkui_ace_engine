@@ -46,7 +46,7 @@ using TextChangeEvent = std::function<void(const std::string&, double)>;
 using TextCascadeChangeEvent = std::function<void(const std::vector<std::string>&, const std::vector<double>&)>;
 using TextCascadeValueChangeEvent = std::function<void(const std::vector<std::string>&)>;
 using TextCascadeSelectedChangeEvent = std::function<void(const std::vector<double>&)>;
-class TextPickerModel {
+class ACE_FORCE_EXPORT TextPickerModel {
 public:
     static TextPickerModel* GetInstance();
     virtual ~TextPickerModel() = default;
@@ -62,6 +62,9 @@ public:
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void HasUserDefinedDisappearFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedNormalFontFamily(bool isUserDefined) = 0;
+    virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void MultiInit(const RefPtr<PickerTheme> pickerTheme) = 0;
     virtual void SetColumns(const std::vector<NG::TextCascadePickerOptions>& options) = 0;
     virtual void SetIsCascade(bool isCascade) = 0;

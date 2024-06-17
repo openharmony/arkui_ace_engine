@@ -57,12 +57,25 @@ void TitleBarLayoutAlgorithm::BackButtonLayout(const RefPtr<FrameNode>& backButt
 {
     auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(backIconWidth_),
-        CalcLength(backIconHeight_)));
+    auto menuPadding = MENU_BUTTON_PADDING;
+    if (backButtonImageNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(backIconWidth_), CalcLength(backIconHeight_)));
+    } else if (backButtonImageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = backButtonImageNode->GetLayoutProperty<TextLayoutProperty>();
+        auto symbolSourceInfo = symbolProperty->GetSymbolSourceInfo();
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        if (symbolSourceInfo.has_value() && symbolSourceInfo.value().GetUnicode() == theme->GetBackSymbolId()) {
+            menuPadding = BACK_BUTTON_SYMBOL_PADDING;
+        }
+    }
+
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+    padding.SetEdges(CalcLength(menuPadding), CalcLength(menuPadding), CalcLength(MENU_BUTTON_PADDING),
+        CalcLength(MENU_BUTTON_PADDING));
     buttonLayoutProperty->UpdatePadding(padding);
 }
 
@@ -141,8 +154,8 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     auto customBackButtonRightPadding = BUTTON_PADDING.ConvertToPx();
     auto defaultPaddingStart = defaultPaddingStart_.ConvertToPx();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        leftPadding = marginLeft_.ConvertToPx();
-        rightPadding = marginRight_.ConvertToPx();
+        leftPadding = navLeftMargin_;
+        rightPadding = navRightMargin_;
         horizontalMargin = menuCompPadding_.ConvertToPx();
         backButtonWidth = backButtonWidth_.ConvertToPx();
         customBackButtonRightPadding = 0.0f;
@@ -151,7 +164,6 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
-
         // nav destination custom title
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
         CHECK_NULL_RETURN(navDestination, 0.0f);
@@ -258,6 +270,9 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>
     CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
 
     auto avoidArea = titlebarRect.GetX() + titleBarGeo->GetFrameSize().Width() - appBarOffset.GetX();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        avoidArea = appBarOffset.GetX() + appBarSize.Width();
+    }
     auto buttonTop = appBarOffset.GetY() + appBarSize.Height();
     if (LessOrEqual(titlebarRect.GetY(), buttonTop) && GreatOrEqual(avoidArea, 0.0)) {
         afterAvoidWidth = afterAvoidWidth - avoidArea;
@@ -466,14 +481,14 @@ void TitleBarLayoutAlgorithm::ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
 {
     auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
     Dimension backButtonHeight = BACK_BUTTON_SIZE;
-    auto leftMargin = maxPaddingStart_ - BUTTON_PADDING;
+    auto leftMargin = (maxPaddingStart_ - BUTTON_PADDING).ConvertToPx();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         backButtonHeight = backButtonHeight_;
-        leftMargin = marginLeft_;
+        leftMargin = navLeftMargin_;
     }
     float dividerOffset = 2.0f;
     auto offsetY = (titleHeight - backButtonHeight) / dividerOffset;
-    auto offsetX = static_cast<float>(leftMargin.ConvertToPx());
+    float offsetX = static_cast<float>(leftMargin);
     offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
     OffsetF backButtonOffset = OffsetF(offsetX, static_cast<float>(offsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(backButtonOffset);
@@ -885,6 +900,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto isCustomMenu = false;
     if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) != TitleBarParentType::NAV_DESTINATION) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
         isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
     } else {
         isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);
@@ -898,7 +914,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         float offsetX = 0.0f;
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             offsetX = isCustomMenu ? maxWidth - menuWidth
-                                   : (maxWidth - menuWidth - static_cast<float>(marginRight_.ConvertToPx()));
+                                   : (maxWidth - menuWidth - navRightMargin_);
         } else {
             offsetX = isCustomMenu ? maxWidth - menuWidth
                                    : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
@@ -929,7 +945,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     // custom menu doesn't have right padding. if menu isn't custom, menu items has right padding
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         menuOffsetX =
-            isCustomMenu ? menuOffsetX : (menuOffsetX - marginRight_.ConvertToPx());
+            isCustomMenu ? menuOffsetX : (menuOffsetX - navRightMargin_);
     } else {
         menuOffsetX =
             isCustomMenu ? menuOffsetX : (menuOffsetX - maxPaddingEnd_.ConvertToPx() + BUTTON_PADDING.ConvertToPx());
@@ -941,7 +957,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
 }
 
 // set variables from theme
-void TitleBarLayoutAlgorithm::InitializeTheme()
+void TitleBarLayoutAlgorithm::InitializeTheme(const SizeF& titleBarSize)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
@@ -951,8 +967,6 @@ void TitleBarLayoutAlgorithm::InitializeTheme()
     defaultPaddingStart_ = theme->GetDefaultPaddingStart();
     iconSize_ = theme->GetMenuIconSize();
     titleFontSize_ = theme->GetTitleFontSize();
-    marginLeft_ = theme->GetMarginLeft();
-    marginRight_ = theme->GetMarginRight();
     menuCompPadding_ = theme->GetCompPadding();
     iconBackgroundWidth_ = theme->GetIconBackgroundWidth();
     backButtonWidth_ = theme->GetBackButtonWidth();
@@ -968,13 +982,25 @@ void TitleBarLayoutAlgorithm::InitializeTheme()
     navBackIconWidth_ = BACK_BUTTON_ICON_SIZE.ConvertToPx();
     navButtonPadding_ = BUTTON_PADDING.ConvertToPx();
     navHorizontalMargin_ = NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+    Dimension marginLevelS = theme->GetMarginLevelS();
+    Dimension marginLevelM = theme->GetMarginLevelM();
+    Dimension marginLevelL = theme->GetMarginLevelL();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         doubleLineTitleBarHeight_ = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         navTitleSpaceVertical_ = static_cast<float>(titleSpaceVertical_.ConvertToPx());
-        navLeftMargin_ = marginLeft_.ConvertToPx();
         navBackIconWidth_ = backIconWidth_.ConvertToPx();
         navButtonPadding_ = (MENU_BUTTON_PADDING + MENU_BUTTON_PADDING).ConvertToPx();
         navHorizontalMargin_ = navButtonPadding_ + menuCompPadding_.ConvertToPx();
+        Dimension titlebarBreakpointS = theme->GetTitlebarBreakpointS();
+        Dimension titlebarBreakpointM = theme->GetTitlebarBreakpointM();
+        if (titleBarSize.Width() < titlebarBreakpointS.ConvertToPx()) {
+            navLeftMargin_ = marginLevelS.ConvertToPx();
+        } else if (titleBarSize.Width() >= titlebarBreakpointM.ConvertToPx()) {
+            navLeftMargin_ = marginLevelL.ConvertToPx();
+        } else {
+            navLeftMargin_ = marginLevelM.ConvertToPx();
+        }
+        navRightMargin_ = navLeftMargin_;
     }
 }
 
@@ -990,7 +1016,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    InitializeTheme();
+    InitializeTheme(size);
     do {
         if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
         TitleBarParentType::NAV_DESTINATION) {

@@ -54,13 +54,17 @@ public:
     void SetHeight(const Dimension& value) override;
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override {};
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};
@@ -69,6 +73,7 @@ public:
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetEnablePreviewText(bool enablePreviewText) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

@@ -21,8 +21,24 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/ime/text_range.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+
+namespace OHOS::Ace {
+enum class TextDeleteDirection { BACKWARD = 0, FORWARD = 1 };
+
+struct InsertValueInfo {
+    int32_t insertOffset = 0;
+    std::string insertValue;
+};
+
+struct DeleteValueInfo {
+    int32_t deleteOffset = 0;
+    TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
+    std::string deleteValue;
+};
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class TextFieldCommonEvent : public BaseEventInfo {
@@ -111,17 +127,17 @@ public:
         }
     }
 
-    void SetOnChange(std::function<void(const std::string&)>&& func)
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func)
     {
         onChange_ = std::move(func);
     }
 
-    const std::function<void(const std::string&)>& GetOnChange() const
+    const std::function<void(const std::string&, TextRange&)>& GetOnChange() const
     {
         return onChange_;
     }
 
-    void FireOnChange(const std::string& value)
+    void FireOnChange(const std::string& value, TextRange& range)
     {
         if (lastValue_.has_value() && lastValue_.value() == value) {
             return;
@@ -132,7 +148,8 @@ public:
         }
         if (onChange_) {
             LOGI("On change %{private}s", value.c_str());
-            onChange_(value);
+            LOGI("On change %{private}d", range.start);
+            onChange_(value, range);
         }
         lastValue_ = value;
     }
@@ -295,6 +312,56 @@ public:
         }
     }
 
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func)
+    {
+        onWillInsertValueEvent_ = std::move(func);
+    }
+
+    bool FireOnWillInsertValueEvent(const InsertValueInfo& info)
+    {
+        if (onWillInsertValueEvent_) {
+            return onWillInsertValueEvent_(info);
+        }
+        return true;
+    }
+
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
+    {
+        onDidInsertValueEvent_ = std::move(func);
+    }
+
+    void FireOnDidInsertValueEvent(const InsertValueInfo& info)
+    {
+        if (onDidInsertValueEvent_) {
+            onDidInsertValueEvent_(info);
+        }
+    }
+
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func)
+    {
+        onWillDeleteEvent_ = std::move(func);
+    }
+
+    bool FireOnWillDeleteEvent(const DeleteValueInfo& info)
+    {
+        if (onWillDeleteEvent_) {
+            return onWillDeleteEvent_(info);
+        }
+        return true;
+    }
+
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
+    {
+        onDidDeleteEvent_ = std::move(func);
+    }
+
+    void FireOnDidInsertValueEvent(const DeleteValueInfo& info)
+    {
+        if (onDidDeleteEvent_) {
+            onDidDeleteEvent_(info);
+        }
+    }
+
 private:
     std::optional<std::string> lastValue_;
 
@@ -310,7 +377,7 @@ private:
     std::function<void(bool)> onEditChanged_;
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
-    std::function<void(const std::string&)> onChange_;
+    std::function<void(const std::string&, TextRange&)> onChange_;
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
@@ -319,6 +386,11 @@ private:
     std::function<void(const std::string&)> onPaste_;
     std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
     std::function<void(const std::string&)> onValueChangeEvent_;
+
+    std::function<bool(const InsertValueInfo&)> onWillInsertValueEvent_;
+    std::function<void(const InsertValueInfo&)> onDidInsertValueEvent_;
+    std::function<bool(const DeleteValueInfo&)> onWillDeleteEvent_;
+    std::function<void(const DeleteValueInfo&)> onDidDeleteEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
 

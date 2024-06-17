@@ -52,8 +52,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
-        json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
         json->PutFixedAttr("content", propContent_.value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
         json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
     }
 

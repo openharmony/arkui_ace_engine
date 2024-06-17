@@ -64,10 +64,6 @@ private:
         LayoutWrapper* layoutWrapper);
     void OnHoverStatusChange(LayoutWrapper* layoutWrapper);
     void MeasureByStack(const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper);
-    bool JudgeSkipNode(const std::string& nodeTag);
-    void AdjustChildren(RefPtr<UINode> childUI, std::list<RefPtr<FrameNode>>& childList);
-    void AddNodeToParent(const RefPtr<UINode>& hoverNode,
-        const RefPtr<UINode>& controlPartsStackNode, const RefPtr<FolderStackGroupNode>& hostNode);
     ACE_DISALLOW_COPY_AND_MOVE(FolderStackLayoutAlgorithm);
     float preHoverStackHeight_ = 0.0f;
     float preControlPartsStackHeight_ = 0.0f;

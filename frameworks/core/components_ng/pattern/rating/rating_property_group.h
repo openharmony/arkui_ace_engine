@@ -34,6 +34,10 @@ struct RatingPropertyGroup {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("indicator", GetIndicator().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("stars", std::to_string(GetStars().value_or(DEFAULT_RATING_STAR_NUM)).c_str(), filter);
         auto jsonStarStyle = JsonUtil::Create(true);

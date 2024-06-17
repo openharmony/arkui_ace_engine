@@ -31,6 +31,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"
@@ -126,6 +127,8 @@ public:
     {
         return false;
     }
+
+    virtual RefPtr<AceView> GetAceView() const = 0;
 
     virtual void* GetView() const = 0;
 
@@ -238,6 +241,13 @@ public:
         return false;
     }
 
+    virtual bool IsFormRender() const
+    {
+        return false;
+    }
+    
+    virtual void SetIsFormRender(bool isFormRender) {};
+
     const std::string& GetCardHapPath() const
     {
         return cardHapPath_;
@@ -284,15 +294,19 @@ public:
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
 
+    static int32_t SafelyId();
     static int32_t CurrentId();
     static int32_t CurrentIdSafely();
     static RefPtr<Container> Current();
     static RefPtr<Container> CurrentSafely();
+    static RefPtr<Container> CurrentSafelyWithCheck();
     static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
+    static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
+    static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
 
     void SetUseNewPipeline()
@@ -458,7 +472,8 @@ public:
     }
 
     virtual bool GetCurPointerEventInfo(
-        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -469,7 +484,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr)
     {
         return false;
     }
@@ -493,12 +508,18 @@ public:
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) < static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
-        return (AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000) >= static_cast<int32_t>(version);
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        auto apiTargetVersion = container->GetApiTargetVersion();
+        return apiTargetVersion >= static_cast<int32_t>(version);
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
@@ -515,6 +536,16 @@ public:
 
     template<ContainerType type>
     static int32_t GenerateId();
+
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion % 1000;
+    }
 
 private:
     static bool IsIdAvailable(int32_t id);
@@ -542,6 +573,7 @@ private:
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
     RefPtr<NG::AppBarView> appBar_;
+    int32_t apiTargetVersion_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

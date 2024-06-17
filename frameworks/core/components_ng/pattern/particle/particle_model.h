@@ -60,7 +60,7 @@ public:
     virtual ~ParticleModel() = default;
     virtual void Create(std::list<NG::ParticleOption>& arrayValue) = 0;
     virtual void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) = 0;
-    virtual void updateEmitter(const std::vector<EmitterProperty>& property) = 0;
+    virtual void updateEmitter(std::vector<EmitterProperty>& property) = 0;
 
 private:
     static std::unique_ptr<ParticleModel> instance_;

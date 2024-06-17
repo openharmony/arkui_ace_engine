@@ -116,6 +116,7 @@ public:
                             const double& height,
                             const double& pre_height,
                             const double& pre_width) = 0;
+    virtual void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) = 0;
 };
 }
 #endif

@@ -21,7 +21,10 @@ namespace OHOS::Ace::NG {
 void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
@@ -29,6 +32,7 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
 
     json->PutExtAttr("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str(), filter);
     auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("color", propCursorColor_.value_or(textFieldTheme->GetCursorColor()).ColorToString().c_str());
     jsonValue->Put("width", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());
     json->PutExtAttr("caretStyle", jsonValue->ToString().c_str(), filter);
     json->PutExtAttr("selectedBackgroundColor",

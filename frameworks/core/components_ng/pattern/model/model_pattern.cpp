@@ -134,6 +134,138 @@ void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
     host->MarkDirtyNode(flag);
 }
 
+static std::string TextureImagesToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetModelImageTexturePaths().has_value()) {
+        return ret;
+    }
+    auto& imageTextures = modelPaintProperty->GetModelImageTexturePaths().value();
+    for (auto& imageTexture : imageTextures) {
+        ret += imageTexture + " ";
+    }
+    return ret;
+}
+
+static std::string ShaderInputBufferToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetModelShaderInputBuffer().has_value()) {
+        return ret;
+    }
+    const auto& shaderInputBuffer = modelPaintProperty->GetModelShaderInputBuffer().value();
+    if (!shaderInputBuffer || !shaderInputBuffer->IsValid()) {
+        return ret;
+    }
+    auto fSize = shaderInputBuffer->FloatSize();
+    auto buffer = shaderInputBuffer->Map(fSize);
+
+    if (!buffer) {
+        return ret;
+    }
+    for (auto i = 0u; i < fSize; i++) {
+        ret += std::to_string(buffer[i]) + " ";
+    }
+    return ret;
+}
+
+static std::string SurfaceTypeToStr(const RefPtr<ModelAdapterWrapper>& modelAdapter)
+{
+    std::string ret;
+    if (!modelAdapter) {
+        return ret;
+    }
+    auto surfaceType = modelAdapter->GetSurfaceType();
+    switch (surfaceType) {
+        case Render3D::SurfaceType::UNDEFINE: {
+            ret = "UNDEFINE";
+            break;
+        }
+        case Render3D::SurfaceType::SURFACE_WINDOW: {
+            ret = "ModelType.SURFACE";
+            break;
+        }
+        case Render3D::SurfaceType::SURFACE_TEXTURE: {
+            ret = "ModelType.TEXTURE";
+            break;
+        }
+        case Render3D::SurfaceType::SURFACE_BUFFER: {
+            ret = "SURFACE_BUFFER";
+            break;
+        }
+        default: {
+            ret = "SURFACE_WINDOW";
+            break;
+        }
+    }
+    return ret;
+}
+
+static std::string SceneResourceToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetModelSource().has_value()) {
+        return ret;
+    }
+    ret = modelPaintProperty->GetModelSource().value();
+    return ret;
+}
+
+static std::string SceneEnvironmentToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetModelBackground().has_value()) {
+        return ret;
+    }
+    ret = modelPaintProperty->GetModelBackground().value();
+    return ret;
+}
+
+static std::string SceneCustomRenderToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetModelCustomRender().has_value()) {
+        return ret;
+    }
+    auto& customRender = modelPaintProperty->GetModelCustomRender().value();
+    if (!customRender) {
+        return ret;
+    }
+    ret = customRender->GetUri();
+    return ret;
+}
+
+static std::string SceneShaderPathToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    std::string ret;
+    if (!modelPaintProperty->GetShaderPath().has_value()) {
+        return ret;
+    }
+    ret = modelPaintProperty->GetShaderPath().value();
+    return ret;
+}
+
+void ModelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mainProperty = DynamicCast<ModelPaintProperty>(host->GetPaintProperty<ModelPaintProperty>());
+    CHECK_NULL_VOID(mainProperty);
+    auto widthScale = mainProperty->GetRenderWidth().value_or(1.0);
+    auto heightScale = mainProperty->GetRenderHeight().value_or(1.0);
+    json->PutExtAttr("renderWidth", std::to_string(widthScale).c_str(), filter);
+    json->PutExtAttr("renderHeight", std::to_string(heightScale).c_str(), filter);
+    json->PutExtAttr("shaderInputBuffer", ShaderInputBufferToStr(mainProperty).c_str(), filter);
+    json->PutExtAttr("shaderImageTexture", TextureImagesToStr(mainProperty).c_str(), filter);
+    json->PutExtAttr("modelType", SurfaceTypeToStr(modelAdapter_).c_str(), filter);
+
+    json->PutExtAttr("environment", SceneEnvironmentToStr(mainProperty).c_str(), filter);
+    json->PutExtAttr("customRender", SceneCustomRenderToStr(mainProperty).c_str(), filter);
+    json->PutExtAttr("shader", SceneShaderPathToStr(mainProperty).c_str(), filter);
+    json->PutExtAttr("scene", SceneResourceToStr(mainProperty).c_str(), filter);
+}
+
 ModelPattern::~ModelPattern()
 {
     CHECK_NULL_VOID(modelAdapter_);

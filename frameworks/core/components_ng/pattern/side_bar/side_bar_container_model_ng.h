@@ -42,6 +42,7 @@ public:
         const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void SetControlButtonSwitchingIconInfo(
         const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void ResetControlButtonIconInfo() override;
     void SetOnChange(std::function<void(const bool)>&& onChange) override;
     void SetDividerStrokeWidth(const Dimension& strokeWidth) override;
     void SetDividerColor(const Color& color) override;
@@ -73,6 +74,7 @@ public:
     static void SetDividerStartMargin(FrameNode* frameNode, const Dimension& startMargin);
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
     static void ResetControlButtonLeft(FrameNode* frameNode);
+    static void ResetControlButtonIconInfo(FrameNode* frameNode);
 private:
     void MarkNeedInitRealSideBarWidth() override;
     static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);

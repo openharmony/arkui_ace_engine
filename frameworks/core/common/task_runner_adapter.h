@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
 
 namespace OHOS::Ace {
 class TaskRunnerAdapter : public virtual AceType {
@@ -29,11 +30,16 @@ public:
     TaskRunnerAdapter() = default;
     virtual ~TaskRunnerAdapter() override = default;
 
-    virtual void PostTask(std::function<void()> task, const std::string& name) {}
+    virtual void PostTask(
+        std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW)
+    {}
     virtual void PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller) {}
-    virtual void PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& name) {}
+    virtual void PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW)
+    {}
     virtual bool RunsTasksOnCurrentThread() = 0;
     virtual void Initialize(bool useCurrentEventRunner = false, const std::string& name = "") {}
+    virtual void RemoveTask(const std::string &name) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_RUNNER_ADAPTER_H

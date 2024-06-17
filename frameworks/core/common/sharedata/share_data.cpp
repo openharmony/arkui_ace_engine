@@ -22,14 +22,17 @@
 namespace OHOS::Ace {
 
 std::map<int32_t, std::shared_ptr<std::vector<uint8_t>>> ShareData::shareDataMap_;
+std::mutex ShareData::shareDataMapMutex_;
 
 void ShareData::InsertBuffer(int32_t bufferId, std::shared_ptr<std::vector<uint8_t>> dataArray)
 {
+    std::unique_lock<std::mutex> lock(shareDataMapMutex_);
     shareDataMap_[bufferId] = dataArray;
 }
 
 std::shared_ptr<std::vector<uint8_t>> ShareData::GetShareBufferById(int32_t id)
 {
+    std::unique_lock<std::mutex> lock(shareDataMapMutex_);
     auto data = ShareData::shareDataMap_.find(id);
     if (data != ShareData::shareDataMap_.end()) {
         return data->second;
@@ -39,6 +42,7 @@ std::shared_ptr<std::vector<uint8_t>> ShareData::GetShareBufferById(int32_t id)
 
 void ShareData::ReleaseShareBufferById(int32_t id)
 {
+    std::unique_lock<std::mutex> lock(shareDataMapMutex_);
     auto data = ShareData::shareDataMap_.find(id);
     if (data != ShareData::shareDataMap_.end()) {
         ShareData::shareDataMap_.erase(data);

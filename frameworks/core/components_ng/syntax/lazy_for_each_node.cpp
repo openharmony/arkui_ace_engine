@@ -45,6 +45,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     }
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
+    node->RegisterBuilderListener();
     return node;
 }
 
@@ -116,6 +117,9 @@ void LazyForEachNode::OnDataReloaded()
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataReloaded();
+        if (FrameCount() == 0) {
+            PostIdleTask();
+        }
     }
     NotifyDataCountChanged(0);
     MarkNeedSyncRenderTree(true);
@@ -317,11 +321,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false);
+        child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
     if (isActive_) {
-        child.second->SetJSViewActive(true);
+        child.second->SetJSViewActive(true, true);
     }
     if (addToRenderTree) {
         child.second->SetActive(true);
@@ -384,7 +388,7 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (!builder_) {
         return;
@@ -408,7 +412,6 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
             } else {
                 node.second->DetachFromMainTree();
             }
-            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         for (const auto& [index, item] : items) {
             if (item.second) {
@@ -447,10 +450,19 @@ void LazyForEachNode::MoveData(int32_t from, int32_t to)
 {
     if (builder_) {
         builder_->OnDataMoveToNewPlace(from, to);
+        builder_->UpdateMoveFromTo(from, to);
     }
     children_.clear();
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::FireOnMove(int32_t from, int32_t to)
+{
+    if (builder_) {
+        builder_->ResetMoveFromTo();
+    }
+    ForEachBaseNode::FireOnMove(from, to);
 }
 
 RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
@@ -460,11 +472,16 @@ RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
     CHECK_NULL_RETURN(child.second, nullptr);
     return AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
 }
-int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+
+int32_t LazyForEachNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
+    if (!isExpanded) {
+        return UINode::GetFrameNodeIndex(node, false);
+    }
     CHECK_NULL_RETURN(builder_, -1);
     return builder_->GetChildIndex(node);
 }
+
 void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
 {
     CHECK_NULL_VOID(childNode);

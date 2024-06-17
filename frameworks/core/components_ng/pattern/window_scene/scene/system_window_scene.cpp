@@ -137,6 +137,24 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 }
 
+void SystemWindowScene::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedRebuildRSTree(true);
+}
+
+void SystemWindowScene::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedRebuildRSTree(false);
+}
+
 void SystemWindowScene::RegisterEventCallback()
 {
     CHECK_NULL_VOID(session_);
@@ -150,7 +168,13 @@ void SystemWindowScene::RegisterEventCallback()
                 PointerEvent->MarkProcessed();
                 return;
             }
-            pipelineContext->PostAsyncEvent([weakThis, PointerEvent]() {
+            auto taskExecutor = pipelineContext->GetTaskExecutor();
+            if (!taskExecutor) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "taskExecutor is null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
+            taskExecutor->PostTask([weakThis, PointerEvent]() {
                 auto self = weakThis.Upgrade();
             if (!self) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
@@ -166,7 +190,8 @@ void SystemWindowScene::RegisterEventCallback()
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
-            }, "ArkUIWindowInjectPointerEvent", TaskExecutor::TaskType::UI);
+            },
+                TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
 
@@ -248,7 +273,7 @@ void SystemWindowScene::RegisterFocusCallback()
             CHECK_NULL_VOID(self);
             CHECK_NULL_VOID(self->GetSession());
             pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
-        }, "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }

@@ -58,6 +58,9 @@ public:
             theme->showMessage_ = static_cast<int32_t>(pattern->GetAttr<double>("badge_show_message", 0.0));
             theme->badgeColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
             theme->badgeFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp);
+            theme->badgeAgeFontSize_ = pattern->GetAttr<Dimension>(BADGE_AGE_FONT_SIZE, 16.0_vp);
+            theme->badgeAgeSize_ = pattern->GetAttr<Dimension>(BADGE_AGE_SIZE, 23.0_vp);
+            theme->badgeAgeAddPadding_ = pattern->GetAttr<Dimension>(BADGE_AFE_ADD_PADDING, 2.0_vp);
             theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
             theme->badgeBorderColor_ = pattern->GetAttr<Color>(BADGE_BORDER_COLOR, Color::BLACK);
             theme->badgeBorderWidth_ = pattern->GetAttr<Dimension>(BADGE_BORDER_WIDTH, 0.0_vp);
@@ -116,9 +119,24 @@ public:
         return badgeFontSize_;
     }
 
+    const Dimension& GetBadgeAgeFontSize() const
+    {
+        return badgeAgeFontSize_;
+    }
+
     const Dimension& GetBadgeCircleSize()
     {
         return badgeSize_;
+    }
+
+    const Dimension& GetBadgeAgeCircleSize() const
+    {
+        return badgeAgeSize_;
+    }
+
+    const Dimension& GetBadgeAgeAddPadding() const
+    {
+        return badgeAgeAddPadding_;
     }
 
     const Dimension& GetLittleBadgeCircleSize()
@@ -155,8 +173,11 @@ private:
     bool isPositionXy_ = false;
     bool showMessage_;
     Dimension badgeFontSize_;
+    Dimension badgeAgeFontSize_;
     Dimension badgeBorderWidth_;
     Dimension badgeSize_ = 16.0_vp;
+    Dimension badgeAgeSize_;
+    Dimension badgeAgeAddPadding_;
     Dimension littleBadgeSize_ = 6.0_vp;
     Dimension numericalBadgePadding_ = 6.0_vp;
     int maxCount_ = 99;

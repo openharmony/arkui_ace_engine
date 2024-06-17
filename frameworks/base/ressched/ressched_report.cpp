@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,10 +30,13 @@ constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
-constexpr int32_t TOUCH_EVENT               = 1;
+constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
+constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_ON_EVENT = 1;
+constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
+constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
@@ -51,6 +54,8 @@ constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
 constexpr char SLIDE_ON[] = "slide_on";
 constexpr char SLIDE_OFF[] = "slide_off";
+constexpr char AUTO_PLAY_ON[] = "auto_play_on";
+constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
@@ -102,6 +107,16 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
                 }
             },
+            { AUTO_PLAY_ON,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, AUTO_PLAY_ON_EVENT, payload);
+                }
+            },
+            { AUTO_PLAY_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, AUTO_PLAY_OFF_EVENT, payload);
+                }
+            },
             { POP_PAGE,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
@@ -148,10 +163,14 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
 
 void ResSchedReport::OnTouchEvent(const TouchType& touchType)
 {
-    if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+    if (touchType == TouchType::DOWN) {
         std::unordered_map<std::string, std::string> payload;
         payload[NAME] = TOUCH;
-        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
+        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
+    } else if (touchType == TouchType::UP) {
+        std::unordered_map<std::string, std::string> payload;
+        payload[NAME] = TOUCH;
+        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     }
 }
 

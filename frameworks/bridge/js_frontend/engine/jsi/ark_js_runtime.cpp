@@ -80,6 +80,17 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     instanceId_ = instanceId;
 
     vm_ = JSNApi::CreateJSVM(option);
+#if defined(PREVIEW)
+    if (!pkgNameMap_.empty()) {
+        JSNApi::SetPkgNameList(vm_, pkgNameMap_);
+    }
+    if (!pkgAliasMap_.empty()) {
+        JSNApi::SetPkgAliasList(vm_, pkgAliasMap_);
+    }
+    if (!pkgContextInfoMap_.empty()) {
+        JSNApi::SetpkgContextInfoList(vm_, pkgContextInfoMap_);
+    }
+#endif
     return vm_ != nullptr;
 }
 
@@ -229,6 +240,17 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName,
     LocalScope scope(vm_);
     panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
+    HandleUncaughtException(trycatch, errorCallback);
+    return ret;
+}
+
+bool ArkJSRuntime::ExecuteJsBinForAOT(const std::string& fileName,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    bool ret = JSNApi::ExecuteForAbsolutePath(vm_, fileName, PANDA_MAIN_FUNCTION);
     HandleUncaughtException(trycatch, errorCallback);
     return ret;
 }
@@ -386,6 +408,12 @@ void ArkJSRuntime::ExecutePendingJob()
 {
     LocalScope scope(vm_);
     JSNApi::ExecutePendingJob(vm_);
+}
+
+void ArkJSRuntime::NotifyUIIdle()
+{
+    LocalScope scope(vm_);
+    panda::JSNApi::NotifyUIIdle(vm_, 0);
 }
 
 #if !defined(PREVIEW) && !defined(IOS_PLATFORM)

@@ -60,16 +60,17 @@ public:
 
 void CounterTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_COUNTER);
+    auto counterTheme = CounterTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
 }
 
 void CounterTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void CounterTestNg::SetUp() {}
@@ -304,5 +305,32 @@ HWTEST_F(CounterTestNg, CounterPatternTest011, TestSize.Level1)
     EXPECT_EQ(subEventHub->IsEnabled(), false);
     EXPECT_EQ(addRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
     EXPECT_EQ(subRenderContext->GetOpacityValue(-1), BUTTON_ALPHA_DISABLED);
+}
+
+/**
+ * @tc.name: CounterLayoutAlgorithmTestNg001
+ * @tc.desc: test counter Layout.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = AceType::DynamicCast<CounterPattern>(frameNode->GetPattern());
+    ASSERT_NE(counterPattern, nullptr);
+    auto counterLayoutAlgorithm = counterPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(counterLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    counterLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutDirection, TextDirection::RTL);
 }
 } // namespace OHOS::Ace::NG

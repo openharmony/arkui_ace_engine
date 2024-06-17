@@ -33,7 +33,7 @@ int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
@@ -62,7 +62,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
         localPoint = localPoint + paintRect.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
+                event.touchEventId);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         }
@@ -188,9 +190,9 @@ void ClickRecognizer::OnRejected()
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
-        "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch down event, begin to detect click "
+        "event, current finger info: %{public}d, %{public}d, state: %{public}d",
+        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -209,7 +211,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    if (!IsInAttachedNode(event)) {
+    if (!IsInAttachedNode(event, false)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -250,6 +252,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, click recognizer receives %{public}d"
+        " touch up event, state: %{public}d", event.touchEventId, event.id, refereeState_);
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -337,6 +341,9 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if (IsRefereeFinished()) {
         return;
     }
@@ -437,6 +444,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayY(touchPoint.screenY);
 #endif
     info.SetPointerEvent(lastPointEvent_);
+    info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     return info;
 }
 
@@ -454,8 +462,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !sysJudge_) {
+    if (!callback && !sysJudge_ && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<TapGestureEvent>();
@@ -477,6 +486,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }
@@ -515,7 +527,9 @@ RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 
 void ClickRecognizer::CleanRecognizerState()
 {
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         tappedCount_ = 0;
         refereeState_ = RefereeState::READY;

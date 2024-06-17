@@ -350,6 +350,11 @@ public:
         return text_align_content_;
     }
 
+    int32_t GetButtonType() const
+    {
+        return button_type_;
+    }
+
     int32_t GetTextAlignTitle() const
     {
         return text_align_title_;
@@ -546,6 +551,7 @@ private:
     int32_t opacityAnimationDurIn_ = 150;
     int32_t animationDurationOut_ = 250;
     int32_t text_align_content_ = 0;
+    int32_t button_type_ = 0;
     int32_t text_align_title_ = 0;
     int32_t device_columns_dialog_ = 0;
     Color maskColorStart_;

@@ -14,14 +14,12 @@
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("$ace_root/frameworks/core/components_ng/components.gni")
 
-config("ui_extension_config") {
-  include_dirs = [ "$window_manager_path/interfaces/innerkits" ]
-}
-
 build_component_ng("ui_extension_pattern_ng") {
   sources = [
     "accessibility_session_adapter_ui_extension.cpp",
+    "isolated_pattern.cpp",
     "modal_ui_extension_proxy_impl.cpp",
+    "platform_pattern.cpp",
     "session_wrapper_factory.cpp",
     "session_wrapper_impl.cpp",
     "ui_extension_manager.cpp",
@@ -31,7 +29,6 @@ build_component_ng("ui_extension_pattern_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    configs = [ ":ui_extension_config" ]
     external_deps = [
       "ability_runtime:abilitykit_native",
       "accessibility:accessibility_common",

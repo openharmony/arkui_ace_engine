@@ -146,9 +146,6 @@ void JankFrameReport::RecordJankStatus(double jank)
     if (recordStatus_ == JANK_IDLE && animatorEndTime_ == 0) {
         return;
     }
-    if (jsAnimationDelayJank_ > 1.0f) {
-        jank += jsAnimationDelayJank_;
-    }
     if (animatorEndTime_ != 0) {
         hasJsAnimation_ = false;
         animatorEndTime_ = 0;

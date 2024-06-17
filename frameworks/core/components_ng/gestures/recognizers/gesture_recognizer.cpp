@@ -100,14 +100,32 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+void NGGestureRecognizer::OnRejectBridgeObj()
+{
+    if (bridgeObjList_.empty()) {
+        return;
+    }
+    for (const auto& item : bridgeObjList_) {
+        auto bridgeObj = item.Upgrade();
+        if (bridgeObj) {
+            bridgeObj->OnRejected();
+            bridgeObj->OnRejectBridgeObj();
+        }
+    }
+}
+
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (!ShouldResponse()) {
         return true;
     }
+    if (bridgeMode_) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
+            HandleEventToBridgeObjList(point, bridgeObjList_);
             break;
         case TouchType::DOWN: {
             deviceId_ = point.deviceId;
@@ -120,6 +138,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             auto result = AboutToAddCurrentFingers(point.id);
             if (result) {
                 HandleTouchDownEvent(point);
+                HandleEventToBridgeObjList(point, bridgeObjList_);
             }
             break;
         }
@@ -127,14 +146,20 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             auto result = AboutToMinusCurrentFingers(point.id);
             if (result) {
                 HandleTouchUpEvent(point);
+                HandleEventToBridgeObjList(point, bridgeObjList_);
                 currentFingers_--;
             }
             break;
         }
-        case TouchType::CANCEL:
-            HandleTouchCancelEvent(point);
-            currentFingers_--;
+        case TouchType::CANCEL: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchCancelEvent(point);
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+                currentFingers_--;
+            }
             break;
+        }
         default:
             break;
     }
@@ -144,6 +169,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
     if (!ShouldResponse()) {
+        return true;
+    }
+    if (bridgeMode_) {
         return true;
     }
     switch (event.action) {
@@ -163,7 +191,96 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             HandleTouchCancelEvent(event);
             break;
     }
+    for (const auto& item : bridgeObjList_) {
+        auto bridgeObj = item.Upgrade();
+        if (bridgeObj) {
+            bridgeObj->HandleBridgeModeEvent(event);
+        }
+    }
     return true;
+}
+
+void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
+{
+    switch (point.type) {
+        case TouchType::MOVE:
+            HandleTouchMoveEvent(point);
+            HandleEventToBridgeObjList(point, bridgeObjList_);
+            break;
+        case TouchType::DOWN: {
+            deviceId_ = point.deviceId;
+            deviceType_ = point.sourceType;
+            if (deviceType_ == SourceType::MOUSE) {
+                inputEventType_ = InputEventType::MOUSE_BUTTON;
+            } else {
+                inputEventType_ = InputEventType::TOUCH_SCREEN;
+            }
+            auto result = AboutToAddCurrentFingers(point.id);
+            if (result) {
+                HandleTouchDownEvent(point);
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+            }
+            break;
+        }
+        case TouchType::UP: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchUpEvent(point);
+                currentFingers_--;
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+            }
+            break;
+        }
+        case TouchType::CANCEL: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchCancelEvent(point);
+                currentFingers_--;
+                HandleEventToBridgeObjList(point, bridgeObjList_);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void NGGestureRecognizer::HandleEventToBridgeObjList(
+    const TouchEvent& point, const std::list<WeakPtr<NGGestureRecognizer>>& bridgeObjList)
+{
+    for (const auto& item : bridgeObjList) {
+        auto bridgeObj = item.Upgrade();
+        if (bridgeObj) {
+            bridgeObj->HandleBridgeModeEvent(point);
+        }
+    }
+}
+
+void NGGestureRecognizer::HandleBridgeModeEvent(const AxisEvent& event)
+{
+    switch (event.action) {
+        case AxisAction::BEGIN:
+            deviceId_ = event.deviceId;
+            deviceType_ = event.sourceType;
+            inputEventType_ = InputEventType::AXIS;
+            HandleTouchDownEvent(event);
+            break;
+        case AxisAction::UPDATE:
+            HandleTouchMoveEvent(event);
+            break;
+        case AxisAction::END:
+            HandleTouchUpEvent(event);
+            break;
+        default:
+            HandleTouchCancelEvent(event);
+            break;
+    }
+    for (const auto& item : bridgeObjList_) {
+        auto bridgeObj = item.Upgrade();
+        if (bridgeObj) {
+            bridgeObj->HandleBridgeModeEvent(event);
+        }
+    }
 }
 
 void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
@@ -348,7 +465,7 @@ void NGGestureRecognizer::SetEventImportGestureGroup(const WeakPtr<NGGestureReco
     eventImportGestureGroup_ = gestureGroup;
 }
 
-bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
+bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealTime)
 {
     bool isChildTouchTestResult = false;
     auto frameNode = GetAttachedNode();
@@ -367,8 +484,13 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
     }
 
     PointF localPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
-        isPostEventResult_, event.postEventNodeId);
+    if (isRealTime) {
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
+            isPostEventResult_, event.postEventNodeId);
+    } else {
+        NGGestureRecognizer::Transform(localPoint, frameNode, false,
+            isPostEventResult_, event.postEventNodeId);
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -381,5 +503,43 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
             AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str());
     }
     return result;
+}
+
+void NGGestureRecognizer::SetResponseLinkRecognizers(const std::list<RefPtr<TouchEventTarget>>& responseLinkResult)
+{
+    responseLinkRecognizer_.clear();
+    for (const auto& item : responseLinkResult) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (recognizer) {
+            responseLinkRecognizer_.emplace_back(recognizer);
+        }
+    }
+}
+
+bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
+            touchId, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
+        return false;
+    }
+    currentFingers_++;
+    return true;
+}
+
+bool NGGestureRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        return true;
+    }
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Recognizer has already receive touchId: %{public}d up event, node tag = %{public}s, id = %{public}s",
+        touchId, node ? node->GetTag().c_str() : "null",
+        node ? std::to_string(node->GetId()).c_str() : "invalid");
+    return false;
 }
 } // namespace OHOS::Ace::NG

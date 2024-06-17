@@ -83,6 +83,9 @@ enum class HitTestMode {
 
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
+using ShouldBuiltInRecognizerParallelWithFunc =
+    std::function<RefPtr<NGGestureRecognizer>(RefPtr<TouchEventTarget>, std::vector<RefPtr<TouchEventTarget>>)>;
+
 enum class TouchTestStrategy {
     DEFAULT = 0,
     FORWARD_COMPETITION,
@@ -285,6 +288,14 @@ public:
 
     TouchInterceptFunc GetOnTouchIntercept() const;
 
+    void SetShouldBuildinRecognizerParallelWithFunc(ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc);
+
+    ShouldBuiltInRecognizerParallelWithFunc GetParallelInnerGestureToFunc() const;
+
+    void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+
+    GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
+
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const
@@ -410,10 +421,15 @@ public:
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
+    bool HasDragEvent() const
+    {
+        return dragEventActuator_ && dragEventActuator_->HasDragEvent();
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
-        const RefPtr<TargetComponent>& targetComponent);
+        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -613,6 +629,17 @@ public:
         externalExclusiveRecognizer_.clear();
     }
 
+    void CleanInnerRecognizer()
+    {
+        innerExclusiveRecognizer_ = nullptr;
+    }
+
+    void CleanNodeRecognizer()
+    {
+        nodeParallelRecognizer_ = nullptr;
+        nodeExclusiveRecognizer_ = nullptr;
+    }
+
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
@@ -639,9 +666,9 @@ public:
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
+    void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 #if defined(PIXEL_MAP_SUPPORTED)
-    static void PrintBuilderNode(
-        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
@@ -650,7 +677,7 @@ public:
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
-        const RefPtr<TargetComponent>& targetComponent);
+        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
 
@@ -706,7 +733,7 @@ private:
 
     OffsetF frameNodeOffset_;
     SizeF frameNodeSize_;
-    GestureEvent gestureInfoForWeb_;
+    std::shared_ptr<GestureEvent> gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
@@ -716,6 +743,9 @@ private:
     GestureJudgeFunc gestureJudgeNativeFunc_;
 
     TouchInterceptFunc touchInterceptFunc_;
+
+    ShouldBuiltInRecognizerParallelWithFunc shouldBuildinRecognizerParallelWithFunc_;
+    GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool isDragForbidden_ = false;

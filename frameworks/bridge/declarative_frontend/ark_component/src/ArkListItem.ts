@@ -35,9 +35,30 @@ class ListItemSelectableModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+
+class ListItemSwipeActionModifier extends ModifierWithKey<SwipeActionOptions> {
+  constructor(value: SwipeActionOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemSwipeAction');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItem.resetSwipeAction(node);
+    } else {
+      getUINativeModule().listItem.setSwipeAction(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): this {
+    return this;
   }
   sticky(value: Sticky): this {
     throw new Error('Method not implemented.');
@@ -54,7 +75,8 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     return this;
   }
   swipeAction(value: SwipeActionOptions): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListItemSwipeActionModifier.identity, ListItemSwipeActionModifier, value);
+    return this;
   }
   onSelect(event: (isSelected: boolean) => void): this {
     throw new Error('Method not implemented.');

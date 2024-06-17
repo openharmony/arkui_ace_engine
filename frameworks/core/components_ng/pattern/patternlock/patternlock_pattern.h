@@ -154,7 +154,7 @@ private:
     RefPtr<TouchEventImpl> touchUpListener_;
     RefPtr<TouchEventImpl> touchMoveListener_;
     RefPtr<PanEvent> panEvent_;
-    OffsetF globalTouchPoint_;
+    OffsetF screenTouchPoint_;
 
     bool isMoveEventValid_ = false;
     bool isOnKeyEventState_ = false;

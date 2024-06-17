@@ -32,10 +32,11 @@ public:
     static void SetSelectable(const JSCallbackInfo& info);
     static void SetSelected(const JSCallbackInfo& info);
     static void SetSwiperAction(const JSCallbackInfo& args);
+    static void ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context);
     static void SelectCallback(const JSCallbackInfo& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
-    static void JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea);
+    static void JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, bool isStartArea);
 };
 
 } // namespace OHOS::Ace::Framework

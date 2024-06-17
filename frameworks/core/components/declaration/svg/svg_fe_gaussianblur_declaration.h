@@ -22,7 +22,6 @@
 #include "core/components/declaration/svg/svg_fe_declaration.h"
 
 namespace OHOS::Ace {
-
 enum class FeEdgeMode {
     EDGE_DUPLICATE,
     EDGE_WRAP,

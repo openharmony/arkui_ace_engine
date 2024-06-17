@@ -17,7 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
-#include "frameworks/core/components/declaration/svg/svg_circle_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,11 +51,11 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {
     auto attr = animate->GetAttributeName();
-    if (attr == DOM_SVG_CX) {
+    if (attr == SVG_CX) {
         AnimateOnAttribute(animate, circleAttr_.cx);
-    } else if (attr == DOM_SVG_CY) {
+    } else if (attr == SVG_CY) {
         AnimateOnAttribute(animate, circleAttr_.cy);
-    } else if (attr == DOM_SVG_R) {
+    } else if (attr == SVG_R) {
         AnimateOnAttribute(animate, circleAttr_.r);
     } else {
         SvgNode::PrepareAnimation(animate);
@@ -65,15 +65,15 @@ void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 bool SvgCircle::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgCircleAttribute&)> attrs[] = {
-        { DOM_SVG_CX,
+        { SVG_CX,
             [](const std::string& val, SvgCircleAttribute& attr) {
                 attr.cx = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_CY,
+        { SVG_CY,
             [](const std::string& val, SvgCircleAttribute& attr) {
                 attr.cy = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_R,
+        { SVG_R,
             [](const std::string& val, SvgCircleAttribute& attr) {
                 attr.r = SvgAttributesParser::ParseDimension(val);
             } },

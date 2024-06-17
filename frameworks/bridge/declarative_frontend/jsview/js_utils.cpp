@@ -162,6 +162,18 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 }
 #endif
 
+const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj)
+{
+    auto visualEffectPtr = static_cast<Rosen::VisualEffect*>(UnwrapNapiValue(obj));
+    return visualEffectPtr;
+}
+
+const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
+{
+    auto filterPtr = static_cast<Rosen::Filter*>(UnwrapNapiValue(obj));
+    return filterPtr;
+}
+
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
 {
     return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
@@ -378,5 +390,18 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
         barStyle = static_cast<int32_t>(NG::BarStyle::STANDARD);
         return;
     }
+}
+
+napi_env GetCurrentEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return nullptr;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return nullptr;
+    }
+    return reinterpret_cast<napi_env>(nativeEngine);
 }
 } // namespace OHOS::Ace::Framework

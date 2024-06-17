@@ -45,7 +45,7 @@ class TrackedObject {
    * if optimisation can not be applied calls notifyPropertyChanged and returns false
    */
   public static notifyObjectValueAssignment(obj1: Object, obj2: Object,
-    notifyPropertyChanged: () => void, // notify as assignment (none-optimised)
+    notifyPropertyChanged: (isFromSource) => void, // notify as assignment (none-optimised)
     notifyTrackedPropertyChange: (propName) => void, obSelf: ObservedPropertyAbstractPU<any>): boolean {
     if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
       (obj1.constructor !== obj2.constructor) ||

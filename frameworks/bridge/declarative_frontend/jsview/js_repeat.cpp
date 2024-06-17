@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 
 namespace OHOS::Ace {
@@ -104,6 +105,20 @@ void JSRepeat::CreateNewChildFinish(const JSCallbackInfo& info)
     RepeatModel::GetInstance()->CreateNewChildFinish(key);
 }
 
+void JSRepeat::OnMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])]
+            (int32_t from, int32_t to) {
+                auto params = ConvertToJSValues(from, to);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            };
+        RepeatModel::GetInstance()->OnMove(std::move(onMove));
+    } else {
+        RepeatModel::GetInstance()->OnMove(nullptr);
+    }
+}
+
 void JSRepeat::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeat>::Declare("RepeatNative");
@@ -112,6 +127,7 @@ void JSRepeat::JSBind(BindingTarget globalObj)
     JSClass<JSRepeat>::StaticMethod("moveChild", &JSRepeat::MoveChild);
     JSClass<JSRepeat>::StaticMethod("createNewChildStart", &JSRepeat::CreateNewChildStart);
     JSClass<JSRepeat>::StaticMethod("createNewChildFinish", &JSRepeat::CreateNewChildFinish);
+    JSClass<JSRepeat>::StaticMethod("onMove", &JSRepeat::OnMove);
     JSClass<JSRepeat>::Bind<>(globalObj);
 }
 

@@ -147,12 +147,17 @@ struct SafeAreaExpandOpts {
         return type != SAFE_AREA_TYPE_NONE && edges != SAFE_AREA_EDGE_NONE;
     }
 
+    bool ExpansiveToKeyboard() const
+    {
+        return (edges & SAFE_AREA_EDGE_BOTTOM) && (type & SAFE_AREA_TYPE_KEYBOARD);
+    }
+
     std::string ToString()
     {
         return "SafeAreaExpandOpts: type:" + TypeToString() + ", edges: " + EdgeToString();
     }
 
-    std::string TypeToString()
+    const std::string TypeToString()
     {
         switch (type) {
             case SAFE_AREA_TYPE_NONE:
@@ -170,7 +175,7 @@ struct SafeAreaExpandOpts {
         }
     }
 
-    std::string EdgeToString()
+    const std::string EdgeToString()
     {
         switch (edges) {
             case SAFE_AREA_EDGE_NONE:

@@ -25,6 +25,7 @@
 #include "core/components/form/resource/form_request_data.h"
 
 namespace OHOS::Ace {
+const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";
 struct PixelMapRecordDetails {
     int32_t width = 0;
     int32_t height = 0;
@@ -64,6 +65,9 @@ public:
     virtual std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) = 0;
     virtual std::pair<int32_t, std::string> GetErrorInfo(int32_t errorCode) = 0;
+    virtual void AddSpanStringRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) = 0;
+    virtual std::vector<uint8_t> GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
 };
 } // namespace OHOS::Ace
 #endif

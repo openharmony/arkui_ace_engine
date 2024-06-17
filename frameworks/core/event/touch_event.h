@@ -96,12 +96,15 @@ struct TouchEvent final : public UIInputEvent {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     bool isInterpolated = false;
+    bool isMouseTouchTest = false;
+    bool isMocked = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
     std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
+    std::vector<KeyCode> pressedKeyCodes_;
 
     std::list<std::string> childTouchTestList;
 
@@ -250,6 +253,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        this->pressedKeyCodes_ = pressedKeyCodes;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -279,6 +288,7 @@ struct TouchEvent final : public UIInputEvent {
             .SetPointers(pointers)
             .SetPointerEvent(pointerEvent)
             .SetOriginalId(originalId)
+            .SetPressedKeyCodes(pressedKeyCodes_)
             .SetIsInjected(isInjected);
     }
 
@@ -422,7 +432,7 @@ struct TouchEvent final : public UIInputEvent {
 };
 
 namespace Platform {
-Offset GetTouchEventOriginOffset(const TouchEvent& event);
+ACE_FORCE_EXPORT Offset GetTouchEventOriginOffset(const TouchEvent& event);
 } // namespace Platform
 
 struct TouchRestrict final {
@@ -598,16 +608,6 @@ public:
         touchType_ = type;
     }
 
-    void SetOriginalId(int32_t originalId)
-    {
-        originalId_ = originalId;
-    }
-
-    int32_t GetOriginalId() const
-    {
-        return originalId_;
-    }
-
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -629,10 +629,6 @@ private:
 
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
-
-    // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
-    // different ids.
-    int32_t originalId_ = 0;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;

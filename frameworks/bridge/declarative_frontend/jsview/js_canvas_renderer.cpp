@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 
 #include <cstdint>
+#include <memory>
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -60,10 +61,6 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 
 inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>& result)
 {
-    if (!jsValue->IsArray() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
         for (size_t i = 0; i < array->Length(); i++) {
@@ -82,30 +79,6 @@ inline bool ParseJsDoubleArray(const JSRef<JSVal>& jsValue, std::vector<double>&
             }
         }
         return true;
-    }
-    return false;
-}
-
-inline bool ParseJsInt(const JSRef<JSVal>& jsValue, int32_t& result)
-{
-    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-        return false;
-    }
-
-    if (jsValue->IsNumber()) {
-        result = jsValue->ToNumber<int32_t>();
-        return true;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
-        return false;
-    }
-
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        return false;
     }
     return false;
 }
@@ -133,6 +106,34 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
+    density_ = PipelineBase::GetCurrentDensity();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
+            auto canvasRender = self.Upgrade();
+            CHECK_NULL_VOID(canvasRender);
+            canvasRender->density_ = density;
+        });
+    }
+}
+
+JSCanvasRenderer::~JSCanvasRenderer()
+{
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
+}
+
+// A helper fucntion to create GradientObj
+JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradient>& gradient)
+{
+    JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
+    pasteObj->SetProperty("__type", "gradient");
+    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
+    pasteData->SetGradient(gradient);
+    return pasteObj;
 }
 
 // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient
@@ -144,15 +145,11 @@ void JSCanvasRenderer::JsCreateLinearGradient(const JSCallbackInfo& info)
     double y1 = 0.0;
     if (info.GetDoubleArg(0, x0) && info.GetDoubleArg(1, y0) && info.GetDoubleArg(2, x1) && info.GetDoubleArg(3, y1)) {
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::LINEAR);
         gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
         gradient->SetEndOffset(Offset(x1 * density, y1 * density));
-
-        JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-        pasteObj->SetProperty("__type", "gradient");
-        auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-        pasteData->SetGradient(gradient);
+        JSRef<JSObject> pasteObj = createGradientObj(gradient);
         info.SetReturnValue(pasteObj);
     }
 }
@@ -169,17 +166,13 @@ void JSCanvasRenderer::JsCreateRadialGradient(const JSCallbackInfo& info)
     if (info.GetDoubleArg(0, startX) && info.GetDoubleArg(1, startY) && info.GetDoubleArg(2, startRadial) &&
         info.GetDoubleArg(3, endX) && info.GetDoubleArg(4, endY) && info.GetDoubleArg(5, endRadial)) {
         double density = GetDensity();
-        Gradient* gradient = new Gradient();
+        auto gradient = std::make_shared<Gradient>();
         gradient->SetType(GradientType::RADIAL);
         gradient->SetBeginOffset(Offset(startX * density, startY * density));
         gradient->SetEndOffset(Offset(endX * density, endY * density));
         gradient->SetInnerRadius(startRadial * density);
         gradient->SetOuterRadius(endRadial * density);
-
-        JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-        pasteObj->SetProperty("__type", "gradient");
-        auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-        pasteData->SetGradient(gradient);
+        JSRef<JSObject> pasteObj = createGradientObj(gradient);
         info.SetReturnValue(pasteObj);
     }
 }
@@ -198,16 +191,12 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     info.GetDoubleArg(1, x);
     info.GetDoubleArg(2, y);
     double density = GetDensity();
-    Gradient* gradient = new Gradient();
+    auto gradient = std::make_shared<Gradient>();
     gradient->SetType(GradientType::CONIC);
     gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
-
-    JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-    pasteObj->SetProperty("__type", "gradient");
-    auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
-    pasteData->SetGradient(gradient);
+    JSRef<JSObject> pasteObj = createGradientObj(gradient);
     info.SetReturnValue(pasteObj);
 }
 
@@ -261,7 +250,6 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, fontStr)) {
         return;
     }
-    ContainerScope scope(instanceId_);
     std::vector<std::string> fontProps;
     StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
     bool updateFontweight = false;
@@ -301,14 +289,14 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     }
 }
 
+// getLineDash(): number[]
 void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
 {
     std::vector<double> lineDash = renderingContext2DModel_->GetLineDash();
-    JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
+    JSRef<JSArray> lineDashObj = JSRef<JSArray>::New();
     double density = GetDensity();
     for (auto i = 0U; i < lineDash.size(); i++) {
-        lineDash[i] *= density;
-        lineDashObj->SetProperty<double>(std::to_string(i).c_str(), lineDash[i]);
+        lineDashObj->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(lineDash[i] / density)));
     }
     info.SetReturnValue(lineDashObj);
 }
@@ -339,9 +327,9 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetFillGradient(*gradient);
+        renderingContext2DModel_->SetFillGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
@@ -376,9 +364,9 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     if (type == "gradient") {
         auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
         CHECK_NULL_VOID(jSCanvasGradient);
-        Gradient* gradient = jSCanvasGradient->GetGradient();
+        auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
-        renderingContext2DModel_->SetStrokeGradient(*gradient);
+        renderingContext2DModel_->SetStrokeGradient(gradient);
     } else if (type == "pattern") {
         auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
         CHECK_NULL_VOID(jSCanvasPattern);
@@ -394,6 +382,13 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
             std::string capStr = "";
             JSViewAbstract::ParseJsString(info[0], capStr);
             return AceType::MakeRefPtr<CanvasPath2D>(capStr);
+        }
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && info[0]->IsObject()) {
+            auto* jsPath2d = info.UnwrapArg<JSPath2D>(0);
+            CHECK_NULL_RETURN(jsPath2d, AceType::MakeRefPtr<CanvasPath2D>());
+            auto canvasPath2D = jsPath2d->GetCanvasPath2d();
+            return AceType::MakeRefPtr<CanvasPath2D>(canvasPath2D);
         }
     }
     // Example: ctx.createPath2D()
@@ -432,7 +427,7 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
     JSRenderImage* jsImage = nullptr;
     Local<panda::StringRef> keyObj = panda::StringRef::GetNapiWrapperString(vm);
     Local<panda::JSValueRef> valObj = nativeObject->Get(vm, keyObj);
-    if (valObj->IsObject()) {
+    if (valObj->IsObject(vm)) {
         Local<panda::ObjectRef> ext(valObj);
         auto ref = reinterpret_cast<NativeReference*>(ext->GetNativePointerField(0));
         jsImage = ref != nullptr ? reinterpret_cast<JSRenderImage*>(ref->GetData()) : nullptr;
@@ -479,8 +474,8 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 #else
     CHECK_NULL_VOID(jsImage);
     isImage = true;
-    std::string imageValue = jsImage->GetSrc();
-    image.src = imageValue;
+    image.src = jsImage->GetSrc();
+    image.imageData = jsImage->GetImageData();
     imageInfo.imgWidth = jsImage->GetWidth();
     imageInfo.imgHeight = jsImage->GetHeight();
     imageInfo.isImage = true;
@@ -545,11 +540,12 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
 // createPattern(image: ImageBitmap, repetition: string | null): CanvasPattern | null
 void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
-    std::string repeat;
     auto arg0 = info[0];
-    if (arg0->IsObject() && info.GetStringArg(1, repeat)) {
+    if (arg0->IsObject()) {
         JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         CHECK_NULL_VOID(jsImage);
+        std::string repeat;
+        info.GetStringArg(1, repeat);
         auto pattern = std::make_shared<Pattern>();
         pattern->SetImgSrc(jsImage->GetSrc());
         pattern->SetImageWidth(jsImage->GetWidth());
@@ -615,28 +611,41 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 //              dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void
 void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    auto arg0 = info[0]; // store the variable to avoid it being constructed multiple time.
+    if (!arg0->IsObject()) {
         return;
     }
-    int32_t width = 0;
-    int32_t height = 0;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> widthValue = obj->GetProperty("width");
-    JSRef<JSVal> heightValue = obj->GetProperty("height");
-    ParseJsInt(widthValue, width);
-    ParseJsInt(heightValue, height);
+    // Parse the first parameter with type ImageData
+    JSRef<JSObject> jsImageData = JSRef<JSObject>::Cast(arg0);
+    JSRef<JSVal> jsImgWidth = jsImageData->GetProperty("width");
+    JSRef<JSVal> jsImgHeight = jsImageData->GetProperty("height");
+    JSRef<JSVal> jsImgData = jsImageData->GetProperty("data");
+    if ((!jsImgWidth->IsNumber()) || (!jsImgHeight->IsNumber()) || (!jsImgData->IsUint8ClampedArray())) {
+        return;
+    }
+    int32_t imgWidth = jsImgWidth->ToNumber<int32_t>();
+    int32_t imgHeight = jsImgHeight->ToNumber<int32_t>();
 
-    ImageData imageData;
-    std::vector<uint8_t> array;
-    ParseImageData(info, imageData, array);
+    // Parse other parameters
+    ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
+    ParseImageData(info, imageData);
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
+                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
+                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
 
+    // copy the data from the image data.
+    JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(jsImgData);
+    auto arrayBuffer = colorArray->GetArrayBuffer();
+    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    int32_t bufferLength = arrayBuffer->ByteLength();
+    imageData.data = std::vector<Color>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = 4 * (j + width * i);
-            if (array.size() > idx + 3) {
+            uint32_t idx = 4 * (j + imgWidth * i);
+            if (bufferLength > idx + 3) {
                 imageData.data.emplace_back(
-                    Color::FromARGB(array[idx + 3], array[idx], array[idx + 1], array[idx + 2]));
+                    Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
             }
         }
     }
@@ -644,101 +653,46 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     renderingContext2DModel_->PutImageData(imageData);
 }
 
-void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array)
+void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData)
 {
     double density = GetDensity();
-    int32_t width = 0;
-    int32_t height = 0;
-
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> widthValue = obj->GetProperty("width");
-        JSRef<JSVal> heightValue = obj->GetProperty("height");
-        JSRef<JSVal> dataValue = obj->GetProperty("data");
-        ParseJsInt(widthValue, width);
-        ParseJsInt(heightValue, height);
-        if (dataValue->IsUint8ClampedArray()) {
-            JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(dataValue);
-            auto arrayBuffer = colorArray->GetArrayBuffer();
-            auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-            for (auto idx = 0; idx < arrayBuffer->ByteLength(); ++idx) {
-                array.emplace_back(buffer[idx]);
-            }
-        }
+    std::string argStr;
+    if (info.GetStringArg(1, argStr)) {
+        imageData.x = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(1, imageData.x)) {
+        imageData.x = static_cast<int32_t>(imageData.x * density);
     }
 
-    Dimension value;
-    if (info[1]->IsString()) {
-        std::string imageDataXStr = "";
-        JSViewAbstract::ParseJsString(info[1], imageDataXStr);
-        value = GetDimensionValue(imageDataXStr);
-        imageData.x = value.Value();
-    } else {
-        ParseJsInt(info[1], imageData.x);
-        imageData.x *= density;
+    if (info.GetStringArg(2, argStr)) {
+        imageData.y = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(2, imageData.y)) {
+        imageData.y = static_cast<int32_t>(imageData.y * density);
     }
-    if (info[2]->IsString()) {
-        std::string imageDataYStr = "";
-        JSViewAbstract::ParseJsString(info[2], imageDataYStr);
-        value = GetDimensionValue(imageDataYStr);
-        imageData.y = value.Value();
-    } else {
-        ParseJsInt(info[2], imageData.y);
-        imageData.y *= density;
+    if (info.Length() != 7) {
+        return;
+    }
+    if (info.GetStringArg(3, argStr)) {
+        imageData.dirtyX = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(3, imageData.dirtyX)) {
+        imageData.dirtyX = static_cast<int32_t>(imageData.dirtyX * density);
     }
 
-    imageData.dirtyWidth = width;
-    imageData.dirtyHeight = height;
-
-    if (info.Length() == 7) {
-        ParseImageDataAsStr(info, imageData);
+    if (info.GetStringArg(4, argStr)) {
+        imageData.dirtyY = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(4, imageData.dirtyY)) {
+        imageData.dirtyY = static_cast<int32_t>(imageData.dirtyY * density);
     }
 
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, width)
-                                                : std::min(width - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, height)
-                                                 : std::min(height - imageData.dirtyY, imageData.dirtyHeight);
-}
+    if (info.GetStringArg(5, argStr)) {
+        imageData.dirtyWidth = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(5, imageData.dirtyWidth)) {
+        imageData.dirtyWidth = static_cast<int32_t>(imageData.dirtyWidth * density);
+    }
 
-void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData& imageData)
-{
-    double density = GetDensity();
-    Dimension value;
-    if (info[3]->IsString()) {
-        std::string imageDataDirtyXStr = "";
-        JSViewAbstract::ParseJsString(info[3], imageDataDirtyXStr);
-        value = GetDimensionValue(imageDataDirtyXStr);
-        imageData.dirtyX = value.Value();
-    } else {
-        ParseJsInt(info[3], imageData.dirtyX);
-        imageData.dirtyX *= density;
-    }
-    if (info[4]->IsString()) {
-        std::string imageDataDirtyYStr = "";
-        JSViewAbstract::ParseJsString(info[4], imageDataDirtyYStr);
-        value = GetDimensionValue(imageDataDirtyYStr);
-        imageData.dirtyY = value.Value();
-    } else {
-        ParseJsInt(info[4], imageData.dirtyY);
-        imageData.dirtyY *= density;
-    }
-    if (info[5]->IsString()) {
-        std::string imageDataDirtWidth = "";
-        JSViewAbstract::ParseJsString(info[5], imageDataDirtWidth);
-        value = GetDimensionValue(imageDataDirtWidth);
-        imageData.dirtyWidth = value.Value();
-    } else {
-        ParseJsInt(info[5], imageData.dirtyWidth);
-        imageData.dirtyWidth *= density;
-    }
-    if (info[6]->IsString()) {
-        std::string imageDataDirtyHeight = "";
-        JSViewAbstract::ParseJsString(info[6], imageDataDirtyHeight);
-        value = GetDimensionValue(imageDataDirtyHeight);
-        imageData.dirtyHeight = value.Value();
-    } else {
-        ParseJsInt(info[6], imageData.dirtyHeight);
-        imageData.dirtyHeight *= density;
+    if (info.GetStringArg(6, argStr)) {
+        imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(argStr).Value());
+    } else if (info.GetInt32Arg(6, imageData.dirtyHeight)) {
+        imageData.dirtyHeight = static_cast<int32_t>(imageData.dirtyHeight * density);
     }
 }
 
@@ -795,6 +749,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pixelmap);
 
     // 3 pixelmap to NapiValue
+    ContainerScope scope(instanceId_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_VOID(runtime);
     NativeEngine* nativeEngine = runtime->GetNativeEngine();
@@ -886,16 +841,12 @@ void JSCanvasRenderer::JsSetDirection(const JSCallbackInfo& info)
         renderingContext2DModel_->SetTextDirection(direction);
     }
 }
-
+// getJsonData(path: string): string
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 {
-    ContainerScope scope(instanceId_);
-    std::string path = "";
-    std::string jsonData = "";
-
-    if (info[0]->IsString()) {
-        JSViewAbstract::ParseJsString(info[0], path);
-        jsonData = renderingContext2DModel_->GetJsonData(path);
+    std::string path;
+    if (info.GetStringArg(0, path)) {
+        std::string jsonData = renderingContext2DModel_->GetJsonData(path);
         auto returnValue = JSVal(ToJSValue(jsonData));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
         info.SetReturnValue(returnPtr);
@@ -1040,7 +991,7 @@ void JSCanvasRenderer::JsSetShadowOffsetY(const JSCallbackInfo& info)
 {
     double offsetY = 0.0;
     if (info.GetDoubleArg(0, offsetY)) {
-        renderingContext2DModel_->SetShadowOffsetX(offsetY * GetDensity());
+        renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
     }
 }
 
@@ -1312,7 +1263,7 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
     }
 
     // >= API10: setTransform(transform?: Matrix2D): void
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         auto* jsMatrix2d = info.UnwrapArg<JSMatrix2d>(0);
         CHECK_NULL_VOID(jsMatrix2d);
         param = jsMatrix2d->GetTransform();
@@ -1361,15 +1312,16 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
     }
 }
 
+// setLineDash(segments: number[]): void
 void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
 {
     std::vector<double> lineDash;
-    ParseJsDoubleArray(info[0], lineDash);
+    info.GetDoubleArrayArg(0, lineDash);
     if (lineDash.size() % 2 != 0) {
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
     double density = GetDensity();
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         for (auto i = 0U; i < lineDash.size(); i++) {
             lineDash[i] *= density;
         }
@@ -1387,7 +1339,7 @@ Pattern JSCanvasRenderer::GetPattern(unsigned int id)
 
 std::weak_ptr<Ace::Pattern> JSCanvasRenderer::GetPatternNG(int32_t id)
 {
-    if (id < 0) {
+    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
         return std::shared_ptr<Pattern>();
     }
     return pattern_[id];
@@ -1503,13 +1455,13 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
     }
 }
 
-// Abandoned
+// saveLayer(): void
 void JSCanvasRenderer::JsSaveLayer(const JSCallbackInfo& info)
 {
     renderingContext2DModel_->SaveLayer();
 }
 
-// Abandoned
+// restoreLayer(): void
 void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 {
     renderingContext2DModel_->RestoreLayer();
@@ -1533,7 +1485,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * SystemProperties::GetResolution());
+        return Dimension(dimension.Value() * GetDensity());
     }
     return Dimension(0.0);
 }

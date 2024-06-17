@@ -722,17 +722,17 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
         if (isContainerModal) {
             childPosition =
                 mouseOffset_ - Offset((CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-                                   CONTAINER_TITLE_HEIGHT.ConvertToPx());
+                                      CONTAINER_TITLE_HEIGHT.ConvertToPx());
         } else {
             childPosition = mouseOffset_;
         }
         if (GreatOrEqual(
-                childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width()) &&
+            childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width()) &&
             GreatOrEqual(childPosition.GetX(), child->GetLayoutSize().Width())) {
             childPosition.SetX(childPosition.GetX() - child->GetLayoutSize().Width());
         }
         if (GreatOrEqual(
-                childPosition.GetY() + child->GetLayoutSize().Height(), GetLayoutParam().GetMaxSize().Height()) &&
+            childPosition.GetY() + child->GetLayoutSize().Height(), GetLayoutParam().GetMaxSize().Height()) &&
             GreatOrEqual(childPosition.GetY(), child->GetLayoutSize().Height())) {
             childPosition.SetY(childPosition.GetY() - child->GetLayoutSize().Height());
         }
@@ -744,7 +744,7 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
         if (LessOrEqual(childPosition.GetX(), 0.0)) {
             childPosition.SetX(DEFAULT_SPACING);
         } else if (GreatOrEqual(
-                       childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
+            childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
             childPosition.SetX(
                 GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
         }

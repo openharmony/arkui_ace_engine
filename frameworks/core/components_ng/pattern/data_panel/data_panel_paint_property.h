@@ -76,6 +76,12 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            ToJsonValueColors(json, filter);
+            ToJsonTrackShadow(json, filter);
+            return;
+        }
         auto jsonDashArray = JsonUtil::CreateArray(true);
         for (size_t i = 0; i < propValues_.value().size(); ++i) {
             auto index = std::to_string(i);
@@ -104,6 +110,10 @@ public:
 
     void ToJsonValueColors(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         std::vector<Gradient> valueColors;
         if (propValueColors_.has_value()) {
             valueColors = propValueColors_.value();
@@ -137,6 +147,10 @@ public:
 
     void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();

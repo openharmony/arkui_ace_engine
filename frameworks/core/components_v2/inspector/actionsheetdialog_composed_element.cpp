@@ -24,8 +24,8 @@
 
 
 namespace OHOS::Ace::V2 {
- 
-const std::unordered_map<std::string, std::function<std::string(const ActionSheetDialogComposedElement &)>> 
+
+const std::unordered_map<std::string, std::function<std::string(const ActionSheetDialogComposedElement &)>>
     CREATE_JSON_MAP {
         {"show", [](const ActionSheetDialogComposedElement &inspector) { return inspector.Show(); }}
     };

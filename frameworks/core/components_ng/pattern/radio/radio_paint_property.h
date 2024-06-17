@@ -54,10 +54,14 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto radioTheme = pipeline->GetTheme<RadioTheme>();
-        PaintProperty::ToJsonValue(json, filter);
         json->PutExtAttr("checked", GetRadioCheck().value_or(false) ? "true" : "false", filter);
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("checkedBackgroundColor",

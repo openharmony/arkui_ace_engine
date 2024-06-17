@@ -110,7 +110,11 @@ void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
     if (args.Length() != 1 || !(args[0]->IsObject())) {
         return;
     }
-    JSRef<JSObject> childrenSizeObj = JSRef<JSObject>::Cast(args[0]);
+    SetChildrenMainSize(JSRef<JSObject>::Cast(args[0]));
+}
+
+void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
+{
     double defaultSize = 0.0f;
     if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
         LOGW("JSListItemGroup input parameter defaultSize check failed.");
@@ -224,7 +228,9 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
     JSClass<JSListItemGroup>::StaticMethod("childrenMainSize", &JSListItemGroup::SetChildrenMainSize);
     JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
+    JSClass<JSListItemGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSListItemGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 

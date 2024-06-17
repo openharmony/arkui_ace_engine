@@ -448,7 +448,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     auto childLayoutConstraint = ptr->CreateChildConstraint();
     auto layoutProperty = child->GetLayoutProperty();
     auto info = runtimeCallInfo;
-    if (info->GetArgsNumber() >= 1 && info->GetCallArgRef(0)->IsObject()) {
+    if (info->GetArgsNumber() >= 1 && info->GetCallArgRef(0)->IsObject(vm)) {
         auto jsObject = JsiObject(info->GetCallArgRef(0)->ToObject(vm));
         JSRef<JSObject> sizeObj = JSRef<JSObject>::Make(jsObject);
         CalcDimension minWidth;
@@ -527,7 +527,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     }
 
     auto info = runtimeCallInfo;
-    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
+    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject(vm)) {
         LOGE("JSLayout arg is wrong");
         child->Layout();
         return panda::JSValueRef::Undefined(vm);
@@ -564,7 +564,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     }
 
     auto info = runtimeCallInfo;
-    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
+    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject(vm)) {
         LOGE("JSPlaceChildren arg is wrong");
         child->Layout();
         return panda::JSValueRef::Undefined(vm);
@@ -610,7 +610,9 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntim
     }
     auto layoutProperty = child->GetLayoutProperty();
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
-    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false), direction).Get().GetLocalHandle();
+    return GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction)
+        .Get()
+        .GetLocalHandle();
 }
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRuntimeCallInfo* runtimeCallInfo)

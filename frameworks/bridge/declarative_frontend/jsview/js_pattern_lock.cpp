@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_pattern_lock_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
@@ -61,6 +62,7 @@ JSRef<JSArray> JSPatternLock::ChoosePointToJSValue(std::vector<int> input)
 void JSPatternLock::Create(const JSCallbackInfo& info)
 {
     auto controller = PatternLockModel::GetInstance()->Create();
+    JSPatternLockTheme::ApplyTheme();
 
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPatternLockController>();
@@ -83,8 +85,11 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("circleRadius", &JSPatternLock::SetCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
+    JSClass<JSPatternLock>::StaticMethod("activateCircleStyle", &JSPatternLock::SetActivateCircleStyle);
     JSClass<JSPatternLock>::StaticMethod("onDotConnect", &JSPatternLock::SetDotConnect);
+    JSClass<JSPatternLock>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSPatternLock>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSPatternLock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSPatternLock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSPatternLock>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -253,6 +258,46 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
     };
 
     PatternLockModel::GetInstance()->SetDotConnect(std::move(onDotConnect));
+}
+void JSPatternLock::SetActiveCircleColor(const JSRef<JSVal>& info)
+{
+    Color activeColor;
+    if (!ParseJsColor(info, activeColor)) {
+        activeColor = Color::TRANSPARENT;
+    }
+    PatternLockModel::GetInstance()->SetActiveCircleColor(activeColor);
+}
+void JSPatternLock::SetActiveCircleRadius(const JSRef<JSVal>& info)
+{
+    CalcDimension radius;
+    if (!ParseLengthMetricsToPositiveDimension(info, radius) || radius.IsNonPositive()) {
+        radius = Dimension(0.0f, DimensionUnit::VP);
+    }
+    PatternLockModel::GetInstance()->SetActiveCircleRadius(radius);
+}
+void JSPatternLock::SetEnableWaveEffect(const JSRef<JSVal>& info)
+{
+    if (!info->IsBoolean()) {
+        PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
+        return;
+    }
+    PatternLockModel::GetInstance()->SetEnableWaveEffect(info->ToBoolean());
+}
+void JSPatternLock::SetActivateCircleStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsObject()) {
+        PatternLockModel::GetInstance()->SetActiveCircleColor(Color::TRANSPARENT);
+        PatternLockModel::GetInstance()->SetActiveCircleRadius(Dimension(0.0f, DimensionUnit::VP));
+        PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsColor = paramObject->GetProperty("color");
+    JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
+    JSRef<JSVal> jsEnable = paramObject->GetProperty("enableWaveEffect");
+    SetActiveCircleColor(jsColor);
+    SetActiveCircleRadius(jsRadius);
+    SetEnableWaveEffect(jsEnable);
 }
 void JSPatternLockController::JSBind(BindingTarget globalObj)
 {

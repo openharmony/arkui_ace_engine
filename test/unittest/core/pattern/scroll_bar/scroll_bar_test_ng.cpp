@@ -870,11 +870,13 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
 
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -884,7 +886,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
 }
 
@@ -1418,11 +1421,12 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRectRegion(localPoint, source), true);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->longPressRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -1433,7 +1437,7 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
 
     pattern_->longPressRecognizer_ = nullptr;
     pattern_->scrollableEvent_->BarCollectLongPressTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
 }
 
@@ -1446,8 +1450,8 @@ HWTEST_F(ScrollBarTestNg, BarCollectLongPressTarget001, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
@@ -1470,7 +1474,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
         true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON), layoutConstraint);
     ret = pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper_, config);
     EXPECT_EQ(ret, true);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1481,8 +1485,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest020, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -1492,7 +1496,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
     auto scrollBarSize = layoutWrapper_->GetGeometryNode()->GetFrameSize();
     EXPECT_EQ(scrollBarSize, SCROLL_BAR_SELF_SIZE) << "scrollBarSize: " << scrollBarSize.ToString()
                                                    << " SCROLL_BAR_SELF_SIZE: " << SCROLL_BAR_SELF_SIZE.ToString();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1503,8 +1507,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest021, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -1529,7 +1533,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
     scrollBarProxy->NotifyScrollBarNode(1.0, SCROLL_FROM_BAR);
     EXPECT_EQ(distance, 1.0);
     EXPECT_EQ(source, SCROLL_FROM_BAR);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1540,8 +1544,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest022, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1568,7 +1572,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
     pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1579,8 +1583,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
 HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
 {
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
     LayoutConstraintF layoutConstraint;
@@ -1602,6 +1606,775 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest024, TestSize.Level1)
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest063
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest063, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest064
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest064, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest065
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest065, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest066
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest066, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest067
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest067, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest068
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest068, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest069
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest069, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest070
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest070, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest071
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest071, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest072
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest072, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_10);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_10);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_10);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_10);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest073
+ * @tc.desc: Test scrollbar pattern functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest073, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(SCROLL_BAR_SELF_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    pattern_->scrollBar_->displayMode_ = DisplayMode::AUTO;
+    pattern_->SetControlDistance(SCROLL_BAR_FLOAT_200);
+    pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_200);
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_200);
+    EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_200);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest074
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest074, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest075
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest075, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::FREE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest076
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest076, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::NONE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest077
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest077, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest078
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest078, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest79
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest79, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::FREE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest80
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest80, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::NONE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::SHRINK);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::SHRINK);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest081
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest081, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::HORIZONTAL), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest82
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest82, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::FREE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest083
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest083, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(settingApiVersion);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBarWithoutSubComponent(true, false, static_cast<int>(Axis::NONE), -1, layoutConstraint);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollBarPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    EXPECT_TRUE(scrollBar->NeedPaint());
+    auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
+    auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

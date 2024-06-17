@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 using NodeId = int32_t;
-ACE_EXPORT extern const NodeId DOM_ROOT_NODE_ID_BASE;
+ACE_FORCE_EXPORT extern const NodeId DOM_ROOT_NODE_ID_BASE;
 ACE_EXPORT extern const char DOM_DEFAULT_ROOT_NODE_ID[];
 // node tag defines
 ACE_EXPORT extern const char DOM_NODE_TAG_CALENDAR[];

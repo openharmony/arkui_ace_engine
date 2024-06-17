@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/form_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -881,6 +882,14 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
     formPattern->isLoaded_ = true;
     formModelNG.SetVisibility(VisibleType::GONE);
     ASSERT_EQ(property->GetVisibility(), VisibleType::GONE);
+
+    /**
+     * @tc.steps: step5. Test RequestPublishFormWithSnapshot in form_model_ng
+     */
+    AAFwk::Want want;
+    int64_t formId;
+    std::string formBindingDataStr;
+    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId), 1);
 }
 
 /**
@@ -1012,7 +1021,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      */
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto columnNode = pattern->CreateColumnNode();
+    auto columnNode = pattern->CreateColumnNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), columnNode);
 
     /**
@@ -1030,7 +1039,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      * @tc.steps: step5. Remove form skeleton node form form.
      * @tc.expected: Remove node success.
      */
-    pattern->RemoveFormSkeleton();
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 
@@ -1064,8 +1073,10 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.
      */
+    pattern->isUnTrust_ = true;
     pattern->LoadFormSkeleton();
     ASSERT_NE(host->GetLastChild(), nullptr);
+    pattern->isUnTrust_ = false;
 
     /**
      * @tc.steps: step4. Test when form RSSurfaceNode created.
@@ -1080,7 +1091,266 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     ASSERT_NE(externalRenderContext, nullptr);
     auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
+
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, true);
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
     ASSERT_EQ(host->GetLastChild(), nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest001
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+    pattern->InitClickEvent();
+
+    TouchEventInfo event("onTouchUp");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    event.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleTouchUpEvent(event);
+    ASSERT_EQ(event.GetTouches().empty(), false);
+}
+
+/**
+ * @tc.name: FormPatternTest002
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+    pattern->InitClickEvent();
+
+    TouchEventInfo event("onTouchDown");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    event.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleUnTrustForm();
+    pattern->UpdateBackgroundColorWhenUnTrustForm();
+    pattern->HandleTouchDownEvent(event);
+    ASSERT_EQ(event.GetTouches().empty(), false);
+}
+/**
+ * @tc.name: FormPatternTest003
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    int32_t delayTime = 0;
+    pattern->HandleSnapshot(delayTime);
+    ASSERT_EQ(delayTime, 0);
+}
+
+/**
+ * @tc.name: FormPatternTest004
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    pattern->HandleEnableForm(true);
+
+    pattern->isFrsNodeDetached_ = true;
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isFrsNodeDetached_ = false;
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+}
+
+/**
+ * @tc.name: FormPatternTest005
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    PointF touchPoint;
+    touchPoint.SetX(-5.0f);
+    touchPoint.SetY(5.0f);
+    std::vector<std::string> infos;
+    pattern->SetFormLinkInfos(infos);
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    pattern->isDynamic_ = true;
+    pattern->HandleStaticFormEvent(touchPoint);
+
+    pattern->isDynamic_ = false;
+    pattern->shouldResponseClick_ = false;
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->shouldResponseClick_ = true;
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+}
+
+/**
+ * @tc.name: FormPatternTest006
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest006, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+
+    pattern->FireFormSurfaceDetachCallback();
+    ASSERT_EQ(pattern->isFrsNodeDetached_, true);
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isFrsNodeDetached_ = false;
+    pattern->isDynamic_ = false;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+}
+
+/**
+ * @tc.name: FormPatternTest007
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, false);
+
+    pixelMap = std::make_shared<Media::PixelMap>();
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, true);
+}
+
+/**
+ * @tc.name: FormPatternTest008
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+
+    pattern->OnAccessibilityChildTreeDeregister();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest009
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest009, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest010
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest010, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto retNodeRef = pattern->CreateImageNode();
+    pattern->UpdateImageNode();
+    pattern->RemoveFrsNode();
+    ASSERT_NE(retNodeRef, nullptr);
 }
 } // namespace OHOS::Ace::NG

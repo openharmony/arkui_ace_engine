@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,6 +31,8 @@ JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)
     keyEventObj->SetProperty<int32_t>("metaKey", event.GetMetaKey());
     keyEventObj->SetProperty<double>("timestamp", static_cast<double>(event.GetTimeStamp().time_since_epoch().count()));
     keyEventObj->SetPropertyObject("stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
+    keyEventObj->SetPropertyObject("getModifierKeyState",
+        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     keyEventObj->SetProperty<int32_t>("intentionCode", static_cast<int32_t>(event.GetKeyIntention()));
     keyEventObj->Wrap<KeyEventInfo>(&event);
     return keyEventObj;

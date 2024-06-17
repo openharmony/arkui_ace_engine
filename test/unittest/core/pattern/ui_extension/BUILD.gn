@@ -18,6 +18,7 @@ ace_unittest("ui_extension_component_test_ng") {
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",

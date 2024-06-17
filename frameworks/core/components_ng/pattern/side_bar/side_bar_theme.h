@@ -62,7 +62,7 @@ public:
             auto sideBarUnfocusEffectEnable
                 = sideBarPattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
             theme->sideBarUnfocusEffectEnable_ = StringUtils::StringToInt(sideBarUnfocusEffectEnable);
-            theme->sideBarUnfocusColor_ = sideBarPattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
+            theme->sideBarUnfocusColor_ = sideBarPattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
         }
     };
 

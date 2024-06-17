@@ -116,6 +116,31 @@ public:
         return iteration_;
     }
 
+    bool IsReverse() {
+        return isReverse_;
+    }
+
+    int32_t GetDuration() {
+        return animator_->GetDuration();
+    }
+
+    Animator::Status GetStatus() {
+        return status_;
+    }
+
+    bool IsFixedSize() {
+        return fixedSize_;
+    }
+
+    FillMode GetFillMode() {
+        return animator_->GetFillMode();
+    }
+
+    int32_t GetImagesSize()
+    {
+        return static_cast<int32_t>(images_.size());
+    }
+
 private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
@@ -138,7 +163,7 @@ private:
     void ResetFormAnimationFlag();
     void RunAnimatorByStatus(int32_t index);
 
-    int32_t iteration_ = 0;
+    int32_t iteration_ = 1;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;

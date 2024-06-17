@@ -16,11 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H
 
+#include <memory>
+
+#include "test/mock/core/rosen/testing_draw_cmd_list.h"
 namespace OHOS::Ace::Testing {
-class TestingRecordingCanvas {
+class TestingRecordingCanvas : public TestingCanvas {
 public:
     TestingRecordingCanvas() = default;
+    TestingRecordingCanvas(int32_t width, int32_t weight, bool addDrawOpImmediate = true) {}
     ~TestingRecordingCanvas() = default;
+    std::shared_ptr<TestingDrawCmdList> GetDrawCmdList() const
+    {
+        return nullptr;
+    }
+
+    void Clear() const {}
+
+    void SetIsCustomTextType(bool isCustomTextType) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_RECORDING_CANVAS_H

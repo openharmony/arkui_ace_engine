@@ -85,6 +85,19 @@ void JSVideo::Create(const JSCallbackInfo& info)
     ParseJsDouble(currentProgressRateValue, currentProgressRate);
     VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
 
+    auto aiOptions = videoObj->GetProperty("imageAIOptions");
+    if (aiOptions->IsObject()) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+        VideoModel::GetInstance()->SetImageAIOptions(optionsValue);
+    }
+
     std::string previewUri;
     std::string bundleName;
     std::string moduleName;
@@ -411,7 +424,9 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSVideo>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSVideo>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSVideo>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSVideo>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSVideo>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSVideo>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     // override method

@@ -47,7 +47,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    border.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
@@ -81,7 +81,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    border.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -110,9 +110,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
-    
-    AddExpandableAreaView(menuItem);
-    AddClickableAreaView(menuItem, border);
+
     UpdateMenuProperty(menuItem, menuItemProps);
 }
 
@@ -125,35 +123,8 @@ void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, 
     menuProperty->UpdateContent(menuItemProps.content);
     menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
-    menuProperty->UpdateHasFurtherExpand(true);
     menuProperty->SetStartSymbol(menuItemProps.startApply);
     menuProperty->SetEndSymbol(menuItemProps.endApply);
-}
-
-void MenuItemModelNG::AddExpandableAreaView(RefPtr<FrameNode> menuItem)
-{
-    auto expandableArea = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_VOID(expandableArea);
-    auto areaProps = expandableArea->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(areaProps);
-    areaProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    areaProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-    areaProps->UpdateFlexDirection(FlexDirection::COLUMN);
-    expandableArea->MountToParent(menuItem);
-}
-
-void MenuItemModelNG::AddClickableAreaView(RefPtr<FrameNode> menuItem, BorderRadiusProperty border)
-{
-    auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_VOID(clickableArea);
-    auto clickableContext = clickableArea->GetRenderContext();
-    CHECK_NULL_VOID(clickableContext);
-    clickableContext->UpdateBorderRadius(border);
-    clickableArea->MountToParent(menuItem);
 }
 
 void MenuItemModelNG::SetSelected(bool isSelected)
@@ -178,7 +149,7 @@ void MenuItemModelNG::SetSelectIconSrc(const std::string& src)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src);
 }
 
-void MenuItemModelNG::SetSelectIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply)
+void MenuItemModelNG::SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply)
 {
     if (symbolApply != nullptr) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -355,4 +326,13 @@ void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::string& 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src, frameNode);
 }
 
+void MenuItemModelNG::SetSelectIconSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply)
+{
+    if (symbolApply != nullptr) {
+        auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        menuProperty->SetSelectSymbol(symbolApply);
+    }
+}
 } // namespace OHOS::Ace::NG

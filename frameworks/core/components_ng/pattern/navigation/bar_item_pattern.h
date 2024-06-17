@@ -84,6 +84,26 @@ public:
         return initalInfo_;
     }
 
+    void SetInitialIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        initalSymbol_ = symbol;
+    }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetInitialIconSymbol() const
+    {
+        return initalSymbol_;
+    }
+
+    void SetActiveIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol)
+    {
+        activeSymbol_ = symbol;
+    }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetActiveIconSymbol() const
+    {
+        return activeSymbol_;
+    }
+
     void SetToolbarItemStatus(NavToolbarItemStatus status)
     {
         status_ = status;
@@ -110,6 +130,8 @@ private:
     RefPtr<ClickEvent> clickListener_;
     ImageSourceInfo info_;
     ImageSourceInfo initalInfo_;
+    std::function<void(WeakPtr<NG::FrameNode>)> initalSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol_;
     NavToolbarItemStatus status_ = NavToolbarItemStatus::NORMAL;
     ToolbarIconStatus iconStatus_ = ToolbarIconStatus::INITIAL;
 };

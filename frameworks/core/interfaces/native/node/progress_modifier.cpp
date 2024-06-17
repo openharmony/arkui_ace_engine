@@ -418,13 +418,32 @@ ArkUI_Uint32 GetProgressColor(ArkUINodeHandle node)
     return ProgressModelNG::GetColor(frameNode).GetValue();
 }
 
+void SetProgressInitialize(
+    ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::ProgressInitialize(
+        frameNode, 0.0, value, 0.0, total, static_cast<NG::ProgressType>(progressStyle));
+}
+
+void ResetProgressInitialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = 0;
+    auto total = 100;
+    ProgressModelNG::ProgressInitialize(
+        frameNode, 0.0, value, 0.0, total, ProgressType::LINEAR);
+}
+
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
     static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
         SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
         ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor };
+        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
     return &modifier;
 }
 }

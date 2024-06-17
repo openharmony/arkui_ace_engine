@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT IfElseModel {
+class ACE_FORCE_EXPORT IfElseModel {
 public:
     static IfElseModel* GetInstance();
 

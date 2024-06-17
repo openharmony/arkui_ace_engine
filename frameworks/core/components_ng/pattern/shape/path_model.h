@@ -18,9 +18,10 @@
 
 #include <memory>
 #include <mutex>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class PathModel {
+class ACE_FORCE_EXPORT PathModel {
 public:
     static PathModel* GetInstance();
     virtual ~PathModel() = default;

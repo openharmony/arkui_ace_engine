@@ -173,74 +173,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
 };
 
-class OverlayModifier : public Modifier {
-    DECLARE_ACE_TYPE(OverlayModifier, Modifier);
-
-public:
-    OverlayModifier() = default;
-    ~OverlayModifier() override = default;
-    virtual void onDraw(DrawingContext& Context) = 0;
-
-    void AttachProperty(const RefPtr<PropertyBase>& prop)
-    {
-        attachedProperties_.push_back(prop);
-    }
-
-    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
-    {
-        return attachedProperties_;
-    }
-
-    const RectF& GetBoundsRect()
-    {
-        return rect_;
-    }
-
-    void SetBoundsRect(const RectF& rect)
-    {
-        rect_ = rect;
-    }
-
-private:
-    std::vector<RefPtr<PropertyBase>> attachedProperties_;
-    RectF rect_;
-    ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
-};
-
-class ForegroundModifier : public Modifier {
-    DECLARE_ACE_TYPE(ForegroundModifier, Modifier);
-
-public:
-    ForegroundModifier() = default;
-    ~ForegroundModifier() override = default;
-    virtual void onDraw(DrawingContext& Context) = 0;
-
-    void AttachProperty(const RefPtr<PropertyBase>& prop)
-    {
-        attachedProperties_.push_back(prop);
-    }
-
-    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties() const
-    {
-        return attachedProperties_;
-    }
-
-    const RectF& GetBoundsRect() const
-    {
-        return rect_;
-    }
-
-    void SetBoundsRect(const RectF& rect)
-    {
-        rect_ = rect;
-    }
-
-private:
-    std::vector<RefPtr<PropertyBase>> attachedProperties_;
-    RectF rect_;
-    ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifier);
-};
-
 #define DECLARE_PROP_TYPED_CLASS(classname, template_class, type)        \
     class classname : public template_class<type> {                      \
         DECLARE_ACE_TYPE(classname, template_class);                     \
@@ -267,6 +199,102 @@ DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, Grad
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
 DECLARE_PROP_TYPED_CLASS(AnimatableArithmeticProperty, AnimatableProperty, RefPtr<CustomAnimatableArithmetic>);
+
+class OverlayModifier : public Modifier {
+    DECLARE_ACE_TYPE(OverlayModifier, Modifier);
+
+public:
+    OverlayModifier()
+    {
+        changeCount_ = MakeRefPtr<PropertyInt>(0);
+        AttachProperty(changeCount_);
+    };
+    ~OverlayModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+    void Draw(DrawingContext& Context);
+
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
+    {
+        return attachedProperties_;
+    }
+
+    const RectF& GetBoundsRect()
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const RectF& rect)
+    {
+        rect_ = rect;
+    }
+
+    void SetExtensionHandler(ExtensionHandler* extensionHandler);
+
+    void SetOverlayChange()
+    {
+        changeCount_->Set(changeCount_->Get() + 1);
+    }
+
+private:
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    RectF rect_;
+    ExtensionHandler* extensionHandler_ = nullptr;
+    RefPtr<PropertyInt> changeCount_;
+    ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
+};
+
+class ForegroundModifier : public Modifier {
+    DECLARE_ACE_TYPE(ForegroundModifier, Modifier);
+
+public:
+    ForegroundModifier()
+    {
+        changeCount_ = MakeRefPtr<PropertyInt>(0);
+        AttachProperty(changeCount_);
+    };
+    ~ForegroundModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+    void Draw(DrawingContext& Context);
+
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties() const
+    {
+        return attachedProperties_;
+    }
+
+    const RectF& GetBoundsRect() const
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const RectF& rect)
+    {
+        rect_ = rect;
+    }
+
+    void SetExtensionHandler(ExtensionHandler* extensionHandler);
+
+    void SetForegroundChange()
+    {
+        changeCount_->Set(changeCount_->Get() + 1);
+    }
+
+private:
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
+    RectF rect_;
+    ExtensionHandler* extensionHandler_ = nullptr;
+    RefPtr<PropertyInt> changeCount_;
+    ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifier);
+};
 
 class ContentModifier : public Modifier {
     DECLARE_ACE_TYPE(ContentModifier, Modifier);

@@ -45,6 +45,7 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
     static void OnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
@@ -53,6 +54,12 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue);
+    static JSRef<JSVal> CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo);
+    static void OnWillInsertValue(const JSCallbackInfo& info);
+    static void OnDidInsertValue(const JSCallbackInfo& info);
+    static void OnWillDelete(const JSCallbackInfo& info);
+    static void OnDidDelete(const JSCallbackInfo& info);
     static void SetIconStyle(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
@@ -74,6 +81,8 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

@@ -113,12 +113,11 @@ void SkiaSvgDom::OffScreenDraw(
     auto* skCanvas = rsCanvas->ExportSkCanvas();
 
     skCanvas->save();
-    // TODO:use graphics_2d to paint SVG
     FitViewPort(layout);
     FitImage(skCanvas, imageFit, layout);
     Render(skCanvas);
     skCanvas->restore();
-    
+
     // transform bitmap to image
     RSImage image;
     image.BuildFromBitmap(bitmap);

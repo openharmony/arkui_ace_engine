@@ -28,7 +28,8 @@ void NAPI_arkui_advanced_FullScreenLaunchComponent_GetABCCode(const char** buf, 
         *buf = _binary_fullscreenlaunchcomponent_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = _binary_fullscreenlaunchcomponent_abc_end - _binary_fullscreenlaunchcomponent_abc_start;
+        *buflen = _binary_fullscreenlaunchcomponent_abc_end - 
+            _binary_fullscreenlaunchcomponent_abc_start;
     }
 }
 

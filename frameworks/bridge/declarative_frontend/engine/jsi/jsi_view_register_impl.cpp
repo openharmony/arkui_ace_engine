@@ -24,6 +24,7 @@
 #include "bridge/card_frontend/card_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
@@ -87,7 +88,9 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -133,6 +136,7 @@
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
+#include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
@@ -178,6 +182,7 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -231,6 +236,7 @@
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_form.h"
+#include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
 #endif
 
 #ifdef WEB_SUPPORTED
@@ -629,6 +635,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
+    { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
@@ -677,6 +684,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
+    { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
@@ -688,6 +696,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
+    { "FormMenuItem", JSFormMenuItem::JSBind },
 #endif
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     { "PluginComponent", JSPlugin::JSBind },
@@ -809,11 +818,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "WindowScene", JSWindowScene::JSBind },
 #if defined(DYNAMIC_COMPONENT_SUPPORT)
     { "DynamicComponent", JSDynamicComponent::JSBind },
+    { "IsolatedComponent", JSIsolatedComponent::JSBind },
 #endif
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
     { "RichEditorStyledStringController", JSRichEditorStyledStringController::JSBind },
+    { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
@@ -825,6 +836,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__PathShape__", JSPathShape::JSBind },
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
+    { "GestureRecognizer", JSGestureRecognizer::JSBind },
+    { "EventTargetInfo", JSEventTargetInfo::JSBind },
+    { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
+    { "PanRecognizer", JSPanRecognizer::JSBind }
 };
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
@@ -865,6 +880,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
+    JSLayoutManager::JSBind(globalObj);
     JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
@@ -976,6 +992,7 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
         JSRichEditorController::JSBind(globalObj);
         JSRichEditorStyledStringController::JSBind(globalObj);
+        JSLayoutManager::JSBind(globalObj);
     } else if ((*func).first == V2::TEXT_ETS_TAG) {
         JSTextController::JSBind(globalObj);
     }
@@ -1055,6 +1072,7 @@ void JsBindFormViews(
             RegisterFormModuleByName(globalObj, module, nativeEngine);
         }
     } else {
+        TAG_LOGI(AceLogTag::ACE_FORM, "register all form components, isReload:%{public}d", isReload);
         RegisterAllFormModule(globalObj, nativeEngine);
     }
 }
@@ -1106,6 +1124,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
+    JSPath2D::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

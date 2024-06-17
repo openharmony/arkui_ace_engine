@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_EXPORT ManifestParser : public Referenced {
+class ACE_FORCE_EXPORT ManifestParser : public Referenced {
 public:
     ManifestParser();
     ~ManifestParser() override = default;

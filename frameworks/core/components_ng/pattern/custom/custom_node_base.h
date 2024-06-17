@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CustomNodeBase : public virtual AceType {
+class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
 public:
@@ -194,6 +194,16 @@ public:
         extraInfo_ = std::move(extraInfo);
     }
 
+    bool GetIsV2()
+    {
+        return isV2_;
+    }
+
+    void SetIsV2(bool isV2)
+    {
+        isV2_ = isV2;
+    }
+
     const ExtraInfo& GetExtraInfo() const
     {
         return extraInfo_;
@@ -219,9 +229,20 @@ public:
         return nullptr;
     }
 
+    void SetOnDumpInspectorFunc(std::function<std::string()>&& func);
+
+    std::string FireOnDumpInspectorFunc()
+    {
+        if (onDumpInspectorFunc_) {
+            return onDumpInspectorFunc_();
+        }
+        return "";
+    }
+
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
+    bool isV2_ = false;
 
 private:
     std::function<void()> updateFunc_;
@@ -236,6 +257,7 @@ private:
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
+    std::function<std::string()> onDumpInspectorFunc_;
     std::function<void*()> getThisFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;

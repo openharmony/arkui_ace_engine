@@ -34,6 +34,11 @@ class WantWrap;
 }
 #endif
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+}
+
 namespace OHOS::Ace::Framework {
 class ScopeRAII {
 public:
@@ -61,6 +66,8 @@ bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<Pi
     int32_t& duration, int32_t& iterations);
 #endif
 
+const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj);
+const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj);
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();
@@ -71,5 +78,6 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj);
 bool CheckRegexValid(const std::string& pattern);
 void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options);
+napi_env GetCurrentEnv();
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

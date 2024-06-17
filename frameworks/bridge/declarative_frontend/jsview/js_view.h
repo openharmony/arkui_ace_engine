@@ -180,7 +180,7 @@ protected:
 
 private:
     int32_t instanceId_ = -1;
-    std::stack<int32_t> restoreInstanceIdStack_;
+    std::vector<int32_t> restoreInstanceIdStack_;
     bool isStatic_ = false;
     std::function<void()> notifyRenderDone_;
 };
@@ -342,8 +342,6 @@ public:
 
     void JSGetUIContext(const JSCallbackInfo& info);
 
-    void JSSendStateInfo(const std::string& stateInfo);
-
     void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
@@ -351,6 +349,8 @@ public:
     {
         recycleCustomNode_.Reset();
     }
+
+    void JSSendStateInfo(const std::string& stateInfo);
 
     bool isFullUpdate() const override
     {
@@ -405,6 +405,13 @@ public:
         return isRecycleRerender_;
     }
 
+    void JSSetIsV2(const bool isV2);
+
+    bool GetJSIsV2() const
+    {
+        return isV2_;
+    }
+
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
 private:
@@ -438,6 +445,7 @@ private:
     std::string jsViewName_;
 
     bool isRecycleRerender_ = false;
+    bool isV2_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

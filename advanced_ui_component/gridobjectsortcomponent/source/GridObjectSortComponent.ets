@@ -67,9 +67,9 @@ interface PositionXY {
 }
 
 class MenuItem {
-  value: Resource;
-  isEnabled: boolean;
-  action: () => void;
+  pubilc value: Resource;
+  pubilc isEnabled: boolean;
+  pubilc action: () => void;
 
   constructor(value: Resource, enabled: boolean, action: () => void) {
     this.value = value;
@@ -203,7 +203,9 @@ export struct GridObjectSortComponent {
 
   // cancel edit function
   cancelEdit() {
-    if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) return
+    if (this.isStartDrag || this.clickAddBtn || this.clickRemoveBtn) {
+      return
+    }
     animateTo({
       duration: ENTER_EXIT_ICON_DURATION,
       curve: LONG_TOUCH_SCALE
@@ -276,7 +278,9 @@ export struct GridObjectSortComponent {
 
   // delete Editing an Area Item
   handleDeleteClick(content: GridObjectSortComponentItem) {
-    if (this.clickAddBtn || this.clickRemoveBtn) return
+    if (this.clickAddBtn || this.clickRemoveBtn) {
+      return
+    }
     this.clickRemoveBtn = true;
     this.scaleIcon = 0;
     this.arraySelectIsChange = 1;
@@ -345,19 +349,19 @@ export struct GridObjectSortComponent {
     return height
   }
   // Display area icon in image_text mode
-  imageTextRemoveIcon (select: GridObjectSortComponentItem): Resource {
+  imageTextRemoveIcon(select: GridObjectSortComponentItem): Resource {
     const clickRemoveIcon = this.clickRemoveBtn && this.content.id === select.id
     const icon = clickRemoveIcon ? $r("sys.media.ohos_ic_public_add_norm_filled") : $r("sys.media.ohos_ic_public_remove_filled")
     return icon
   }
   // Adding a Region Icon in image_text Mode
-  imageTextAddIcon (select: GridObjectSortComponentItem): Resource {
+  imageTextAddIcon(select: GridObjectSortComponentItem): Resource {
     const clickAddIcon = this.clickAddBtn && this.content.id === select.id && this.gridComState
     const icon = clickAddIcon ? $r("sys.media.ohos_ic_public_remove_filled") : $r("sys.media.ohos_ic_public_add_norm_filled")
     return icon
   }
   // Displaying and hiding area icons in image_text mode
-  imageTextAddIconVisible (select: GridObjectSortComponentItem): Visibility {
+  imageTextAddIconVisible(select: GridObjectSortComponentItem): Visibility {
     const iconHideShow = this.clickAddBtn && this.content.id === select.id && !this.gridComState
     const visible = iconHideShow ? Visibility.Hidden : Visibility.Visible
     return visible
@@ -527,7 +531,7 @@ export struct GridObjectSortComponent {
       }
 
     // Move the position when adding an item.
-    if(!this.clickRemoveBtn && index === this.unSelectedIndex) {
+    if (!this.clickRemoveBtn && index === this.unSelectedIndex) {
         return {
           x: this.addItemMoveX,
           y: -this.addItemMoveY
@@ -665,7 +669,9 @@ export struct GridObjectSortComponent {
             y: -MARGIN_EIGHT
           })
           .onClick(() => {
-            if (this.clickAddBtn || this.clickRemoveBtn) return
+            if (this.clickAddBtn || this.clickRemoveBtn) {
+              return
+            }
             this.scaleIcon = 0
             this.content = select
             const index = this.unSelected.findIndex(i => i.id === select.id)
@@ -713,7 +719,8 @@ export struct GridObjectSortComponent {
       .width('100%')
       .height(this.imageItemWidth)
       .padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT })
-      .borderRadius((this.isTouchDown && select.id === this.content.id) || select.id === this.hoverId ? this.touchBorderRadius : 0)
+      .borderRadius((this.isTouchDown && select.id === this.content.id) ||
+        select.id === this.hoverId ? this.touchBorderRadius : 0)
       .backgroundColor(
           this.isTouchDown && select.id === this.content.id
           ? this.touchDown : select.id === this.hoverId ? this.hoverBackgroundColor : ''
@@ -734,9 +741,8 @@ export struct GridObjectSortComponent {
       }
       .borderRadius(50)
       .width(this.clickRemoveBtn && select.id === this.content.id ? this.textItemEditWidth + 8 : this.textItemEditWidth)
-      .translate(this.gridComState ? this.clickRemoveBtn && select.id === this.content.id ? { x: 0 } : { x: -4 } : {
-                                                                                                                     x: 0
-                                                                                                                   })
+      .translate(this.gridComState ? this.clickRemoveBtn &&
+        select.id === this.content.id ? { x: 0 } : { x: -4 } : { x: 0})
       .height('100%')
       .animation(!this.firstIn ? {
                                    duration: ENTER_EXIT_ICON_DURATION,
@@ -909,14 +915,18 @@ export struct GridObjectSortComponent {
           })
           .clickEffect({ level: ClickEffectLevel.LIGHT })
           .onTouch((event: TouchEvent) => {
-            if (this.clickAddBtn || this.clickRemoveBtn) return
-            if(event.type === TouchType.Down) {
+            if (this.clickAddBtn || this.clickRemoveBtn) {
+              return
+            }
+            if (event.type === TouchType.Down) {
               this.content = item
               this.isTouchDown = true
             }
             if (event.type === TouchType.Up) {
               this.isTouchDown = false
-              if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) return
+              if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
+                return
+              }
               animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
                 curve: COMMON_BEZIER
@@ -994,7 +1004,7 @@ export struct GridObjectSortComponent {
         .clip(false)
         .translate(this.getAddAreaItemTranslate(index))
         .animation({
-          curve: this.clickRemoveBtn ? DRAG_SPRING : index === this.unSelectedIndex ?  REMOVE_ADD_SPRING : DRAG_SPRING
+          curve: this.clickRemoveBtn ? DRAG_SPRING : index === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
         })
       }, (item: GridObjectSortComponentItem) => item.id.toString())
     }
@@ -1038,7 +1048,9 @@ export struct GridObjectSortComponent {
               bottom: this.imageText ? ROW_GAP : this.gridComState ? ROW_GAP : MARGIN_EIGHT
             })
             .onTouch((event: TouchEvent) => {
-              if (this.clickAddBtn || this.clickRemoveBtn) return
+              if (this.clickAddBtn || this.clickRemoveBtn) {
+                return
+              }
               if (event.type === TouchType.Down) {
                 this.content = select
                 this.isTouchDown = true
@@ -1058,7 +1070,7 @@ export struct GridObjectSortComponent {
           .clip(false)
           .translate(this.getShowAreaItemTranslate(index))
           .animation({
-            curve: this.isStartDrag ? DRAG_SPRING : index === this.selectedIndex ?  REMOVE_ADD_SPRING : DRAG_SPRING,
+            curve: this.isStartDrag ? DRAG_SPRING : index === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
           })
         }, (item: GridObjectSortComponentItem) => item.id.toString())
       }
@@ -1135,7 +1147,8 @@ export struct GridObjectSortComponent {
         this.isStartDrag = false
         this.selected.splice(insertIndex === -1 ? itemIndex : insertIndex, 0, this.content)
       })
-      .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) => this.onDragMoveEvent(event, itemIndex, insertIndex))
+      .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) =>
+        this.onDragMoveEvent(event, itemIndex, insertIndex))
     }
   }
 

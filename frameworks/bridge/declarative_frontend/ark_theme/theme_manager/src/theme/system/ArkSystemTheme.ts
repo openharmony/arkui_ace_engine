@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 class ArkSystemTheme implements ThemeInternal {
-    colors: Colors
-    shapes: Shapes
-    typography: Typography
+    colors: Colors;
+    shapes: Shapes;
+    typography: Typography;
 
     constructor() {
-        this.colors = new ArkSystemColors()
-        this.shapes = new ArkSystemShapes()
-        this.typography = new ArkSystemTypography()
+        this.colors = new ArkSystemColors();
+        this.shapes = new ArkSystemShapes();
+        this.typography = new ArkSystemTypography();
     }
 }

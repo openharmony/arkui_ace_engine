@@ -64,7 +64,9 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("fontColor", &JSSymbol::SetFontColor, opt);
     JSClass<JSSymbol>::StaticMethod("effectStrategy", &JSSymbol::SetSymbolEffect, opt);
     JSClass<JSSymbol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSymbol>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSymbol>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
     JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);
@@ -179,8 +181,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto commonSubTypeProperty = symbolEffectObj->GetProperty("direction");
     if (commonSubTypeProperty->IsNumber()) {
         auto commonSubTypeNum = commonSubTypeProperty->ToNumber<uint32_t>();
-        if (commonSubTypeNum >= static_cast<int>(CommonSubType::DOWN) &&
-            commonSubTypeNum <= static_cast<int>(CommonSubType::UP)) {
+        if (commonSubTypeNum >= static_cast<uint32_t>(CommonSubType::DOWN) &&
+            commonSubTypeNum <= static_cast<uint32_t>(CommonSubType::UP)) {
             symbolEffectOptions.SetCommonSubType(static_cast<CommonSubType>(commonSubTypeNum));
         }
     }
@@ -188,8 +190,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto fillStyleProperty = symbolEffectObj->GetProperty("fillStyle");
     if (fillStyleProperty->IsNumber()) {
         auto fillStyleNum = fillStyleProperty->ToNumber<uint32_t>();
-        if (fillStyleNum >= static_cast<int>(FillStyle::CUMULATIVE) &&
-            fillStyleNum <= static_cast<int>(FillStyle::ITERATIVE)) {
+        if (fillStyleNum >= static_cast<uint32_t>(FillStyle::CUMULATIVE) &&
+            fillStyleNum <= static_cast<uint32_t>(FillStyle::ITERATIVE)) {
             symbolEffectOptions.SetFillStyle(static_cast<FillStyle>(fillStyleNum));
         }
     }

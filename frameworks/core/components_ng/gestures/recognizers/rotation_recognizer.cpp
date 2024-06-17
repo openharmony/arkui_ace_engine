@@ -73,7 +73,10 @@ void RotationRecognizer::OnRejected()
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch down event, begin to detect"
+        "rotation event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -89,6 +92,9 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
 
@@ -106,10 +112,13 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives axis start event, begin to detect rotation event, "
+        "state: %{public}d",
+        event.touchEventId, refereeState_);
     lastAxisEvent_ = event;
     touchPoints_[event.id] = TouchEvent();
     UpdateTouchPointWithAxisEvent(event);
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis start event, begin to detect rotation event");
     if (refereeState_ == RefereeState::READY) {
         initialAngle_ = event.rotateAxisAngle;
         refereeState_ = RefereeState::DETECTING;
@@ -118,10 +127,15 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch up event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch up event, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -151,7 +165,9 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis end event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives axis end event, state: %{public}d",
+        event.touchEventId, refereeState_);
     // if rotation recognizer received another axisEvent, no need to active.
     if (!event.isRotationEvent) {
         return;
@@ -179,18 +195,19 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
+        touchPoints_[event.id] = event;
         lastAngle_ = 0.0;
         angleSignChanged_ = false;
         return;
     }
     touchPoints_[event.id] = event;
+    currentAngle_ = ComputeAngle();
+    time_ = event.time;
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
         lastAngle_ = 0.0;
         angleSignChanged_ = false;
         return;
     }
-    currentAngle_ = ComputeAngle();
-    time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
         auto trueAngle = currentAngle_;
@@ -256,7 +273,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -271,7 +290,8 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis cancel event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, rotation recognizer receives axis cancel event",
+        event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -347,6 +367,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetSourceTool(touchPoint.sourceTool);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -357,8 +378,11 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    if (!callback && !gestureRecognizerJudgeFunc) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<RotationGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -378,6 +402,9 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
         info->SetTiltY(touchPoint.tiltY.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
+    }
     return callback(gestureInfo_, info);
 }
 

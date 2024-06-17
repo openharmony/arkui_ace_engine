@@ -27,53 +27,55 @@ class NavigationTransitionProxy : public AceType {
     DECLARE_ACE_TYPE(NavigationTransitionProxy, AceType);
 
 public:
-    NavContentInfo GetPreDestination() const
+    NavigationTransitionProxy() = default;
+    ~NavigationTransitionProxy() = default;
+
+    RefPtr<NG::NavDestinationContext> GetPreDestinationContext() const
     {
-        return preNavInfo_;
+        return preContext_;
     }
 
-    NavContentInfo GetTopDestination() const
+    RefPtr<NG::NavDestinationContext> GetTopDestinationContext() const
     {
-        return topNavInfo_;
+        return topContext_;
     }
 
     void SetPreDestination(const RefPtr<NavDestinationGroupNode>& preDestination)
     {
-        if (!preDestination) {
-            preNavInfo_.index = -1;
-            return;
-        }
-        preNavInfo_.index = preDestination->GetIndex();
-        preNavInfo_.mode = preDestination->GetNavDestinationMode();
+        CHECK_NULL_VOID(preDestination);
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
-        preNavInfo_.name = pattern->GetName();
+        preContext_ = pattern->GetNavDestinationContext();
+        preContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 
     void SetTopDestination(const RefPtr<NavDestinationGroupNode>& topDestination)
     {
-        if (!topDestination) {
-            topNavInfo_.index = -1;
-            return;
-        }
-        topNavInfo_.index = topDestination->GetIndex();
-        topNavInfo_.mode = topDestination->GetNavDestinationMode();
+        CHECK_NULL_VOID(topDestination);
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
-        topNavInfo_.name = pattern->GetName();
+        topContext_ = pattern->GetNavDestinationContext();
+        topContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 
-    void SetFinishTransitionEvent(std::function<void(bool)>&& event)
+    void SetFinishTransitionEvent(std::function<void()>&& event)
     {
         finishCallback_ = std::move(event);
     }
 
     void FireFinishCallback()
     {
+        if (interactive_) {
+            FinishInteractiveAnimation();
+            return;
+        }
         if (hasFinished_ || !finishCallback_) {
             return;
         }
-        finishCallback_(isSuccess_);
+        finishCallback_();
+        if (endCallback_) {
+            endCallback_(true);
+        }
     }
 
     void SetIsSuccess(bool isSuccess)
@@ -96,13 +98,99 @@ public:
         operation_ = operation;
     }
 
+    void SetCancelAnimationCallback(std::function<void()>&& cancelAnimation)
+    {
+        cancelAnimation_ = std::move(cancelAnimation);
+    }
+
+    void FireCancelAnimation()
+    {
+        if (!cancelAnimation_ || hasFinished_ || !interactive_) {
+            return;
+        }
+        cancelAnimation_();
+    }
+
+    void SetInteractive(bool interactive)
+    {
+        interactive_ = interactive;
+    }
+
+    bool GetInteractive() const
+    {
+        return interactive_;
+    }
+
+    void SetEndCallback(std::function<void(bool)>&& callback)
+    {
+        endCallback_ = std::move(callback);
+    }
+
+    void FireEndCallback()
+    {
+        if (endCallback_) {
+            endCallback_(isSuccess_);
+        }
+    }
+
+    bool GetIsSuccess()
+    {
+        return isSuccess_;
+    }
+
+    void SetInteractiveAnimation(std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation)
+    {
+        interactiveAnimation_ = interactiveAnimation;
+    }
+
+    void StartAnimation()
+    {
+        if (!interactiveAnimation_) {
+            return;
+        }
+        AnimationUtils::StartInteractiveAnimation(interactiveAnimation_);
+    }
+
+    void UpdateTransition(float progress)
+    {
+        if (!interactive_ || hasFinished_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "update transition failed interactive: %{public}d, hasFinished: %{public}d",
+                interactive_, hasFinished_);
+            return;
+        }
+        AnimationUtils::UpdateInteractiveAnimation(interactiveAnimation_, progress);
+    }
+
+    void FinishInteractiveAnimation()
+    {
+        if (!interactive_ || hasFinished_) {
+            return;
+        }
+        isSuccess_ = true;
+        AnimationUtils::ContinueInteractiveAnimation(interactiveAnimation_);
+    }
+
+    void CancelInteractiveAnimation()
+    {
+        if (!interactive_ || hasFinished_) {
+            return;
+        }
+        isSuccess_ = false;
+        AnimationUtils::ReverseInteractiveAnimation(interactiveAnimation_);
+    }
+
 private:
-    NavContentInfo preNavInfo_;
-    NavContentInfo topNavInfo_;
-    std::function<void(bool)> finishCallback_;
+    RefPtr<NavDestinationContext> preContext_;
+    RefPtr<NavDestinationContext> topContext_;
+    std::function<void()> finishCallback_; // finish transition callback to continue animation
+    std::function<void()> cancelAnimation_; // cancel transition callback to reverse animation
+    std::function<void(bool)> endCallback_;
     NavigationOperation operation_;
-    bool hasFinished_ = false;
-    bool isSuccess_ = false;
+    std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation_;
+    bool hasFinished_ = false; // current transition is finish or not
+    bool isSuccess_ = true; // set current custom transition is start success or not
+    bool interactive_ = false; // set current interactive animation
 };
 
 struct NavigationTransition {
@@ -110,6 +198,7 @@ struct NavigationTransition {
     std::function<void(const RefPtr<NavigationTransitionProxy>&)> transition;
     std::function<void(bool)> endCallback;
     bool isValid = true;
+    bool interactive = false;
 };
 } // namespace OHOS::Ace::NG
 #endif

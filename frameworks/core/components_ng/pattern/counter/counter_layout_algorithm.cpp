@@ -19,6 +19,7 @@
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,6 +64,18 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(subButtonGeometryNode);
     auto subButtonLayoutProperty = subButtonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(subButtonLayoutProperty);
+    auto leftButtonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(subButtonLayoutProperty);
+    CHECK_NULL_VOID(leftButtonLayoutProperty);
+    BorderRadiusProperty leftButtonBorder { counterTheme->GetBorderRadius().radiusTopLeft.value(), 0.0_vp, 0.0_vp,
+        counterTheme->GetBorderRadius().radiusBottomLeft.value() };
+    BorderRadiusProperty rightButtonBorder { 0.0_vp, counterTheme->GetBorderRadius().radiusTopRight.value(),
+        counterTheme->GetBorderRadius().radiusBottomRight.value(), 0.0_vp };
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        leftButtonLayoutProperty->UpdateBorderRadius(rightButtonBorder);
+    } else {
+        leftButtonLayoutProperty->UpdateBorderRadius(leftButtonBorder);
+    }
     CalcSize subButtonSize;
     subButtonSize.SetWidth(CalcLength(buttonWidth));
     subButtonSize.SetHeight(CalcLength(selfContentSize.Height()));
@@ -95,6 +108,13 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(addButtonGeometryNode);
     auto addButtonLayoutProperty = addButtonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(addButtonLayoutProperty);
+    auto rightButtonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(addButtonLayoutProperty);
+    CHECK_NULL_VOID(rightButtonLayoutProperty);
+    if (layoutDirection == TextDirection::RTL) {
+        rightButtonLayoutProperty->UpdateBorderRadius(leftButtonBorder);
+    } else {
+        rightButtonLayoutProperty->UpdateBorderRadius(rightButtonBorder);
+    }
     CalcSize addButtonSize;
     addButtonSize.SetWidth(CalcLength(buttonWidth));
     addButtonSize.SetHeight(CalcLength(selfContentSize.Height()));

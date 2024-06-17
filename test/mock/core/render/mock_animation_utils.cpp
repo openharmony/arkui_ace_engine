@@ -18,6 +18,11 @@
 namespace OHOS::Ace {
 class AnimationUtils::Animation {};
 
+class AnimationUtils::InteractiveAnimation {
+public:
+    FinishCallback finishCallback_;
+};
+
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
 {
@@ -95,4 +100,37 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback) {}
+
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)
+{
+    addCallback();
+    std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation =
+        std::make_shared<AnimationUtils::InteractiveAnimation>();
+    CHECK_NULL_RETURN(interactiveAnimation, nullptr);
+    interactiveAnimation->finishCallback_ = callback;
+    return interactiveAnimation;
+}
+
+void AnimationUtils::UpdateInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress) {}
+
+void AnimationUtils::ContinueInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->finishCallback_);
+    interactiveAnimation->finishCallback_();
+}
+
+void AnimationUtils::StartInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation) {}
+
+void AnimationUtils::ReverseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->finishCallback_);
+    interactiveAnimation->finishCallback_();
+}
 } // namespace OHOS::Ace

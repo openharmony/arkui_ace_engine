@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
-// TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
@@ -56,6 +55,7 @@ constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
 constexpr Dimension SUBWINDOW_DIALOG_DEFAULT_WIDTH = 400.0_vp;
+constexpr Dimension AVOID_LIMIT_PADDING = 8.0_vp;
 constexpr double EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO = 0.67;
 constexpr double EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO = 0.9;
 constexpr double HALF = 2.0;
@@ -63,6 +63,7 @@ constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t DIALOG_DEVICE_COLUMN_TWO = 2;
 constexpr int32_t DIALOG_DEVICE_COLUMN_THREE = 3;
 constexpr int32_t DIALOG_DEVICE_COLUMN_FOUR = 4;
+constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -85,6 +86,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
+    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging();
+    if (dialogPattern->GetNeeedUpdateOrientation()) {
+        dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
+    }
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -112,6 +117,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
     }
 
+    if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        childLayoutConstraint.maxSize.SetWidth(LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+    }
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
@@ -185,17 +193,19 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
 
 void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll)
 {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
     auto text = scroll->GetAllChildrenWithBuild().front();
     CHECK_NULL_VOID(text);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
+    textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -210,8 +220,6 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
             scrollPropery->UpdateAlignment(Alignment::CENTER);
         }
     } else {
-        auto dialogPattern = hostNode->GetPattern<DialogPattern>();
-        CHECK_NULL_VOID(dialogPattern);
         if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
                 GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
@@ -220,7 +228,12 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
                 scrollPropery->UpdateAlignment(Alignment::CENTER);
             }
         } else {
-            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
+            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+            if (!isRtl) {
+                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
+            } else {
+                scrollPropery->UpdateAlignment(Alignment::CENTER_RIGHT);
+            }
         }
     }
 }
@@ -297,6 +310,12 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, height);
     }
+    if (isSuitableForElderly_) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            innerLayout.minSize = SizeF(width, 0.0);
+            innerLayout.maxSize.SetWidth(pipeline->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
+        }
+    }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
     return true;
@@ -336,7 +355,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
-    // TODO: need to use theme json to replace this function.
+    // need to use theme json to replace this function.
     // get grid size type based on the screen where the dialog locate
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
@@ -380,6 +399,12 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
     }
+    if (isSuitableForElderly_) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            innerLayout.minSize = SizeF(width, 0.0);
+            innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
+        }
+    }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
 }
@@ -400,31 +425,31 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     int32_t deviceColumns;
     if (deviceType == DeviceType::WATCH) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 3;
+            deviceColumns = 3; // 3: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::PHONE) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 5;
+            deviceColumns = 5; // 5: the number of deviceColumns
         } else {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::CAR) {
         if (type == GridSizeType::SM) {
-            deviceColumns = 4;
+            deviceColumns = 4; // 4: the number of deviceColumns
         } else if (type == GridSizeType::MD) {
-            deviceColumns = 6;
+            deviceColumns = 6; // 6: the number of deviceColumns
         } else {
-            deviceColumns = 8;
+            deviceColumns = 8; // 8: the number of deviceColumns
         }
     } else if (deviceType == DeviceType::TABLET && type == GridSizeType::MD &&
                Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        deviceColumns = 5;
+        deviceColumns = 5; // 5: the number of deviceColumns
     } else {
         deviceColumns = GetDeviceColumn(type);
     }
@@ -461,6 +486,11 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        Dimension offsetX = Dimension(offset.GetX().Value() * (-1));
+        offset.SetX(offsetX);
+    }
     if (width.IsNegative()) {
         width = FULLSCREEN;
     }
@@ -478,7 +508,7 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
         dialogContext->ClipWithRect(rect);
         dialogContext->UpdateClipEdge(true);
     }
-    if (isUIExtensionSubWindow_) {
+    if (isUIExtensionSubWindow_ && expandDisplay_) {
         ClipUIExtensionSubWindowContent(dialog, clipMask);
     }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -486,6 +516,26 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     mouseResponseRegion.emplace_back(width, height, offset);
     gestureHub->SetMouseResponseRegion(mouseResponseRegion);
     gestureHub->SetResponseRegion(mouseResponseRegion);
+}
+
+std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<FrameNode>& dialog)
+{
+    std::optional<DimensionRect> maskRect;
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, maskRect);
+    maskRect = dialogPattern->GetDialogProperties().maskRect;
+    if (!isUIExtensionSubWindow_) {
+        return maskRect;
+    }
+
+    if (expandDisplay_ && hostWindowRect_.GetSize().IsPositive()) {
+        auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
+        maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
+    } else {
+        maskRect = DimensionRect(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT),
+            DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    }
+    return maskRect;
 }
 
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -508,15 +558,12 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
-        std::optional<DimensionRect> maskRect = dialogPattern->GetDialogProperties().maskRect;
-        if (isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive()) {
-            auto offset = DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY()));
-            maskRect = DimensionRect(Dimension(hostWindowRect_.Width()), Dimension(hostWindowRect_.Height()), offset);
-        }
+        std::optional<DimensionRect> maskRect = GetMaskRect(frameNode);
         ProcessMaskRect(maskRect, frameNode, true);
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    dialogChildSize_ = childSize;
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
@@ -536,30 +583,52 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
+    AdjustHeightForKeyboard(layoutWrapper, child);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !child || !resizeFlag_) {
+        return;
+    }
+    auto childConstraint =
+        CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
+    child->Measure(childConstraint);
+    child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
+    auto renderContext = child->GetHostNode()->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    renderContext->UpdateClipEdge(true);
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
     const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId)
 {
-    if (dialogProp->GetShowInSubWindowValue(false)) {
-        std::vector<Rect> rects;
-        Rect rect;
-        if (!dialogProp->GetIsScenceBoardDialog().value_or(false)) {
-            rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
-        } else {
-            rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
-        }
-        if (isUIExtensionSubWindow_ && isModal_) {
+    if (!dialogProp->GetShowInSubWindowValue(false)) {
+        return;
+    }
+
+    std::vector<Rect> rects;
+    Rect rect;
+    if (!dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+        rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+    } else {
+        rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+    }
+    if (isUIExtensionSubWindow_ && isModal_) {
+        if (expandDisplay_) {
             auto isValid = hostWindowRect_.GetSize().IsPositive();
             auto hostOffset = Offset(hostWindowRect_.GetX(), hostWindowRect_.GetY());
             auto hostSize = Size(hostWindowRect_.Width(), hostWindowRect_.Height());
             rect = isValid ? Rect(hostOffset, hostSize) : Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        } else {
+            rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         }
-        rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
     }
+    rects.emplace_back(rect);
+    SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
 }
 
 bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize)
@@ -625,7 +694,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    auto isHostWindowAlign = isUIExtensionSubWindow_ && hostWindowRect_.GetSize().IsPositive();
+    auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
     if (!customSize_ && !IsAlignmentByWholeScreen()) {
         maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
@@ -742,7 +811,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitchLessThanAPITwelve(const SizeF& max
 
 void DialogLayoutAlgorithm::UpdateTouchRegion()
 {
-    // TODO: update touch region is not completed.
+    //update touch region is not completed.
 }
 
 double DialogLayoutAlgorithm::GetPaddingBottom() const
@@ -756,7 +825,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -779,7 +848,16 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childBottom = childOffset.GetY() + childSize.Height();
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        auto limitPos = std::min(childOffset.GetY(),
+            static_cast<float>(safeAreaInsets_.top_.Length() + AVOID_LIMIT_PADDING.ConvertToPx()));
         childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
+            resizeFlag_ = true;
+            dialogChildSize_ = childSize;
+            dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            childOffset.SetY(limitPos);
+        }
     }
     return childOffset;
 }

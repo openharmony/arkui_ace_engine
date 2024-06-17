@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 config("uiservice_manager_public_config") {
@@ -20,18 +19,6 @@ config("uiservice_manager_public_config") {
   include_dirs = [
     "$ace_root/frameworks",
     "include/",
-    "//drivers/peripheral/base",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
-    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
-    "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
-    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "$ability_runtime_innerkits_path/ability_manager/include/",
-    "$ability_runtime_path/interfaces/kits/native/ability/native",
-    "$ability_runtime_services_path/uiservicemgr/include",
-    "//commonlibrary/c_utils/base/include",
-    "//utils/system/safwk/native/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -47,22 +34,22 @@ ohos_shared_library("ui_service_mgr") {
       debug = ace_sanitize_debug
     }
   }
+
   sources = [
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
 
   configs = [
     "$ace_root:ace_config",
     "$ace_root:ace_coverage_config",
-    "//commonlibrary/c_utils/base:utils_config",
   ]
 
   public_configs = [
     ":uiservice_manager_public_config",
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config",
+    "$ace_root/adapter/ohos/services/uiservice:uiservicems_config",
   ]
 
   external_deps = [
@@ -71,6 +58,7 @@ ohos_shared_library("ui_service_mgr") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
+    "window_manager:libwm",
   ]
 
   subsystem_name = ace_engine_subsystem

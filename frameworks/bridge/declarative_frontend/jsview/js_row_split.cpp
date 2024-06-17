@@ -59,7 +59,9 @@ void JSRowSplit::JSBind(BindingTarget globalObj)
     JSClass<JSRowSplit>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSRowSplit>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRowSplit>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRowSplit>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRowSplit>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRowSplit>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRowSplit>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRowSplit>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSRowSplit>::StaticMethod("clip", &JSRowSplit::JsClip);

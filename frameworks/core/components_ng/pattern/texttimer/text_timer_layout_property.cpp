@@ -68,6 +68,10 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
 void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT).c_str(), filter);
     json->PutExtAttr("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str(), filter);

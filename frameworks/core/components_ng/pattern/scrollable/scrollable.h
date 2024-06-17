@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ using CalePredictSnapOffsetCallback =
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using IsReverseCallback = std::function<bool()>;
 
 class FrameNode;
 class PipelineContext;
@@ -124,8 +125,8 @@ public:
         }
     }
 
-    void OnCollectTouchTarget(
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+    void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TargetComponent>& targetComponent, TouchTestResult& responseLinkResult);
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {
@@ -158,6 +159,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
+    void LayoutDirectionEst(double& correctVelocity);
 
     void SetMoved(bool value)
     {
@@ -245,6 +247,11 @@ public:
         return currentVelocity_;
     };
 
+    void SetIsReverseCallback(const IsReverseCallback& isReverseCallback)
+    {
+        isReverseCallback_ = isReverseCallback;
+    }
+
     void OnAnimateStop();
     void ProcessScrollSnapStop();
     void StartSpringMotion(
@@ -285,6 +292,11 @@ public:
     void SetNodeId(int32_t nodeId)
     {
         nodeId_ = nodeId;
+    }
+
+    void SetNodeTag(const std::string& nodeTag)
+    {
+        nodeTag_ = nodeTag;
     }
 
     void ProcessScrollOverCallback(double velocity);
@@ -418,6 +430,11 @@ public:
         maxFlingVelocity_ = max * density;
     }
 
+    double GetMaxFlingVelocity() const
+    {
+        return maxFlingVelocity_;
+    }
+
     void StopFrictionAnimation();
     void StopSpringAnimation();
     void StopSnapAnimation();
@@ -425,6 +442,12 @@ public:
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSpringProperty();
     RefPtr<NodeAnimatablePropertyFloat> GetSnapProperty();
+
+    Axis GetPanDirection() const
+    {
+        CHECK_NULL_RETURN(panRecognizerNG_, Axis::NONE);
+        return panRecognizerNG_->GetAxisDirection();
+    }
 
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
@@ -455,6 +478,7 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+    IsReverseCallback isReverseCallback_;
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
@@ -479,7 +503,10 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    // The accessibilityId of UINode
     int32_t nodeId_ = 0;
+    // The tag of UINode
+    std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
     static std::optional<double> sFriction_;
     static std::optional<double> sVelocityScale_;

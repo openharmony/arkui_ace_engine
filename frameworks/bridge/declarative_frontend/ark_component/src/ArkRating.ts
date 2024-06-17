@@ -63,6 +63,17 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
   }
 }
 
+class RatingContentModifier extends ModifierWithKey<ContentModifier<RatingConfiguration>> {
+  constructor(value: ContentModifier<RatingConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ratingContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let ratingComponent = component as ArkRatingComponent;
+    ratingComponent.setContentModifier(this.value);
+  }
+}
+
 class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   ratingNode: BuilderNode<[RatingConfiguration]> | null = null;
@@ -94,6 +105,10 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   }
   onChange(callback: (value: number) => void): this {
     throw new Error('Method not implemented.');
+  }
+  contentModifier(value: ContentModifier<RatingConfiguration>): this {
+    modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);
+    return this;
   }
   setContentModifier(modifier: ContentModifier<RatingConfiguration>): this {
     if (modifier === undefined || modifier === null) {

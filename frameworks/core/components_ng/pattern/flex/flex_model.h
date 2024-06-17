@@ -42,7 +42,7 @@ constexpr int32_t MAIN_ALIGN_MAX_VALUE = 8;
 constexpr int32_t CROSS_ALIGN_MAX_VALUE = 5;
 constexpr int32_t DIRECTION_MAX_VALUE = 3;
 
-class ACE_EXPORT FlexModel {
+class ACE_FORCE_EXPORT FlexModel {
 public:
     static FlexModel* GetInstance();
     virtual ~FlexModel() = default;

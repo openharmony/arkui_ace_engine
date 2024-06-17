@@ -89,6 +89,7 @@ void RosenMediaPlayer::CreateMediaPlayer()
 
 void RosenMediaPlayer::ResetMediaPlayer()
 {
+    CHECK_NULL_VOID(mediaPlayer_);
     (void)mediaPlayer_->Reset();
 }
 

@@ -25,17 +25,20 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
-                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto optionNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(optionNode);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    const auto& selectTheme = optionPattern->GetSelectTheme();
+    CHECK_NULL_VOID(selectTheme);
+    horInterval_ = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+                   static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
@@ -48,9 +51,10 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxChildWidth);
     // set self size based on childNode size;
-    auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
+    auto minOptionHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
+    UpdateIconMargin(layoutWrapper);
     MeasureRow(child, childConstraint);
 
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
@@ -63,17 +67,13 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
     
-    auto optionNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(optionNode);
-    auto optionPattern = optionNode->GetPattern<OptionPattern>();
-    CHECK_NULL_VOID(optionPattern);
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
     }
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
-        float dividerWidth = static_cast<float>(theme->GetDefaultDividerWidth().ConvertToPx());
+        float dividerWidth = static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
         SizeF idealSizePaste(idealSize.Width() - dividerWidth, idealSize.Height() - dividerWidth);
         childConstraint.selfIdealSize.SetSize(idealSizePaste);
         auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
@@ -88,12 +88,12 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
     auto optionSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto optionHeight = optionSize.Height();
-
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
         child->GetGeometryNode()->SetMarginFrameOffset(
@@ -101,8 +101,14 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         return;
     }
+
+    float horInterval = horInterval_;
+    if (layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        horInterval = optionSize.Width() - childSize.Width() - horInterval_;
+    }
     child->GetGeometryNode()->SetMarginFrameOffset(
-        OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+        OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();
 }
 
@@ -145,5 +151,37 @@ void OptionLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const L
         roWHeight = std::max(roWHeight, childSize.Height());
     }
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
+}
+
+void OptionLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
+{
+    auto optionNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(optionNode);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    auto direction = layoutProps->GetNonAutoLayoutDirection();
+    bool isRtl = direction == TextDirection::RTL;
+    const auto& selectTheme = optionPattern->GetSelectTheme();
+    CHECK_NULL_VOID(selectTheme);
+    auto calcLength = CalcLength(selectTheme->GetIconContentPadding());
+    MarginProperty margin;
+    if (isRtl) {
+        margin.left = calcLength;
+        margin.right = CalcLength();
+    } else {
+        margin.left = CalcLength();
+        margin.right = calcLength;
+    }
+    Alignment align = isRtl ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
+    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    for (auto iconChild : child->GetAllChildrenWithBuild()) {
+        if ((iconChild->GetHostTag() == V2::IMAGE_ETS_TAG) || (iconChild->GetHostTag() == V2::SYMBOL_ETS_TAG)) {
+            auto iconProps = iconChild->GetLayoutProperty();
+            iconProps->UpdateAlignment(align);
+            iconProps->UpdateMargin(margin);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

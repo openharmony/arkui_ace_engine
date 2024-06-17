@@ -104,6 +104,8 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContextSafely();
 
+    static RefPtr<PipelineBase> GetCurrentContextSafelyWithCheck();
+
     static RefPtr<PipelineBase> GetMainPipelineContext();
 
     static RefPtr<ThemeManager> CurrentThemeManager();
@@ -229,7 +231,30 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density) = 0;
+    virtual void OnSurfaceDensityChanged(double density)
+    {
+        for (auto&& [id, callback] : densityChangedCallbacks_) {
+            if (callback) {
+                callback(density);
+            }
+        }
+    }
+
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+    {
+        if (callback) {
+            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
+            return densityChangeCallbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterDensityChangedCallback(int32_t callbackId)
+    {
+        densityChangedCallbacks_.erase(callbackId);
+    }
+
+    virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
     virtual void OnSystemBarHeightChanged(double statusBar, double navigationBar) = 0;
 
@@ -277,7 +302,7 @@ public:
         appBgColor_ = color;
     }
 
-    virtual void ChangeDarkModeBrightness(bool isFocus) {}
+    virtual void ChangeDarkModeBrightness() {}
 
     void SetFormRenderingMode(int8_t renderMode)
     {
@@ -777,7 +802,7 @@ public:
     void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload(const ConfigurationChange& configurationChange) {}
+    virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -819,12 +844,22 @@ public:
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
-        virtualKeyBoardCallback_.push_back(std::move(listener));
+        static std::atomic<int32_t> pseudoId(-1); // -1 will not be conflict with real node ids.
+        auto nodeId = pseudoId.fetch_sub(1, std::memory_order_relaxed);
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void SetVirtualKeyBoardCallback(int32_t nodeId, virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.emplace(std::make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveVirtualKeyBoardCallback(int32_t nodeId)
+    {
+        virtualKeyBoardCallback_.erase(nodeId);
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
         bool isConsume = false;
-        for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+        for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
                 isConsume = true;
             }
@@ -833,14 +868,18 @@ public:
     }
 
     using configChangedCallback = std::function<void()>;
-    void SetConfigChangedCallback(configChangedCallback&& listener)
+    void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
     {
-        configChangedCallback_.push_back(std::move(listener));
+        configChangedCallback_.emplace(make_pair(nodeId, std::move(listener)));
+    }
+    void RemoveConfigChangedCallback(int32_t nodeId)
+    {
+        configChangedCallback_.erase(nodeId);
     }
 
     void NotifyConfigurationChange()
     {
-        for (const auto& callback : configChangedCallback_) {
+        for (const auto& [nodeId, callback] : configChangedCallback_) {
             if (callback) {
                 callback();
             }
@@ -920,7 +959,9 @@ public:
         gsVsyncCallback_ = std::move(callback);
     }
 
-    virtual void FlushUITasks() = 0;
+    virtual void FlushUITasks(bool triggeredByImplicitAnimation = false) = 0;
+
+    virtual void FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
     virtual void FlushPipelineImmediately() = 0;
 
@@ -940,6 +981,11 @@ public:
     void SetKeyboardAnimationConfig(const KeyboardAnimationConfig& config)
     {
         keyboardAnimationConfig_ = config;
+    }
+
+    KeyboardAnimationConfig GetKeyboardAnimationConfig() const
+    {
+        return keyboardAnimationConfig_;
     }
 
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
@@ -1061,6 +1107,36 @@ public:
         return halfLeading_;
     }
 
+    void SetHasPreviewTextOption(bool hasOption)
+    {
+        hasPreviewTextOption_ = hasOption;
+    }
+
+    bool GetHasPreviewTextOption() const
+    {
+        return hasPreviewTextOption_;
+    }
+
+    void SetSupportPreviewText(bool changeSupported)
+    {
+        hasSupportedPreviewText_ = !changeSupported;
+    }
+
+    bool GetSupportPreviewText() const
+    {
+        return hasSupportedPreviewText_;
+    }
+
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout() const
+    {
+        return useCutout_;
+    }
+
     bool GetOnFoucs() const
     {
         return onFocus_;
@@ -1151,20 +1227,33 @@ public:
         return false;
     }
 
-    void setProfilerStatus(bool stateProfilerStatus)
-    {
-        stateProfilerStatus_ = stateProfilerStatus;
-    }
-
-    bool getProfilerStatus() const
-    {
-        return stateProfilerStatus_;
-    }
-
     uint32_t GetFrameCount() const
     {
         return frameCount_;
     }
+
+    virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+    virtual void CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+    virtual void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+    virtual void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+    virtual float GetPageAvoidOffset()
+    {
+        return 0.0f;
+    }
+
+    virtual bool IsDensityChanged() const = 0;
+
+    virtual bool GetOnShow() const = 0;
+
+    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1202,8 +1291,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
 
-    std::list<configChangedCallback> configChangedCallback_;
-    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::map<int32_t, configChangedCallback> configChangedCallback_;
+    std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
     std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
@@ -1324,6 +1413,9 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    bool hasSupportedPreviewText_ = true;
+    bool hasPreviewTextOption_ = false;
+    bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
@@ -1332,7 +1424,9 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool stateProfilerStatus_ = false;
+
+    int32_t densityChangeCallbackId_ = 0;
+    std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

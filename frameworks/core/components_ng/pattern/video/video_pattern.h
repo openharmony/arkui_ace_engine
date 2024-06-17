@@ -238,6 +238,12 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
+    bool GetAnalyzerState();
+    void UpdateAnalyzerState(bool isCreated)
+    {
+        isAnalyzerCreated_ = isCreated;
+    }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -260,10 +266,12 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
+    void OnWindowHide() override;
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -356,6 +364,8 @@ private:
 
     bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
+    bool isAnalyzerCreated_ = false;
+    bool isPaused_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

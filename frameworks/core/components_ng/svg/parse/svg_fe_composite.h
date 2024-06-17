@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_FE_COMPOSITE_H
 
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_fe.h"
 

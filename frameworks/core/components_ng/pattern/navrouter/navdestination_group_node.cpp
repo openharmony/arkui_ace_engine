@@ -57,7 +57,8 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -131,4 +132,13 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
     return nullptr;
 }
 
+void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
+{
+    mode_ = mode;
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    context->SetMode(mode);
+}
 } // namespace OHOS::Ace::NG

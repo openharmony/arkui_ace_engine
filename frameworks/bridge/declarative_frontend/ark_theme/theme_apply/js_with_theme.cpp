@@ -58,6 +58,10 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     colors.SetColors(jsColorsArray);
 
     JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
+    // keep info about WithTheme containers usage
+    if (themeScopeId > 0) {
+        JSThemeScope::jsThemeScopeEnabled = true;
+    }
 }
 
 } // namespace OHOS::Ace::Framework

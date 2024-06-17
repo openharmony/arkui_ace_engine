@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT CounterModel {
+class ACE_FORCE_EXPORT CounterModel {
 public:
     static CounterModel* GetInstance();
     virtual ~CounterModel() = default;

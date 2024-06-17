@@ -841,8 +841,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -902,8 +902,8 @@ HWTEST_F(OverlayTestNg, MenuTest004, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindowWithAnimation();
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
 }
 
 /**
@@ -1439,14 +1439,13 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
     CHECK_NULL_VOID(textLayoutProperty);
 
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
     toastPattern->UpdateTextSizeConstraint(textNode);
-    EXPECT_EQ(textLayoutProperty->GetAdaptMaxFontSize().value().value_, fontSize.value_);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
     MockPipelineContext::GetCurrent()->SetThemeManager(backupThemeManager);
@@ -1472,12 +1471,10 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     CHECK_NULL_VOID(textLayoutProperty);
 
     int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
-    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

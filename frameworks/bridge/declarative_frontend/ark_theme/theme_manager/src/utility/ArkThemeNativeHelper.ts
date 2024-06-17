@@ -67,9 +67,9 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveActive,
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
-        ]
+        ];
 
         // @ts-ignore
-        WithTheme.sendThemeToNative(colorsArray, elmtId)
+        WithTheme.sendThemeToNative(colorsArray, elmtId);
     }
 }

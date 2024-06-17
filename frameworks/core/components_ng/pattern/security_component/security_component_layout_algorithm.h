@@ -39,7 +39,7 @@ private:
         OffsetF& offset);
     void MeasureButton(LayoutWrapper* layoutWrapper,
         RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void UpdateHorizontalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
+    void UpdateHorizontalOffset(LayoutWrapper* layoutWrapper, OffsetF& offsetIcon, OffsetF& offsetText);
     void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
     void InitPadding(RefPtr<SecurityComponentLayoutProperty>& property);
     double ShrinkWidth(double diff);
@@ -51,6 +51,7 @@ private:
     void MeasureIntegralSize();
     void UpdateCircleButtonConstraint();
     void FillBlank();
+    TextDirection GetTextDirection(LayoutWrapper* layoutWrapper);
 
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;

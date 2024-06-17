@@ -29,7 +29,6 @@
 #endif
 
 namespace OHOS::Ace::Framework {
-
 void CanvasRenderingContext2DModelImpl::SetPattern(RefPtr<AceType> pattern)
 {
     pattern_ = AceType::DynamicCast<CanvasTaskPool>(pattern);
@@ -82,10 +81,10 @@ std::vector<double> CanvasRenderingContext2DModelImpl::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void CanvasRenderingContext2DModelImpl::SetFillGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelImpl::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillGradient(gradient);
+    pattern_->UpdateFillGradient(*gradient);
 }
 
 void CanvasRenderingContext2DModelImpl::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -101,10 +100,10 @@ void CanvasRenderingContext2DModelImpl::SetFillColor(const Color& color, bool co
     }
 }
 
-void CanvasRenderingContext2DModelImpl::SetStrokeGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelImpl::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeGradient(gradient);
+    pattern_->UpdateStrokeGradient(*gradient);
 }
 
 void CanvasRenderingContext2DModelImpl::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -495,7 +494,6 @@ void CanvasRenderingContext2DModelImpl::GetImageDataModel(const ImageSize& image
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
-
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
             buffer[4 * idx] = data->data[idx].GetRed();

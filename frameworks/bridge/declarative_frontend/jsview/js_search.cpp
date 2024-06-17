@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 
 namespace OHOS::Ace {
 
@@ -65,6 +66,7 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -99,7 +101,9 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("enableKeyboardOnFocus", &JSSearch::SetEnableKeyboardOnFocus);
+    JSClass<JSSearch>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSearch>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
@@ -112,6 +116,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
+    JSClass<JSSearch>::StaticMethod("selectionMenuOptions", &JSSearch::SelectionMenuOptions);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -130,6 +135,11 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("inputFilter", &JSSearch::SetInputFilter);
     JSClass<JSSearch>::StaticMethod("onEditChange", &JSSearch::SetOnEditChange);
     JSClass<JSSearch>::StaticMethod("textIndent", &JSSearch::SetTextIndent);
+    JSClass<JSSearch>::StaticMethod("onWillInsert", &JSSearch::OnWillInsertValue);
+    JSClass<JSSearch>::StaticMethod("onDidInsert", &JSSearch::OnDidInsertValue);
+    JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
+    JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
+    JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -152,10 +162,10 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
+
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
         return;
     }
-
     std::string fontFeatureSettings = info[0]->ToString();
     SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
@@ -199,7 +209,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
             src = icon;
         }
         auto controllerObj = param->GetProperty("controller");
-        if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
@@ -212,6 +222,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
+    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -270,6 +281,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    // set font color
+    Color fontColor = theme->GetSearchButtonTextColor();
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -284,16 +297,19 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
-        // set font color
-        Color fontColor;
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            fontColor = theme->GetSearchButtonTextColor();
+            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+            }
+        } else {
+                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
-        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
+            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        }
     }
 }
 
@@ -368,9 +384,12 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetCancelButtonStyle(cancelButtonStyle);
 
     auto iconProp = param->GetProperty("icon");
+    Color iconColor = theme->GetSearchIconColor();
     if (iconProp->IsUndefined() || iconProp->IsNull()) {
         SearchModel::GetInstance()->SetCancelIconSize(theme->GetIconHeight());
-        SearchModel::GetInstance()->SetCancelIconColor(theme->GetSearchIconColor());
+        if (!JSSeacrhTheme::ObtainCancelIconColor(iconColor)) {
+            SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        }
         SearchModel::GetInstance()->SetRightIconSrcPath("");
     } else {
         SetIconStyle(info);
@@ -573,7 +592,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     auto themeFontWeight = theme->GetFontWeight();
-    Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
+    Font font {.fontWeight = themeFontWeight, .fontSize = themeFontSize, .fontStyle = Ace::FontStyle::NORMAL};
     if (info.Length() < 1 || !info[0]->IsObject()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             SearchModel::GetInstance()->SetTextFont(font);
@@ -626,29 +645,7 @@ void JSSearch::SetTextAlign(int32_t value)
 void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    RefPtr<Decoration> decoration = nullptr;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth);
-    }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
-    auto valueRadius = object->GetProperty("radius");
-    if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
-    }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
-    }
     SearchModel::GetInstance()->SetBackBorder();
-    info.ReturnSelf();
 }
 
 void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
@@ -694,11 +691,27 @@ void JSSearch::OnSubmit(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
+JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const TextRange& textRange)
+{
+    JSRef<JSObject> range = JSRef<JSObject>::New();
+    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
+    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
+    return JSRef<JSVal>::Cast(range);
+}
+
 void JSSearch::OnChange(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnChange(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const std::string& val, TextRange& range) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onChange");
+        func->Execute(val, range);
+    };
+    SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSSearch::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -783,6 +796,87 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     SearchModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+JSRef<JSVal> JSSearch::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
+    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSSearch::OnWillInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(insertValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillInsertValueEvent(std::move(callback));
+}
+
+JSRef<JSVal> JSSearch::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo)
+{
+    JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
+    aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
+    aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
+    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    return JSRef<JSVal>::Cast(aboutToIMEInputObj);
+}
+
+void JSSearch::OnDidInsertValue(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc = AceType::MakeRefPtr<JsEventFunction<InsertValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsAboutToIMEInputObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const InsertValueInfo& insertValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(insertValue);
+    };
+    SearchModel::GetInstance()->SetOnDidInsertValueEvent(std::move(callback));
+}
+
+void JSSearch::OnWillDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        auto ret = func->ExecuteWithValue(deleteValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillDeleteEvent(std::move(callback));
+}
+
+void JSSearch::OnDidDelete(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsAboutToIMEInputFunc =
+        AceType::MakeRefPtr<JsEventFunction<DeleteValueInfo, 1>>(JSRef<JSFunc>::Cast(jsValue), CreateJsDeleteToIMEObj);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToIMEInputFunc)](
+                        const DeleteValueInfo& deleteValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->ExecuteWithValue(deleteValue);
+    };
+    SearchModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
 }
 
 void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
@@ -910,6 +1004,8 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         SearchModel::GetInstance()->SetTextDecoration(textDecoration);
         SearchModel::GetInstance()->SetTextDecorationColor(result);
@@ -979,5 +1075,24 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     SearchModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSSearch::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+}
+
+void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        SearchModel::GetInstance()->SetEnablePreviewText(true);
+        return;
+    }
+    SearchModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

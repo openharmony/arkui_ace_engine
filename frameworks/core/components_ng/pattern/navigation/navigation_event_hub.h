@@ -83,6 +83,8 @@ public:
         }
     }
 
+    void FireOnAppear() override;
+
 private:
     OnTitleModeChangeEvent onTitleModeChangeEvent_;
     OnNavBarStateChangeEvent onNavBarStateChangeEvent_;

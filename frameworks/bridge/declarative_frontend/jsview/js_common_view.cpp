@@ -45,7 +45,11 @@ CommonViewModel* CommonViewModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSCommonView::Create(const JSCallbackInfo& info)
 {
-    CommonViewModel::GetInstance()->Create();
+    bool isLayoutNode = false;
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], isLayoutNode);
+    }
+    CommonViewModel::GetInstance()->Create(isLayoutNode);
 }
 
 void JSCommonView::JSBind(BindingTarget globalObj)
@@ -53,7 +57,9 @@ void JSCommonView::JSBind(BindingTarget globalObj)
     JSClass<JSCommonView>::Declare("__Common__");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSCommonView>::StaticMethod("create", &JSCommonView::Create, opt);
+    JSClass<JSCommonView>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCommonView>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCommonView>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCommonView>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCommonView>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCommonView>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

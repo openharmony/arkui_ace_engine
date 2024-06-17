@@ -175,6 +175,11 @@ public:
         return lifecycleIndex_;
     }
 
+    OHOS::Ace::NG::NavPathList& GetPathList()
+    {
+        return navPathList_;
+    }
+
 private:
     int8_t lifecycleIndex_ = 0;
     std::function<void()> onStateChangedCallback_;

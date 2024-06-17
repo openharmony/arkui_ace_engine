@@ -48,9 +48,6 @@ class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
-    static void CreateCustomMenu(const std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, MenuParam menuParam);
-
     void SetWidth(const CalcDimension& width) override
     {
         if (width.Unit() == DimensionUnit::CALC) {
@@ -181,6 +178,26 @@ public:
         ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
     }
 
+    void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) override
+    {
+        ViewAbstract::SetVisualEffect(visualEffect);
+    }
+
+    void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override
+    {
+        ViewAbstract::SetBackgroundFilter(backgroundFilter);
+    }
+
+    void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override
+    {
+        ViewAbstract::SetForegroundFilter(foregroundFilter);
+    }
+
+    void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override
+    {
+        ViewAbstract::SetCompositingFilter(compositingFilter);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -309,6 +326,40 @@ public:
         borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
         borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(borderStyles);
+    }
+
+    void SetDashGap(const Dimension& value) override
+    {
+        ViewAbstract::SetDashGap(value);
+    }
+
+    void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashGap;
+        dashGap.leftDimen = left;
+        dashGap.rightDimen = right;
+        dashGap.topDimen = top;
+        dashGap.bottomDimen = bottom;
+        dashGap.multiValued = true;
+        ViewAbstract::SetDashGap(dashGap);
+    }
+
+    void SetDashWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetDashWidth(value);
+    }
+
+    void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashWidth;
+        dashWidth.leftDimen = left;
+        dashWidth.rightDimen = right;
+        dashWidth.topDimen = top;
+        dashWidth.bottomDimen = bottom;
+        dashWidth.multiValued = true;
+        ViewAbstract::SetDashWidth(dashWidth);
     }
 
     void SetOuterBorderRadius(const Dimension& value) override
@@ -539,11 +590,13 @@ public:
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) override
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) override
     {
         if (type == NG::OverlayType::BUILDER) {
             ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
+        } else if (type == NG::OverlayType::COMPONENT_CONTENT) {
+            ViewAbstract::SetOverlayComponentContent(contentNode, align, offsetX, offsetY);
         } else {
             NG::OverlayOptions overlay;
             overlay.content = text;
@@ -674,16 +727,16 @@ public:
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
-    
+
     void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override
     {
         ViewAbstract::SetBgDynamicBrightness(brightnessOption);
     }
 
     void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override
-     {
+    {
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
-     }
+    }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
@@ -794,6 +847,17 @@ public:
         ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
     }
 
+    void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {
+        ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
+    }
+
+    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    {
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    }
+
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
     {
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
@@ -828,9 +892,19 @@ public:
         ViewAbstract::SetOnAppear(std::move(onAppearCallback));
     }
 
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override
+    {
+        ViewAbstract::SetOnAttach(std::move(onAttachCallback));
+    }
+
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override
     {
         ViewAbstract::SetOnDisappear(std::move(onDisAppearCallback));
+    }
+
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override
+    {
+        ViewAbstract::SetOnDetach(std::move(onDetachCallback));
     }
 
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override {}
@@ -1000,6 +1074,11 @@ public:
         ViewAbstract::SetGroupDefaultFocus(isSet);
     }
 
+    void SetFocusBoxStyle(const NG::FocusBoxStyle& style) override
+    {
+        ViewAbstract::SetFocusBoxStyle(style);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);
@@ -1112,12 +1191,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-    
+
     void SetForegroundEffect(float radius) override
     {
         ViewAbstract::SetForegroundEffect(radius);
     }
-    
+
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1158,6 +1237,16 @@ public:
     void DisableOnDisAppear() override
     {
         ViewAbstract::DisableOnDisAppear();
+    }
+
+    void DisableOnAttach() override
+    {
+        ViewAbstract::DisableOnAttach();
+    }
+
+    void DisableOnDetach() override
+    {
+        ViewAbstract::DisableOnDetach();
     }
 
     void DisableOnAreaChange() override

@@ -17,6 +17,10 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
+import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node';
+import common from '@ohos.app.ability.common';
+import window from '@ohos.window';
 
 export enum EditableLeftIconType {
   Back,
@@ -26,6 +30,7 @@ export enum EditableLeftIconType {
 export declare interface EditableTitleBarMenuItem {
   value: ResourceStr;
   isEnabled: boolean;
+  label?: ResourceStr;
   action?: () => void;
 }
 
@@ -50,6 +55,36 @@ const PUBLIC_OK = $r('sys.media.ohos_ic_public_ok');
 
 const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
 
+const DEFAULT_TITLE_BAR_HEIGHT = 56;
+const DEFAULT_TITLE_PADDING = 2;
+const MAX_LINE_ONE = 1;
+const MAX_LINES_TWO = 2;
+const MAX_MAIN_TITLE_PERCENT = 0.65;
+const MAX_SUB_TITLE_PERCENT = 0.35;
+const DEFAULT_BREAKPOINT_S = 600;
+const DEFAULT_BREAKPOINT_M = 840;
+const MIN_SUBTITLE_SIZE = '10.0vp';
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+const TITLE_VP: number = 20;
+const SUBTITLE_VP: number = 14;
+const TITLE_F: number = getNumberByResource('titlebar_title_tertiary_size');
+const SUBTITLE_F: number = getNumberByResource('titlebar_subheader_size');
+const TITLE_F_VP: string = (TITLE_F > 0 ? TITLE_F : TITLE_VP) + 'vp';
+const SUBTITLE_F_VP: string = (SUBTITLE_F > 0 ? SUBTITLE_F : SUBTITLE_VP) + 'vp';
+
+class EditableTitleBarTheme {
+  public iconColor: ResourceColor = $r('sys.color.titlebar_icon_color');
+  public iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
+  public iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
+  public iconBackgroundHoverColor: ResourceColor = $r('sys.color.titlebar_icon_background_hover_color');
+  public iconBackgroundFocusOutlineColor: ResourceColor = $r('sys.color.titlebar_icon_background_focus_outline_color');
+  public titleColor: ResourceColor = $r('sys.color.titlebar_title_tertiary_color');
+  public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
+}
+
 @Component
 export struct EditableTitleBar {
   leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
@@ -64,19 +99,52 @@ export struct EditableTitleBar {
   };
   onSave?: () => void;
   onCancel?: () => void;
-  @State titleMaxWidth: number = 0;
+  @Prop contentMargin?: LocalizedMargin;
+  @State titleBarMargin: LocalizedMargin = {
+    start: LengthMetrics.vp(0),
+    end: LengthMetrics.vp(0),
+  }
   @State backActive: boolean = false;
-  static maxCountOfExtraItems = 3;
-  static maxOtherCountOfExtraItems = 2;
-  static countOfImageItem = 0;
-  static countOfSaveIcon = 0;
-  static readonly commonOne = 1;
-  static readonly commonZero = 0;
-  static readonly noneColor = '#00000000';
-  private static readonly totalHeight = getNumberByResource('titlebar_default_height');
-  private static readonly leftMargin = getNumberByResource('titlebar_title_margin_left');
-  private static readonly rightMargin = getNumberByResource('titlebar_title_margin_right');
-  private static readonly titlePadding = getNumberByResource('titlebar_icon_background_space_horizontal');
+  @State fontSize: number = 1;
+  constraintWidth: number = 0;
+  public static readonly maxCountOfExtraItems = 3;
+  public static readonly maxOtherCountOfExtraItems = 2;
+  public static readonly commonZero = 0;
+  public static readonly noneColor = '#00000000';
+  public static readonly defaultHeight: number = getNumberByResource('titlebar_default_height');
+  public static readonly defaultMarginLevel1: number = getNumberByResource('margin_level1');
+  public static readonly defaultMarginLevel2: number = getNumberByResource('margin_level2');
+  public static readonly defaultMarginLevel3: number = getNumberByResource('margin_level3');
+  public static readonly defaultTitlePadding: number = getNumberByResource('titlebar_icon_background_space_horizontal');
+  private static readonly defaultBreakpointS: number = getNumberByResource('breakpoint_horizontal_s');
+  private static readonly defaultBreakpointM: number = getNumberByResource('breakpoint_horizontal_m');
+  public static readonly totalHeight: number =
+    EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ? DEFAULT_TITLE_BAR_HEIGHT :
+    EditableTitleBar.defaultHeight;
+  static readonly titlePadding: number =
+    EditableTitleBar.defaultTitlePadding === EditableTitleBar.commonZero ?
+      DEFAULT_TITLE_PADDING : EditableTitleBar.defaultTitlePadding;
+  private static readonly maxMainTitleHeight =
+    (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_MAIN_TITLE_PERCENT;
+  private static readonly maxSubTitleHeight =
+    (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_SUB_TITLE_PERCENT;
+  private static readonly breakpointS =
+    EditableTitleBar.defaultBreakpointS === EditableTitleBar.commonZero ? DEFAULT_BREAKPOINT_S :
+    EditableTitleBar.defaultBreakpointS;
+  private static readonly breakpointM =
+    EditableTitleBar.defaultBreakpointM === EditableTitleBar.commonZero ? DEFAULT_BREAKPOINT_M :
+    EditableTitleBar.defaultBreakpointM;
+  @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
+
+  onWillApplyTheme(theme: Theme): void {
+    this.editableTitleBarTheme.iconColor = theme.colors.iconPrimary;
+    this.editableTitleBarTheme.titleColor = theme.colors.fontPrimary;
+    this.editableTitleBarTheme.subTitleColor = theme.colors.fontSecondary;
+    this.editableTitleBarTheme.iconBackgroundColor = theme.colors.compBackgroundTertiary;
+    this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
+    this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
+    this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
+  }
 
   build() {
     Flex({
@@ -84,142 +152,170 @@ export struct EditableTitleBar {
       alignItems: ItemAlign.Stretch,
     }) {
       Row() {
-        if (this.leftIconStyle === EditableLeftIconType.Back) {
-          Navigator()
-            .active(this.backActive)
-
-          ImageMenuItem({
-            item: {
-              value: PUBLIC_BACK,
-              isEnabled: true,
-              action: () => this.onCancel ? this.onCancel() : this.backActive = true,
-            },
-            attribute: ItemType.LeftIcon,
-          })
-        } else {
-          ImageMenuItem({
-            item: {
-              value: PUBLIC_CANCEL,
-              isEnabled: true,
-              action: () => this.onCancel && this.onCancel(),
-            },
-            attribute: ItemType.LeftIcon,
-          })
+        Row() {
+          this.leftIconLayout();
         }
-        if (this.imageItem !== undefined) {
-          ImageMenuItem({
-            item: this.imageItem,
-            attribute: ItemType.Image,
-          })
-        }
+        .flexShrink(0)
 
-        Column() {
+        if (this.imageItem) {
           Row() {
-            Text(this.title)
-              .fontSize($r('sys.float.titlebar_title_tertiary_size'))
-              .fontColor($r('sys.color.titlebar_title_tertiary_color'))
-              .maxLines(1)
-              .fontWeight(FontWeight.Bold)
-              .textAlign(TextAlign.Start)
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .width(this.titleMaxWidth)
+            this.imageItemLayout();
           }
-          .justifyContent(FlexAlign.Start)
-
-          if (this.subtitle) {
-            Row() {
-              Text(this.subtitle)
-                .fontSize($r('sys.float.titlebar_subheader_size'))
-                .fontColor($r('sys.color.titlebar_subheader_color'))
-                .maxLines(1)
-                .fontWeight(FontWeight.Regular)
-                .textAlign(TextAlign.Start)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .width(this.titleMaxWidth)
-            }
-            .margin({
-              top: $r('sys.float.padding_level1'),
-            })
-            .justifyContent(FlexAlign.Start)
-          }
-
+          .flexShrink(0)
         }
-        .justifyContent(FlexAlign.Start)
-        .padding({
-          top: $r('sys.float.titlebar_padding_top'),
-          bottom: $r('sys.float.titlebar_padding_bottom'),
-        })
-        .margin({
-          left: $r('sys.float.titlebar_icon_background_space_horizontal'),
-        })
-        .alignItems(HorizontalAlign.Start)
-        .constraintSize({ maxWidth: this.titleMaxWidth })
 
-        EditableTitleBarMenuSection({
-          menuItems: this.menuItems,
-          onSave: this.onSave,
-          isSaveEnabled: this.isSaveIconRequired,
-        })
+        Row() {
+          this.titleLayout();
+        }
+        .width('100%')
+        .flexShrink(1)
+
+        Row() {
+          this.rightMenuItemsLayout();
+        }
+        .flexShrink(0)
       }
-      .constraintSize({
-        minHeight: EditableTitleBar.totalHeight,
+      .width('100%')
+      .margin(this.contentMargin ?? this.titleBarMargin)
+      .height(EditableTitleBar.totalHeight)
+    }
+    .backgroundColor(this.options.backgroundColor ?? EditableTitleBar.noneColor)
+    .backgroundBlurStyle(
+      this.options.backgroundBlurStyle ?? BlurStyle.NONE)
+    .expandSafeArea(
+      this.options.safeAreaTypes,
+      this.options.safeAreaEdges,
+    )
+  }
+
+  @Builder
+  leftIconLayout(): void {
+    if (this.leftIconStyle === EditableLeftIconType.Back) {
+      Navigator()
+        .active(this.backActive)
+
+      ImageMenuItem({
+        item: {
+          value: PUBLIC_BACK,
+          isEnabled: true,
+          action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+        },
+        fontSize: this.fontSize,
+        attribute: ItemType.LeftIcon,
       })
-      .margin({
-        left: EditableTitleBar.leftMargin,
-        right: EditableTitleBar.rightMargin,
+    } else {
+      ImageMenuItem({
+        item: {
+          value: PUBLIC_CANCEL,
+          isEnabled: true,
+          action: () => this.onCancel && this.onCancel(),
+        },
+        fontSize: this.fontSize,
+        attribute: ItemType.LeftIcon,
       })
     }
-    .width('100%')
-    .backgroundColor(this.options.backgroundColor ? this.options.backgroundColor :
-      EditableTitleBar.noneColor)
-    .backgroundBlurStyle(
-      this.options.backgroundBlurStyle ? this.options.backgroundBlurStyle : BlurStyle.NONE)
-    .expandSafeArea(
-      this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM],
-      this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP])
-    .onAreaChange((_oldValue: Area, newValue: Area) => {
-      let maxCountOfExtraItems = EditableTitleBar.commonZero;
-      if (this.isSaveIconRequired) {
-        maxCountOfExtraItems = EditableTitleBar.maxOtherCountOfExtraItems;
-        EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonOne;
-      } else {
-        maxCountOfExtraItems = EditableTitleBar.maxCountOfExtraItems;
-        EditableTitleBar.countOfSaveIcon = EditableTitleBar.commonZero;
+  }
+
+  @Builder
+  imageItemLayout(): void {
+    ImageMenuItem({
+      item: this.imageItem,
+      attribute: ItemType.Image,
+    })
+  }
+
+  @Builder
+  titleLayout(): void {
+    Column() {
+      Row() {
+        Text(this.title)
+          .maxFontSize(TITLE_F_VP)
+          .minFontSize(SUBTITLE_F_VP)
+          .fontColor(this.editableTitleBarTheme.titleColor)
+          .maxLines(this.subtitle ? MAX_LINE_ONE : MAX_LINES_TWO)
+          .fontWeight(FontWeight.Bold)
+          .textAlign(TextAlign.Start)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .heightAdaptivePolicy(this.subtitle ?
+          TextHeightAdaptivePolicy.MAX_LINES_FIRST : TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .constraintSize({
+            maxHeight: this.subtitle ? EditableTitleBar.maxMainTitleHeight : EditableTitleBar.totalHeight,
+          })
       }
-      if (this.imageItem) {
-        EditableTitleBar.countOfImageItem = EditableTitleBar.commonOne;
-      } else {
-        EditableTitleBar.countOfImageItem = EditableTitleBar.commonZero;
+      .justifyContent(FlexAlign.Start)
+
+      if (this.subtitle) {
+        Row() {
+          Text(this.subtitle)
+            .maxFontSize(SUBTITLE_F_VP)
+            .minFontSize(MIN_SUBTITLE_SIZE)
+            .fontColor(this.editableTitleBarTheme.subTitleColor)
+            .maxLines(MAX_LINE_ONE)
+            .fontWeight(FontWeight.Regular)
+            .textAlign(TextAlign.Start)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
+            .constraintSize({
+              maxHeight: this.title ? EditableTitleBar.maxSubTitleHeight : EditableTitleBar.totalHeight,
+            })
+        }
+        .margin({
+          top: $r('sys.float.padding_level1'),
+        })
+        .justifyContent(FlexAlign.Start)
       }
-      let nValue = Number(newValue.width);
-      nValue = nValue - EditableTitleBar.leftMargin -
-        EditableTitleBar.rightMargin - EditableTitleBar.titlePadding;
-      nValue = nValue - ImageMenuItem.imageHotZoneWidth;
-      if (this.menuItems === undefined) {
-        this.titleMaxWidth = nValue -
-          EditableTitleBar.countOfImageItem *
-            (ImageMenuItem.imageHotZoneWidth +
-            ImageMenuItem.iconBackgroundSpaceHorizontal) -
-          EditableTitleBar.countOfSaveIcon *
-            (ImageMenuItem.imageHotZoneWidth + ImageMenuItem.iconBackgroundSpaceHorizontal);
-        return;
+    }
+    .height(EditableTitleBar.totalHeight)
+    .justifyContent(FlexAlign.Center)
+    .margin({
+      start: LengthMetrics.vp(EditableTitleBar.titlePadding),
+    })
+    .alignItems(HorizontalAlign.Start)
+  }
+
+  @Builder
+  rightMenuItemsLayout(): void {
+    EditableTitleBarMenuSection({
+      menuItems: this.menuItems,
+      onSave: this.onSave,
+      isSaveEnabled: this.isSaveIconRequired,
+      fontSize: this.fontSize,
+    })
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
+    let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    children.forEach((child) => {
+      if (Math.abs(this.constraintWidth - Number(constraint.maxWidth)) > Number.EPSILON) {
+        if (!this.contentMargin) {
+          this.constraintWidth = Number(constraint.maxWidth);
+          if (this.constraintWidth < EditableTitleBar.breakpointS) {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level1')),
+              end: LengthMetrics.resource($r('sys.float.margin_level1')),
+            }
+          } else if (this.constraintWidth >= EditableTitleBar.breakpointM) {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level3')),
+              end: LengthMetrics.resource($r('sys.float.margin_level3')),
+            }
+          } else {
+            this.titleBarMargin = {
+              start: LengthMetrics.resource($r('sys.float.margin_level2')),
+              end: LengthMetrics.resource($r('sys.float.margin_level2')),
+            }
+          }
+        }
       }
-      if (this.menuItems?.length >= EditableTitleBar.maxCountOfExtraItems) {
-        this.titleMaxWidth = nValue -
-          ImageMenuItem.imageHotZoneWidth * EditableTitleBar.maxCountOfExtraItems -
-          EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
-          ImageMenuItem.iconBackgroundSpaceHorizontal *
-            (maxCountOfExtraItems + EditableTitleBar.countOfSaveIcon +
-            EditableTitleBar.countOfImageItem);
-      } else {
-        this.titleMaxWidth = nValue -
-          ImageMenuItem.imageHotZoneWidth * this.menuItems?.length -
-          ImageMenuItem.imageHotZoneWidth * EditableTitleBar.countOfSaveIcon -
-          EditableTitleBar.countOfImageItem * ImageMenuItem.imageHotZoneWidth -
-          ImageMenuItem.iconBackgroundSpaceHorizontal *
-            (this.menuItems?.length + EditableTitleBar.countOfSaveIcon +
-            EditableTitleBar.countOfImageItem);
-      }
+      result.height = child.measure(constraint).height;
+      result.width = Number(constraint.maxWidth);
+    })
+    return result;
+  }
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
     })
   }
 }
@@ -229,6 +325,7 @@ struct EditableTitleBarMenuSection {
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
+  @Prop fontSize: number = 1;
 
   build() {
     Column() {
@@ -241,6 +338,7 @@ struct EditableTitleBarMenuSection {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
+                fontSize: this.fontSize,
               })
             })
         }
@@ -251,6 +349,7 @@ struct EditableTitleBarMenuSection {
               isEnabled: true,
               action: () => this.onSave && this.onSave(),
             },
+            fontSize: this.fontSize,
             attribute: ItemType.Icon,
           })
         }
@@ -265,32 +364,64 @@ struct ImageMenuItem {
   item: EditableTitleBarMenuItem = {
     value: '',
     isEnabled: true,
+    label: '',
   };
   attribute: ItemType = ItemType.Image;
-  static readonly imageHotZoneWidth = getNumberByResource('titlebar_icon_background_width');
-  static readonly imageHotZoneHeight = getNumberByResource('titlebar_icon_background_height');
-  static readonly iconBackgroundSpaceHorizontal = getNumberByResource('titlebar_icon_background_space_horizontal');
+  callbackId: number | undefined = undefined;
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
+  @Consume editableTitleBarTheme: EditableTitleBarTheme;
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: EditableTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      itemEditableDialog: this.item,
+      textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
 
-  @Styles focusedStyle() {
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_OK) {
+      return $r('sys.string.icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return $r('sys.string.icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
+
+  @Styles
+  focusedStyle() {
     .border({
       radius: $r('sys.float.titlebar_icon_background_shape'),
       width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
-      color: $r('sys.color.titlebar_icon_background_focus_outline_color'),
+      color: this.editableTitleBarTheme.iconBackgroundFocusOutlineColor,
       style: BorderStyle.Solid,
     })
   }
 
-  @Styles notInFocusedStyle() {
+  @Styles
+  notInFocusedStyle() {
     .border({
       radius: $r('sys.float.titlebar_icon_background_shape'),
       width: EditableTitleBar.commonZero,
     })
   }
 
-  @Styles buttonStateStyles() {
+  @Styles
+  buttonStateStyles() {
     .stateStyles({
       focused: this.focusedStyle,
       normal: this.notInFocusedStyle,
@@ -298,7 +429,38 @@ struct ImageMenuItem {
     })
   }
 
-  @Styles buttonEventStyle() {
+  private keyEventAction(event: KeyEvent): void {
+    if (!this.item.isEnabled) {
+      return;
+    }
+    if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+      return;
+    }
+    if (event.type === KeyType.Down) {
+      this.isOnClick = true;
+    }
+    if (event.type === KeyType.Up) {
+      this.isOnClick = false;
+    }
+  }
+
+  private touchEventAction(event: TouchEvent): void {
+    if (!this.item.isEnabled) {
+      return;
+    }
+    if (event.type === TouchType.Down) {
+      this.isOnClick = true;
+    }
+    if (event.type === TouchType.Up) {
+      if (this.fontSize >= this.minFontSize) {
+        this.dialogController?.close()
+      }
+      this.isOnClick = false;
+    }
+  }
+
+  @Styles
+  buttonEventStyle() {
     .onFocus(() => {
       if (!this.item.isEnabled) {
         return;
@@ -313,36 +475,33 @@ struct ImageMenuItem {
       this.isOnHover = isOn;
     })
     .onKeyEvent((event) => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return;
-      }
-      if (event.type === KeyType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === KeyType.Up) {
-        this.isOnClick = false;
-      }
+      this.keyEventAction(event);
     })
     .onTouch((event) => {
-      if (!this.item.isEnabled) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === TouchType.Up) {
-        this.isOnClick = false;
-      }
+      this.touchEventAction(event);
     })
-    .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .gesture(GestureGroup(GestureMode.Exclusive,
+      LongPressGesture({ repeat: false, duration: 500 })
+        .onAction((event: GestureEvent) => {
+          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+          this.fontSize = context.config?.fontSizeScale ?? 1;
+          if (event) {
+            if (this.fontSize >= this.minFontSize) {
+              this.dialogController?.open()
+            }
+          }
+        }),
+      TapGesture()
+        .onAction((event: GestureEvent) => {
+          this.item.isEnabled && this.item.action && this.item.action()
+        })
+    ))
   }
 
-  @Styles backgroundButtonStyle() {
-    .width(ImageMenuItem.imageHotZoneWidth)
-    .height(ImageMenuItem.imageHotZoneHeight)
+  @Styles
+  backgroundButtonStyle() {
+    .width($r('sys.float.titlebar_icon_background_width'))
+    .height($r('sys.float.titlebar_icon_background_height'))
     .focusable(this.item.isEnabled)
     .enabled(this.item.isEnabled)
   }
@@ -357,24 +516,36 @@ struct ImageMenuItem {
     }
   }
 
+  getBgColor(): ResourceColor {
+    if (this.isOnClick) {
+      return this.editableTitleBarTheme.iconBackgroundPressedColor;
+    } else if (this.isOnHover) {
+      return this.editableTitleBarTheme.iconBackgroundHoverColor;
+    } else {
+      return this.editableTitleBarTheme.iconBackgroundColor;
+    }
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor($r('sys.color.titlebar_icon_color'))
+        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
+        .draggable(false)
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
     .margin({
-      left: this.attribute === ItemType.LeftIcon ? EditableTitleBar.commonZero :
-      ImageMenuItem.iconBackgroundSpaceHorizontal,
+      start: this.attribute === ItemType.LeftIcon ? LengthMetrics.vp(EditableTitleBar.commonZero) :
+      LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     })
     .foregroundColor(this.getFgColor())
-    .backgroundColor($r('sys.color.titlebar_icon_background_color'))
+    .backgroundColor(this.getBgColor())
     .buttonStateStyles()
     .buttonEventStyle()
   }
@@ -383,8 +554,8 @@ struct ImageMenuItem {
   ImageBuilder() {
     Stack({ alignContent: Alignment.Center }) {
       Image(this.item.value)
-        .width(ImageMenuItem.imageHotZoneWidth)
-        .height(ImageMenuItem.imageHotZoneHeight)
+        .width($r('sys.float.titlebar_icon_background_width'))
+        .height($r('sys.float.titlebar_icon_background_height'))
         .borderRadius($r('sys.float.corner_radius_level10'))
         .focusable(false)
         .enabled(this.item.isEnabled)
@@ -398,7 +569,7 @@ struct ImageMenuItem {
         .buttonEventStyle()
     }
     .margin({
-      left: ImageMenuItem.iconBackgroundSpaceHorizontal,
+      start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
     })
   }
 
@@ -410,6 +581,94 @@ struct ImageMenuItem {
     }
   }
 }
+
+/**
+ * EditableTitleBarDialog
+ *
+ * @since 2024-05-28
+ */
+@CustomDialog
+struct EditableTitleBarDialog {
+  itemEditableDialog: EditableTitleBarMenuItem = {
+    value: '',
+    isEnabled: true,
+  };
+  callbackId: number | undefined = undefined;
+  textEditableTitleBarDialog?: ResourceStr = '';
+  mainWindowStage: window.Window | undefined = undefined;
+  controller?: CustomDialogController
+  minFontSize: number = 1.75;
+  maxFontSize: number = 3.2;
+  @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
+  @Prop fontSize: number = 1;
+  @State maxLines: number = 1;
+  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  cancel: () => void = () => {
+  }
+  confirm: () => void = () => {
+  }
+
+  build() {
+    if (this.textEditableTitleBarDialog) {
+      Column() {
+        Image(this.itemEditableDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .margin({
+            top: $r('sys.float.padding_level24'),
+            bottom: $r('sys.float.padding_level8'),
+          })
+          .fillColor($r('sys.color.icon_primary'))
+        Column() {
+          Text(this.textEditableTitleBarDialog)
+            .fontSize(TEXT_EDITABLE_DIALOG)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLines)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        })
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius(($r('sys.float.corner_radius_level10')))
+    } else {
+      Column() {
+        Image(this.itemEditableDialog.value)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor($r('sys.color.icon_primary'))
+      }
+      .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
+      .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius(($r('sys.float.corner_radius_level10')))
+      .justifyContent(FlexAlign.Center)
+    }
+  }
+
+  async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.mainWindowStage = context.windowStage.getMainWindowSync();
+    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+    let rect = properties.windowRect;
+    if (px2vp(rect.height) > 640) {
+      this.maxLines = 6;
+    } else {
+      this.maxLines = 1;
+    }
+  }
+}
+
 
 /**
  * get resource size

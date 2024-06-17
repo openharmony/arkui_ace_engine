@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { LengthMetrics } from '@ohos.arkui.node';
 const LOADINGPROGRESS_SIZE = 24
 const DEFAULT_MARGIN = 16
 const ITEM_SPACE = 4
@@ -31,7 +32,7 @@ export struct SwipeRefresher {
           .height(LOADINGPROGRESS_SIZE)
           .width(LOADINGPROGRESS_SIZE)
           .margin({
-            right: ITEM_SPACE
+            end: LengthMetrics.vp(ITEM_SPACE)
           })
       }
       Text(this.content)

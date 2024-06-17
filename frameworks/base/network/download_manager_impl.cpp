@@ -59,6 +59,8 @@ constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 using NetStackRequest = NetStack::HttpClient::HttpClientRequest;
 using NetStackResponse = NetStack::HttpClient::HttpClientResponse;
 using NetStackError = NetStack::HttpClient::HttpClientError;
+using NetStackTask = NetStack::HttpClient::HttpClientTask;
+using NetStackTaskStatus = NetStack::HttpClient::TaskStatus;
 
 class ACE_FORCE_EXPORT DownloadManagerImpl : public DownloadManager {
 public:
@@ -94,9 +96,6 @@ public:
         // Some servers don't like requests that are made without a user-agent field, so we provide one
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
-#if !defined(PREVIEW)
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
-#endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
 
@@ -136,21 +135,21 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
-        task->OnSuccess([successCallback = downloadCallback.successCallback,
-                            failCallback = downloadCallback.failCallback,
-                            instanceId](const NetStackRequest& request, const NetStackResponse& response) {
-            if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
-                LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.", request.GetURL().c_str(),
+        task->OnSuccess(
+            [successCallback = downloadCallback.successCallback, failCallback = downloadCallback.failCallback,
+                instanceId](const NetStackRequest& request, const NetStackResponse& response) {
+                if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
+                    LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.",
+                        request.GetURL().c_str(), response.GetResponseCode());
+                    std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
+                                           std::to_string(response.GetResponseCode());
+                    failCallback(errorMsg, true, instanceId);
+                    return;
+                }
+                LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
                     response.GetResponseCode());
-                std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
-                                       std::to_string(response.GetResponseCode());
-                failCallback(errorMsg, true, instanceId);
-                return;
-            }
-            LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
-                response.GetResponseCode());
-            successCallback(std::move(response.GetResult()), true, instanceId);
-        });
+                successCallback(std::move(response.GetResult()), true, instanceId);
+            });
         task->OnCancel([cancelCallback = downloadCallback.cancelCallback, instanceId](
                            const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
@@ -169,15 +168,14 @@ public:
         });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                const NetStackRequest& request,
-                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                onProgressCallback(dlTotal, dlNow, true, instanceId);
-            });
+                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, true, instanceId); });
         }
+        std::scoped_lock lock(httpTaskMutex_);
+        httpTaskMap_.emplace(url, task);
         auto result = task->Start();
-        LOGI("Task of netstack with src [%{private}s] [%{public}s]", url.c_str(),
-            result ? " started on another thread successfully"
-                   : " failed to start on another thread, please check netStack log");
+        LOGI("download src [%{private}s] [%{public}s]", url.c_str(),
+            result ? " successfully" : " failed to download, please check netStack log");
         return result;
     }
 
@@ -231,13 +229,29 @@ public:
         });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
-                const NetStackRequest& request,
-                u_long dlTotal, u_long dlNow, u_long ulTotal, u_long ulNow) {
-                onProgressCallback(dlTotal, dlNow, false, instanceId);
-            });
+                                 const NetStackRequest& request, u_long dlTotal, u_long dlNow, u_long ulTotal,
+                                 u_long ulNow) { onProgressCallback(dlTotal, dlNow, false, instanceId); });
         }
+        std::scoped_lock lock(httpTaskMutex_);
+        httpTaskMap_.emplace(url, task);
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
+    }
+
+    bool RemoveDownloadTask(const std::string& url) override
+    {
+        std::scoped_lock lock(httpTaskMutex_);
+        auto iter = httpTaskMap_.find(url);
+        if (iter != httpTaskMap_.end()) {
+            auto task = iter->second;
+            if (task->GetStatus() == NetStackTaskStatus::RUNNING) {
+                LOGI("AceImage RemoveDownloadTask, url:%{private}s", url.c_str());
+                task->Cancel();
+            }
+            httpTaskMap_.erase(url);
+            return true;
+        }
+        return false;
     }
 
 private:
@@ -246,6 +260,8 @@ private:
         int32_t port = 0;
         std::string exclusions;
     };
+    std::mutex httpTaskMutex_;
+    std::unordered_map<std::string, std::shared_ptr<NetStackTask>> httpTaskMap_;
 
     bool HandleDownloadResult(bool result, DownloadCallback&& downloadCallback,
         const std::shared_ptr<DownloadCondition>& downloadCondition, int32_t instanceId, const std::string& url)

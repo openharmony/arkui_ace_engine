@@ -33,7 +33,7 @@ struct ForEachFunc {
     std::function<void(int32_t index)> itemGenFunc_;
 };
 
-class ACE_EXPORT ForEachModel {
+class ACE_FORCE_EXPORT ForEachModel {
 public:
     static ForEachModel* GetInstance();
     virtual ~ForEachModel() = default;
@@ -41,8 +41,8 @@ public:
     virtual void Pop() = 0;
 
     // classic / full update code path
-    virtual void Create(const std::string& compilerGenId, const ForEachFunc& ForEachFunc) = 0;    
-    
+    virtual void Create(const std::string& compilerGenId, const ForEachFunc& ForEachFunc) = 0;
+
     // Only implemented by ForEachModelNG
     virtual void Create() = 0;
 

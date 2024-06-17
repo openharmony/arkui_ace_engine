@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "base/utils/utils.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
@@ -149,13 +150,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Any FocusView (entry focus view)
-          |-> NavDestination
-        */
-        return ENTRY_ANY_FOCUSVIEW;
+        return false;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -175,6 +172,14 @@ public:
         return navigationNode_.Upgrade();
     }
 
+    NavDestinationState GetNavDestinationState() const
+    {
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
+        auto state = eventHub->GetState();
+        return state;
+    }
+
     void DumpInfo() override;
 
     uint64_t GetNavDestinationId() const
@@ -186,11 +191,30 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
-    
+
     void OnDetachFromMainTree() override
     {
-        auto weak = AceType::WeakClaim(this);
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+        backupStyle_.reset();
+        currStyle_.reset();
+    }
+
+    bool OverlayOnBackPressed();
+
+    void CreateOverlayManager(bool isShow)
+    {
+        if (!overlayManager_ && isShow) {
+            overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
+        }
+    }
+
+    const RefPtr<OverlayManager>& GetOverlayManager()
+    {
+        return overlayManager_;
+    }
+
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
     }
 
     void SetNavigationId(const std::string& id)
@@ -214,11 +238,35 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
+    }
+
+    bool NeedIgnoreKeyboard();
+
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+    const std::optional<RefPtr<SystemBarStyle>>& GetBackupStyle() const
+    {
+        return backupStyle_;
+    }
+    const std::optional<RefPtr<SystemBarStyle>>& GetCurrentStyle() const
+    {
+        return currStyle_;
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
+    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
+    void HandleLongPress();
+    void HandleLongPressActionEnd();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -226,11 +274,19 @@ private:
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
+    RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
+    float keyboardOffset_ = 0.0f;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<FrameNode> dialogNode_;
+
+    std::optional<RefPtr<SystemBarStyle>> backupStyle_;
+    std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
 
 } // namespace OHOS::Ace::NG

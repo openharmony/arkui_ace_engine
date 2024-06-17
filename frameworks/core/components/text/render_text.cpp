@@ -480,7 +480,7 @@ void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
         if (isContainerModal) {
             longPressPosition =
                 longPressPosition + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-                                        -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+                                           -CONTAINER_TITLE_HEIGHT.ConvertToPx());
         }
     }
 

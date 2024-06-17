@@ -121,6 +121,14 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
     return this;
   }
+  autoCollapse(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, AutoCollapseModifier.identity, AutoCollapseModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, EnableHapticFeedbackModifier.identity, EnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent): void {
@@ -513,5 +521,41 @@ class AdaptiveWidthModifier extends ModifierWithKey<Length> {
     } else {
       getUINativeModule().alphabetIndexer.setAdaptiveWidth(node, this.value);
     }
+  }
+}
+
+class AutoCollapseModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('autoCollapse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetAutoCollapse(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setAutoCollapse(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class EnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('enableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setEnableHapticFeedback(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

@@ -188,7 +188,7 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 #else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
 #endif
-    modifier->onDraw(context_);
+    modifier->Draw(context_);
 }
 
 void OverlayModifierAdapter::AttachProperties()
@@ -219,7 +219,7 @@ void ForegroundModifierAdapter::Draw(RSDrawingContext& context) const
 #else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
 #endif
-    modifier->onDraw(context_);
+    modifier->Draw(context_);
 }
 
 void ForegroundModifierAdapter::AttachProperties()

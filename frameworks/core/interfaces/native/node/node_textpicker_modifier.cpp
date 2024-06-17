@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -22,6 +24,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -30,11 +33,13 @@ constexpr int32_t SIZE_OF_THREE = 3;
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int NUM_3 = 3;
 constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 std::string g_strValue;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -47,11 +52,18 @@ void ResetTextPickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
     TextPickerModelNG::SetBackgroundColor(frameNode, theme->GetBackgroundColor());
+}
+
+ArkUI_Int32 GetTextPickerCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return TextPickerModelNG::GetCanLoop(frameNode);
 }
 
 void SetTextPickerCanLoop(ArkUINodeHandle node, int canLoop)
@@ -73,8 +85,7 @@ void GetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkU
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (TextPickerModelNG::IsSingle(frameNode)) {
-        auto selectedValue = static_cast<ArkUI_Uint32>(
-            TextPickerModelNG::getTextPickerSelectedIndex(frameNode));
+        auto selectedValue = static_cast<ArkUI_Uint32>(TextPickerModelNG::getTextPickerSelectedIndex(frameNode));
         values[0] = selectedValue;
     } else {
         auto selectedValue = TextPickerModelNG::getTextPickerSelecteds(frameNode);
@@ -94,9 +105,9 @@ void SetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkU
 
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, values, size);
-    } else {
-        NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
+        return;
     }
+    NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
 }
 
 void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
@@ -107,23 +118,39 @@ void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
     selectedValues.emplace_back(0);
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, selectedValues.data(), selectedValues.size());
-    } else {
-        NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
+        return;
     }
+    NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
 }
 
-void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerTextStyle(ArkUINodeHandle node)
@@ -140,18 +167,34 @@ void ResetTextPickerTextStyle(ArkUINodeHandle node)
 }
 
 void SetTextPickerSelectedTextStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetSelectedTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
@@ -168,18 +211,34 @@ void ResetTextPickerSelectedTextStyle(ArkUINodeHandle node)
 }
 
 void SetTextPickerDisappearTextStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle;
-    NodeModifier::GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
-    TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
+    auto theme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
@@ -193,6 +252,13 @@ void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(themeManager);
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
+}
+
+ArkUI_Float32 GetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, ArkUI_Int32 dUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextPickerModelNG::GetDefaultPickerItemHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(dUnit));
 }
 
 void SetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, float dVal, ArkUI_Int32 dUnit)
@@ -297,12 +363,11 @@ ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -326,12 +391,11 @@ ArkUI_CharPtr GetTextPickerTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -355,17 +419,16 @@ ArkUI_CharPtr GetTextPickerDisappearTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
-    g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
+    g_strValue = g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL)));
+        g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(OHOS::Ace::FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
-void SetTextPickerDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-    const ArkUI_Int32* units, ArkUI_Int32 length)
+void SetTextPickerDivider(
+    ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -403,7 +466,7 @@ void ResetTextPickerGradientHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -424,6 +487,9 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
+    if (TextPickerModelNG::IsSingle(frameNode)) {
+        return 1;
+    }
     return TextPickerModelNG::GetSelectedSize(frameNode);
 }
 
@@ -440,7 +506,7 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
         GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
         SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize };
+        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
 
     return &modifier;
 }
@@ -479,9 +545,9 @@ void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, cons
     TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
     if (selectedValues[0] >= rangeResult.size()) {
         TextPickerModelNG::SetSelected(frameNode, 0);
-    } else {
-        TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
+        return;
     }
+    TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
 }
 
 void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
@@ -489,15 +555,15 @@ void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
 {
     if (!TextPickerModelNG::IsCascade(frameNode)) {
         NodeModifier::SetSelectedInternal(count, options, selectedValues);
-    } else {
-        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
-        NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
-        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
-        if (selectedValues.size() < maxCount) {
-            auto differ = maxCount - selectedValues.size();
-            for (uint32_t i = 0; i < differ; i++) {
-                selectedValues.emplace_back(0);
-            }
+        return;
+    }
+    TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+    NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
+    uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+    if (selectedValues.size() < maxCount) {
+        auto differ = maxCount - selectedValues.size();
+        for (uint32_t i = 0; i < differ; i++) {
+            selectedValues.emplace_back(0);
         }
     }
 }
@@ -513,17 +579,17 @@ void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptio
         for (uint32_t i = 1; i < count; i++) {
             selectedValues.emplace_back(0);
         }
-    } else {
-        for (uint32_t i = 0; i < count; i++) {
-            selectedValues.emplace_back(0);
-        }
+        return;
+    }
+    for (uint32_t i = 0; i < count; i++) {
+        selectedValues.emplace_back(0);
     }
 }
 
 void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    for (uint32_t i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; ++i) {
         uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
         if (i > val) {
             selectedValues.emplace_back(0);
@@ -570,7 +636,7 @@ void ProcessCascadeSelected(
     if (selectedValues[index] >= rangeResultValue.size()) {
         selectedValues[index] = 0;
     }
-    if (selectedValues[index] <= options.size() - 1 && options[selectedValues[index]].children.size() > 0) {
+    if ((selectedValues[index] <= options.size() - 1) && (options[selectedValues[index]].children.size() > 0)) {
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
 }
@@ -579,8 +645,8 @@ void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChangeEvent = [node, extraParam](const std::vector<std::string>& value,
-        const std::vector<double>& indexVector) {
+    auto onChangeEvent = [node, extraParam](
+                             const std::vector<std::string>& value, const std::vector<double>& indexVector) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

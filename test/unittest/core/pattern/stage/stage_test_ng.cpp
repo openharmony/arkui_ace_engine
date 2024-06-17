@@ -114,22 +114,23 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
      * @tc.steps: step1. Build a PageEventHub.
      */
     PageEventHub pageEventHub;
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    auto groupManager = pageEventHub.GetGroupManager();
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
 
     /**
      * @tc.steps: step2. Add radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_TRUE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
-    EXPECT_FALSE(pageEventHub.HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_TRUE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    EXPECT_FALSE(groupManager->HasRadioId(ERROR_GROUP_NAME, RADIO_ID_FIRST));
 
     /**
      * @tc.steps: step3. Add another two radio to group.
      * @tc.expected: The HasRadioId function of PageEventHub meets expectations .
      */
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
-    pageEventHub.AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->AddRadioToGroup(TEST_GROUP_NAME, RADIO_ID_THIRD);
 
     /**
      * @tc.steps: step4. Create real node and fake node to ElementRegister.
@@ -144,15 +145,15 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
     /**
      * @tc.steps: step5. UpdateRadioGroupValue.
      */
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    pageEventHub.UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_SECOND);
 
     /**
      * @tc.steps: step6. RemoveRadioFromGroup.
      * @tc.expected: The radio remove successful .
      */
-    pageEventHub.RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
-    EXPECT_FALSE(pageEventHub.HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
+    groupManager->RemoveRadioFromGroup(TEST_GROUP_NAME, RADIO_ID_FIRST);
+    EXPECT_FALSE(groupManager->HasRadioId(TEST_GROUP_NAME, RADIO_ID_FIRST));
 }
 
 /**
@@ -1298,6 +1299,36 @@ HWTEST_F(StageTestNg, PageTransitionModelTest001, TestSize.Level1)
     stageNode->GetPattern<PagePattern>()->GetTopTransition()->userCallback_(RouteType::PUSH, 2);
     EXPECT_EQ(iTemp, 0);
 }
+
+/**
+ * @tc.name: PageTransitionModelTest002
+ * @tc.desc: Testing .
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PageTransitionModelTest002, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    stageNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    ViewStackProcessor::GetInstance()->SetPageNode(stageNode);
+    PageTransitionModelNG pageTransitionModel;
+    PageTransitionOption option;
+    pageTransitionModel.CreateTransition(PageTransitionType::ENTER, option);
+    /**
+     * @tc.steps: step1. SetSlideEffect is START.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetSlideEffect(SlideEffect::START);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->slide_, SlideEffect::START);
+
+    /**
+     * @tc.steps: step2. SetSlideEffect is END.
+     * @tc.expected: set Success;
+     */
+    pageTransitionModel.SetSlideEffect(SlideEffect::END);
+    EXPECT_EQ(stageNode->GetPattern<PagePattern>()->GetTopTransition()->slide_, SlideEffect::END);
+}
+
 /**
  * @tc.name: StageLayoutAlgorithmTest001
  * @tc.desc: Testing .

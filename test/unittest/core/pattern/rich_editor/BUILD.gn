@@ -15,5 +15,16 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_test_ng") {
   type = "new"
-  sources = [ "rich_editor_test_ng.cpp" ]
+  sources = [
+    "rich_editor_base_test_ng.cpp",
+    "rich_editor_change_callback_test_ng.cpp",
+    "rich_editor_click_test_ng.cpp",
+    "rich_editor_common_test_ng.cpp",
+    "rich_editor_drag_test_ng.cpp",
+    "rich_editor_edit_test_ng.cpp",
+    "rich_editor_keyboard_shortcut_test_ng.cpp",
+    "rich_editor_overlay_test_ng.cpp",
+    "rich_editor_preview_text_test_ng.cpp",
+    "rich_editor_styled_string_test_ng.cpp",
+  ]
 }

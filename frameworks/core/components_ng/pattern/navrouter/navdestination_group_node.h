@@ -105,10 +105,7 @@ public:
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
 
-    void SetNavDestinationMode(NavDestinationMode mode)
-    {
-        mode_ = mode;
-    }
+    void SetNavDestinationMode(NavDestinationMode mode);
 
     NavDestinationMode GetNavDestinationMode() const
     {
@@ -145,6 +142,27 @@ public:
         return isAnimated_;
     }
 
+    void SetCanReused(bool canReused)
+    {
+        canReused_ = canReused;
+    }
+
+    bool GetCanReused() const
+    {
+        return canReused_;
+    }
+
+    void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navDestinationPathInfo_ = pagePath;
+        navDestinationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavDestinationPathInfo() const
+    {
+        return navDestinationPathInfo_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -154,7 +172,10 @@ private:
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
-    bool isAnimated_ = false;
+    bool isAnimated_ = true;
+    bool canReused_ = true;
+    std::string navDestinationPathInfo_;
+    std::string navDestinationModuleName_;
 };
 
 } // namespace OHOS::Ace::NG

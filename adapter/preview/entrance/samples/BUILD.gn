@@ -49,7 +49,6 @@ foreach(device, ace_devices) {
     include_dirs = [
       "$ace_root",
       "$ace_root/frameworks",
-      "$flutter_root/glfw/include",
       "//foundation/window/window_manager",
       "//ide/tools/previewer",
     ]

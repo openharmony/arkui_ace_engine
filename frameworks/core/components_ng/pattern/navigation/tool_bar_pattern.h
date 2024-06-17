@@ -20,6 +20,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
@@ -49,7 +50,8 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_BOTTOM };
             host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
@@ -61,10 +63,16 @@ public:
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
 private:
+    void OnModifyDone() override;
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<BarItemNode>& barItemNode);
+    void HandleLongPressEvent(const RefPtr<BarItemNode>& barItemNode);
+    void HandleLongPressActionEnd();
+
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     NavigationToolbarOptions options_;
+    RefPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG
 

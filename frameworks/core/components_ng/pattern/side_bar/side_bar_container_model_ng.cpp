@@ -181,6 +181,16 @@ void SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(const std::strin
     }
 }
 
+void SideBarContainerModelNG::ResetControlButtonIconInfo()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
+}
+
 void SideBarContainerModelNG::SetDividerStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth);
@@ -362,9 +372,20 @@ void SideBarContainerModelNG::SetDividerEndMargin(FrameNode* frameNode, const Di
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin, frameNode);
 }
+
 void SideBarContainerModelNG::ResetControlButtonLeft(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft,
         PROPERTY_UPDATE_LAYOUT, frameNode);
+}
+
+void SideBarContainerModelNG::ResetControlButtonIconInfo(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
 }
 } // namespace OHOS::Ace::NG

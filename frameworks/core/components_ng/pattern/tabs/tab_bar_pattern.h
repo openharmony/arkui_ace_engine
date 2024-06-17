@@ -145,10 +145,7 @@ public:
         layoutAlgorithm->SetIndicator(indicator_);
         layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
-        if (needSetCentered_) {
-            layoutAlgorithm->SetNeedSetCentered();
-            needSetCentered_ = false;
-        }
+        layoutAlgorithm->SetNeedSetCentered(needSetCentered_);
         layoutAlgorithm->SetScrollMargin(scrollMargin_);
         return layoutAlgorithm;
     }
@@ -207,9 +204,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
     {
-        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
     }
 
     bool IsContainsBuilder();
@@ -232,6 +229,7 @@ public:
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarStyle_ = tabBarStyle;
+        InitLongPressAndDragEvent();
     }
 
     TabBarStyle GetTabBarStyle() const
@@ -254,7 +252,7 @@ public:
     }
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
-        if (selectedModes_.size() == position) {
+        if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
         } else {
             selectedModes_[position] = selectedMode;
@@ -263,7 +261,7 @@ public:
 
     void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
     {
-        if (indicatorStyles_.size() == position) {
+        if (indicatorStyles_.size() <= position) {
             indicatorStyles_.emplace_back(indicatorStyle);
         } else {
             indicatorStyles_[position] = indicatorStyle;
@@ -272,7 +270,7 @@ public:
 
     void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
     {
-        if (tabBarStyles_.size() == position) {
+        if (tabBarStyles_.size() <= position) {
             tabBarStyles_.emplace_back(tabBarStyle);
         } else {
             tabBarStyles_[position] = tabBarStyle;
@@ -281,7 +279,7 @@ public:
 
     void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position)
     {
-        if (bottomTabBarStyles_.size() == position) {
+        if (bottomTabBarStyles_.size() <= position) {
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
         } else {
             bottomTabBarStyles_[position] = bottomTabBarStyle;
@@ -290,7 +288,7 @@ public:
 
     void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
     {
-        if (labelStyles_.size() == position) {
+        if (labelStyles_.size() <= position) {
             labelStyles_.emplace_back(labelStyle);
         } else {
             labelStyles_[position] = labelStyle;
@@ -299,7 +297,7 @@ public:
 
     void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
     {
-        if (iconStyles_.size() == position) {
+        if (iconStyles_.size() <= position) {
             iconStyles_.emplace_back(iconStyle);
         } else {
             iconStyles_[position] = iconStyle;
@@ -313,7 +311,7 @@ public:
 
     void SetSymbol(const TabBarSymbol& symbol, uint32_t position)
     {
-        if (symbolArray_.size() == position) {
+        if (symbolArray_.size() <= position) {
             symbolArray_.emplace_back(symbol);
         } else {
             symbolArray_[position] = symbol;
@@ -427,13 +425,19 @@ public:
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
+    void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+
+    void RemoveTabBarItemClickEvent(int32_t tabBarId)
+    {
+        clickEvents_.erase(tabBarId);
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
@@ -451,8 +455,9 @@ private:
     bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleLongPressEvent(const GestureEvent& info);
     void ShowDialogWithNode(int32_t index);
-    void CloseDialog(int32_t index);
-    void HandleClick(const GestureEvent& info);
+    void CloseDialog();
+    void InitLongPressAndDragEvent();
+    void HandleClick(const GestureEvent& info, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
@@ -466,6 +471,8 @@ private:
         int32_t maskIndex, float& selectedImageSize, float& unselectedImageSize, OffsetF& originalSelectedMaskOffset,
         OffsetF& originalUnselectedMaskOffset);
     void UpdateBottomTabBarImageColor(const std::vector<int32_t>& selectedIndexes, int32_t maskIndex);
+    void UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode, RefPtr<TextLayoutProperty>& symbolProperty,
+        int32_t index, std::string type);
     bool CheckSvg(int32_t index) const;
 
     void HandleTouchDown(int32_t index);
@@ -498,6 +505,8 @@ private:
     void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void CalculateIndicatorStyle(
+        int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
@@ -505,8 +514,13 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
-
-    RefPtr<ClickEvent> clickEvent_;
+    std::pair<float, float> GetOverScrollInfo(const SizeF& size);
+    void RemoveTabBarEventCallback();
+    void AddTabBarEventCallback();
+    void AddMaskItemClickEvent();
+    void TabBarSuitAging();
+    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
+    std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -575,6 +589,8 @@ private:
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
+    MarginProperty marginLeftOrRight_;
+    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

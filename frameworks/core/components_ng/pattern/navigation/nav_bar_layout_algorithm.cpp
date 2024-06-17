@@ -97,6 +97,124 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     return titleBarHeight;
 }
 
+MarginPropertyF GetNavigationMargin(const RefPtr<NavBarNode>& hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, MarginPropertyF());
+    auto parent = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetParent());
+    CHECK_NULL_RETURN(parent, MarginPropertyF());
+    auto layoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty,  MarginPropertyF());
+    const auto& margin = layoutProperty->CreateMargin();
+    return margin;
+}
+
+bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty,
+    const RefPtr<NavBarNode>& hostNode, SafeAreaExpandOpts opts)
+{
+    if (!navBarLayoutProperty || !hostNode) {
+        return false;
+    }
+    const auto& margin = GetNavigationMargin(hostNode);
+    float topMargin = margin.top.value_or(0.0f);
+    const auto& padding = navBarLayoutProperty->CreatePaddingAndBorder();
+    float topPadding = padding.top.value_or(0.0f);
+    if (!NearEqual(topPadding, 0.0f) || !NearEqual(topMargin, 0.0f)) {
+        return false;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto NavBarGeometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(NavBarGeometryNode, false);
+    auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
+
+    if ((opts.edges & SAFE_AREA_EDGE_TOP) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+        auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
+
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+        CHECK_NULL_RETURN(titleBarNode, false);
+        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_RETURN(titlePattern, false);
+        auto options = titlePattern->GetTitleBarOptions();
+        auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+        if ((navBarLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
+            safeAreaPos.top_.IsOverlapped(frame.Top())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckBottomEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty,
+    const RefPtr<NavBarNode>& hostNode, SafeAreaExpandOpts opts)
+{
+    if (!navBarLayoutProperty || !hostNode) {
+        return false;
+    }
+    const auto& margin = GetNavigationMargin(hostNode);
+    float bottomMargin = margin.bottom.value_or(0.0f);
+    const auto& padding = navBarLayoutProperty->CreatePaddingAndBorder();
+    float bottomPadding = padding.bottom.value_or(0.0f);
+    if (!NearEqual(bottomPadding, 0.0f) || !NearEqual(bottomMargin, 0.0f)) {
+        return false;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto NavBarGeometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(NavBarGeometryNode, false);
+    auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
+
+    if ((opts.edges & SAFE_AREA_EDGE_BOTTOM) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
+        if (safeAreaPos.bottom_.IsOverlapped(frame.Bottom())
+            && navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
+    const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
+{
+    NavSafeArea safeArea;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, safeArea);
+    auto inset = pipeline->GetSafeArea();
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+
+    auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
+        .edges = SAFE_AREA_TYPE_NONE});
+    bool edgeTopOverLayCondition = CheckTopEdgeOverlap(navBarLayoutProperty, hostNode, opts);
+    bool edgeBottomOverLayCondition = CheckBottomEdgeOverlap(navBarLayoutProperty, hostNode, opts);
+
+    if (edgeTopOverLayCondition) {
+        auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
+        SafeAreaExpandOpts topParam = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_NONE};
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(topParam);
+
+        if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+            auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
+            navBarContentRenderContext->UpdateClipEdge(false);
+        }
+        safeArea.top = static_cast<float>(inset.top_.Length());
+    }
+
+    if (edgeBottomOverLayCondition) {
+        safeArea.bottom = static_cast<float>(inset.bottom_.Length());
+    }
+    return safeArea;
+}
+
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
     if (hostNode->GetPrevMenuIsCustomValue(false)) {
@@ -201,11 +319,16 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     float contentHeight = navigationSize.Height() - titleBarHeight - toolBarHeight - toolBarDividerHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navBarLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(navigationSize.Width());
+        contentWrapper->Measure(constraint);
+        return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
     } else {
         constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), contentHeight);
     }
+    auto safeArea = CheckIgnoreLayoutSafeArea(layoutWrapper, hostNode, navBarLayoutProperty);
+    auto currentHeight = static_cast<float>(constraint.selfIdealSize.Height().value());
+    constraint.selfIdealSize.SetHeight(currentHeight + safeArea.top + safeArea.bottom);
     contentWrapper->Measure(constraint);
-    return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
+    return currentHeight;
 }
 
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
@@ -235,13 +358,20 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
+    auto pattern = hostNode->GetPattern<NavBarPattern>();
+    float keyboardOffset = pattern ? pattern->GetKeyboardOffset() : 0.0f;
+    auto contentOffset = OffsetF(0.0f, keyboardOffset);
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
-        geometryNode->SetMarginFrameOffset(contentOffset);
-        contentWrapper->Layout();
-        return;
+        contentOffset += OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
     }
-    auto contentOffset = OffsetF(0.0f, 0.0f);
+    auto safeArea = CheckIgnoreLayoutSafeArea(layoutWrapper, hostNode, navBarLayoutProperty);
+    auto offsetY = contentOffset.GetY();
+    auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
+        .edges = SAFE_AREA_TYPE_NONE});
+    if ((opts.edges & SAFE_AREA_EDGE_TOP) && NearEqual(offsetY, 0.0f)) {
+        offsetY -= safeArea.top;
+        contentOffset.SetY(offsetY);
+    }
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
@@ -373,6 +503,15 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto navBarLayoutProperty = AceType::DynamicCast<NavBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navBarLayoutProperty);
+
+    auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
+        .edges = SAFE_AREA_TYPE_NONE});
+    bool edgeTopOverLayCondition = CheckTopEdgeOverlap(navBarLayoutProperty, hostNode, opts);
+    bool edgeBottomOverLayCondition = CheckBottomEdgeOverlap(navBarLayoutProperty, hostNode, opts);
+    if (edgeTopOverLayCondition || edgeBottomOverLayCondition) {
+        Measure(layoutWrapper);
+    }
+
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titlebarHeight);
     LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, resetTitleBarHeight);

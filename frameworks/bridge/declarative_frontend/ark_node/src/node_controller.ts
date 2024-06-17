@@ -15,6 +15,7 @@
 
 class __InternalField__ {
   _value: number;
+  __rootNodeOfNodeController__: FrameNode | null;
   constructor()
   {
     this._value = -1;
@@ -28,6 +29,11 @@ abstract class NodeController {
   }
 
   abstract makeNode(UIContext: UIContext): FrameNode | null;
+  __makeNode__(UIContext: UIContext): FrameNode | null {
+    this._nodeContainerId.__rootNodeOfNodeController__ = this.makeNode(UIContext);
+    return this._nodeContainerId.__rootNodeOfNodeController__;
+
+  }
   rebuild() {
     if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
       getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);

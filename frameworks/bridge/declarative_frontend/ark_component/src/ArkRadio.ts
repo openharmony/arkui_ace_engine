@@ -59,6 +59,10 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
       RadioResponseRegionModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<RadioConfiguration>): this {
+    modifierWithKey(this._modifiersWithKeys, RadioContentModifier.identity, RadioContentModifier, value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<RadioConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
@@ -299,6 +303,17 @@ class RadioResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rec
     } else {
       return true;
     }
+  }
+}
+
+class RadioContentModifier extends ModifierWithKey<ContentModifier<RadioConfiguration>> {
+  constructor(value: ContentModifier<RadioConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let radioComponent = component as ArkRadioComponent;
+    radioComponent.setContentModifier(this.value); 
   }
 }
 // @ts-ignore

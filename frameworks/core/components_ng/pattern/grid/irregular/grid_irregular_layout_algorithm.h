@@ -106,15 +106,6 @@ private:
     // ========================================== MeasureOnJump functions =====================================
 
     void MeasureOnJump(float mainSize);
-    /**
-     * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values, based on current position of
-     * jumpIdx_ item.
-     *
-     * REQUIRES: scrollAlign_ is set to AUTO.
-     * @param mainSize The main-axis length of the grid.
-     * @return ScrollAlign value transformed from AUTO.
-     */
-    ScrollAlign TransformAutoScrollAlign(float mainSize) const;
 
     /**
      * @brief Find the line the jumpIdx item resides in. If not in matrix, fill the matrix up to [jumpIdx].

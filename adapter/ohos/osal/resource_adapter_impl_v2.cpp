@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT,
     THEME_PATTERN_TEXTFIELD,
     THEME_PATTERN_TEXT_OVERLAY,
+    THEME_PATTERN_CONTAINER_MODAL
 };
 const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
@@ -747,9 +748,14 @@ uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
 uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
 {
     uint32_t result = 0;
+    auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, -1);
-    manager->GetSymbolByName(resName, result);
+    auto state = manager->GetSymbolByName(actualResName.c_str(), result);
+    if (state != Global::Resource::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
+            resName, state);
+    }
     return result;
 }
 

@@ -25,6 +25,11 @@
 #include "frameworks/core/common/card_scope.h"
 
 namespace OHOS::Ace::NG {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
@@ -68,10 +73,10 @@ bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, 
         result = Color(value->Uint32Value(vm));
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         return Color::ParseColorString(value->ToString(vm)->ToString(), result);
     }
-    if (value->IsObject()) {
+    if (value->IsObject(vm)) {
         auto obj = value->ToObject(vm);
         auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
         if (!resId->IsNumber()) {
@@ -88,10 +93,10 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         return Color::ParseColorString(value->ToString(vm)->ToString(), result);
     }
-    if (value->IsObject()) {
+    if (value->IsObject(vm)) {
         return ParseJsColorFromResource(vm, value, result);
     }
     return false;
@@ -100,14 +105,14 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
 bool ArkTSUtils::ParseJsColorAlpha(
     const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
 {
-    if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+    if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
         return false;
     }
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         return Color::ParseColorString(value->ToString(vm)->ToString(), result, defaultColor);
     }
     return ParseJsColorFromResource(vm, value, result);
@@ -116,7 +121,7 @@ bool ArkTSUtils::ParseJsColorAlpha(
 std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
 {
     panda::LocalScope scope(vm);
-    if (jsVal->IsObject()) {
+    if (jsVal->IsObject(vm)) {
         return panda::JSON::Stringify(vm, jsVal)->ToString(vm)->ToString();
     }
     return jsVal->ToString(vm)->ToString();
@@ -133,7 +138,7 @@ RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRe
     std::string moduleName;
     auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
     auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    if (bundle->IsString() && module->IsString()) {
+    if (bundle->IsString(vm) && module->IsString(vm)) {
         bundleName = bundle->ToString(vm)->ToString();
         moduleName = module->ToString(vm)->ToString();
     }
@@ -147,7 +152,7 @@ RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRe
         std::string valueString = ToString(vm, item).c_str();
 
         ResourceObjectParams resObjParams { .value = valueString };
-        if (item->IsString()) {
+        if (item->IsString(vm)) {
             resObjParams.type = ResourceObjectParamType::STRING;
         } else if (item->IsNumber()) {
             if (std::regex_match(item->ToString(vm)->ToString(), FLOAT_PATTERN)) {
@@ -170,7 +175,7 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
         auto obj = jsObj->ToObject(vm);
         auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
         auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString() && module->IsString()) {
+        if (bundle->IsString(vm) && module->IsString(vm)) {
             bundleName = bundle->ToString(vm)->ToString();
             moduleName = module->ToString(vm)->ToString();
         }
@@ -225,7 +230,7 @@ bool IsGetResourceByName(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
     }
     auto bundleName = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
     auto moduleName = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    if (!bundleName->IsString() || !moduleName->IsString()) {
+    if (!bundleName->IsString(vm) || !moduleName->IsString(vm)) {
         return false;
     }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
@@ -288,7 +293,7 @@ void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>&
     auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     auto identity = panda::ArrayRef::GetValueAt(vm, params, 0);
-    if (!identity->IsString()) {
+    if (!identity->IsString(vm)) {
         return;
     }
     resName = identity->ToString(vm)->ToString();
@@ -299,7 +304,7 @@ void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>&
     }
 
     auto moduleName = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-    if (moduleName->IsString() && moduleName->ToString(vm)->ToString().empty()) {
+    if (moduleName->IsString(vm) && moduleName->ToString(vm)->ToString().empty()) {
         std::regex resNameRegex(RESOURCE_NAME_PATTERN);
         std::smatch resNameResults;
         if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
@@ -368,7 +373,7 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
     ResourceType resType;
     std::string targetModule;
     std::string resName;
-    if (resId->IsString()) {
+    if (resId->IsString(vm)) {
         auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
         int32_t typeNum = -1;
         if (type->IsNumber()) {
@@ -582,7 +587,7 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
 
 bool ArkTSUtils::ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
+    if (!jsValue->IsNumber() && !jsValue->IsObject(vm)) {
         return false;
     }
 
@@ -698,10 +703,10 @@ bool ArkTSUtils::ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value,
         result = value->ToNumber(vm)->Value();
         return true;
     }
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         return StringUtils::StringToDouble(value->ToString(vm)->ToString(), result);
     }
-    if (value->IsObject()) {
+    if (value->IsObject(vm)) {
         return ParseResourceToDouble(vm, value, result);
     }
     return false;
@@ -738,21 +743,21 @@ bool ArkTSUtils::ParseAllRadius(const EcmaVM* vm, const Local<JSValueRef>& args,
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+    if (!jsValue->IsNumber() && !jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
         return true;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         auto value = jsValue->ToString(vm)->ToString();
         if (value.back() == '%' && !isSupportPercent) {
             return false;
         }
         return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
     }
-    if (jsValue->IsObject()) {
+    if (jsValue->IsObject(vm)) {
         return ParseJsDimensionFromResourceNG(vm, jsValue, defaultUnit, result);
     }
     return false;
@@ -767,7 +772,7 @@ bool ArkTSUtils::ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> 
 bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, bool isSupportPercent, bool enableCheckInvalidvalue)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+    if (!jsValue->IsNumber() && !jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
 
@@ -775,7 +780,7 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
         return true;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         auto stringValue = jsValue->ToString(vm)->ToString();
         if (stringValue.back() == '%' && !isSupportPercent) {
             return false;
@@ -792,7 +797,7 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
         return true;
     }
-    if (jsValue->IsObject()) {
+    if (jsValue->IsObject(vm)) {
         return ParseJsDimensionFromResource(vm, jsValue, defaultUnit, result);
     }
     return false;
@@ -817,7 +822,7 @@ bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSVal
         return false;
     }
 
-    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+    if (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString().empty()) {
         return false;
     }
 
@@ -843,14 +848,14 @@ bool ArkTSUtils::ParseJsFontFamilies(
     const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result)
 {
     result.clear();
-    if (!jsValue->IsString() && !jsValue->IsObject()) {
+    if (!jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         result = Framework::ConvertStrToFontFamilies(jsValue->ToString(vm)->ToString());
         return true;
     }
-    if (jsValue->IsObject()) {
+    if (jsValue->IsObject(vm)) {
         auto obj = jsValue->ToObject(vm);
         auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
         if (!resId->IsNumber()) {
@@ -914,14 +919,14 @@ bool ArkTSUtils::ParseJsLengthMetrics(
 
 bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
 {
-    if (!jsValue->IsObject() && !jsValue->IsString()) {
+    if (!jsValue->IsObject(vm) && !jsValue->IsString(vm)) {
         return false;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         result = jsValue->ToString(vm)->ToString();
         return true;
     }
-    if (jsValue->IsObject()) {
+    if (jsValue->IsObject(vm)) {
         auto obj = jsValue->ToObject(vm);
         CompleteResourceObject(vm, obj);
         auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
@@ -952,7 +957,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
             auto fileName = panda::ArrayRef::GetValueAt(vm, params, 0);
-            if (!fileName->IsString()) {
+            if (!fileName->IsString(vm)) {
                 return false;
             }
             result = resourceWrapper->GetRawfile(fileName->ToString(vm)->ToString());
@@ -987,17 +992,17 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
 void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result)
 {
     result = DEFAULT_STR;
-    if (!value->IsNull() && value->IsString()) {
+    if (!value->IsNull() && value->IsString(vm)) {
         result = value->ToString(vm)->ToString();
     }
-    if (value->IsObject()) {
+    if (value->IsObject(vm)) {
         ParseJsStringFromResource(vm, value, result);
     }
 }
 
 bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)
 {
-    if (!values->IsArray(vm) && !values->IsObject()) {
+    if (!values->IsArray(vm) && !values->IsObject(vm)) {
         return false;
     }
 
@@ -1006,7 +1011,7 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
         Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
         if (value->IsNumber()) {
             result.emplace_back(value->Uint32Value(vm));
-        } else if (value->IsObject()) {
+        } else if (value->IsObject(vm)) {
             uint32_t singleResInt;
             if (ParseJsInteger(vm, value, singleResInt)) {
                 result.emplace_back(singleResInt);
@@ -1022,14 +1027,14 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
 
 bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
-    if (!jsValue->IsString() && !jsValue->IsObject()) {
+    if (!jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
-    if (jsValue->IsString()) {
+    if (jsValue->IsString(vm)) {
         result = jsValue->ToString(vm)->ToString();
         return true;
     }
-    if (jsValue->IsObject()) {
+    if (jsValue->IsObject(vm)) {
         return ArkTSUtils::ParseJsStringFromResource(vm, jsValue, result);
     }
     return false;
@@ -1048,7 +1053,7 @@ std::string GetReplaceContentStr(
             return std::to_string(item->ToNumber(vm)->Value());
         }
     } else if (type == "s") {
-        if (item->IsString()) {
+        if (item->IsString(vm)) {
             return item->ToString(vm)->ToString();
         }
     } else if (type == "f") {
@@ -1171,7 +1176,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
 
 bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result)
 {
-    if (!jsValue->IsObject()) {
+    if (!jsValue->IsObject(vm)) {
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
@@ -1207,14 +1212,14 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
 void ArkTSUtils::GetJsMediaBundleInfo(
     const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName)
 {
-    if (!jsValue->IsObject() || jsValue->IsString()) {
+    if (!jsValue->IsObject(vm) || jsValue->IsString(vm)) {
         return;
     }
     auto jsObj = jsValue->ToObject(vm);
     if (!jsObj->IsUndefined()) {
         auto bundle = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
         auto module = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString() && module->IsString()) {
+        if (bundle->IsString(vm) && module->IsString(vm)) {
             bundleName = bundle->ToString(vm)->ToString();
             moduleName = module->ToString(vm)->ToString();
         }
@@ -1224,7 +1229,7 @@ void ArkTSUtils::GetJsMediaBundleInfo(
 bool ArkTSUtils::ParseJsColorStrategy(
     const EcmaVM* vm, const Local<JSValueRef>& value, ForegroundColorStrategy& strategy)
 {
-    if (value->IsString()) {
+    if (value->IsString(vm)) {
         std::string colorStr = value->ToString(vm)->ToString();
         if (colorStr.compare("invert") == 0) {
             strategy = ForegroundColorStrategy::INVERT;
@@ -1244,39 +1249,39 @@ bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &js
     result.showModuleName = "";
     result.hideModuleName = "";
 
-    if (!jsOnIconSrc->IsString() && !jsOnIconSrc->IsObject()
-        && !jsOffIconSrc->IsString() && !jsOffIconSrc->IsObject()) {
+    if (!jsOnIconSrc->IsString(vm) && !jsOnIconSrc->IsObject(vm)
+        && !jsOffIconSrc->IsString(vm) && !jsOffIconSrc->IsObject(vm)) {
         return false;
     }
 
-    if (jsOnIconSrc->IsString()) {
+    if (jsOnIconSrc->IsString(vm)) {
         result.showResult = jsOnIconSrc->ToString(vm)->ToString();
     }
 
-    if (jsOnIconSrc->IsObject()) {
+    if (jsOnIconSrc->IsObject(vm)) {
         auto obj = jsOnIconSrc->ToObject(vm);
         std::string bundleName;
         std::string moduleName;
         auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
         auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString() && module->IsString()) {
+        if (bundle->IsString(vm) && module->IsString(vm)) {
             result.showBundleName = bundle->ToString(vm)->ToString();
             result.showModuleName = module->ToString(vm)->ToString();
         }
         ParseJsMedia(vm, jsOnIconSrc, result.showResult);
     }
 
-    if (jsOffIconSrc->IsString()) {
+    if (jsOffIconSrc->IsString(vm)) {
         result.hideResult = jsOffIconSrc->ToString(vm)->ToString();
     }
 
-    if (jsOffIconSrc->IsObject()) {
+    if (jsOffIconSrc->IsObject(vm)) {
         auto obj = jsOffIconSrc->ToObject(vm);
         std::string bundleName;
         std::string moduleName;
         auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
         auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
-        if (bundle->IsString() && module->IsString()) {
+        if (bundle->IsString(vm) && module->IsString(vm)) {
             result.hideBundleName = bundle->ToString(vm)->ToString();
             result.hideModuleName = module->ToString(vm)->ToString();
         }
@@ -1438,6 +1443,7 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, jsObj);
     auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     if (resId->IsNull() || !resId->IsNumber()) {
         return false;
@@ -1450,6 +1456,25 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     if (!resourceWrapper) {
         return false;
     }
+    auto resIdNum = resId->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->ToString(vm)->ToString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        symbolId = symbol;
+        return true;
+    }
+ 
     auto symbol = resourceWrapper->GetSymbolById(resId->Uint32Value(vm));
     if (!symbol) {
         return false;
@@ -1457,4 +1482,308 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     symbolId = symbol;
     return true;
 }
+
+BorderStyle ArkTSUtils::ConvertBorderStyle(int32_t value)
+{
+    auto style = static_cast<BorderStyle>(value);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        style = BorderStyle::SOLID;
+    }
+    return style;
+}
+
+void ArkTSUtils::PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
+    std::vector<ArkUI_Float32> &options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
+    }
+}
+
+void ArkTSUtils::ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+
+    ParseOuterBorder(vm, leftArgs, leftDim);
+    ParseOuterBorder(vm, rightArgs, rightDim);
+    ParseOuterBorder(vm, topArgs, topDim);
+    ParseOuterBorder(vm, bottomArgs, bottomDim);
+
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
+void ArkTSUtils::PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
+{
+    options.push_back(static_cast<uint32_t>(valueColor.has_value()));
+    if (valueColor.has_value()) {
+        options.push_back(static_cast<uint32_t>(valueColor.value().GetValue()));
+    } else {
+        options.push_back(0);
+    }
+}
+
+void ArkTSUtils::ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBorderColorVector(leftColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+void ArkTSUtils::ParseOuterBorderRadius(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values);
+    PushOuterBorderDimensionVector(topRightOptional, values);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values);
+    PushOuterBorderDimensionVector(bottomRightOptional, values);
+}
+
+void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values, units);
+    PushOuterBorderDimensionVector(topRightOptional, values, units);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
+    PushOuterBorderDimensionVector(bottomRightOptional, values, units);
+}
+
+void ArkTSUtils::PushOuterBorderStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
+{
+    options.push_back(static_cast<uint32_t>(value.has_value()));
+    if (value.has_value()) {
+        options.push_back(static_cast<uint32_t>(value.value()));
+    } else {
+        options.push_back(NUM_0);
+    }
+}
+
+void ArkTSUtils::ParseOuterBorderStyle(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+{
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+
+    auto topArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    auto rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    auto leftArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    if (!topArg->IsUndefined() && topArg->IsNumber()) {
+        styleTop = ConvertBorderStyle(topArg->Int32Value(vm));
+    }
+    if (!rightArg->IsUndefined() && rightArg->IsNumber()) {
+        styleRight = ConvertBorderStyle(rightArg->Int32Value(vm));
+    }
+    if (!bottomArg->IsUndefined() && bottomArg->IsNumber()) {
+        styleBottom = ConvertBorderStyle(bottomArg->Int32Value(vm));
+    }
+    if (!leftArg->IsUndefined() && leftArg->IsNumber()) {
+        styleLeft = ConvertBorderStyle(leftArg->Int32Value(vm));
+    }
+
+    PushOuterBorderStyleVector(styleLeft, values);
+    PushOuterBorderStyleVector(styleRight, values);
+    PushOuterBorderStyleVector(styleTop, values);
+    PushOuterBorderStyleVector(styleBottom, values);
+}
+
+void ArkTSUtils::SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, ArkUI_Float32 values[],
+    int units[], int index)
+{
+    CalcDimension borderDimension;
+    if (!args->IsUndefined()) {
+        if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
+            values[index] = borderDimension.Value();
+            units[index] = static_cast<int>(borderDimension.Unit());
+        } else {
+            values[index] = 0;
+            units[index] = static_cast<int>(DimensionUnit::VP);
+        }
+    } else {
+        values[index] = -1;
+        units[index] = static_cast<int>(DimensionUnit::INVALID);
+    }
+}
+
+ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg)
+{
+    ArkUISizeType size = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    CalcDimension dimen(0, DimensionUnit::VP);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimen)) {
+        size.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            size.string = dimen.CalcValue().c_str();
+        } else {
+            size.value = dimen.Value();
+        }
+    }
+    return size;
+}
+
+bool ArkTSUtils::CheckKeysPressed(
+    const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
+{
+    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
+        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
+        return it != pressedKeyCodes.end();
+    };
+    for (auto& checkKeyCode : checkKeyCodes) {
+        if (checkKeyCode == "ctrl") {
+            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "shift") {
+            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "alt") {
+            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "fn") {
+            if (!hasKeyCode(KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+    }
+    return true;
+}
+
+void ArkTSUtils::ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code)
+{
+    auto errorVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, msg.c_str()));
+    auto codeVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, std::to_string(code).c_str()));
+    Local<panda::StringRef> codeKey = panda::StringRef::NewFromUtf8(vm, "code");
+    Local<panda::ObjectRef> errorObj(errorVal);
+    errorObj->Set(vm, codeKey, codeVal);
+    panda::JSNApi::ThrowException(vm, errorObj);
+}
+
+Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
+    ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes)
+{
+    auto vm = info->GetVM();
+    auto param = info->GetCallArgRef(0);
+    if (!param->IsArray(vm)) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    std::vector<std::string> checkKeyCodes;
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    auto paramArray = panda::Local<panda::ArrayRef>(param);
+    auto length = paramArray->Length(vm);
+    for (size_t i = 0; i < length; i++) {
+        auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
+        auto code = value->ToString(vm)->ToString();
+        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
+        if (it == validKeyCodes.end()) {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return JSValueRef::Undefined(info->GetVM());
+        } else {
+            checkKeyCodes.emplace_back(code);
+        }
+    }
+    if (checkKeyCodes.empty()) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    if (ArkTSUtils::CheckKeysPressed(vm, pressedKeyCodes, checkKeyCodes)) {
+        return panda::BooleanRef::New(vm, true);
+    } else {
+        return panda::BooleanRef::New(vm, false);
+    }
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
+    return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
+}
+
 } // namespace OHOS::Ace::NG

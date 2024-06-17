@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ struct Index {
         .width(TITLE_ICON_SIZE)
         .interpolation(ImageInterpolation.Medium)
         .focusable(false)
-        .margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
+        .margin({ left: TITLE_ELEMENT_MARGIN_HORIZONTAL, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
         .opacity(this.iconOpacity)
         .draggable(false)
 
@@ -72,11 +72,12 @@ struct Index {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .textAlign(TextAlign.Start)
         .layoutWeight(1.0)
+        .opacity(this.iconOpacity)
     }
     .width('100%')
     .height(TITLE_ROW_HEIGHT)
     .justifyContent(FlexAlign.Start)
     .alignItems(VerticalAlign.Center)
-    .padding({ top: 6, bottom: 6 })
+    .padding({ top: 6, bottom: 6, left: 8, right: 8 })
    }
 }

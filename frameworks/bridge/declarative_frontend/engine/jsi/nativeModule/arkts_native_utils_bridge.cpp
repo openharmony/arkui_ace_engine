@@ -17,6 +17,8 @@
 
 #include "jsnapi_expo.h"
 
+#include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -26,13 +28,14 @@ constexpr uint32_t ARRAY_INDEX_RED = 0;
 constexpr uint32_t ARRAY_INDEX_GREEN = 1;
 constexpr uint32_t ARRAY_INDEX_BLUE = 2;
 constexpr uint32_t ARRAY_INDEX_ALPHA = 3;
+constexpr uint32_t ARRAY_SIZE = 2;
 
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsNativePointer()) {
+    if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto* weak = new NativeWeakRef(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
@@ -68,7 +71,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeStrongRef(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsNativePointer()) {
+    if (firstArg.IsEmpty() || !firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     auto refPtr = AceType::Claim(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
@@ -136,7 +139,7 @@ ArkUINativeModuleValue NativeUtilsBridge::ParseResourceColor(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (firstArg.IsEmpty() || !firstArg->IsObject()) {
+    if (firstArg.IsEmpty() || !firstArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     Color color;
@@ -173,5 +176,21 @@ ArkUINativeModuleValue NativeUtilsBridge::BlendColor(ArkUIRuntimeCallInfo* runti
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_BLUE, panda::NumberRef::New(vm, blendColor.GetBlue()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_ALPHA, panda::NumberRef::New(vm, blendColor.GetAlpha()));
     return chanels;
+}
+
+ArkUINativeModuleValue NativeUtilsBridge::ResoureToLengthMetrics(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CalcDimension result;
+    ArkTSUtils::ParseJsDimensionFromResourceNG(vm, firstArg, DimensionUnit::VP, result);
+    Local<panda::ArrayRef> length = panda::ArrayRef::New(vm, ARRAY_SIZE);
+    panda::ArrayRef::SetValueAt(vm, length, 0, panda::NumberRef::New(vm, result.Value()));
+    panda::ArrayRef::SetValueAt(vm, length, 1, panda::NumberRef::New(vm, static_cast<int32_t>(result.Unit())));
+    return length;
 }
 } // namespace OHOS::Ace::NG

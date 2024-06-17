@@ -146,6 +146,9 @@ public:
     // Percentage unit conversion is not supported.
     double ConvertToPx() const;
 
+    // Percentage unit conversion is not supported.
+    double ConvertToFp() const;
+
     double GetNativeValue(DimensionUnit unit) const
     {
         if (unit_ == unit || unit == DimensionUnit::PERCENT) {

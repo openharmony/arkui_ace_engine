@@ -48,12 +48,17 @@ class FrameNodeFinalizationRegisterProxy {
   private finalizationRegistry_: FinalizationRegistry;
 }
 
-globalThis.__AttachToMainTree__ = function __AttachToMainTree__(nodeId: number) {
-  if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-    FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.set(nodeId, FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref());
-  }
+class NodeControllerRegisterProxy {
+  public static instance_: NodeControllerRegisterProxy = new NodeControllerRegisterProxy();
+  public static __NodeControllerMap__ = new Map<number, NodeController>();
 }
 
-globalThis.__DetachToMainTree__ = function __DetachToMainTree__(nodeId: number) {
-  FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_.delete(nodeId);
+globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(containerId: number,nodeController:NodeController ) {
+  NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
+}
+
+globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number) {
+  let nodeController: NodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
+  nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+  NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 }

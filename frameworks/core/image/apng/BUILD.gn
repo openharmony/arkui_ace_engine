@@ -22,11 +22,7 @@ template("ace_core_apng_source_set") {
     defines += invoker.defines
 
     #add png support
-    include_dirs = [
-      "$flutter_root/skia/third_party/libpng",
-      "$flutter_root/skia/third_party/externals/libpng",
-      "//third_party/zlib",
-    ]
+    include_dirs = [ "//third_party/zlib" ]
 
     # apng support file
     sources = [
@@ -40,7 +36,6 @@ template("ace_core_apng_source_set") {
     defines += [ "APNG_IMAGE_SUPPORT" ]
 
     deps = [
-      "$skia_root_new:skia_$platform",
       "../../pipeline:ace_core_pipeline_$platform",
       "../../pipeline_ng:ace_core_pipeline_ng_$platform",
     ]

@@ -30,10 +30,19 @@ void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32
         std::string idStr(values[i].id);
         info.id = idStr;
         info.direction = static_cast<LineDirection>(values[i].direction);
-        CalcDimension start(values[i].start, DimensionUnit::VP);
-        CalcDimension end(values[i].end, DimensionUnit::VP);
-        info.start = start;
-        info.end = end;
+        if (values[i].hasStart && values[i].hasEnd) {
+            CalcDimension start(values[i].start, DimensionUnit::VP);
+            info.start = start;
+        } else if (values[i].hasStart) {
+            CalcDimension start(values[i].start, DimensionUnit::VP);
+            info.start = start;
+        } else if (values[i].hasEnd) {
+            CalcDimension end(values[i].end, DimensionUnit::VP);
+            info.end = end;
+        } else {
+            CalcDimension start(0.0, DimensionUnit::VP);
+            info.start = start;
+        }
         guidelineInfos.push_back(info);
     }
     RelativeContainerModelNG::SetGuideline(frameNode, guidelineInfos);

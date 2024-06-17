@@ -155,6 +155,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
     void DoAnimation();
     void CreateAnimation();
@@ -177,6 +178,7 @@ private:
     void OnUpdateShowDivider(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
     void OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host);
+    void OnDividerMouseEvent(MouseInfo& info);
     void OnHover(bool isHover);
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
@@ -192,8 +194,10 @@ private:
     void UpdateDividerShadow() const;
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
+    void SetSideBarMask(bool isWindowFocus) const;
 
     RefPtr<InputEvent> hoverEvent_;
+    RefPtr<InputEvent> dividerMouseEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
     RefPtr<InputEvent> controlButtonHoverEvent_;
     RefPtr<PanEvent> panEvent_;
@@ -215,6 +219,11 @@ private:
     bool autoHide_ = false;
     bool inAnimation_ = false;
     bool isRightToLeft_ = false;
+    bool isInDividerDrag_ = false;
+    bool isDividerDraggable_ = true;
+    bool isWindowFocus_ = true;
+    bool isMousePressing_ = false;
+    bool isResizeMouseStyle_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
@@ -231,6 +240,16 @@ private:
     Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    GestureEventFunc longPressActionEnd_;
+    RefPtr<FrameNode> dialogNode_;
+    ImageSourceInfo imageInfo_;
+    void InitLongPressEvent(const RefPtr<FrameNode>& buttonNode);
+    void HandleLongPressEvent();
+    void HandleLongPressActionEnd();
+    void ShowDialogWithNode();
+    bool isDialogShow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

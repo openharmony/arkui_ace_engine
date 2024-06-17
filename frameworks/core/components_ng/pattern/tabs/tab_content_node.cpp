@@ -113,6 +113,10 @@ RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
 void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto tabBar = JsonUtil::Create(true);
     auto tabContentPattern = GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);

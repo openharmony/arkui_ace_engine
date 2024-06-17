@@ -15,10 +15,11 @@
 
 #include <string>
 
-#include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
+
+#include "base/log/ace_performance_monitor.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -53,9 +54,6 @@ template<typename C>
 thread_local panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
 
 template<typename C>
-thread_local std::vector<shared_ptr<int32_t>> JsiClass<C>::functionIds_;
-
-template<typename C>
 void JsiClass<C>::Declare(const char* name)
 {
     className_ = name;
@@ -68,28 +66,27 @@ void JsiClass<C>::Declare(const char* name)
 
 template<typename C>
 template<typename Base, typename R, typename... Args>
-void JsiClass<C>::Method(const char* name, R (Base::*func)(Args...), int id)
+void JsiClass<C>::Method(const char* name, FunctionBinding<Base, R, Args...>* binding)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    auto funcId = std::make_shared<int32_t>(id);
-    functionIds_.emplace_back(funcId);
     customFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm,
-        panda::FunctionRef::New(vm, MethodCallback<Base, R, Args...>, nullptr, funcId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(vm, MethodCallback<Base, R, Args...>, nullptr, (void*)binding)));
+
 }
 
 template<typename C>
 template<typename T>
-void JsiClass<C>::CustomMethod(const char* name, MemberFunctionCallback<T> callback, int id)
+void JsiClass<C>::CustomMethod(
+    const char* name, FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* binding)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    auto funcId = std::make_shared<int32_t>(id);
-    functionIds_.emplace_back(funcId);
     customFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, funcId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(
+                          vm, InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, (void*)binding)));
 }
 
 template<typename C>
@@ -97,41 +94,37 @@ void JsiClass<C>::CustomMethod(const char* name, FunctionCallback callback)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    customFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
+    customFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
 }
 
 template<typename C>
 template<typename T>
-void JsiClass<C>::CustomMethod(const char* name, JSMemberFunctionCallback<T> callback, int id)
+void JsiClass<C>::CustomMethod(const char* name, FunctionBinding<T, void, const JSCallbackInfo&>* binding)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    auto funcId = std::make_shared<int32_t>(id);
-    functionIds_.emplace_back(funcId);
     customFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalJSMemberFunctionCallback<T>, nullptr, funcId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(vm, InternalJSMemberFunctionCallback<T>, nullptr, (void*)binding)));
 }
 
 template<typename C>
 template<typename T>
-void JsiClass<C>::CustomProperty(const char* name, MemberFunctionGetCallback<T> callback, int getterId, int setterId)
+void JsiClass<C>::CustomProperty(const char* name,
+    FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* getter,
+    FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>* setter)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    auto funcGetId = std::make_shared<int32_t>(getterId);
-    functionIds_.emplace_back(funcGetId);
-
     customGetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, funcGetId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(
+                          vm, InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, (void*)getter)));
 
-    auto funcSetId = std::make_shared<int32_t>(setterId);
-    functionIds_.emplace_back(funcSetId);
     customSetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, funcSetId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(
+                          vm, InternalMemberFunctionCallback<T, panda::JsiRuntimeCallInfo*>, nullptr, (void*)setter)));
 }
 
 template<typename C>
@@ -139,28 +132,23 @@ void JsiClass<C>::CustomProperty(const char* name, FunctionGetCallback getter, F
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    customGetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, getter)));
-    customSetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, setter)));
+    customGetFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, getter)));
+    customSetFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, setter)));
 }
 
 template<typename C>
 template<typename T>
-void JsiClass<C>::CustomProperty(const char* name, JSMemberFunctionCallback<T> callback, int getterId, int setterId)
+void JsiClass<C>::CustomProperty(const char* name, FunctionBinding<T, void, const JSCallbackInfo&>* getter,
+    FunctionBinding<T, void, const JSCallbackInfo&>* setter)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    auto funcGetId = std::make_shared<int32_t>(getterId);
-    functionIds_.emplace_back(funcGetId);
     customGetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalJSMemberFunctionCallback<T>, nullptr, funcGetId.get())));
-    auto funcSetId = std::make_shared<int32_t>(setterId);
-    functionIds_.emplace_back(funcSetId);
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(vm, InternalJSMemberFunctionCallback<T>, nullptr, (void*)getter)));
     customSetFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        InternalJSMemberFunctionCallback<T>, nullptr, funcSetId.get())));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(vm, InternalJSMemberFunctionCallback<T>, nullptr, (void*)setter)));
 }
 
 template<typename C>
@@ -169,9 +157,9 @@ void JsiClass<C>::StaticMethod(const char* name, StaticFunctionBinding<R, Args..
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    staticFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        StaticMethodCallback<R, Args...>, nullptr, (void*)staticFunctionBinding)));
+    staticFunctions_.emplace(name,
+        panda::Global<panda::FunctionRef>(
+            vm, panda::FunctionRef::New(vm, StaticMethodCallback<R, Args...>, nullptr, (void*)staticFunctionBinding)));
 }
 
 template<typename C>
@@ -181,8 +169,8 @@ void JsiClass<C>::StaticMethod(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     staticFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm,
-        JSStaticMethodCallback, nullptr, (void*)staticFunctionBinding)));
+        name, panda::Global<panda::FunctionRef>(
+                  vm, panda::FunctionRef::New(vm, JSStaticMethodCallback, nullptr, (void*)staticFunctionBinding)));
 }
 
 template<typename C>
@@ -190,8 +178,7 @@ void JsiClass<C>::CustomStaticMethod(const char* name, FunctionCallback callback
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    staticFunctions_.emplace(
-        name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
+    staticFunctions_.emplace(name, panda::Global<panda::FunctionRef>(vm, panda::FunctionRef::New(vm, callback)));
 }
 
 template<typename C>
@@ -227,8 +214,8 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
-                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(), valSet.ToLocal());
+                prototype->SetAccessorProperty(
+                    vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()), valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
@@ -263,8 +250,8 @@ void JsiClass<C>::Bind(
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
-                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(), valSet.ToLocal());
+                prototype->SetAccessorProperty(
+                    vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()), valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
@@ -298,8 +285,8 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
-                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(), valSet.ToLocal());
+                prototype->SetAccessorProperty(
+                    vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()), valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
@@ -336,8 +323,8 @@ void JsiClass<C>::InheritAndBind(
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     LocalScope scope(vm);
-    panda::Local<panda::JSValueRef> hasExistRef = t->Get(vm,
-        panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
+    panda::Local<panda::JSValueRef> hasExistRef =
+        t->Get(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())));
     if (hasExistRef.IsEmpty()) {
         return;
     }
@@ -349,8 +336,8 @@ void JsiClass<C>::InheritAndBind(
         vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
 
-    panda::Local<panda::JSValueRef> getResult = t->Get(vm,
-        panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, JSClassImpl<Base, JsiClass>::JSName())));
+    panda::Local<panda::JSValueRef> getResult = t->Get(
+        vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, JSClassImpl<Base, JsiClass>::JSName())));
     if (getResult.IsEmpty()) {
         return;
     }
@@ -374,8 +361,8 @@ void JsiClass<C>::InheritAndBind(
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
-                prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(), valSet.ToLocal());
+                prototype->SetAccessorProperty(
+                    vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()), valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
@@ -398,20 +385,21 @@ std::unordered_map<std::string, panda::Global<panda::FunctionRef>>& JsiClass<C>:
 
 template<typename C>
 template<typename T, typename... Args>
-panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     T* instance = static_cast<T*>(ptr);
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
-    auto binding = ThisJSClass::GetFunctionBinding(index);
+    auto binding = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, panda::JsiRuntimeCallInfo*>*>(
+        runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
+    panda::JsiFastNativeScope scope(vm);
+    auto fnPtr = binding->Get();
     (instance->*fnPtr)(runtimeCallInfo);
     ACE_BUILD_TRACE_END()
 }
@@ -419,28 +407,26 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
 template<typename C>
 template<typename T>
 panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
-    panda::JsiRuntimeCallInfo *runtimeCallInfo)
+    panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    if (thisObj->IsProxy()) {
+    if (thisObj->IsProxy(vm)) {
         panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(thisObj);
         ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))->GetNativePointerField(0));
-    } else {
-        ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     }
 
     T* instance = static_cast<T*>(ptr);
 
-    int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
-    auto binding = ThisJSClass::GetFunctionBinding(index);
+    auto binding = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
+    panda::JsiFastNativeScope scope(vm);
+    auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
 
@@ -455,20 +441,20 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
 
 template<typename C>
 template<typename Class, typename R, typename... Args>
-panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     Class* instance = static_cast<Class*>(ptr);
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
-    auto binding = ThisJSClass::GetFunctionBinding(index);
+    auto binding = static_cast<FunctionBinding<Class, R, Args...>*>(runtimeCallInfo->GetData());
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
+    panda::JsiFastNativeScope scope(vm);
+    auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
     constexpr bool isVoid = std::is_void_v<R>;
@@ -499,29 +485,8 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
 }
 
 template<typename C>
-template<typename Class, typename R, typename... Args>
-panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
-{
-    panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
-    Class* instance = static_cast<Class*>(ptr);
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
-    auto binding = ThisJSClass::GetFunctionBinding(index);
-    if (binding == nullptr) {
-        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
-    }
-    STATIC_API_DURATION();
-    ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
-    JsiCallbackInfo info(runtimeCallInfo);
-    auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
-    (instance->*fnPtr)(info);
-    ACE_BUILD_TRACE_END()
-}
-
-template<typename C>
 template<typename R, typename... Args>
-panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto binding = static_cast<StaticFunctionBinding<R, Args...>*>(runtimeCallInfo->GetData());
@@ -530,6 +495,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -562,7 +528,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
 }
 
 template<typename C>
-panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto binding = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(runtimeCallInfo->GetData());
@@ -571,6 +537,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     }
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
+    panda::JsiFastNativeScope scope(vm);
     auto fnPtr = binding->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);
@@ -585,13 +552,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
 
 template<typename C>
 template<typename... Args>
-panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (!newTarget->IsFunction()) {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    if (!newTarget->IsFunction(vm)) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(runtimeCallInfo->GetVM()));
     }
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     C* instance = FunctionUtils::ConstructFromTuple<C>(tuple);
@@ -601,28 +568,28 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalConstructor(panda::JsiRunti
 }
 
 template<typename C>
-bool JsiClass<C>::CheckIfConstructCall(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+bool JsiClass<C>::CheckIfConstructCall(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     return true;
 }
 
 template<typename C>
-panda::Local<panda::JSValueRef> JsiClass<C>::ConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::ConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    if (!newTarget->IsFunction()) {
+    if (!newTarget->IsFunction(vm)) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
     return constructor_(runtimeCallInfo);
 }
 
 template<typename C>
-panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (newTarget->IsFunction() && jsConstructor_) {
+    if (newTarget->IsFunction(vm) && jsConstructor_) {
         JsiCallbackInfo info(runtimeCallInfo);
         jsConstructor_(info);
         auto retVal = info.GetReturnValue();

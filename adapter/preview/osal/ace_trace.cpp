@@ -16,29 +16,11 @@
 #include "base/log/ace_trace.h"
 
 namespace OHOS::Ace {
-
-bool AceTraceEnabled()
-{
-    return false;
-}
-
-void AceTraceBegin(const char* name)
-{
-}
-
-void AceTraceEnd()
-{
-}
-
-void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)
-{
-}
-
-void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace)
-{
-}
-
-void AceCountTrace(const char *key, int32_t count)
-{
-}
+void AceTraceBegin(const char* name) {}
+void AceTraceEnd() {}
+void AceTraceBeginCommercial(const char* name) {}
+void AceTraceEndCommercial() {}
+void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace) {}
+void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace) {}
+void AceCountTrace(const char *key, int32_t count) {}
 } // namespace OHOS::Ace

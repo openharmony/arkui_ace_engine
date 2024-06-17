@@ -48,6 +48,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("resizeable", propResizable_.value_or(false) ? "true" : "false", filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);

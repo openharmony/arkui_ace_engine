@@ -51,7 +51,9 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDynamicComponent>::StaticMethod("create", &JSDynamicComponent::Create, opt);
     JSClass<JSDynamicComponent>::StaticMethod("onSizeChanged", &JSDynamicComponent::SetOnSizeChanged, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSDynamicComponent>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDynamicComponent>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -59,7 +61,7 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument is invalid");
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument is invalid");
         return;
     }
     auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
@@ -67,7 +69,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
     if (!hapPathValue->IsString() || !abcPathValue->IsString() || !entryPointValue->IsString()) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument type is invalid");
         return;
     }
 
@@ -80,7 +82,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
+    TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
     auto hapPath = hapPathValue->ToString();
     auto abcPath = abcPathValue->ToString();
@@ -109,7 +111,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
 void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "OnSizeChanged argument is invalid");
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "OnSizeChanged argument is invalid");
         return;
     }
     auto execCtx = info.GetExecutionContext();

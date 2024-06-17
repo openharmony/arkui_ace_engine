@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h"
 #include "frameworks/core/components/counter/counter_theme.h"
 
 namespace OHOS::Ace {
@@ -66,7 +67,9 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
+    JSClass<JSCounter>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSCounter>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSCounter>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSCounter>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSCounter>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCounter>::InheritAndBind<JSContainerBase>(globalObj);
@@ -216,6 +219,7 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
 void JSCounter::Create()
 {
     CounterModel::GetInstance()->Create();
+    JSCounterTheme::ApplyTheme();
 }
 
 } // namespace OHOS::Ace::Framework

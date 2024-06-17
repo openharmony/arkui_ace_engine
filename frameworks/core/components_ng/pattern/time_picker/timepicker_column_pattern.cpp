@@ -22,6 +22,8 @@
 
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -81,7 +83,7 @@ void TimePickerColumnPattern::OnModifyDone()
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
@@ -125,43 +127,9 @@ void TimePickerColumnPattern::OnModifyDone()
     }
 }
 
-void TimePickerColumnPattern::InitMouseAndPressEvent()
+void TimePickerColumnPattern::ParseTouchListener()
 {
-    if (mouseEvent_ || touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto columnEventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(columnEventHub);
-    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
-    CHECK_NULL_VOID(touchListener);
-    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(columnGesture);
-    columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID(GetToss());
-    auto toss = GetToss();
-    CHECK_NULL_VOID(toss);
-    RefPtr<FrameNode> middleChild = nullptr;
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
-    auto midSize = childSize / 2;
-    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
-    CHECK_NULL_VOID(middleChild);
-    auto eventHub = middleChild->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
-    };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
-    auto gesture = middleChild->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
@@ -180,6 +148,47 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+}
+
+void TimePickerColumnPattern::ParseMouseEvent()
+{
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern) {
+            pattern->HandleMouseEvent(isHover);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+}
+
+void TimePickerColumnPattern::InitMouseAndPressEvent()
+{
+    if (mouseEvent_ || touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
+    RefPtr<FrameNode> middleChild = nullptr;
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    auto midSize = childSize / 2;
+    middleChild = DynamicCast<FrameNode>(host->GetChildAtIndex(midSize));
+    CHECK_NULL_VOID(middleChild);
+    auto eventHub = middleChild->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ParseMouseEvent();
+    inputHub->AddOnHoverEvent(mouseEvent_);
+    auto gesture = middleChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    ParseTouchListener();
     gesture->AddTouchEvent(touchListener_);
     for (int32_t i = 0; i < childSize; i++) {
         RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
@@ -322,6 +331,42 @@ bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void TimePickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = timePickerRowPattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = timePickerRowPattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = timePickerRowPattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        timePickerLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        timePickerLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        timePickerLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
 {
     auto host = GetHost();
@@ -348,6 +393,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     auto child = host->GetChildren();
     auto iter = child.begin();
+    InitTextFontFamily();
 
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
@@ -456,7 +502,7 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(uint32_t index, uint32_t showO
     if (showOptionCount != CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -483,7 +529,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     if (showOptionCount == CHILDREN_SIZE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -871,7 +917,7 @@ void TimePickerColumnPattern::CalcAlgorithmOffset(TimePickerScrollDirection dir,
 
 float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -939,7 +985,7 @@ float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScroll
 
 float TimePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, TimePickerScrollDirection dir)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -1037,7 +1083,7 @@ void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto childSize = host->GetChildren().size();
     if (childSize != CHILDREN_SIZE) {
@@ -1103,6 +1149,12 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
+        if (!NearZero(dragDelta) && !CanMove(LessNotEqual(dragDelta, 0))) {
+            dragDelta = 0.0;
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation();
+        }
         ScrollOption(dragDelta, true);
         offsetCurSet_ = dragDelta;
         yOffset_ = dragDelta;
@@ -1271,6 +1323,48 @@ void TimePickerColumnPattern::PlayRestAnimation()
     CreateAnimation(scrollDelta_, 0.0);
 }
 
+DimensionRect TimePickerColumnPattern::CalculateHotZone(
+    int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight)
+{
+    float hotZoneHeight = 0.0f;
+    float hotZoneOffsetY = 0.0f;
+    if (index == midSize) {
+        hotZoneHeight = middleChildHeight;
+    }
+    if (size_.Height() <= middleChildHeight) {
+        hotZoneHeight = index == midSize ? size_.Height() : 0;
+    } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)) {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = (size_.Height() - middleChildHeight) / MIDDLE_CHILD_INDEX;
+            hotZoneOffsetY = (index == midSize - 1) ? (otherChildHeight - hotZoneHeight) : 0;
+        }
+    } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = otherChildHeight;
+        } else if ((index == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+            hotZoneHeight = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight) /
+                            MIDDLE_CHILD_INDEX;
+            hotZoneOffsetY = (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHeight) : 0;
+        }
+    } else {
+        if ((index == midSize + 1) || (index == midSize - 1)) {
+            hotZoneHeight = otherChildHeight;
+        } else if ((index == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (index == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+            hotZoneHeight = otherChildHeight;
+        }
+    }
+    OffsetF hotZoneOffset;
+    SizeF hotZoneSize;
+    hotZoneOffset.SetX(0.0f);
+    hotZoneOffset.SetY(hotZoneOffsetY);
+    hotZoneSize.SetWidth(size_.Width());
+    hotZoneSize.SetHeight(hotZoneHeight);
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+    return hotZoneRegion;
+}
+
 void TimePickerColumnPattern::AddHotZoneRectToText()
 {
     auto host = GetHost();
@@ -1282,45 +1376,7 @@ void TimePickerColumnPattern::AddHotZoneRectToText()
     for (int32_t i = 0; i < childSize; i++) {
         RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
         CHECK_NULL_VOID(childNode);
-        float hotZoneHegiht = 0.0f;
-        float hotZoneOffsetY = 0.0f;
-        if (size_.Height() <= middleChildHeight) {
-            hotZoneHegiht = i == midSize ? size_.Height() : 0;
-        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)) {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = (size_.Height() - middleChildHeight) / MIDDLE_CHILD_INDEX;
-                hotZoneOffsetY = (i == midSize - 1) ? (otherChildHeight - hotZoneHegiht) : 0;
-            }
-        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = otherChildHeight;
-            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
-                hotZoneHegiht = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight) /
-                                MIDDLE_CHILD_INDEX;
-                hotZoneOffsetY = (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHegiht) : 0;
-            }
-        } else {
-            if (i == midSize) {
-                hotZoneHegiht = middleChildHeight;
-            } else if ((i == midSize + 1) || (i == midSize - 1)) {
-                hotZoneHegiht = otherChildHeight;
-            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
-                hotZoneHegiht = otherChildHeight;
-            }
-        }
-        OffsetF hotZoneOffset;
-        SizeF hotZoneSize;
-        hotZoneOffset.SetX(0.0f);
-        hotZoneOffset.SetY(hotZoneOffsetY);
-        hotZoneSize.SetWidth(size_.Width());
-        hotZoneSize.SetHeight(hotZoneHegiht);
-        DimensionRect hotZoneRegion;
-        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
-        hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+        DimensionRect hotZoneRegion = CalculateHotZone(i, midSize, middleChildHeight, otherChildHeight);
         childNode->AddHotZoneRect(hotZoneRegion);
     }
 }

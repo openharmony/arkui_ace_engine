@@ -749,10 +749,10 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
 }
 
 void ViewAbstractModelImpl::SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY, NG::OverlayType type)
+    const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type)
 {
-    if (buildFunc) {
+    if (buildFunc || contentNode) {
         return;
     }
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
@@ -1180,11 +1180,7 @@ void ViewAbstractModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
     box->SetOnDragStartId(ToDragFunc(std::move(onDragStart)));
 }
 
-void ViewAbstractModelImpl::SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag)
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetOnPreDragId(onPreDrag);
-}
+void ViewAbstractModelImpl::SetOnPreDrag(NG::OnPreDragFunc&& onPreDrag) {}
 
 void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
 {

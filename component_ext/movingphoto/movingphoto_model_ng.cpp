@@ -60,23 +60,25 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->HasImageSourceInfo()) {
-        auto imageSourceInfo = layoutProperty->GetImageSourceInfo().value();
-        const std::string& preValue = imageSourceInfo.GetSrc();
-        if (preValue == value) {
+    if (layoutProperty->HasMovingPhotoUri()) {
+        auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
+        if (movingPhotoUri == value) {
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
             return;
         }
     }
-
-    ImageSourceInfo src;
-    src.SetSrc(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);
+    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
     CHECK_NULL_VOID(dataProvider);
+
+    std::string imageSrc = dataProvider->GetMovingPhotoImageUri(value);
+    ImageSourceInfo src;
+    src.SetSrc(imageSrc);
+    ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);
+
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
 }
@@ -110,6 +112,15 @@ void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
     auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
+}
+
+void MovingPhotoModelNG::SetOnPause(MovingPhotoEventFunc&& onPause)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPause(std::move(onPause));
 }
 
 void MovingPhotoModelNG::SetOnFinish(MovingPhotoEventFunc&& onFinish)

@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, nullptr);
 
     double speed = context->NormalizeToPx(Dimension(speed_, DimensionUnit::VP));
@@ -36,6 +36,7 @@ RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
     swipeRecognizer->SetPriority(priority_);
     swipeRecognizer->SetPriorityMask(gestureMask_);
     swipeRecognizer->SetGestureInfo(gestureInfo_);
+    swipeRecognizer->SetUserData(userData_);
     return swipeRecognizer;
 }
 

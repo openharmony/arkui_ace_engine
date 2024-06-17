@@ -24,7 +24,12 @@ namespace OHOS::Ace::NG {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern) {}
+    explicit OnTextChangedListenerImpl(const WeakPtr<TextInputClient>& pattern) : pattern_(pattern)
+    {
+        auto client = pattern_.Upgrade();
+        CHECK_NULL_VOID(client);
+        patternInstanceId_ = client->GetInstanceId();
+    }
     ~OnTextChangedListenerImpl() override = default;
 
     void InsertText(const std::u16string& text) override;
@@ -55,8 +60,10 @@ private:
     void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
+    int32_t CheckPreviewTextParams(const std::u16string &text, const MiscServices::Range &range);
 
     WeakPtr<TextInputClient> pattern_;
+    int32_t patternInstanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

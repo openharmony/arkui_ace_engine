@@ -61,7 +61,9 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
     JSClass<JSHyperlink>::StaticMethod("create", &JSHyperlink::Create, opt);
     JSClass<JSHyperlink>::StaticMethod("color", &JSHyperlink::SetColor, opt);
     JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop);
+    JSClass<JSHyperlink>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSHyperlink>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSHyperlink>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSHyperlink>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSHyperlink>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSHyperlink>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

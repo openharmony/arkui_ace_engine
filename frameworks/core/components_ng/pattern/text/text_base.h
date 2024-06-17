@@ -23,7 +23,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -108,7 +108,8 @@ public:
             }
         } else {
             if (static_cast<size_t>(extend) <= (text.length())) {
-                aroundChar = text[std::min(static_cast<int32_t>(text.length() - 1), extend)];
+                aroundChar =
+                    text[std::min(static_cast<int32_t>(text.length() ? text.length() - 1 : 0), extend)];
             }
         }
         return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
@@ -134,21 +135,18 @@ public:
         }
         selectedRect.clear();
         auto firstRect = lineGroup.begin()->second;
-        if (lineGroup.size() == 1) {
-            selectedRect.emplace_back(firstRect);
-            return;
+        float lastLineBottom = firstRect.Top();
+        auto end = *(lineGroup.rbegin());
+        for (auto const& line : lineGroup) {
+            if (line == end) {
+                break;
+            }
+            auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
+                line.second.Bottom() - lastLineBottom);
+            selectedRect.emplace_back(rect);
+            lastLineBottom = line.second.Bottom();
         }
-        firstRect.SetWidth(longestLine - firstRect.Left());
-        selectedRect.emplace_back(firstRect);
-        auto endRect = lineGroup.rbegin()->second;
-        endRect.SetWidth(endRect.Right());
-        endRect.SetLeft(0.0f);
-        selectedRect.emplace_back(endRect);
-        const int32_t drawMiddleLineNumberLimit = 2;
-        if (static_cast<int32_t>(lineGroup.size()) > drawMiddleLineNumberLimit || firstRect.Left() <= endRect.Right()) {
-            auto middleRect = RectF(0.0f, firstRect.Bottom(), longestLine, endRect.Top() - firstRect.Bottom());
-            selectedRect.emplace_back(middleRect);
-        }
+        selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
     }
 
     // The methods that need to be implemented for input class components
@@ -158,38 +156,6 @@ public:
     }
 
     virtual void ScrollToSafeArea() const {}
-
-    static bool UpdateKeyboardOffset(double positionY, double height, bool foreChange = false)
-    {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        if (container->IsUIExtensionWindow()) {
-            return false;
-        }
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto keyboardArea = container->GetKeyboardSafeArea();
-        auto keyboardLength = keyboardArea.bottom_.Length();
-        Rect keyboardRect;
-        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
-        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, foreChange);
-        return true;
-    }
-
-    static bool AvoidKeyboard(float offsetY, float height)
-    {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto safeAreaManager = context->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, false);
-        auto keyboardInset = safeAreaManager->GetKeyboardInset();
-        CHECK_NULL_RETURN(keyboardInset.Length() != 0, false);
-        if (LessOrEqual(offsetY + height, keyboardInset.start)) {
-            return false;
-        }
-        auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-        return UpdateKeyboardOffset(offsetY - keyboardOffset, height, true);
-    }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
@@ -245,17 +211,12 @@ public:
         return textSelector_;
     }
 
-    virtual bool CaretAvoidSoftKeyboard()
-    {
-        auto caretRect = GetCaretRect();
-        return AvoidKeyboard(caretRect.Top() + GetTextPaintOffset().GetY(),
-            caretRect.Height() + GetAvoidSoftKeyboardOffset().ConvertToPx());
-    }
-
     virtual const Dimension& GetAvoidSoftKeyboardOffset() const
     {
         return avoidKeyboardOffset_;
     }
+
+    virtual void OnHandleAreaChanged() {}
 
 protected:
     TextSelector textSelector_;

@@ -50,6 +50,10 @@ public:
 
     int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
 
+    int32_t OnGetRectRelativeToWindow(int32_t &top, int32_t &left) override;
+
+    int32_t OnEnableForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable) override;
+
 private:
     static bool WriteInterfaceToken(MessageParcel& data);
 

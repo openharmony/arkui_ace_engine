@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/web/slide_update_listener.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -161,7 +160,8 @@ public:
 
     // scroller
     void ScrollTo(float position) override;
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
@@ -183,7 +183,7 @@ public:
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
-    void CalculateCurrentOffset(float delta);
+    void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -262,7 +262,6 @@ public:
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
-    void registerSlideUpdateListener(const std::shared_ptr<ISlideUpdateCallback>& listener);
 
     void SetItemPressed(bool isPressed, int32_t id)
     {
@@ -274,7 +273,9 @@ public:
     }
 
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
+    void ResetChildrenSize();
     bool ListChildrenSizeExist()
     {
         return static_cast<bool>(childrenSize_);
@@ -340,19 +341,19 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
-    void UpdateFrameSizeToWeb();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
     float GetStartOverScrollOffset(float offset) const;
     float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
-    std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
+    void ReadThemeToFadingEdge();
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
     void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
     bool isFadingEdge_ = false;
     bool isTopEdgeFading_ = false;
     bool isLowerEdgeFading_ = false;
+    Axis fadingAxis_ = Axis::VERTICAL;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

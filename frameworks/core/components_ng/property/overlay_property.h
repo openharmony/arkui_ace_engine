@@ -42,6 +42,10 @@ struct OverlayOptions {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonOverlay = JsonUtil::Create(true);
         jsonOverlay->Put("title", content.c_str());
         auto jsonOptions = JsonUtil::Create(true);

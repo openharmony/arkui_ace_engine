@@ -188,7 +188,6 @@ void JSMatrix2d::JsGetTranslateX(const JSCallbackInfo& info)
 {
     double translateX = transform_.translateX;
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     translateX /= density;
     auto returnValue = JSVal(ToJSValue(translateX));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
@@ -199,7 +198,6 @@ void JSMatrix2d::JsGetTranslateY(const JSCallbackInfo& info)
 {
     double translateY = transform_.translateY;
     double density = GetDensity();
-    density = (density == 0.0 ? 1.0 : density);
     translateY /= density;
     auto returnValue = JSVal(ToJSValue(translateY));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);

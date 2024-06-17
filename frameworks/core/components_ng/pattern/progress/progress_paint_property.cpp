@@ -29,7 +29,11 @@ constexpr float PROGRSS_MAX_VALUE = 100.f;
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ToJsonValueForCapsule(json, filter);
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
@@ -73,6 +77,10 @@ std::string ProgressPaintProperty::ProgressOptions() const
 
 void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();

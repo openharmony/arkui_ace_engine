@@ -49,11 +49,22 @@ public:
         onDetachCallback_ = std::move(callback);
     }
 
+    void* GetUserData() const
+    {
+        return userData_;
+    }
+
+    void SetUserData(void* userData)
+    {
+        userData_ = userData;
+    }
+
 private:
     WeakPtr<UINode> nodeSlot_;
     std::list<RefPtr<UINode>> children_;
     std::function<void()> onAttachCallback_;
     std::function<void()> onDetachCallback_;
+    void* userData_ = nullptr;
 
     bool onMainTree_ = false;
 };

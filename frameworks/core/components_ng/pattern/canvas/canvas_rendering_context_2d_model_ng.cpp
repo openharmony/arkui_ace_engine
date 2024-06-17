@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> pattern)
 {
-    pattern_ = AceType::DynamicCast<CustomPaintPattern>(pattern);
+    pattern_ = AceType::DynamicCast<CanvasPattern>(pattern);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo)
@@ -80,10 +80,10 @@ std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};
 }
 
-void CanvasRenderingContext2DModelNG::SetFillGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateFillGradient(gradient);
+    pattern_->SetFillGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -98,10 +98,10 @@ void CanvasRenderingContext2DModelNG::SetFillColor(const Color& color, bool colo
     pattern_->UpdateFillColor(color);
 }
 
-void CanvasRenderingContext2DModelNG::SetStrokeGradient(const Ace::Gradient& gradient)
+void CanvasRenderingContext2DModelNG::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(pattern_);
-    pattern_->UpdateStrokeGradient(gradient);
+    pattern_->SetStrokeGradient(gradient);
 }
 
 void CanvasRenderingContext2DModelNG::SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
@@ -578,27 +578,38 @@ void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, 
     height = pattern_->GetHeight();
 }
 
-void CanvasRenderingContext2DModelNG::SetTransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern)
+#ifdef PIXEL_MAP_SUPPORTED
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
+    RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap)
 {
-    auto customPaintPattern = AceType::DynamicCast<CustomPaintPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
-    auto offscreenCanvasPattern = AceType::DynamicCast<OffscreenCanvasPattern>(offscreenCPattern);
-    CHECK_NULL_VOID(offscreenCanvasPattern);
-    customPaintPattern->TransferFromImageBitmap(offscreenCanvasPattern);
+    auto imagePixelMap = AceType::DynamicCast<PixelMap>(pixelMap);
+    CHECK_NULL_VOID(imagePixelMap);
+    customPaintPattern->TransferFromImageBitmap(imagePixelMap);
 }
+#else
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
+    RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData)
+{
+    auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
+    CHECK_NULL_VOID(customPaintPattern);
+    CHECK_NULL_VOID(imageData);
+    customPaintPattern->TransferFromImageBitmap(*imageData);
+}
+#endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
-    RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed)
+    RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
     customPaintPattern->StartImageAnalyzer(config, onAnalyzed);
 }
 
 void CanvasRenderingContext2DModelNG::StopImageAnalyzer(RefPtr<AceType>& canvasPattern)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);
     customPaintPattern->StopImageAnalyzer();
 }

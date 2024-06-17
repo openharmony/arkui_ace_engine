@@ -30,8 +30,10 @@ void RefreshTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RefreshTheme>()));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
+    auto refreshTheme = RefreshTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(refreshTheme));
 }
 
 void RefreshTestNg::TearDownTestSuite()
@@ -174,6 +176,8 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     auto result = swiperPattern_->HandleScrollVelocity(5.f);
     EXPECT_TRUE(result);
     result = pattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+    result = pattern_->HandleScrollVelocity(-5.f);
     EXPECT_FALSE(result);
 
     /**

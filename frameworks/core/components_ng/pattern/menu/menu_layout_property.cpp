@@ -20,9 +20,61 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
+void MenuLayoutProperty::BindToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    auto jsonDashArray = JsonUtil::CreateArray(true);
+    int32_t index = 0;
+    // output format
+    // {
+    //     "bindMenu" : [
+    //         <index> : <value>,
+    //         ...
+    //     ]
+    // }
+    for (auto&&option : options) {
+        auto pattern = DynamicCast<FrameNode>(option)->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto jsonValue = JsonUtil::Create(true);
+
+        jsonValue->Put("value", pattern->GetText().c_str());
+        jsonValue->Put("icon", pattern->GetIcon().c_str());
+        jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
+    }
+    json->PutExtAttr("bindMenu", jsonDashArray, filter);
+}
+
+void MenuLayoutProperty::DividerToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    if (propItemDivider_.has_value()) {
+        auto divider = JsonUtil::Create(true);
+        divider->Put("strokeWidth", propItemDivider_.value().strokeWidth.ToString().c_str());
+        divider->Put("startMargin", propItemDivider_.value().startMargin.ToString().c_str());
+        divider->Put("endMargin", propItemDivider_.value().endMargin.ToString().c_str());
+        divider->Put("color", propItemDivider_.value().color.ColorToString().c_str());
+        json->Put("itemDivider", divider);
+    }
+    if (propItemGroupDivider_.has_value()) {
+        auto groupDivider = JsonUtil::Create(true);
+        groupDivider->Put("strokeWidth", propItemGroupDivider_.value().strokeWidth.ToString().c_str());
+        groupDivider->Put("startMargin", propItemGroupDivider_.value().startMargin.ToString().c_str());
+        groupDivider->Put("endMargin", propItemGroupDivider_.value().endMargin.ToString().c_str());
+        groupDivider->Put("color", propItemGroupDivider_.value().color.ColorToString().c_str());
+        json->Put("itemGroupDivider", groupDivider);
+    }
+}
+
 void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("title", GetTitle().value_or("").c_str(), filter);
     json->PutExtAttr("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str(), filter);
     auto context = PipelineBase::GetCurrentContext();
@@ -39,33 +91,8 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
     fontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
     json->PutExtAttr("font", fontJsonObject, filter);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto menuPattern = host->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    auto jsonDashArray = JsonUtil::CreateArray(true);
-    int32_t index = 0;
-    // output format
-    // {
-    //     "bindMenu" : [
-    //         <index> : <value>,
-    //         ...
-    //     ]
-    // }
-    for (auto&& option : options) {
-        auto pattern = DynamicCast<FrameNode>(option)->GetPattern<OptionPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto jsonValue = JsonUtil::Create(true);
-
-        jsonValue->Put("value", pattern->GetText().c_str());
-        jsonValue->Put("icon", pattern->GetIcon().c_str());
-        jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
-    }
-    json->PutExtAttr("bindMenu", jsonDashArray, filter);
-
+    BindToJsonValue(json, filter);
     json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
-    
     auto expandingMode = "SubMenuExpandingMode.SIDE";
     if (propExpandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         expandingMode = "SubMenuExpandingMode.EMBEDDED";
@@ -73,5 +100,6 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         expandingMode = "SubMenuExpandingMode.STACK";
     }
     json->Put("subMenuExpandingMode", expandingMode);
+    DividerToJsonValue(json);
 }
 } // namespace OHOS::Ace::NG

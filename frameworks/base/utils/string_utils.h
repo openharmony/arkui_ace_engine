@@ -32,9 +32,9 @@
 
 namespace OHOS::Ace::StringUtils {
 
-ACE_EXPORT extern const char DEFAULT_STRING[];
+ACE_FORCE_EXPORT  extern const char DEFAULT_STRING[];
 ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
-ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
+ACE_FORCE_EXPORT  extern const std::u16string DEFAULT_USTRING;
 ACE_EXPORT extern const std::u32string DEFAULT_U32STRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
@@ -183,6 +183,17 @@ inline std::string RestoreEscape(const std::string& src)
             default:
                 res.push_back(c);
                 break;
+        }
+    }
+    return res;
+}
+
+inline std::string RestoreBackslash(const std::string& src)
+{
+    std::string res;
+    for (auto &c : src) {
+        if (c != '\\') {
+            res.push_back(c);
         }
     }
     return res;
@@ -667,7 +678,7 @@ inline void SplitStr(const std::string& str, const std::string& sep, std::vector
     }
 }
 
-const std::string ACE_EXPORT FormatString(const char* fmt, ...);
+const std::string ACE_FORCE_EXPORT FormatString(const char* fmt, ...);
 
 inline bool StartWith(const std::string& dst, const std::string& prefix)
 {
@@ -708,7 +719,7 @@ inline void TransformStrCase(std::string& str, int32_t textCase)
     }
 }
 
-bool IsAscii(const std::string& str);
+ACE_FORCE_EXPORT bool IsAscii(const std::string& str);
 } // namespace OHOS::Ace::StringUtils
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H

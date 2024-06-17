@@ -126,6 +126,10 @@ constexpr T Infinity()
     return static_cast<const T>(1000000.0);
 }
 
+namespace {
+constexpr float INF_APPROACH = Infinity<float>() * 0.5f;
+}
+
 inline bool NearEqual(const double left, const double right, const double epsilon)
 {
     return (std::abs(left - right) <= epsilon);
@@ -248,7 +252,7 @@ inline bool InRegion(double lowerBound, double upperBound, double destNum)
 
 inline bool GreaterOrEqualToInfinity(float num)
 {
-    return GreatOrEqual(num, Infinity<float>() / 2.0f);
+    return GreatOrEqual(num, INF_APPROACH);
 }
 
 inline uint64_t GetMilliseconds()
@@ -272,6 +276,16 @@ inline float CalculateFriction(float gamma)
         gamma = 1.0;
     }
     return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
+}
+
+inline bool IsDarkColor(uint32_t color)
+{
+    constexpr int lightThresholds = 128;
+    int r = (color >> 16) & 0xFF;
+    int g = (color >> 8) & 0xFF;
+    int b = color & 0xFF;
+    int gray = (r * 299 + g * 587 + b * 114) / 1000;
+    return gray < lightThresholds;
 }
 
 bool RealPath(const std::string& fileName, char* realPath);

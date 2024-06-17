@@ -253,6 +253,32 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerUseMilitaryTime(ArkUIRun
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue TimepickerBridge::SetTimepickerLoop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> loopArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (loopArg->IsBoolean()) {
+        bool value = loopArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerLoop(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerLoop(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::ResetTimepickerLoop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerLoop(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -266,7 +292,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
     ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
     ZeroPrefixType secondType = ZeroPrefixType::AUTO;
     std::string hour = "hour";
-    if (hourArg->IsString()) {
+    if (hourArg->IsString(vm)) {
         std::string hour = hourArg->ToString(vm)->ToString();
         if (hour == "2-digit") {
             hourType = ZeroPrefixType::SHOW;
@@ -275,7 +301,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
         }
     }
     std::string minute = "minute";
-    if (minuteArg->IsString()) {
+    if (minuteArg->IsString(vm)) {
         minuteType = ZeroPrefixType::SHOW;
         std::string minute = minuteArg->ToString(vm)->ToString();
         if (minute == "numeric") {
@@ -283,7 +309,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRunti
         }
     }
     std::string second = "second";
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         secondType = ZeroPrefixType::SHOW;
         std::string second = secondArg->ToString(vm)->ToString();
         if (second == "numeric") {

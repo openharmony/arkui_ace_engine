@@ -28,7 +28,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
@@ -59,11 +58,15 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
+    if (isHorizontalAndRightToLeft_) {
+        currentIndex_ = itemCount_ - 1 - currentIndex_;
+    }
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
+    dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
@@ -87,20 +90,6 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
-    }
-    dotIndicatorModifier_->SetFocusedAndSelectedColor(paintWrapper);
-}
-
-void DotIndicatorModifier::SetFocusedAndSelectedColor(PaintWrapper* paintWrapper)
-{
-    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto swiperTheme = GetSwiperIndicatorTheme();
-    CHECK_NULL_VOID(swiperTheme);
-    if (isFocused_->Get()) {
-        SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetFocusedSelectedColor()));
-    } else {
-        SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     }
 }
 
@@ -181,7 +170,8 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
     } else if (dotIndicatorModifier_->GetIsHover()) {
         if (!mouseClickIndex_.has_value()) {
-            dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+            dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes,
+                vectorBlackPointCenterX_, longPointCenterX_);
         }
     } else {
         dotIndicatorModifier_->UpdateNormalToHoverPaintProperty(
@@ -195,19 +185,24 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
-
+    PaintHoverIndicator(itemHalfSizes, paddingSide);
+}
+void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
+{
     if (mouseClickIndex_) {
         if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < itemCount_) {
-            longPointCenterX_ =
-                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
+            longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
 
-                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
-            longPointCenterX_ =
-                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
+            auto mouseClickIndex = mouseClickIndex_.value();
+            if (isHorizontalAndRightToLeft_) {
+                mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
+            }
+            longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
 
-                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
@@ -218,7 +213,6 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->UpdateLongPointDilateRatio();
     }
 }
-
 void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -261,27 +255,28 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     }
 }
 
-void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize)
+void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes,
+    const SizeF& frameSize, const int32_t displayCount)
 {
     // diameter calculation
     auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
     auto itemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
+    auto allPointDiameterSum = itemWidth * static_cast<float>(displayCount + 1);
     if (IsCustomSizeValue_) {
-        allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
+        allPointDiameterSum = itemWidth * static_cast<float>(displayCount - 1) + selectedItemWidth;
     }
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (displayCount - 1);
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
     auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
-    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
-    auto contentHeight = indicatorPadding + itemHeight + indicatorPadding;
+    auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
+    auto contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
-        contentHeight = indicatorPadding + selectedItemHeight + indicatorPadding;
+        contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
     float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
     float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * 0.5;
@@ -338,7 +333,7 @@ std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod
     itemHalfSizes.emplace_back(itemHeight * 0.5);
     itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
     itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
-    CalculateNormalMargin(itemHalfSizes, frameSize);
+    CalculateNormalMargin(itemHalfSizes, frameSize, itemCount_);
     Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
         static_cast<float>(paddingSide.ConvertToPx()),
@@ -352,7 +347,6 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
     float longPointLeftCenterMoveRate = 0.0f;
     float longPointRightCenterMoveRate = 0.0f;
-
     if (isPressed_ && touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY :
             LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
@@ -382,6 +376,10 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointRightCenterMoveRate = std::abs(turnPageRate_);
         longPointLeftCenterMoveRate = std::abs(turnPageRate_) * LONG_POINT_TAIL_RATIO;
     }
+    if (isHorizontalAndRightToLeft_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
+        return { blackPointCenterMoveRate, longPointRightCenterMoveRate, longPointLeftCenterMoveRate };
+    }
     return { blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate };
 }
 
@@ -404,6 +402,14 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
             longPointRightCenterMoveRate;
+    if (isHorizontalAndRightToLeft_) {
+        longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX -
+        (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
+            longPointLeftCenterMoveRate;
+        longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX -
+            (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
+                longPointRightCenterMoveRate;
+    }
     return longPointCenterX;
 }
 

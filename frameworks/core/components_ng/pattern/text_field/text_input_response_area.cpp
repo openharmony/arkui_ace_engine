@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -80,7 +81,17 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, size);
     return geometryNode->GetFrameSize();
-} // TextInputResponseArea end
+}
+
+SizeF TextInputResponseArea::GetFrameSize(bool withSafeArea)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, SizeF(0, 0));
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF(0, 0));
+    return geometryNode->GetFrameSize(withSafeArea);
+}
+// TextInputResponseArea end
 
 // PasswordResponseArea begin
 void PasswordResponseArea::InitResponseArea()
@@ -179,11 +190,16 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(textfield);
         textfield->RestoreDefaultMouseState();
     };
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        info.SetStopPropagation(true);
+    };
+
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
 }
 
 void PasswordResponseArea::Refresh()
@@ -235,7 +251,14 @@ void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, f
 
 OffsetF PasswordResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 float PasswordResponseArea::GetIconSize()
@@ -374,7 +397,14 @@ void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float
 
 OffsetF UnitResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 bool UnitResponseArea::IsShowUnit()
@@ -403,14 +433,33 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     return TextInputResponseArea::Measure(layoutWrapper, index);
 }
 
-void CleanNodeResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
+bool CleanNodeResponseArea::IsShowClean()
 {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsShowCancelButtonMode();
+}
+
+void CleanNodeResponseArea::Layout(LayoutWrapper *layoutWrapper, int32_t index, float &nodeWidth)
+{
+    if (!IsShowClean()) {
+        return;
+    }
     LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
 OffsetF CleanNodeResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 const RefPtr<FrameNode> CleanNodeResponseArea::GetFrameNode()

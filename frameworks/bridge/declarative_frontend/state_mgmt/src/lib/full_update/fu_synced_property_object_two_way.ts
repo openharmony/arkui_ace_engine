@@ -61,7 +61,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
 
   private setObject(newValue: C): void {
     if (this.linkedParentProperty_) {
-        this.linkedParentProperty_.set(newValue)
+        this.linkedParentProperty_.set(newValue);
     }
   }
 
@@ -69,7 +69,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
     if (!this.changeNotificationIsOngoing_) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || 'unknown'}']: contained ObservedObject hasChanged'.`);
       this.notifyHasChanged(this.getObject());
     }
   }
@@ -78,18 +78,18 @@ class SynchedPropertyObjectTwoWay<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || 'unknown'}']: get`);
     return this.getObject();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
-    if (this.getObject() == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+    if (this.getObject() === newValue) {
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || 'unknown'}']: set to newValue: '${newValue}'.`);
 
     ObservedObject.removeOwningProperty(this.getObject(), this);
 

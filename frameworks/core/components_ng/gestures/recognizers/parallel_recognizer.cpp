@@ -84,6 +84,11 @@ void ParallelRecognizer::OnBlocked()
 
 bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "InputTracking id:%{public}d, parallel recognizer receives %{public}d touch event, type: %{public}d",
+            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+    }
     if (refereeState_ == RefereeState::READY) {
         refereeState_ = RefereeState::DETECTING;
     }
@@ -207,7 +212,9 @@ void ParallelRecognizer::CleanRecognizerState()
             child->CleanRecognizerState();
         }
     }
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;

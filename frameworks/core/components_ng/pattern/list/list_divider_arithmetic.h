@@ -25,65 +25,65 @@ struct ListDivider {
     OffsetF offset;
     float length = 0.0f;
 };
+using ListDividerMap = std::map<int32_t, ListDivider>;
+
+class RefDividerMap : public AceType {
+    DECLARE_ACE_TYPE(RefDividerMap, AceType);
+public:
+    void SetMap(const ListDividerMap& map)
+    {
+        refMap_ = map;
+        for (auto& div : refMap_) {
+            div.second.isDelta = false;
+        }
+    }
+    const ListDividerMap& GetMap() const
+    {
+        return  refMap_;
+    }
+private:
+    ListDividerMap refMap_;
+};
 
 class ListDividerArithmetic : public CustomAnimatableArithmetic {
     DECLARE_ACE_TYPE(ListDividerArithmetic, CustomAnimatableArithmetic);
 public:
-    using DividerMap = std::map<int32_t, ListDivider>;
     ListDividerArithmetic() = default;
     ~ListDividerArithmetic() override = default;
    
-    explicit ListDividerArithmetic(const DividerMap& dividerMap) : dividermap_(dividerMap) {}
+    ListDividerArithmetic(const ListDividerMap& dividerMap, RefPtr<RefDividerMap> ref)
+        : dividermap_(dividerMap), refDivider_(ref) {}
 
     RefPtr<CustomAnimatableArithmetic> Add(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
-        if (!rhs) {
-            return {};
-        }
-        DividerMap another = rhs->GetDividerMap();
-        DividerMap one = another;
-        for (auto& child : one) {
-            auto it = dividermap_.find(child.first);
-            if (it != dividermap_.end()) {
-                child.second.length = child.second.length + it->second.length;
-                child.second.offset = child.second.offset + it->second.offset;
-            }
-        }
-        return MakeRefPtr<ListDividerArithmetic>(one);
+        return Calculate(value, true);
     }
 
     RefPtr<CustomAnimatableArithmetic> Minus(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
-        if (!rhs) {
-            return {};
-        }
-        DividerMap another = rhs->GetDividerMap();
-        rhs->ResetDividerMap();
-        DividerMap one = dividermap_;
-        for (auto& child : one) {
-            auto it = another.find(child.first);
-            if (it != another.end()) {
-                child.second.length = child.second.length - it->second.length;
-                child.second.offset = child.second.offset - it->second.offset;
-            } else {
-                child.second.isDelta = false;
-            }
-        }
-        return MakeRefPtr<ListDividerArithmetic>(one);
+        return Calculate(value, false);
     }
 
     RefPtr<CustomAnimatableArithmetic> Multiply(const float scale) const override
     {
-        DividerMap one = dividermap_;
-        for (auto& child : one) {
-            if (child.second.isDelta == true) {
-                child.second.length = child.second.length * scale;
-                child.second.offset = child.second.offset * scale;
-            }
+        if (!refDivider_) {
+            return {};
         }
-        return MakeRefPtr<ListDividerArithmetic>(one);
+        ListDividerMap result;
+        for (const auto& child : refDivider_->GetMap()) {
+            auto it = dividermap_.find(child.first);
+            if (it == dividermap_.end() || !it->second.isDelta) {
+                result.emplace(child.first, child.second);
+                continue;
+            }
+            ListDivider divider = {
+                .isDelta = true,
+                .offset = it->second.offset * scale,
+                .length = it->second.length * scale,
+            };
+            result.emplace(child.first, divider);
+        }
+        return MakeRefPtr<ListDividerArithmetic>(result, refDivider_);
     }
 
     bool IsEqual(const RefPtr<CustomAnimatableArithmetic>& value) const override
@@ -92,48 +92,68 @@ public:
         if (!rhs) {
             return false;
         }
-        DividerMap another = rhs->GetDividerMap();
-        DividerMap one = dividermap_;
-        for (const auto& child : one) {
+        const ListDividerMap& another = rhs->GetDividerMap();
+        if (another.size() != dividermap_.size()) {
+            return false;
+        }
+        for (const auto& child : dividermap_) {
             auto it = another.find(child.first);
             if (it == another.end() || it->second.offset != child.second.offset ||
                 it->second.length != child.second.length) {
                 return false;
             }
         }
-        return true && !one.empty();
+        return true;
     }
 
-    bool IsSurfaceChange(const RefPtr<CustomAnimatableArithmetic>& value) const
-    {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
-        if (!rhs) {
-            return false;
-        }
-        DividerMap another = rhs->GetDividerMap();
-        DividerMap one = dividermap_;
-        auto iterAnother = another.begin();
-        auto iterOne = one.begin();
-        if (iterAnother == another.end() || iterOne == one.end()) {
-            return false;
-        }
-        return iterAnother->second.length < iterOne->second.length / 2.0f;
-    }
-
-    DividerMap GetDividerMap() const
+    ListDividerMap GetDividerMap() const
     {
         return dividermap_;
     }
 
-    void ResetDividerMap()
-    {
-        for (auto& child : dividermap_) {
-            child.second.isDelta = true;
-        }
-    }
-
 private:
-    DividerMap dividermap_;
+    RefPtr<CustomAnimatableArithmetic> Calculate(const RefPtr<CustomAnimatableArithmetic>& value, bool isAdd) const
+    {
+        if (!refDivider_) {
+            return {};
+        }
+        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
+        if (!rhs) {
+            return {};
+        }
+        const ListDividerMap& another = rhs->GetDividerMap();
+        ListDividerMap result;
+        for (const auto& child : refDivider_->GetMap()) {
+            auto it1 = dividermap_.find(child.first);
+            if (it1 == dividermap_.end() || !it1->second.isDelta) {
+                result.emplace(child.first, child.second);
+                continue;
+            }
+            auto it2 = another.find(child.first);
+            if (it2 == another.end() || !it2->second.isDelta) {
+                result.emplace(child.first, child.second);
+                continue;
+            }
+            if (isAdd) {
+                ListDivider divider = {
+                    .isDelta = true,
+                    .offset = it1->second.offset + it2->second.offset,
+                    .length = it1->second.length + it2->second.length,
+                };
+                result.emplace(child.first, divider);
+            } else {
+                ListDivider divider = {
+                    .isDelta = true,
+                    .offset = it1->second.offset - it2->second.offset,
+                    .length = it1->second.length - it2->second.length,
+                };
+                result.emplace(child.first, divider);
+            }
+        }
+        return MakeRefPtr<ListDividerArithmetic>(result, refDivider_);
+    }
+    ListDividerMap dividermap_;
+    RefPtr<RefDividerMap> refDivider_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListDividerArithmetic);
 };

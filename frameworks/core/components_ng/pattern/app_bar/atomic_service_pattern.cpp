@@ -26,40 +26,88 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
+constexpr int32_t FIRST_OVERLAY_INDEX = 1;
+
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeArea();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     manager->SetIsAtomicService(true);
     manager->AddGeoRestoreNode(host);
-    PaddingProperty padding {
-        .left = CalcLength(safeArea.left_.Length()),
-        .right = CalcLength(safeArea.right_.Length()),
-        .top = CalcLength(safeArea.top_.Length()),
-        .bottom = CalcLength(safeArea.bottom_.Length()),
-    };
-    host->GetLayoutProperty()->UpdatePadding(padding);
-
     auto systemSafeArea = manager->GetSystemSafeArea();
     auto theme = pipeline->GetTheme<AppBarTheme>();
     CHECK_NULL_VOID(theme);
     float topMargin = theme->GetMenuBarTopMargin().ConvertToPx();
-    topMargin += (systemSafeArea.top_.Length() - safeArea.top_.Length());
+    topMargin += systemSafeArea.top_.Length();
+    UpdateOverlayLayout();
     auto menuBarRow = GetMenuBarRow();
     CHECK_NULL_VOID(menuBarRow);
     auto renderContext = menuBarRow->GetRenderContext();
     renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, Dimension(topMargin, DimensionUnit::PX)));
 
     auto menuBar = GetMenuBar();
-    UpdateMenuBarColor(theme, menuBar, SystemProperties::GetColorMode() != ColorMode::DARK);
+    if (settedColorMode.has_value()) {
+        UpdateMenuBarColor(theme, menuBar, settedColorMode.value());
+    } else {
+        UpdateMenuBarColor(theme, menuBar, SystemProperties::GetColorMode() != ColorMode::DARK);
+    }
+    UpdateLayoutMargin();
+}
 
+void AtomicServicePattern::UpdateLayoutMargin()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeArea();
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    MarginProperty margin;
+    margin.left = CalcLength(safeArea.left_.Length());
+    margin.right = CalcLength(safeArea.right_.Length());
+    margin.top = CalcLength(safeArea.top_.Length());
+    margin.bottom = CalcLength(safeArea.bottom_.Length());
+    // update stage margin
+    auto stage = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(0));
+    CHECK_NULL_VOID(stage);
+    auto layoutProperty = stage->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMargin(margin);
+    stage->MarkModifyDone();
+    stage->MarkDirtyNode();
+    // update menuBarRow margin
+    MarginProperty appBarmargin;
+    appBarmargin.left = CalcLength(safeArea.left_.Length());
+    appBarmargin.right = CalcLength(safeArea.right_.Length());
+    auto menuBarRow = GetMenuBarRow();
+    CHECK_NULL_VOID(menuBarRow);
+    auto property = menuBarRow->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateMargin(appBarmargin);
     menuBarRow->MarkModifyDone();
     menuBarRow->MarkDirtyNode();
+}
+
+void AtomicServicePattern::UpdateOverlayLayout()
+{
+    auto atom = GetHost();
+    CHECK_NULL_VOID(atom);
+    if (atom->GetChildren().size() <= ATOMIC_SERVICE_MIN_SIZE) {
+        return;
+    }
+    for (int index = FIRST_OVERLAY_INDEX;
+        index <= static_cast<int32_t>(atom->GetChildren().size()) - ATOMIC_SERVICE_MIN_SIZE; index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(index));
+        CHECK_NULL_VOID(overlay);
+        auto overlayRender = overlay->GetRenderContext();
+        overlayRender->UpdatePosition(OffsetT<Dimension>());
+        overlay->MarkModifyDone();
+        overlay->MarkDirtyNode();
+    }
 }
 
 void AtomicServicePattern::OnAttachToFrameNode()
@@ -84,14 +132,18 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
-    UpdateColor();
+    if (settedColorMode.has_value()) {
+        UpdateColor(settedColorMode);
+    } else {
+        UpdateColor(SystemProperties::GetColorMode() != ColorMode::DARK);
+    }
 }
 
 RefPtr<FrameNode> AtomicServicePattern::GetMenuBarRow()
 {
     auto atom = GetHost();
     CHECK_NULL_RETURN(atom, nullptr);
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
+    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildren().back());
     return menuBarRow;
 }
 
@@ -143,24 +195,25 @@ RefPtr<FrameNode> AtomicServicePattern::GetCloseIcon()
     return closeIcon;
 }
 
-void AtomicServicePattern::UpdateColor()
+void AtomicServicePattern::UpdateColor(std::optional<bool> isLight)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
-
+    if (!(isLight.has_value())) {
+        isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
+    }
     auto menuButton = GetMenuButton();
-    UpdateButtonColor(theme, menuButton);
+    UpdateButtonColor(theme, menuButton, isLight.value());
     auto divider = GetDivider();
-    UpdateDividerColor(theme, divider, isLight);
+    UpdateDividerColor(theme, divider, isLight.value());
     auto closeButton = GetCloseButton();
-    UpdateButtonColor(theme, closeButton);
+    UpdateButtonColor(theme, closeButton, isLight.value());
 
     auto menuIcon = GetMenuIcon();
-    UpdateIconColor(theme, menuIcon);
+    UpdateIconColor(theme, menuIcon, isLight.value());
     auto closeIcon = GetCloseIcon();
-    UpdateIconColor(theme, closeIcon);
+    UpdateIconColor(theme, closeIcon, isLight.value());
 }
 
 void AtomicServicePattern::UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isLight)
@@ -186,16 +239,24 @@ void AtomicServicePattern::UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr
     menuBar->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void AtomicServicePattern::UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button)
+void AtomicServicePattern::UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLight)
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(button);
     // pressed color
     auto buttonPattern = button->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetClickedColor(theme->GetClickEffectColor());
+    if (isLight) {
+        buttonPattern->SetClickedColor(theme->GetClickEffectColorLight());
+    } else {
+        buttonPattern->SetClickedColor(theme->GetClickEffectColorDark());
+    }
     // focus border color
-    buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColor());
+    if (isLight) {
+        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorLight());
+    } else {
+        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorDark());
+    }
 
     button->MarkModifyDone();
     button->MarkDirtyNode();
@@ -217,14 +278,16 @@ void AtomicServicePattern::UpdateDividerColor(RefPtr<AppBarTheme>& theme, RefPtr
     divider->MarkDirtyNode();
 }
 
-void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon)
+void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLight)
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(icon);
     // fill color
-    auto color = theme->GetIconColor();
+    auto color = isLight ? theme->GetIconColorLight() : theme->GetIconColorDark();
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, icon);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, icon);
+    icon->MarkModifyDone();
+    icon->MarkDirtyNode();
 }
 
 void AtomicServicePattern::UpdateLayout()

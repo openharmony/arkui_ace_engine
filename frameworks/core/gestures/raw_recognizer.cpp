@@ -196,6 +196,7 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
         info.SetTiltY(point.tiltY.value());
     }
     info.SetSourceTool(point.sourceTool);
+    info.SetPressedKeyCodes(point.pressedKeyCodes_);
     TouchLocationInfo currentTouchLocationInfo("onTouch", point.id);
     currentTouchLocationInfo.SetGlobalLocation(point.GetOffset())
         .SetLocalLocation(point.GetOffset() - coordinateOffset_)

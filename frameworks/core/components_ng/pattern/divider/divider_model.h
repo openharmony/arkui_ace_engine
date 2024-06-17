@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT DividerModel {
+class ACE_FORCE_EXPORT DividerModel {
 public:
     static DividerModel* GetInstance();
     virtual ~DividerModel() = default;

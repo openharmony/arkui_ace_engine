@@ -14,11 +14,11 @@
  */
 
 class ArkResourcesHelper {
-    static COLOR: number = 10001
-    static FLOAT: number = 10002
+    static COLOR: number = 10001;
+    static FLOAT: number = 10002;
 
-    static $r(id: string) {
-        var splitted = id.split(".", 2);
+    static $r(name: string, id?: number) {
+        var splitted = name.split(".", 2);
         var strType = splitted[1]
         var type = undefined;
         switch (strType) {
@@ -30,6 +30,6 @@ class ArkResourcesHelper {
                 type = ArkResourcesHelper.COLOR;
                 break;
         }
-        return { "id": -1, "type": type, 'params': [id], 'bundleName': '', 'moduleName': '' };
+        return { "id": id ?? -1, "type": type, 'params': [name], 'bundleName': '', 'moduleName': '' };
     }
 }

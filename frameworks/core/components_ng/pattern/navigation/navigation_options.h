@@ -67,6 +67,12 @@ struct NavigationToolbarOptions {
         return !(*this == other);
     }
 };
+
+struct ImageOption {
+    bool noPixMap;
+    bool isValidImage;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_OPTIONS_H

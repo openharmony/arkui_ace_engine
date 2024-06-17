@@ -37,6 +37,8 @@ public:
     const Gradient& GetGradient() const;
 
 private:
+    static void SetGradientTransform(const std::string& val, SvgGradientAttribute& attr);
+    static void SetSpreadMethod(const std::string& val, SvgGradientAttribute& attr);
     SvgGradientAttribute gradientAttr_;
 };
 

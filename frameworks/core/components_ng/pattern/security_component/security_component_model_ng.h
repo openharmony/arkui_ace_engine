@@ -34,13 +34,13 @@ class ACE_EXPORT SecurityComponentModelNG {
 public:
     virtual ~SecurityComponentModelNG() = default;
     virtual void Create(int32_t text, int32_t icon,
-        int32_t backgroundType) = 0;
+        int32_t backgroundType, bool isArkuiComponent) = 0;
     void CreateCommon(const std::string& tag, int32_t text, int32_t icon,
         int32_t backgroundType,
-        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     RefPtr<FrameNode> CreateNode(const std::string& tag, int32_t nodeId,
         SecurityComponentElementStyle& style,
-        const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
     static void SetFontSize(const Dimension& value);
@@ -92,6 +92,8 @@ private:
         bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
+    static bool IsArkuiComponent();
+    static bool IsBelowThreshold(const Color& value);
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         int32_t type);
     static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);

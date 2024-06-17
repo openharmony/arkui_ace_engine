@@ -204,12 +204,33 @@ void ResetSelectIconSrc(ArkUINodeHandle node)
     MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
 }
 
+void SetSelectIconSymbol(ArkUINodeHandle node, void* symbolFunction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (symbolFunction) {
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+        MenuItemModelNG::SetSelectIconSymbol(frameNode, std::move(*symbolCallback));
+    } else {
+        MenuItemModelNG::SetSelectIconSymbol(frameNode, nullptr);
+    }
+}
+
+void ResetSelectIconSymbol(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    MenuItemModelNG::SetSelectIconSymbol(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
     static const ArkUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
         ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc};
+        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
+        ResetSelectIconSymbol };
 
     return &modifier;
 }

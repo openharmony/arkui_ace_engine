@@ -27,9 +27,11 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JsDisturbanceFields(const JSCallbackInfo& args);
     static void AddDisturbance(std::vector<ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj);
+    static void GetSizeAndPositionValues(const JSRef<JSObject>& paramObj, int& sizeXValue, int& sizeYValue,
+        int& positionXValue, int& positionYValue);
     static void JsEmitter(const JSCallbackInfo& args);
     static void ParseEmitterProperty(
-        std::vector<EmitterProperty>& dataArray, const JSRef<JSObject>& paramObj, const int length);
+        std::vector<EmitterProperty>& dataArray, const JSRef<JSObject>& paramObj);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PARTICLE_H

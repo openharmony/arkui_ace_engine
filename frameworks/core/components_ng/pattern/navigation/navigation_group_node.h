@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 
+#include <atomic>
 #include <cstdint>
 #include <list>
 
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -111,6 +113,16 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    bool IsOnModeSwitchAnimation()
+    {
+        return isOnModeSwitchAnimation_;
+    }
+
+    void SetDoingModeSwitchAnimationFlag(bool isOnAnimation)
+    {
+        isOnModeSwitchAnimation_ = isOnAnimation;
+    }
+
     std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
     {
         return pushAnimations_;
@@ -171,29 +183,73 @@ public:
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    void ReduceModeSwitchAnimationCnt()
+    {
+        --modeSwitchAnimationCnt_;
+    }
+
+    void IncreaseModeSwitchAnimationCnt()
+    {
+        ++modeSwitchAnimationCnt_;
+    }
+
+    int32_t GetModeSwitchAnimationCnt()
+    {
+        return modeSwitchAnimationCnt_;
+    }
+
     float CheckLanguageDirection();
+
+    void RemoveDialogDestination();
+
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavigationPathInfo() const
+    {
+        return navigationPathInfo_;
+    }
+
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
 
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
+        const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
     bool FindNavigationParent(const std::string& parentName);
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar);
+
+    void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
+    // dialog hideNodes, if is true, nodes need remove
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
+    std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

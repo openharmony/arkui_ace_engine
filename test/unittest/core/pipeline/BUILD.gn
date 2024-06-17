@@ -36,6 +36,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
+    "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
@@ -70,6 +71,8 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
+    "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
@@ -92,7 +95,9 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "mock_input_method_manager.cpp",
     "pipeline_context_test_ng.cpp",
+    "pipeline_context_test_ng_new.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]

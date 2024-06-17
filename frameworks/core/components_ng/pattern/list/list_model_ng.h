@@ -76,6 +76,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
+    static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
@@ -97,6 +98,7 @@ public:
     static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
+    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
@@ -124,6 +126,10 @@ public:
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetListChildrenMainSize(
+        FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
+    static void ResetListChildrenMainSize(FrameNode* frameNode);
+    static int32_t GetInitialIndex(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
 };

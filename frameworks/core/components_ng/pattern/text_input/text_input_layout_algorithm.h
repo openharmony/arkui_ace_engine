@@ -17,7 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_INPUT_TEXT_INPUT_PATTERN_H
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
+
 namespace OHOS::Ace::NG {
+class TextFieldPattern;
 class TextInputLayoutAlgorithm : public TextFieldLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextInputLayoutAlgorithm, TextFieldLayoutAlgorithm);
 
@@ -37,6 +40,30 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     LayoutConstraintF BuildLayoutConstraintWithoutResponseArea(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+
+private:
+    struct UpdateContentPositionParams {
+        bool isRTL = false;
+        OffsetF offsetBase = OffsetF(0.0f, 0.0f);
+        SizeT<float> size = SizeT<float>(0.0f, 0.0f);
+        SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
+        Alignment align = Alignment::CENTER;
+        RefPtr<TextInputResponseArea> responseArea = nullptr;
+        RefPtr<TextInputResponseArea> cleanResponseArea = nullptr;
+    };
+
+    struct UpdateTextRectParams {
+        RefPtr<TextFieldLayoutProperty> layoutProperty = nullptr;
+        RefPtr<TextFieldPattern> pattern = nullptr;
+        SizeT<float> contentSize = SizeT<float>(0.0f, 0.0f);
+        bool isRTL = false;
+        RefPtr<TextInputResponseArea> responseArea = nullptr;
+        RefPtr<TextInputResponseArea> cleanResponseArea = nullptr;
+        OffsetF offsetBase = OffsetF(0.0f, 0.0f);
+    };
+    void UpdateContentPosition(const UpdateContentPositionParams& params,
+        const std::unique_ptr<GeometryProperty>& content);
+    void UpdateTextRect(const UpdateTextRectParams& params);
 };
 } // namespace OHOS::Ace::NG
 

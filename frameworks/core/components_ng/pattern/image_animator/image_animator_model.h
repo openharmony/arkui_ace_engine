@@ -22,7 +22,7 @@
 #include "core/components/image/image_animator_component.h"
 
 namespace OHOS::Ace {
-class ImageAnimatorModel {
+class ACE_FORCE_EXPORT ImageAnimatorModel {
 public:
     static ImageAnimatorModel* GetInstance();
     virtual ~ImageAnimatorModel() = default;

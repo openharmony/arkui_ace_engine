@@ -37,6 +37,9 @@ public:
     static bool IsBackGroundColorAvailable(const XComponentType& type)
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
+#ifdef PLATFORM_VIEW_SUPPORTED
+                type == XComponentType::PLATFORM_VIEW ||
+#endif
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
     static bool IsCommonEventAvailable(const XComponentType& type, std::string& libraryName)
@@ -73,6 +76,7 @@ public:
         return "";
     }
     virtual void EnableAnalyzer(bool enable) {}
+    virtual void SetImageAIOptions(void* options) {}
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}

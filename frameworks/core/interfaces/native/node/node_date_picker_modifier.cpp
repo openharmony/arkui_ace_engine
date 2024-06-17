@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -28,13 +29,16 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/properties/text_style.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t POS_0 = 0;
 constexpr int32_t POS_1 = 1;
 constexpr int32_t POS_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int YEAR_1900 = 1900;
+constexpr int YEAR_1970 = 1970;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 std::string g_strValue;
@@ -60,11 +64,11 @@ ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -72,15 +76,20 @@ void SetSelectedTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t c
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -97,9 +106,11 @@ void ResetSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
@@ -130,11 +141,11 @@ ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -142,16 +153,20 @@ void SetDatePickerTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-
+    if (res.size() != NUM_3) {
+        return;
+    }
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -168,9 +183,11 @@ void ResetDatePickerTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
@@ -201,11 +218,11 @@ ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
         index++;
     }
     g_strValue = pickerTextStyle.textColor->ColorToString() + ";";
-    g_strValue = g_strValue + pickerTextStyle.fontSize->ToString() + ";";
+    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontSize->ConvertToFp())) + ";";
     g_strValue =
-        g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontWeight.value_or(FontWeight::W100))) + ";";
+        g_strValue + StringUtils::ToString(pickerTextStyle.fontWeight.value_or(FontWeight::W100)) + ";";
     g_strValue = g_strValue + families + ";";
-    g_strValue = g_strValue + std::to_string(static_cast<int>(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL)));
+    g_strValue = g_strValue + StringUtils::ToStringNDK(pickerTextStyle.fontStyle.value_or(FontStyle::NORMAL));
     return g_strValue.c_str();
 }
 
@@ -213,16 +230,20 @@ void SetDisappearTextStyle(ArkUINodeHandle node, const char* fontInfo, uint32_t 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
-
+    if (res.size() != NUM_3) {
+        return;
+    }
     textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
         textStyle.fontStyle = FONT_STYLES[style];
@@ -239,9 +260,11 @@ void ResetDisappearTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
@@ -309,7 +332,13 @@ void SetStartDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    DatePickerModelNG::SetStartDate(frameNode, PickerDate(year, month, day));
+    auto pickerDate = PickerDate(year, month, day);
+    if (pickerDate.GetYear() < YEAR_1900) {
+        pickerDate.SetYear(YEAR_1970);
+        pickerDate.SetMonth(1);
+        pickerDate.SetDay(1);
+    }
+    DatePickerModelNG::SetStartDate(frameNode, pickerDate);
 }
 
 void ResetStartDate(ArkUINodeHandle node)
@@ -369,7 +398,7 @@ void ResetSelectedDate(ArkUINodeHandle node)
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
     CHECK_NULL_VOID(currentTm);
-    PickerDate pickerDate(currentTm->tm_year + 1900, currentTm->tm_mon + 1, currentTm->tm_mday);
+    PickerDate pickerDate(currentTm->tm_year + YEAR_1900, currentTm->tm_mon + 1, currentTm->tm_mday);
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
 }
@@ -402,9 +431,9 @@ void SetDatePickerOnDateChange(ArkUINodeHandle node, void* extraParam)
         if (!argsPtr) {
             event.componentAsyncEvent.data[0].i32 = 1970;
             event.componentAsyncEvent.data[1].i32 = 1;
-            event.componentAsyncEvent.data[1].i32 = 1;
-            event.componentAsyncEvent.data[1].i32 = 0;
-            event.componentAsyncEvent.data[1].i32 = 0;
+            event.componentAsyncEvent.data[2].i32 = 1;
+            event.componentAsyncEvent.data[3].i32 = 0;
+            event.componentAsyncEvent.data[4].i32 = 0;
         }
         auto year = argsPtr->GetValue("year");
         auto month = argsPtr->GetValue("month");

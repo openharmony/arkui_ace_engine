@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 
 #include "base/utils/utils.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -72,27 +73,27 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
 bool SvgRect::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgRectAttribute&)> attrs[] = {
-        { DOM_SVG_HEIGHT,
+        { SVG_HEIGHT,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_RX,
+        { SVG_RX,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.rx = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_RY,
+        { SVG_RY,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.ry = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_WIDTH,
+        { SVG_WIDTH,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_X,
+        { SVG_X,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_Y,
+        { SVG_Y,
             [](const std::string& val, SvgRectAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

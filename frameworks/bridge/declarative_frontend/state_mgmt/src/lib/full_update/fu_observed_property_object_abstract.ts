@@ -26,6 +26,6 @@ abstract class ObservedPropertyObjectAbstract<C extends Object>
   extends ObservedPropertyAbstract<C> {
 
   constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
-    super(owningView, thisPropertyName)
+    super(owningView, thisPropertyName);
   }
 }

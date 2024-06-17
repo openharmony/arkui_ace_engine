@@ -96,29 +96,18 @@ SelectionInfo RichEditorController::GetSelectionSpansInfo()
     return value;
 }
 
-void RichEditorController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
-    }
-}
-
 void RichEditorController::DeleteSpans(const RangeOptions& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->DeleteSpans(options);
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->DeleteSpans(options);
 }
 
 void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
     auto richEditorPattern = pattern_.Upgrade();
-    if (richEditorPattern) {
-        richEditorPattern->UpdateParagraphStyle(start, end, style);
-    }
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->UpdateParagraphStyle(start, end, style);
 }
 std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start, int32_t end)
 {
@@ -126,4 +115,21 @@ std::vector<ParagraphInfo> RichEditorController::GetParagraphsInfo(int32_t start
     CHECK_NULL_RETURN(pattern, {});
     return pattern->GetParagraphInfo(start, end);
 }
+
+RefPtr<SpanStringBase> RichEditorController::ToStyledString(int32_t start, int32_t end)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, nullptr);
+    return richEditorPattern->ToStyledString(start, end);
+}
+
+SelectionInfo RichEditorController::FromStyledString(RefPtr<SpanStringBase> spanStringBase)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, SelectionInfo());
+    auto spanString = AceType::DynamicCast<SpanString>(spanStringBase);
+    CHECK_NULL_RETURN(spanString, SelectionInfo());
+    return richEditorPattern->FromStyledString(spanString);
+}
+
 } // namespace OHOS::Ace::NG

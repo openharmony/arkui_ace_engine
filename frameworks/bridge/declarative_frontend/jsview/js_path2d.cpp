@@ -75,7 +75,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     SetPathSize(args);
 
     // two parameters
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         auto* jsMatrix2d = args.UnwrapArg<JSMatrix2d>(1);
         if (jsMatrix2d) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),

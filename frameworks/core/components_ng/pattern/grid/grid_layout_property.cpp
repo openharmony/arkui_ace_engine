@@ -50,6 +50,10 @@ void GridLayoutProperty::ResetPositionFlags() const
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);

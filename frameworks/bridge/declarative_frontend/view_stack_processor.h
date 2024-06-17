@@ -58,7 +58,7 @@ public:
     using SaveComponentEvent = std::function<void(std::unordered_map<std::string, RefPtr<Component>>)>;
     friend class ScopedViewStackProcessor;
 
-    static ViewStackProcessor* GetInstance();
+    ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
     // possible wrapping components
     RefPtr<FlexItemComponent> GetFlexItemComponent();

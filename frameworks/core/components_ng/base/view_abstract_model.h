@@ -33,6 +33,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
@@ -110,8 +111,20 @@ public:
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
         const std::optional<BorderStyle>& styleBottom) = 0;
+    virtual void SetDashGap(const Dimension& value) {}
+    virtual void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
+    virtual void SetDashWidth(const Dimension& value) {}
+    virtual void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) {}
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
+
+    // visual
+    virtual void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {};
+    virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
+    virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
+    virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
@@ -167,8 +180,8 @@ public:
     virtual void CleanTransition() {};
     virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
     virtual void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
@@ -228,6 +241,9 @@ public:
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
+    virtual void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
+    virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
@@ -235,7 +251,9 @@ public:
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
+    virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
+    virtual void SetOnDetach(std::function<void()>&& onDetachCallback) = 0;
     virtual void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) = 0;
     virtual void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) = 0;
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
@@ -271,13 +289,15 @@ public:
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
     virtual void DisableOnDisAppear() = 0;
+    virtual void DisableOnAttach() = 0;
+    virtual void DisableOnDetach() = 0;
     virtual void DisableOnAreaChange() = 0;
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
-    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
+    virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -286,6 +306,9 @@ public:
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {}
+    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
     virtual void SetAutoEventParam(const std::string& param) {}
     virtual void SetRestoreId(int32_t restoreId) = 0;
@@ -297,7 +320,7 @@ public:
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
-    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {};
+    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
@@ -363,9 +386,6 @@ public:
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
-
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {};
-    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {};
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

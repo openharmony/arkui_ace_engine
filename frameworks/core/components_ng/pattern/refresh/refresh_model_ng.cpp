@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
+constexpr double DEFAULT_REFRESH_OFFSET = 64.0f;
 } // namespace
 
 void RefreshModelNG::Create()
@@ -61,8 +62,7 @@ void RefreshModelNG::Create()
 
 RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
@@ -167,6 +167,15 @@ void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
     }
 }
 
+void RefreshModelNG::SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio)
+{
+    if (pullDownRatio.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, pullDownRatio.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullDownRatio, frameNode);
+    }
+}
+
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -236,5 +245,34 @@ void RefreshModelNG::SetRefreshOffset(FrameNode* frameNode, const Dimension& off
 void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
+}
+
+float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
+{
+    float value = 1.0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullDownRatio, value, frameNode, value);
+    return value;
+}
+
+Dimension RefreshModelNG::GetRefreshOffset(FrameNode* frameNode)
+{
+    Dimension value(DEFAULT_REFRESH_OFFSET, DimensionUnit::VP);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, RefreshOffset, value, frameNode, value);
+    return value;
+}
+
+bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
+{
+    bool value = true;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, PullToRefresh, value, frameNode, value);
+    return value;
+}
+
+void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

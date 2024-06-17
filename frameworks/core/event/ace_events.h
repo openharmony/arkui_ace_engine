@@ -28,6 +28,8 @@
 
 namespace OHOS::Ace {
 
+enum class KeyCode : int32_t;
+
 enum class SourceType : int32_t {
     NONE = 0,
     MOUSE = 1,
@@ -188,6 +190,16 @@ public:
         patternName_ = patternName;
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -206,6 +218,7 @@ protected:
     bool stopPropagation_ = false;
     bool preventDefault_ = false;
     std::string patternName_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

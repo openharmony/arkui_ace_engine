@@ -29,6 +29,16 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+struct FadeoutInfo {
+    bool isLeftFadeout = false;
+    bool isRightFadeout = false;
+    double fadeoutPercent = 0;
+    bool IsFadeount()
+    {
+        return isLeftFadeout || isRightFadeout;
+    }
+};
+
 class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
@@ -39,9 +49,9 @@ public:
     void onDraw(DrawingContext& drawingContext) override;
 
     void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetAdaptMinFontSize(const Dimension& value);
-    void SetAdaptMaxFontSize(const Dimension& value);
+    void SetFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle);
+    void SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetTextShadow(const std::vector<Shadow>& value);
@@ -58,6 +68,8 @@ public:
 
     void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
+    void ResumeAnimation();
+    void PauseAnimation();
     void SetIsFocused(const bool& isFocused);
     void SetIsHovered(const bool& isHovered);
 
@@ -139,12 +151,15 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
-    void UpdateFadeout(const DrawingContext& drawingContext);
+    void DrawNormal(DrawingContext& drawingContext);
+    void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
+    FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;

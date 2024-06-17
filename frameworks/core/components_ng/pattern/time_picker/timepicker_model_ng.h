@@ -35,6 +35,9 @@ public:
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
+    void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
 
@@ -58,6 +61,7 @@ public:
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
+    static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

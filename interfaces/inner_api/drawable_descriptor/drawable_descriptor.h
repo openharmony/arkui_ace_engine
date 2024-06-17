@@ -38,6 +38,8 @@
 #include "include/core/SkPaint.h"
 #else
 #include "draw/canvas.h"
+#include "image/bitmap.h"
+#include "image/image_info.h"
 #endif
 #include "resource_manager.h"
 
@@ -96,6 +98,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -103,6 +106,7 @@ public:
         : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
     {
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
     LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
@@ -112,6 +116,7 @@ public:
     {
         InitLayeredParam(foregroundInfo, backgroundInfo);
         InitialResource(resourceMgr);
+        jsonBuf_.reset();
     };
 
     ~LayeredDrawableDescriptor() override = default;
@@ -149,6 +154,11 @@ public:
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetDefaultMask();
 
+    bool GetCompositePixelMapWithBadge(
+        const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+        const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+        std::shared_ptr<Media::PixelMap> &compositePixelMap);
+
 private:
     friend class ImageConverter;
     void InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
@@ -165,8 +175,17 @@ private:
     void DrawOntoCanvas(
         const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
 #else
-    void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap,
-        float width, float height, Rosen::Drawing::Canvas& canvas);
+    bool GetLayeredIconParm(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    Rosen::Drawing::ImageInfo ImageInfo();
+    void CompositeIconNotAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    void CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    Rosen::Drawing::ImageInfo CreateRSImageInfo(OptionalPixelMap pixelmap, int32_t width, int32_t height);
+    void TransformToPixelMap(const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo);
+    void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height,
+        Rosen::Drawing::Canvas& canvas);
 #endif
 
     std::unique_ptr<uint8_t[]> defaultMaskData_;
@@ -195,6 +214,8 @@ public:
     std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
     int32_t GetDuration();
     int32_t GetIterations();
+    void SetDuration(int32_t duration);
+    void SetIterations(int32_t iterations);
 private:
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
     int32_t duration_ = -1;

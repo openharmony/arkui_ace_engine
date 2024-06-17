@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
@@ -132,12 +133,19 @@ void LoadingProgressPattern::OnWindowShow()
     StartAnimation();
 }
 
+void LoadingProgressPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("IsInVisibleArea: ").append(isVisibleArea_ ? "true" : "false"));
+}
+
 void LoadingProgressPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!makeFunc_.has_value()) {
         host->RemoveChildAtIndex(0);
+        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->SetClipToBounds(true);
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -145,9 +153,8 @@ void LoadingProgressPattern::FireBuilder()
     if (contentModifierNode_ == node) {
         return;
     }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->GetRenderContext()->SetClipToFrame(false);
+    host->GetRenderContext()->SetClipToBounds(false);
     host->RemoveChildAndReturnIndex(contentModifierNode_);
     contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);

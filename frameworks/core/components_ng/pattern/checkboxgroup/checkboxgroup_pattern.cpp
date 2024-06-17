@@ -331,15 +331,10 @@ void CheckBoxGroupPattern::InitPreGroup()
     groupManager->AddCheckBoxGroup(group, host);
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
-        auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
-        if (selectAll) {
-            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
-        }
-        if (selectAll || (!selectAll && !isFirstCreated_)) {
-            UpdateUIStatus(selectAll);
-        }
-        initSelected_ = selectAll;
+    if (paintProperty->GetCheckBoxGroupSelect().value_or(false)) {
+        paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+        UpdateUIStatus(true);
+        initSelected_ = true;
     }
     isFirstCreated_ = false;
     SetPreGroup(group);
@@ -408,9 +403,6 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
         CHECK_NULL_VOID(paintProperty);
         auto eventHub = node->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !eventHub->IsEnabled()) {
-            continue;
-        }
         if (select) {
             vec.push_back(eventHub->GetName());
         }
@@ -638,9 +630,11 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
-    currentNavId_ = "";
-    groupManager->SetLastNavId(std::nullopt);
-    UpdateState();
+    if (!currentNavId_.value_or("").empty()) {
+        currentNavId_ = "";
+        groupManager->SetLastNavId(std::nullopt);
+        UpdateState();
+    }
 }
 
 std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
@@ -679,15 +673,9 @@ void CheckBoxGroupPattern::UpdateCheckBoxStyle()
     auto list = groupManager->GetCheckboxList(group);
     CheckBoxStyle groupStyle;
     GetCheckBoxGroupStyle(host, groupStyle);
-    auto isEnabled = checkBoxGroupEventHub->IsEnabled();
     for (auto node : list) {
         if (!node) {
             continue;
-        }
-        const auto& checkboxEventHub = node->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(checkboxEventHub);
-        if (!isEnabled) {
-            checkboxEventHub->SetEnabled(false);
         }
         auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);

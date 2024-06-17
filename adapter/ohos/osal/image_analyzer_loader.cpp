@@ -45,6 +45,7 @@ bool ImageAnalyzerLoader::Init()
     libraryHandle_ = dlopen(IMAGE_ANALYZER_SO_PATH, RTLD_LAZY);
     if (libraryHandle_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not dlopen %s: %s", IMAGE_ANALYZER_SO_PATH, dlerror());
+        return false;
     }
     createImageAnalyzerInstance_ =
         (ImageAnalyzerInterface* (*)(napi_env)) dlsym(libraryHandle_, "createImageAnalyzerInstance");

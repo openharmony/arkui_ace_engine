@@ -46,6 +46,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 const bool RATING_INDICATOR = true;
+const bool RATING_INDICATOR_FALSE = false;
 const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
 constexpr double RATING_SCORE = 3.0;
@@ -54,6 +55,7 @@ const std::string RATING_SCORE_STRING = "";
 constexpr double RATING_SCORE_2 = -2;
 constexpr double RATING_SCORE_3 = 3.5;
 constexpr double RATING_SCORE_4 = 3.0;
+constexpr double RATING_SCORE_5 = 1.0;
 constexpr int32_t RATING_STAR_NUM_1 = -1;
 const std::string RATING_BACKGROUND_URL = "common/img1.png";
 const std::string RATING_FOREGROUND_URL = "common/img2.png";
@@ -62,6 +64,7 @@ const std::string RATING_SVG_URL = "common/img4.svg";
 constexpr double DEFAULT_RATING_SCORE = 0.0;
 constexpr double DEFAULT_STEP_SIZE = 0.5;
 constexpr double RATING_STEP_SIZE = 0.7;
+constexpr double RATING_STEP_SIZE_1 = 1;
 constexpr double RATING_STEP_SIZE_2 = DEFAULT_STAR_NUM + DEFAULT_STAR_NUM;
 constexpr int32_t RATING_TOUCH_STAR = 3;
 constexpr int32_t RATING_DRAW_BACKGROUND_TIMES = 1;
@@ -94,6 +97,10 @@ constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 const std::string RATING_FOREGROUND_IMAGE_KEY = "foregroundImageSourceInfo";
 const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
+const std::string TEST_RESULT_FIRST = "test_ok_1";
+const std::string TEST_RESULT_SECOND = "test_ok_2";
+const std::string TEST_RESULT_THIRD = "test_ok_3";
+const std::string TEST_RESULT_FORTH = "test_ok_4";
 } // namespace
 
 class RatingTestNg : public testing::Test {
@@ -673,77 +680,32 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: RatingPatternTest013
- * @tc.desc: SetChangeValue and get value.
+ * @tc.name: RatingPatternTest015
+ * @tc.desc: Test for CreateNodePaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingTestNg, RatingPatternTest013, TestSize.Level1)
+HWTEST_F(RatingTestNg, RatingPatternTest015, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create RatingModelNG.
+     * @tc.steps: step1. create rating FrameNode and pattern loads ImageLoadingContext.
      */
     RatingModelNG rating;
     rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(DEFAULT_STEP_SIZE);
-    rating.SetStars(RATING_STAR_NUM);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL, false);
+    rating.SetForegroundSrc("", true);
+    rating.SetSecondarySrc(RATING_SVG_URL, false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
-    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
-    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
-    /**
-     * @tc.steps: step2. Check the Rating property value.
-     */
-    ratingPattern->SetRatingScore(RATING_SCORE);
-
-    double ratingScore = DEFAULT_RATING_SCORE;
-    if (ratingRenderProperty->HasRatingScore()) {
-        ratingScore = ratingRenderProperty->GetRatingScore().value();
-    } else {
-        ratingScore = DEFAULT_RATING_SCORE;
-    }
-    EXPECT_EQ(ratingScore, RATING_SCORE);
-}
-
-/**
- * @tc.name: RatingPatternTest014
- * @tc.desc: SetBuilderFunc and get value
- * @tc.type: FUNC
- */
-HWTEST_F(RatingTestNg, RatingPatternTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create RatingModelNG.
-     */
-    RatingModelNG rating;
-    rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(DEFAULT_STEP_SIZE);
-    rating.SetStars(RATING_STAR_NUM);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
-    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
-    ASSERT_NE(ratingPattern, nullptr);
-    ratingPattern->SetRatingScore(RATING_SCORE);
-    /**
-     * @tc.steps: step3. Set paramaters to node.
-     */
-
-    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
-            EXPECT_EQ(config.starNum_, RATING_STAR_NUM);
-            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
-            EXPECT_EQ(config.rating_, RATING_SCORE);
-            EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
-            return nullptr;
-        };
 
     /**
-     * @tc.steps: step2. Set paramaters to pattern Builderfunc.
+     * @tc.steps: step2. create nodePaintMethod, should return a default method instead of nullptr.
      */
-    ratingPattern->SetBuilderFunc(node);
-    ratingPattern->BuildContentModifierNode();
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
 }
 
 /**
@@ -1046,5 +1008,659 @@ HWTEST_F(RatingTestNg, RatingPatternOnKeyEvent001, TestSize.Level1)
     event.code = KeyCode::KEY_MENU;
     result = ratingPattern->OnKeyEvent(event);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RatingTestBuilderFunc001
+ * @tc.desc: SetBuilderFunc and get value, and test the result when the func changed, the func is not nullptr.
+ * This test will change 3 times:
+ * 1.Func set 1 star,expect the result is 1 star.
+ * 2.Func change to set 2 stars, and expect 2 stars.
+ * 3.Func change to set 3 stars, and expect 3 stars.
+ * This test whether the function can be excuted successfully by changing the function callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingTestBuilderFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     * @tc.expected: step1. node is not null.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(false);
+    rating.SetStepSize(1); // Default step size as 1.
+    rating.SetStars(5); // Default stars as 5.
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+
+    std::string result;
+    /**
+     * @tc.steps: step2. Create RatingBuilderFunc and test a node with rating star 1.
+     */
+    auto firstNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_FIRST;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(1); // First time, set stars as 1.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(firstNodeFunc);
+    auto firstNode = ratingPattern->BuildContentModifierNode();
+
+    EXPECT_EQ(result, TEST_RESULT_FIRST);
+    EXPECT_EQ("Rating", firstNode->GetTag());
+    auto layoutProperty = firstNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetStars().value(), 1); // First time， set 1 star, and expect the result is 1.
+
+    /**
+     * @tc.steps: step4. Create RatingBuilderFunc and test a node with rating star 2.
+     */
+    auto secondNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_SECOND;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(2); // Second time, set stars as 2.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+    ratingPattern->SetBuilderFunc(secondNodeFunc);
+    auto secondNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_SECOND);
+    auto secondLayoutProperty = secondNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(secondLayoutProperty->GetStars().value(), 2); // Second time， set 2 star, and expect the result is 2.
+
+    /**
+     * @tc.steps: step5. Create RatingBuilderFunc and test a node with rating star 3,expect star is 3.
+     */
+    auto thirdNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_THIRD;
+        RatingModelNG rating;
+        rating.Create();
+        rating.SetStars(3); // Third time, set stars as 3.
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        return frameNode;
+    };
+    ratingPattern->SetBuilderFunc(thirdNodeFunc);
+    auto thirdNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_THIRD);
+    auto thirdLayoutProperty = thirdNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_EQ(thirdLayoutProperty->GetStars().value(), 3); // Third time， set 3 star, and expect the result is 3.
+}
+
+/**
+ * @tc.name: RatingTestBuilderFunc002
+ * @tc.desc: SetBuilderFunc and get value, and test the result when the func is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingTestBuilderFunc002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     * @tc.expected: step1. node is not null.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(false);
+    rating.SetStepSize(1); // Default step size as 1.
+    rating.SetStars(5); // Default stars as 5.
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+
+    std::string result;
+    /**
+     * @tc.steps: step2. Create RatingBuilderFunc and test a nullptr node.
+     * @tc.expected: step2. Func is excuted successfully.
+     */
+    auto forthNodeFunc = [&result](RatingConfiguration config) -> RefPtr<FrameNode> {
+        result = TEST_RESULT_FORTH;
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step3. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(forthNodeFunc);
+    auto forthNode = ratingPattern->BuildContentModifierNode();
+    EXPECT_EQ(result, TEST_RESULT_FORTH);
+    EXPECT_EQ(forthNode, nullptr);
+}
+
+/**
+ * @tc.name: RatingPatternTest059
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_3);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR_FALSE);
+            EXPECT_EQ(config.rating_, RATING_SCORE_3);
+            EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest060
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_4);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR_FALSE);
+            EXPECT_EQ(config.rating_, RATING_SCORE_4);
+            EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest061
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_5);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR_FALSE);
+            EXPECT_EQ(config.rating_, RATING_SCORE_5);
+            EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest062
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(DEFAULT_RATING_SCORE);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR_FALSE);
+            EXPECT_EQ(config.rating_, DEFAULT_RATING_SCORE);
+            EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest063
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE);
+
+    /**
+     * @tc.steps: step3. Get render property.
+     * @tc.expected: Check the Rating property value.
+     */
+    double ratingScore = DEFAULT_RATING_SCORE;
+    if (ratingRenderProperty->HasRatingScore()) {
+        ratingScore = ratingRenderProperty->GetRatingScore().value();
+    } else {
+        ratingScore = DEFAULT_RATING_SCORE;
+    }
+    EXPECT_EQ(ratingScore, RATING_SCORE);
+}
+
+/**
+ * @tc.name: RatingPatternTest064
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_LAST_SCORE);
+
+    /**
+     * @tc.steps: step3. Get render property.
+     * @tc.expected: Check the Rating property value.
+     */
+    double ratingScore = DEFAULT_RATING_SCORE;
+    if (ratingRenderProperty->HasRatingScore()) {
+        ratingScore = ratingRenderProperty->GetRatingScore().value();
+    } else {
+        ratingScore = DEFAULT_RATING_SCORE;
+    }
+    EXPECT_EQ(ratingScore, RATING_LAST_SCORE);
+}
+
+/**
+ * @tc.name: RatingPatternTest065
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_4);
+
+    /**
+     * @tc.steps: step3. Get render property.
+     * @tc.expected: Check the Rating property value.
+     */
+    double ratingScore = DEFAULT_RATING_SCORE;
+    if (ratingRenderProperty->HasRatingScore()) {
+        ratingScore = ratingRenderProperty->GetRatingScore().value();
+    } else {
+        ratingScore = DEFAULT_RATING_SCORE;
+    }
+    EXPECT_EQ(ratingScore, RATING_SCORE_4);
+}
+
+/**
+ * @tc.name: RatingPatternTest066
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_5);
+
+    /**
+     * @tc.steps: step3. Get render property.
+     * @tc.expected: Check the Rating property value.
+     */
+    double ratingScore = DEFAULT_RATING_SCORE;
+    if (ratingRenderProperty->HasRatingScore()) {
+        ratingScore = ratingRenderProperty->GetRatingScore().value();
+    } else {
+        ratingScore = DEFAULT_RATING_SCORE;
+    }
+    EXPECT_EQ(ratingScore, RATING_SCORE_5);
+}
+
+/**
+ * @tc.name: RatingPatternTest067
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest067, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(DEFAULT_RATING_SCORE);
+
+    /**
+     * @tc.steps: step3. Get render property.
+     * @tc.expected: Check the Rating property value.
+     */
+    double ratingScore = DEFAULT_RATING_SCORE;
+    if (ratingRenderProperty->HasRatingScore()) {
+        ratingScore = ratingRenderProperty->GetRatingScore().value();
+    } else {
+        ratingScore = DEFAULT_RATING_SCORE;
+    }
+    EXPECT_EQ(ratingScore, DEFAULT_RATING_SCORE);
+}
+
+/**
+ * @tc.name: RatingPatternTest068
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest068, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
+            EXPECT_EQ(config.rating_, RATING_SCORE);
+            EXPECT_EQ(config.stepSize_, RATING_STEP_SIZE_1);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest069
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest069, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_LAST_SCORE);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
+            EXPECT_EQ(config.rating_, RATING_LAST_SCORE);
+            EXPECT_EQ(config.stepSize_, RATING_STEP_SIZE_1);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest070
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest070, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_4);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
+            EXPECT_EQ(config.rating_, RATING_SCORE_4);
+            EXPECT_EQ(config.stepSize_, RATING_STEP_SIZE_1);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RatingPatternTest071
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest071, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern ratingScore.
+     */
+    ratingPattern->SetRatingScore(RATING_SCORE_5);
+
+    /**
+     * @tc.steps: step3. Make builderFunc.
+     */
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(config.starNum_, DEFAULT_STAR_NUM);
+            EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
+            EXPECT_EQ(config.rating_, RATING_SCORE_5);
+            EXPECT_EQ(config.stepSize_, RATING_STEP_SIZE_1);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step4. Set paramaters to pattern Builderfunc.
+     */
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
 }
 } // namespace OHOS::Ace::NG

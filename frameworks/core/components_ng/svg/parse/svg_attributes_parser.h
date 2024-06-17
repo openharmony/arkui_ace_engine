@@ -22,6 +22,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/common/properties/svg_paint_state.h"
 
 namespace OHOS::Ace::NG {
 class SvgAttributesParser {
@@ -93,6 +94,51 @@ struct SvgAttributes {
     Dimension height = -1.0_px;
     bool autoMirror = false;
 };
+
+struct SvgBaseAttribute {
+    bool hasOpacity = false;
+    double opacity = 1.0;
+    FillState fillState;
+    StrokeState strokeState;
+    SvgTextStyle textStyle;
+    std::string transform;
+    std::string transformOrigin;
+    std::string filterId;
+    std::string maskId;
+    std::string href;
+    std::string id;
+    ClipState clipState;
+
+    void InheritFromUse(const SvgBaseAttribute& parent)
+    {
+        if (!hasOpacity) {
+            if (parent.hasOpacity) {
+                fillState.SetOpacity(parent.opacity);
+                opacity = parent.opacity;
+            } else {
+                opacity = 1.0; // default opacity is 1.0
+            }
+        }
+        fillState.Inherit(parent.fillState);
+        strokeState.Inherit(parent.strokeState);
+        clipState.Inherit(parent.clipState);
+    }
+
+    void Inherit(const SvgBaseAttribute& parent)
+    {
+        if (!hasOpacity) {
+            if (parent.hasOpacity) {
+                opacity = parent.opacity;
+            } else {
+                opacity = 1.0; // default opacity is 1.0
+            }
+        }
+        fillState.Inherit(parent.fillState);
+        strokeState.Inherit(parent.strokeState);
+        clipState.Inherit(parent.clipState);
+    }
+};
+
 
 struct SvgAnimateAttribute {
     std::string attributeName;

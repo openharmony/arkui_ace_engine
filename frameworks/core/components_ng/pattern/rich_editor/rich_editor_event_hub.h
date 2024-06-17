@@ -56,7 +56,7 @@ private:
     int32_t offsetInSpan_ = 0;
 };
 
-class RichEditorInsertValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorInsertValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorInsertValue, BaseEventInfo)
 public:
     RichEditorInsertValue() : BaseEventInfo("RichEditorInsertValue") {}
@@ -64,16 +64,19 @@ public:
     void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
     void SetInsertValue(const std::string& insertValue);
+    void SetPreviewText(const std::string& previewText);
     const std::string& GetInsertValue() const;
+    const std::string& GetPreviewText() const;
 
 private:
     int32_t insertOffset_;
     std::string insertValue_;
+    std::string previewText_;
 };
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
 
-class RichEditorAbstractSpanResult {
+class ACE_FORCE_EXPORT RichEditorAbstractSpanResult {
 public:
     RichEditorAbstractSpanResult() = default;
     ~RichEditorAbstractSpanResult() = default;
@@ -91,12 +94,20 @@ public:
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
     const std::string& GetValue() const;
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
     void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
     const FONT_FEATURES_LIST& GetFontFeatures() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
+    void SetValueResource(const RefPtr<ResourceObject>&);
+    const RefPtr<ResourceObject> GetValueResource() const;
+    void SetValueString(const std::string& valueString);
+    const std::string GetValueString() const;
+    void SetSymbolSpanStyle(const SymbolSpanStyle& symbolSpanStyle);
+    const SymbolSpanStyle GetSymbolSpanStyle() const;
     void SetLineHeight(double lineHeight);
     double GetLineHeight() const;
     void SetLetterspacing(double letterSpacing);
@@ -161,6 +172,7 @@ private:
     int32_t offsetInSpan_ = 0;
     int32_t eraseLength_ = 0;
     std::string value_;
+    std::string previewText_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
@@ -177,12 +189,14 @@ private:
     ImageFit objectFit_;
     std::string borderRadius_;
     std::string margin_;
+    std::string valueString_;
+    SymbolSpanStyle symbolSpanStyle_;
+    RefPtr<ResourceObject> valueResource_;
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
-enum class KeyboardType { NONE, VIRTUAL_KEYBOARD, EXTERNAL_KEYBOARD };
 
-class RichEditorDeleteValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
 public:
     RichEditorDeleteValue() : BaseEventInfo("RichEditorDeleteValue") {}
@@ -195,14 +209,11 @@ public:
     int32_t GetLength() const;
     void SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorDeleteSpans() const;
-    void SetKeyboardType(KeyboardType Keyboard);
-    KeyboardType GetKeyboardType() const;
 
 private:
     int32_t offset_ = 0;
     RichEditorDeleteDirection direction_;
     int32_t length_ = 0;
-    KeyboardType Keyboard_ = KeyboardType::NONE;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 
@@ -213,16 +224,16 @@ public:
     ~RichEditorChangeValue() = default;
 
     void SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorOriginalSpans() const;
 
     void SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedSpans() const;
 
     void SetRichEditorReplacedImageSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedImageSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedImageSpans() const;
 
     void SetRichEditorReplacedSymbolSpans(const RichEditorAbstractSpanResult& span);
-    const std::list<RichEditorAbstractSpanResult>& GetRichEditorReplacedSymbolSpans() const;
+    const std::vector<RichEditorAbstractSpanResult>& GetRichEditorReplacedSymbolSpans() const;
 
     void SetRangeBefore(const TextRange& rangeBefore);
     TextRange GetRangeBefore() const;
@@ -230,11 +241,21 @@ public:
     void SetRangeAfter(const TextRange& rangeAfter);
     TextRange GetRangeAfter() const;
 
+    void reset()
+    {
+        originalSpans_.clear();
+        replacedSpans_.clear();
+        replacedImageSpans_.clear();
+        replacedSymbolSpans_.clear();
+        rangeBefore_ = TextRange();
+        rangeAfter_ = TextRange();
+    }
+
 private:
-    std::list<RichEditorAbstractSpanResult> originalSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedImageSpans_;
-    std::list<RichEditorAbstractSpanResult> replacedSymbolSpans_;
+    std::vector<RichEditorAbstractSpanResult> originalSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedImageSpans_;
+    std::vector<RichEditorAbstractSpanResult> replacedSymbolSpans_;
     TextRange rangeBefore_;
     TextRange rangeAfter_;
 };

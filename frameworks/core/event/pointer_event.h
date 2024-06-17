@@ -26,6 +26,9 @@ class PointerEvent;
 }
 
 namespace OHOS::Ace {
+
+enum class KeyCode : int32_t;
+
 enum class PointerAction : int32_t {
     UNKNOWN = 0,
     CANCEL = 1,
@@ -53,6 +56,7 @@ enum class PointerAction : int32_t {
 };
 
 struct PointerEvent final {
+    int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     bool pressed = false;
     int32_t windowX = 0;
@@ -69,6 +73,7 @@ struct PointerEvent final {
     int32_t x = 0;
     int32_t y = 0;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
+    std::vector<KeyCode> pressedKeyCodes_;
 
     PointerEvent() = default;
     PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}

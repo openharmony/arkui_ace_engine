@@ -116,13 +116,20 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
-        ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        context->PrepareOpenImplicitAnimation();
+        auto executor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask(
+            [container, context]() {
+                ContainerScope scope(container->GetInstanceId());
+                context->FlushBuild();
+                context->PrepareOpenImplicitAnimation();
+            },
+            TaskExecutor::TaskType::UI, "animateToContainerTask");
     });
+    pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
@@ -140,15 +147,23 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
             return;
         }
-        ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        context->PrepareCloseImplicitAnimation();
+        auto executor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask(
+            [container, context]() {
+                ContainerScope scope(container->GetInstanceId());
+                context->FlushBuild();
+                context->PrepareCloseImplicitAnimation();
+            },
+            TaskExecutor::TaskType::UI, "animateToContainerTask");
     });
+    pipelineContext->FlushBuild();
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
@@ -452,6 +467,10 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 #endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
+        const char* funcName = immediately ? "animateToImmediately" : "animateTo";
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "can not find current context, %{public}s failed, please use uiContext.%{public}s to specify the context",
+            funcName, funcName);
         return;
     }
     if (info.Length() < 2) {

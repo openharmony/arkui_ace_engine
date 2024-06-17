@@ -112,6 +112,16 @@ public:
         return isSearchRefresh_;
     }
 
+    void SetIsNestedInterrupt(bool isNestedInterrupt)
+    {
+        isNestedInterrupt_ = isNestedInterrupt;
+    }
+    
+    bool GetIsNestedInterrupt() const
+    {
+        return isNestedInterrupt_;
+    }
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
@@ -133,6 +143,7 @@ private:
 
     bool isFixedNestedScrollMode_ = false;
     bool isSearchRefresh_ = true;
+    bool isNestedInterrupt_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_NESTABLE_SCROLL_CONTAINER_H

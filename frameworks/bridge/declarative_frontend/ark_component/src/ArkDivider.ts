@@ -82,6 +82,12 @@ class ArkDividerComponent extends ArkComponent implements DividerAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): DividerAttribute {
+    return this;
+  }
+  allowChildCount(): number {
+    return 0;
+  }
   vertical(value: boolean): DividerAttribute {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;

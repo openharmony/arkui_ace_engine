@@ -63,17 +63,11 @@ void RadioPattern::OnAttachToFrameNode()
 void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
     auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    pageEventHub->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+    groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
 }
 
 void RadioPattern::SetBuilderState()
@@ -96,12 +90,19 @@ void RadioPattern::UpdateIndicatorType()
     } else {
         ImageNodeCreate();
     }
-    if (radioPaintProperty->HasRadioCheck()) {
-        if (!radioPaintProperty->GetRadioCheckValue()) {
-            SetBuilderState();
-        }
-    } else {
+    CHECK_NULL_VOID(builderChildNode_);
+    auto renderContext = builderChildNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformScale({ INDICATOR_MAX_SCALE, INDICATOR_MAX_SCALE });
+    renderContext->UpdateOpacity(1);
+    if (!radioModifier_) {
+        radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+    }
+    if (!radioPaintProperty->HasRadioCheck()) {
         radioPaintProperty->UpdateRadioCheck(false);
+    }
+    if (!radioPaintProperty->GetRadioCheckValue()) {
+        radioModifier_->InitOpacityScale(false);
         SetBuilderState();
     }
 }
@@ -184,13 +185,43 @@ void RadioPattern::InitFocusEvent()
 void RadioPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(true);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
 }
 
 void RadioPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(radioModifier_);
-    radioModifier_->SetIsFocused(false);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void RadioPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RadioPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(radioModifier_);
+    radioModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -441,6 +472,9 @@ void RadioPattern::OnTouchUp()
 
 void RadioPattern::CheckPageNode()
 {
+    if (Container::IsInSubContainer()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prePageId = GetPrePageId();
@@ -453,18 +487,17 @@ void RadioPattern::CheckPageNode()
     if (pageNode->GetId() != prePageId) {
         auto eventHub = host->GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(eventHub);
-        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-        CHECK_NULL_VOID(pageEventHub);
+        auto groupManager = GetGroupManager();
+        CHECK_NULL_VOID(groupManager);
         auto group = eventHub->GetGroup();
-
-        pageEventHub->AddRadioToGroup(group, host->GetId());
+        groupManager->AddRadioToGroup(group, host->GetId());
         auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         bool check = false;
         if (paintProperty->HasRadioCheck()) {
             check = paintProperty->GetRadioCheckValue();
         }
-        UpdateGroupCheckStatus(host, pageNode, check);
+        UpdateGroupCheckStatus(host, groupManager, check);
     }
 }
 
@@ -477,17 +510,13 @@ void RadioPattern::UpdateState()
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
     auto preGroup = GetPreGroup();
     auto group = eventHub->GetGroup();
     if (!preGroup.has_value()) {
-        pageEventHub->AddRadioToGroup(group, host->GetId());
-        SetPrePageId(pageNode->GetId());
+        groupManager->AddRadioToGroup(group, host->GetId());
+        SetPrePageIdToLastPageId();
         auto callback = [weak = WeakClaim(this)]() {
             auto radio = weak.Upgrade();
             if (radio) {
@@ -497,9 +526,9 @@ void RadioPattern::UpdateState()
         pipelineContext->AddBuildFinishCallBack(callback);
     }
     if (preGroup.has_value() && preGroup.value() != group) {
-        pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
-        pageEventHub->AddRadioToGroup(group, host->GetId());
-        SetPrePageId(pageNode->GetId());
+        groupManager->RemoveRadioFromGroup(preGroup.value(), host->GetId());
+        groupManager->AddRadioToGroup(group, host->GetId());
+        SetPrePageIdToLastPageId();
         isGroupChanged_ = true;
     }
     SetPreGroup(group);
@@ -528,7 +557,7 @@ void RadioPattern::UpdateState()
         isFirstCreated_ = false;
     }
     if (preCheck_ != check || isGroupChanged_) {
-        UpdateGroupCheckStatus(host, pageNode, check);
+        UpdateGroupCheckStatus(host, groupManager, check);
     }
     preCheck_ = check;
     isGroupChanged_ = false;
@@ -712,22 +741,19 @@ CalcSize RadioPattern::GetChildContentSize()
 }
 
 void RadioPattern::UpdateGroupCheckStatus(
-    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check)
+    const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check)
 {
     frameNode->MarkNeedRenderOnly();
-    CHECK_NULL_VOID(pageNode);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (!isFirstCreated_ && check) {
             startEnterAnimation();
         }
     }
-    auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
-    CHECK_NULL_VOID(pageEventHub);
 
     auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     if (check) {
-        pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
+        groupManager->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
@@ -933,4 +959,26 @@ RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
     return (makeFunc_.value())(radioConfiguration);
 }
 
+RefPtr<GroupManager> RadioPattern::GetGroupManager()
+{
+    auto manager = groupManager_.Upgrade();
+    if (manager) {
+        return manager;
+    }
+    groupManager_ = GroupManager::GetGroupManager();
+    return groupManager_.Upgrade();
+}
+
+void RadioPattern::SetPrePageIdToLastPageId()
+{
+    if (!Container::IsInSubContainer()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto stageManager = pipelineContext->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        SetPrePageId(pageNode->GetId());
+    }
+}
 } // namespace OHOS::Ace::NG

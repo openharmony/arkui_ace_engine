@@ -47,8 +47,7 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
 
 void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
-RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
-    float globalX, float globalY, DragType dragType, bool findDrop)
+RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY)
 {
     return nullptr;
 }
@@ -77,7 +76,7 @@ void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::str
 void DragDropManager::onDragCancel() {}
 
 void DragDropManager::FireOnDragEvent(
-    const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
+    const RefPtr<FrameNode>& frameNode, const PointerEvent& point, DragEventType type, const std::string& extraInfo)
 {}
 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode) {}

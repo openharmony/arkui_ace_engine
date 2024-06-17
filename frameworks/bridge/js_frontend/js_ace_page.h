@@ -54,7 +54,7 @@ using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<st
 const char MERGE_SOURCEMAPS_PATH[] = "sourceMaps.map";
 
 // One JsAcePage corresponding to a JS bundle, so it should maintain page's lifecycle.
-class ACE_EXPORT JsAcePage final : public AcePage {
+class ACE_FORCE_EXPORT JsAcePage final : public AcePage {
     DECLARE_ACE_TYPE(JsAcePage, AcePage);
 
 public:

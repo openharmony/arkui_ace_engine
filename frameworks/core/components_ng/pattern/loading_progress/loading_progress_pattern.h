@@ -99,6 +99,7 @@ private:
     void OnModifyDone() override;
     void OnWindowHide() override;
     void OnWindowShow() override;
+    void DumpInfo() override;
     void StartAnimation();
     void StopAnimation();
     void FireBuilder();

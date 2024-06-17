@@ -1227,6 +1227,11 @@ void WebPattern::OnDefaultTextEncodingFormatUpdate(const std::string& value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnOverlayScrollbarEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnMetaViewportUpdate(bool value)
 {
     // cross platform is not support now;

@@ -89,6 +89,7 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::GetUserData,
     OHOS::Ace::NodeModel::SetLengthMetricUnit,
     OHOS::Ace::NodeModel::GetParent,
+    OHOS::Ace::NodeModel::RemoveAllChildren,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -133,6 +134,9 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
 
 ArkUI_NativeAnimateAPI_1 animateImpl_1 = {
     OHOS::Ace::AnimateModel::AnimateTo,
+    OHOS::Ace::AnimateModel::KeyframeAnimateTo,
+    OHOS::Ace::AnimateModel::CreateAnimator,
+    OHOS::Ace::AnimateModel::DisposeAnimator,
 };
 
 } // namespace
@@ -143,7 +147,7 @@ extern "C" {
 
 void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
 {
-    if (!OHOS::Ace::NodeModel::GetFullImpl()) {
+    if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
         return nullptr;

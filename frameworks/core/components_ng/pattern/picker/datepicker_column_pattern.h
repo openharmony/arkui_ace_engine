@@ -279,6 +279,8 @@ private:
     void SetDividerHeight(uint32_t showOptionCount);
     void OnTouchDown();
     void OnTouchUp();
+    void ParseTouchListener();
+    void ParseMouseEvent();
     void InitMouseAndPressEvent();
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
@@ -324,7 +326,10 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
+    DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
+    void InitTextFontFamily();
+
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
@@ -366,6 +371,11 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+
+    bool hasAppCustomFont_ = false;
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

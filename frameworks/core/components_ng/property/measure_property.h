@@ -270,19 +270,22 @@ struct MeasureProperty {
         auto context = PipelineBase::GetCurrentContext();
         if (context && context->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
 #if !defined(PREVIEW)
-            std::string width = selfIdealSize.has_value() ?
-                (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
-                : "-";
-            std::string height = selfIdealSize.has_value() ?
-                (selfIdealSize.value().Height().has_value() ? selfIdealSize.value().Height().value().ToString() : "-")
-                : "-";
-            json->PutExtAttr("width", width.c_str(), filter);
-            json->PutExtAttr("height", height.c_str(), filter);
+            /* no fixed attr below */
+            if (!filter.IsFastFilter()) {
+                std::string width = selfIdealSize.has_value() ?
+                    (selfIdealSize.value().Width().has_value() ?
+                    selfIdealSize.value().Width().value().ToString() : "-") : "-";
+                std::string height = selfIdealSize.has_value() ?
+                    (selfIdealSize.value().Height().has_value() ?
+                    selfIdealSize.value().Height().value().ToString() : "-") : "-";
+                json->PutExtAttr("width", width.c_str(), filter);
+                json->PutExtAttr("height", height.c_str(), filter);
 
-            auto jsonSize = JsonUtil::Create(true);
-            jsonSize->Put("width", width.c_str());
-            jsonSize->Put("height", height.c_str());
-            json->PutExtAttr("size", jsonSize, filter);
+                auto jsonSize = JsonUtil::Create(true);
+                jsonSize->Put("width", width.c_str());
+                jsonSize->Put("height", height.c_str());
+                json->PutExtAttr("size", jsonSize, filter);
+            }
 #else
             ToJsonValue_GetJsonSize(json, filter);
 #endif
@@ -290,6 +293,10 @@ struct MeasureProperty {
             ToJsonValue_GetJsonSize(json, filter);
         }
 
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonConstraintSize = JsonUtil::Create(true);
         jsonConstraintSize->Put("minWidth",
             minSize.value_or(CalcSize()).Width().value_or(CalcLength(0, DimensionUnit::VP)).ToString().c_str());
@@ -310,6 +317,10 @@ struct MeasureProperty {
 
     void ToJsonValue_GetJsonSize(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonSize = JsonUtil::Create(true);
         if (selfIdealSize.has_value()) {
             if (selfIdealSize.value().Width().has_value()) {
@@ -403,10 +414,10 @@ struct PaddingPropertyT {
             return "0.0";
         }
         auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("top", top->ToString().c_str());
-        jsonValue->Put("right", right->ToString().c_str());
-        jsonValue->Put("bottom", bottom->ToString().c_str());
-        jsonValue->Put("left", left->ToString().c_str());
+        jsonValue->Put("top", top.has_value() ? top->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("right", right.has_value() ? right->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("bottom", bottom.has_value() ? bottom->ToString().c_str() : T{}.ToString().c_str());
+        jsonValue->Put("left", left.has_value() ? left->ToString().c_str() : T{}.ToString().c_str());
         return jsonValue->ToString();
     }
 

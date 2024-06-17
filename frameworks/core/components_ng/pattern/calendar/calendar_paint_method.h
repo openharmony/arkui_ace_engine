@@ -43,6 +43,7 @@ public:
 private:
     void DrawWeekAndDates(RSCanvas& canvas, Offset offset);
     void DrawWeek(RSCanvas& canvas, const Offset& offset) const;
+    void DrawDates(RSCanvas& canvas, const Offset& offset);
     void SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty);
     void DrawCalendar(RSCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day);
     void DrawTodayArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
@@ -148,6 +149,8 @@ private:
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;
     SizeF frameSize_;
+
+    std::vector<std::string> appFontFamilies_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPaintMethod);
 };

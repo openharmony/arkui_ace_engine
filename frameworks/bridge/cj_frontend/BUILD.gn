@@ -1,0 +1,269 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("$ace_root/frameworks/bridge/cj_frontend/platform.gni")
+
+# cj frontend source
+template("cj_frontend") {
+  forward_variables_from(invoker, "*")
+
+  ohos_shared_library(target_name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+    innerapi_tags = [ "platformsdk" ]
+    defines += invoker.defines
+    defines += platform_config.common_defines
+    configs = [ "$ace_root:ace_config" ]
+    include_dirs = [ "$ace_root/frameworks" ]
+
+    if (!defined(deps)) {
+      deps = []
+    }
+
+    external_deps = [
+      "ability_runtime:cj_environment",
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+    ]
+
+    sources = [
+      "frontend/cj_frontend_abstract.cpp",
+      "frontend/cj_page_router_abstract.cpp",
+    ]
+
+    sources += [
+      "frontend/cj_frontend_loader.cpp",
+      "frontend/cj_frontend_ng.cpp",
+      "frontend/cj_page_router_ng.cpp",
+    ]
+
+    # actually that depends on variable `ace_config: enable_ng_build`, but `adapter` failed to stick on the plan.
+    # then we have to trace `defines` on each platform, the facts is that ohos-ng enables ng build, others are not.
+    if (invoker.platform != "ohos_ng") {
+      sources += [
+        "frontend/cj_frontend.cpp",
+        "frontend/cj_page_router.cpp",
+      ]
+    }
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    sources += [
+      "cppview/canvas_gradient.cpp",
+      "cppview/canvas_path.cpp",
+      "cppview/canvas_renderer.cpp",
+      "cppview/data_change_listener.cpp",
+      "cppview/gesture.cpp",
+      "cppview/interactable_view.cpp",
+      "cppview/lazy_foreach.cpp",
+      "cppview/lazy_foreach_func.cpp",
+      "cppview/native_view.cpp",
+      "cppview/search_controller.cpp",
+      "cppview/shape_abstract.cpp",
+      "cppview/swiper_controller.cpp",
+      "cppview/view_abstract.cpp",
+      "cppview/view_stack_processor.cpp",
+      "interfaces/cj_ffi/animator/cj_animator.cpp",
+      "interfaces/cj_ffi/animator/cj_animator_ffi.cpp",
+      "interfaces/cj_ffi/base/cj_base_ffi.cpp",
+      "interfaces/cj_ffi/cj_alert_dialog_ffi.cpp",
+      "interfaces/cj_ffi/cj_alphabet_indexer_ffi.cpp",
+      "interfaces/cj_ffi/cj_animate_param_ffi.cpp",
+      "interfaces/cj_ffi/cj_badge_ffi.cpp",
+      "interfaces/cj_ffi/cj_blank_ffi.cpp",
+      "interfaces/cj_ffi/cj_button_ffi.cpp",
+      "interfaces/cj_ffi/cj_canvas_ffi.cpp",
+      "interfaces/cj_ffi/cj_checkbox_ffi.cpp",
+      "interfaces/cj_ffi/cj_checkbox_group_ffi.cpp",
+      "interfaces/cj_ffi/cj_circle_ffi.cpp",
+      "interfaces/cj_ffi/cj_collection_ffi.cpp",
+      "interfaces/cj_ffi/cj_column_ffi.cpp",
+      "interfaces/cj_ffi/cj_column_split_ffi.cpp",
+      "interfaces/cj_ffi/cj_common_ffi.cpp",
+      "interfaces/cj_ffi/cj_component_id_ffi.cpp",
+      "interfaces/cj_ffi/cj_container_base_ffi.cpp",
+      "interfaces/cj_ffi/cj_context_menu_ffi.cpp",
+      "interfaces/cj_ffi/cj_counter_ffi.cpp",
+      "interfaces/cj_ffi/cj_customdialog_controller_ffi.cpp",
+      "interfaces/cj_ffi/cj_data_change_listener_ffi.cpp",
+      "interfaces/cj_ffi/cj_data_ffi.cpp",
+      "interfaces/cj_ffi/cj_data_panel_ffi.cpp",
+      "interfaces/cj_ffi/cj_datepicker_ffi.cpp",
+      "interfaces/cj_ffi/cj_divider_ffi.cpp",
+      "interfaces/cj_ffi/cj_ellipse_ffi.cpp",
+      "interfaces/cj_ffi/cj_flex_ffi.cpp",
+      "interfaces/cj_ffi/cj_foreach_ffi.cpp",
+      "interfaces/cj_ffi/cj_gauge_ffi.cpp",
+      "interfaces/cj_ffi/cj_gesture_ffi.cpp",
+      "interfaces/cj_ffi/cj_grid_col_ffi.cpp",
+      "interfaces/cj_ffi/cj_grid_ffi.cpp",
+      "interfaces/cj_ffi/cj_grid_item_ffi.cpp",
+      "interfaces/cj_ffi/cj_grid_row_ffi.cpp",
+      "interfaces/cj_ffi/cj_hyperlink_ffi.cpp",
+      "interfaces/cj_ffi/cj_if_else_ffi.cpp",
+      "interfaces/cj_ffi/cj_image_animator_ffi.cpp",
+      "interfaces/cj_ffi/cj_image_ffi.cpp",
+      "interfaces/cj_ffi/cj_image_span_ffi.cpp",
+      "interfaces/cj_ffi/cj_interactable_view_ffi.cpp",
+      "interfaces/cj_ffi/cj_lazy_foreach_ffi.cpp",
+      "interfaces/cj_ffi/cj_line_ffi.cpp",
+      "interfaces/cj_ffi/cj_list_ffi.cpp",
+      "interfaces/cj_ffi/cj_list_item_ffi.cpp",
+      "interfaces/cj_ffi/cj_list_item_group_ffi.cpp",
+      "interfaces/cj_ffi/cj_loading_progress_ffi.cpp",
+      "interfaces/cj_ffi/cj_marquee_ffi.cpp",
+      "interfaces/cj_ffi/cj_menu_ffi.cpp",
+      "interfaces/cj_ffi/cj_menu_item_ffi.cpp",
+      "interfaces/cj_ffi/cj_menu_item_group_ffi.cpp",
+      "interfaces/cj_ffi/cj_native_view_ffi.cpp",
+      "interfaces/cj_ffi/cj_navigation_ffi.cpp",
+      "interfaces/cj_ffi/cj_navigator_ffi.cpp",
+      "interfaces/cj_ffi/cj_page_transition_ffi.cpp",
+      "interfaces/cj_ffi/cj_panel_ffi.cpp",
+      "interfaces/cj_ffi/cj_path_ffi.cpp",
+      "interfaces/cj_ffi/cj_pattern_lock.cpp",
+      "interfaces/cj_ffi/cj_pixel_unit_convert_ffi.cpp",
+      "interfaces/cj_ffi/cj_polygon_ffi.cpp",
+      "interfaces/cj_ffi/cj_polyline_ffi.cpp",
+      "interfaces/cj_ffi/cj_progress_ffi.cpp",
+      "interfaces/cj_ffi/cj_qrcode_ffi.cpp",
+      "interfaces/cj_ffi/cj_radio_ffi.cpp",
+      "interfaces/cj_ffi/cj_rating_ffi.cpp",
+      "interfaces/cj_ffi/cj_rect_ffi.cpp",
+      "interfaces/cj_ffi/cj_refresh_ffi.cpp",
+      "interfaces/cj_ffi/cj_relative_container_ffi.cpp",
+      "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
+      "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
+      "interfaces/cj_ffi/cj_row_ffi.cpp",
+      "interfaces/cj_ffi/cj_row_split_ffi.cpp",
+      "interfaces/cj_ffi/cj_scroll_ffi.cpp",
+      "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
+      "interfaces/cj_ffi/cj_search_ffi.cpp",
+      "interfaces/cj_ffi/cj_select_ffi.cpp",
+      "interfaces/cj_ffi/cj_shape_ffi.cpp",
+      "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
+      "interfaces/cj_ffi/cj_slider_ffi.cpp",
+      "interfaces/cj_ffi/cj_span_ffi.cpp",
+      "interfaces/cj_ffi/cj_stack_ffi.cpp",
+      "interfaces/cj_ffi/cj_stepper_ffi.cpp",
+      "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
+      "interfaces/cj_ffi/cj_swiper_ffi.cpp",
+      "interfaces/cj_ffi/cj_tab_ffi.cpp",
+      "interfaces/cj_ffi/cj_text_clock_ffi.cpp",
+      "interfaces/cj_ffi/cj_text_ffi.cpp",
+      "interfaces/cj_ffi/cj_textarea_ffi.cpp",
+      "interfaces/cj_ffi/cj_textfield_ffi.cpp",
+      "interfaces/cj_ffi/cj_textinput_ffi.cpp",
+      "interfaces/cj_ffi/cj_textpicker_ffi.cpp",
+      "interfaces/cj_ffi/cj_texttimer_ffi.cpp",
+      "interfaces/cj_ffi/cj_toggle_ffi.cpp",
+      "interfaces/cj_ffi/cj_transitioneffect.cpp",
+      "interfaces/cj_ffi/cj_transitioneffect_ffi.cpp",
+      "interfaces/cj_ffi/cj_view_abstract_ffi.cpp",
+      "interfaces/cj_ffi/cj_view_context_ffi.cpp",
+      "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
+      "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
+      "interfaces/cj_ffi/font/cj_font_ffi.cpp",
+      "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
+      "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
+      "interfaces/cj_ffi/router/cj_router_ffi.cpp",
+      "interfaces/cj_ffi/state_manage/cj_environment.cpp",
+      "interfaces/cj_ffi/state_manage/cj_persistent_storage_ffi.cpp",
+      "interfaces/cj_ffi/utils.cpp",
+      "runtime/cj_runtime_delegate.cpp",
+    ]
+
+    deps += [ "$ace_root/build:libace_compatible" ]
+
+    external_deps += [
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+    ]
+
+    deps += [
+      "$ace_root/frameworks/core:ace_container_scope",
+      "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
+    ]
+
+    if (platform_config.is_ohos) {
+      external_deps += [
+        "c_utils:utils",
+        "image_framework:cj_image_ffi",
+        "image_framework:image",
+        "image_framework:image_native",
+      ]
+    } else {
+      sources -= [
+        "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
+        "interfaces/cj_ffi/state_manage/cj_environment.cpp",
+        "interfaces/cj_ffi/state_manage/cj_persistent_storage_ffi.cpp",
+      ]
+
+      # add mock sources for ohos-sdk
+      sources += [
+        "interfaces/cj_ffi/mock/cj_richtext.cpp",
+        "interfaces/cj_ffi/state_manage/mock/cj_state_manage_mock.cpp",
+      ]
+    }
+
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      external_deps += [
+        "ability_runtime:app_context",
+        "webview:cj_webview_ffi",
+        "webview:libnweb",
+      ]
+      sources += [
+        "interfaces/cj_ffi/cj_richtext_ffi.cpp",
+        "interfaces/cj_ffi/cj_web_ffi.cpp",
+      ]
+    } else {
+      sources += [ "interfaces/cj_ffi/mock/cj_web_mock.cpp" ]
+    }
+
+    if (defined(config.video_components_support) &&
+        config.video_components_support) {
+      sources += [ "interfaces/cj_ffi/cj_video_ffi.cpp" ]
+      if (defined(config.video_support_jsstack) &&
+          config.video_support_jsstack) {
+        external_deps += [ "hiview:libxpower_event_js" ]
+      }
+    } else {
+      sources += [ "interfaces/cj_ffi/mock/cj_video_mock.cpp" ]
+    }
+  }
+}
+
+foreach(item, ace_platforms) {
+  platform = item.name
+  engine_config = {
+  }
+  engine_config = item.config
+  cj_frontend("cj_frontend_" + item.name) {
+    # platform = item.name
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
+}

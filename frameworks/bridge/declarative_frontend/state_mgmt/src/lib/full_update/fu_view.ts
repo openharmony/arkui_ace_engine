@@ -31,8 +31,7 @@ abstract class View extends NativeViewFullUpdate implements
   private propsUsedForRender: Set<string> = new Set<string>();
   private isRenderingInProgress: boolean = false;
 
-  private watchedProps: Map<string, (propName: string) => void>
-    = new Map<string, (propName: string) => void>();
+  private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMap;
@@ -122,14 +121,14 @@ abstract class View extends NativeViewFullUpdate implements
       // need to sync container instanceId to switch instanceId in C++ side.
       this.syncInstanceId();
       if (this.propsUsedForRender.has(info)) {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View needs update`);
         this.markNeedUpdate();
       } else {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. View does NOT need update`);
       }
-      let cb = this.watchedProps.get(info)
+      let cb = this.watchedProps.get(info);
       if (cb) {
-        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || 'unknowm'}']. calling @Watch function`);
         cb.call(this, info);
       }
       this.restoreInstanceId();
@@ -137,8 +136,8 @@ abstract class View extends NativeViewFullUpdate implements
   }
 
   propertyRead(info?: PropertyInfo): void {
-    stateMgmtConsole.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
-    if (info && (info != "unknown") && this.isRenderingInProgress) {
+    stateMgmtConsole.debug(`${this.constructor.name}: propertyRead ['${info || 'unknowm'}'].`);
+    if (info && (info !== 'unknown') && this.isRenderingInProgress) {
       this.propsUsedForRender.add(info);
     }
   }

@@ -120,6 +120,9 @@ Rosen::Drawing::AlphaType ImageConverter::AlphaTypeToAlphaType(Media::AlphaType 
 std::shared_ptr<Rosen::Drawing::Bitmap> ImageConverter::PixelMapToBitmap(
     const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
+    if (!pixelMap) {
+        return nullptr;
+    }
     auto data = pixelMap->GetPixels();
     Rosen::Drawing::Bitmap bitmap;
     Rosen::Drawing::ColorType colorType = ImageConverter::PixelFormatToColorType(pixelMap->GetPixelFormat());

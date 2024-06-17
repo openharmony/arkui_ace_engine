@@ -26,13 +26,13 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
-#include "core/components/declaration/svg/svg_base_declaration.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
 #include "core/components_ng/svg/svg_context.h"
+#include "core/components_ng/svg/parse/svg_attributes_parser.h"
 
 namespace OHOS::Ace::NG {
 enum class SvgLengthType {

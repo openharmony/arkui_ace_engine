@@ -39,6 +39,7 @@ public:
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
     void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override;
     void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override;
+    void AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) override;
     void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) override;
     void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
@@ -46,6 +47,7 @@ public:
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
     void HasData(const std::function<void(bool hasData)>& callback) override;
     void Clear() override;
+    void GetSpanStringData(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode = false) override;
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
@@ -57,8 +59,11 @@ private:
     void GetDataAsync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback);
+    void ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+        std::string& resText);
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
+    void GetSpanStringDataHelper(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode);
 #endif
 };
 

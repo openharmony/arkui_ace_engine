@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_slider_theme.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -80,8 +81,10 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
+    JSClass<JSSlider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -127,6 +130,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         SliderModel::GetInstance()->Create(
             static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
+        JSSliderTheme::ApplyTheme();
         return;
     }
 
@@ -207,6 +211,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSliderValueObject(info, changeEventVal);
     }
+    JSSliderTheme::ApplyTheme();
 }
 
 void JSSlider::SetThickness(const JSCallbackInfo& info)
@@ -294,13 +299,20 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        auto theme = GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetTrackSelectedColor();
+    NG::Gradient gradient;
+    bool isResourceColor = false;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        if (!ParseJsColor(info[0], colorVal)) {
+            auto theme = GetTheme<SliderTheme>();
+            CHECK_NULL_VOID(theme);
+            colorVal = theme->GetTrackSelectedColor();
+        }
+        isResourceColor = true;
+        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
+        SliderModel::GetInstance()->SetSelectColor(colorVal);
     }
-    SliderModel::GetInstance()->SetSelectColor(colorVal);
+    SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
@@ -386,11 +398,8 @@ void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto mode = static_cast<SliderInteraction>(info[0]->ToNumber<int32_t>());
-        auto sliderInteractionMode = mode == SliderInteraction::SLIDE_ONLY
-                                         ? SliderModel::SliderInteraction::SLIDE_ONLY
-                                         : SliderModel::SliderInteraction::SLIDE_AND_CLICK;
-        SliderModel::GetInstance()->SetSliderInteractionMode(sliderInteractionMode);
+        auto mode = static_cast<SliderModel::SliderInteraction>(info[0]->ToNumber<int32_t>());
+        SliderModel::GetInstance()->SetSliderInteractionMode(mode);
     } else {
         SliderModel::GetInstance()->ResetSliderInteractionMode();
     }

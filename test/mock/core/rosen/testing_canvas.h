@@ -62,12 +62,16 @@ public:
     virtual void Rotate(float deg) {}
     virtual void Translate(float tx, float ty) {}
     virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
-    virtual void DrawImage(const TestingImage &image, const float px,
-                           const float py, const TestingSamplingOptions &sampling) {}
+    virtual void DrawImage(
+        const TestingImage& image, const float px, const float py, const TestingSamplingOptions& sampling)
+    {}
     virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
         float lightRadius, TestingColor /* ambientColor */, TestingColor /* spotColor */, TestingShadowFlags flag)
     {}
-
+    virtual void DrawShadowStyle(const TestingPath& path, const TestingPoint3& planeParams,
+        const TestingPoint3& devLightPos, float lightRadius, TestingColor /* ambientColor */,
+        TestingColor /* spotColor */, TestingShadowFlags flag, bool isLimitElevation)
+    {}
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
     {
         return *this;
@@ -101,7 +105,7 @@ public:
     virtual void DrawBackground(const TestingBrush& brush) {}
     virtual void ClipRect(const TestingRect& rect, ClipOp op = ClipOp::INTERSECT, bool doAntiAlias = false) {}
     virtual void Scale(float sx, float sy) {}
-    virtual void ClipPath(const TestingPath& path, ClipOp op, bool doAntiAlias) {}
+    virtual void ClipPath(const TestingPath& path, ClipOp op, bool doAntiAlias = false) {}
     virtual void DrawOval(const TestingRect& oval) {}
     virtual void DrawImageRect(
         const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling)
@@ -117,8 +121,16 @@ public:
     }
 
     virtual void RestoreToCount(uint32_t count) {}
-
     virtual void ConcatMatrix(const TestingMatrix& matrix) {}
+    void SetMatrix(const TestingMatrix& matrix) {}
+    void ResetMatrix() {}
+    void SetScale(float sx, float sy) {}
+    void Bind(const TestingBitmap& bitmap) {}
+    void Clear(ColorQuad color) {}
+    TestingMatrix GetTotalMatrix() const
+    {
+        return TestingMatrix();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H

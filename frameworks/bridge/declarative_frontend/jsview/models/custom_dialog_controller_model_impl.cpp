@@ -134,7 +134,7 @@ void CustomDialogControllerModelImpl::ShowDialog(DialogProperties& dialogPropert
     } else {
         LOGE("JSCustomDialogController(ShowDialog) stack is null, post delay task.");
         result = executor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK, "ArkUICustomDialogNotifyOpenOperation");
+            task, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_STACK, "ArkUICustomDialogNotifyOpenOperationDelay");
     }
     if (!result) {
         LOGW("JSCustomDialogController(ShowDialog) fail to post task, reset pending status");
@@ -232,7 +232,6 @@ void CustomDialogControllerModelImpl::SetOpenDialog(DialogProperties& dialogProp
     }
     buildFunc();
     customDialog = ViewStackProcessor::GetInstance()->Finish();
-
     if (!customDialog) {
         LOGE("Builder does not generate view.");
         return;

@@ -39,6 +39,7 @@ void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
@@ -94,7 +95,18 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafely()
     return MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafelyWithCheck()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
 PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    return AceType::RawPtr(context);
+}
+
+PipelineContext* PipelineContext::GetCurrentContextPtrSafelyWithCheck()
 {
     auto context = MockPipelineContext::GetCurrent();
     return AceType::RawPtr(context);
@@ -136,9 +148,12 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
+
+void PipelineContext::SendEventToAccessibilityWithNode(
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
@@ -190,13 +205,15 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
-void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
 void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
+void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
@@ -218,7 +235,9 @@ void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
 
-void PipelineContext::FlushUITasks() {}
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation) {}
+
+void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
 void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
@@ -286,7 +305,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload(const ConfigurationChange& configurationChange) {}
+void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
@@ -312,7 +331,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     }
     return focusManager_;
 }
@@ -368,13 +387,15 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
-void UITaskScheduler::FlushTask() {}
+void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
 
 UITaskScheduler::UITaskScheduler() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
@@ -385,7 +406,7 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
-void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
     if (task) {
         task();
@@ -418,6 +439,8 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 }
 
 void PipelineContext::DumpPipelineInfo() const {}
+
+void PipelineContext::AddVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
     const VisibleRatioCallback& callback, bool isUserCallback)
@@ -481,6 +504,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+float PipelineContext::GetPageAvoidOffset()
+{
+    return 0.0f;
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -583,6 +611,21 @@ bool PipelineContext::IsContainerModalVisible()
 {
     return false;
 }
+
+void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
+
+void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+void PipelineContext::CheckAndLogLastConsumedMouseEventInfo(int32_t eventId, MouseAction action) {}
+
+void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
+
+void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -741,6 +784,11 @@ bool PipelineBase::HasFloatTitle() const
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetFontScale(float fontScale)
+{
+    fontScale_ = fontScale;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

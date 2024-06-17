@@ -102,7 +102,8 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
      * @tc.steps: step3.Fire RemakeNode return with a root node of BuilderNode.
      * @tc.expected: process success without crash, and change the child of NodeContainer.
      */
-    childNode->SetIsRootBuilderNode(true);
+    childNode->SetIsRootBuilderNode(false);
+    childNode->SetIsArkTsFrameNode(true);
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode->GetId());
 
@@ -118,7 +119,8 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
      * @tc.expected: process success without crash, and does change the child of NodeContainer.
      */
     auto childNode_one = FrameNode::CreateFrameNode(CHILD_NODE, 1, AceType::MakeRefPtr<Pattern>());
-    childNode_one->SetIsRootBuilderNode(true);
+    childNode_one->SetIsRootBuilderNode(false);
+    childNode_one->SetIsArkTsFrameNode(true);
     pattern->SetMakeFunction([childNode_one]() -> RefPtr<UINode> { return childNode_one; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_one->GetId());
@@ -128,6 +130,8 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
      * @tc.expected: process success without crash, and does change the child of NodeContainer.
      */
     auto childNode_two = FrameNode::CreateFrameNode(V2::CUSTOM_FRAME_NODE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    childNode_two->SetIsRootBuilderNode(false);
+    childNode_two->SetIsArkTsFrameNode(true);
     pattern->SetMakeFunction([childNode_two]() -> RefPtr<UINode> { return childNode_two; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_two->GetId());

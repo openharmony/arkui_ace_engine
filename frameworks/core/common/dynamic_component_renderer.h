@@ -22,6 +22,18 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+struct RendererDumpInfo {
+    int64_t createUiContenTime;
+    int64_t limitedWorkerInitTime;
+    int64_t loadAbcTime;
+
+    void ReSet()
+    {
+        createUiContenTime = 0;
+        limitedWorkerInitTime = 0;
+        loadAbcTime = 0;
+    }
+};
 
 class DynamicComponentRenderer : public virtual AceType {
     DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
@@ -40,7 +52,24 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
-    virtual void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+    virtual bool TransferKeyEvent(const KeyEvent& event) = 0;
+    virtual void TransferFocusState(bool isFocus) = 0;
+    virtual void TransferFocusActiveEvent(bool isFocus) = 0;
+
+    virtual void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) = 0;
+    virtual bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) = 0;
+    virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) = 0;
+
+    virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);

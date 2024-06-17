@@ -258,8 +258,8 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
   return class extends BaseClass {
     constructor(...args) {
       super(...args);
-      AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
       AsyncAddComputedV2.addComputed(this, BaseClass.name);
+      AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
     }
   };
 }

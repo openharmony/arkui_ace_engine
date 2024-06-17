@@ -99,7 +99,7 @@ class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
       for (let i = 0; i < this.value.length; i++) {
         let data = this.value[i];
         let indexValue = 0;
-        if (data.index > 0 && data.index < this.value.length) {
+        if (data.index > 0) {
           indexValue = data.index;
         }
         dataArray.push(indexValue);
@@ -107,7 +107,7 @@ class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
         let emitRateValue = 5;
         if (isNumber(data.emitRate)) {
           dataArray.push(1);
-          if (data.emitRate > 0) {
+          if (data.emitRate >= 0) {
             emitRateValue = data.emitRate;
           }
           dataArray.push(emitRateValue);

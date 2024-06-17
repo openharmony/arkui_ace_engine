@@ -18,12 +18,14 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
 
 namespace OHOS::Ace {
 
@@ -90,6 +92,7 @@ void JSRadio::Create(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         RadioModel::GetInstance()->SetBuilder(std::move(customBuilderFunc));
     }
+    JSRadioTheme::ApplyTheme();
 }
 
 void JSRadio::ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
@@ -129,7 +132,9 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRadio>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSRadio>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRadio>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRadio>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRadio>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRadio>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRadio>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -175,8 +180,8 @@ void JSRadio::JsSize(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    JSViewAbstract::JsWidth(sizeObj->GetProperty("width"));
-    JSViewAbstract::JsHeight(sizeObj->GetProperty("height"));
+    JSViewAbstract::JsWidth(sizeObj->GetProperty(static_cast<int32_t>(ArkUIIndex::WIDTH)));
+    JSViewAbstract::JsHeight(sizeObj->GetProperty(static_cast<int32_t>(ArkUIIndex::HEIGHT)));
 }
 
 void JSRadio::JsPadding(const JSCallbackInfo& info)
@@ -194,16 +199,18 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
     NG::PaddingPropertyF padding({ 0.0f, 0.0f, 0.0f, 0.0f });
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom") || jsObj->HasProperty("left") ||
-            jsObj->HasProperty("right")) {
+        if (jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::TOP)) ||
+            jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)) ||
+            jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::LEFT)) ||
+            jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::RIGHT))) {
             CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
-            ParseJsDimensionVp(jsObj->GetProperty("top"), topDimen);
-            ParseJsDimensionVp(jsObj->GetProperty("left"), leftDimen);
-            ParseJsDimensionVp(jsObj->GetProperty("right"), rightDimen);
-            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottomDimen);
+            ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), topDimen);
+            ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), leftDimen);
+            ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), rightDimen);
+            ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottomDimen);
             if (leftDimen == 0.0_vp) {
                 leftDimen = rightDimen;
             }
@@ -246,19 +253,19 @@ NG::PaddingProperty JSRadio::GetNewPadding(const JSCallbackInfo& info)
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
 
         CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), leftDimen)) {
             left = leftDimen;
         }
         CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), rightDimen)) {
             right = rightDimen;
         }
         CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), topDimen)) {
             top = topDimen;
         }
         CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottomDimen)) {
             bottom = bottomDimen;
         }
         if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
@@ -298,28 +305,38 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
 
 void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
 {
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
-        JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
-        JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
-        Color checkedBackgroundColorVal;
-        auto theme = GetTheme<RadioTheme>();
-        if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+    auto theme = GetTheme<RadioTheme>();
+    if (!info[0]->IsObject()) {
+        RadioModel::GetInstance()->SetCheckedBackgroundColor(theme->GetActiveColor());
+        RadioModel::GetInstance()->SetUncheckedBorderColor(theme->GetInactiveColor());
+        RadioModel::GetInstance()->SetIndicatorColor(theme->GetPointColor());
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
+    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
+    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
+    Color checkedBackgroundColorVal;
+    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+        if (!JSRadioTheme::ObtainCheckedBackgroundColor(checkedBackgroundColorVal)) {
             checkedBackgroundColorVal = theme->GetActiveColor();
         }
-        RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
-        Color uncheckedBorderColorVal;
-        if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+    }
+    RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
+    Color uncheckedBorderColorVal;
+    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+        if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
             uncheckedBorderColorVal = theme->GetInactiveColor();
         }
-        RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
-        Color indicatorColorVal;
-        if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+    }
+    RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
+    Color indicatorColorVal;
+    if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+        if (!JSRadioTheme::ObtainIndicatorColor(indicatorColorVal)) {
             indicatorColorVal = theme->GetPointColor();
         }
-        RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
     }
+    RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
 }
 
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)

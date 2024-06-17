@@ -67,6 +67,13 @@ int64_t GetCurrentTimestamp()
     return static_cast<int64_t>(currentTime.tv_sec) * SEC_TO_MILLISEC + currentTime.tv_usec / MILLISEC_TO_MICROSEC;
 }
 
+int64_t GetCurrentTimestampMicroSecond()
+{
+    struct timeval currentTime;
+    gettimeofday(&currentTime, nullptr);
+    return static_cast<int64_t>(currentTime.tv_sec) * SEC_TO_MILLISEC * MILLISEC_TO_MICROSEC + currentTime.tv_usec;
+}
+
 std::string ConvertTimestampToStr(int64_t timestamp)
 {
     char timeStr[MAX_TIME_STR_LEN];

@@ -57,9 +57,6 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
         callback.callback_(nanoTimestamp, frameCount);
     }
-#ifdef VSYNC_TIMEOUT_CHECK
-    onVsyncEventCheckTimer_.Cancel();
-#endif
 }
 
 void Window::SetVsyncCallback(AceVsyncCallback&& callback)

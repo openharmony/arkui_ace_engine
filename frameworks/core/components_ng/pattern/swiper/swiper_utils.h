@@ -27,6 +27,10 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension SWIPER_MARGIN = 16.0_vp;
+constexpr Dimension SWIPER_GUTTER = 16.0_vp;
+}
 
 class SwiperUtils {
 public:
@@ -37,11 +41,7 @@ public:
     {
         // If display count is setted, use stretch mode.
         CHECK_NULL_RETURN(property, true);
-        if (property->HasDisplayCount() && !property->HasMinSize()) {
-            return true;
-        }
-
-        return property->GetDisplayMode().value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::STRETCH;
+        return property->IsStretch();
     }
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
@@ -64,6 +64,7 @@ public:
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
         // re-determine ignoreItemSpace_ based on child calc length
+        property->ResetIgnorePrevMarginAndNextMargin();
         property->ResetIgnoreItemSpace();
         auto itemSpace = GetItemSpace(property);
         auto parentMainSize = idealSize.MainSize(axis);
@@ -75,13 +76,12 @@ public:
         auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
         auto childSelfIdealSize = idealSize;
         float childCalcIdealLength = 0.0f;
-
-        if ((axis == Axis::HORIZONTAL && idealSize.Width().has_value()) ||
-            (axis == Axis::VERTICAL && idealSize.Height().has_value())) {
-            auto length = axis == Axis::HORIZONTAL ? idealSize.Width().value() :
-                idealSize.Height().value();
-            childCalcIdealLength = (length - itemSpace * itemSpaceCount -
-                                        static_cast<float>(prevMargin + nextMargin)) / displayCount;
+        // Invalid size need not to calculate margin
+        if (!idealSize.IsNonPositive() && ((axis == Axis::HORIZONTAL && idealSize.Width().has_value()) ||
+                                              (axis == Axis::VERTICAL && idealSize.Height().has_value()))) {
+            auto length = axis == Axis::HORIZONTAL ? idealSize.Width().value() : idealSize.Height().value();
+            childCalcIdealLength =
+                (length - itemSpace * itemSpaceCount - static_cast<float>(prevMargin + nextMargin)) / displayCount;
             if (LessNotEqual(childCalcIdealLength, 0.0)) {
                 // prioritize margin and displayCount, ignore itemSpace to create a positive idealLength.
                 property->MarkIgnoreItemSpace();
@@ -141,6 +141,28 @@ public:
                 displayCount + displayCount - 1;
     }
 
+    static void CheckAutoFillDisplayCount(RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, float contentWidth,
+        int32_t totalCount)
+    {
+        bool isAutoFill = swiperLayoutProperty->GetMinSize().has_value();
+        if (!isAutoFill) {
+            return;
+        }
+        auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
+        auto displayCount = static_cast<int32_t>(floor((contentWidth - 2 * SWIPER_MARGIN.ConvertToPx() +
+            SWIPER_GUTTER.ConvertToPx()) / (minSize + SWIPER_GUTTER.ConvertToPx())));
+        if (LessOrEqual(minSize, 0)) {
+            displayCount = 1;
+        }
+        displayCount = displayCount > 0 ? displayCount : 1;
+        displayCount = displayCount > totalCount ? totalCount : displayCount;
+
+        auto displayCountProperty = swiperLayoutProperty->GetDisplayCount().value_or(1);
+        if (displayCountProperty != displayCount) {
+            swiperLayoutProperty->UpdateDisplayCount(displayCount);
+        }
+    }
+
 private:
     static bool CheckMarginPropertyExceed(
         const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
@@ -150,8 +172,7 @@ private:
         auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
         if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
             GreatNotEqual(nextMargin, childCalcIdealLength)) {
-            property->UpdatePrevMarginWithoutMeasure(0.0_px);
-            property->UpdateNextMarginWithoutMeasure(0.0_px);
+            property->MarkIgnorePrevMarginAndNextMargin();
             return true;
         }
         return false;

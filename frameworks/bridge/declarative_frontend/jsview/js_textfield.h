@@ -70,6 +70,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
@@ -79,6 +80,12 @@ public:
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsAboutToIMEInputObj(const InsertValueInfo& insertValue);
+    static JSRef<JSVal> CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValueInfo);
+    static void OnWillInsertValue(const JSCallbackInfo& info);
+    static void OnDidInsertValue(const JSCallbackInfo& info);
+    static void OnWillDelete(const JSCallbackInfo& info);
+    static void OnDidDelete(const JSCallbackInfo& info);
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
@@ -116,6 +123,8 @@ public:
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
+    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

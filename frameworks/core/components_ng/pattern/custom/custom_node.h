@@ -59,16 +59,25 @@ public:
         return 1;
     }
 
+    int32_t CurrentFrameCount() const override
+    {
+        return 1;
+    }
+
     void Render();
 
     void SetCompleteReloadFunc(RenderFunction&& func) override
     {
         completeReloadFunc_ = std::move(func);
     }
-    void FlushReload();
+    ACE_FORCE_EXPORT void FlushReload();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("viewKey", viewKey_.c_str(), filter);
     }
 
@@ -83,7 +92,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false) override;
 
     bool GetJsActive()
     {
@@ -105,7 +114,7 @@ public:
         return extraInfos_;
     }
 
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
     const WeakPtr<UINode>& GetNavigationNode() const
     {
@@ -116,6 +125,8 @@ public:
     {
         navigationNode_ = navigationNode;
     }
+
+    std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
 private:
     std::string viewKey_;

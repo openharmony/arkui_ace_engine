@@ -131,7 +131,6 @@ void AbilityComponentPattern::UpdateWindowRect()
     CHECK_NULL_VOID(pipeline);
     Rect rect = pipeline->GetDisplayWindowRectInfo();
     rect = Rect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
-
     if (adapter_ && rect != lastRect_) {
         LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
             size.Width(), size.Height());

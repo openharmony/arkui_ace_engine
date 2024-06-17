@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_DECLARATIVE_FRONTEND_H
 
 #include <string>
+#include <map>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -59,7 +60,7 @@ public:
     UIContentErrorCode RunPage(
         const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
 
-    UIContentErrorCode RunPageByNamedRouter(const std::string& name) override;
+    UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -94,6 +95,21 @@ public:
     napi_value GetContextValue() override;
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override;
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map)
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map)
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map)
+    {
+        pkgContextInfoMap_ = map;
+    }
+
     void SetPagePath(const std::string& pagePath)
     {
         if (delegate_) {
@@ -152,6 +168,7 @@ public:
     std::string GetPagePath() const override;
     void TriggerGarbageCollection() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    void NotifyUIIdle() override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
@@ -172,9 +189,10 @@ public:
     // navigator component call router
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
-    std::string GetContentInfo() const override;
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     int32_t GetRouterSize() const override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
@@ -241,6 +259,11 @@ private:
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;
     std::string pageProfile_;
+#if defined(PREVIEW)
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+#endif
     bool foregroundFrontend_ = false;
     bool isSubWindow_ = false;
 

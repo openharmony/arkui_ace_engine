@@ -18,9 +18,10 @@
 
 #include <memory>
 #include <mutex>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class CircleModel {
+class ACE_FORCE_EXPORT CircleModel {
 public:
     static CircleModel* GetInstance();
     virtual ~CircleModel() = default;

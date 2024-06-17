@@ -40,6 +40,9 @@ public:
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
+    void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override;
     static void SetSelectedTextStyle(
@@ -69,6 +72,11 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    void createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
+        const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor);
+    void createYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    std::string dateOrder = "";
+    std::string dateTimeOrder = "";
 };
 
 class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {

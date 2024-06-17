@@ -15,6 +15,8 @@
 
 #include "tabs_test_ng.h"
 
+#include "base/error/error_code.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -156,7 +158,7 @@ HWTEST_F(TabsEventTestNg, OnChange002, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnChangeEvent(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -177,7 +179,7 @@ HWTEST_F(TabsEventTestNg, OnTabBarClick001, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnTabBarClick(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -201,7 +203,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange001, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnContentWillChange(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -225,7 +227,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange002, TestSize.Level1)
     CreateWithItem([=](TabsModelNG model) {
         model.SetOnContentWillChange(event);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
     EXPECT_TRUE(isTrigger);
 }
@@ -254,7 +256,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd001, TestSize.Level1)
         model.SetOnAnimationStart(startEvent);
         model.SetOnAnimationEnd(endEvent);
     });
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isStartTrigger);
     EXPECT_TRUE(isEndTrigger);
@@ -295,7 +297,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
     });
     pattern_->SetAnimationStartEvent(std::move(startEvent2));
     pattern_->SetAnimationEndEvent(std::move(endEvent2));
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_FALSE(isStartTrigger);
     EXPECT_FALSE(isEndTrigger);
@@ -318,7 +320,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     GestureEvent info;
     info.SetLocalLocation(Offset(200.f, 30.f));
     info.SetSourceDevice(SourceType::KEYBOARD);
-    tabBarPattern_->HandleClick(info);
+    tabBarPattern_->HandleClick(info, 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
@@ -336,7 +338,7 @@ HWTEST_F(TabsEventTestNg, HandleClick002, TestSize.Level1)
      * @tc.expected: Can not swipe
      */
     Create([](TabsModelNG model) {}); // empty item
-    ClickTo(Offset(200.f, 30.f));
+    ClickTo(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -354,7 +356,7 @@ HWTEST_F(TabsEventTestNg, HandleClick003, TestSize.Level1)
     Create([](TabsModelNG model) {
         CreateSingleItem([](TabContentModelNG tabContentModel) {}, 0);
     });
-    ClickTo(Offset(200.f, 30.f));
+    ClickTo(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -376,8 +378,8 @@ HWTEST_F(TabsEventTestNg, HandleClick004, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
     scrollable->isSpringAnimationStop_ = false;
-    ClickTo(Offset(200.f, 30.f)); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
+    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(scrollable->IsSpringStopped());
 }
 
@@ -400,7 +402,7 @@ HWTEST_F(TabsEventTestNg, HandleClick005, TestSize.Level1)
         }, 1);
     });
     
-    ClickTo(Offset(400.f, 30.f)); // click second tabBarItem
+    ClickTo(Offset(400.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
 }
@@ -1602,5 +1604,42 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->turnPageRate_ = -1.0f;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
+}
+
+/**
+ * @tc.name: TabsControllerPreloadItems001
+ * @tc.desc: test preloadItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Init preload items callback.
+     */
+    CreateWithItem([](TabsModelNG model) {});
+    int32_t code = ERROR_CODE_NO_ERROR;
+    auto onPreloadFinish = [&code](int32_t errorCode, std::string message) {
+        code = errorCode;
+    };
+
+    /**
+     * @tc.steps: steps2. Set preload items to different value
+     * @tc.expected: steps2. Check errorCode
+     */
+    std::set<int32_t> indexSet;
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+
+    code = ERROR_CODE_NO_ERROR;
+    indexSet.insert(1);
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_NO_ERROR);
+
+    indexSet.insert(-1);
+    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
+    swiperController_->PreloadItems(indexSet);
+    EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
 }
 } // namespace OHOS::Ace::NG

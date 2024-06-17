@@ -22,7 +22,7 @@
 #include "frameworks/core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace {
-class GridColModel {
+class ACE_FORCE_EXPORT GridColModel {
 public:
     static GridColModel* GetInstance();
     virtual ~GridColModel() = default;

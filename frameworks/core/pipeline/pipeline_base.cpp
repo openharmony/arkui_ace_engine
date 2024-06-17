@@ -124,6 +124,13 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return currentContainer->GetPipelineContext();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -225,7 +232,6 @@ void PipelineBase::SetRootSize(double density, float width, float height)
             return;
         }
         context->SetRootRect(width, height);
-
     };
 #ifdef NG_BUILD
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
@@ -603,7 +609,7 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 
     // flush ui tasks before open implicit animation
     if (!IsLayouting()) {
-        FlushUITasks();
+        FlushUITasks(true);
     }
 #endif
 }
@@ -619,7 +625,7 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         if (!IsLayouting()) {
-            FlushUITasks();
+            FlushUITasks(true);
         } else if (IsLayouting()) {
             LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
         }
@@ -735,8 +741,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown() && subwindow->IsFocused()) {
-            // subwindow is shown, main window no need to handle the keyboard event
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && NearZero(GetPageAvoidOffset())) {
+            // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             return;
         }
     }

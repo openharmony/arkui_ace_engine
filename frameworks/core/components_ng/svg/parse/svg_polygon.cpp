@@ -17,7 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
-#include "frameworks/core/components/declaration/svg/svg_polygon_declaration.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,7 +74,7 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 
 bool SvgPolygon::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
-    if (name == DOM_SVG_POINTS) {
+    if (name == SVG_POINTS) {
         polyAttr_.points = value;
         return true;
     }

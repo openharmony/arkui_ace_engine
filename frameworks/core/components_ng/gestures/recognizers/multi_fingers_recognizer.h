@@ -33,7 +33,7 @@ public:
 
     ~MultiFingersRecognizer() override = default;
 
-    void UpdateFingerListInfo();
+    virtual void UpdateFingerListInfo();
 
     bool CheckTouchId(int32_t touchId) override
     {
@@ -67,6 +67,11 @@ public:
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
     }
 
+    int32_t GetTouchPointsSize() const
+    {
+        return static_cast<int32_t>(touchPoints_.size());
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
@@ -96,7 +101,6 @@ protected:
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
     std::list<int32_t> activeFingers_;
-    std::set<int32_t> fingersId_;
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
 };

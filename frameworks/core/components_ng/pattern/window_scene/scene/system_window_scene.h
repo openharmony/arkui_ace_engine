@@ -50,6 +50,8 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
     void RegisterEventCallback();

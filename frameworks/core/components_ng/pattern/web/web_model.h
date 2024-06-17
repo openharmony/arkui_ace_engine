@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
-class WebModel {
+class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();
     virtual ~WebModel() = default;
@@ -166,6 +166,7 @@ public:
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
+    virtual void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
     virtual void SetIntelligentTrackingPreventionResultId(
@@ -177,7 +178,14 @@ public:
     virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
+    virtual void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetOnInterceptKeyboardAttach(
+        std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback) {}
+    virtual void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) = 0;
 
+    virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

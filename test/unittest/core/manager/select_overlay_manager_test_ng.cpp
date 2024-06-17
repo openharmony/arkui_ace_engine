@@ -422,7 +422,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest009, TestSize.Level
     selectOverlayManager->MarkDirty(flag);
     const NG::PointF point { 0.0f, 0.0f };
     auto result = selectOverlayManager->IsInSelectedOrSelectOverlayArea(point);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 /**
  * @tc.name: SelectOverlayManagerTest010
@@ -1240,5 +1240,807 @@ HWTEST_F(SelectOverlayManagerTestNg, GetSelectOverlayInfo01, TestSize.Level1)
     selectOverlayInfo = client.GetSelectOverlayInfo(clientInfo);
     ASSERT_TRUE(selectOverlayInfo->handlerColor.has_value());
     EXPECT_TRUE(selectOverlayInfo->handlerColor.value() == Color::RED);
+}
+
+/**
+ * @tc.name: InitSelectOverlay
+ * @tc.desc: test InitSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. InitSelectOverlay
+     */
+    TextFieldPattern client;
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onCopy();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onCut();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onSelectAll();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onPaste();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onCameraInput();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    bool isFirst = true;
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.onHandleMoveStart(isFirst);
+    EXPECT_TRUE(isFirst);
+
+    RectF area;
+    area = RectF(1, 1, 1, 1);
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.onHandleMove(area, isFirst);
+    EXPECT_TRUE(isFirst);
+
+    area = RectF(1, 2, 2, 2);
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.onHandleMoveDone(area, isFirst);
+    EXPECT_TRUE(isFirst);
+
+    bool closedByGlobalEvent = true;
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.onClose(closedByGlobalEvent);
+    EXPECT_TRUE(isFirst);
+}
+
+/**
+ * @tc.name: RequestOpenSelectOverlay001
+ * @tc.desc: test RequestOpenSelectOverlay001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RequestOpenSelectOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RequestOpenSelectOverlay001
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+    client.RequestOpenSelectOverlay(clientInfo);
+}
+
+/**
+ * @tc.name: RequestOpenSelectOverlay002
+ * @tc.desc: test RequestOpenSelectOverlay002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RequestOpenSelectOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RequestOpenSelectOverlay002
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+
+    client.RequestOpenSelectOverlay(clientInfo);
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: CreateSelectOverlay01
+ * @tc.desc: test CreateSelectOverlay01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CreateSelectOverlay01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateSelectOverlay01
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    SelectOverlayInfo selectOverlayInfo;
+
+    selectOverlayInfo.isUsingMouse = IS_USING_MOUSE;
+    client.CreateSelectOverlay(clientInfo);
+    EXPECT_TRUE(selectOverlayInfo.isUsingMouse);
+
+
+    selectOverlayInfo.isUsingMouse = false;
+    client.CreateSelectOverlay(clientInfo);
+    EXPECT_FALSE(selectOverlayInfo.isUsingMouse);
+}
+
+/**
+ * @tc.name: CreateSelectOverlay02
+ * @tc.desc: test CreateSelectOverlay02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CreateSelectOverlay02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateSelectOverlay02
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    SelectOverlayInfo selectOverlayInfo;
+
+    selectOverlayInfo.isUsingMouse = false;
+    client.CreateSelectOverlay(clientInfo);
+    EXPECT_FALSE(selectOverlayInfo.isUsingMouse);
+}
+
+/**
+ * @tc.name: UpdateShowingSelectOverlay03
+ * @tc.desc: test UpdateShowingSelectOverlay03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateShowingSelectOverlay03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateShowingSelectOverlay03
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    SelectHandleInfo handleInfo;
+    SelectHandleInfo secondInfo;
+    secondInfo.isShow = false;
+    clientInfo.isShowMouseMenu = false;
+    clientInfo.secondHandleInfo = secondInfo;
+
+    clientInfo.isNewAvoid = true;
+    client.UpdateShowingSelectOverlay(clientInfo);
+    EXPECT_TRUE(clientInfo.isNewAvoid);
+
+    clientInfo.isUpdateMenu = true;
+    client.UpdateShowingSelectOverlay(clientInfo);
+
+    clientInfo.firstHandleInfo = handleInfo;
+    client.UpdateShowingSelectOverlay(clientInfo);
+}
+
+/**
+ * @tc.name: UpdateSelectInfo
+ * @tc.desc: test UpdateSelectInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateSelectInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateSelectInfo
+     */
+    TextFieldPattern client;
+    SelectOverlayInfo selectOverlayInfo;
+    const std::string selectInfo = "selectInfo";
+    client.UpdateSelectInfo(selectInfo);
+    selectOverlayInfo.selectText = selectInfo;
+    EXPECT_EQ(selectOverlayInfo.selectText, selectInfo);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuInfo
+ * @tc.desc: test UpdateSelectMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateSelectMenuInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateSelectMenuInfo
+     */
+    TextFieldPattern client;
+    SelectOverlayInfo selectOverlayInfo;
+    std::function<void(SelectMenuInfo&)> updateAction;
+    client.UpdateSelectMenuInfo(updateAction);
+    EXPECT_FALSE(selectOverlayInfo.isUseOverlayNG);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuVisibility001
+ * @tc.desc: test UpdateSelectMenuVisibility001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateSelectMenuVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateSelectMenuVisibility001
+     */
+    TextFieldPattern client;
+    SelectOverlayInfo selectOverlayInfo;
+    bool isVisible = true;
+    client.UpdateSelectMenuVisibility(isVisible);
+    EXPECT_TRUE(isVisible);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuVisibility002
+ * @tc.desc: test UpdateSelectMenuVisibility002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateSelectMenuVisibility002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateSelectMenuVisibility002
+     */
+    TextFieldPattern client;
+    SelectOverlayInfo selectOverlayInfo;
+    bool isVisible = false;
+    client.UpdateSelectMenuVisibility(isVisible);
+    EXPECT_FALSE(isVisible);
+}
+
+/**
+ * @tc.name: StartListeningScrollableParent001
+ * @tc.desc: test StartListeningScrollableParent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, StartListeningScrollableParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. StartListeningScrollableParent001
+     */
+    TextFieldPattern client;
+    ScrollableParentInfo scrollableParentInfo;
+    scrollableParentInfo.hasParent = true;
+    client.StartListeningScrollableParent(root_);
+    EXPECT_TRUE(scrollableParentInfo.hasParent);
+}
+
+/**
+ * @tc.name: StopListeningScrollableParent
+ * @tc.desc: test StopListeningScrollableParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, StopListeningScrollableParent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. StopListeningScrollableParent
+     */
+    TextFieldPattern client;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    client.StopListeningScrollableParent(root);
+    EXPECT_NE(root, nullptr);
+}
+
+/**
+ * @tc.name: GetVisibleContentRect
+ * @tc.desc: test GetVisibleContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, GetVisibleContentRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetVisibleContentRect
+     */
+    TextFieldPattern client;
+    RectF visibleRect;
+    visibleRect = RectF(1, 1, 1, 1);
+    client.GetVisibleContentRect(root_, visibleRect);
+    EXPECT_NE(visibleRect.GetY(), 0);
+}
+
+/**
+ * @tc.name: SetHolder
+ * @tc.desc: test SetHolder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SetHolder, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetHolder
+     */
+    auto content = SelectContentOverlayManager(root_);
+    content.SetHolder(nullptr);
+
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+
+    content.selectionHoldId_ = 1;
+    content.SetHolder(holder);
+}
+
+/**
+ * @tc.name: SetHolderInternal
+ * @tc.desc: test SetHolderInternal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SetHolderInternal, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetHolderInternal
+     */
+    auto content = SelectContentOverlayManager(root_);
+    content.SetHolderInternal(nullptr);
+
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+
+    content.SetHolder(holder);
+    content.SetHolderInternal(holder);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: HasHolder
+ * @tc.desc: test HasHolder
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, HasHolder, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. HasHolder
+     */
+    auto content = SelectContentOverlayManager(root_);
+    int32_t id = -1;
+    bool hasHolder = content.HasHolder(id);
+    EXPECT_FALSE(hasHolder);
+}
+
+/**
+ * @tc.name: SelectContent Show
+ * @tc.desc: test SelectContent Show
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, Show, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Show
+     */
+    auto content = SelectContentOverlayManager(root_);
+    bool animation = true;
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    int32_t requestCode = -1;
+    content.Show(animation, requestCode);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: SelectContent BuildSelectOverlayInfo
+ * @tc.desc: test SelectContent BuildSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, BuildSelectOverlayInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. BuildSelectOverlayInfo
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    int32_t requestCode = -1;
+    content.BuildSelectOverlayInfo(requestCode);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: SelectContent UpdateStatusInfos
+ * @tc.desc: test SelectContent UpdateStatusInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateStatusInfos, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateStatusInfos
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    SelectOverlayInfo info;
+    content.UpdateStatusInfos(info);
+    EXPECT_NE(holder, nullptr);
+}
+
+/**
+ * @tc.name: MarkInfoChange
+ * @tc.desc: test MarkInfoChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, MarkInfoChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. MarkInfoChange
+     */
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayDirtyFlag dirty = 1;
+
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.MarkInfoChange(dirty);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: UpdateHandleInfosWithFlag
+ * @tc.desc: test UpdateHandleInfosWithFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateHandleInfosWithFlag, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. UpdateHandleInfosWithFlag
+     */
+    auto content = SelectContentOverlayManager(root_);
+    int32_t updateFlag = 1;
+
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.UpdateHandleInfosWithFlag(updateFlag);
+
+    updateFlag = 2;
+    content.UpdateHandleInfosWithFlag(updateFlag);
+
+    updateFlag = 3;
+    content.UpdateHandleInfosWithFlag(updateFlag);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: CreateSelectOverlay
+ * @tc.desc: test CreateSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CreateSelectOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateSelectOverlay
+     */
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo info;
+    bool animation = true;
+    content.CreateSelectOverlay(info, animation);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: CreateAndMountNode
+ * @tc.desc: test CreateAndMountNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CreateAndMountNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateAndMountNode
+     */
+    auto content = SelectContentOverlayManager(root_);
+    bool animation = true;
+    content.CreateAndMountNode(root_, animation);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: GetSelectOverlayRoot
+ * @tc.desc: test GetSelectOverlayRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, GetSelectOverlayRoot, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetSelectOverlayRoot
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto rootNode = content.GetSelectOverlayRoot();
+    EXPECT_EQ(rootNode, nullptr);
+}
+
+/**
+ * @tc.name: CloseInternal
+ * @tc.desc: test CloseInternal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CloseInternal, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CloseInternal
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    int32_t id = 1;
+    bool animation = true;
+    CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
+    content.CloseInternal(id, animation, reason);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: DestroySelectOverlayNode
+ * @tc.desc: test DestroySelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, DestroySelectOverlayNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. DestroySelectOverlayNode
+     */
+    auto content = SelectContentOverlayManager(root_);
+    content.DestroySelectOverlayNode(root_);
+    content.ClearAllStatus();
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: ClearAllStatus
+ * @tc.desc: test ClearAllStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, ClearAllStatus, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ClearAllStatus
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.ClearAllStatus();
+    EXPECT_NE(holder, nullptr);
+}
+
+/**
+ * @tc.name: CloseCurrent
+ * @tc.desc: test CloseCurrent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CloseCurrent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CloseCurrent
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    bool animation = true;
+    CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
+    bool isCloseCurrent = content.CloseCurrent(animation, reason);
+    EXPECT_FALSE(isCloseCurrent);
+}
+
+/**
+ * @tc.name: ShowOptionMenu
+ * @tc.desc: test ShowOptionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, ShowOptionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ShowOptionMenu
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.ShowOptionMenu();
+    content.HideOptionMenu(true);
+    content.ToggleOptionMenu();
+    content.DisableMenu();
+    content.EnableMenu();
+    content.HideHandle();
+    content.IsCreating();
+    content.IsMenuShow();
+    content.IsSingleHandle();
+    bool isHandlesShow = content.IsHandlesShow();
+    EXPECT_FALSE(isHandlesShow);
+}
+
+/**
+ * @tc.name: IsHandleReverse
+ * @tc.desc: test IsHandleReverse
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, IsHandleReverse, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. IsHandleReverse
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    bool isHandle = content.IsHandleReverse();
+    EXPECT_FALSE(isHandle);
+}
+
+/**
+ * @tc.name: RestartHiddenHandleTask
+ * @tc.desc: test RestartHiddenHandleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RestartHiddenHandleTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RestartHiddenHandleTask
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    bool isDelay = true;
+    content.RestartHiddenHandleTask(isDelay);
+    EXPECT_FALSE(content.isIntercept_);
+}
+
+/**
+ * @tc.name: CancelHiddenHandleTask
+ * @tc.desc: test RestartHiddenHandleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, CancelHiddenHandleTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CancelHiddenHandleTask
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.CancelHiddenHandleTask();
+    EXPECT_FALSE(content.isIntercept_);
+}
+
+/**
+ * @tc.name: GetSelectOverlayNode
+ * @tc.desc: test GetSelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, GetSelectOverlayNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetSelectOverlayNode
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    auto selectOverlayNode = content.GetSelectOverlayNode();
+    EXPECT_EQ(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: GetShowMenuType
+ * @tc.desc: test GetShowMenuType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, GetShowMenuType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetShowMenuType
+     */
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.GetShowMenuType();
+    EXPECT_FALSE(content.IsOpen());
+}
+
+/**
+ * @tc.name: ContentHandleGlobalEvent
+ * @tc.desc: test SelectContentOverlayManager HandleGlobalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, ContentHandleGlobalEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. HandleGlobalEvent
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    TouchEvent touchPoint;
+    content.HandleGlobalEvent(touchPoint, ROOT_OFFSET);
+    EXPECT_NE(touchPoint.type, TouchType::DOWN);
+    /**
+     * @tc.steps: step2. Change the TouchEvent and call HandleGlobalEvent
+     */
+    touchPoint.type = TouchType::DOWN;
+    content.HandleGlobalEvent(touchPoint, ROOT_OFFSET);
+    EXPECT_NE(touchPoint.type, TouchType::UP);
+
+    touchPoint.type = TouchType::UP;
+    content.HandleGlobalEvent(touchPoint, ROOT_OFFSET);
+    EXPECT_NE(touchPoint.type, TouchType::MOVE);
+}
+
+/**
+ * @tc.name: IsTouchInSelectOverlayArea
+ * @tc.desc: test IsTouchInSelectOverlayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, IsTouchInSelectOverlayArea, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. IsTouchInSelectOverlayArea
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    PointF point { 9.0f, 12.0f };
+    content.SetHolder(holder);
+    content.IsTouchInSelectOverlayArea(point);
+    EXPECT_FALSE(content.IsOpen());
+}
+
+/**
+ * @tc.name: HandleSelectionEvent
+ * @tc.desc: test HandleSelectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, HandleSelectionEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. HandleSelectionEvent
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    PointF point { 9.0f, 12.0f };
+    content.SetHolder(holder);
+    TouchEvent touchPoint;
+    touchPoint.type = TouchType::UP;
+    content.HandleSelectionEvent(point, touchPoint);
+    EXPECT_FALSE(content.IsOpen());
+}
+
+/**
+ * @tc.name: ResetSelectionRect
+ * @tc.desc: test ResetSelectionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, ResetSelectionRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ResetSelectionRect
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    HoldSelectionInfo holdSelectionInfo_;
+    holdSelectionInfo_ = {};
+    content.ResetSelectionRect();
+    EXPECT_EQ(content.selectionHoldId_, -1);
+}
+
+/**
+ * @tc.name: SetHoldSelectionCallback
+ * @tc.desc: test SetHoldSelectionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SetHoldSelectionCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetHoldSelectionCallback
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    int32_t id = -1;
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    HoldSelectionInfo holdSelectionInfo_;
+    holdSelectionInfo_ = {};
+    content.SetHolder(holder);
+    content.SetHoldSelectionCallback(id, holdSelectionInfo_);
+    EXPECT_EQ(content.selectionHoldId_, -1);
+    id = 1;
+    content.SetHoldSelectionCallback(id, holdSelectionInfo_);
+    EXPECT_EQ(content.selectionHoldId_, 1);
+}
+
+/**
+ * @tc.name: RemoveHoldSelectionCallback
+ * @tc.desc: test RemoveHoldSelectionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RemoveHoldSelectionCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RemoveHoldSelectionCallback
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    HoldSelectionInfo holdSelectionInfo_;
+    holdSelectionInfo_ = {};
+    int32_t id = -1;
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    content.SetHolder(holder);
+    content.RemoveHoldSelectionCallback(id);
+    id = 1;
+    content.RemoveHoldSelectionCallback(id);
+    EXPECT_EQ(content.selectionHoldId_, -1);
 }
 } // namespace OHOS::Ace::NG

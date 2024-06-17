@@ -227,10 +227,10 @@ public:
 
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
-    void PushWithCallback(const std::string& uri, const std::string& params,
+    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;

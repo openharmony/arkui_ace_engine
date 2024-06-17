@@ -80,6 +80,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str(), filter);
         json->PutExtAttr("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx(), filter);
         json->PutExtAttr("strokeOpacity",

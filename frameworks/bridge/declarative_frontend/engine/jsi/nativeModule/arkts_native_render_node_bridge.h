@@ -42,6 +42,7 @@ public:
     static ArkUINativeModuleValue SetPivot(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFrame(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTranslate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -54,6 +55,7 @@ public:
     static ArkUINativeModuleValue SetOvalMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCommandPathMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMarkNodeGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     template<typename T>
@@ -63,7 +65,7 @@ private:
         T value = defaultValue;
         if (jsValueRef->IsNumber()) {
             if (std::is_same<T, uint32_t>::value) {
-                value = jsValueRef->Uint32Value(vm);
+                value = static_cast<uint32_t>(jsValueRef->Uint32Value(vm));
             } else if (std::is_same<T, int32_t>::value) {
                 value = jsValueRef->Int32Value(vm);
             } else if (std::is_same<T, int64_t>::value) {

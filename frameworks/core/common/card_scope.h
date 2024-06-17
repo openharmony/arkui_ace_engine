@@ -40,7 +40,7 @@ public:
         CardScope::UpdateCurrent(restoreId_);
     }
 
-    static uint64_t CurrentId();
+    ACE_FORCE_EXPORT static uint64_t CurrentId();
 
     static void UpdateCurrent(uint64_t id);
 

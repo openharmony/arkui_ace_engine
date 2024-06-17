@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <variant>
 
 #include "html.h"
 #include "image.h"
@@ -27,6 +28,7 @@
 #include "text.h"
 #include "plain_text.h"
 #include "udmf_client.h"
+#include "application_defined_record.h"
 #include "unified_data.h"
 #include "unified_data_napi.h"
 #include "unified_types.h"
@@ -103,7 +105,7 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
 
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::CustomOption udCustomOption;
     udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
@@ -114,7 +116,7 @@ int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::str
 
 int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::QueryOption queryOption;
     queryOption.key = key;
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
@@ -125,7 +127,7 @@ int32_t UdmfClientImpl::GetData(const RefPtr<UnifiedData>& unifiedData, const st
 
 int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
@@ -136,7 +138,7 @@ int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64
 
 bool UdmfClientImpl::GetRemoteStatus(std::string& key)
 {
-    auto client = UDMF::UdmfClient::GetInstance();
+    auto& client = UDMF::UdmfClient::GetInstance();
     bool isRemoteData = false;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
@@ -372,5 +374,35 @@ std::pair<int32_t, std::string> UdmfClientImpl::GetErrorInfo(int32_t errorCode)
         default:
             return { ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
     }
+}
+
+void UdmfClientImpl::AddSpanStringRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto record = std::make_shared<UDMF::ApplicationDefinedRecord>("OPENHARMONY_STYLED_STRING_UDMF", data);
+    udData->GetUnifiedData()->AddRecord(record);
+}
+
+std::vector<uint8_t> UdmfClientImpl::GetSpanStringRecord(const RefPtr<UnifiedData>& unifiedData)
+{
+    std::vector<uint8_t> arr;
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, arr);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), arr);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record: records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::APPLICATION_DEFINED_RECORD) {
+            UDMF::ApplicationDefinedRecord* app = reinterpret_cast<UDMF::ApplicationDefinedRecord*>(record.get());
+            if (app->GetApplicationDefinedType() == "OPENHARMONY_STYLED_STRING_UDMF") {
+                arr = app->GetRawData();
+                return arr;
+            }
+        }
+    }
+    return arr;
 }
 } // namespace OHOS::Ace

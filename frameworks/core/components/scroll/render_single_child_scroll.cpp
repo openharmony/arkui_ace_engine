@@ -152,7 +152,6 @@ void RenderSingleChildScroll::MoveChildToViewPort(
     auto selfOffset = GetGlobalOffset();
     auto itemActualRect = Rect(childOffset, size);
     auto viewRect = Rect(selfOffset, viewPort_);
-
     // rect is in viewport
     if (itemActualRect.IsWrappedBy(viewRect)) {
         return;

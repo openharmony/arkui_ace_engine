@@ -36,6 +36,7 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
+    bool IsSystemApp();
     int32_t RegisterCallBackInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply);
     int32_t PushInner(MessageParcel& data, MessageParcel& reply);

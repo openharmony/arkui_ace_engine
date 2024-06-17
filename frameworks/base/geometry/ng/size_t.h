@@ -26,6 +26,9 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr int32_t PERCISION = 2;
+
 template<typename T>
 class SizeT {
 public:
@@ -380,14 +383,13 @@ public:
 
     std::string ToString() const
     {
-        static const int32_t precision = 2;
-        std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision);
-        ss << width_;
-        ss << " x ";
-        ss << height_;
-        ss << "]";
-        std::string output = ss.str();
+        auto heightStr = std::to_string(height_);
+        auto widthStr = std::to_string(width_);
+        std::string output = "[";
+        output += widthStr.substr(0, widthStr.find(".") + PERCISION + 1);
+        output += " x ";
+        output += heightStr.substr(0, heightStr.find(".") + PERCISION + 1);
+        output += "]";
         return output;
     }
 
@@ -681,31 +683,32 @@ public:
         return isModified;
     }
 
-    void UpdateMin(const SizeT<T>& minSize)
+    void UpdateMin(const SizeT<T>& minSize, bool forceOverwriteInvalidValue = false)
     {
-        if (NonNegative(minSize.Width()) && width_) {
+        if (NonNegative(minSize.Width()) && (width_ || forceOverwriteInvalidValue)) {
             width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
         }
-        if (NonNegative(minSize.Height()) && height_) {
+        if (NonNegative(minSize.Height()) && (height_ || forceOverwriteInvalidValue)) {
             height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
         }
     }
 
-    void UpdateMax(const SizeT<T>& maxSize)
+    void UpdateMax(const SizeT<T>& maxSize, bool forceOverwriteInvalidValue = false)
     {
-        if (NonNegative(maxSize.Width()) && width_) {
+        if (NonNegative(maxSize.Width()) && (width_ || forceOverwriteInvalidValue)) {
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
-        if (NonNegative(maxSize.Height()) && height_) {
+        if (NonNegative(maxSize.Height()) && (height_ || forceOverwriteInvalidValue)) {
             height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }
 
-    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool version10OrLarger = false)
+    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool version10OrLarger = false,
+        bool forceOverwriteInvalidValue = false)
     {
         if (version10OrLarger) {
-            UpdateMax(maxSize);
-            UpdateMin(minSize);
+            UpdateMax(maxSize, forceOverwriteInvalidValue);
+            UpdateMin(minSize, forceOverwriteInvalidValue);
             return;
         }
         UpdateMin(minSize);

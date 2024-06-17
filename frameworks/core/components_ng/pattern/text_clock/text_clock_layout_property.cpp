@@ -86,6 +86,10 @@ std::string ConvertFeature(const FONT_FEATURES_LIST& fontFeaTures)
 void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str(), filter);
     } else {

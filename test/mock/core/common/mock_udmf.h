@@ -58,6 +58,9 @@ public:
     MOCK_METHOD(std::vector<std::string>, GetPlainTextRecords, (const RefPtr<UnifiedData>& unifiedData), (override));
     MOCK_METHOD(int32_t, GetVideoRecordUri, (const RefPtr<UnifiedData>& unifiedData, std::string& uri), (override));
     MOCK_METHOD((std::pair<int32_t, std::string>), GetErrorInfo, (int32_t errorCode), (override));
+    MOCK_METHOD(void, AddSpanStringRecord,
+        (const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data), (override));
+    MOCK_METHOD(std::vector<uint8_t>, GetSpanStringRecord, (const RefPtr<UnifiedData>& unifiedData), (override));
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);

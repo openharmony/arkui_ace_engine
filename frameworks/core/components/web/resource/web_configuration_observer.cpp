@@ -18,9 +18,8 @@
 namespace OHOS::Ace {
 void WebConfigurationObserver::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration)
 {
-    std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto delegate = delegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
-    delegate->OnConfigurationUpdated(colorMode);
+    delegate->OnConfigurationUpdated(configuration);
 }
 } // namespace OHOS::ACE

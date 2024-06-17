@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,6 @@ namespace {
 
 constexpr double VIEW_PORT_SCALE = 1.2;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
-constexpr int32_t DEFAULT_SOURCE = 3;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr int32_t SCROLL_FROM_JUMP = 3;
 constexpr int32_t DEFAULT_FINGERS = 1;
@@ -1748,7 +1747,7 @@ void RenderList::ApplyPreviousStickyListItem(size_t index, bool needLayout)
     }
 }
 
-void RenderList::JumpToIndex(int32_t idx, int32_t source)
+void RenderList::JumpToIndex(int32_t idx)
 {
     RemoveAllItems();
     startIndex_ = static_cast<size_t>(idx);
@@ -1800,15 +1799,15 @@ void RenderList::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     }
     if (vertical_) {
         if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
-            JumpToIndex(0, SCROLL_FROM_JUMP);
+            JumpToIndex(0);
         } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-            JumpToIndex(TotalCount(), SCROLL_FROM_JUMP);
+            JumpToIndex(TotalCount());
         }
     } else {
         if (scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) {
-            JumpToIndex(0, SCROLL_FROM_JUMP);
+            JumpToIndex(0);
         } else if (scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) {
-            JumpToIndex(TotalCount(), SCROLL_FROM_JUMP);
+            JumpToIndex(TotalCount());
         }
     }
 }
@@ -2101,7 +2100,6 @@ size_t RenderList::GetNearChildByPosition(double mainOffset) const
 
     for (auto& child : items_) {
         auto childMainOffset = GetMainAxis(child->GetPosition());
-
         if (childMainOffset > mainOffset) {
             return prevIndex;
         }
@@ -2271,9 +2269,9 @@ bool RenderList::HandleActionScroll(bool forward)
     }
 
     if (forward) {
-        JumpToIndex(lastDisplayIndex_, DEFAULT_SOURCE);
+        JumpToIndex(lastDisplayIndex_);
     } else {
-        JumpToIndex(startIndex_, DEFAULT_SOURCE);
+        JumpToIndex(startIndex_);
     }
     if (scrollFinishEventBack_) {
         scrollFinishEventBack_();
@@ -2511,7 +2509,6 @@ void RenderList::CreateDragDropRecognizer()
 
             auto targetRenderlist = renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info);
             auto preTargetRenderlist = renderList->GetPreTargetRenderList();
-
             if (preTargetRenderlist == targetRenderlist) {
                 if (targetRenderlist && targetRenderlist->GetOnItemDragMove()) {
                     Point point = info.GetGlobalPoint() - targetRenderlist->GetGlobalOffset();
@@ -2570,7 +2567,6 @@ void RenderList::CreateDragDropRecognizer()
         ACE_DCHECK(renderList->GetPreTargetRenderList() ==
                    renderList->FindTargetRenderNode<V2::RenderList>(pipelineContext, info));
         auto targetRenderlist = renderList->GetPreTargetRenderList();
-
         if (!targetRenderlist) {
             (renderList->GetOnItemDrop())(dragInfo, static_cast<int32_t>(renderList->selectedItemIndex_), -1, true);
             renderList->SetPreTargetRenderList(nullptr);

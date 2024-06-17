@@ -69,11 +69,14 @@ private:
     Color wrongColor_;
     Color correctColor_;
     Color hoverColor_;
+    Color activeCircleColor_;
     Dimension pathStrokeWidth_;
     Dimension activeCircleRadius_;
+    Dimension backgroundCircleRadius_;
 
     OffsetF cellCenter_;
-    bool isMoveEventValid_;
+    bool isMoveEventValid_ = false;
+    bool enableWaveEffect_ = true;
     std::vector<PatternLockCell> choosePoint_;
     RefPtr<PatternLockModifier> patternlockModifier_;
 

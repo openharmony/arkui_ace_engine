@@ -515,7 +515,11 @@ struct KeyEvent final {
  
     bool IsExactlyKey(const std::vector<KeyCode>& expectCodes) const
     {
-        return (expectCodes.size() != pressedCodes.size()) ? false : IsKey(expectCodes);
+        auto pressedKeysCnt = pressedCodes.size();
+        if (std::find(pressedCodes.begin(), pressedCodes.end(), KeyCode::KEY_FN) != pressedCodes.end()) {
+            --pressedKeysCnt;
+        }
+        return (expectCodes.size() != pressedKeysCnt) ? false : IsKey(expectCodes);
     }
 
     bool IsKey(const std::vector<KeyCode>& expectCodes) const
@@ -588,6 +592,7 @@ struct KeyEvent final {
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
     bool isPreIme = false;
+    bool isRedispatch = false;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
@@ -620,6 +625,7 @@ public:
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
         keyMsg_ = event.msg;
+        SetPressedKeyCodes(event.pressedCodes);
     };
     ~KeyEventInfo() override = default;
 

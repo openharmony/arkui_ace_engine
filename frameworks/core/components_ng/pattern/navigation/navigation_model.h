@@ -22,15 +22,17 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
-    NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation operation)>;
-class NavigationModel {
+     RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
+class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
     virtual ~NavigationModel() = default;
@@ -40,6 +42,7 @@ public:
     virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
         std::function<void(RefPtr<NG::NavigationStack>)> updater) {};
+    virtual void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
     virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false)
@@ -54,8 +57,9 @@ public:
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
-    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetHideToolBar(bool hideToolBar) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
@@ -83,6 +87,8 @@ public:
     virtual void SetMenuCount(int32_t menuCount) = 0;
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

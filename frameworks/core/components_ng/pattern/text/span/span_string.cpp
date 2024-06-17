@@ -26,9 +26,11 @@
 
 namespace OHOS::Ace {
 
+const std::unordered_set<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
+
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start, length);
@@ -36,7 +38,7 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
 
 std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
 {
-    if (start >= content.length()) {
+    if (start >= static_cast<int32_t>(content.length())) {
         return StringUtils::ToWstring("");
     }
     return content.substr(start);
@@ -86,7 +88,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
     auto wString = StringUtils::ToWstring((*it)->content);
     auto newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
     int32_t offset = (*it)->interval.first;
-    while (newlineIndex != -1 && newlineIndex != wString.size() - 1) {
+    while (newlineIndex != -1 && newlineIndex != static_cast<int32_t>(wString.size()) - 1) {
         auto newSpan = (*it)->GetSameStyleSpanItem();
         newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
         (*it)->interval = { offset, offset + newlineIndex + 1 };
@@ -454,6 +456,16 @@ void SpanString::SetString(const std::string& text)
     text_ = text;
 }
 
+void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
+{
+    spans_ = spanItems;
+}
+
+void SpanString::SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap)
+{
+    spansMap_ = spansMap;
+}
+
 const std::string& SpanString::GetString() const
 {
     return text_;
@@ -706,6 +718,138 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
             continue;
         }
         ++iter;
+    }
+}
+
+void SpanString::GetSpecialTypesVector(std::list<int32_t>& indexList, int32_t start, int32_t length)
+{
+    int32_t end = start + length;
+    auto iter = indexList.begin();
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        for (const auto& span : spans) {
+            auto intersection = span->GetIntersectionInterval({ start, end });
+            if (!intersection) {
+                continue;
+            }
+            iter = indexList.insert(iter, span->GetStartIndex());
+        }
+    }
+    indexList.sort([](const int32_t& a, const int32_t& b) { return a < b; });
+}
+
+void SpanString::GetNormalTypesVector(std::list<std::pair<int32_t, int32_t>>& indexList, int32_t start, int32_t length)
+{
+    std::list<int32_t> specialList;
+    GetSpecialTypesVector(specialList, start, length);
+    auto next = start;
+    auto iter = indexList.begin();
+    for (const auto& index : specialList) {
+        if (index > next) {
+            iter = indexList.insert(iter, { next, index - next });
+        }
+        next = index + 1;
+    }
+    if (next < start + length) {
+        indexList.insert(iter, { next, start + length - next });
+    }
+}
+
+bool SpanString::ContainSpecialNode(int32_t start, int32_t length)
+{
+    int32_t end = start + length;
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        for (const auto& span : spans) {
+            auto intersection = span->GetIntersectionInterval({ start, end });
+            if (intersection) {
+                return true;
+            }
+            if (span->GetStartIndex() >= end) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+bool SpanString::IsSpecialNode(RefPtr<SpanBase> span)
+{
+    auto type = span->GetSpanType();
+    if (specailTypes.find(type) == specailTypes.end()) {
+        return false;
+    }
+    return true;
+}
+
+void SpanString::ClearSpans()
+{
+    spans_.clear();
+}
+
+void SpanString::AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spans_.emplace_back(spanItem);
+}
+
+bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
+{
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteInt32(buff, spans_.size());
+    for (auto it = spans_.begin(); it != spans_.end(); ++it) {
+        auto spanItem = (*it);
+        if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+            auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
+            placeHolderSpan->content = " ";
+            placeHolderSpan->interval = spanItem->interval;
+            placeHolderSpan->EncodeTlv(buff);
+            continue;
+        }
+        TLVUtil::WriteInt32(buff, static_cast<int32_t>(spanItem->spanItemType));
+        spanItem->EncodeTlv(buff);
+    }
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(buff, text_);
+    TLVUtil::WriteUint8(buff, TLV_END);
+    return true;
+}
+
+RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
+{
+    int32_t cursor = 0;
+    RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>("");
+    spanStr->ClearSpans();
+    for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
+        switch (tag) {
+            case TLV_SPAN_STRING_CONTENT: {
+                auto str = TLVUtil::ReadString(buff, cursor);
+                spanStr->SetString(str);
+                break;
+            }
+            case TLV_SPAN_STRING_SPANS: {
+                DecodeSpanItemList(buff, cursor, spanStr);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return spanStr;
+}
+
+void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr)
+{
+    int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
+    for (auto i = 0; i < spanLength; i++) {
+        auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
+        if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
+            auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
+            spanStr->AppendSpanItem(imageSpanItem);
+        } else {
+            auto spanItem = NG::SpanItem::DecodeTlv(buff, cursor);
+            spanStr->AppendSpanItem(spanItem);
+        }
     }
 }
 } // namespace OHOS::Ace

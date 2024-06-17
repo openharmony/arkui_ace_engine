@@ -42,7 +42,8 @@ public:
 
     static void JsOnAppear(const JSCallbackInfo& info);
     static void JsOnDisAppear(const JSCallbackInfo& info);
-
+    static void JsOnAttach(const JSCallbackInfo& info);
+    static void JsOnDetach(const JSCallbackInfo& info);
     static void JsOnDelete(const JSCallbackInfo& info);
     static void JsOnAccessibility(const JSCallbackInfo& info);
     static void JsCommonRemoteMessage(const JSCallbackInfo& info);

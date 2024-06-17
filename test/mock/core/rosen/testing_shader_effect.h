@@ -19,8 +19,10 @@
 #include <memory>
 
 #include "testing_color.h"
+#include "testing_image.h"
 #include "testing_matrix.h"
 #include "testing_point.h"
+#include "testing_sampling_options.h"
 
 namespace OHOS::Ace::Testing {
 enum class TileMode {
@@ -64,6 +66,12 @@ public:
     }
 
     static std::shared_ptr<TestingShaderEffect> CreateColorShader(ColorQuad color)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
+    static std::shared_ptr<TestingShaderEffect> CreateImageShader(const TestingImage& image, TileMode tileX,
+        TileMode tileY, const TestingSamplingOptions& sampling, const TestingMatrix& matrix)
     {
         return std::make_shared<TestingShaderEffect>();
     }

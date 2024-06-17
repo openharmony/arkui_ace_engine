@@ -21,6 +21,9 @@
 namespace OHOS::Ace {
 
 class LayoutInspector {
+
+using ProfilerStatusCallback = std::function<void(bool)>&&;
+
 public:
     static void SupportInspector();
     static void SetlayoutInspectorStatus(int32_t containerId);
@@ -29,10 +32,17 @@ public:
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
-    static void SetArkUIStateProfilerStatus(bool status);
+    // for profiler
+    static void SetStateProfilerStatus(bool status);
+    static void TriggerJsStateProfilerStatusCallback(bool status);
+    static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback);
+    static void SendStateProfilerMessage(const std::string& message);
+    static bool GetStateProfilerStatus();
 
 private:
+    static bool stateProfilerStatus_;
     static bool layoutInspectorStatus_;
+    static std::function<void(bool)> jsStateProfilerStatusCallback_;
 };
 
 } // namespace OHOS::Ace

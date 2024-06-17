@@ -51,7 +51,6 @@ public:
             }
             theme->defaultSize_ = pattern->GetAttr<Dimension>("clock_default_size", 0.0_vp);
             return theme;
-
         }
     };
 

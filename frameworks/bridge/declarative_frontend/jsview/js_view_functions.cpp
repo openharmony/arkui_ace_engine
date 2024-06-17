@@ -176,6 +176,22 @@ void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
     }
 }
 
+std::string ViewFunctions::ExecuteOnDumpInfo()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, "")
+    std::string res;
+    auto func = jsOnDumpInspector_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+        if (result->IsString()) {
+            res = result->ToString();
+        }
+    } else {
+        LOGE("the onDumpInspector func is null");
+    }
+    return res;
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -248,6 +264,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsOnDumpInfo = jsObject->GetProperty("onDumpInfo");
         if (jsOnDumpInfo->IsFunction()) {
             jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
+        }
+
+        JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
+        if (jsOnDumpInspector->IsFunction()) {
+            jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
         }
     }
 

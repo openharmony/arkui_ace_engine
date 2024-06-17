@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
@@ -70,7 +71,7 @@ private:
 };
 
 // Pattern is the base class for different measure, layout and paint behavior.
-class Pattern : public virtual AceType {
+class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
@@ -85,6 +86,11 @@ public:
     }
 
     virtual bool StopExpandMark()
+    {
+        return false;
+    }
+
+    virtual bool IsNeedPercent() const
     {
         return false;
     }
@@ -167,6 +173,11 @@ public:
 
     virtual void OnContextAttached() {}
 
+    virtual OPINC_TYPE_E OpIncType()
+    {
+        return OPINC_NODE_POSSIBLE;
+    }
+
     virtual void OnModifyDone()
     {
 #if (defined(__aarch64__) || defined(__x86_64__))
@@ -207,6 +218,12 @@ public:
                 childrenList.emplace_back(childFrameNode);
             }
         }
+        UpdateChildRenderContext(renderContext, childrenList);
+    }
+
+    void UpdateChildRenderContext(
+        const RefPtr<RenderContext>& renderContext, std::list<RefPtr<FrameNode>>& childrenList)
+    {
         bool isForegroundColor = renderContext->HasForegroundColor();
         for (auto child : childrenList) {
             auto childRenderContext = child->GetRenderContext();
@@ -261,7 +278,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
+    virtual void NotifyForNextTouchEvent() {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -341,11 +358,18 @@ public:
         return UnsafeRawPtr(frameNode_);
     }
 
+    PipelineContext* GetContext() {
+        auto frameNode = GetUnsafeHostPtr();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetContext();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
-    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
-    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
+    virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {
         return false;
@@ -465,6 +489,7 @@ public:
     virtual void OnDirectionConfigurationUpdate() {}
     virtual void OnDpiConfigurationUpdate() {}
     virtual void OnIconConfigurationUpdate() {}
+    virtual void OnFontConfigurationUpdate() {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -535,6 +560,7 @@ public:
 
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
+    virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

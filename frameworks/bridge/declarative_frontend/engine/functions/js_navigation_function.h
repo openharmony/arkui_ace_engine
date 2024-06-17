@@ -37,7 +37,8 @@ public:
         ExecuteJS();
     }
 
-    JSRef<JSVal> Execute(NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation operation);
+    JSRef<JSVal> Execute(RefPtr<NG::NavDestinationContext> from,
+        RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation);
 
     void Execute(const RefPtr<NG::NavigationTransitionProxy>& proxy);
 };
@@ -66,7 +67,15 @@ public:
 
     void FinishTransition(const JSCallbackInfo& info);
 
-    static JSRef<JSVal> ConvertContentInfo(NG::NavContentInfo info);
+    static JSRef<JSVal> ConvertContentInfo(RefPtr<NG::NavDestinationContext> info);
+
+    void SetInteractive(const JSCallbackInfo& info);
+
+    void GetInteractive(const JSCallbackInfo& info);
+
+    void CancelAnimation(const JSCallbackInfo& info);
+
+    void UpdateTransition(const JSCallbackInfo& info);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

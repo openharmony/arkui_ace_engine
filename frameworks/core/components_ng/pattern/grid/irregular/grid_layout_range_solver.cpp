@@ -150,7 +150,11 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
 {
     float len = mainGap;
     while (idx > 0 && LessNotEqual(len, targetLen)) {
-        len += info_->lineHeightMap_.at(--idx) + mainGap;
+        auto it = info_->lineHeightMap_.find(--idx);
+        if (it == info_->lineHeightMap_.end()) {
+            return { 0, 0, 0.0f };
+        }
+        len += it->second + mainGap;
     }
 
     auto [startLine, startItem] = CheckMultiRow(idx);

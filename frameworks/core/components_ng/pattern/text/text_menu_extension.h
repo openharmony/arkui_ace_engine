@@ -24,6 +24,7 @@ struct MenuOptionsParam {
     std::optional<std::string> content;
     std::optional<std::string> icon;
     std::function<void(const std::string&)> action;
+    std::function<void(int32_t, int32_t)> actionRange;
     std::string ToString() const
     {
         std::string result;

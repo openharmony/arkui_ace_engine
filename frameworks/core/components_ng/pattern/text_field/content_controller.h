@@ -39,6 +39,7 @@ public:
     std::string GetValueAfterIndex(int32_t index);
     void erase(int32_t startIndex, int32_t length);
     int32_t Delete(int32_t startIndex, int32_t length, bool isBackward);
+    int32_t GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward);
     bool IsIndexBeforeOrInEmoji(int32_t index);
     void FilterValue();
     void FilterValueType(std::string& value);
@@ -81,6 +82,11 @@ public:
         content_ = "";
     }
 
+    std::string GetInsertValue()
+    {
+        return insertValue_;
+    }
+
 private:
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     void FilterTextInputStyle(bool& textChanged, std::string& result);
@@ -92,6 +98,7 @@ private:
     static bool FilterWithAscii(std::string& result);
     static bool FilterWithDecimal(std::string& result);
 
+    std::string insertValue_;
     std::string content_;
     WeakPtr<Pattern> pattern_;
 };

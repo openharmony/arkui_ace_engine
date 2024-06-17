@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SwipeGesture : public Gesture {
+class ACE_FORCE_EXPORT SwipeGesture : public Gesture {
     DECLARE_ACE_TYPE(SwipeGesture, Gesture);
 
 public:
@@ -34,8 +34,10 @@ public:
         speed_ = speed;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::SWIPE_GESTURE);
+            gestureInfo_->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);
         } else {
-            gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE);
+            gestureInfo_ =
+                MakeRefPtr<GestureInfo>(GestureTypeName::SWIPE_GESTURE, GestureTypeName::SWIPE_GESTURE, false);
         }
     };
 

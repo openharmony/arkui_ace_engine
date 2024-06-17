@@ -33,14 +33,14 @@ type SynchedPropertyFactoryFunc = <T>(source: ObservedPropertyAbstract<T>) => Ob
    and SyncedPropertyTwoWay
 */
 abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T> implements AbstractProperty<T> {
-  protected subscribers_: Set<number>
+  protected subscribers_: Set<number>;
   private id_: number;
   protected info_?: PropertyInfo;
 
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
     super();
     this.subscribers_ = new Set<number>();
-    this.id_ = SubscriberManager.MakeId();
+    this.id_ = SubscriberManager.MakeStateVariableId();
     SubscriberManager.Add(this);
     if (subscribeMe) {
       this.subscribers_.add(subscribeMe.id__());
@@ -51,7 +51,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   aboutToBeDeleted() {
-    SubscriberManager.Delete(this.id__())
+    SubscriberManager.Delete(this.id__());
   }
 
   id__(): number {
@@ -63,7 +63,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   public setInfo(propName: PropertyInfo) {
-    if (propName && propName != "") {
+    if (propName && propName !== '') {
       this.info_ = propName;
     }
   }
@@ -84,7 +84,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   // Method name is used to check object is of type ObservedPropertyAbstract
   // Do NOT override in derived classed, use addSubscriber
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
     this.subscribers_.add(subscriber.id__());
   }
 
@@ -119,9 +119,9 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   // FU code path callback
   protected notifyHasChanged(newValue: T) {
     stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyHasChanged");
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      let subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (subscriber) {
         // FU code path
         if ('hasChanged' in subscriber) {
@@ -131,7 +131,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
       } else {
-        stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+        stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
     stateMgmtProfiler.end();
@@ -139,7 +139,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   protected notifyPropertyRead() {
     stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyPropertyRead");
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: propertyRead.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
@@ -188,7 +188,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
    * depreciated SDK function, not used anywhere by the framework
    */
   public createTwoWaySync(subscribeMe?: IPropertySubscriber, info?: string): SubscribedAbstractProperty<T> {
-    stateMgmtConsole.warn("Using depreciated method 'createTwoWaySync'!")
+    stateMgmtConsole.warn("Using depreciated method 'createTwoWaySync'!");
     return this.createLink(subscribeMe, info);
   }
 
@@ -196,7 +196,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
    * depreciated SDK function, not used anywhere by the framework
    */
   public createOneWaySync(subscribeMe?: IPropertySubscriber, info?: string): SubscribedAbstractProperty<T> {
-    stateMgmtConsole.warn("Using depreciated method 'createOneWaySync' !")
+    stateMgmtConsole.warn("Using depreciated method 'createOneWaySync' !");
     return this.createProp(subscribeMe, info);
   }
 
@@ -211,7 +211,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
    */
   static CreateObservedObject<C>(value: C, owningView: IPropertySubscriber, thisPropertyName: PropertyInfo)
     : ObservedPropertyAbstract<C> {
-    return (typeof value === "object") ?
+    return (typeof value === 'object') ?
       new ObservedPropertyObject(value, owningView, thisPropertyName)
       : new ObservedPropertySimple(value, owningView, thisPropertyName);
   }

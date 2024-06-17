@@ -127,6 +127,8 @@ public:
 private:
     void PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path);
     void PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path);
+    void PaintHorizontalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
+    void PaintVerticalBubbleSuitableAging(float vertexOffsetFromBlock, RSPath& path);
     void PaintText(DrawingContext& context);
     void SetBubbleDisplayAnimation();
     void SetBubbleDisappearAnimation();

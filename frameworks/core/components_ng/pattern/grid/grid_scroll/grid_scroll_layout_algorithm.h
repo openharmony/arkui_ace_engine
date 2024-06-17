@@ -35,9 +35,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(
-        const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
-    static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
     void SetCanOverScroll(bool canOverScroll)
     {
         canOverScroll_ = canOverScroll;
@@ -80,6 +77,8 @@ public:
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    void SkipRegularLines(bool forward);
+    virtual void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward);
 
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
@@ -150,7 +149,6 @@ private:
     bool IsScrollToEndLine() const;
     bool IsEndLineInScreenWithGap(int32_t targetLine, float totalViewHeight, float mainSize) const;
     void UpdateCurrentOffsetForJumpTo(float mainSize);
-    void SkipRegularLines(bool forward);
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     void FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
@@ -175,9 +173,11 @@ private:
     virtual void UpdateMainLineOnReload(int32_t startIdx);
 
     // get [resetFromStart,resetFromUpdate]
-    std::pair<bool, bool> GetResetMode(int32_t updateIdx);
+    std::pair<bool, bool> GetResetMode(LayoutWrapper* layoutWrapper, int32_t updateIdx);
 
     void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+
+    bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
 protected:
     uint32_t crossCount_ = 0;
@@ -189,6 +189,7 @@ protected:
     int32_t currentItemRowEnd_ = -1;
     int32_t currentItemColEnd_ = -1;
     float cellAveLength_ = -1.0f;
+    float mainGap_ = 0;
 
 private:
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
@@ -196,7 +197,6 @@ private:
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
-    float mainGap_ = 0;
     float crossGap_ = 0;
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;

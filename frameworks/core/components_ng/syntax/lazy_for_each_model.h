@@ -33,7 +33,7 @@ public:
     ~LazyForEachActuator() override = default;
 };
 
-class LazyForEachModel {
+class ACE_FORCE_EXPORT LazyForEachModel {
 public:
     static LazyForEachModel* GetInstance();
     virtual ~LazyForEachModel() = default;

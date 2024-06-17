@@ -43,12 +43,14 @@ public:
     void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override {};
     void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override {};
     void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override {};
+    void AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) override {};
     void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption = CopyOptions::Distributed) override {};
     void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback,
         bool syncMode = false) override {};
-
+    void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode = false) override {};
     RefPtr<PasteDataMix> CreatePasteDataMix()
     {
         return AceType::MakeRefPtr<PasteDataMix>();

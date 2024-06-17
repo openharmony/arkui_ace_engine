@@ -172,7 +172,7 @@ enum AceLogTag : uint8_t {
     ACE_WINDOW_SCENE,         // C0393B
     ACE_NODE_CONTAINER,       // C0393C
     ACE_NATIVE_NODE,          // C0393D
-    ACE_DYNAMIC_COMPONENT,    // C0393E
+    ACE_ISOLATED_COMPONENT,   // C0393E
     ACE_MARQUEE,              // C0393F
     ACE_OBSERVER,             // C03940
     ACE_EMBEDDED_COMPONENT,   // C03941
@@ -188,6 +188,7 @@ enum AceLogTag : uint8_t {
     ACE_SCROLL_BAR,           // C0394B
     ACE_MOVING_PHOTO,         // C0394C
     ACE_ARK_COMPONENT,        // C0394D
+    ACE_WINDOW,               // C0394E
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

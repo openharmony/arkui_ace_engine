@@ -17,8 +17,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -82,7 +84,7 @@ bool ConvertProgressRResourceColor(const EcmaVM* vm, const Local<JSValueRef>& it
 bool ConvertProgressResourceColor(
     const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
 {
-    if (!itemParam->IsObject()) {
+    if (!itemParam->IsObject(vm)) {
         return ConvertProgressRResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
@@ -199,7 +201,7 @@ void ParseStrokeWidth(
     CalcDimension strokeWidth = CalcDimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP);
     auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
 
-    if (strokeWidthArg->IsString()) {
+    if (strokeWidthArg->IsString(vm)) {
         const std::string& value = strokeWidthArg->ToString(vm)->ToString();
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_STROKE_WIDTH);
     } else {
@@ -224,7 +226,7 @@ void ParseBorderWidth(
     Local<JSValueRef> borderWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension borderWidth = CalcDimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
 
-    if (borderWidthArg->IsString()) {
+    if (borderWidthArg->IsString(vm)) {
         const std::string& value = borderWidthArg->ToString(vm)->ToString();
         borderWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_BORDER_WIDTH);
     } else {
@@ -284,7 +286,7 @@ void ParseScaleWidth(
     Local<JSValueRef> scaleWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension scaleWidth = CalcDimension(DEFAULT_SCALE_WIDTH, DimensionUnit::VP);
 
-    if (scaleWidthArg->IsString()) {
+    if (scaleWidthArg->IsString(vm)) {
         const std::string& value = scaleWidthArg->ToString(vm)->ToString();
         scaleWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_SCALE_WIDTH);
     } else {
@@ -351,7 +353,7 @@ void ParseContent(
 {
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(index);
     std::string content = contentArg->ToString(vm)->ToString();
-    progressStyle.content = (contentArg->IsString()) ? content.c_str() : nullptr;
+    progressStyle.content = (contentArg->IsString(vm)) ? content.c_str() : nullptr;
 }
 
 void ParseEnableScanEffect(
@@ -404,7 +406,7 @@ void ParseCapsuleFontWeight(
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString()) {
+        } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString();
         }
         progressStyle.fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
@@ -576,7 +578,7 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         ProgressModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -598,11 +600,11 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
         panda::TryCatch trycatch(vm);
         auto jsObject = obj.ToLocal();
         auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-        CHECK_NULL_RETURN(makeFunc->IsFunction(), nullptr);
+        CHECK_NULL_RETURN(makeFunc->IsFunction(vm), nullptr);
         panda::Local<panda::FunctionRef> func = makeFunc;
         auto result = func->Call(vm, jsObject, params, 2);
         JSNApi::ExecutePendingJob(vm);
-        if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject()) {
+        if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm)) {
             return nullptr;
         }
         auto resultObj = result->ToObject(vm);
@@ -615,6 +617,63 @@ ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCal
         CHECK_NULL_RETURN(frameNode, nullptr);
         return AceType::Claim(frameNode);
     });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::ResetProgressInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getProgressModifier()->resetProgressInitialize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::SetProgressInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> totalArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(4);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto value = 0;
+    if (valueArg->IsNumber()) {
+        value = valueArg->ToNumber(vm)->Value();
+    }
+    auto total = 100;
+    if (totalArg->IsNumber() && totalArg->ToNumber(vm)->Value() > 0) {
+        total = totalArg->Int32Value(vm);
+    }
+    if (value > total) {
+        value = total;
+    } else if (value < 0) {
+        value = 0;
+    }
+    auto type = 0;
+    if (styleArg->IsNull() || styleArg->IsUndefined()) {
+        if (typeArg->IsNumber()) {
+            type = typeArg->Int32Value(vm);
+        }
+    } else if (styleArg->IsNumber()) {
+        type = styleArg->Int32Value(vm);
+    }
+    auto progressStyle = static_cast<Framework::ProgressStyle>(type);
+    ProgressType g_progressType = NG::ProgressType::LINEAR;
+    if (progressStyle == Framework::ProgressStyle::Eclipse) {
+        g_progressType = NG::ProgressType::MOON;
+    } else if (progressStyle == Framework::ProgressStyle::Ring) {
+        g_progressType = NG::ProgressType::RING;
+    } else if (progressStyle == Framework::ProgressStyle::ScaleRing) {
+        g_progressType = NG::ProgressType::SCALE;
+    } else if (progressStyle == Framework::ProgressStyle::Capsule) {
+        g_progressType = NG::ProgressType::CAPSULE;
+    }
+    GetArkUINodeModifiers()->getProgressModifier()->setProgressInitialize(
+        nativeNode, value, total, static_cast<int>(g_progressType));
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

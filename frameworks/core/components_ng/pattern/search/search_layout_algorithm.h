@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_LAYOUT_ALGORITHM_H
 
+#include "core/components/search/search_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/search/search_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,6 +37,14 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    struct LayoutSearchParams {
+        LayoutWrapper* layoutWrapper = nullptr;
+        RefPtr<SearchLayoutProperty> layoutProperty = nullptr;
+        RefPtr<SearchTheme> searchTheme = nullptr;
+        float searchFrameWidth = 0.0f;
+        float searchFrameHeight = 0.0f;
+        bool isRTL = false;
+    };
     void CancelImageMeasure(LayoutWrapper* layoutWrapper);
     void CancelButtonMeasure(LayoutWrapper* layoutWrapper);
     void TextFieldMeasure(LayoutWrapper* layoutWrapper);
@@ -55,10 +65,14 @@ private:
     SizeF searchButtonSizeMeasure_;
     SizeF cancelBtnSizeMeasure_;
     SizeF textFieldSizeMeasure_;
+    void LayoutSearchIcon(const LayoutSearchParams& params);
+    void LayoutSearchButton(const LayoutSearchParams& params);
+    void LayoutCancelButton(const LayoutSearchParams& params);
+    void LayoutCancelImage(const LayoutSearchParams& params);
+    void LayoutTextField(const LayoutSearchParams& params);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_LAYOUT_ALGORITHM_H

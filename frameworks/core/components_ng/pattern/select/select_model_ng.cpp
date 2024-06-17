@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -58,57 +59,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
         V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
     ViewStackProcessor::GetInstance()->Push(select);
 
-    SetSelectDefaultSize(select);
-    auto pattern = select->GetPattern<SelectPattern>();
-    
-    CHECK_NULL_VOID(pattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        pattern->SetSelectDefaultTheme();
-    
-        NG::PaddingProperty paddings;
-        paddings.top = std::nullopt;
-        paddings.bottom = std::nullopt;
-        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
-        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
-        ViewAbstract::SetPadding(paddings);
-    }
-    
-    pattern->BuildChild();
-    // create menu node
-    if (!pattern->GetMenuNode()) {
-        auto menuWrapper = MenuView::Create(params, nodeId, V2::SELECT_ETS_TAG);
-        pattern->SetMenuNode(menuWrapper);
-        pattern->InitSelected();
-    } else {
-        auto menuNode = pattern->GetMenuNode();
-        CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->UpdateSelectParam(params);
-    }
-    // store option pointers in select
-    auto menuContainer = pattern->GetMenuNode();
-    CHECK_NULL_VOID(menuContainer);
-    pattern->ClearOptions();
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    menuPattern->SetSelectProperties(params);
-    for (auto&& option : options) {
-        pattern->AddOptionNode(option);
-    }
-
-    // delete menu when select node destroy
-    auto destructor = [id = select->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
-    };
-    select->PushDestroyCallback(destructor);
+    InitSelect(AceType::RawPtr(select), params);
 }
 
 void SelectModelNG::SetSelected(int32_t idx)
@@ -477,6 +428,20 @@ void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
     }
 }
 
+void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+}
+
+void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+}
+
 void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
     if (controlSize.has_value()) {
@@ -501,6 +466,70 @@ ControlSize SelectModelNG::GetControlSize(FrameNode* frameNode)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_RETURN(pattern, ControlSize::NORMAL);
     return pattern->GetControlSize();
+}
+
+RefPtr<FrameNode> SelectModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+
+    return frameNode;
+}
+
+void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params)
+{
+    auto select = AceType::Claim(frameNode);
+    SetSelectDefaultSize(select);
+    auto pattern = select->GetPattern<SelectPattern>();
+    
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        pattern->SetSelectDefaultTheme();
+    
+        NG::PaddingProperty paddings;
+        paddings.top = std::nullopt;
+        paddings.bottom = std::nullopt;
+        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+        ViewAbstract::SetPadding(paddings);
+    }
+    
+    pattern->BuildChild();
+    // create menu node
+    if (!pattern->GetMenuNode()) {
+        auto menuWrapper = MenuView::Create(params, select->GetId(), V2::SELECT_ETS_TAG);
+        pattern->SetMenuNode(menuWrapper);
+        pattern->InitSelected();
+    } else {
+        auto menuNode = pattern->GetMenuNode();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->UpdateSelectParam(params);
+    }
+    // store option pointers in select
+    auto menuContainer = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuContainer);
+    pattern->ClearOptions();
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    menuPattern->SetSelectProperties(params);
+    for (auto && option : options) {
+        pattern->AddOptionNode(option);
+    }
+
+    // delete menu when select node destroy
+    auto destructor = [id = select->GetId()]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    select->PushDestroyCallback(destructor);
 }
 
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
@@ -726,5 +755,34 @@ void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::s
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetItemSelected(index, value);
+}
+
+void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto hub = frameNode->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectEvent(std::move(onSelect));
+}
+
+void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundColor(color);
+}
+
+void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuBackgroundBlurStyle(blurStyle);
+}
+
+void SelectModelNG::SetLayoutDirection(TextDirection value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutDirection(value);
 }
 } // namespace OHOS::Ace::NG

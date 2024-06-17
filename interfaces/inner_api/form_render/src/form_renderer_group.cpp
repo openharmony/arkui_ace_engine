@@ -247,5 +247,14 @@ void FormRendererGroup::RecycleForm(std::string& statusData) const
     }
     formRenderer_->RecycleForm(statusData);
 }
+
+void FormRendererGroup::EnableForm(const AppExecFwk::FormJsInfo& formJsInfo, const bool enable)
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("EnableForm failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->OnEnableForm(formJsInfo, enable);
+}
 }  // namespace Ace
 }  // namespace OHOS

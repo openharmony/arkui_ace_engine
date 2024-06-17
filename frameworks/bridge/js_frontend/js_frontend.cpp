@@ -268,7 +268,7 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
             }
             jsEngine->Initialize(weakDelegate.Upgrade());
         },
-        TaskExecutor::TaskType::JS, "ArkUIJsInitialize");
+        TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
     LOGI("JsFrontend initialize end.");
     return true;
 }
@@ -789,6 +789,13 @@ void JsFrontend::ForceFullGC()
 {
     if (jsEngine_) {
         jsEngine_->ForceFullGC();
+    }
+}
+
+void JsFrontend::NotifyUIIdle()
+{
+    if (jsEngine_) {
+        jsEngine_->NotifyUIIdle();
     }
 }
 

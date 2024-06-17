@@ -43,6 +43,7 @@ public:
     void SetContent(const std::string& content) {}
     void SetFontStyle(Ace::FontStyle fontStyle) {}
     void SetIconColor(const std::optional<Color>& color) {}
+    void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
 
 private:

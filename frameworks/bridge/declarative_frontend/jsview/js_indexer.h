@@ -56,6 +56,7 @@ public:
     static void SetPopupTitleBackground(const JSCallbackInfo& args);
     static std::optional<Color> PaseColor(const JSCallbackInfo& args);
     static void SetWidth(const JSCallbackInfo& args);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_INDEXER_H

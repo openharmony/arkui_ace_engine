@@ -63,9 +63,10 @@ struct LinearData {
     Gradient segmentColor;
     Gradient segmentShadowColor;
 
-    float segmentWidth;
-    float xSegment;
-    float height;
+    float segmentWidth = 0.0f;
+    float xSegment = 0.0f;
+    float height = 0.0f;
+    float totalWidth = 0.0f;
 
     bool isFirstData = false;
     bool isEndData = false;
@@ -176,6 +177,11 @@ public:
         }
     }
 
+    void SetIsRtl(bool isRtl)
+    {
+        isRtl_ = isRtl;
+    };
+
 private:
     void PaintCircle(DrawingContext& context, OffsetF offset) const;
     void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
@@ -196,6 +202,7 @@ private:
     OffsetF offset_;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;
+    bool isRtl_ = false;
     RefPtr<PropertyBool> useContentModifier_;
     
     RefPtr<AnimatablePropertyFloat> max_;

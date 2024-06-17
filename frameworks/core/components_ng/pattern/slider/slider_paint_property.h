@@ -75,13 +75,33 @@ public:
         return jsonArray->ToString();
     }
 
+    std::string ToJsonSelectColor() const
+    {
+        if (HasSelectGradientColor() && !GetSelectIsResourceColorValue(false)) {
+            Gradient colors = GetSelectGradientColor().value();
+            return GradientToJson(colors);
+        }
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, "");
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, "");
+        return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            if (GetCustomContent().has_value()) {
+                json->PutFixedAttr("content", GetCustomContent().value().c_str(), filter, FIXED_ATTR_CONTENT);
+            }
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
-        PaintProperty::ToJsonValue(json, filter);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
         jsonConstructor->Put("min", std::to_string(GetMin().value_or(0.0f)).c_str());
@@ -94,8 +114,7 @@ public:
         json->PutExtAttr("blockColor",
             GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("trackColor", ToJsonTrackBackgroundColor().c_str(), filter);
-        json->PutExtAttr("selectedColor",
-            GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectedColor", ToJsonSelectColor().c_str(), filter);
         json->PutExtAttr("showSteps", GetShowSteps().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("showTips", GetShowTips().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("blockBorderColor",
@@ -163,6 +182,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)

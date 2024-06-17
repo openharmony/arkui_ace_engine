@@ -42,7 +42,7 @@ struct ItemDivider final {
 
 namespace OHOS::Ace {
 
-class LinearSplitModel {
+class ACE_FORCE_EXPORT LinearSplitModel {
 public:
     static LinearSplitModel* GetInstance();
     virtual ~LinearSplitModel() = default;

@@ -461,6 +461,9 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
     if (paramObj->IsUndefined()) {
         return nullptr;
     }
+    if (!paramObj->IsObject()) {
+        return nullptr;
+    }
     auto styleStringValue = JSRef<JSObject>::Cast(JSRef<JSObject>::Cast(paramObj)->GetProperty("styledValue"));
     if (styleStringValue->IsUndefined()) {
         return nullptr;
@@ -525,6 +528,9 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JS
             continue;
         }
         auto type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
+        if (type == SpanType::Image || type == SpanType::CustomSpan) {
+            continue;
+        }
         auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleStringValue));
         if (spanBase) {
             spanBaseVector.emplace_back(spanBase);
@@ -579,6 +585,9 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
                 spanString->BindWithSpans(spanBases);
             }
         } else {
+            if (!args[0]->IsObject()) {
+                return;
+            }
             auto* base = JSRef<JSObject>::Cast(args[0])->Unwrap<AceType>();
             auto* imageAttachment = AceType::DynamicCast<JSImageAttachment>(base);
             if (imageAttachment) {
@@ -745,6 +754,9 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     if (type == SpanType::CustomSpan && !VerifyCustomSpanParameters(start, length)) {
         return;
     }
+    if (!styleValueObj->IsObject()) {
+        return;
+    }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);
     if (!spanBase) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
@@ -784,6 +796,9 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
         return;
     }
     if (type == SpanType::CustomSpan && !VerifyCustomSpanParameters(start, length)) {
+        return;
+    }
+    if (!styleValueObj->IsObject()) {
         return;
     }
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);

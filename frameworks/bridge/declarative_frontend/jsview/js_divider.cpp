@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_divider_theme.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/pipeline/pipeline_base.h"
@@ -51,6 +52,7 @@ namespace OHOS::Ace::Framework {
 void JSDivider::Create()
 {
     DividerModel::GetInstance()->Create();
+    JSDividerTheme::ApplyTheme();
 }
 
 void JSDivider::SetVertical(bool isVertical)
@@ -111,7 +113,9 @@ void JSDivider::JSBind(BindingTarget globalObj)
     JSClass<JSDivider>::StaticMethod("vertical", &JSDivider::SetVertical, opt);
     JSClass<JSDivider>::StaticMethod("strokeWidth", &JSDivider::SetStrokeWidth, opt);
     JSClass<JSDivider>::StaticMethod("lineCap", &JSDivider::SetLineCap, opt);
+    JSClass<JSDivider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSDivider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSDivider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSDivider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDivider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDivider>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

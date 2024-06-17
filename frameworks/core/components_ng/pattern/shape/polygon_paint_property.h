@@ -62,6 +62,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         ShapePaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (propPoints_.has_value()) {
             const auto size = static_cast<int32_t>(propPoints_.value().size());
             std::vector<std::array<float, 2>> point(size);

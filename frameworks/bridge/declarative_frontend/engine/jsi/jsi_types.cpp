@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
@@ -42,7 +43,7 @@ bool JsiValue::IsFunction() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsFunction();
+        return GetHandle()->IsFunction(GetEcmaVM());
     }
 }
 
@@ -60,7 +61,7 @@ bool JsiValue::IsString() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsString();
+        return GetHandle()->IsString(GetEcmaVM());
     }
 }
 
@@ -78,7 +79,7 @@ bool JsiValue::IsObject() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsObject();
+        return GetHandle()->IsObject(GetEcmaVM());
     }
 }
 
@@ -96,13 +97,13 @@ bool JsiValue::IsArrayBuffer() const
     if (GetHandle().IsEmpty()) {
         return false;
     } else {
-        return GetHandle()->IsArrayBuffer();
+        return GetHandle()->IsArrayBuffer(GetEcmaVM());
     }
 }
 
 bool JsiValue::IsUint8ClampedArray() const
 {
-    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray());
+    return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray(GetEcmaVM()));
 }
 
 bool JsiValue::IsUndefined() const
@@ -190,10 +191,20 @@ JsiRef<JsiValue> JsiArray::GetProperty(const char* prop) const
     return refValue;
 }
 
+JsiRef<JsiValue> JsiArray::GetProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto value = GetHandle()->Get(vm, stringRef);
+    auto func = JsiValue(vm, value);
+    auto refValue = JsiRef<JsiValue>(func);
+    return refValue;
+}
+
 size_t JsiArray::Length() const
 {
     size_t length = -1;
-    JsiRef<JsiValue> propLength = GetProperty("length");
+    JsiRef<JsiValue> propLength = GetProperty(static_cast<int32_t>(ArkUIIndex::LENGTH));
     if (propLength->IsNumber()) {
         length = propLength->ToNumber<int32_t>();
     }
@@ -228,7 +239,7 @@ int32_t JsiArrayBuffer::ByteLength() const
 
 void* JsiArrayBuffer::GetBuffer() const
 {
-    return GetHandle()->GetBuffer();
+    return GetHandle()->GetBuffer(GetEcmaVM());
 }
 
 void JsiArrayBuffer::Detach() const
@@ -238,7 +249,7 @@ void JsiArrayBuffer::Detach() const
 
 bool JsiArrayBuffer::IsDetach() const
 {
-    return GetHandle()->IsDetach();
+    return GetHandle()->IsDetach(GetEcmaVM());
 }
 
 // -----------------------
@@ -274,6 +285,24 @@ JsiRef<JsiArray> JsiObject::GetPropertyNames() const
 {
     auto vm = GetEcmaVM();
     return JsiRef<JsiArray>::Make(GetHandle()->GetOwnPropertyNames(vm));
+}
+
+JsiRef<JsiValue> JsiObject::GetProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto str = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto value = GetHandle()->Get(vm, str);
+    auto func = JsiValue(vm, value);
+    auto refValue = JsiRef<JsiValue>(func);
+    return refValue;
+}
+
+bool JsiObject::HasProperty(int32_t propertyIndex) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    bool has = GetHandle()->Has(vm, stringRef);
+    return has;
 }
 
 JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
@@ -314,7 +343,7 @@ void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
     auto vm = GetEcmaVM();
     auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     auto valueRef = JsiValueConvertor::toJsiValueWithVM<std::string>(GetEcmaVM(), value);
-    if (valueRef->IsString()) {
+    if (valueRef->IsString(vm)) {
         GetHandle()->Set(vm, stringRef, JSON::Parse(vm, valueRef));
     }
 }
@@ -457,32 +486,57 @@ bool JsiCallbackInfo::GetUint32Arg(size_t index, uint32_t& value) const
 bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsNumber()) {
+    if (arg.IsEmpty()) {
         return false;
     }
-    value = arg->ToNumber(info_->GetVM())->Value();
-    return true;
+    bool ret = false;
+    value = arg->GetValueDouble(ret);
+    return ret;
 }
 
 bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsString()) {
+    if (arg.IsEmpty() || !arg->IsString(info_->GetVM())) {
         return false;
     }
     value = arg->ToString(info_->GetVM())->ToString();
     return true;
 }
 
+bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsArray(info_->GetVM())) {
+        return false;
+    }
+    auto arrayRef = Local<ArrayRef>(arg);
+    uint32_t length = arrayRef->Length(info_->GetVM());
+    valueArr.reserve(length);
+    for (int32_t i = 0; i < length; ++i) {
+        auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);
+        if (!jsDouble.IsEmpty() && jsDouble->IsNumber()) {
+            valueArr.emplace_back(jsDouble->ToNumber(info_->GetVM())->Value());
+        }
+    }
+    return true;
+}
+
 // -----------------------
 // Implementation of JsiString
 // -----------------------
-JsiString::JsiString(const char* str) : JsiValue(StringRef::NewFromUtf8(GetEcmaVM(), str)) {}
-JsiString::JsiString(JsiValue str) : JsiValue(str) {}
+JsiString::JsiString(const panda::CopyableGlobal<panda::StringRef>& val) : JsiType(val) {}
+JsiString::JsiString(panda::Local<panda::StringRef> val) : JsiType(val) {}
 
-JsiString JsiString::New(const char* str)
+panda::Local<panda::StringRef> JsiString::New(const char* str)
 {
-    return JsiString(str);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), str);
+}
+
+panda::Local<panda::StringRef> JsiString::New(const std::string& str)
+{
+    return JsiString::New(str.c_str());
 }
 
 // -----------------------

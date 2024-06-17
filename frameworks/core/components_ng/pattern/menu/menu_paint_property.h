@@ -37,6 +37,8 @@ constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUn
 // preview menu
 constexpr Dimension PORTRAIT_TOP_SECURITY = 48.0_vp;
 constexpr Dimension PORTRAIT_BOTTOM_SECURITY = 48.0_vp;
+constexpr Dimension PORTRAIT_TOP_SECURITY_API12 = 16.0_vp;
+constexpr Dimension PORTRAIT_BOTTOM_SECURITY_API12 = 4.0_vp;
 constexpr Dimension LANDSCAPE_TOP_SECURITY = 24.0_vp;
 constexpr Dimension LANDSCAPE_BOTTOM_SECURITY = 24.0_vp;
 constexpr Dimension PREVIEW_INNER_SECURITY = 24.0_vp;
@@ -92,6 +94,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("enableArrow", V2::ConvertBoolToString(GetEnableArrow().value_or(false)).c_str(), filter);
         json->PutExtAttr("arrowOffset",
             GetArrowOffset().value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str(), filter);

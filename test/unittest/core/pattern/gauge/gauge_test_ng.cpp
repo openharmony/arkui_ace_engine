@@ -115,10 +115,10 @@ public:
 void GaugeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
 }
 
@@ -1183,7 +1183,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     layoutWrapper->AppendChild(textLayoutWrapper);
 
     auto descriptionNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, pattern_->GetDescriptionNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        V2::TEXT_ETS_TAG, pattern_->GetDescriptionNodeId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     frameNode_->AddChild(descriptionNode);
     auto descriptionWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(descriptionNode, geometryNode, layoutProperty_);
     layoutWrapper->AppendChild(descriptionWrapper);
@@ -1826,19 +1826,13 @@ HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest001, TestSize.Level1)
     pattern_->minValueTextId_ = valueTextId;
     auto textPattern = textNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto frameNode = textPattern->GetHost();
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    std::vector<ObscuredReasons> reasons;
 
     /**
      * @tc.steps: step2. change privacy sensitive and check status.
      */
     pattern_->OnSensitiveStyleChange(false);
-    EXPECT_EQ(renderContext->GetObscured(), reasons);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
     pattern_->OnSensitiveStyleChange(true);
-    reasons.push_back(ObscuredReasons::PLACEHOLDER);
-    EXPECT_EQ(renderContext->GetObscured(), reasons);
+    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
 }
 } // namespace OHOS::Ace::NG

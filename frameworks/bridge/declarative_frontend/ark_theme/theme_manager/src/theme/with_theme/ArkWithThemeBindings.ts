@@ -14,27 +14,29 @@
  */
 
 // @ts-ignore
-globalThis.WithTheme.create = function (themeOptions) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor()
-    // get theme instance from ThemeMap by CustomTheme instance
-    const theme: ThemeInternal = globalThis.themeScopeMgr?.makeTheme(themeOptions?.theme)
-
-    // set local color mode if need
-    const colorMode = themeOptions?.colorMode
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        globalThis.themeScopeMgr?.onEnterLocalColorMode(colorMode)
+if (globalThis.WithTheme !== undefined) {
+    globalThis.WithTheme.create = function (themeOptions) {
+        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        // get theme instance from ThemeMap by CustomTheme instance
+        const theme: ThemeInternal = ArkThemeScopeManager.getInstance().makeTheme(themeOptions?.theme);
+    
+        // set local color mode if need
+        const colorMode = themeOptions?.colorMode;
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+    
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+    
+        // reset local color mode if need
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+    
+        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
     }
-
-    ArkThemeNativeHelper.sendThemeToNative(theme, elmtId)
-
-    // reset local color mode if need
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        globalThis.themeScopeMgr?.onExitLocalColorMode()
+    // @ts-ignore
+    globalThis.WithTheme.pop = function () {
+        ArkThemeScopeManager.getInstance().onScopeExit();
     }
-
-    globalThis.themeScopeMgr?.onScopeEnter(elmtId, themeOptions, theme)
-}
-// @ts-ignore
-globalThis.WithTheme.pop = function () {
-    globalThis.themeScopeMgr?.onScopeExit()
 }

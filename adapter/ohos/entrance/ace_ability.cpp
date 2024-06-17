@@ -229,7 +229,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceEngine::InitJsDumpHeadSignal();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
-    // TODO: now choose pipeline using param set as package name, later enable for all.
+    // now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;
@@ -418,9 +418,10 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             if (rsUiDirector) {
                 rsUiDirector->SetUITaskRunner(
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                        const std::function<void()>& task) {
+                        const std::function<void()>& task, uint32_t delay) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIRenderServiceTask");
+                        taskExecutor->PostDelayedTask(
+                            task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
@@ -688,27 +689,24 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
             Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-                auto isNeedAvoidWindowMode =
-                        (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-                         Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                         Ability::GetWindow()->GetMode()
-                         == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-                        (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                         SystemProperties::GetDeviceType() == DeviceType::TABLET);
+        auto isNeedAvoidWindowMode = SystemProperties::GetNeedAvoidWindow() &&
+            (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [rect, density = density_, reason, container, rsTransaction]() {
-            auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+            auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
             ViewportConfig config(rect.width_, rect.height_, density);
             Platform::AceViewOhos::SetViewportMetrics(aceView, config);
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISurfaceChanged");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged");
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -747,7 +745,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange");
     }
 }
 
@@ -768,7 +766,7 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     LOGI("AceAbility OnDrag called ");
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_VOID(aceView);
     DragEventAction action;
     switch (event) {
@@ -795,7 +793,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerE
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(abilityId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     aceView->DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -805,7 +803,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_RETURN(container, false);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     CHECK_NULL_RETURN(aceView, false);
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
@@ -860,7 +858,7 @@ uint32_t AceAbility::GetBackgroundColor()
             CHECK_NULL_VOID(pipelineContext);
             bgColor = pipelineContext->GetAppBgColor().GetValue();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
+        TaskExecutor::TaskType::UI, "ArkUIAbilityGetAppBackgroundColor");
 
     LOGI("AceAbilityHandler GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;

@@ -32,6 +32,15 @@ public:
         CheckBoxModel::GetInstance()->SetUnSelectedColor(themeColors->IconFourth());
         CheckBoxModel::GetInstance()->SetCheckMarkColor(themeColors->IconOnPrimary());
     }
+
+    static bool ObtainCheckMarkColor(Color& color)
+    {
+        if (auto themeColors = JSThemeUtils::GetThemeColors(); themeColors.has_value()) {
+            color = themeColors->IconOnPrimary();
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_CHECKBOX_THEME_H

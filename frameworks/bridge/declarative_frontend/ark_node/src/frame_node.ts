@@ -30,6 +30,7 @@ class FrameNode {
   protected uiContext_: UIContext | undefined | null;
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
+  private nodeAdapterRef_?: NodeAdapter;
   constructor(uiContext: UIContext, type: string) {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
@@ -95,13 +96,10 @@ class FrameNode {
     }
     return null;
   }
-  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef): void {
+  setNodePtr(nativeRef: NativeStrongRef | NativeWeakRef, nodePtr: NodePtr): void {
+    FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
-    if (nativeRef === null || nativeRef === undefined) {
-      this.resetNodePtr();
-      return;
-    }
-    this.nodePtr_ = this._nativeRef.getNativeHandle();
+    this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
     if (this._nodeId === -1) {
       return;
@@ -120,6 +118,9 @@ class FrameNode {
     this.baseNode_ = baseNode;
     this.renderNode_?.setBaseNode(baseNode);
   }
+  setAdapterRef(adapter: NodeAdapter | undefined): void {
+    this.nodeAdapterRef_ = adapter;
+  }
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;
   }
@@ -129,6 +130,27 @@ class FrameNode {
     this._nodeId = -1;
     this._nativeRef = null;
     this.nodePtr_ = null;
+  }
+
+  static disposeTreeRecursively(node: FrameNode | null): void {
+    if (node === null) {
+      return;
+    }
+    let child = node.getFirstChildWithoutExpand();
+    FrameNode.disposeTreeRecursively(child);
+    let sibling = node.getNextSiblingWithoutExpand();
+    FrameNode.disposeTreeRecursively(sibling);
+    node.dispose();
+  }
+
+  disposeTree(): void {
+    let parent = this.getParent();
+    if (parent?.getNodeType() === "NodeContainer") {
+      getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
+    } else {
+      parent?.removeChild(this);
+    }
+    FrameNode.disposeTreeRecursively(this);
   }
 
   checkType(): void {
@@ -156,11 +178,15 @@ class FrameNode {
     return null;
   }
 
+  checkValid(node?: FrameNode): boolean {
+    return true;
+  }
+
   appendChild(node: FrameNode): void {
     if (node === undefined || node === null) {
       return;
     }
-    if (node.getType() === 'ProxyFrameNode') {
+    if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -176,19 +202,34 @@ class FrameNode {
     if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
       return;
     }
+    if (!this.checkValid()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    } else {
+      content.setAttachedParent(new WeakRef<FrameNode>(this));
     }
+  }
+
+  removeComponentContent(content: ComponentContent): void {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() === undefined) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
+    content.setAttachedParent(undefined);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
     if (child === undefined || child === null) {
       return;
     }
-    if (child.getType() === 'ProxyFrameNode') {
+    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let flag = true;
@@ -228,7 +269,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -241,7 +282,20 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFirstChildWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), false);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -254,7 +308,20 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      return frameNode === undefined ? null : frameNode;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getNextSiblingWithoutExpand(): FrameNode | null {
+    const result = getUINativeModule().frameNode.getNextSibling(this.getNodePtr(), false);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -267,7 +334,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -280,7 +347,7 @@ class FrameNode {
       return null;
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-      var frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+      let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
@@ -373,7 +440,7 @@ class FrameNode {
   }
 
   getUniqueId(): number {
-      return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+    return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
   }
 
   getNodeType(): string {
@@ -408,7 +475,7 @@ class FrameNode {
 
   setMeasuredSize(size: Size): void {
     getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0),
-        Math.max(size.height, 0));
+      Math.max(size.height, 0));
   }
 
   setLayoutPosition(position: Position): void {
@@ -434,6 +501,7 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
+      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
     return this._commonAttribute;
@@ -448,9 +516,9 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
-  updateInstance(uiContext: UIContext) {
-      this.uiContext_ = uiContext;
-      this.instanceId_ = uiContext.instanceId_;
+  updateInstance(uiContext: UIContext): void {
+    this.uiContext_ = uiContext;
+    this.instanceId_ = uiContext.instanceId_;
   }
 }
 
@@ -569,7 +637,34 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
       this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
     }
     this.attribute_.setNodePtr(this.nodePtr_);
+    this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this.attribute_;
+  }
+
+  checkValid(node?: FrameNode): boolean {
+    if (this.attribute_ === undefined) {
+      this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
+    }
+
+    if (this.attribute_.allowChildCount !== undefined) {
+      const allowCount = this.attribute_.allowChildCount();
+      if (this.getChildrenCount() >= allowCount) {
+        return false;
+      }
+    }
+
+    if (this.attribute_.allowChildTypes !== undefined && node !== undefined) {
+      const childType = node.getNodeType();
+      const allowTypes = this.attribute_.allowChildTypes();
+      let isValid = false;
+      allowTypes.forEach((nodeType: string) => {
+        if (nodeType === childType) {
+          isValid = true;
+        }
+      });
+      return isValid;
+    }
+    return true;
   }
 }
 
@@ -596,19 +691,93 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
       })
     }],
     ["GridRow", (context: UIContext) => {
-      return new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
+      let node = new TypedFrameNode(context, "GridRow", (node: NodePtr, type: ModifierType) => {
         return new ArkGridRowComponent(node, type);
+      });
+      node.initialize();
+      return node;
+    }],
+    ["TextInput", (context: UIContext) => {
+      return new TypedFrameNode(context, "TextInput", (node: NodePtr, type: ModifierType) => {
+        return new ArkTextInputComponent(node, type);
       })
     }],
     ["GridCol", (context: UIContext) => {
-      return new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
+      let node = new TypedFrameNode(context, "GridCol", (node: NodePtr, type: ModifierType) => {
         return new ArkGridColComponent(node, type);
+      });
+      node.initialize();
+      return node;
+    }],
+    ["Blank", (context: UIContext) => {
+      return new TypedFrameNode(context, "Blank", (node: NodePtr, type: ModifierType) => {
+        return new ArkBlankComponent(node, type);
+      })
+    }],
+    ["Image", (context: UIContext) => {
+      return new TypedFrameNode(context, "Image", (node: NodePtr, type: ModifierType) => {
+        return new ArkImageComponent(node, type);
+      })
+    }],
+    ["Flex", (context: UIContext) => {
+      return new TypedFrameNode(context, "Flex", (node: NodePtr, type: ModifierType) => {
+        return new ArkFlexComponent(node, type);
+      })
+    }],
+    ["Swiper", (context: UIContext) => {
+      return new TypedFrameNode(context, "Swiper", (node: NodePtr, type: ModifierType) => {
+        return new ArkSwiperComponent(node, type);
+      })
+    }],
+    ["Progress", (context: UIContext) => {
+      return new TypedFrameNode(context, "Progress", (node: NodePtr, type: ModifierType) => {
+        return new ArkProgressComponent(node, type);
+      })
+    }],
+    ["Scroll", (context: UIContext) => {
+      return new TypedFrameNode(context, "Scroll", (node: NodePtr, type: ModifierType) => {
+        return new ArkScrollComponent(node, type);
+      })
+    }],
+    ["RelativeContainer", (context: UIContext) => {
+      return new TypedFrameNode(context, "RelativeContainer", (node: NodePtr, type: ModifierType) => {
+        return new ArkRelativeContainerComponent(node, type);
+      })
+    }],
+    ["List", (context: UIContext) => {
+      return new TypedFrameNode(context, "List", (node: NodePtr, type: ModifierType) => {
+        return new ArkListComponent(node, type);
+      })
+    }],
+    ["ListItem", (context: UIContext) => {
+      return new TypedFrameNode(context, "ListItem", (node: NodePtr, type: ModifierType) => {
+        return new ArkListItemComponent(node, type);
+      })
+    }],
+    ["Divider", (context: UIContext) => {
+      return new TypedFrameNode(context, "Divider", (node: NodePtr, type: ModifierType) => {
+        return new ArkDividerComponent(node, type);
+      })
+    }],
+    ["LoadingProgress", (context: UIContext) => {
+      return new TypedFrameNode(context, "LoadingProgress", (node: NodePtr, type: ModifierType) => {
+        return new ArkLoadingProgressComponent(node, type);
+      })
+    }],
+    ["Search", (context: UIContext) => {
+      return new TypedFrameNode(context, "Search", (node: NodePtr, type: ModifierType) => {
+        return new ArkSearchComponent(node, type);
+      })
+    }],
+    ["Button", (context: UIContext) => {
+      return new TypedFrameNode(context, "Button", (node: NodePtr, type: ModifierType) => {
+        return new ArkButtonComponent(node, type);
       })
     }],
   ]
 )
 
-class TypedNode {
+class typeNode {
   static createNode(context: UIContext, type: string): FrameNode {
     let creator = __creatorMap__.get(type)
     if (creator === undefined) {

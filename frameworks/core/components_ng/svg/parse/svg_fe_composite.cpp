@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -115,7 +116,7 @@ void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter
 bool SvgFeComposite::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeCompositeAttribute&)> attrs[] = {
-        { DOM_SVG_FE_IN2,
+        { SVG_FE_IN2,
             [](const std::string& val, SvgFeCompositeAttribute& attribute) {
                 SvgFeInType type = SvgFeInType::PRIMITIVE;
                 bool res = ConvertStrToSvgFeInType(val, type);
@@ -125,23 +126,23 @@ bool SvgFeComposite::ParseAndSetSpecializedAttr(const std::string& name, const s
                     attribute.in2.id = val;
                 }
             } },
-        { DOM_SVG_FE_K1,
+        { SVG_FE_K1,
             [](const std::string& val, SvgFeCompositeAttribute& attr) {
                 attr.k1 = SvgAttributesParser::ParseDouble(val);
             } },
-        { DOM_SVG_FE_K2,
+        { SVG_FE_K2,
             [](const std::string& val, SvgFeCompositeAttribute& attr) {
                 attr.k2 = SvgAttributesParser::ParseDouble(val);
             } },
-        { DOM_SVG_FE_K3,
+        { SVG_FE_K3,
             [](const std::string& val, SvgFeCompositeAttribute& attr) {
                 attr.k3 = SvgAttributesParser::ParseDouble(val);
             } },
-        { DOM_SVG_FE_K4,
+        { SVG_FE_K4,
             [](const std::string& val, SvgFeCompositeAttribute& attr) {
                 attr.k4 = SvgAttributesParser::ParseDouble(val);
             } },
-        { DOM_SVG_FE_OPERATOR_TYPE,
+        { SVG_FE_OPERATOR_TYPE,
             [](const std::string& val, SvgFeCompositeAttribute& attr) {
                 SvgFeOperatorType type = SvgFeOperatorType::FE_OVER;
                 bool res = ConvertStrToSvgFeOperatorType(val, type);

@@ -35,10 +35,46 @@ void ResetNextLabel(ArkUINodeHandle node)
     StepperItemModelNG::ResetNextLabel(frameNode);
 }
 
+void SetPrevLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string leftLabel = value;
+    StepperItemModelNG::SetPrevLabel(frameNode, leftLabel);
+}
+
+void ResetPrevLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    StepperItemModelNG::ResetPrevLabel(frameNode);
+}
+
+void SetStatus(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string labelStatus = value;
+    StepperItemModelNG::SetStatus(frameNode, labelStatus);
+}
+
+void ResetStatus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    StepperItemModelNG::ResetStatus(frameNode);
+}
 namespace NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
-    static const ArkUIStepperItemModifier modifier = { SetNextLabel, ResetNextLabel };
+    static const ArkUIStepperItemModifier modifier = {
+        SetNextLabel,
+        ResetNextLabel,
+        SetPrevLabel,
+        ResetPrevLabel,
+        SetStatus,
+        ResetStatus,
+    };
 
     return &modifier;
 }

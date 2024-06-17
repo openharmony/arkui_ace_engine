@@ -48,19 +48,7 @@ public:
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
-    Axis GetAxisDirection() override
-    {
-        if (direction_.type == PanDirection::ALL) {
-            return Axis::FREE;
-        }
-        if ((direction_.type & PanDirection::VERTICAL) == 0) {
-            return Axis::HORIZONTAL;
-        }
-        if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-            return Axis::VERTICAL;
-        }
-        return Axis::NONE;
-    }
+    Axis GetAxisDirection() override;
 
     void SetDirection(const PanDirection& direction);
 
@@ -82,10 +70,18 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
+    
+    void UpdateFingerListInfo() override;
 
-    bool AboutToAddCurrentFingers(int32_t touchId) override;
+    double GetDistance() const
+    {
+        return distance_;
+    }
 
-    bool AboutToMinusCurrentFingers(int32_t touchId) override;
+    PanDirection GetDirection() const
+    {
+        return direction_;
+    }
 
 private:
     class PanVelocity {
@@ -132,6 +128,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
@@ -146,15 +143,28 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
-    AxisEvent lastAxisEvent_;
-    Offset averageDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
-    Offset delta_;
-    double mainDelta_ = 0.0;
-    PanVelocity panVelocity_;
-    TimeStamp time_;
 
+    struct PanRecognizerInfo {
+        Offset delta_;
+        double mainDelta_ = 0.0;
+        PanVelocity panVelocity_;
+        Offset averageDistance_;
+
+        void ResetInfo()
+        {
+            delta_.Reset();
+            panVelocity_.ResetAll();
+            averageDistance_.Reset();
+        }
+    };
+
+    TimeStamp time_;
     Point globalPoint_;
+    PanRecognizerInfo touchInfoForPan;
+    PanRecognizerInfo axisInfoForPan;
+    InputEventType lastInputEventType_ = InputEventType::TOUCH_SCREEN;
+    AxisEvent lastAxisEvent_;
     TouchEvent lastTouchEvent_;
     RefPtr<PanGestureOption> panGestureOption_;
     OnPanFingersFunc onChangeFingers_;
@@ -167,6 +177,7 @@ private:
     bool isFlushTouchEventsEnd_ = false;
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
+    bool isStartTriggered_ = false;
 };
 
 } // namespace OHOS::Ace::NG

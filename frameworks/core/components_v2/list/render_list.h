@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,7 +154,7 @@ public:
 
     void RemoveAllItems();
 
-    void JumpToIndex(int32_t idx, int32_t source);
+    void JumpToIndex(int32_t idx);
 
     void AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
 

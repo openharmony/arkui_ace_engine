@@ -89,7 +89,6 @@ void TextPickerTossAnimationController::StartSpringMotion()
     auto columnNode = column->GetHost();
     CHECK_NULL_VOID(columnNode);
     auto offset = column->GetOffset();
-    auto speed = column->GetMainVelocity() / VELOCTY_TRANS;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto springCurve = UpdatePlayAnimationValue();
@@ -97,7 +96,7 @@ void TextPickerTossAnimationController::StartSpringMotion()
     double midIndex = column->GetShowOptionCount() / 2;
     auto optionProperties = column->GetMidShiftDistance();
     auto midShiftDistance =
-        (speed) < 0.0 ? optionProperties[midIndex].prevDistance : optionProperties[midIndex].nextDistance;
+        column->IsDownScroll() ? optionProperties[midIndex].nextDistance : optionProperties[midIndex].prevDistance;
     column->SetYLast(0);
     end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();
@@ -114,7 +113,6 @@ void TextPickerTossAnimationController::StartSpringMotion()
         if (ref->isManualStopToss_) {
             return;
         }
-        column->UpdateToss(static_cast<int>(ref->end_));
         column->TossAnimationStoped();
         auto isTouchBreak = column->GetTouchBreakStatus();
         if (isTouchBreak == false) {
@@ -186,7 +184,7 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
         if ((isTouchBreak) || (static_cast<int32_t>(position) == DISMIN)) {
             return;
         }
-        column->UpdateToss(static_cast<int>(position));
+        column->UpdateToss(position);
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));

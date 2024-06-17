@@ -694,7 +694,7 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
     }
 
     if (paragraphStyle_.maxLines.has_value()) {
-        spanItem->textLineStyle->UpdateMaxLines(paragraphStyle_.maxLines.value());
+        spanItem->textLineStyle->UpdateMaxLines(static_cast<uint32_t>(paragraphStyle_.maxLines.value()));
     }
 
     if (paragraphStyle_.textOverflow.has_value()) {

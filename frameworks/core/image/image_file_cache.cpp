@@ -123,7 +123,7 @@ std::string ImageFileCache::GetImageCacheKey(const std::string& fileName)
 
 void ImageFileCache::SetCacheFileLimit(size_t cacheFileLimit)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "User Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
     fileLimit_ = cacheFileLimit;
 }
 
@@ -170,7 +170,7 @@ void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::stri
         infoIter->fileName = cacheFileName;
         infoIter->fileSize = cacheSize;
         infoIter->accessTime = cacheTime;
-        infoIter->accessCount = suffix == ASTC_SUFFIX ? convertAstcThreshold : 1;
+        infoIter->accessCount = static_cast<uint32_t>(suffix == ASTC_SUFFIX ? convertAstcThreshold : 1);
     } else {
         cacheFileInfo_.emplace_front(cacheFileName, cacheSize, cacheTime,
             suffix == ASTC_SUFFIX ? convertAstcThreshold : 1);
@@ -303,7 +303,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
         auto infoIter = fileNameToFileInfoPos_[fileCacheKey];
         cacheFileSize_ = cacheFileSize_ + packedSize - infoIter->fileSize;
         infoIter->fileName = astcFileName;
-        infoIter->fileSize = packedSize;
+        infoIter->fileSize = static_cast<uint64_t>(packedSize);
     }
     // remove the old file before convert
     ClearCacheFile(removeVector);
@@ -340,7 +340,7 @@ std::string ImageFileCache::GetCacheFilePathInner(const std::string& url, const 
         infoIter->accessCount++;
         auto filePath = ConstructCacheFilePath(infoIter->fileName);
         if (SystemProperties::IsImageFileCacheConvertAstcEnabled() &&
-            infoIter->accessCount == SystemProperties::GetImageFileCacheConvertAstcThreshold()) {
+            infoIter->accessCount == static_cast<uint32_t>(SystemProperties::GetImageFileCacheConvertAstcThreshold())) {
             BackgroundTaskExecutor::GetInstance().PostTask(
                 [this, fileCacheKey, filePath, url] () {
                     ConvertToAstcAndWriteToFile(fileCacheKey, filePath, url);
@@ -380,7 +380,7 @@ void ImageFileCache::SetCacheFileInfo()
                 IsAstcFile(filePtr->d_name) ? SystemProperties::GetImageFileCacheConvertAstcThreshold() : 1);
             std::string fileCacheKey = GetImageCacheKey(std::string(filePtr->d_name));
             fileNameToFileInfoPos_[fileCacheKey] = cacheFileInfo_.begin();
-            cacheFileSize += fileStatus.st_size;
+            cacheFileSize += static_cast<size_t>(fileStatus.st_size);
         }
         filePtr = readdir(dir.get());
     }
@@ -400,7 +400,7 @@ void ImageFileCache::DumpCacheInfo()
     if (cacheFileInfoSize == 0) {
         return;
     }
-    auto totalCount = 0;
+    size_t totalCount = 0;
     for (const auto& item : cacheFileInfo_) {
         auto filePath = ConstructCacheFilePath(item.fileName);
         auto fileSize = item.fileSize;

@@ -46,7 +46,6 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
-    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
     if (type == ProgressType::CAPSULE) {
@@ -568,7 +567,7 @@ double ProgressModelNG::GetTotal(FrameNode* frameNode)
 NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
 {
     NG::ProgressType value = ProgressType::LINEAR;
-    ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, value, frameNode);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(ProgressPaintProperty, ProgressType, value, frameNode, value);
     return value;
 }
 
@@ -579,4 +578,50 @@ void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&
     pattern->SetBuilderFunc(std::move(makeFunc));
 }
 
+void ProgressModelNG::ProgressInitialize(
+    FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type)
+{
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Value, value, frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type, frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
+    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+    auto progressFocusNode = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(progressFocusNode);
+    if (type == ProgressType::CAPSULE) {
+        progressFocusNode->SetFocusable(true);
+    } else {
+        progressFocusNode->SetFocusable(false);
+    }
+
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    if (type == ProgressType::CAPSULE) {
+        if (frameNode->GetChildren().empty()) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->SetInternal();
+            textNode->MountToParent(AceType::Claim(reinterpret_cast<FrameNode*>(frameNode)));
+        }
+        auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+        CHECK_NULL_VOID(textHost);
+        SetTextDefaultStyle(textHost, value, max);
+        textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+    } else {
+        if (!frameNode->GetChildren().empty()) {
+            frameNode->RemoveChildAtIndex(0);
+        }
+        eventHub->SetHoverEffect(HoverEffectType::NONE);
+    }
+}
 } // namespace OHOS::Ace::NG

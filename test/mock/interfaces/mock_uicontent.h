@@ -46,9 +46,9 @@ public:
     MOCK_METHOD0(UnFocus, void());
     MOCK_METHOD0(Destroy, void());
     MOCK_METHOD1(OnNewWant, void(const OHOS::AAFwk::Want& want));
-    MOCK_METHOD3(Restore, UIContentErrorCode(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage));
-    MOCK_CONST_METHOD0(GetContentInfo, std::string());
+    MOCK_METHOD4(Restore, UIContentErrorCode(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type));
+    MOCK_CONST_METHOD1(GetContentInfo, std::string(ContentInfoType type));
     MOCK_METHOD0(DestroyUIDirector, void());
     MOCK_METHOD0(ProcessBackPressed, bool());
     MOCK_METHOD1(ProcessPointerEvent, bool(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent));

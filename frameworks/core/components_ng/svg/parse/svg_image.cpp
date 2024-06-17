@@ -17,8 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "base/base64/base64_util.h"
-#include "frameworks/core/components/declaration/svg/svg_image_declaration.h"
 #include "frameworks/base/network/download_manager.h"
+#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -68,6 +68,12 @@ std::shared_ptr<RSData> SvgImage::LoadLocalImage(const std::string& uri)
 {
     std::string svgPath = GetImagePath();
     auto realPath = uri;
+    auto dotPos = realPath.find_last_of('.');
+    auto format = realPath.substr(dotPos + 1);
+    if (format == "svg" || format == "gif") {
+        LOGW("Svg image format is not supported");
+        return nullptr;
+    }
     auto pos = svgPath.find_last_of('/');
     if (pos != std::string::npos) {
         realPath = svgPath.substr(0, pos + 1) + uri;
@@ -161,27 +167,27 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
 bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgImageAttribute&)> attrs[] = {
-        { DOM_SVG_HEIGHT,
+        { SVG_HEIGHT,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_HREF,
+        { SVG_HREF,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.href = val;
             } },
-        { DOM_SVG_WIDTH,
+        { SVG_WIDTH,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_X,
+        { SVG_X,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { DOM_SVG_XLINK_HREF,
+        { SVG_XLINK_HREF,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.href = val;
             } },
-        { DOM_SVG_Y,
+        { SVG_Y,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

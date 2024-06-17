@@ -20,6 +20,8 @@
 
 #include "native_type.h"
 
+#include "base/utils/utils.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,13 +47,15 @@ void OH_ArkUI_WaterFlowSectionOption_Destroy(ArkUI_WaterFlowSectionOption* optio
 
 void OH_ArkUI_WaterFlowSectionOption_SetSize(ArkUI_WaterFlowSectionOption* option, int32_t size)
 {
+    CHECK_NULL_VOID(option);
     option->sections.resize(size);
 }
 
 void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t itemCount)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].itemsCount = itemCount;
@@ -63,7 +67,8 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
 void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t crossCount)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].crossCount = crossCount;
@@ -74,8 +79,8 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
 
 void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float columnGap)
 {
-    auto size = option->sections.size();
-    ArkUIWaterFlowSection section;
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].columnsGap = columnGap;
@@ -86,7 +91,8 @@ void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* 
 
 void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float rowGap)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
         option->sections[index].rowsGap = rowGap;
@@ -98,35 +104,32 @@ void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* opt
 void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index, float marginTop,
     float marginRight, float marginBottom, float marginLeft)
 {
-    float margins[4] = { 0.0, 0.0, 0.0, 0.0 };
-    auto size = option->sections.size();
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(index + 1);
-        //marginTop
-        margins[0] = marginTop;
-        //marginRight
-        margins[1] = marginRight;
-        //marginBottom
-        margins[2] = marginBottom;
-        //marginLeft
-        margins[3] = marginLeft;
-        option->sections[index].margin = margins;
+        option->sections[index].margin[0] = marginTop;
+        option->sections[index].margin[1] = marginRight;
+        option->sections[index].margin[2] = marginBottom;
+        option->sections[index].margin[3] = marginLeft;
     } else {
-        //marginTop
-        margins[0] = marginTop;
-        //marginRight
-        margins[1] = marginRight;
-        //marginBottom
-        margins[2] = marginBottom;
-        //marginLeft
-        margins[3] = marginLeft;
-        option->sections[index].margin = margins;
+        option->sections[index].margin[0] = marginTop;
+        option->sections[index].margin[1] = marginRight;
+        option->sections[index].margin[2] = marginBottom;
+        option->sections[index].margin[3] = marginLeft;
     }
+}
+
+int32_t OH_ArkUI_WaterFlowSectionOption_GetSize(ArkUI_WaterFlowSectionOption* option)
+{
+    CHECK_NULL_RETURN(option, -1);
+    return static_cast<int32_t>(option->sections.size());
 }
 
 int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_RETURN(option, -1);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0;
     }
@@ -135,7 +138,8 @@ int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOptio
 
 int32_t OH_ArkUI_WaterFlowSectionOption_GetCrossCount(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_RETURN(option, -1);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0;
     }
@@ -144,7 +148,8 @@ int32_t OH_ArkUI_WaterFlowSectionOption_GetCrossCount(ArkUI_WaterFlowSectionOpti
 
 float OH_ArkUI_WaterFlowSectionOption_GetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_RETURN(option, 0.0f);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0.0f;
     }
@@ -153,7 +158,8 @@ float OH_ArkUI_WaterFlowSectionOption_GetColumnGap(ArkUI_WaterFlowSectionOption*
 
 float OH_ArkUI_WaterFlowSectionOption_GetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
-    auto size = option->sections.size();
+    CHECK_NULL_RETURN(option, 0.0f);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return 0.0f;
     }
@@ -163,7 +169,8 @@ float OH_ArkUI_WaterFlowSectionOption_GetRowGap(ArkUI_WaterFlowSectionOption* op
 ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index)
 {
     ArkUI_Margin margin = { 0.0, 0.0, 0.0, 0.0 };
-    auto size = option->sections.size();
+    CHECK_NULL_RETURN(option, margin);
+    auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size < index + 1) {
         return margin;
     }
@@ -172,6 +179,30 @@ ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOpt
     margin.bottom = option->sections[index].margin[2];
     margin.left = option->sections[index].margin[3];
     return margin;
+}
+
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(
+    ArkUI_WaterFlowSectionOption* option, int32_t index, float (*callback)(int32_t itemIndex))
+{
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
+    if (size == 0 || size < index + 1) {
+        return;
+    }
+    option->sections[index].onGetItemMainSizeByIndex = reinterpret_cast<void*>(callback);
+}
+
+void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithUserData(
+    ArkUI_WaterFlowSectionOption* option, int32_t index, void* userData,
+    float (*callback)(int32_t itemIndex, void* extraParams))
+{
+    CHECK_NULL_VOID(option);
+    auto size = static_cast<int32_t>(option->sections.size());
+    if (size == 0 || size < index + 1) {
+        return;
+    }
+    option->sections[index].onGetItemMainSizeByIndex = reinterpret_cast<void*>(callback);
+    option->sections[index].userData = userData;
 }
 
 #ifdef __cplusplus

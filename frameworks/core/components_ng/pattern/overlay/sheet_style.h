@@ -49,6 +49,11 @@ enum SheetLevel {
     EMBEDDED,
 };
 
+enum ScrollSizeMode {
+    FOLLOW_DETENT,
+    CONTINUOUS,
+};
+
 struct SheetHeight {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
@@ -74,6 +79,7 @@ struct SheetStyle {
     std::vector<SheetHeight> detents;
     std::optional<bool> interactive;
     std::optional<bool> showInPage;
+    std::optional<ScrollSizeMode> scrollSizeMode;
     std::optional<NG::BorderWidthProperty> borderWidth; // border width
     std::optional<NG::BorderColorProperty> borderColor; // border color
     std::optional<NG::BorderStyleProperty> borderStyle;  // border style
@@ -92,7 +98,7 @@ struct SheetStyle {
                 interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage &&
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
-                instanceId == sheetStyle.instanceId);
+                instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode);
     }
 };
 } // namespace OHOS::Ace::NG

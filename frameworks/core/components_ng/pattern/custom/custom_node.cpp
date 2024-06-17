@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 
+#include "base/json/json_util.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/frame_node.h"
@@ -101,7 +102,7 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);
@@ -171,7 +172,7 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
     return UINode::GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
 }
 
-void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (start <= end) {
         if (start > 0 || end < 0) {
@@ -188,5 +189,13 @@ void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
             SetJSViewActive(true);
         }
     }
+}
+
+std::unique_ptr<JsonValue> CustomNode::GetStateInspectorInfo()
+{
+    std::string res = FireOnDumpInspectorFunc();
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI State Inspector dump info %{public}s", res.c_str());
+    auto json = JsonUtil::ParseJsonString(res);
+    return json;
 }
 } // namespace OHOS::Ace::NG

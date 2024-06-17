@@ -59,7 +59,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::string&)>&& func) override;
+    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
@@ -94,6 +94,11 @@ public:
     void SetShowPasswordText(bool value) override {}
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override {};
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
+    void SetEnablePreviewText(bool enablePreviewText) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

@@ -191,10 +191,12 @@ ohos_unittest("ImageCompressorTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
-    "//third_party/opencl-headers:libcl",
   ]
   defines = [ "ENABLE_OPENCL" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "opencl-headers:libcl",
+  ]
   part_name = ace_engine_part
   resource_config_file = "//foundation/arkui/ace_engine/test/resource/graphicalbasicability/ohos_test.xml"
 }

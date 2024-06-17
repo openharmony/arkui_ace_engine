@@ -99,7 +99,6 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
         ScopeRAII scope(env);
         double density = context->GetDensity();
-        density = (density == 0.0 ? 1.0 : density);
         height /= density;
         width /= density;
         context->size_.SetHeight(height);
@@ -109,7 +108,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
         context->jsCanvasVal_ = JSRef<JSVal>::Cast(jsCanvasVal);
     };
     std::function<void(RSCanvas*, double, double)> callback = func;
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);
     }
@@ -117,7 +116,7 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPatte
 
 void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CustomPaintPattern>(canvasPattern_);
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_);
     CHECK_NULL_VOID(customPaintPattern);
     customPaintPattern->SetInvalidate();
 }

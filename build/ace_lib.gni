@@ -29,11 +29,11 @@ template("libace_static") {
     }
 
     deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
-
+    external_deps = []
     if (use_mingw_win || use_mac || use_linux) {
-      deps += [
-        "//third_party/icu/icu4c:shared_icui18n",
-        "//third_party/icu/icu4c:shared_icuuc",
+      external_deps += [
+        "icu:shared_icui18n",
+        "icu:shared_icuuc",
       ]
     }
 
@@ -94,7 +94,7 @@ template("libace_static") {
     }
     configs = [ "$ace_root:ace_coverage_config" ]
     if (use_hilog) {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps += [ "hilog:libhilog" ]
     }
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem

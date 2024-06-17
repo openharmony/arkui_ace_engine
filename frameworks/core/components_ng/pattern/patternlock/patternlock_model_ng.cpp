@@ -95,6 +95,21 @@ void PatternLockModelNG::SetStrokeWidth(const Dimension& lineWidth)
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth);
 }
 
+void PatternLockModelNG::SetActiveCircleColor(const Color& activeCircleColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColor, activeCircleColor);
+}
+
+void PatternLockModelNG::SetActiveCircleRadius(const Dimension& activeCircleRadius)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, activeCircleRadius);
+}
+
+void PatternLockModelNG::SetEnableWaveEffect(bool enableWaveEffect)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect);
+}
+
 void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const Color& activeColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveColor, activeColor, frameNode);
@@ -133,6 +148,21 @@ void PatternLockModelNG::SetRegularColor(FrameNode* frameNode, const Color& regu
 void PatternLockModelNG::SetPathColor(FrameNode* frameNode, const Color& pathColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColor, pathColor, frameNode);
+}
+
+void PatternLockModelNG::SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColor, activeCircleColor, frameNode);
+}
+
+void PatternLockModelNG::SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, activeCircleRadius, frameNode);
+}
+
+void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,7 @@ private:
     void UpdateCurrentIndex();
 
     int32_t currentIndex_ = 0;
+    std::list<std::string> childTouchTestList_;
     CancelableCallback<void()> deadlineTimer_;
 };
 

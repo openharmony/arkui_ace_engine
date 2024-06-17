@@ -33,18 +33,24 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
-        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
-        ScopedViewStackProcessor scopedViewStackProcessor;
-        deepRenderFunc(nodeId);
-        return ViewStackProcessor::GetInstance()->Finish();
-    };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
-        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
-        });
-    stack->Push(frameNode);
+    if (deepRenderFunc) {
+        auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+            CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+            ScopedViewStackProcessor scopedViewStackProcessor;
+            deepRenderFunc(nodeId);
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
+        auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+                return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
+            });
+        stack->Push(frameNode);
+    } else {
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
+        stack->Push(frameNode);
+    }
 }
 
 void ListItemModelNG::Create()
@@ -194,6 +200,54 @@ void ListItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectable(selectable);
+}
+
+void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isStartArea) {
+        const auto startNode = AceType::Claim<UINode>(buildNode);
+        pattern->SetStartNode(startNode);
+
+        eventHub->SetStartOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterStartDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitStartDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetStartOnStateChange(std::move(onStateChange));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length, frameNode);
+    } else {
+        const auto endNode = AceType::Claim<UINode>(buildNode);
+        pattern->SetEndNode(endNode);
+
+        eventHub->SetEndOnDelete(std::move(onDelete));
+        eventHub->SetOnEnterEndDeleteArea(std::move(onEnterDeleteArea));
+        eventHub->SetOnExitEndDeleteArea(std::move(onExitDeleteArea));
+        eventHub->SetEndOnStateChange(std::move(onStateChange));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length, frameNode);
+    }
+}
+
+void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
+    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+}
+
+void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(selectCallback));
 }
 
 } // namespace OHOS::Ace::NG

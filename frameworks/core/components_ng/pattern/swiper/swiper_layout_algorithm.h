@@ -152,7 +152,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetStartIndex() == 0) {
+        if (GetStartIndex() == 0 && !isLoop_) {
             return itemPosition_.begin()->second.startPos;
         }
         return itemPosition_.begin()->second.startPos - spaceWidth_;
@@ -163,7 +163,7 @@ public:
         if (itemPosition_.empty()) {
             return 0.0f;
         }
-        if (GetEndIndex() == totalItemCount_ - 1) {
+        if (GetEndIndex() == totalItemCount_ - 1 && !isLoop_) {
             return itemPosition_.rbegin()->second.endPos;
         }
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
@@ -187,16 +187,6 @@ public:
     int32_t GetCurrentIndex() const
     {
         return currentIndex_;
-    }
-
-    void SetIsNeedResetPrevMarginAndNextMargin()
-    {
-        isNeedResetPrevMarginAndNextMargin_ = false;
-    }
-
-    bool GetIsNeedResetPrevMarginAndNextMargin() const
-    {
-        return isNeedResetPrevMarginAndNextMargin_;
     }
 
     bool IsCrossMatchChild() const
@@ -284,6 +274,16 @@ public:
         isMeasureOneMoreItem_ = isMeasureOneMoreItem;
     }
 
+    void SetIsFrameAnimation(bool isFrameAnimation)
+    {
+        isFrameAnimation_ = isFrameAnimation;
+    }
+
+    float GetTargetStartPos() const
+    {
+        return targetStartPos_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -313,6 +313,8 @@ private:
     bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
     void UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
+    float GetChildMainAxisSize(
+        const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -348,7 +350,6 @@ private:
     std::optional<int32_t> removeFromRSTreeIndex_;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
-    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool useCustomAnimation_ = false;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
@@ -360,6 +361,10 @@ private:
     bool isCaptureReverse_ = false;
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
+    bool isFrameAnimation_ = false;
+    std::set<int32_t> measuredItems_;
+    // only be used in AutoLinear mode
+    float targetStartPos_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

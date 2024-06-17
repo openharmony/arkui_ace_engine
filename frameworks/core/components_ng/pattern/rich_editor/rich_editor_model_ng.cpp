@@ -35,7 +35,7 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-    richEditorPattern->SetStyledStringMode(isStyledStringMode);
+    richEditorPattern->SetSpanStringMode(isStyledStringMode);
     isStyledStringMode_ = isStyledStringMode;
     if (isStyledStringMode) {
         richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
@@ -47,11 +47,13 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
     richEditorPattern->ClearSelectionMenu();
-
+    auto host = richEditorPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    richEditorPattern->SetSupportPreviewText(pipelineContext->GetSupportPreviewText());
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto draggable = pipeline->GetDraggable<RichEditorTheme>();
+        auto draggable = pipelineContext->GetDraggable<RichEditorTheme>();
         SetDraggable(draggable);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -70,7 +72,7 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, nullptr);
-    if (richEditorPattern->IsStyledStringMode()) {
+    if (richEditorPattern->GetSpanStringMode()) {
         return richEditorPattern->GetRichEditorStyledStringController();
     }
     return richEditorPattern->GetRichEditorController();
@@ -198,6 +200,15 @@ void RichEditorModelNG::SetTextDetectEnable(bool value)
     pattern->SetTextDetectEnable(value);
 }
 
+void RichEditorModelNG::SetSupportPreviewText(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(value);
+}
+
 void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
     std::function<void(const std::string&)>&& onResult)
 {
@@ -275,6 +286,7 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
 
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnWillChange(std::move(func));
@@ -282,6 +294,7 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
 
 void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
+    CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));
@@ -299,5 +312,12 @@ void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& fu
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
+}
+
+void RichEditorModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
 }
 } // namespace OHOS::Ace::NG

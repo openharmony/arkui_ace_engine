@@ -25,13 +25,14 @@ class ACE_EXPORT ParticlePattern : public Pattern {
     DECLARE_ACE_TYPE(ParticlePattern, Pattern);
 
 public:
-    ParticlePattern() = default;
+    ParticlePattern(uint32_t emitterCount) : emitterCount_(emitterCount) {};
     ~ParticlePattern() override = default;
 
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
-    void updateEmitterPosition(const std::vector<EmitterProperty>& property);
+    void updateEmitterPosition(std::vector<EmitterProperty>& property);
 
     bool HaveUnVisibleParent() const
     {
@@ -53,9 +54,26 @@ public:
         disturbance_ = disturbance;
     }
 
+    const std::vector<EmitterProperty>& GetEmitterProperty() const
+    {
+        return emitterProperty_;
+    }
+
+    void SetEmitterProperty(std::vector<EmitterProperty> emitterProperty)
+    {
+        emitterProperty_ = emitterProperty;
+    }
+
+    uint32_t GetEmitterCount() const
+    {
+        return emitterCount_;
+    }
+
 private:
     bool haveUnVisibleParent_ = false;
     std::vector<ParticleDisturbance> disturbance_;
+    std::vector<EmitterProperty> emitterProperty_;
+    uint32_t emitterCount_ = 0;
 };
 } // namespace OHOS::Ace
 

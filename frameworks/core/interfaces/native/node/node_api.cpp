@@ -16,8 +16,10 @@
 #include "core/interfaces/native/node/node_api.h"
 
 #include <deque>
+#include <securec.h>
 
 #include "base/error/error_code.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
@@ -26,12 +28,14 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
-#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -41,19 +45,24 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
+#include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -264,6 +273,9 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     NodeModifier::SetOnFocus,
     NodeModifier::SetOnTouchIntercept,
+    NodeModifier::SetOnAttach,
+    NodeModifier::SetOnDetach,
+    NodeModifier::SetOnAccessibilityActions,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -309,6 +321,8 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
+    NodeModifier::SetRefreshOnOffsetChange,
+    NodeModifier::SetRefreshChangeEvent,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -351,6 +365,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationStart,
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
+    NodeModifier::SetSwiperOnContentDidScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -367,6 +382,10 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListDidScroll,
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
+};
+
+const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetListItemOnSelect,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -405,6 +424,18 @@ const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnRadioChange,
+};
+
+const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSelectSelect,
+};
+
+const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageAnimatorOnStart,
+    NodeModifier::SetImageAnimatorOnPause,
+    NodeModifier::SetImageAnimatorOnRepeat,
+    NodeModifier::SetImageAnimatorOnCancel,
+    NodeModifier::SetImageAnimatorOnFinish,
 };
 
 /* clang-format on */
@@ -509,7 +540,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
-            break;            
+            break;
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
@@ -564,6 +595,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = listNodeAsyncEventHandlers[subKind];
             break;
         }
+        case ARKUI_LIST_ITEM: {
+            // list item event type.
+            if (subKind >= sizeof(LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -607,6 +647,24 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SELECT: {
+            // select event type.
+            if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -745,9 +803,9 @@ ArkUI_Int32 UnregisterCustomNodeEvent(ArkUINodeHandle node, ArkUI_Int32 eventTyp
 {
     auto companion = ViewModel::GetCompanion(node);
     CHECK_NULL_RETURN(companion, -1);
-    auto originEventType = companion->GetFlags();
+    auto originEventType = static_cast<uint32_t>(companion->GetFlags());
     //check is Contains
-    if ((originEventType & eventType) != eventType) {
+    if ((originEventType & static_cast<uint32_t>(eventType)) != static_cast<uint32_t>(eventType)) {
         return -1;
     }
     companion->SetFlags(static_cast<uint32_t>(originEventType) ^ static_cast<uint32_t>(eventType));
@@ -1138,6 +1196,100 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void* event, vo
     ViewAnimate::AnimateTo(context, option, reinterpret_cast<void (*)(void*)>(event), user);
 }
 
+void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animateOption)
+{
+    ViewAnimate::KeyframeAnimateTo(context, animateOption);
+}
+
+ArkUIAnimatorHandle CreateAnimator(ArkUIContext* context, ArkUIAnimatorOption* animateOption)
+{
+    return ViewAnimate::CreateAnimator(context, animateOption);
+}
+
+void DisposeAnimator(ArkUIAnimatorHandle animator)
+{
+    ViewAnimate::DisposeAnimator(animator);
+}
+
+ArkUI_Int32 AnimatorReset(ArkUIAnimatorHandle animator, ArkUIAnimatorOption* option)
+{
+    return ViewAnimate::AnimatorReset(animator, option);
+}
+
+ArkUI_Int32 AnimatorPlay(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPlay(animator);
+}
+
+ArkUI_Int32 AnimatorFinish(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorFinish(animator);
+}
+
+ArkUI_Int32 AnimatorPause(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPause(animator);
+}
+
+ArkUI_Int32 AnimatorCancel(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorCancel(animator);
+}
+
+ArkUI_Int32 AnimatorReverse(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorReverse(animator);
+}
+
+ArkUICurveHandle CreateCurve(ArkUI_Int32 curve)
+{
+    return ViewAnimate::CreateCurve(curve);
+}
+
+ArkUICurveHandle CreateStepsCurve(ArkUI_Int32 count, ArkUI_Bool end)
+{
+    return ViewAnimate::CreateStepsCurve(count, end);
+}
+
+ArkUICurveHandle CreateCubicBezierCurve(ArkUI_Float32 x1, ArkUI_Float32 y1, ArkUI_Float32 x2, ArkUI_Float32 y2)
+{
+    return ViewAnimate::CreateCubicBezierCurve(x1, y1, x2, y2);
+}
+
+ArkUICurveHandle CreateSpringCurve(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateSpringCurve(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateResponsiveSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateResponsiveSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateInterpolatingSpring(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateInterpolatingSpring(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateCustomCurve(ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userData), void* userData)
+{
+    return ViewAnimate::CreateCustomCurve(interpolate, userData);
+}
+
+void DisposeCurve(ArkUICurveHandle curve)
+{
+    return ViewAnimate::DisposeCurve(curve);
+}
+
 const ArkUIAnimation* GetAnimationAPI()
 {
     static const ArkUIAnimation modifier = {
@@ -1145,6 +1297,24 @@ const ArkUIAnimation* GetAnimationAPI()
         nullptr,
         nullptr,
         AnimateTo,
+        KeyframeAnimateTo,
+        CreateAnimator,
+        DisposeAnimator,
+        AnimatorReset,
+        AnimatorPlay,
+        AnimatorFinish,
+        AnimatorPause,
+        AnimatorCancel,
+        AnimatorReverse,
+        CreateCurve,
+        CreateStepsCurve,
+        CreateCubicBezierCurve,
+        CreateSpringCurve,
+        CreateSpringMotion,
+        CreateResponsiveSpringMotion,
+        CreateInterpolatingSpring,
+        CreateCustomCurve,
+        DisposeCurve,
     };
     return &modifier;
 }
@@ -1281,13 +1451,17 @@ __attribute__((constructor)) static void provideEntryPoint(void)
 #ifdef WINDOWS_PLATFORM
     // mingw has no setenv :(.
     static char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "__LIBACE_ENTRY_POINT=%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     putenv(entryPointString);
 #else
     char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
 #endif
 }
