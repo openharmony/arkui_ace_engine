@@ -363,4 +363,287 @@ HWTEST_F(JsonUtilTest, JsonUtilTest013, TestSize.Level1)
     EXPECT_FALSE(illegalValue->IsValid());
     EXPECT_TRUE(illegalValue->IsNull());
 }
+
+/**
+ * @tc.name: JsonUtilTest014
+ * @tc.desc: Check json util function Put(const char* key, const char* value) for nullptr key or value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    const char* value = nullptr;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. construct the nullptr value.
+     */
+    char c = '5';
+    const char* key2 = &c;
+    const char* value2 = nullptr;
+    /**
+     * @tc.steps: step4. get results
+     * @tc.expected: step4.  the results are correct.
+     */
+    bool ret2 = jsonValue.Put(key2, value2);
+    EXPECT_FALSE(ret2);
+}
+
+/**
+ * @tc.name: JsonUtilTest015
+ * @tc.desc: Check json util function Put(const char* key, bool value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    bool value = true;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest016
+ * @tc.desc: Check json util function Put(const char* key, const std::unique_ptr<JsonValue>& value)
+ * for nullptr key or nullptr value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    const std::unique_ptr<JsonValue>& value = nullptr;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step1. construct the nullptr value.
+     */
+    char c = '5';
+    const char* key2 = &c;
+    const std::unique_ptr<JsonValue>& value2 = nullptr;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret2 = jsonValue.Put(key2, value2);
+    EXPECT_FALSE(ret2);
+}
+
+/**
+ * @tc.name: JsonUtilTest017
+ * @tc.desc: Check json util function Put(const char* key, size_t value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    size_t value = 8;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step1. construct the nullptr value.
+     */
+    char c = '5';
+    const char* key2 = &c;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret2 = jsonValue.Put(key2, value);
+    EXPECT_TRUE(ret2);
+}
+
+/**
+ * @tc.name: JsonUtilTest018
+ * @tc.desc: Check json util function Put(const char* key, int32_t value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    int32_t value = 8;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest019
+ * @tc.desc: Check json util function Put(const char* key, double value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    double value = 8;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Put(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest020
+ * @tc.desc: Check json util function Replace(const char* key, double value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    double value = 8;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Replace(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest021
+ * @tc.desc: Check json util function Replace(const char* key, bool value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    bool value = true;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Replace(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest022
+ * @tc.desc: Check json util function Replace(const char* key, const char* value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    const char* value = nullptr;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Replace(key, value);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. construct the nullptr value.
+     */
+    char c = '5';
+    const char* value2 = &c;
+    const char* key2 = nullptr;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret2 = jsonValue.Replace(key2, value2);
+    EXPECT_FALSE(ret2);
+}
+
+/**
+ * @tc.name: JsonUtilTest023
+ * @tc.desc: Check json util function Replace(const char* key, int32_t value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    int32_t value = 5;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Replace(key, value);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest024
+ * @tc.desc: Check json util Replace(const char* key, const std::unique_ptr<JsonValue>& value) for nullptr key
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key.
+     */
+    const char* key = nullptr;
+    const std::unique_ptr<JsonValue>& value = nullptr;
+    JsonValue jsonValue;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.Replace(key, value);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace
