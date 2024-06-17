@@ -27,7 +27,7 @@ struct IsolatedInfo {
 };
 
 struct IsolatedDumpInfo {
-    int64_t createLimitedWorkerTime;
+    int64_t createLimitedWorkerTime = 0;
 };
 
 class IsolatedPattern : public PlatformPattern {
