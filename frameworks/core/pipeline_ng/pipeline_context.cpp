@@ -310,6 +310,9 @@ void PipelineContext::FlushDirtyNodeUpdate()
         node->ProcessPropertyDiff();
     }
 
+    if (!ViewStackProcessor::GetInstance()->IsEmpty()) {
+        LOGW("stack is not empty when call FlushDirtyNodeUpdate, node may be mounted to incorrect pos!");
+    }
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;

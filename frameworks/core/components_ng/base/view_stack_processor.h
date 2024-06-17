@@ -452,6 +452,11 @@ public:
     {
         containerId_ = containerId;
     }
+
+    bool IsEmpty() const
+    {
+        return elementsStack_.empty();
+    }
 private:
     ViewStackProcessor();
 
