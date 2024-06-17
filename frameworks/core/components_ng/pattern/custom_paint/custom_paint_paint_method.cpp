@@ -198,6 +198,9 @@ void CustomPaintPaintMethod::UpdateLineDash(RSPen& pen)
 void CustomPaintPaintMethod::UpdateFontFamilies()
 {
     auto context = context_.Upgrade();
+    if (!context) {
+        context = PipelineBase::GetCurrentContextSafely();
+    }
     CHECK_NULL_VOID(context);
     auto fontManager = context->GetFontManager();
     CHECK_NULL_VOID(fontManager);
