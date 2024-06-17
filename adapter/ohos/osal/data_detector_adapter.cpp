@@ -40,6 +40,11 @@ const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
     { TextDataDetectType::DATETIME, "datetime" }
 };
+const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
+    { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
+    { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
+    { "datetime", TextDataDetectType::DATETIME }
+};
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
     const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
@@ -185,6 +190,43 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
     }
 }
 
+bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
+{
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
+    CHECK_NULL_RETURN(runtimeContext, false);
+    if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
+        return false;
+    }
+    auto aiSpanArray = entityJson->GetValue("entity");
+    if (aiSpanArray->IsNull() || !aiSpanArray->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "Error AI Entity.");
+        return false;
+    }
+
+    AISpan aiSpan;
+    for (int32_t i = 0; i < aiSpanArray->GetArraySize(); ++i) {
+        auto item = aiSpanArray->GetArrayItem(i);
+        aiSpan.content = item->GetString("entityContent");
+        aiSpan.type = TEXT_DETECT_MAP_REVERSE.at(item->GetString("entityType"));
+        aiSpan.start = item->GetInt("start");
+        aiSpan.end = item->GetInt("end");
+        aiSpanMap_[aiSpan.start] = aiSpan;
+    }
+    auto entityMenuServiceInfoJson = entityJson->GetValue("entityMenuServiceInfoJson");
+    if (!entityMenuServiceInfoJson->IsNull()) {
+        if (uiExtensionBundleName_.empty()) {
+            uiExtensionBundleName_ = entityMenuServiceInfoJson->GetString("bundlename");
+        }
+        if (uiExtensionAbilityName_.empty()) {
+            uiExtensionAbilityName_ = entityMenuServiceInfoJson->GetString("abilityname");
+        }
+    }
+    aiDetectInitialized_ = true;
+    text = entityJson->GetString("content");
+    textForAI_ = text;
+    return true;
+}
+
 void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText)
 {
     TextDataDetectInfo info;
@@ -208,12 +250,6 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
             auto dataDetectorAdapter = weak.Upgrade();
             CHECK_NULL_VOID(dataDetectorAdapter);
             if (info.module != dataDetectorAdapter->textDetectTypes_) {
-                return;
-            }
-            dataDetectorAdapter->SetTextDetectResult(result);
-            dataDetectorAdapter->FireOnResult(result);
-            if (result.code != 0) {
-                TAG_LOGE(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
                 return;
             }
             dataDetectorAdapter->ParseAIResult(result, startPos);
@@ -249,6 +285,7 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
 
     if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
+        auto entityJsonArray = JsonUtil::CreateArray(true);
         // process with overlapping entities, leaving only the earlier ones
         int32_t preEnd = 0;
         auto aiSpanIterator = aiSpanMap_.begin();
@@ -259,8 +296,20 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
             } else {
                 preEnd = aiSpan.end;
                 ++aiSpanIterator;
+                auto aiSpanJson = JsonUtil::Create(true);
+                aiSpanJson->Put("start", aiSpan.start);
+                aiSpanJson->Put("end", aiSpan.end);
+                aiSpanJson->Put("entityContent", aiSpan.content.c_str());
+                aiSpanJson->Put("entityType", TEXT_DETECT_MAP.at(aiSpan.type).c_str());
+                entityJsonArray->Put(aiSpanJson);
             }
         }
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put("entity", entityJsonArray);
+        resultJson->Put("code", result.code);
+        resultJson->Put("entityMenuServiceInfoJson", entityMenuServiceInfoJson);
+        SetTextDetectResult(result);
+        FireOnResult(resultJson->ToString());
     }
 }
 
