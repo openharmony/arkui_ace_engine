@@ -484,7 +484,7 @@ void WaterFlowPattern::OnSectionChangedNow(int32_t start)
     CHECK_NULL_VOID(host);
     int32_t childUpdateIdx = host->GetChildrenUpdated();
     if (sections_->IsSpecialUpdateCAPI(childUpdateIdx)) {
-        start += sections_->GetSectionInfo().size();
+        start += static_cast<int32_t>(sections_->GetSectionInfo().size());
     }
     info->InitSegments(sections_->GetSectionInfo(), start);
     info->margins_.clear();
