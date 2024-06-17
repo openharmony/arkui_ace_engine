@@ -267,12 +267,10 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     } else {
         styledString_->InsertString(changeStart, insertValue);
     }
+    SetCaretPosition(changeStart + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
     if (!caretVisible_) {
         StartTwinkling();
     }
-    isTextChange_ = true;
-    moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -343,63 +341,48 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
 
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 {
+    CHECK_NULL_VOID(caretPosition_ != 0);
+    DeleteValueInStyledString(caretPosition_ - length, length);
+}
+
+void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
+{
+    CHECK_NULL_VOID(GetTextContentLength() != 0);
+    DeleteValueInStyledString(caretPosition_, length, isIME);
+}
+
+void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length, bool isIME)
+{
     CHECK_NULL_VOID(styledString_);
     if (!textSelector_.SelectNothing()) {
+        start = textSelector_.GetTextStart();
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
-    CHECK_NULL_VOID(caretPosition_ != 0);
-    int32_t changeStart = caretPosition_ - length;
-    bool isPreventChange = !BeforeStyledStringChange(changeStart, length, "");
+    bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, "");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "start=%{public}d, length=%{public}d, isPreventChange=%{public}d",
+        start, length, isPreventChange);
     CHECK_NULL_VOID(!isPreventChange);
     if (textSelector_.IsValid()) {
-        SetCaretPosition(textSelector_.GetTextEnd());
         CloseSelectOverlay();
         ResetSelection();
     }
-    styledString_->RemoveString(changeStart, length);
+    styledString_->RemoveString(start, length);
+    SetCaretPosition(start);
     if (!caretVisible_) {
         StartTwinkling();
-        if (previewLongPress_) {
+        if (previewLongPress_ && isIME) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
             RequestKeyboard(false, true, true);
             previewLongPress_ = false;
         }
     }
-    isTextChange_ = true;
-    SetCaretPosition(caretPosition_ - length);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    host->MarkModifyDone();
-    AfterStyledStringChange(changeStart, length, "");
-}
-
-void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
-{
-    CHECK_NULL_VOID(styledString_);
-    if (!textSelector_.SelectNothing()) {
-        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-    }
-    CHECK_NULL_VOID(GetTextContentLength() != 0);
-    int32_t changeStart = caretPosition_;
-    bool isPreventChange = isIME && !BeforeStyledStringChange(changeStart, length, "");
-    CHECK_NULL_VOID(!isPreventChange);
-    if (textSelector_.IsValid()) {
-        SetCaretPosition(textSelector_.GetTextStart());
-        CloseSelectOverlay();
-        ResetSelection();
-    }
-    styledString_->RemoveString(changeStart, length);
-    if (!caretVisible_) {
-        StartTwinkling();
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    host->MarkModifyDone();
     if (isIME) {
-        AfterStyledStringChange(changeStart, length, "");
+        AfterStyledStringChange(start, length, "");
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
 }
 
 bool RichEditorPattern::BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string)
