@@ -150,7 +150,7 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_;
+        return currentOffset_ - adjustOffset_;
     }
 
     void SetIsNeedCheckOffset(bool isNeedCheckOffset)
@@ -360,9 +360,9 @@ public:
         posMap_ = posMap;
     }
 
-    int32_t GetSnapStartIndex();
+    std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
-    int32_t GetSnapEndIndex();
+    std::pair<int32_t, float> GetSnapEndIndexAndPos();
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -438,7 +438,6 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
-    void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -452,6 +451,7 @@ private:
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
     float currentOffset_ = 0.0f;
+    float adjustOffset_ = 0.0f;
     float totalOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;

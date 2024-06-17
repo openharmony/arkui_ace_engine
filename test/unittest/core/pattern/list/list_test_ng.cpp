@@ -419,6 +419,7 @@ void ListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
 void ListTestNg::ScrollSnap(float offset, float velocity)
 {
     pattern_->OnScrollSnapCallback(offset, velocity);
+    pattern_->SetScrollSource(SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     // StartScrollSnapMotion, for condition that equal item height
     float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
