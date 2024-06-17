@@ -127,6 +127,11 @@ void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
     }
 }
 
+void TextClockModelNG::SetDateTimeOptions(const ZeroPrefixType& hourType)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType);
+}
+
 void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
     if (format.empty()) {
@@ -179,5 +184,11 @@ void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallbac
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void TextClockModelNG::SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType, frameNode);
 }
 } // namespace OHOS::Ace::NG

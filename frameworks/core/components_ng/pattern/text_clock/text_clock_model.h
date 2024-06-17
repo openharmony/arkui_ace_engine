@@ -41,6 +41,7 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void InitFontDefault(const TextStyle& textStyle) = 0;
+    virtual void SetDateTimeOptions(const ZeroPrefixType& hourType) {};
     
 private:
     static std::unique_ptr<TextClockModel> instance_;

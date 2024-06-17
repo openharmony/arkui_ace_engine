@@ -87,6 +87,11 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     }
     return this.textClockNode.getFrameNode();
   }
+  dateTimeOptions(value: DateTimeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity,
+      TextClockDateTimeOptionsModifier, value);
+    return this;
+  }
 }
 
 class TextClockFormatModifier extends ModifierWithKey<string> {
@@ -241,6 +246,24 @@ class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
       getUINativeModule().textClock.resetFontFamily(node);
     } else {
       getUINativeModule().textClock.setFontFamily(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextClockDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
+  constructor(value: DateTimeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockDateTimeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetDateTimeOptions(node);
+    } else {
+      getUINativeModule().textClock.setDateTimeOptions(node, this.value.hour);
     }
   }
 

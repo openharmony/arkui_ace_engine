@@ -22050,6 +22050,10 @@ class ArkTextClockComponent extends ArkComponent {
     }
     return this.textClockNode.getFrameNode();
   }
+  dateTimeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity, TextClockDateTimeOptionsModifier, value);
+    return this;
+  }
 }
 class TextClockFormatModifier extends ModifierWithKey {
   constructor(value) {
@@ -22215,6 +22219,25 @@ class TextClockTextShadowModifier extends ModifierWithKey {
   }
 }
 TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
+
+class TextClockDateTimeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textClock.resetDateTimeOptions(node);
+    }
+    else {
+      getUINativeModule().textClock.setDateTimeOptions(node, this.value.hour);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextClockDateTimeOptionsModifier.identity = Symbol('textClockDateTimeOptions');
+
 // @ts-ignore
 if (globalThis.TextClock !== undefined) {
   globalThis.TextClock.attributeModifier = function (modifier) {

@@ -35,6 +35,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<TextClockModel> TextClockModel::instance_ = nullptr;
 std::mutex TextClockModel::mutex_;
+const char TEXTCLOCK_DATE_TIME_OPTIONS_HOUR[] = "hour";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 
 TextClockModel* TextClockModel::GetInstance()
 {
@@ -136,6 +139,7 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSTextClock::SetFontFamily, opt);
     JSClass<JSTextClock>::StaticMethod("textShadow", &JSTextClock::SetTextShadow, opt);
     JSClass<JSTextClock>::StaticMethod("fontFeature", &JSTextClock::SetFontFeature, opt);
+    JSClass<JSTextClock>::StaticMethod("dateTimeOptions", &JSTextClock::SetDateTimeOptions, opt);
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -345,5 +349,24 @@ void JSTextClockController::Stop()
             i->Stop();
         }
     }
+}
+
+void JSTextClock::SetDateTimeOptions(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> paramObject;
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto hourValue = paramObject->GetProperty(TEXTCLOCK_DATE_TIME_OPTIONS_HOUR);
+        if (hourValue->IsString()) {
+            std::string hour = hourValue->ToString();
+            if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+                hourType = ZeroPrefixType::SHOW;
+            } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+                hourType = ZeroPrefixType::HIDE;
+            }
+        }
+    }
+    TextClockModel::GetInstance()->SetDateTimeOptions(hourType);
 }
 } // namespace OHOS::Ace::Framework
