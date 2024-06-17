@@ -46,4 +46,15 @@ void FfiOHOSAceFrameworkPostTaskToMainThread(void(*callback)())
         },
         TaskExecutor::TaskType::UI, "CJSPAWNMAIN");
 }
+
+bool FfiOHOSAceFrameworkHasContainer()
+{
+    auto currentObj = Container::Current();
+    if (!currentObj) {
+        LOGI("Can not get Current Container");
+        return false;
+    } else {
+        return true;
+    }
+}
 }
