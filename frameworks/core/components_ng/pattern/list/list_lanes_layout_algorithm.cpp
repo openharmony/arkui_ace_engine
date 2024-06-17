@@ -242,6 +242,19 @@ void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32
     layoutWrapper->SetCacheCount(count);
 }
 
+void ListLanesLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    auto& itemPosition = GetItemPosition();
+    if (itemPosition.empty()) {
+        layoutWrapper->SetActiveChildRange(-1, -1);
+        return;
+    }
+    auto cacheStart = itemPosition.begin()->second.isGroup ? cacheCount : cacheCount * lanes_;
+    auto cacheEnd = itemPosition.rbegin()->second.isGroup ? cacheCount : cacheCount * lanes_;
+    layoutWrapper->SetActiveChildRange(
+        itemPosition.begin()->first, itemPosition.rbegin()->first, cacheStart, cacheEnd);
+}
+
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
     std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter)
 {
