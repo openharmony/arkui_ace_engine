@@ -140,7 +140,6 @@ private:
     void FireOnOffsetChange(float value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
-    bool HasLoadingText();
     void UpdateLoadingTextOpacity(float opacity);
     void DumpInfo() override;
 
@@ -151,6 +150,7 @@ private:
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
+    bool hasLoadingText_ = false;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> loadingTextNode_;
     RefPtr<FrameNode> columnNode_;
