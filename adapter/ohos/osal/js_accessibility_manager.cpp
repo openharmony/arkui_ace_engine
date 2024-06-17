@@ -4090,7 +4090,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
-    parentWindowId_ = parentWindowId;
+    parentWindowId_ = static_cast<int32_t>(parentWindowId);
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)

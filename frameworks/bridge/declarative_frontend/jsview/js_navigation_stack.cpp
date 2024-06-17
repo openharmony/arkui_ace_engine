@@ -968,7 +968,11 @@ void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
     if (index < 0 || index >= len) {
         return;
     }
-    auto path = JSRef<JSObject>::Cast(pathArray->GetValueAt(index));
+    auto objPath = pathArray->GetValueAt(index);
+    if (!objPath->IsObject()) {
+        return;
+    }
+    auto path = JSRef<JSObject>::Cast(objPath);
     if (path->IsEmpty()) {
         return;
     }
