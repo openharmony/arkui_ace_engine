@@ -203,6 +203,15 @@
                       ]
                     },
                     "name": "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session/",
+                        "header_files": [
+                            "ui_content_service_interface.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"
                 }
             ],
             "test": [

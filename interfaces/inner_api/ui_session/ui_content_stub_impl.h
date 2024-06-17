@@ -26,12 +26,21 @@
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
-private:
-    int32_t OnGetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    int32_t OnReportUnfocusEventInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    int32_t RegisterRemoteObjectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-
-    sptr<IRemoteObject> SAObject_ = nullptr;
+public:
+    int32_t Connect() override
+    {
+        return 0;
+    }
+    int32_t GetInspectorTree() override;
+    int32_t RegisterClickEventCallback(EventCallback eventCallback) override;
+    int32_t RegisterRouterChangeEventCallback(EventCallback eventCallback) override;
+    int32_t RegisterSearchEventCallback(EventCallback eventCallback) override;
+    int32_t RegisterComponentChangeEventCallback(EventCallback eventCallback) override;
+    int32_t UnregisterClickEventCallback() override;
+    int32_t UnregisterSearchEventCallback() override;
+    int32_t UnregisterRouterChangeEventCallback() override;
+    int32_t UnregisterComponentChangeEventCallback() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H
+
