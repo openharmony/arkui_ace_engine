@@ -66,6 +66,8 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO use theme.
+constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
+constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
@@ -5538,5 +5540,24 @@ void SwiperPattern::UpdateNodeRate()
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Expected gesture frame rate is: %{public}d", expectedRate);
         frameRateManager->UpdateNodeRate(nodeId, expectedRate);
     }
+}
+
+int32_t SwiperPattern::GetMaxDisplayCount() const
+{
+    if (!swiperParameters_ || !swiperParameters_->maxDisplayCountVal.has_value()) {
+        return 0;
+    }
+
+    auto maxDisplayCount = swiperParameters_->maxDisplayCountVal.value();
+    if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
+        return 0;
+    }
+
+    auto childrenSize = RealTotalCount();
+    if (childrenSize <= maxDisplayCount) {
+        return 0;
+    }
+
+    return maxDisplayCount;
 }
 } // namespace OHOS::Ace::NG

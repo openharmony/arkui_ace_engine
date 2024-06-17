@@ -667,13 +667,8 @@ public:
         frameRateRange_[type] = rateRange;
     }
     void UpdateNodeRate();
-    int32_t GetMaxDisplayCount() const
-    {
-        if ((swiperParameters_ != nullptr) && (swiperParameters_->maxDisplayCountVal.has_value())) {
-            return swiperParameters_->maxDisplayCountVal.value();
-        }
-        return 0;
-    }
+    int32_t GetMaxDisplayCount() const;
+
 protected:
     void MarkDirtyNodeSelf();
 
