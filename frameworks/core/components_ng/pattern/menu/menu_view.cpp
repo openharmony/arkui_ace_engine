@@ -632,17 +632,32 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(targetNode);
-    if (menuParam.previewMode != MenuPreviewMode::NONE || targetNode->IsDraggable()) {
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
+    if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE) {
-        auto renderContext = menuNode->GetRenderContext();
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
+        auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetLastChild());
+        CHECK_NULL_VOID(pixelMapNode);
+        auto renderContext = pixelMapNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(1);
+        renderContext->UpdateZIndex(-1);
+        // if filter set in subwindow, need to adjust zOrder to show in back.
+        auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto columnNode = menuWrapperPattern->GetFilterColumnNode();
+        CHECK_NULL_VOID(columnNode);
+        auto columnRenderContext = columnNode->GetRenderContext();
+        CHECK_NULL_VOID(columnRenderContext);
+        columnRenderContext->UpdateZIndex(-1);
     }
 }
 
