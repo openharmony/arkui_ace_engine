@@ -14,16 +14,19 @@
  */
 
 #include "gtest/gtest.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 #define protected public
 #define private public
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+
 #include "core/animation/spring_curve.h"
 #include "core/animation/spring_motion.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -1211,5 +1214,232 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
     ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
     titleBarPattern_->OnCoordScrollStart();
     ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone001
+ * @tc.desc: Increase the coverage of OnModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    titleBarPattern_->isInitialTitle_ = false;
+    titleBarPattern_->isTitleChanged_ = true;
+    titleBarPattern_->tempTitleBarHeight_ = 10.0_vp;
+    // Make ConvertToPx return not 0.
+    titleBarPattern_->tempTitleBarHeight_.SetUnit(DimensionUnit::NONE);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
+    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && titleBarPattern_->isTitleChanged_);
+    EXPECT_FALSE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
+        static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
+    EXPECT_FALSE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
+        static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
+    titleBarPattern_->OnModifyDone();
+    
+    titleBarPattern_->isTitleChanged_ = true;
+    titleBarPattern_->tempTitleBarHeight_ = FULL_DOUBLE_LINE_TITLEBAR_HEIGHT;
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
+    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && titleBarPattern_->isTitleChanged_);
+    EXPECT_TRUE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
+        static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
+    titleBarPattern_->OnModifyDone();
+    
+    titleBarPattern_->isTitleChanged_ = false;
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
+    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && !titleBarPattern_->isTitleChanged_);
+    titleBarPattern_->OnModifyDone();
+
+    titleBarPattern_->isInitialTitle_ = true;
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
+    EXPECT_TRUE(titleBarPattern_->isInitialTitle_);
+    titleBarPattern_->OnModifyDone();
+
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::MINI);
+    EXPECT_NE(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
+    titleBarPattern_->OnModifyDone();
+}
+
+/**
+ * @tc.name: TitleBarPatternUpdateScaleByDragOverDragOffset001
+ * @tc.desc: Increase the coverage of UpdateScaleByDragOverDragOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdateScaleByDragOverDragOffset001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    CreateNavBar();
+    titleBarPattern_->GetHost()->SetParent(navBarNode_);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarPattern_->GetHost()->GetParent());
+    ASSERT_NE(navBarNode, nullptr);
+    navBarNode->propPrevTitleIsCustom_ = false;
+    float overDragOffset = 10.0f;
+    EXPECT_FALSE(Negative(overDragOffset));
+    EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(true));
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
+    EXPECT_EQ(titleBarNode->GetSubtitle(), nullptr);
+    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
+
+    titleBarNode->subtitle_ = FrameNode::CreateFrameNode("SubTitle", 101, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_FALSE(Negative(overDragOffset));
+    EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(true));
+    EXPECT_NE(titleBarNode->GetSubtitle(), nullptr);
+    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
+
+    navBarNode->propPrevTitleIsCustom_ = true;
+    EXPECT_FALSE(Negative(overDragOffset));
+    EXPECT_TRUE(navBarNode->GetPrevTitleIsCustomValue(true));
+    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
+
+    overDragOffset = -10.0f;
+    EXPECT_TRUE(Negative(overDragOffset));
+    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged002
+ * @tc.desc: Increase the coverage of OnWindowSizeChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnWindowSizeChanged002, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    titleBarPattern_->maxMenuNums_ = 0;
+    titleBarNode->propPrevMenuIsCustom_ = false;
+    titleBarNode->SetIsTitleMenuNodeShowing(true);
+    WindowSizeChangeReason type = WindowSizeChangeReason::DRAG;
+
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
+    EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
+    ASSERT_EQ(titleBarNode->GetMenu(), nullptr);
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+
+    titleBarPattern_->maxMenuNums_ = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ?
+        MAX_MENU_NUM_LARGE : MAX_MENU_NUM_SMALL;
+    titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->children_.emplace_back(AceType::MakeRefPtr<BarItemNode>("BarItem", 301));
+    titleBarNode->menu_->children_.emplace_back(buttonNode);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
+    EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
+    ASSERT_NE(titleBarNode->GetMenu(), nullptr);
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged003
+ * @tc.desc: Increase the coverage of OnWindowSizeChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
+    titleBarPattern_->maxMenuNums_ = 0;
+    titleBarNode->propPrevMenuIsCustom_ = true;
+    titleBarNode->SetIsTitleMenuNodeShowing(true);
+    WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
+    titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItem", 301);
+    buttonNode->children_.emplace_back(barItemNode);
+    titleBarNode->menu_->children_.emplace_back(buttonNode);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
+    EXPECT_EQ(type, WindowSizeChangeReason::RESIZE);
+    ASSERT_NE(titleBarNode->GetMenu(), nullptr);
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+
+    type = WindowSizeChangeReason::ROTATION;
+    barItemNode->isMoreItemNode_ = true;
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
+    EXPECT_EQ(type, WindowSizeChangeReason::ROTATION);
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+
+    titleBarNode->SetIsTitleMenuNodeShowing(false);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_FALSE(titleBarNode->IsTitleMenuNodeShowing());
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    EXPECT_NE(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
+        TitleBarParentType::NAV_DESTINATION);
+    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
+}
+
+/**
+ * @tc.name: GetFontSize001
+ * @tc.desc: Increase the coverage of GetFontSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetFontSize001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+    float singleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->maxTitleBarHeight_ = singleHeight;
+    EXPECT_FALSE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    EXPECT_TRUE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
+    float offset = 0.0f;
+    auto titleBarHeight = titleBarPattern_->defaultTitleBarHeight_ + offset;
+    Dimension titleL = theme->GetTitleFontSizeBig();
+    Dimension titleM = theme->GetTitleFontSize();
+    auto tempFontSize = titleM.Value() + (titleBarHeight - singleHeight) * titleBarPattern_->fontSizeRatio_;
+    EXPECT_FALSE(GreatNotEqual(tempFontSize, titleL.Value()));
+    EXPECT_FALSE(LessNotEqual(tempFontSize, titleM.Value()));
+    titleBarPattern_->GetFontSize(offset);
+
+    titleBarPattern_->defaultTitleBarHeight_ = singleHeight - 2.0f;
+    titleBarPattern_->fontSizeRatio_ = 1.0f;
+    theme->titleFontSizeBig_.SetValue(1.0f);
+    theme->titleFontSize_.SetValue(5.0f);
+    EXPECT_TRUE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
+    titleBarHeight = titleBarPattern_->defaultTitleBarHeight_ + offset;
+    titleL = theme->GetTitleFontSizeBig();
+    titleM = theme->GetTitleFontSize();
+    tempFontSize = titleM.Value() + (titleBarHeight - singleHeight) * titleBarPattern_->fontSizeRatio_;
+    EXPECT_TRUE(GreatNotEqual(tempFontSize, titleL.Value()));
+    EXPECT_TRUE(LessNotEqual(tempFontSize, titleM.Value()));
+    titleBarPattern_->GetFontSize(offset);
+
+    titleBarPattern_->maxTitleBarHeight_ = singleHeight - 2.0f;
+    EXPECT_FALSE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
+    titleBarPattern_->GetFontSize(offset);
+
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    EXPECT_TRUE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    titleBarPattern_->GetFontSize(offset);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG
