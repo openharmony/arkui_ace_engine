@@ -3506,16 +3506,23 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
 
 TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& spanItem)
 {
-    TextSpanOptions options;
-    CHECK_NULL_RETURN(spanItem, options);
-    options.value = spanItem->content;
-    options.offset = caretPosition_;
-    options.userGestureOption.onClick = spanItem->onClick;
-    options.userGestureOption.onLongPress = spanItem->onLongPress;
+    CHECK_NULL_RETURN(spanItem, {});
     TextStyle textStyle;
     UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
-    options.style = textStyle;
-    return options;
+    struct UpdateParagraphStyle paraStyle = {
+        .textAlign = spanItem->textLineStyle->GetTextAlign(),
+        .leadingMargin = spanItem->textLineStyle->GetLeadingMargin(),
+        .wordBreak = spanItem->textLineStyle->GetWordBreak(),
+        .lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy()
+    };
+    return {
+        .value = spanItem->content,
+        .offset = caretPosition_,
+        .userGestureOption.onClick = spanItem->onClick,
+        .userGestureOption.onLongPress = spanItem->onLongPress,
+        .style = textStyle,
+        .paraStyle = paraStyle
+    };
 }
 
 void RichEditorPattern::ResetDragSpanItems()
