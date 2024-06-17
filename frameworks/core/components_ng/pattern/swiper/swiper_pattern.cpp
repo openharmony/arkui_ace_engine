@@ -2418,8 +2418,8 @@ void SwiperPattern::CheckMarkForIndicatorBoundary()
 {
     bool isRtl = IsHorizontalAndRightToLeft();
 
-    uint32_t startIndex = isRtl ? TotalCount() - 1 : 0;
-    uint32_t endIndex = isRtl ? 0 : TotalCount() - 1;
+    auto startIndex = isRtl ? TotalCount() - 1 : 0;
+    auto endIndex = isRtl ? 0 : TotalCount() - 1;
     if (!IsLoop() && ((currentFirstIndex_ == startIndex && GreatNotEqualCustomPrecision(turnPageRate_, 0.0f)) ||
         (currentFirstIndex_ == endIndex && LessNotEqualCustomPrecision(turnPageRate_, 0.0f)))) {
         return;
