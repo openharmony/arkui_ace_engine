@@ -387,7 +387,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::HasUINodeBeenUpdated(
         auto& node4key = nodesIter->second;
         auto iter = node4key.find(fromKey);
         if (iter != node4key.end()) {
-            const auto& node = iter->second;
+            auto node = iter->second;
             node4key.erase(iter);
             node4key.emplace(forKey, node);
         }
@@ -396,11 +396,13 @@ RefPtr<UINode> RepeatVirtualScrollCaches::HasUINodeBeenUpdated(
     // 2. update the key: fromKey to forKey in node4key_
     auto iter = node4key_.find(fromKey);
     if (iter != node4key_.end()) {
-        const auto& node = iter->second;
+        auto node = iter->second;
         node4key_.erase(iter);
         node4key_.emplace(forKey, node);
         return node;
     }
+    TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
+        fromKey.c_str(), forKey.c_str());
     return nullptr;
 }
 

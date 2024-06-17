@@ -136,7 +136,7 @@ void RepeatVirtualScrollNode::InvalidateKeyCache()
 RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t forIndex, const std::string& forKey)
 {
     RefPtr<UINode> node4Index = caches_.UpdateFromL2(forIndex);
-    if (!node4Index) {
+    if (node4Index) {
         return node4Index;
     }
 
