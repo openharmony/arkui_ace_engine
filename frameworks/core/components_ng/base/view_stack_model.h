@@ -51,6 +51,7 @@ public:
     virtual void ImplicitPopBeforeContinue() = 0;
     virtual void GetAndPushFrameNode(const std::string& tag, int32_t elmtId) = 0;
     virtual bool CheckTopNodeFirstBuilding() const = 0;
+    virtual bool IsEmptyStack() const = 0;
 
 private:
     static std::unique_ptr<ViewStackModel> instance_;
