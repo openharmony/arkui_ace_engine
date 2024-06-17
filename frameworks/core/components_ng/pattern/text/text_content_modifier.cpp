@@ -488,7 +488,7 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
 
     RSCanvas& canvas = drawingContext.canvas;
     auto contentRect = textPattern->GetTextContentRect();
-    RSRect clipInnerRect = RSRect(0, 0, contentRect.Width(), contentRect.Height());
+    RSRect clipInnerRect = RSRect(0, 0, drawingContext.width, drawingContext.height);
 
     RSSaveLayerOps slo(&clipInnerRect, nullptr);
     canvas.SaveLayer(slo);
@@ -501,7 +501,9 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     PaintCustomSpan(drawingContext);
 
     RSBrush brush;
-    std::vector<RSPoint> points = { RSPoint(0, 0.0f), RSPoint(contentRect.Width(), 0.0f) };
+    auto contentOffset = contentOffset_->Get();
+    std::vector<RSPoint> points = { RSPoint(contentOffset.GetX(), contentOffset.GetY()),
+        RSPoint(contentRect.Width(), 0.0f) };
     std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
         Color::TRANSPARENT.GetValue() };
     std::vector<RSScalar> pos = { 0.0f, info.isLeftFadeout ? info.fadeoutPercent : 0.0f,
