@@ -3061,7 +3061,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         return;
     }
     usePropertyAnimation_ = false;
-
+    ACE_SCOPED_TRACE("Swiper stop property animation");
     // Stop CurrentAnimationProperty.
     AnimationOption option;
     option.SetDuration(0);
@@ -3082,6 +3082,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         }
     };
     AnimationUtils::Animate(option, propertyUpdateCallback);
+    targetIndex_.reset();
     OffsetF currentOffset;
     for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
