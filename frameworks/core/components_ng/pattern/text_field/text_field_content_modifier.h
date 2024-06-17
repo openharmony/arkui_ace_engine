@@ -89,6 +89,7 @@ private:
     void UpdateTextFadeout(
         RSCanvas& canvas, const RectF& textRect, float gradientPercent, bool leftFade, bool rightFade);
     void AdjustTextFadeRect(RectF& textFadeRect);
+    float GetTextFadeDuration() const;
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
