@@ -166,8 +166,7 @@ void ResetTextPickerTextStyle(ArkUINodeHandle node)
     TextPickerModelNG::SetNormalTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextPickerSelectedTextStyle(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
+void SetTextPickerSelectedTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -257,7 +256,7 @@ void ResetTextPickerDisappearTextStyle(ArkUINodeHandle node)
 ArkUI_Float32 GetTextPickerDefaultPickerItemHeight(ArkUINodeHandle node, ArkUI_Int32 dUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0.0f);
+    CHECK_NULL_RETURN(frameNode, -1.0f);
     return TextPickerModelNG::GetDefaultPickerItemHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(dUnit));
 }
 
@@ -288,10 +287,11 @@ ArkUI_Int32 GetTextPickerSingleRange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return !TextPickerModelNG::isSingleRange();
+    return TextPickerModelNG::GetTextPickerRangeType(frameNode);
 }
 
-void SetTextPickerRangeStr(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange)
+void SetTextPickerRangeStr(
+    ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange, ArkUI_Int32 rangeType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -316,6 +316,7 @@ void SetTextPickerRangeStr(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_B
         }
         TextPickerModelNG::SetColumns(frameNode, multiResult);
     }
+    TextPickerModelNG::SetTextPickerRangeType(frameNode, rangeType);
 }
 
 ArkUI_CharPtr GetTextPickerValue(ArkUINodeHandle node)

@@ -399,6 +399,16 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    void SetRangeType(int32_t rangeType)
+    {
+        rangeType_ = rangeType;
+    }
+
+    int32_t GetRangeType()
+    {
+        return rangeType_;
+    }
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -470,6 +480,7 @@ private:
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
+    int32_t rangeType_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

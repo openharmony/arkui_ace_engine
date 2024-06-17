@@ -7948,7 +7948,7 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
@@ -7958,15 +7958,14 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
-        node->uiNodeHandle, item->string, isSingleRange);
+        node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetTextPickerRange(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true, NUM_0);
 }
 
 const ArkUI_AttributeItem* GetTextPickerValue(ArkUI_NodeHandle node)

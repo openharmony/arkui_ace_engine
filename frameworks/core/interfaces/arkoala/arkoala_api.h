@@ -3590,7 +3590,8 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerBackgroundColor)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextPickerRangeStr)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerSingleRange)(ArkUINodeHandle node);
-    void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
+    void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange,
+        ArkUI_Int32 rangeType);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
