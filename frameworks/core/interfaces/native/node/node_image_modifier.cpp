@@ -450,7 +450,7 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
     colorFilter->filterSize = filterFloatArray.size() < MAX_COLOR_FILTER_SIZE
                                   ? static_cast<int32_t>(filterFloatArray.size())
                                   : static_cast<int32_t>(MAX_COLOR_FILTER_SIZE);
-    for (size_t i = 0; i < colorFilter->filterSize && i < MAX_COLOR_FILTER_SIZE; i++) {
+    for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
         *(colorFilter->filterArray+i) = filterFloatArray[i];
     }
 }
