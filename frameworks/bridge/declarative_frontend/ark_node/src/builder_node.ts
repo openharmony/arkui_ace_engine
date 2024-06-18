@@ -74,6 +74,7 @@ class JSBuilderNode extends BaseNode {
     this.updateFuncByElmtId = new Map();
   }
   public reuse(param: Object): void {
+    this.updateStart();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -86,6 +87,7 @@ class JSBuilderNode extends BaseNode {
         }
       } // if child
     });
+    this.updateEnd();
   }
   public recycle(): void {
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
