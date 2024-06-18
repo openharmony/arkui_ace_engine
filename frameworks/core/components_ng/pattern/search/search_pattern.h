@@ -239,6 +239,8 @@ private:
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
+        int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent(bool forwardFocusMovement, bool backwardFocusMovement);
     void HandleBlurEvent();
@@ -246,6 +248,11 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
+    void InitHoverEvent();
+    void InitTouchEvent();
+    void InitSearchTheme();
+    void OnTouchDownOrUp(bool isDown);
+    void HandleHoverEvent(bool isHover);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,
@@ -277,16 +284,32 @@ private:
     RefPtr<TextFieldController> searchController_;
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
+    RefPtr<TouchEventImpl> searchTouchListener_;
     RefPtr<TouchEventImpl> searchButtonTouchListener_;
     RefPtr<TouchEventImpl> cancelButtonTouchListener_;
+    RefPtr<InputEvent> searchHoverListener_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
     RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
     RefPtr<ClickEvent> clickListener_;
 
+    bool isSearchHover_ = false;
+    bool isSearchPress_ = false;
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
+    bool focusBoxGlow_ = false;
+    Color searchHoverColor_;
+    Color searchTouchColor_;
+    Color searchNormalColor_;
+    Color focusBorderColor_;
+    Color focusBgColor_;
+    Color focusIconColor_;
+    Color normalIconColor_;
+    Color focusTextColor_;
+    Color normalTextColor_;
+    Dimension focusBorderWidth_;
+    Dimension focusBorderPadding_;
 
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;

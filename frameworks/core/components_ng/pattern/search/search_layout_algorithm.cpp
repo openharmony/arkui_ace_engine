@@ -760,9 +760,8 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     } else {
         auto searchIconWrapper = params.layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
         CHECK_NULL_VOID(searchIconWrapper);
-        auto searchIconFrameSize = searchIconWrapper->GetGeometryNode()->GetFrameSize();
         auto searchIconHorizontalOffset = searchIconWrapper->GetGeometryNode()->GetMarginFrameOffset().GetX();
-        textFieldHorizontalOffset = searchIconHorizontalOffset + searchIconFrameSize.Width() + searchIconRightSpace;
+        textFieldHorizontalOffset = searchIconHorizontalOffset + searchIconRightSpace + searchIconRightSpace;
     }
 
     auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;
