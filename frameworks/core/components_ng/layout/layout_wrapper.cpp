@@ -297,7 +297,28 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
         return;
     }
     auto childGeo = child->GetGeometryNode();
+    auto parentAdjust = childGeo->GetParentAdjust();
+    if (parentAdjust.GetOffset() != offset) {
+        AddChildToExpandListIfNeeded(AceType::WeakClaim(AceType::RawPtr(child)));
+    }
     childGeo->SetParentAdjust(RectF(offset, SizeF()));
+}
+
+void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    bool canAdd = safeAreaManager->AddNodeToExpandListIfNeeded(node);
+    CHECK_NULL_VOID(canAdd);
+    auto task = [weak = node]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        DirtySwapConfig emptyConfig;
+        frameNode->SyncGeometryNode(true, emptyConfig);
+    };
+    pipeline->AddSyncGeometryNodeTask(task);
 }
 
 OffsetF LayoutWrapper::ExpandIntoKeyboard()

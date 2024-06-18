@@ -180,6 +180,7 @@ public:
 
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
+    void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
 
 protected:
     void CreateRootConstraint();
