@@ -588,7 +588,8 @@ export struct ConfirmDialog {
       }
       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.checkBoxHeight = Number(newValue.height);
-        this.maxContentHeight = `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        this.maxContentHeight =
+          `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
       })
       .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
       .width('100%')
@@ -916,7 +917,8 @@ struct CustomDialogContentComponent {
       if (this.updateTitleHeight) {
         this.updateTitleHeight(this.titleHeight);
       }
-      if (maxHeight - this.buttonHeight - this.titleHeight < (this.minContentHeight? this.minContentHeight: MIN_CONTENT_HEIGHT)) {
+      if (maxHeight - this.buttonHeight - this.titleHeight <
+        (this.minContentHeight ? this.minContentHeight : MIN_CONTENT_HEIGHT)) {
         this.contentMaxHeight = `${MAX_CONTENT_HEIGHT}vp`;
       } else {
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
