@@ -27,6 +27,7 @@ void DialogTheme::Builder::ParsePattern(
     if (!dialogPattern) {
         return;
     }
+    theme->normalButtonFontSize_ = dialogPattern->GetAttr<Dimension>("normal_button_text_font_size", 16.0_fp);
     theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
     theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
@@ -103,7 +104,6 @@ void DialogTheme::Builder::ParsePattern(
     theme->maskColorEnd_ = dialogPattern->GetAttr<Color>(DIALOG_MASK_COLOR_END, Color::WHITE);
     // pattern config
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp));
-    theme->normalButtonFontSize_ = dialogPattern->GetAttr<Dimension>("normal_button_text_font_size", 16.0_fp);
     theme->titleMinFontSize_ = dialogPattern->GetAttr<Dimension>("title_text_font_size_min", 20.0_vp);
     theme->commonButtonBgColor_ = dialogPattern->GetAttr<Color>("common_button_bg_color", Color::GRAY);
     theme->emphasizeButtonBgColor_ = dialogPattern->GetAttr<Color>("first_button_bg_color", Color::BLACK);
