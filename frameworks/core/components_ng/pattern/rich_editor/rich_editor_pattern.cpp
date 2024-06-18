@@ -3488,29 +3488,56 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(spanString);
     if (isSpanStringMode_) {
-        styledString_->InsertSpanString(caretPosition_, spanString);
-        moveLength_ += StringUtils::ToWstring(spanString->GetString()).length();
+        InsertStyledStringByPaste(spanString);
     } else {
-        auto spanItems = spanString->GetSpanItems();
-        for (const auto& spanItem : spanItems) {
-            if (!spanItem) {
-                continue;
-            }
-            auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
-            if (imageSpanItem) {
-                AddImageSpan(imageSpanItem->options, true, caretPosition_, true);
-            } else {
-                auto options = GetTextSpanOptions(spanItem);
-                AddTextSpan(options, true, caretPosition_);
-            }
-        }
+        AddSpansByPaste(spanString->GetSpanItems());
     }
     StartTwinkling();
-    CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+}
+
+void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& spanString)
+{
+    CHECK_NULL_VOID(spanString && styledString_);
+    int32_t changeStart = caretPosition_;
+    int32_t changeLength = 0;
+    if (textSelector_.IsValid()) {
+        changeStart = textSelector_.GetTextStart();
+        changeLength = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+    }
+    CHECK_NULL_VOID(BeforeStyledStringChange(changeStart, changeLength, spanString));
+    if (changeLength > 0) {
+        DeleteForwardInStyledString(changeLength, false);
+    }
+    styledString_->InsertSpanString(changeStart, spanString);
+    SetCaretPosition(caretPosition_ + spanString->GetLength());
+    AfterStyledStringChange(changeStart, changeLength, spanString->GetString());
+}
+
+void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans)
+{
+    if (textSelector_.IsValid()) {
+        SetCaretPosition(textSelector_.GetTextStart());
+        DeleteForward(textSelector_.GetTextStart(), textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        ResetSelection();
+    }
+    for (const auto& spanItem : spans) {
+        if (!spanItem) {
+            continue;
+        }
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+        if (imageSpanItem) {
+            auto options = imageSpanItem->options;
+            options.offset = caretPosition_;
+            AddImageSpan(options, true, caretPosition_, true);
+        } else {
+            auto options = GetTextSpanOptions(spanItem);
+            AddTextSpan(options, true, caretPosition_);
+        }
+    }
 }
 
 TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& spanItem)
