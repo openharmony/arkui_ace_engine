@@ -270,6 +270,10 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (destroyed_) {
+        LOGI("cannot add dirty render node as the pipeline context is destroyed.");
+        return;
+    }
     if (!dirty->GetInspectorIdValue("").empty()) {
         ACE_BUILD_TRACE_BEGIN("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
@@ -3365,6 +3369,11 @@ void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
 bool PipelineContext::IsWindowSceneConsumed()
 {
     return isWindowSceneConsumed_;
+}
+
+bool PipelineContext::IsDestroyed()
+{
+    return destroyed_;
 }
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled)
