@@ -1729,4 +1729,32 @@ HWTEST_F(ToggleTestNg, ToggleAccessibilityPropertyTestNg002, TestSize.Level1)
     pattern->isOn_ = true;
     EXPECT_TRUE(accessibility->IsChecked());
 }
+
+/**
+ * @tc.name: SwitchPatternTest001
+ * @tc.desc: Test the IsCheckable and IsChecked properties of Switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SwitchPatternTest001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<SwitchAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsCheckable());
+
+    auto pattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOn_ = false;
+    EXPECT_FALSE(accessibility->IsChecked());
+
+    pattern->isOn_ = true;
+    EXPECT_TRUE(accessibility->IsChecked());
+
+    pattern->OnAfterModifyDone();
+}
+
 } // namespace OHOS::Ace::NG
