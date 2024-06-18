@@ -1316,7 +1316,7 @@ HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest001, TestSize.Level1)
     menuOptionsItems.push_back(menuOptionsParam2);
 
     NG::MenuOptionsParam menuOptionsParam3;
-    menuOptionsParam3.content = "按钮1";
+    menuOptionsParam3.content = "按钮3";
     menuOptionsParam3.icon = TEST_IMAGE_SOURCE;
     menuOptionsItems.push_back(menuOptionsParam3);
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
@@ -1344,7 +1344,7 @@ HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest002, TestSize.Level1)
     menuOptionsItems.push_back(menuOptionsParam2);
 
     NG::MenuOptionsParam menuOptionsParam3;
-    menuOptionsParam3.content = "按钮1";
+    menuOptionsParam3.content = "按钮3";
     menuOptionsItems.push_back(menuOptionsParam3);
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
     EXPECT_EQ(richEditorPattern->menuOptionItems_.size(), 3);
