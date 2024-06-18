@@ -288,7 +288,7 @@ RefPtr<FocusHub> FocusManager::GetCurrentFocus()
 int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
 {
     // max callbacks count: INT32_MAX - 1
-    if (listeners_.size() == std::numeric_limits<int32_t>::max() - 1) {
+    if (listeners_.size() == static_cast<size_t>(std::numeric_limits<int32_t>::max() - 1)) {
         return -1;
     }
     int32_t handler = nextListenerHdl_;

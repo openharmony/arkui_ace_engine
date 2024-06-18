@@ -503,7 +503,7 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JS
     auto arrays = JSRef<JSArray>::Cast(obj);
     for (size_t i = 0; i < arrays->Length(); i++) {
         JSRef<JSVal> value = arrays->GetValueAt(i);
-        if (value->IsNull() || value->IsUndefined()) {
+        if (value->IsNull() || value->IsUndefined() || (!value->IsObject())) {
             continue;
         }
         auto valueObj = JSRef<JSObject>::Cast(value);

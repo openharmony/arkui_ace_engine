@@ -513,7 +513,7 @@ bool JsiCallbackInfo::GetDoubleArrayArg(size_t index, std::vector<double>& value
     auto arrayRef = Local<ArrayRef>(arg);
     uint32_t length = arrayRef->Length(info_->GetVM());
     valueArr.reserve(length);
-    for (int32_t i = 0; i < length; ++i) {
+    for (uint32_t i = 0; i < length; ++i) {
         auto jsDouble = panda::ArrayRef::GetValueAt(info_->GetVM(), arrayRef, i);
         if (!jsDouble.IsEmpty() && jsDouble->IsNumber()) {
             valueArr.emplace_back(jsDouble->ToNumber(info_->GetVM())->Value());
