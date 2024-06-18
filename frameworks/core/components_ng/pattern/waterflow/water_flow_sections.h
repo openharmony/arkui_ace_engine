@@ -70,8 +70,8 @@ public:
      */
     void ChangeData(size_t start, size_t deleteCount, const std::vector<Section>& newSections);
 
-    // for c-api, replace all sections from start
-    void ChangeDataCAPI(size_t start, const std::vector<Section>& newSections);
+    // replace all sections from start
+    void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
 
     const std::vector<Section>& GetSectionInfo() const
     {

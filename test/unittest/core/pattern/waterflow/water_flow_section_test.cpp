@@ -78,32 +78,32 @@ HWTEST_F(WaterFlowSectionTest, CAPI001, TestSize.Level1)
     int32_t startIdx = -1;
     s.SetOnDataChange([&startIdx](int32_t start) { startIdx = start; });
 
-    s.ChangeDataCAPI(0, SECTION_7);
+    s.ReplaceFrom(0, SECTION_7);
     EXPECT_EQ(startIdx, 0);
 
-    s.ChangeDataCAPI(0, SECTION_7);
+    s.ReplaceFrom(0, SECTION_7);
     EXPECT_EQ(startIdx, 4);
 
     auto sections = SECTION_7;
     sections[3].crossCount = 5;
-    s.ChangeDataCAPI(0, sections);
+    s.ReplaceFrom(0, sections);
     EXPECT_EQ(startIdx, 3);
 
     ++sections[2].itemsCount;
-    s.ChangeDataCAPI(0, sections);
+    s.ReplaceFrom(0, sections);
     EXPECT_EQ(startIdx, 3);
 
     --sections[3].itemsCount;
-    s.ChangeDataCAPI(0, sections);
+    s.ReplaceFrom(0, sections);
     EXPECT_EQ(startIdx, 4);
     EXPECT_EQ(s.sections_.size(), 4);
 
-    s.ChangeDataCAPI(3, SECTION_7);
+    s.ReplaceFrom(3, SECTION_7);
     EXPECT_EQ(startIdx, 3);
     EXPECT_EQ(s.sections_.size(), 7);
 
     // illegal
-    s.ChangeDataCAPI(20, SECTION_7);
+    s.ReplaceFrom(20, SECTION_7);
     EXPECT_EQ(startIdx, 7);
     EXPECT_EQ(s.sections_.size(), 11);
 }

@@ -58,8 +58,7 @@ void WaterFlowSections::ChangeData(
     }
 }
 
-// for c-api, replace all from start
-void WaterFlowSections::ChangeDataCAPI(size_t start, const std::vector<WaterFlowSections::Section>& newSections)
+void WaterFlowSections::ReplaceFrom(size_t start, const std::vector<WaterFlowSections::Section>& newSections)
 {
     ChangeData(start, sections_.size(), newSections);
 }
