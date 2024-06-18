@@ -124,6 +124,48 @@ class RichEditorOnEditingChangeModifier extends ModifierWithKey<(value: boolean)
   }
 }
 
+class RichEditorOnPasteModifier extends ModifierWithKey<(event?: PasteEvent) => void> {
+  constructor(value: (event?: PasteEvent) => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnPaste');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnPaste(node);
+    } else {
+      getUINativeModule().richEditor.setOnPaste(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnCutModifier extends ModifierWithKey<Callback<CutEvent>> {
+  constructor(value: Callback<CutEvent>) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnCut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCut(node);
+    } else {
+      getUINativeModule().richEditor.setOnCut(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnCopyModifier extends ModifierWithKey<Callback<CopyEvent>> {
+  constructor(value: Callback<CopyEvent>) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCopy(node);
+    } else {
+      getUINativeModule().richEditor.setOnCopy(node, this.value);
+    }
+  }
+}
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey<EnterKeyType> {
   constructor(value: EnterKeyType) {
     super(value);
@@ -170,8 +212,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
 
   onPaste(callback: (event?: PasteEvent) => void): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnPasteModifier.identity, RichEditorOnPasteModifier, callback);
+    return this;
   }
+
   onReady(callback: () => void): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnReadyModifier.identity, RichEditorOnReadyModifier, callback);
     return this;
@@ -202,11 +246,18 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
     return this;
   }
+  onCut(callback: Callback<CutEvent>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCutModifier.identity, RichEditorOnCutModifier, callback);
+    return this;
+  }
+  onCopy(callback: Callback<CopyEvent>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCopyModifier.identity, RichEditorOnCopyModifier, callback);
+    return this;
+  }
   enterKeyType(value: EnterKeyType): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
     return this;
   }
-
 }
 
 // @ts-ignore

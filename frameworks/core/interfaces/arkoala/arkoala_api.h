@@ -3986,6 +3986,12 @@ struct ArkUIRichEditorModifier {
     void (*resetOnEditingChange)(ArkUINodeHandle node);
     void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setRichEditorOnPaste)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnPaste)(ArkUINodeHandle node);
+    void (*setRichEditorOnCut)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnCut)(ArkUINodeHandle node);
+    void (*setRichEditorOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
 };

@@ -149,6 +149,63 @@ void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
     RichEditorModelNG::SetSelectedBackgroundColor(frameNode, selectedBackgroundColor);
 }
 
+void SetRichEditorOnPaste(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPaste = reinterpret_cast<std::function<void(NG::TextCommonEvent&)>*>(callback);
+        RichEditorModelNG::SetOnPaste(frameNode, std::move(*onPaste));
+    } else {
+        RichEditorModelNG::SetOnPaste(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnPaste(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnPaste(frameNode, nullptr);
+}
+
+void SetRichEditorOnCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCut = reinterpret_cast<std::function<void(NG::TextCommonEvent&)>*>(callback);
+        RichEditorModelNG::SetOnCut(frameNode, std::move(*onCut));
+    } else {
+        RichEditorModelNG::SetOnCut(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnCut(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnCut(frameNode, nullptr);
+}
+
+void SetRichEditorOnCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCopy = reinterpret_cast<std::function<void(NG::TextCommonEvent&)>*>(callback);
+        RichEditorModelNG::SetOnCopy(frameNode, std::move(*onCopy));
+    } else {
+        RichEditorModelNG::SetOnCopy(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnCopy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnCopy(frameNode, nullptr);
+}
+
 void SetRichEditorEnterKeyType(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -171,8 +228,9 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
         SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
-        ResetRichEditorEnterKeyType };
+        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,
+        ResetRichEditorOnPaste, SetRichEditorOnCut, ResetRichEditorOnCut, SetRichEditorOnCopy, ResetRichEditorOnCopy,
+        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType };
     return &modifier;
 }
 }
