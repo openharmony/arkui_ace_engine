@@ -1692,4 +1692,117 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest113, TestSize.Level1)
     auto val = pattern->preTypeIsBuilder_;
     ASSERT_NE(val, true);
 }
+
+/**
+ * @tc.name: RadioPatternTest114
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest114, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetPrePageIdToLastPageId();
+
+    auto groupManager = pattern->GetGroupManager();
+    auto check = false;
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, check);
+}
+
+/**
+ * @tc.name: RadioPatternTest115
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest115, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetPrePageIdToLastPageId();
+
+    auto groupManager = pattern->GetGroupManager();
+    auto check = false;
+    pattern->UpdateGroupCheckStatus(frameNode, groupManager, check);
+}
+
+/**
+ * @tc.name: RadioPatternTest116
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest116, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto status = eventHub->IsEnabled();
+    auto enabled = status;
+    if (enabled == true) {
+        enabled = false;
+    } else {
+        enabled = true;
+    }
+    eventHub->SetEnabled(enabled);
+    pattern->HandleEnabled();
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->HandleEnabled();
+    eventHub->SetEnabled(status);
+}
+
+/**
+ * @tc.name: RadioPatternTest117
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest117, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto status = eventHub->IsEnabled();
+    auto enabled = status;
+    if (enabled == true) {
+        enabled = false;
+    } else {
+        enabled = true;
+    }
+    eventHub->SetEnabled(enabled);
+    settingApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->HandleEnabled();
+    eventHub->SetEnabled(status);
+}
 } // namespace OHOS::Ace::NG
