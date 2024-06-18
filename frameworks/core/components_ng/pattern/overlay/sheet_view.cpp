@@ -364,6 +364,13 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
             }
         }
+    } else if (sheetStyle.isTitleBuilder.has_value()) {
+        auto isCustomBuilder = sheetStyle.isTitleBuilder.value();
+		
+        // When title is custombuilder, set FlexAlign to CENTER.
+        if (isCustomBuilder) {
+            columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+        }
     }
     return titleColumn;
 }
