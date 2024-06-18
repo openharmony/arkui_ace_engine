@@ -37,8 +37,6 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
     void StrokeText(
         const std::string& text, double x, double y, std::optional<double> maxWidth, const PaintState& state);
-    double MeasureText(const std::string& text, const PaintState& state);
-    double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;

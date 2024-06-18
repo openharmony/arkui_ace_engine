@@ -433,48 +433,6 @@ void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, 
     PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
 }
 
-double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    Constants::ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetMaxIntrinsicWidth();
-#else
-    return 0.0;
-#endif
-}
-
-double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    Constants::ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetHeight();
-#else
-    return 0.0;
-#endif
-}
-
 TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
 #ifndef ACE_UNITTEST

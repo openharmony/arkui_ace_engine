@@ -277,52 +277,6 @@ void OffscreenCanvasPaintMethod::StrokeText(
     PaintText(static_cast<float>(width_), x, y, maxWidth, true);
 }
 
-double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    using namespace Constants;
-    RSParagraphStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetMaxIntrinsicWidth();
-#else
-    return 0.0;
-#endif
-}
-
-double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    using namespace Constants;
-    RSParagraphStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetHeight();
-#else
-    return 0.0;
-#endif
-}
-
 TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
 #ifndef ACE_UNITTEST

@@ -96,8 +96,8 @@ public:
     virtual void SetLineDash(const std::vector<double>& lineDash) = 0;
     virtual void SetTextAlign(const TextAlign& align) = 0;
     virtual void SetTextBaseline(const TextBaseline& baseline) = 0;
-    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) = 0;
-    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) = 0;
+    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) { return 0.0; };
+    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) { return 0.0; };
     virtual void FillRect(const Rect& rect) = 0;
     virtual void StrokeRect(const Rect& rect) = 0;
     virtual void ClearRect(const Rect& rect) = 0;

@@ -152,16 +152,6 @@ void OffscreenCanvasPattern::StrokeText(
     offscreenPaintMethod_->StrokeText(text, x, y, maxWidth, state);
 }
 
-double OffscreenCanvasPattern::MeasureText(const std::string& text, const PaintState& state)
-{
-    return offscreenPaintMethod_->MeasureText(text, state);
-}
-
-double OffscreenCanvasPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-    return offscreenPaintMethod_->MeasureTextHeight(text, state);
-}
-
 TextMetrics OffscreenCanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     return offscreenPaintMethod_->MeasureTextMetrics(text, state);
