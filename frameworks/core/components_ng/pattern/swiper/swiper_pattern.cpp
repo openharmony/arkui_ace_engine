@@ -150,9 +150,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
-        auto isMeasureOneMoreItem = AceType::InstanceOf<TabsNode>(host->GetParent()) &&
-            !NearZero(velocity_.value_or(0)) && !hasCachedCapture_ && !SupportSwiperCustomAnimation();
-        swiperLayoutAlgorithm->SetIsMeasureOneMoreItem(isMeasureOneMoreItem);
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
     swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
