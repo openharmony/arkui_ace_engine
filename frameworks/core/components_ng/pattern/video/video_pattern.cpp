@@ -59,6 +59,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
+using HiddenChangeEvent = std::function<void(bool)>;
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
 constexpr uint32_t SECONDS_PER_MINUTE = 60;
 const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
@@ -826,19 +827,16 @@ void VideoPattern::RegisterRenderContextCallBack()
 void VideoPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+
     if (!hiddenChangeEvent_) {
-        SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            auto fullScreenNode = videoPattern->GetFullScreenNode();
-            if (fullScreenNode) {
-                auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-                CHECK_NULL_VOID(fullScreenPattern);
-                fullScreenPattern->HiddenChange(hidden);
-                return;
-            }
-            videoPattern->HiddenChange(hidden);
-        });
+        SetHiddenChangeEvent(CreateHiddenChangeEvent());
+    }
+
+    // src has changed
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+        ResetStatus();
     }
 
     // update full screen pattern state
@@ -883,6 +881,22 @@ void VideoPattern::OnModifyDone()
     }
 }
 
+HiddenChangeEvent VideoPattern::CreateHiddenChangeEvent()
+{
+    return [weak = WeakClaim(this)](bool hidden) {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto fullScreenNode = videoPattern->GetFullScreenNode();
+        if (fullScreenNode) {
+            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+            CHECK_NULL_VOID(fullScreenPattern);
+            fullScreenPattern->HiddenChange(hidden);
+            return;
+        }
+        videoPattern->HiddenChange(hidden);
+    };
+}
+
 void VideoPattern::UpdatePreviewImage()
 {
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
@@ -899,7 +913,7 @@ void VideoPattern::UpdatePreviewImage()
     CHECK_NULL_VOID(video);
     auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
     CHECK_NULL_VOID(image);
-    if (!isInitialState_ || !layoutProperty->HasPosterImageInfo()) {
+    if (!isInitialState_) {
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         image->MarkModifyDone();
