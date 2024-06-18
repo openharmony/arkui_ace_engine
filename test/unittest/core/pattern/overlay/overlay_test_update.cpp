@@ -113,6 +113,8 @@ protected:
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
     DatePickerSettingData GenDatePickerSettingData();
+    void TestUpdateAlign(
+        RefPtr<OHOS::Ace::NG::LayoutAlgorithm> toastLayoutAlgorithm, LayoutWrapper* layoutWrapper, ToastInfo toastInfo);
 };
 
 void OverlayTestUpdate::SetUpTestCase()
@@ -222,6 +224,36 @@ DatePickerSettingData OverlayTestUpdate::GenDatePickerSettingData()
     datePickerSettingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
     datePickerSettingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
     return datePickerSettingData;
+}
+
+void OverlayTestUpdate::TestUpdateAlign(
+    RefPtr<OHOS::Ace::NG::LayoutAlgorithm> toastLayoutAlgorithm, LayoutWrapper* layoutWrapper, ToastInfo toastInfo)
+{
+    ASSERT_NE(toastLayoutAlgorithm, nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::TOP_START));
+
+    toastInfo.alignment = static_cast<int32_t>(ToastAlignment::TOP_END);
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::TOP_END));
+
+    toastInfo.alignment = static_cast<int32_t>(ToastAlignment::CENTER_START);
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::CENTER_START));
+
+    toastInfo.alignment = static_cast<int32_t>(ToastAlignment::CENTER_END);
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::CENTER_END));
+
+    toastInfo.alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_START);
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::BOTTOM_START));
+
+    toastInfo.alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_END);
+    toastLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(toastInfo.alignment, static_cast<int32_t>(ToastAlignment::BOTTOM_END));
 }
 
 /**
@@ -1530,5 +1562,87 @@ HWTEST_F(OverlayTestUpdate, ToastTest027, TestSize.Level1)
     EXPECT_EQ(fontSize, ADAPT_TOAST_MIN_FONT_SIZE);
     EXPECT_EQ(fontSize1, ADAPT_TOAST_MAX_FONT_SIZE);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ToastTest028
+ * @tc.desc: Test UpdateToastAlign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(toastLayoutAlgorithm, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateTextNode.
+     */
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. Test left to right alignment.
+     */
+    TestUpdateAlign(toastLayoutAlgorithm, layoutWrapper.rawPtr_, toastInfo);
+
+    /**
+     * @tc.steps: step4. Test right to left alignment.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    TestUpdateAlign(toastLayoutAlgorithm, layoutWrapper.rawPtr_, toastInfo);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: ToastTest029
+ * @tc.desc: Test ToastPattern::GetTextLineHeight ToastPattern::GetTextMaxWidth ToastPattern::GetTextMaxHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateTextNode.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    pattern->SetTextNode(textNode);
+
+    /**
+     * @tc.steps: step2. Test GetTextLineHeight.
+     */
+    auto textLineHeight = pattern->GetTextLineHeight(textNode);
+    EXPECT_EQ(textLineHeight, 0);
+
+    /**
+     * @tc.steps: step3. Test GetTextMaxWidth.
+     */
+    auto textMaxWidth = pattern->GetTextMaxWidth();
+    EXPECT_EQ(textMaxWidth, 0);
+
+    /**
+     * @tc.steps: step3. Test GetTextMaxHeight.
+     */
+    auto textMaxHeight = pattern->GetTextMaxHeight();
+    EXPECT_EQ(textMaxHeight, 0);
 }
 }
