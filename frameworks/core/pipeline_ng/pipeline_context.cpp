@@ -3229,8 +3229,7 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 void PipelineContext::OnIdle(int64_t deadline)
 {
     if (deadline == 0  && lastVsyncEndTimestamp_ > 0 && GetSysTimestamp() > lastVsyncEndTimestamp_
-        && GetSysTimestamp() - lastVsyncEndTimestamp_ >
-        VSYNC_PERIOD_COUNT * static_cast<uint64_t>(window_->GetVSyncPeriod())) {
+        && GetSysTimestamp() - lastVsyncEndTimestamp_ > VSYNC_PERIOD_COUNT * window_->GetVSyncPeriod()) {
         auto frontend = weakFrontend_.Upgrade();
         if (frontend) {
             frontend->NotifyUIIdle();
