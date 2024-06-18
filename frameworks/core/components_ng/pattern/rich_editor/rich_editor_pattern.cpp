@@ -4588,6 +4588,7 @@ void RichEditorPattern::AfterInsertValue(
     UpdateSpanPosition();
     if (isIME) {
         AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
+        return;
     }
     MoveCaretAfterTextChange();
 }
@@ -4627,6 +4628,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
     retInfo.SetFontFeature(spanNode->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
+    MoveCaretAfterTextChange();
     eventHub->FireOnIMEInputComplete(retInfo);
     return true;
 }
