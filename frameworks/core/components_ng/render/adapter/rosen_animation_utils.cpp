@@ -162,6 +162,10 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     auto wrappedOnRepeat = GetWrappedCallback(repeatCallback);
     animation->animations_ = Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
         callback, wrappedOnFinish, wrappedOnRepeat);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && !pipeline->GetOnShow()) {
+        pipeline->FlushMessages();
+    }
     if (!animation->animations_.empty()) {
         return animation;
     }
