@@ -8814,16 +8814,28 @@ float RichEditorPattern::GetTextThemeFontSize()
 
 int32_t RichEditorPattern::CalcLineEndPosition()
 {
+    float caretHeightUp = 0.0f;
     float caretHeightDown = 0.0f;
-
-    OffsetF CaretOffsetDown = CalcCursorOffsetByPosition(caretPosition_, caretHeightDown, true, false);
-    auto textPaintOffset = GetTextContentRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    float caretHeightLine = 0.0f;
+    int32_t realCaretOffsetY = 0;
+    int32_t realLastClickOffsetY = 0;
+    OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition_, caretHeightUp, false, false);
+    OffsetF caretOffsetDown = CalcCursorOffsetByPosition(caretPosition_, caretHeightDown, true, false);
+    OffsetF caretOffsetLine = CalcCursorOffsetByPosition(caretPosition_, caretHeightLine);
+    if (NearEqual(richTextRect_.GetY(), contentRect_.GetY())) {
+        realLastClickOffsetY = lastClickOffset_.GetY();
+        realCaretOffsetY = caretOffsetDown.GetY();
+    } else {
+        auto scrollOffset = caretOffsetDown.GetY() - caretOffsetUp.GetY() + caretOffsetLine.GetY();
+        realLastClickOffsetY = lastClickOffset_.GetY() + std::abs(richTextRect_.GetY()) + contentRect_.GetY();
+        realCaretOffsetY = scrollOffset + std::abs(richTextRect_.GetY()) + contentRect_.GetY();
+    }
     auto minDet = paragraphs_.minParagraphFontSize.value_or(GetTextThemeFontSize());
     Offset textOffset;
-    float textWidth = GetTextRect().Width();
-    float textPaintOffsetY = textPaintOffset.GetY() - minDet / 2.0;
-    float textOffsetClickY = lastClickOffset_.GetY() - textPaintOffsetY;
-    float textOffsetDownY = CaretOffsetDown.GetY() - textPaintOffsetY;
+    float textWidth = richTextRect_.Width();
+    float textPaintOffsetY = contentRect_.GetY() - std::min(baselineOffset_, 0.0f) - minDet / 2.0;
+    float textOffsetClickY = realLastClickOffsetY - textPaintOffsetY;
+    float textOffsetDownY = realCaretOffsetY - textPaintOffsetY;
     if (lastClickOffset_.NonNegative()) {
         textOffset = { textWidth, textOffsetClickY };
     } else {
