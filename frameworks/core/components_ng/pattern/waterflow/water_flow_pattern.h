@@ -152,6 +152,15 @@ public:
 
     void DumpAdvanceInfo() override;
 
+    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
+
     // ------------------------ Focus adapter --------------------------------
     FocusPattern GetFocusPattern() const override
     {
@@ -197,6 +206,8 @@ private:
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
+
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

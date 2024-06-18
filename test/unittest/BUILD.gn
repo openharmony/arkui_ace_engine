@@ -1077,6 +1077,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_accessibility_property.cpp",

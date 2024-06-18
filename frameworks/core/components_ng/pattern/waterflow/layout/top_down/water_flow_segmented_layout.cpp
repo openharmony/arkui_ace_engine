@@ -109,10 +109,15 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
+    auto cachedCount = props->GetCachedCountValue(1);
+    wrapper_->SetActiveChildRange(info_->startIndex_, info_->endIndex_, cachedCount, cachedCount);
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
+    PreBuildItems(wrapper_, info_,
+        WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[info_->GetSegment(info_->endIndex_ + 1)][0], mainSize_, axis_ }, props, nullptr),
+        cachedCount);
 }
 
 namespace {

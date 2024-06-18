@@ -141,6 +141,12 @@ public:
      */
     int32_t GetSegment(int32_t itemIdx) const;
 
+    // convert FlowItem's index to children node index.
+    inline int32_t NodeIdx(int32_t idx) const
+    {
+        return idx + footerIndex_ + 1;
+    }
+
     bool itemStart_ = false;
 
     /**

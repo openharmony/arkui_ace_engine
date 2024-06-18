@@ -541,6 +541,7 @@ build_component_ng("pattern_ng") {
     "waterflow/layout/top_down/water_flow_layout_algorithm.cpp",
     "waterflow/layout/top_down/water_flow_layout_info.cpp",
     "waterflow/layout/top_down/water_flow_segmented_layout.cpp",
+    "waterflow/layout/water_flow_layout_algorithm_base.cpp",
     "waterflow/layout/water_flow_layout_info_base.cpp",
     "waterflow/layout/water_flow_layout_utils.cpp",
     "waterflow/water_flow_accessibility_property.cpp",
