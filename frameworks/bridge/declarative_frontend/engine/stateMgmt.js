@@ -10120,7 +10120,7 @@ class PersistenceV2Impl {
             }
             catch (err) {
                 if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    this.cb_(key, 'serialization' /* Serialization */, err);
                     return undefined;
                 }
                 throw err;
@@ -10169,7 +10169,7 @@ class PersistenceV2Impl {
             }
             catch (err) {
                 if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    this.cb_(key, 'serialization' /* Serialization */, err);
                     return;
                 }
                 throw err;
@@ -10198,7 +10198,7 @@ class PersistenceV2Impl {
             }
             catch (err) {
                 if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, "serialisation" /* Serialisation */, err);
+                    this.cb_(key, 'serialization' /* Serialization */, err);
                     continue;
                 }
                 throw err;
