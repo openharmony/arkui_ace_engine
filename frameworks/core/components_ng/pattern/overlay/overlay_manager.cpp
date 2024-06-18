@@ -1844,11 +1844,11 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     EraseMenuInfo(targetId);
 }
 
-void OverlayManager::CleanMenuInSubWindowWithAnimation()
+int32_t OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow with animation enter");
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, -1);
     RefPtr<FrameNode> menu;
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
@@ -1857,8 +1857,11 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
             break;
         }
     }
-    CHECK_NULL_VOID(menu);
+    CHECK_NULL_RETURN(menu, -1);
     PopMenuAnimation(menu);
+
+    auto menuWrapper = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
+    return menuWrapper->GetTargetId();
 }
 
 void OverlayManager::CleanPreviewInSubWindow()
