@@ -121,6 +121,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     ProcessDefaultStyleAndBehaviors(frameNode);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
