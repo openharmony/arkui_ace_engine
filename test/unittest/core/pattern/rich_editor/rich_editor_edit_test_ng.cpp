@@ -194,6 +194,466 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestRichEditorMoveCaretAnywhere001
+ * @tc.desc: test MoveCaretAnywhere
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorMoveCaretAnywhere001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richOffset = Offset(50, 30);
+    auto tempCaretOffset_ =
+        AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
+    richEditorPattern->isMoveCaretAnywhere_ = true;
+    richEditorPattern->MoveCaretAnywhere(richOffset);
+    auto caretOffsetNew = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)->caretOffset_;
+    EXPECT_TRUE(richEditorPattern->isMoveCaretAnywhere_);
+}
+
+/**
+ * @tc.name: TestRichEditorUpdateSelectionByTouchMove001
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richOffset = Offset(40, 30);
+    richEditorPattern->UpdateSelectionByTouchMove(richOffset);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_MEASURE_SELF, 0);
+}
+
+/**
+ * @tc.name: TestRichEditorShowCaretNoTwinkling001
+ * @tc.desc: test ShowCaretNoTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorShowCaretNoTwinkling001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richOffset = Offset(44, 50);
+    richEditorPattern->ShowCaretNoTwinkling(richOffset);
+    EXPECT_EQ(richEditorPattern->caretVisible_, true);
+}
+
+/**
+ * @tc.name: TestRichEditorHandleTripleClickEvent001
+ * @tc.desc: test HandleTripleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    richEditorPattern->HandleTripleClickEvent(info);
+    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
+    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
+}
+
+/**
+ * @tc.name: TestRichEditorGetAllChildren001
+ * @tc.desc: test GetAllChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetAllChildren();
+    EXPECT_EQ(richEditorPattern->childNodes_.size(), 0);
+}
+
+/**
+ * @tc.name: TestRichEditorGetSelectedMaxWidth001
+ * @tc.desc: test GetSelectedMaxWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorGetSelectedMaxWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    std::vector<RectF> rectList;
+    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetSelectedRects(rectList);
+    auto ret = richEditorPattern->GetSelectedMaxWidth();
+    EXPECT_NE(ret, 0.0f);
+}
+
+/**
+ * @tc.name: TestRichEditorHandleSelectFontStyleWrapper001
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyleWrapper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextStyle spanStyle;
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
+    EXPECT_EQ(spanStyle.GetFontWeight(), FontWeight::NORMAL);
+}
+
+/**
+ * @tc.name: TestRichEditorHandleOnShowMenu001
+ * @tc.desc: test HandleOnShowMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleOnShowMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto tempOffset = richEditorPattern->selectionMenuOffsetByMouse_;
+    richEditorPattern->parentGlobalOffset_.x_ = 10.0f;
+    richEditorPattern->parentGlobalOffset_.y_ = 20.0f;
+    richEditorPattern->HandleOnShowMenu();
+    ASSERT_NE(richEditorPattern->selectionMenuOffsetByMouse_, tempOffset);
+}
+
+/**
+ * @tc.name: TestRichEditorHandleSelectFontStyle001
+ * @tc.desc: test HandleSelectFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isSpanStringMode_ = true;
+    KeyCode code = KeyCode::KEY_UNKNOWN;
+    richEditorPattern->HandleSelectFontStyle(code);
+    EXPECT_EQ(richEditorPattern->isSpanStringMode_, true);
+}
+
+/**
+ * @tc.name: TestRichEditorCursorMoveLineBegin001
+ * @tc.desc: test CursorMoveLineBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineBegin001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    richEditorPattern->caretPosition_ = 0;
+    auto ret = richEditorPattern->CursorMoveLineBegin();
+    EXPECT_EQ(ret, false);
+
+    /**
+     * @tc.steps: step3. change parameter and call function.
+     */
+    richEditorPattern->caretPosition_ = 10;
+    richEditorPattern->lastClickOffset_.x_ = 10.0f;
+    richEditorPattern->lastClickOffset_.y_ = 20.0f;
+    ret = richEditorPattern->CursorMoveLineBegin();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TestRichEditorCursorMoveLineEndPos001
+ * @tc.desc: test CursorMoveLineEndPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineEndPos001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->GetCaretOffset().SetY(5.0f);
+    overlayMod->GetCaretOffset().SetX(0.0f);
+    richEditorPattern->richTextRect_.x_ = 5.0f;
+    OffsetF caretOffsetUp(-5.0f, 5.0f);
+    OffsetF caretOffsetDown(5.0f, 10.0f);
+    OffsetF nextCaretOffset(5.0f, 15.0f);
+    auto ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
+    EXPECT_EQ(ret, true);
+    /**
+     * @tc.steps: step3. change parameter and call function.
+     */
+    overlayMod->SetCaretWidth(-5.0f);
+    ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
+    EXPECT_EQ(ret, true);
+    /**
+     * @tc.steps: step4. change parameter and call function.
+     */
+    nextCaretOffset.x_ = -10.0f;
+    ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TestRichEditorCalcLineEndPosition001
+ * @tc.desc: test CalcLineEndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineEndPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    auto ret1 = richEditorPattern->CalcLineEndPosition();
+    richEditorPattern->lastClickOffset_.x_ = 10.0f;
+    richEditorPattern->lastClickOffset_.y_ = 20.0f;
+    auto ret2 = richEditorPattern->CalcLineEndPosition();
+    EXPECT_EQ(ret1, ret2);
+}
+
+/**
+ * @tc.name: TestRichEditorCalcMoveUpPos001
+ * @tc.desc: test CalcMoveUpPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    OffsetF caretOffsetUp(-5.0f, 5.0f);
+    OffsetF caretOffsetDown(5.0f, 10.0f);
+    richEditorPattern->CalcMoveUpPos(caretOffsetUp, caretOffsetDown);
+    EXPECT_NE(caretOffsetUp.x_, -5.0f);
+    EXPECT_NE(caretOffsetDown.x_, 5.0f);
+}
+
+/**
+ * @tc.name: TestRichEditorCalcLineHeightByPosition001
+ * @tc.desc: test CalcLineHeightByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineHeightByPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto ret = richEditorPattern->CalcLineHeightByPosition(10);
+    EXPECT_EQ(ret, 0.0f);
+}
+
+/**
+ * @tc.name: TestRichEditorGetTextPaintOffset001
+ * @tc.desc: test GetTextPaintOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorGetTextPaintOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto ret = richEditorPattern->GetTextPaintOffset();
+    EXPECT_EQ(ret.IsNegative(), false);
+}
+
+/**
+ * @tc.name: TestRichEditorBeforeChangeText001
+ * @tc.desc: test BeforeChangeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, TestRichEditorBeforeChangeText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    RichEditorChangeValue changeValue;
+    RichEditorPattern::OperationRecord operationRecord;
+    OHOS::Ace::NG::RecordType recodrType = OHOS::Ace::NG::RecordType::DEL_BACKWARD;
+    auto ret = richEditorPattern->BeforeChangeText(changeValue, operationRecord, recodrType, 100);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CalcInsertValueObj002
+ * @tc.desc: test CalcInsertValueObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test1");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    TextInsertValueInfo info;
+    it->content = "test123\n";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->moveLength_ = 2;
+    richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
+    EXPECT_EQ(info.spanIndex_, 0);
+}
+
+/**
+ * @tc.name: RedoDrag001
+ * @tc.desc: test RedoDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, RedoDrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    record.beforeCaretPosition = 0;
+    record.addText = "test123";
+    richEditorPattern->RedoDrag(record);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: UndoDrag001
+ * @tc.desc: test UndoDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, UndoDrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    record.deleteCaretPostion = 0;
+    record.addText = "test123";
+    richEditorPattern->UndoDrag(record);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 7);
+}
+
+/**
+ * @tc.name: IsTouchInFrameArea001
+ * @tc.desc: test IsTouchInFrameArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, IsTouchInFrameArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+    */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    PointF touchPoint;
+    auto ret = richEditorPattern->IsTouchInFrameArea(touchPoint);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: CalcInsertValueObj001
  * @tc.desc: test CalcInsertValueObj
  * @tc.type: FUNC
