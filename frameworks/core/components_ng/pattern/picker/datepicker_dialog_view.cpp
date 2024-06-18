@@ -65,7 +65,6 @@ constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 bool DatePickerDialogView::switchTimePickerFlag_ = false;
-bool DatePickerDialogView::hasSwitchContentRow_ = false;
 bool DatePickerDialogView::switchDatePickerFlag_ = false;
 bool DatePickerDialogView::isShowTime_ = false;
 bool DatePickerDialogView::isUserSetFont_ = false;
@@ -548,7 +547,7 @@ void DatePickerDialogView::HideContentChildrenButton(const RefPtr<FrameNode>& co
 
 void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary)
 {
-    if (!NeedadaptForAging() && !hasSwitchContentRow_) {
+    if (!NeedadaptForAging()) {
         return;
     }
     HideContentChildrenButton(contentRow);
@@ -561,7 +560,6 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (!switchFlag_) {
-        hasSwitchContentRow_ = true;
         nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         UpdateNextButtonMargin(nextButtonLayoutProperty);
         textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
@@ -1779,12 +1777,10 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::v
     CHECK_NULL_VOID(cancelButtonNode);
     auto cancelButtonGesturHub = cancelButtonNode->GetOrCreateGestureEventHub();
     cancelButtonGesturHub->AddClickEvent(onClick);
-    if ((settingData.showTime && !settingData.useMilitary) || !settingData.showTime) {
-        auto confirmButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetLastChild());
-        CHECK_NULL_VOID(confirmButtonNode);
-        auto confirmButtonGesturHub = confirmButtonNode->GetOrCreateGestureEventHub();
-        confirmButtonGesturHub->AddClickEvent(onClick);
-    }
+    auto confirmButtonNode = AceType::DynamicCast<FrameNode>(contentRow->GetLastChild());
+    CHECK_NULL_VOID(confirmButtonNode);
+    auto confirmButtonGesturHub = confirmButtonNode->GetOrCreateGestureEventHub();
+    confirmButtonGesturHub->AddClickEvent(onClick);
     contentRow->MountToParent(contentColumn);
 }
 
