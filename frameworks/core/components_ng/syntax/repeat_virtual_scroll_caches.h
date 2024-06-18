@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_VIRTUAL_SCROLL_CACHES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_REPEAT_VIRTUAL_SCROLL_CACHES_H
 
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <optional>
@@ -24,6 +25,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -36,6 +38,11 @@ struct KeySorterClass {
 
     explicit KeySorterClass(const RepeatVirtualScrollCaches* virtualScroll) : virtualScroll_(virtualScroll) {}
     bool operator()(const std::string& left, const std::string& right) const;
+};
+
+struct CacheItem {
+    bool isValid = false;
+    RefPtr<UINode> item;
 };
 
 class RepeatVirtualScrollCaches {
@@ -68,6 +75,8 @@ public:
      *   render the data source item 'forIndex'.
      */
     RefPtr<UINode> UpdateFromL2(uint32_t forIndex);
+
+    void UpdateSameKeyItem(const std::string& key, uint32_t index);
 
     /**
      * request TS to create a new node for given index / key/
@@ -109,12 +118,11 @@ public:
 
     /**
      * return the UINode for given index
-     * bool return indicates if in L1
      *
      * resolve index -> key -> UINode
      *
      */
-    RefPtr<UINode> GetNode4Index(uint32_t forIndex) const;
+    RefPtr<UINode> GetNode4Index(uint32_t forIndex);
 
     void AddKeyToL1(const std::string& key)
     {
@@ -126,7 +134,7 @@ public:
         return activeNodeKeysInL1_.find(key) != activeNodeKeysInL1_.end();
     }
 
-    const std::unordered_map<std::string, RefPtr<UINode>>& GetAllNodes() const
+    const std::unordered_map<std::string, CacheItem>& GetAllNodes() const
     {
         return node4key_;
     }
@@ -261,7 +269,7 @@ private:
     std::unordered_map<std::string, std::unordered_map<std::string, RefPtr<UINode>>> node4key4ttype_;
 
     // Map Map key -> UINode
-    std::unordered_map<std::string, RefPtr<UINode>> node4key_;
+    std::unordered_map<std::string, CacheItem> node4key_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

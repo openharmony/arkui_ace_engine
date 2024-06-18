@@ -160,7 +160,7 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         return nullptr;
     }
     // search if index -> key -> Node exist
-    // pair.first tells of key is in L1
+    // will update the same key item if needs.
     auto node4Index = GetFromCaches(index);
     if (!node4Index && !needBuild) {
         TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -177,11 +177,7 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d not in caches and failed to build.", index);
             return nullptr;
         }
-    } else {
-        // TODO need update existed node4Index with new index.
     }
-
-    // if the item was in L2 cache, remove it from there
 
     if (isActive_) {
         node4Index->SetJSViewActive(true);
@@ -287,8 +283,8 @@ void RepeatVirtualScrollNode::OnConfigurationUpdate(const ConfigurationChange& c
     if ((configurationChange.colorModeUpdate || configurationChange.fontUpdate)) {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
-            if (child) {
-                child->UpdateConfigurationUpdate(configurationChange);
+            if (child.item) {
+                child.item->UpdateConfigurationUpdate(configurationChange);
             }
         }
     }
