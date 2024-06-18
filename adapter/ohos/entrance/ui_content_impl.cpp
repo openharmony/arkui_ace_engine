@@ -2105,6 +2105,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
                                              reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) ||
         taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
+    } else if (rsTransaction != nullptr) {
+        // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
