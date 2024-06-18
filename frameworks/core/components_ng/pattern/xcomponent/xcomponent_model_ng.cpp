@@ -314,4 +314,77 @@ void XComponentModelNG::SetImageAIOptions(void* options)
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetImageAIOptions(options);
 }
+
+void XComponentModelNG::SetXComponentLibraryname(FrameNode* frameNode, const std::string& libraryname)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetLibraryName(libraryname);
+}
+
+void XComponentModelNG::SetControllerOnCreated(FrameNode* frameNode, SurfaceCreatedEvent&& onCreated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerCreatedEvent(std::move(onCreated));
+}
+
+void XComponentModelNG::SetControllerOnChanged(FrameNode* frameNode, SurfaceChangedEvent&& onChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerChangedEvent(std::move(onChanged));
+}
+
+void XComponentModelNG::SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDestroyedEvent&& onDestroyed)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerDestroyedEvent(std::move(onDestroyed));
+}
+
+void XComponentModelNG::SetDetachCallback(FrameNode* frameNode, DetachCallback&& onDetach)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = node->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDetachEvent(std::move(onDetach));
+}
+
+void XComponentModelNG::SetImageAIOptions(FrameNode* frameNode, void* options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetImageAIOptions(options);
+}
 } // namespace OHOS::Ace::NG

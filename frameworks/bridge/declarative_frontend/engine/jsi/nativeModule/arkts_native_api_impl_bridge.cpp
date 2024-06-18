@@ -4691,6 +4691,10 @@ void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> obje
 void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto xComponent = panda::ObjectRef::New(vm);
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setXComponentInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetXComponentInitialize));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetXComponentInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetXComponentInitialize));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetBackgroundColor));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),

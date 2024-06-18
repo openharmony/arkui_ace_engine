@@ -56,9 +56,15 @@ public:
     static XComponentType GetXComponentType(FrameNode* frameNode);
     static uint32_t GetXComponentSurfaceWidth(FrameNode* frameNode);
     static uint32_t GetXComponentSurfaceHeight(FrameNode* frameNode);
+    static void SetXComponentLibraryname(FrameNode* frameNode, const std::string& libraryname);
+    static void SetControllerOnCreated(FrameNode* frameNode, SurfaceCreatedEvent&& onCreated);
+    static void SetControllerOnChanged(FrameNode* frameNode, SurfaceChangedEvent&& onChanged);
+    static void SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDestroyedEvent&& onDestroyed);
+    static void SetDetachCallback(FrameNode* frameNode, DetachCallback&& onDetach);
+    static void SetImageAIOptions(FrameNode* frameNode, void* options);
 
 private:
-    XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
+    static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG
