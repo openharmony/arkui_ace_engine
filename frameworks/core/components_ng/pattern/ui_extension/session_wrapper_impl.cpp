@@ -466,10 +466,17 @@ void SessionWrapperImpl::OnConnect()
 
 void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
 {
+    int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, sessionType = sessionType_, isAbnormal]() {
+        [weak = hostPattern_, sessionType = sessionType_, isAbnormal, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("[AceUiExtensionComponent]OnDisconnect: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
             pattern->OnDisconnect(isAbnormal);
             if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                 pattern->FireOnReleaseCallback(static_cast<int32_t>(isAbnormal));
