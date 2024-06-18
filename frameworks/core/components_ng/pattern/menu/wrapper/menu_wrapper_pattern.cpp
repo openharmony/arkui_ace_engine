@@ -139,7 +139,7 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
             CHECK_NULL_VOID(theme);
             auto curMenuItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(curMenuItemPattern);
-            if (!(curMenuItemPattern->IsDisabled())) {
+            if (!curMenuItemPattern->IsDisabled() && !curMenuItemPattern->IsStackSubmenuHeader()) {
                 curMenuItemPattern->SetBgBlendColor(
                     curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
                 curMenuItemPattern->PlayBgColorAnimation(false);
