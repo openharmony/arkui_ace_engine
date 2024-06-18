@@ -3055,6 +3055,9 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     if (rootNode->GetChildren().empty()) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
+    if (InstanceOf<KeyboardPattern>(pattern)) {
+        FocusHub::LostFocusToViewRoot();
+    }
     return true;
 }
 
