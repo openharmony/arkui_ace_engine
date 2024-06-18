@@ -991,6 +991,15 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_TAB) == MASK_FOCUS_STEP_TAB;
     }
 
+    static inline FocusStep GetRealFocusStepByTab(FocusStep moveStep, bool isRtl = false)
+    {
+        if (isRtl) {
+            return moveStep == FocusStep::TAB ? FocusStep::LEFT : FocusStep::RIGHT;
+        } else {
+            return moveStep == FocusStep::TAB ? FocusStep::RIGHT : FocusStep::LEFT;
+        }
+    }
+    
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
