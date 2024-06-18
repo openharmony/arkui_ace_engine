@@ -22,7 +22,6 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -178,8 +177,6 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d not in caches and failed to build.", index);
             return nullptr;
         }
-        // move item to L1 cache.
-        caches_.AddKeyToL1(key.value());
     } else {
         // TODO need update existed node4Index with new index.
     }
@@ -193,6 +190,13 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     if (addToRenderTree && !isCache) {
         node4Index->SetActive(true);
     }
+
+    if (caches_.IsInL1Cache(key.value())) {
+        return node4Index->GetFrameChildByIndex(0, needBuild);
+    }
+
+    // if the item was in L2 cache, move item to L1 cache.
+    caches_.AddKeyToL1(key.value());
     if (node4Index->GetDepth() != GetDepth() + 1) {
         node4Index->SetDepth(GetDepth() + 1);
     }
@@ -294,7 +298,7 @@ void RepeatVirtualScrollNode::OnConfigurationUpdate(const ConfigurationChange& c
 
 void RepeatVirtualScrollNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
-   // To do
+    // To do
 }
 
 // FOREAch
