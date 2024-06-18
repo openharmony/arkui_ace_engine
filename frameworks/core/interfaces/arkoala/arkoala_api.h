@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 109
+#define ARKUI_FULL_API_VERSION 110
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 109
+#define ARKUI_NODE_API_VERSION 110
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1644,6 +1644,7 @@ struct ArkUICommonModifier {
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
     void (*resetPixelRound)(ArkUINodeHandle node);
+    void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
 };
 
@@ -2779,6 +2780,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaOnDidDelete)(ArkUINodeHandle node);
     void (*setTextAreaEnablePreviewText)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextAreaEnablePreviewText)(ArkUINodeHandle node);
+    void (*getTextAreaPadding)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
 };
 
 struct ArkUITextInputModifier {
@@ -3568,6 +3570,8 @@ struct ArkUITextClockModifier {
     void (*resetTextShadow)(ArkUINodeHandle node);
     void (*setFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetFontFeature)(ArkUINodeHandle node);
+    void (*setDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType);
+    void (*resetDateTimeOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUITextClockControllerModifier {
@@ -3600,7 +3604,8 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerBackgroundColor)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextPickerRangeStr)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerSingleRange)(ArkUINodeHandle node);
-    void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange);
+    void (*setTextPickerRangeStr)(ArkUINodeHandle node, ArkUI_CharPtr rangeStr, ArkUI_Bool isSingleRange,
+        ArkUI_Int32 rangeType);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,

@@ -310,6 +310,9 @@ void PipelineContext::FlushDirtyNodeUpdate()
         node->ProcessPropertyDiff();
     }
 
+    if (!ViewStackProcessor::GetInstance()->IsEmpty()) {
+        LOGW("stack is not empty when call FlushDirtyNodeUpdate, node may be mounted to incorrect pos!");
+    }
     // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
     // use maxFlushTimes to avoid dead cycle.
     int maxFlushTimes = 3;
@@ -2205,10 +2208,11 @@ void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, Ref
     }
 }
 
-void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent)
+void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
+    const std::string& fillContent, bool isPopup)
 {
     CHECK_NULL_VOID(node);
-    node->NotifyFillRequestFailed(errCode, fillContent);
+    node->NotifyFillRequestFailed(errCode, fillContent, isPopup);
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -2427,13 +2431,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
 
     auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-
-    if (event.button == MouseButton::RIGHT_BUTTON &&
-        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
-        manager->SetIsDragCancel(true);
+    if (manager) {
+        if (event.button == MouseButton::RIGHT_BUTTON &&
+            (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
+            manager->SetIsDragCancel(true);
+        } else {
+            manager->SetIsDragCancel(false);
+        }
     } else {
-        manager->SetIsDragCancel(false);
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
+            event.touchEventId);
     }
 
     auto container = Container::Current();
@@ -3017,6 +3024,7 @@ void PipelineContext::Destroy()
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
     dragDropManager_.Reset();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "PipelineContext::Destroy Reset dragDropManager_");
     focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();

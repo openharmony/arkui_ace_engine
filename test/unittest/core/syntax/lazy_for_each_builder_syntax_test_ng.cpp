@@ -21,8 +21,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 
-#define PRIVATE public
-#define PROTECTED public
+#define private public
+#define protected public
 #include "mock_lazy_for_each_actuator.h"
 #include "mock_lazy_for_each_builder.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"

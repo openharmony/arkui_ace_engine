@@ -161,7 +161,10 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
     if (jsStateProfilerStatusCallback_) {
-        jsStateProfilerStatusCallback_(status);
+        auto taskExecutor = Container::CurrentTaskExecutorSafely();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([callback = jsStateProfilerStatusCallback_, status]() { callback(status); },
+            TaskExecutor::TaskType::UI, "ArkUITriggerJsStateProfilerStatusCallback");
     }
 }
 

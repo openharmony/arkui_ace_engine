@@ -259,6 +259,10 @@ void ImageModelNG::SetBackBorder()
 void ImageModelNG::SetBackBorder(FrameNode *frameNode)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedBorderRadius(true);
 }
 
 void ImageModelNG::SetBlur(double blur) {}

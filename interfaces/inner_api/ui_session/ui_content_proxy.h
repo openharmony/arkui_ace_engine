@@ -19,17 +19,26 @@
 #include "iremote_proxy.h"
 #include "ui_content_errors.h"
 #include "ui_content_service_interface.h"
+#include "ui_report_stub.h"
 
 namespace OHOS::Ace {
 class UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
-    virtual int32_t OnGetInspectorTree() override;
-    virtual int32_t OnReportUnfocusEvent() override;
-    virtual int32_t RegisterRemoteObject(sptr<IRemoteObject> remoteObject) override;
+    virtual int32_t GetInspectorTree() override;
+    virtual int32_t Connect() override;
+    virtual int32_t RegisterClickEventCallback(EventCallback eventCallback) override;
+    virtual int32_t RegisterRouterChangeEventCallback(EventCallback eventCallback) override;
+    virtual int32_t RegisterSearchEventCallback(EventCallback eventCallback) override;
+    virtual int32_t RegisterComponentChangeEventCallback(EventCallback eventCallback) override;
+    virtual int32_t UnregisterClickEventCallback() override;
+    virtual int32_t UnregisterSearchEventCallback() override;
+    virtual int32_t UnregisterRouterChangeEventCallback() override;
+    virtual int32_t UnregisterComponentChangeEventCallback() override;
 
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
+    sptr<UiReportStub> report_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H

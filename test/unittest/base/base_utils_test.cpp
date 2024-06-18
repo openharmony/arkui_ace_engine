@@ -816,4 +816,149 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest042, TestSize.Level1)
     ASSERT_EQ(StringUtils::EndWith(startWithValue, prefixString), true);
     ASSERT_EQ(StringUtils::EndWith(startWithValue, prefixString), true);
 }
+
+/**
+ * @tc.name: StringExpressionTest001
+ * @tc.desc: InitMapping()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest001, TestSize.Level1)
+{
+    std::map<std::string, int> mapping;
+    StringExpression::InitMapping(mapping);
+
+    EXPECT_EQ(mapping.find("+")->second, 0);
+    EXPECT_EQ(mapping.find("-")->second, 0);
+    EXPECT_EQ(mapping.find("*")->second, 1);
+    EXPECT_EQ(mapping.find("/")->second, 1);
+    EXPECT_EQ(mapping.find("(")->second, 2);
+    EXPECT_EQ(mapping.find(")")->second, 2);
+}
+
+/**
+ * @tc.name: StringExpressionTest002
+ * @tc.desc: CheckCalcIsValid()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest002, TestSize.Level1)
+{
+    std::string formula;
+    EXPECT_TRUE(StringExpression::CheckCalcIsValid(formula));
+    formula = "+calc(1,1)-calc(1,1)";
+    EXPECT_FALSE(StringExpression::CheckCalcIsValid(formula));
+    formula = "(calc{1,1}+calc{1,1}-calc{1,1})";
+    EXPECT_TRUE(StringExpression::CheckCalcIsValid(formula));
+}
+
+/**
+ * @tc.name: StringExpressionTest003
+ * @tc.desc: CheckCalcIsValid()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest003, TestSize.Level1)
+{
+    std::string formula;
+    StringExpression::ReplaceSignNumber(formula);
+    EXPECT_EQ(formula, "");
+    formula = "+10-10+1.0+2.0+5-1.0";
+    StringExpression::ReplaceSignNumber(formula);
+    EXPECT_EQ(formula, " (0 + 10) (0 - 10) (0 + 1.0) (0 + 2.0) (0 + 5) (0 - 1.0)");
+}
+
+/**
+ * @tc.name: StringExpressionTest004
+ * @tc.desc: PushOpStack()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest004, TestSize.Level1)
+{
+    std::vector<std::string> result;
+    std::vector<std::string> opStack;
+    std::string curNum;
+    std::string formula = "2 * 3 - (2 + 3) / 5 + 6 / 2";
+    EXPECT_TRUE(StringExpression::PushOpStack(formula, curNum, result, opStack));
+    EXPECT_TRUE(!result.empty());
+    EXPECT_TRUE(!opStack.empty());
+    EXPECT_TRUE(!curNum.empty());
+}
+
+/**
+ * @tc.name: StringExpressionTest005
+ * @tc.desc: CalculateFourOperationsExp()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest005, TestSize.Level1)
+{
+    double opRes = 0.0;
+    Dimension num1 = 10.0_px;
+    Dimension num2 = 5.0_px;
+    std::string formula = "+";
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 15.0);
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    num2.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+
+    formula = "-";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num2.SetUnit(DimensionUnit::PX);
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, -5.0);
+
+    formula = "*";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::NONE);
+    num2.SetUnit(DimensionUnit::PX);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    num2.SetUnit(DimensionUnit::NONE);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 50.0);
+
+    formula = "/";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetValue(0.0);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 0.5);
+}
+
+/**
+ * @tc.name: StringExpressionTest006
+ * @tc.desc: CalculateExpImpl()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest006, TestSize.Level1)
+{
+    std::vector<std::string> rpnexp = { "2", "3", "*", "2", "3", "+", "5", "6", "/" };
+    std::vector<Dimension> result;
+    double opRes = 0.0;
+    EXPECT_TRUE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+    rpnexp = { "2_invalid", "*", "3" };
+    EXPECT_FALSE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+    result.clear();
+    rpnexp = { "2", "*", "3", "-", "(", "2", "3", "+", "5", "6", "/" };
+    EXPECT_FALSE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+}
 } // namespace OHOS::Ace

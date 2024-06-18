@@ -93,8 +93,6 @@ public:
     void SetLineDash(const std::vector<double>& lineDash) override;
     void SetTextAlign(const TextAlign& align) override;
     void SetTextBaseline(const TextBaseline& baseline) override;
-    double GetMeasureTextWidth(const PaintState& state, const std::string& text) override;
-    double GetMeasureTextHeight(const PaintState& state, const std::string& text) override;
     void FillRect(const Rect& rect) override;
     void StrokeRect(const Rect& rect) override;
     void ClearRect(const Rect& rect) override;

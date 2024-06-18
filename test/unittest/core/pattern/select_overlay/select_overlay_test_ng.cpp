@@ -3801,7 +3801,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner002, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**
@@ -3839,7 +3839,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner003, TestSize.Level1)
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**
@@ -3874,7 +3874,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateMenuInner004, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
 
     selectOverlayNode->UpdateMenuInner(infoPtr);
-    EXPECT_TRUE(true);
+    EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
 }
 
 /**

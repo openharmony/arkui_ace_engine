@@ -35,6 +35,9 @@ constexpr int32_t NUM_6 = 6;
 constexpr int32_t NUM_7 = 7;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_HOUR = "hour";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 } // namespace
 
 ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -335,6 +338,37 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> hourArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
+    if (hourArg->IsString(vm)) {
+        std::string hour = hourArg->ToString(vm)->ToString();
+        if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+            hourType = ZeroPrefixType::SHOW;
+        } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+            hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    GetArkUINodeModifiers()->getTextClockModifier()->setDateTimeOptions(
+        nativeNode, static_cast<ArkUI_Int32>(hourType));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::ResetDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextClockModifier()->resetDateTimeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

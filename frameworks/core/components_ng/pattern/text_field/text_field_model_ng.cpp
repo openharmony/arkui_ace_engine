@@ -48,7 +48,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
@@ -1985,5 +1985,20 @@ void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePre
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
+{
+    NG::PaddingProperty paddings = NG::ViewAbstract::GetPadding(frameNode);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, paddings);
+    if (textfieldPaintProperty->HasPaddingByUser()) {
+        const auto& property = textfieldPaintProperty->GetPaddingByUserValue();
+        paddings.top = std::optional<CalcLength>(property.top);
+        paddings.right = std::optional<CalcLength>(property.right);
+        paddings.bottom = std::optional<CalcLength>(property.bottom);
+        paddings.left = std::optional<CalcLength>(property.left);
+    }
+    return paddings;
 }
 } // namespace OHOS::Ace::NG

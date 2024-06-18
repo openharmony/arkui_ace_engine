@@ -195,7 +195,8 @@ Rect SubwindowManager::GetParentWindowRect()
 RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
+    auto subwindow =
+        GetSubwindow(containerId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(containerId) : containerId);
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();

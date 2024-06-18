@@ -297,6 +297,7 @@ public:
         const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle, int32_t length);
     void DeleteBackwardInStyledString(int32_t length);
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
+    void DeleteValueInStyledString(int32_t start, int32_t length, bool isIME = true);
 
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::string& string);
     bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
@@ -383,6 +384,7 @@ public:
     int32_t HandleSelectPosition(bool isForward);
     int32_t HandleSelectParagraghPos(bool direction);
     int32_t HandleSelectWrapper(CaretMoveIntent direction);
+    void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
@@ -772,6 +774,7 @@ public:
         contentChange_ = onChange;
     }
 
+    void HideMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
     RectF GetTextContentRect(bool isActualText = false) const override
@@ -1045,6 +1048,8 @@ private:
     RefPtr<FontSpan> ToFontSpan(const RefPtr<SpanItem>& spanItem);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
+    void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
+    void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans);
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);

@@ -51,8 +51,6 @@ constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
-constexpr float SHEET_NORMAL_SCALE = 1.0f;
-constexpr float SHEET_MAX_SCALE = 1.75f;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 } // namespace
 class SheetTheme : public virtual Theme {
@@ -99,6 +97,8 @@ public:
             theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
             theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
             theme->sheetBackgroundBlurStyle_ = sheetPattern->GetAttr<int>("sheet_background_blur_style", 0);
+            theme->sheetNormalScale_ = sheetPattern->GetAttr<double>("sheet_normal_aging_scale", 1.0f);
+            theme->sheetMaxAgingScale_ = sheetPattern->GetAttr<double>("sheet_max_aging_scale", 1.75f);
         }
     };
     ~SheetTheme() override = default;
@@ -178,6 +178,16 @@ public:
         return sheetBackgroundBlurStyle_;
     }
 
+    const double& GetSheetNormalScale() const
+    {
+        return sheetNormalScale_;
+    }
+
+    const double& GetSheetMaxAgingScale() const
+    {
+        return sheetMaxAgingScale_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -197,6 +207,8 @@ private:
     std::string sheetType_;
     std::string sheetBottom_;
     int sheetBackgroundBlurStyle_;
+    double sheetNormalScale_;
+    double sheetMaxAgingScale_;
 };
 } // namespace OHOS::Ace::NG
 

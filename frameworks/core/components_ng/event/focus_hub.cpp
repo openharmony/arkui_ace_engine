@@ -356,7 +356,9 @@ void FocusHub::RemoveSelf(BlurReason reason)
         FocusManager::FocusGuard guard(parent);
         LostFocus(reason);
     }
-    RemoveFocusScopeIdAndPriority();
+    if (!focusScopeId_.empty()) {
+        RemoveFocusScopeIdAndPriority();
+    }
 }
 
 void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
@@ -1019,10 +1021,7 @@ bool FocusHub::GoToNextFocusLinear(FocusStep step, const RectF& rect)
     if (step == FocusStep::NONE) {
         return false;
     }
-    bool reverse = !IsFocusStepForward(step);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        reverse = !reverse;
-    }
+    bool reverse = !IsFocusStepForward(step, AceApplicationInfo::GetInstance().IsRightToLeft());
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = FlushChildrenFocusHub(focusNodes);
     if (focusNodes.empty()) {
@@ -1278,6 +1277,9 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if ((focusDepend_ == FocusDependence::AUTO || focusDepend_ == FocusDependence::CHILD) && isAnyChildFocusable) {
         auto itFocusNode = itLastFocusNode;
         if (RequestFocusByPriorityInScope()) {
+            if (!currentHasFocused) {
+                OnFocusNode();
+            }
             return;
         }
         do {

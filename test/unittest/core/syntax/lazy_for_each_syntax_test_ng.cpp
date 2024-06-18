@@ -1346,7 +1346,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxDoSetActiveChildRangeTest001, Tes
      * @tc.steps: step3. Invoke DoSetActiveChildRange.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->DoSetActiveChildRange(0, 0);
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 
     /**
@@ -1354,7 +1354,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxDoSetActiveChildRangeTest001, Tes
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->builder_ = nullptr;
-    lazyForEachNode->DoSetActiveChildRange(0, 0);
+    lazyForEachNode->DoSetActiveChildRange(0, 0, 0, 0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 

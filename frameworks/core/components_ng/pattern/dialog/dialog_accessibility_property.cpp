@@ -22,6 +22,10 @@
 namespace OHOS::Ace::NG {
 std::string DialogAccessibilityProperty::GetText() const
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return "";
+    }
+
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();

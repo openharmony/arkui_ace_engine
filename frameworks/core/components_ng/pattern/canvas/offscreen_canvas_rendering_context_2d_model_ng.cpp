@@ -427,16 +427,6 @@ void OffscreenCanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaselin
     pattern_->SetTextBaseline(baseline);
 }
 
-double OffscreenCanvasRenderingContext2DModelNG::GetMeasureTextWidth(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureText(text, state) : 0.0;
-}
-
-double OffscreenCanvasRenderingContext2DModelNG::GetMeasureTextHeight(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureTextHeight(text, state) : 0.0;
-}
-
 void OffscreenCanvasRenderingContext2DModelNG::FillRect(const Rect& rect)
 {
     CHECK_NULL_VOID(pattern_);

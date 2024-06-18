@@ -1760,7 +1760,17 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
     auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
-    return gesture->ActClick();
+    bool result = gesture->ActClick();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, result);
+    auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
+    if (accessibilityAction == ACTIONS.end()) {
+        return result;
+    }
+    AccessibilityActionParam param;
+    param.accessibilityProperty = accessibilityProperty;
+    result |= accessibilityAction->second(param);
+    return result;
 }
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
@@ -4080,7 +4090,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
-    parentWindowId_ = parentWindowId;
+    parentWindowId_ = static_cast<int32_t>(parentWindowId);
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)

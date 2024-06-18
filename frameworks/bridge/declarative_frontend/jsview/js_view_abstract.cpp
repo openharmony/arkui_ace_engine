@@ -188,6 +188,8 @@ const char* TOP_START_PROPERTY = "topStart";
 const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
+const char* DEBUG_LINE_INFO_LINE = "$line";
+const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
@@ -2413,7 +2415,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
         ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
+            "", nullptr, nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
         return;
     }
 
@@ -2449,24 +2451,43 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         std::string text = info[0]->ToString();
-        ViewAbstractModel::GetInstance()->SetOverlay(text, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            text, nullptr, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
     } else if (info[0]->IsObject()) {
-        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
-        auto builder = menuObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
+        JSRef<JSObject> overlayObject = JSRef<JSObject>::Cast(info[0]);
+        auto builder = overlayObject->GetProperty("builder");
+        if (builder->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                              node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Overlay");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+            ViewAbstractModel::GetInstance()->SetOverlay(
+                "", std::move(buildFunc), nullptr, align, offsetX, offsetY, NG::OverlayType::BUILDER);
             return;
         }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        CHECK_NULL_VOID(builderFunc);
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = targetNode]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Overlay");
-            PipelineContext::SetCallBackNode(node);
-            func->Execute();
-        };
-        ViewAbstractModel::GetInstance()->SetOverlay("", std::move(buildFunc), align, offsetX,
-            offsetY, NG::OverlayType::BUILDER);
+
+        JSRef<JSVal> builderNode = overlayObject->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            return;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            return;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, contentNode, align, offsetX, offsetY, NG::OverlayType::COMPONENT_CONTENT);
     }
 }
 
@@ -7202,13 +7223,30 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
 
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
+    std::string debugLine;
+    uint32_t length = info.Length();
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
-    auto jsVal = info[0];
-    if (!CheckJSCallbackInfo("JsDebugLine", jsVal, checkList)) {
-        return;
+
+    if (length == 1) { // deprecated version of debug line
+        auto jsVal = info[0];
+        if (!CheckJSCallbackInfo("JsDebugLine", jsVal, checkList)) {
+            return;
+        }
+        debugLine = jsVal->ToString();
+    } else if (length == 2) { // debug line with extra package name
+        auto line = info[0];
+        auto packageName = info[1];
+        if (!CheckJSCallbackInfo("JsDebugLine", line, checkList) ||
+            !CheckJSCallbackInfo("JsDebugLine", packageName, checkList)) {
+            return;
+        }
+        auto json = JsonUtil::Create(true);
+        json->Put(DEBUG_LINE_INFO_LINE, line->ToString().c_str());
+        json->Put(DEBUG_LINE_INFO_PACKAGE_NAME, packageName->ToString().c_str());
+        debugLine = json->ToString();
     }
 
-    ViewAbstractModel::GetInstance()->SetDebugLine(jsVal->ToString());
+    ViewAbstractModel::GetInstance()->SetDebugLine(debugLine);
 }
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)

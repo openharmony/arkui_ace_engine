@@ -66,7 +66,11 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     wrapper_ = layoutWrapper;
 
     LayoutChildren(gridLayoutInfo_.currentOffset_);
-    wrapper_->SetActiveChildRange(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
+
+    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    auto cachedCount = props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_;
+    wrapper_->SetActiveChildRange(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, cachedCount, cachedCount);
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)

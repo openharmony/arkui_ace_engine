@@ -1226,7 +1226,7 @@ public:
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestSuccess");
     }
 
-    void OnFillRequestFailed(int32_t errCode, const std::string& fillContent) override
+    void OnFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
         auto pipelineContext = pipelineContext_.Upgrade();
@@ -1236,9 +1236,9 @@ public:
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [errCode, pipelineContext, node, fillContent]() {
+            [errCode, pipelineContext, node, fillContent, isPopup]() {
                 if (pipelineContext) {
-                    pipelineContext->NotifyFillRequestFailed(node, errCode, fillContent);
+                    pipelineContext->NotifyFillRequestFailed(node, errCode, fillContent, isPopup);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestFailed");

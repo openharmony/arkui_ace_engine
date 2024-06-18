@@ -28,10 +28,10 @@ export var ExtraRegionPosition;
   k3[(k3["BOTTOM"] = 2)] = "BOTTOM";
 })(ExtraRegionPosition || (ExtraRegionPosition = {}));
 export var PresetSplitRatio;
-(function (j3) {
-  j3[(j3["LAYOUT_1V1"] = 1)] = "LAYOUT_1V1";
-  j3[(j3["LAYOUT_2V3"] = 0.6666666666666666)] = "LAYOUT_2V3";
-  j3[(j3["LAYOUT_3V2"] = 1.5)] = "LAYOUT_3V2";
+(function (s4) {
+  s4[(s4["LAYOUT_1V1"] = 1)] = "LAYOUT_1V1";
+  s4[(s4["LAYOUT_2V3"] = 0.6666666666666666)] = "LAYOUT_2V3";
+  s4[(s4["LAYOUT_3V2"] = 1.5)] = "LAYOUT_3V2";
 })(PresetSplitRatio || (PresetSplitRatio = {}));
 function withDefaultValue(h3, i3) {
   if (h3 === void 0 || h3 === null) {
@@ -144,7 +144,7 @@ export class FoldSplitContainer extends ViewPU {
     if (s2.hoverModeLayoutOptions === undefined) {
       this.__hoverModeLayoutOptions.set({
         horizontalSplitRatio: PresetSplitRatio.LAYOUT_3V2,
-        showExtraRegion: true,
+        showExtraRegion: false,
         extraRegionPosition: ExtraRegionPosition.TOP,
       });
     }
@@ -331,9 +331,19 @@ export class FoldSplitContainer extends ViewPU {
       });
       Column.clip(true);
     }, Column);
-    this.primary.bind(this)(this);
-    Column.pop();
     this.observeComponentCreation2((u1, v1) => {
+      If.create();
+      if (this.primary) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.primary.bind(this)(this);
+        });
+      } else {
+        this.ifElseBranchUpdateFunction(1, () => {});
+      }
+    }, If);
+    If.pop();
+    Column.pop();
+    this.observeComponentCreation2((n1, o1) => {
       Column.create();
       Column.size(this.secondaryLayout.size);
       Column.position({
@@ -342,20 +352,30 @@ export class FoldSplitContainer extends ViewPU {
       });
       Column.clip(true);
     }, Column);
-    this.secondary.bind(this)(this);
+    this.observeComponentCreation2((u3, v3) => {
+      If.create();
+      if (this.secondary) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.secondary.bind(this)(this);
+        });
+      } else {
+        this.ifElseBranchUpdateFunction(1, () => {});
+      }
+    }, If);
+    If.pop();
     Column.pop();
-    this.observeComponentCreation2((n1, o1) => {
+    this.observeComponentCreation2((i2, j2) => {
       If.create();
       if (this.extra) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((s1, t1) => {
+          this.observeComponentCreation2((n3, o3) => {
             If.create();
             if (
               this.extraLayout.size.width > 0 &&
               this.extraLayout.size.height > 0
             ) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((m3, n3) => {
+                this.observeComponentCreation2((s3, t3) => {
                   Column.create();
                   Column.size(this.extraLayout.size);
                   Column.position({
@@ -370,7 +390,7 @@ export class FoldSplitContainer extends ViewPU {
                   );
                   Column.clip(true);
                 }, Column);
-                this.extra.bind(this)(this);
+                this.extra?.bind(this)?.(this);
                 Column.pop();
               });
             } else {
@@ -387,12 +407,14 @@ export class FoldSplitContainer extends ViewPU {
     Stack.pop();
   }
   dispatchHoverStatusChange(b4) {
-    this.onHoverStatusChange?.({
-      foldStatus: this.foldStatus,
-      isHoverMode: b4,
-      appRotation: display.getDefaultDisplaySync().rotation,
-      windowStatusType: this.windowStatusType,
-    });
+    if (this.onHoverStatusChange) {
+      this.onHoverStatusChange({
+        foldStatus: this.foldStatus,
+        isHoverMode: b4,
+        appRotation: display.getDefaultDisplaySync().rotation,
+        windowStatusType: this.windowStatusType,
+      });
+    }
   }
   hasExtraRegion() {
     return !!this.extra;
@@ -500,18 +522,18 @@ export class FoldSplitContainer extends ViewPU {
         this.expandedLayoutOptions.extraRegionPosition,
         ExtraRegionPosition.TOP
       );
-      if (j1 === ExtraRegionPosition.TOP) {
-        z.size.width = x - b1.size.width;
-        a1.size.width = x;
-        b1.size.height = z.size.height;
-        b1.position.x = z.size.width;
-        b1.position.y = 0;
-      } else {
+      if (j1 === ExtraRegionPosition.BOTTOM) {
         z.size.width = x;
         a1.size.width = x - b1.size.width;
         b1.size.height = a1.size.height;
         b1.position.x = a1.size.width;
         b1.position.y = z.size.height;
+      } else {
+        z.size.width = x - b1.size.width;
+        a1.size.width = x;
+        b1.size.height = z.size.height;
+        b1.position.x = z.size.width;
+        b1.position.y = 0;
       }
     }
     return { primary: z, secondary: a1, extra: b1 };
@@ -540,15 +562,7 @@ export class FoldSplitContainer extends ViewPU {
       q.size.width = o;
       r.size.width = o;
       s.position.x = o;
-      if (
-        !this.expandedLayoutOptions.isExtraRegionPerpendicular &&
-        this.expandedLayoutOptions.extraRegionPosition ===
-          ExtraRegionPosition.BOTTOM
-      ) {
-        s.position.y = q.size.height;
-      } else {
-        s.position.y = 0;
-      }
+      s.position.y = 0;
     } else {
       const v = getSplitRatio(
         this.hoverModeLayoutOptions.horizontalSplitRatio,
@@ -563,18 +577,18 @@ export class FoldSplitContainer extends ViewPU {
       } else {
         s.size.width = 0;
       }
-      if (w === ExtraRegionPosition.TOP) {
-        s.size.height = q.size.height;
-        q.size.width = o - s.size.width;
-        r.size.width = o;
-        s.position.x = q.position.x + q.size.width;
-        s.position.y = 0;
-      } else {
+      if (w === ExtraRegionPosition.BOTTOM) {
         q.size.width = o;
         r.size.width = o - s.size.width;
         s.size.height = r.size.height;
         s.position.x = r.size.width;
         s.position.y = r.position.y;
+      } else {
+        s.size.height = q.size.height;
+        q.size.width = o - s.size.width;
+        r.size.width = o;
+        s.position.x = q.position.x + q.size.width;
+        s.position.y = 0;
       }
     }
     return { primary: q, secondary: r, extra: s };

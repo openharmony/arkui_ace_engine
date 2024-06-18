@@ -19,6 +19,7 @@ config("uisession_manager_public_config") {
   include_dirs = [
     "$ace_root/frameworks",
     "include/",
+    "$ace_root/interfaces/inner_api/ui_session",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -38,6 +39,9 @@ ohos_shared_library("ui_session") {
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_proxy.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_report_proxy.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_manager.cpp",
   ]
 
   configs = [ "$ace_root:ace_config" ]

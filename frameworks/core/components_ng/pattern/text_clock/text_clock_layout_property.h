@@ -19,6 +19,7 @@
 #include <string>
 #include <sys/time.h>
 
+#include "base/i18n/time_format.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -49,6 +50,7 @@ public:
         value->propFontFamily_ = CloneFontFamily();
         value->propTextShadow_ = CloneTextShadow();
         value->propFontFeature_ = CloneFontFeature();
+        value->propPrefixHour_ = ClonePrefixHour();
         return value;
     }
 
@@ -64,6 +66,7 @@ public:
         ResetFontFamily();
         ResetTextShadow();
         ResetFontFeature();
+        ResetPrefixHour();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -77,6 +80,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextShadow, std::vector<Shadow>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixHour, ZeroPrefixType, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextClockLayoutProperty);

@@ -192,7 +192,11 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)
 {
-    auto engine = EngineHelper::GetCurrentEngineSafely();
+#if !defined(PREVIEW)
+        auto engine = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+#else
+        auto engine = EngineHelper::GetCurrentEngineSafely();
+#endif
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);

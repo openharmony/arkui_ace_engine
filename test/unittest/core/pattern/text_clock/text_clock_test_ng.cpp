@@ -18,6 +18,7 @@
 #include <sys/time.h>
 
 #include "gtest/gtest.h"
+#include "base/i18n/time_format.h"
 #define private public
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -63,6 +64,7 @@ struct TestProperty {
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
     std::optional<std::vector<Shadow>> textShadow = std::nullopt;
     std::optional<FONT_FEATURES_LIST> fontFeature = std::nullopt;
+    std::optional<ZeroPrefixType> preFixHour = ZeroPrefixType::AUTO;
 };
 
 class TextClockTestNG : public testing::Test {
@@ -100,6 +102,9 @@ RefPtr<FrameNode> TextClockTestNG::CreateTextClockParagraph(const TestProperty& 
     }
     if (testProperty.fontFeature.has_value()) {
         textClockModel.SetFontFeature(testProperty.fontFeature.value());
+    }
+    if (testProperty.preFixHour.has_value()) {
+        textClockModel.SetDateTimeOptions(testProperty.preFixHour.value());
     }
     return AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 }
@@ -174,6 +179,9 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     textClockLayoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(textClockLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+
+    textClockLayoutProperty->UpdatePrefixHour(ZeroPrefixType::HIDE);
+    EXPECT_EQ(textClockLayoutProperty->GetPrefixHour(), ZeroPrefixType::HIDE);
 }
 
 /**
@@ -340,8 +348,7 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
      * @tc.steps: step4. call the format and datetime split, and datetime splice function.
      * @tc.expected: check whether the value is correct.
      */
-    bool is24H = false;
-    pattern->ParseInputFormat(is24H);
+    pattern->ParseInputFormat();
     std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
     std::string dateTimeValue = "2023/07/08, 下午8:35:07.007";
     curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
@@ -356,7 +363,7 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
     pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
     pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
     pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
-    EXPECT_EQ(is24H, true);
+    EXPECT_EQ(pattern->is24H_, true);
 }
 
 /**
@@ -395,12 +402,11 @@ HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
      * @tc.steps: step4. call the format split function.
      * @tc.expected: check whether the value is correct.
      */
-    bool is24H = false;
     pattern->GetWeek(true, 3);
     pattern->GetWeek(false, 5);
     pattern->GetDigitNumber("12345abcde-=_+");
-    pattern->ParseInputFormat(is24H);
-    EXPECT_EQ(is24H, false);
+    pattern->ParseInputFormat();
+    EXPECT_EQ(pattern->is24H_, false);
 }
 
 /**
@@ -549,11 +555,13 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. get pattern.
+     * @tc.steps: step2. get pattern and layoutProperty.
      * @tc.expected: step2.
      */
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
 
     /**
      * @tc.steps: step3. ParseDateTimeValue function is called..
@@ -594,6 +602,22 @@ HWTEST_F(TextClockTestNG, TextClockTest009, TestSize.Level1)
     strDateTimeValue = "1970/01/01, 01:01:01.001";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, strVec3);
+
+    std::vector<std::string> strVec4 = { "1970", "01", "01", "1", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
+    strDateTimeValue = "1970/01/01, 01:01:01.001";
+    pattern->is24H_ = true;
+    textClockProperty->UpdatePrefixHour(ZeroPrefixType::HIDE);
+    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, strVec4);
+
+    std::vector<std::string> strVec5 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
+    strDateTimeValue = "1970/01/01, 1:01:01.001";
+    pattern->is24H_ = false;
+    textClockProperty->UpdatePrefixHour(ZeroPrefixType::SHOW);
+    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, strVec5);
 }
 
 /**
@@ -650,11 +674,10 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
     textClockLayoutProperty->UpdateFormat("mm:SS");
     format = pattern->GetFormat();
     EXPECT_EQ(format, FORM_FORMAT);
-    bool is24H = false;
     pattern->GetWeek(true, 3);
     pattern->GetWeek(false, 5);
-    pattern->ParseInputFormat(is24H);
-    EXPECT_EQ(is24H, false);
+    pattern->ParseInputFormat();
+    EXPECT_EQ(pattern->is24H_, false);
 
     /**
      * @tc.steps: step6. isForm_ is change to false.

@@ -356,7 +356,7 @@ int32_t GetButtonArraryLen(napi_env env, std::shared_ptr<PromptAsyncContext>& co
 {
     uint32_t buttonsLen = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
-    int32_t buttonsLenInt = buttonsLen;
+    int32_t buttonsLenInt = static_cast<int32_t>(buttonsLen);
     if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
     }

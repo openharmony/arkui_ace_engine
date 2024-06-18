@@ -785,8 +785,8 @@ private:
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
-    // use 14px for normal font size.
-    Dimension fontSize_ { 14, DimensionUnit::PX };
+    // use 16vp for normal font size.
+    Dimension fontSize_ { 16, DimensionUnit::VP };
     Dimension adaptMinFontSize_;
     Dimension adaptMaxFontSize_;
     Dimension adaptFontSizeStep_;
@@ -878,15 +878,15 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
-    static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
+    static const std::unordered_map<FontWeight, std::string> fontWeightTable = {
         { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
         { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
         { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
         { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
         { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
-    auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
-    return weightIter != -1 ? fontWeightTable[weightIter].value : "";
+    auto weightIter = fontWeightTable.find(fontWeight);
+    return weightIter != fontWeightTable.end() ? weightIter->second : "";
 }
 
 inline std::string ToString(const FontWeight& fontWeight)

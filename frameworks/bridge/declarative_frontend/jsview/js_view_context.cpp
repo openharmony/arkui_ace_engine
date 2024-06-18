@@ -103,6 +103,13 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 {
     ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
         option.GetIteration());
+    if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
+            "curve:%{public}s, iteration:%{public}d]",
+            option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
+    }
+    NG::ScopedViewStackProcessor scopedProcessor;
     auto triggerId = Container::CurrentIdSafely();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
@@ -177,6 +184,13 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 {
     ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
         option.GetIteration());
+    if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "when call animateTo, node stack is not empty, not suitable for animateTo. param is [duration:%{public}d, "
+            "curve:%{public}s, iteration:%{public}d]",
+            option.GetDuration(), option.GetCurve()->ToString().c_str(), option.GetIteration());
+    }
+    NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     pipelineContext->SetSyncAnimationOption(option);

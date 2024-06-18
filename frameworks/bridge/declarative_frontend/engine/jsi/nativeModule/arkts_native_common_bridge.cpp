@@ -993,6 +993,29 @@ void ParseOuterBorderStyle(
     PushOuterBorderStyleVector(styleBottom, values);
 }
 
+void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values,
+    int32_t argsIndex)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, rightArgs, rightDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
 void SetBackgroundImagePositionAlign(double &value, DimensionUnit &type, double valueContent,
     const DimensionUnit &typeContent)
 {
@@ -2679,6 +2702,24 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     
     GetArkUINodeModifiers()->getCommonModifier()->setBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::SetBorder(runtimeCallInfo);
+
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    std::vector<ArkUI_Float32> dashOptions;
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 17); // Border DashGap args start index from 17
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 21); // Border DashWidth args start index from 21
+
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderDashParams(nativeNode, dashOptions.data(),
+        dashOptions.size());
     return panda::JSValueRef::Undefined(vm);
 }
 

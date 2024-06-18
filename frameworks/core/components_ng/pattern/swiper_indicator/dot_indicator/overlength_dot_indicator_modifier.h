@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 namespace OHOS::Ace::NG {
@@ -29,39 +30,15 @@ class OverlengthDotIndicatorModifier : public DotIndicatorModifier {
 public:
     OverlengthDotIndicatorModifier()
         : DotIndicatorModifier(),
-          theFirstPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          theSecondPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          theThirdPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          fourthPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          fifthPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          sixthPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          seventhPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          eighthPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          ninthPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          newPointMove_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          leftSecondPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(ONE_IN_TWO)),
-          leftThirdPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(THREE_QUARTERS)),
-          rightSecondPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(THREE_QUARTERS)),
-          rightFirstPointSizeRate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(ONE_IN_TWO)),
-          firstPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
-          newPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
+          firstPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
+          newPointOpacity_(AceType::MakeRefPtr<AnimatablePropertyUint8>(0)),
+          unselectedIndicatorWidth_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
+          unselectedIndicatorHeight_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0)))
     {
-        AttachProperty(theFirstPointMove_);
-        AttachProperty(theSecondPointMove_);
-        AttachProperty(theThirdPointMove_);
-        AttachProperty(fourthPointMove_);
-        AttachProperty(fifthPointMove_);
-        AttachProperty(sixthPointMove_);
-        AttachProperty(seventhPointMove_);
-        AttachProperty(eighthPointMove_);
-        AttachProperty(ninthPointMove_);
-        AttachProperty(newPointMove_);
-        AttachProperty(leftSecondPointSizeRate_);
-        AttachProperty(leftThirdPointSizeRate_);
-        AttachProperty(rightFirstPointSizeRate_);
-        AttachProperty(rightSecondPointSizeRate_);
-        AttachProperty(firstPointColor_);
-        AttachProperty(newPointColor_);
+        AttachProperty(firstPointOpacity_);
+        AttachProperty(newPointOpacity_);
+        AttachProperty(unselectedIndicatorWidth_);
+        AttachProperty(unselectedIndicatorHeight_);
     }
     ~OverlengthDotIndicatorModifier() override = default;
 
@@ -69,16 +46,13 @@ public:
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty) override;
     void PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes,
-        bool currentIndexFlag, const LinearColor& indicatorColor) override;
-    LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty) override;
-    // Update property
+    void PaintUnselectedIndicator(
+        RSCanvas& canvas, const OffsetF& center, float width, float height, const LinearColor& indicatorColor);
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
-        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX) override;
-    void UpdateMaxDisplayProperty(const LinearVector<float>& vectorBlackPointCenterX);
+        const std::pair<float, float>& longPointCenterX);
 
     void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
-        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX) override;
+        const std::pair<float, float>& longPointCenterX);
     void SetRealItemCount(int32_t realItemCount)
     {
         realItemCount_ = realItemCount;
@@ -88,33 +62,139 @@ public:
     {
         maxDisplayCount_ = maxDisplayCount;
     }
-    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
-        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
-        TouchBottomTypeLoop touchBottomTypeLoop) override;
+
+    void PlayIndicatorAnimation(const OffsetF& margin, const LinearVector<float>& itemHalfSizes,
+        GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop);
+
+    void SetMoveDirection(OverlongIndicatorMove moveDirection)
+    {
+        moveDirection_ = moveDirection;
+    }
+
+    void SetAnimationStartCenterX(const LinearVector<float>& animationStartCenterX)
+    {
+        animationStartCenterX_ = animationStartCenterX;
+    }
+
+    void SetAnimationEndCenterX(const LinearVector<float>& animationEndCenterX)
+    {
+        animationEndCenterX_ = animationEndCenterX;
+    }
+
+    void SetAnimationStartIndicatorWidth(const LinearVector<float>& animationStartIndicatorWidth)
+    {
+        animationStartIndicatorWidth_ = animationStartIndicatorWidth;
+    }
+
+    void SetAnimationEndIndicatorWidth(const LinearVector<float>& animationEndIndicatorWidth)
+    {
+        animationEndIndicatorWidth_ = animationEndIndicatorWidth;
+    }
+
+    void SetAnimationStartIndicatorHeight(const LinearVector<float>& animationStartIndicatorHeight)
+    {
+        animationStartIndicatorHeight_ = animationStartIndicatorHeight;
+    }
+
+    void SetAnimationEndIndicatorHeight(const LinearVector<float>& animationEndIndicatorHeight)
+    {
+        animationEndIndicatorHeight_ = animationEndIndicatorHeight;
+    }
+
+    OverlongType GetCurrentOverlongType() const
+    {
+        return currentOverlongType_;
+    }
+
+    void SetAnimationStartIndex(int32_t animationStartIndex)
+    {
+        animationStartIndex_ = animationStartIndex;
+    }
+
+    void SetAnimationEndIndex(int32_t animationEndIndex)
+    {
+        animationEndIndex_ = animationEndIndex;
+    }
+
+    void SetTurnPageRate(float turnPageRate)
+    {
+        turnPageRate_ = turnPageRate;
+    }
+
+    void SetBlackPointCenterMoveRate(float blackPointCenterMoveRate)
+    {
+        blackPointCenterMoveRate_ = blackPointCenterMoveRate;
+    }
+
+    void SetLongPointLeftCenterMoveRate(float longPointLeftCenterMoveRate)
+    {
+        longPointLeftCenterMoveRate_ = longPointLeftCenterMoveRate;
+    }
+
+    void SetLongPointRightCenterMoveRate(float longPointRightCenterMoveRate)
+    {
+        longPointRightCenterMoveRate_ = longPointRightCenterMoveRate;
+    }
+
+    void SetGestureState(GestureState gestureState)
+    {
+        gestureState_ = gestureState;
+    }
+
+    void SetIsCustomSizeValue(bool isCustomSizeValue)
+    {
+        isCustomSizeValue_ = isCustomSizeValue;
+    }
+
+    void InitOverlongStatus(int32_t pageIndex);
+    void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
+    void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
+
 private:
-    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX) override;
-    void PlayPointOpacityAnimation();
-    void UpdateDisplayProperty(const LinearVector<float>& vectorBlackPointCenterX,
-        const float variableOffset);
+    void PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes);
     void StopAnimation(bool ifImmediately) override;
-    RefPtr<AnimatablePropertyFloat> theFirstPointMove_;
-    RefPtr<AnimatablePropertyFloat> theSecondPointMove_;
-    RefPtr<AnimatablePropertyFloat> theThirdPointMove_;
-    RefPtr<AnimatablePropertyFloat> fourthPointMove_;
-    RefPtr<AnimatablePropertyFloat> fifthPointMove_;
-    RefPtr<AnimatablePropertyFloat> sixthPointMove_;
-    RefPtr<AnimatablePropertyFloat> seventhPointMove_;
-    RefPtr<AnimatablePropertyFloat> eighthPointMove_;
-    RefPtr<AnimatablePropertyFloat> ninthPointMove_;
-    RefPtr<AnimatablePropertyFloat> newPointMove_;
-    RefPtr<AnimatablePropertyFloat> leftSecondPointSizeRate_;
-    RefPtr<AnimatablePropertyFloat> leftThirdPointSizeRate_;
-    RefPtr<AnimatablePropertyFloat> rightSecondPointSizeRate_;
-    RefPtr<AnimatablePropertyFloat> rightFirstPointSizeRate_;
-    RefPtr<AnimatablePropertyColor> firstPointColor_;
-    RefPtr<AnimatablePropertyColor> newPointColor_;
+    void CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes);
+    void CalcTargetStatusOnLongPointMove(const LinearVector<float>& itemHalfSizes);
+    void CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes);
+    void CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes);
+    std::pair<LinearVector<float>, std::pair<float, float>> CalcIndicatorCenterX(
+        const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex);
+    LinearVector<float> CalcIndicatorSize(const LinearVector<float>& itemHalfSizes, int32_t selectedIndex,
+        OverlongType overlongType, int32_t pageIndex, bool isWidth);
+    void UpdateSelectedCenterXOnDrag();
+    void UpdateUnselectedCenterXOnDrag();
+    int32_t CalcTargetIndexOnDrag() const;
+
+    RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
+    RefPtr<AnimatablePropertyUint8> newPointOpacity_;
+    RefPtr<AnimatablePropertyVectorFloat> unselectedIndicatorWidth_;
+    RefPtr<AnimatablePropertyVectorFloat> unselectedIndicatorHeight_;
     int32_t maxDisplayCount_ = 0;
     int32_t realItemCount_ = 0;
+    OverlongIndicatorMove moveDirection_ = OverlongIndicatorMove::NONE;
+    LinearVector<float> animationStartCenterX_ = {};
+    LinearVector<float> animationEndCenterX_ = {};
+    LinearVector<float> animationStartIndicatorWidth_ = {};
+    LinearVector<float> animationEndIndicatorWidth_ = {};
+    LinearVector<float> animationStartIndicatorHeight_ = {};
+    LinearVector<float> animationEndIndicatorHeight_ = {};
+    std::pair<float, float> overlongSelectedStartCenterX_ = { 0.0f, 0.0f};
+    std::pair<float, float> overlongSelectedEndCenterX_ = { 0.0f, 0.0f};
+    OffsetF normalMargin_ = { 0, 0 };
+
+    int32_t animationStartIndex_ = 0;
+    int32_t animationEndIndex_ = 0;
+    int32_t currentSelectedIndex_ = 0;
+    int32_t targetSelectedIndex_ = 0;
+    OverlongType currentOverlongType_ = OverlongType::NONE;
+    OverlongType targetOverlongType_ = OverlongType::NONE;
+    bool longPointWithAnimation_ = true;
+    float turnPageRate_ = 0.0f;
+    float blackPointCenterMoveRate_ = 0.0f;
+    float longPointLeftCenterMoveRate_ = 0.0f;
+    float longPointRightCenterMoveRate_ = 0.0f;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
+    bool isCustomSizeValue_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

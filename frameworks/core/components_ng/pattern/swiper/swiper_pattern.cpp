@@ -66,6 +66,8 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO use theme.
+constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
+constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
@@ -148,9 +150,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
-        auto isMeasureOneMoreItem = AceType::InstanceOf<TabsNode>(host->GetParent()) &&
-            !NearZero(velocity_.value_or(0)) && !hasCachedCapture_ && !SupportSwiperCustomAnimation();
-        swiperLayoutAlgorithm->SetIsMeasureOneMoreItem(isMeasureOneMoreItem);
         swiperLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
     }
     swiperLayoutAlgorithm->SetCurrentIndex(currentIndex_);
@@ -2418,8 +2417,8 @@ void SwiperPattern::CheckMarkForIndicatorBoundary()
 {
     bool isRtl = IsHorizontalAndRightToLeft();
 
-    uint32_t startIndex = isRtl ? TotalCount() - 1 : 0;
-    uint32_t endIndex = isRtl ? 0 : TotalCount() - 1;
+    auto startIndex = isRtl ? TotalCount() - 1 : 0;
+    auto endIndex = isRtl ? 0 : TotalCount() - 1;
     if (!IsLoop() && ((currentFirstIndex_ == startIndex && GreatNotEqualCustomPrecision(turnPageRate_, 0.0f)) ||
         (currentFirstIndex_ == endIndex && LessNotEqualCustomPrecision(turnPageRate_, 0.0f)))) {
         return;
@@ -3072,7 +3071,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         return;
     }
     usePropertyAnimation_ = false;
-
+    ACE_SCOPED_TRACE("Swiper stop property animation");
     // Stop CurrentAnimationProperty.
     AnimationOption option;
     option.SetDuration(0);
@@ -3093,6 +3092,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         }
     };
     AnimationUtils::Animate(option, propertyUpdateCallback);
+    targetIndex_.reset();
     OffsetF currentOffset;
     for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
@@ -5538,5 +5538,24 @@ void SwiperPattern::UpdateNodeRate()
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Expected gesture frame rate is: %{public}d", expectedRate);
         frameRateManager->UpdateNodeRate(nodeId, expectedRate);
     }
+}
+
+int32_t SwiperPattern::GetMaxDisplayCount() const
+{
+    if (!swiperParameters_ || !swiperParameters_->maxDisplayCountVal.has_value()) {
+        return 0;
+    }
+
+    auto maxDisplayCount = swiperParameters_->maxDisplayCountVal.value();
+    if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
+        return 0;
+    }
+
+    auto childrenSize = RealTotalCount();
+    if (childrenSize <= maxDisplayCount) {
+        return 0;
+    }
+
+    return maxDisplayCount;
 }
 } // namespace OHOS::Ace::NG

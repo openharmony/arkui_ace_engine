@@ -966,7 +966,12 @@ const ArkUI_AttributeItem* GetPadding(ArkUI_NodeHandle node)
     ArkUI_Float32 paddings[NUM_4];
     ArkUI_Int32 length = 0;
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, unit);
+    if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaPadding(
+            node->uiNodeHandle, &paddings, length, unit);
+    } else {
+        fullImpl->getNodeModifiers()->getCommonModifier()->getPadding(node->uiNodeHandle, &paddings, length, unit);
+    }
     g_numberValues[NUM_0].f32 = paddings[NUM_0];
     g_numberValues[NUM_1].f32 = paddings[NUM_1];
     g_numberValues[NUM_2].f32 = paddings[NUM_2];
@@ -8044,7 +8049,7 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
@@ -8054,15 +8059,14 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     }
     isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
     fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
-        node->uiNodeHandle, item->string, isSingleRange);
+        node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetTextPickerRange(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
-
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true);
+    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(node->uiNodeHandle, "", true, NUM_0);
 }
 
 const ArkUI_AttributeItem* GetTextPickerValue(ArkUI_NodeHandle node)
@@ -9652,7 +9656,7 @@ int32_t SetAutoResize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
 int32_t SetAlt(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item || !item->string || !item->object) {
+    if (!item || (!item->string && !item->object)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -10465,6 +10469,7 @@ const ArkUI_AttributeItem* GetFontColor(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].u32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontColor(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10496,6 +10501,7 @@ const ArkUI_AttributeItem* GetFontSize(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontSize(node->uiNodeHandle, unit);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10526,6 +10532,7 @@ const ArkUI_AttributeItem* GetFontStyle(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontStyle(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -10550,6 +10557,7 @@ const ArkUI_AttributeItem* GetFontWeight(ArkUI_NodeHandle node)
             g_attributeItem.size = REQUIRED_ONE_PARAM;
             break;
         case ARKUI_NODE_TEXT_INPUT:
+        case ARKUI_NODE_TEXT_AREA:
             g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
                 getTextInputFontWeight(node->uiNodeHandle);
             g_attributeItem.size = REQUIRED_ONE_PARAM;
@@ -13858,7 +13866,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if ((nodeSubTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
+    if ((nodeSubTypeClass >= sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
         !CheckIfAttributeLegal(node, type)) {
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
@@ -13888,7 +13896,7 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if ((nodeSubTypeClass > sizeof(getterClasses) / sizeof(AttributeGetterClass*)) ||
+    if ((nodeSubTypeClass >= sizeof(getterClasses) / sizeof(AttributeGetterClass*)) ||
         !CheckIfAttributeLegal(node, type)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return nullptr;
@@ -13915,7 +13923,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
-    if ((nodeSubTypeClass > sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
+    if ((nodeSubTypeClass >= sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
         !CheckIfAttributeLegal(node, type)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
