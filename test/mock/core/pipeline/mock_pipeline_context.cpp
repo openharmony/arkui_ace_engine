@@ -122,6 +122,11 @@ RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t /* cont
     return MockPipelineContext::GetCurrent();
 }
 
+bool PipelineContext::IsDestroyed()
+{
+    return destroyed_;
+}
+
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::SetupRootElement()

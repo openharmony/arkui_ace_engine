@@ -279,6 +279,8 @@ public:
 
     bool IsWindowSceneConsumed();
 
+    bool IsDestroyed();
+
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
