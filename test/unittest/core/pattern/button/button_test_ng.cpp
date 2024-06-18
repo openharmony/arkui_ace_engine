@@ -1431,7 +1431,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest026, TestSize.Level1)
     /**
      * @tc.steps: step1. create button and get frameNode
      */
-    TestProperty testProperty;;
+    TestProperty testProperty;
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
@@ -1486,6 +1486,216 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest027, TestSize.Level1)
      */
     buttonPattern->SetBuilderFunc(node);
     buttonPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ButtonPatternTest028
+ * @tc.desc: Test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest028, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::TEXT;
+    testProperty.controlSize = ControlSize::NORMAL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetTextBackgroundFocus());
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(
+        textRenderContext->GetForegroundColor(), theme->GetFocusTextColor(ButtonStyleMode::TEXT, ButtonRole::NORMAL));
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetFocusTextColor(ButtonStyleMode::TEXT, ButtonRole::NORMAL));
+}
+
+/**
+ * @tc.name: ButtonPatternTest029
+ * @tc.desc: Test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest029, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::NORMAL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(
+        textRenderContext->GetForegroundColor(), theme->GetFocusTextColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
+    EXPECT_EQ(
+        textLayoutProperty->GetTextColor(), theme->GetFocusTextColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetNormalBackgroundFocus());
+    EXPECT_EQ(renderContext->GetBackShadow(), Shadow::CreateShadow(static_cast<ShadowStyle>(theme->GetShadowNormal())));
+}
+
+/**
+ * @tc.name: ButtonPatternTest030
+ * @tc.desc: Test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest030, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::EMPHASIZE;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+
+    EXPECT_EQ(renderContext->GetBackShadow(), Shadow::CreateShadow(static_cast<ShadowStyle>(theme->GetShadowNormal())));
+}
+
+/**
+ * @tc.name: ButtonPatternTest031
+ * @tc.desc: Test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest031, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::TEXT;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    buttonPattern->HandleBlurStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetBgColor(ButtonStyleMode::TEXT, ButtonRole::NORMAL));
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(textRenderContext->GetForegroundColor(), theme->GetTextColor(ButtonStyleMode::TEXT, ButtonRole::NORMAL));
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTextColor(ButtonStyleMode::TEXT, ButtonRole::NORMAL));
+}
+
+/**
+ * @tc.name: ButtonPatternTest032
+ * @tc.desc: Test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest032, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::NORMAL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    buttonPattern->HandleBlurStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    EXPECT_EQ(renderContext->GetBackShadow(), Shadow::CreateShadow(static_cast<ShadowStyle>(theme->GetShadowNormal())));
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetBgColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
+    auto textRenderContext = textNode->GetRenderContext();
+    ASSERT_NE(textRenderContext, nullptr);
+    EXPECT_EQ(
+        textRenderContext->GetForegroundColor(), theme->GetTextColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTextColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
+}
+
+/**
+ * @tc.name: ButtonPatternTest033
+ * @tc.desc: Test HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest033, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::NORMAL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    buttonPattern->HandleFocusStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    buttonPattern->HandleBlurStyleTask(layoutProperty, renderContext, theme, textLayoutProperty, textNode);
+    EXPECT_EQ(renderContext->GetBackShadow(), Shadow::CreateShadow(static_cast<ShadowStyle>(theme->GetShadowNormal())));
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetBgColor(ButtonStyleMode::NORMAL, ButtonRole::NORMAL));
 }
 
 /**
