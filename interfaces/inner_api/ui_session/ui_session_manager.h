@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
 #include <cstdint>
 #include <iremote_object.h>
+#include <map>
+#include <mutex>
 
 #include "ui_report_stub.h"
 
@@ -31,30 +33,30 @@ public:
     static UiSessionManager& GetInstance();
 
     /**
-     * @description: execute click callback when component click event occurs 
+     * @description: execute click callback when component click event occurs
      */
-    void ReportClickEvent();
+    void ReportClickEvent(std::string data);
 
     /**
-     * @description: execute search callback when component search event occurs 
+     * @description: execute search callback when component search event occurs
      */
-    void ReportSearchEvent();
+    void ReportSearchEvent(std::string data);
 
     /**
-     * @description: execute switch callback when page switch to another page occurs 
+     * @description: execute switch callback when page switch to another page occurs
      */
-    void ReportRouterChangeEvent();
+    void ReportRouterChangeEvent(std::string data);
 
     /**
-     * @description: execute click callback when page some component change occurs 
+     * @description: execute click callback when page some component change occurs
      */
-    void ReportComponentChangeEvent();
+    void ReportComponentChangeEvent(std::string data);
 
     /**
-     * @description: save report communication stub side 
+     * @description: save report communication stub side
      * @param reportStub report communication stub side
      */
-    void SaveReportStub(sptr<IRemoteObject> reportStub);
+    void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
     void SetClickEventRegistered(bool status);
     void SetSearchEventRegistered(bool status);
     void SetRouterChangeEventRegistered(bool status);
@@ -65,12 +67,12 @@ public:
     bool GetComponentChangeEventRegistered();
 
 private:
-    sptr<IRemoteObject> reportObject_ = nullptr;
-    bool isClickEventRegistered_ = false;
-    bool isSearchEventRegistered_ = false;
-    bool isRouterChangeEventRegistered_ = false;
-    bool isComponentChangeEventRegistered_ = false;
+    static std::mutex mutex_;
+    std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
+    int32_t clickEventRegisterProcesses_ = 0;
+    int32_t searchEventRegisterProcesses_ = 0;
+    int32_t routerChangeEventRegisterProcesses_ = 0;
+    int32_t componentChangeEventRegisterProcesses_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
-

@@ -30,22 +30,22 @@ public:
     /**
      * @description: notify stub side to execute click callback
      */
-    void ReportClickEvent() override;
+    void ReportClickEvent(std::string data) override;
 
     /**
      * @description: notify stub side to execute switch callback
      */
-    void ReportRouterChangeEvent() override;
+    void ReportRouterChangeEvent(std::string data) override;
 
     /**
      * @description: notify stub side to execute component callback
      */
-    void ReportComponentChangeEvent() override;
+    void ReportComponentChangeEvent(std::string data) override;
 
     /**
      * @description: notify stub side to execute search callback
      */
-    void ReportSearchEvent() override;
+    void ReportSearchEvent(std::string data) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

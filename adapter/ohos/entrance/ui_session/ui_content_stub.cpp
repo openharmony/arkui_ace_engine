@@ -88,48 +88,63 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
         LOGW("read reportStub object is nullptr,connect failed");
         return FAILED;
     }
-    UiSessionManager::GetInstance().SaveReportStub(report);
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance().SaveReportStub(report, processId);
     return NO_ERROR;
 }
 
 int32_t UiContentStub::RegisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(RegisterClickEventCallback(nullptr));
     return NO_ERROR;
 }
 
 int32_t UiContentStub::RegisterRouterChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(RegisterRouterChangeEventCallback(nullptr));
     return NO_ERROR;
 }
+
 int32_t UiContentStub::RegisterSearchEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(RegisterSearchEventCallback(nullptr));
     return NO_ERROR;
 }
+
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(RegisterRouterChangeEventCallback(nullptr));
     return NO_ERROR;
 }
+
 int32_t UiContentStub::UnregisterClickEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(UnregisterClickEventCallback());
     return NO_ERROR;
 }
+
 int32_t UiContentStub::UnregisterSearchEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(UnregisterSearchEventCallback());
     return NO_ERROR;
 }
+
 int32_t UiContentStub::UnregisterRouterChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(UnregisterRouterChangeEventCallback());
     return NO_ERROR;
 }
+
 int32_t UiContentStub::UnregisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    reply.WriteInt32(UnregisterComponentChangeEventCallback());
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

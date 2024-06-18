@@ -22,7 +22,7 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
-    using EventCallback = void (*)();
+    using EventCallback = std::function<void(std::string)>;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.UIContentService");
     IUiContentService() = default;
     ~IUiContentService() override = default;
@@ -102,7 +102,7 @@ public:
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
-    using EventCallback = void (*)();
+    using EventCallback = std::function<void(std::string)>;
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.ReportService");
     ReportService() = default;
     ~ReportService() override = default;
@@ -111,23 +111,22 @@ public:
     /**
      * @description: define reports the click event to the proxy interface
      */
-    virtual void ReportClickEvent() = 0;
+    virtual void ReportClickEvent(std::string data) = 0;
 
     /**
      * @description: define reports the switch event to the proxy interface
      */
-    virtual void ReportRouterChangeEvent() = 0;
+    virtual void ReportRouterChangeEvent(std::string data) = 0;
 
     /**
      * @description: define reports the component change event to the proxy interface
      */
-    virtual void ReportComponentChangeEvent() = 0;
-    
+    virtual void ReportComponentChangeEvent(std::string data) = 0;
+
     /**
      * @description: define reports the search event to the proxy interface
      */
-    virtual void ReportSearchEvent() = 0;
+    virtual void ReportSearchEvent(std::string data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
-

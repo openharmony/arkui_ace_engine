@@ -32,63 +32,63 @@ public:
     /**
      * @description: receive proxy side communication to execute click callback
      */
-    void ReportClickEvent() override;
+    void ReportClickEvent(std::string data) override;
 
     /**
      * @description: receive proxy side communication to execute switch callback
      */
-    void ReportRouterChangeEvent() override;
+    void ReportRouterChangeEvent(std::string data) override;
 
     /**
      * @description: receive proxy side communication to execute component callback
      */
-    void ReportComponentChangeEvent() override;
+    void ReportComponentChangeEvent(std::string data) override;
 
     /**
      * @description: receive proxy side communication to execute search callback
      */
-    void ReportSearchEvent() override;
+    void ReportSearchEvent(std::string data) override;
 
     /**
-     * @description: register a callback when click event occurs execute 
+     * @description: register a callback when click event occurs execute
      * @param eventCallback callback to be performed
      */
     void RegisterClickEventCallback(EventCallback eventCallback);
 
     /**
-     * @description: register a callback when page switch event occurs execute 
+     * @description: register a callback when page switch event occurs execute
      * @param eventCallback callback to be performed
      */
     void RegisterRouterChangeEventCallback(EventCallback eventCallback);
 
     /**
-     * @description: register a callback when search component do search occurs execute 
+     * @description: register a callback when search component do search occurs execute
      * @param eventCallback callback to be performed
      */
     void RegisterSearchEventCallback(EventCallback eventCallback);
     /**
-     * @description: register a callback when specified component change occurs execute 
+     * @description: register a callback when specified component change occurs execute
      * @param eventCallback callback to be performed
      */
     void RegisterComponentChangeEventCallback(EventCallback eventCallback);
 
     /**
-     * @description: unregister the click callback last register 
+     * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
 
     /**
-     * @description: unregister the search callback last register 
+     * @description: unregister the search callback last register
      */
     void UnregisterSearchEventCallback();
 
     /**
-     * @description: unregister the switch callback last register 
+     * @description: unregister the switch callback last register
      */
     void UnregisterRouterChangeEventCallback();
 
     /**
-     * @description: unregister the component callback last register 
+     * @description: unregister the component callback last register
      */
     void UnregisterComponentChangeEventCallback();
 
