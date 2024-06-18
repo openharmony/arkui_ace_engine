@@ -92,6 +92,8 @@ void SheetPresentationPattern::InitPageHeight()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    TAG_LOGD(AceLogTag::ACE_SHEET, "statusBarHeight_ of sheet by GetSafeAreaWithoutProcess : %{public}u",
+        safeAreaInsets.top_.Length());
     statusBarHeight_ =
         GetSheetType() != SheetType::SHEET_BOTTOMLANDSPACE ? safeAreaInsets.top_.Length() : .0f;
     auto showInPage =
@@ -625,6 +627,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         ref->AvoidAiBar();
         ref->isNeedProcessHeight_ = false;
         ref->FireOnDetentsDidChange(ref->height_);
+        ref->preDidHeight_ = ref->height_;
     };
 
     isAnimationProcess_ = true;
@@ -1090,6 +1093,8 @@ SheetType SheetPresentationPattern::GetSheetType()
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
+        windowGlobalRect.ToString().c_str());
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
