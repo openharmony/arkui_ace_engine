@@ -587,6 +587,13 @@ struct ArkUIPopupParam {
     ArkUI_Int64 secondaryActionId;
 };
 
+struct ArkUIdividerOptions {
+    ArkUI_Uint32 color;
+    ArkUI_Float32 strokeWidth;
+    ArkUI_Float32 startMargin;
+    ArkUI_Float32 endMargin;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -1394,7 +1401,7 @@ struct ArkUICommonModifier {
     void (*resetGridOffset)(ArkUINodeHandle node);
     void (*setGridSpan)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGridSpan)(ArkUINodeHandle node);
-    void (*setExpandSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
+    void (*setExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 typeStr, ArkUI_Uint32 edgesStr);
     void (*resetExpandSafeArea)(ArkUINodeHandle node);
     void (*setFlexBasis)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* flexBasisValue);
     void (*resetFlexBasis)(ArkUINodeHandle node);
@@ -1638,6 +1645,7 @@ struct ArkUICommonModifier {
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
     void (*resetPixelRound)(ArkUINodeHandle node);
     void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
+    void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2071,6 +2079,7 @@ struct ArkUIListModifier {
     ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
     void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
+    void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -2081,6 +2090,7 @@ struct ArkUIListItemGroupModifier {
     void (*listItemGroupSetFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*setListItemGroupChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListItemGroupChildrenMainSize)(ArkUINodeHandle node);
+    void (*getlistItemGroupDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
 };
 
 struct ArkUIParticleModifier {

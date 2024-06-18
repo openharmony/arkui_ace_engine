@@ -97,6 +97,17 @@ void ResetListItemGroupChildrenMainSize(ArkUINodeHandle node)
     ListItemGroupModelNG::ResetListChildrenMainSize(frameNode);
 }
 
+void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto divider = ListItemGroupModelNG::GetDivider(frameNode);
+    option->color = divider.color.GetValue();
+    option->strokeWidth = divider.strokeWidth.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->startMargin = divider.startMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {

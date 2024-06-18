@@ -30,6 +30,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/calc_dimension.h"
@@ -470,6 +471,21 @@ void ParseJsTranslate(const Framework::JSRef<Framework::JSVal>& jsValue, CalcDim
     Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("x"), translateX);
     Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("y"), translateY);
     Framework::JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty("z"), translateZ);
+}
+
+uint32_t ParseStrToUint(std::string safeAreaTypeStr)
+{
+    uint32_t uintType = NG::SAFE_AREA_TYPE_NONE;
+    std::string delimiter = "|";
+    std::string type;
+    size_t pos = 0;
+    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
+        type = safeAreaTypeStr.substr(0, pos);
+        uintType |= (1 << StringUtils::StringToUint(type));
+        safeAreaTypeStr.erase(0, pos + delimiter.length());
+    }
+    uintType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
+    return uintType;
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
@@ -4199,20 +4215,22 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string typeCppStr = "";
     std::string edgesCppStr = "";
+    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString();
+        safeAreaType = ParseStrToUint(typeCppStr);
     } else {
-        typeCppStr = "1|2|4";
+        safeAreaType = NG::SAFE_AREA_TYPE_ALL;
     }
 
     if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString();
+        safeAreaEdge = ParseStrToUint(edgesCppStr);
     } else {
-        edgesCppStr = "1|2|4|8";
+        safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
     }
-    const char* typeStr = typeCppStr.c_str();
-    const char* edgesStr = edgesCppStr.c_str();
-    GetArkUINodeModifiers()->getCommonModifier()->setExpandSafeArea(nativeNode, typeStr, edgesStr);
+    GetArkUINodeModifiers()->getCommonModifier()->setExpandSafeArea(nativeNode, safeAreaType, safeAreaEdge);
     return panda::JSValueRef::Undefined(vm);
 }
 

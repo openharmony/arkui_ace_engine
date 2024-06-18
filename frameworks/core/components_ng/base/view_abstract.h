@@ -692,7 +692,8 @@ public:
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
     static void SetPixelRound(FrameNode* frameNode, uint8_t value);
-
+    static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
+    static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager();
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,

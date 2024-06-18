@@ -66,6 +66,7 @@ constexpr int NUM_10 = 10;
 constexpr int NUM_11 = 11;
 constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
+constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
 constexpr int NUM_23 = 23;
 constexpr int NUM_29 = 29;
@@ -3641,6 +3642,50 @@ const ArkUI_AttributeItem* GetColorBlend(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetExpandSafeArea(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Uint32 safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+    ArkUI_Uint32 safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+    if (item->size > 0 && item->value[0].u32 > 0) {
+        if (item->value[0].u32 > NUM_7) {
+            return ERROR_CODE_PARAM_INVALID;
+        } else {
+            safeAreaType = item->value[0].u32;
+        }
+    } else {
+        safeAreaType = NG::SAFE_AREA_TYPE_ALL;
+    }
+    if (item->size > NUM_1 && item->value[1].u32 > 0) {
+        if (item->value[1].u32 > NUM_15) {
+            return ERROR_CODE_PARAM_INVALID;
+        } else {
+            safeAreaEdge = item->value[1].u32;
+        }
+    } else {
+        safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+    }
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->setExpandSafeArea(
+        node->uiNodeHandle, safeAreaType, safeAreaEdge);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetExpandSafeArea(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetExpandSafeArea(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetExpandSafeArea(ArkUI_NodeHandle node)
+{
+    ArkUI_Uint32 values[NUM_2];
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getExpandSafeArea(node->uiNodeHandle, &values);
+    g_numberValues[NUM_0].u32 = values[NUM_0];
+    g_numberValues[NUM_1].u32 = values[NUM_1];
+    return &g_attributeItem;
+}
 // Text
 int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -5640,6 +5685,44 @@ const ArkUI_AttributeItem* GetListInitialIndex(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetListDivider(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
+    if (actualSize < 0 || LessNotEqual(item->value[NUM_1].f32, NUM_0) ||
+        LessNotEqual(item->value[NUM_2].f32, NUM_0) || LessNotEqual(item->value[NUM_3].f32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto color = item->value[NUM_0].u32;
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    ArkUI_Float32 values[NUM_3] = { item->value[NUM_1].f32, item->value[NUM_2].f32, item->value[NUM_3].f32 };
+    ArkUI_Int32 units[NUM_3] = { unit, unit, unit };
+
+    fullImpl->getNodeModifiers()->getListModifier()->listSetDivider(node->uiNodeHandle, color, values, units, NUM_3);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListDivider(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getListModifier()->listResetDivider(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListDivider(ArkUI_NodeHandle node)
+{
+    ArkUIdividerOptions option;
+    GetFullImpl()->getNodeModifiers()->getListModifier()->getlistDivider(
+        node->uiNodeHandle, &option, GetDefaultUnit(node, UNIT_VP));
+    //size index
+    g_numberValues[NUM_0].u32 = option.color;
+    g_numberValues[NUM_1].f32 = option.strokeWidth;
+    g_numberValues[NUM_2].f32 = option.startMargin;
+    g_numberValues[NUM_3].f32 = option.endMargin;
+    g_attributeItem.size = ALLOW_SIZE_4;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7297,6 +7380,19 @@ void ResetListItemGroupDivider(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListItemGroupDivider(ArkUI_NodeHandle node)
+{
+    ArkUIdividerOptions option;
+    GetFullImpl()->getNodeModifiers()->getListItemGroupModifier()->getlistItemGroupDivider(
+        node->uiNodeHandle, &option, GetDefaultUnit(node, UNIT_VP));
+    g_numberValues[NUM_0].u32 = option.color;
+    g_numberValues[NUM_1].f32 = option.strokeWidth;
+    g_numberValues[NUM_2].f32 = option.startMargin;
+    g_numberValues[NUM_3].f32 = option.endMargin;
+    g_attributeItem.size = ALLOW_SIZE_4;
+    return &g_attributeItem;
 }
 
 int32_t SetListItemGroupChildrenMainSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -12379,6 +12475,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityRole,
         SetAccessibilityState,
         SetAccessibilityValue,
+        SetExpandSafeArea,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12482,6 +12579,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAccessibilityRole,
         GetAccessibilityState,
         GetAccessibilityValue,
+        GetExpandSafeArea,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12589,6 +12687,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityRole,
         ResetAccessibilityState,
         ResetAccessibilityValue,
+        ResetExpandSafeArea,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13428,8 +13527,8 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter,
-        SetListCachedCount, SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex };
+    static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter, SetListCachedCount,
+        SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13439,8 +13538,8 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
 
 const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter,
-        GetListCachedCount, nullptr, GetListAlignListItem, nullptr, GetListInitialIndex };
+    static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
+        nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -13451,7 +13550,8 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
-        ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex };
+        ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
+        ResetListDivider };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -13496,12 +13596,23 @@ void ResetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { nullptr, nullptr, ResetListItemGroupDivider, ResetListItemGroupChildrenMainSize };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "ListItemGroup node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
     }
     if (resetters[subTypeId]) {
         return resetters[subTypeId](node);
     }
+}
+
+const ArkUI_AttributeItem* GetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Getter* getters[] = { nullptr, nullptr, GetListItemGroupDivider, nullptr };
+    if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "ListItemGroup node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return nullptr;
+    }
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return getters[subTypeId](node);
 }
 
 int32_t SetColumnAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
@@ -13777,10 +13888,10 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetImageSpanAttribute, GetImageAttribute, GetToggleAttribute, GetLoadingProgressAttribute,
         GetTextInputAttribute, GetTextAreaAttribute, GetButtonAttribute, GetProgressAttribute, GetCheckboxAttribute,
         GetXComponentAttribute, GetDatePickerAttribute, GetTimePickerAttribute, GetTextPickerAttribute,
-        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
-        GetStackAttribute, GetSwiperAttribute,
-        GetScrollAttribute, GetListAttribute, nullptr, nullptr, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
-        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute };
+        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute, GetStackAttribute,
+        GetSwiperAttribute, GetScrollAttribute, GetListAttribute, nullptr, GetListItemGroupAttribute,
+        GetColumnAttribute, GetRowAttribute, GetFlexAttribute, GetRefreshAttribute, GetWaterFlowAttribute, nullptr,
+        GetRelativeContainerAttribute, GetGridAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
