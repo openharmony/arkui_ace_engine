@@ -1462,6 +1462,50 @@ HWTEST_F(MenuTestNg, MenuPreviewPatternTestNg0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuPatternTestNg0100
+ * @tc.desc: Test MenuPattern functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPatternTestNg0100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, then set the initial properties
+     * @tc.expected: menu node, menu pattern are not null
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    menuNode->MountToParent(menuWrapperNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    const RefPtr<LayoutWrapperNode> layoutWrapper;
+    menuPattern->isMenuShow_ = true;
+
+    /**
+     * @tc.steps: step2. call OnModifyDone and OnDirtyLayoutWrapperSwap
+     * @tc.expected: sMenuShow_ is false and panEvent is not empty
+     */
+    menuPattern->OnModifyDone();
+    menuPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap);
+    EXPECT_FALSE(menuPattern->isMenuShow_);
+
+    /**
+     * @tc.steps: step3. call SetMenuShow
+     * @tc.expected: isMenuShow_ is true.
+     */
+    menuPattern->SetMenuShow();
+    EXPECT_TRUE(menuPattern->isMenuShow_);
+}
+
+/**
  * @tc.name: WidthModifiedBySelectTestNg001
  * @tc.desc: Verify the usability of the select modified flag.
  * @tc.type: FUNC

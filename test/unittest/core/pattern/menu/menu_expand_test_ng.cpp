@@ -69,6 +69,7 @@ const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
+const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -87,6 +88,7 @@ public:
     RefPtr<FrameNode> wrapperNode_;
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<FrameNode> subMenuParent_;
+    RefPtr<FrameNode> subMenu_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     int32_t nodeId_ = 1;
     bool isSubMenuBuilded_ = false;
@@ -116,6 +118,7 @@ void MenuExpandTestNg::TearDown()
     subMenuParent_ = nullptr;
     menuItemPattern_ = nullptr;
     wrapperNode_ = nullptr;
+    subMenu_ = nullptr;
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
@@ -138,7 +141,7 @@ void MenuExpandTestNg::InitMenuTestNg()
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
     menuFrameNode_ = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    auto subMenu = FrameNode::CreateFrameNode(
+    subMenu_ = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
     menuItemFrameNode_ = FrameNode::CreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<MenuItemPattern>());
@@ -156,7 +159,7 @@ void MenuExpandTestNg::InitMenuTestNg()
     menuItemFrameNode_->MountToParent(menuFrameNode_);
     subMenuParent_->MountToParent(menuFrameNode_);
     menuFrameNode_->MountToParent(wrapperNode_);
-    subMenu->MountToParent(wrapperNode_);
+    subMenu_->MountToParent(wrapperNode_);
     menuItemPattern_ = menuItemFrameNode_->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern_, nullptr);
     menuItemPattern_->SetSubBuilder(buildFun);
@@ -166,8 +169,8 @@ void MenuExpandTestNg::InitMenuTestNg()
     pattern2->SetIsSubMenuShowed(false);
     auto menuPattern = menuFrameNode_->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
-    menuPattern->SetShowedSubMenu(subMenu);
-    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    menuPattern->SetShowedSubMenu(subMenu_);
+    auto subMenuPattern = subMenu_->GetPattern<MenuPattern>();
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetParentMenuItem(subMenuParent_);
 }
@@ -269,6 +272,48 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg004, TestSize.Level1)
     menuItemPattern_->ShowSubMenu();
     menuItemPattern_->CloseMenu();
     EXPECT_EQ(isSubMenuBuilded_, true);
+}
 
+/**
+ * @tc.name: MenuExpandTest005
+ * @tc.desc: Test FireBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create cascade menu condition on SetUp() step.
+     * set expandingMode to STACK;
+     * @tc.expected: wrapper and child pattern is not null
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto pattern = subMenuParent_->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    /**
+     * @tc.steps: step2. prepare wrapperNode, menuNode, itemNode
+     * @tc.expected: itemPattern is not null
+     */
+    pattern->ShowSubMenu();
+    EXPECT_EQ(pattern->GetExpandingMode(), SubMenuExpandingMode::STACK);
+    auto subMenuPattern = subMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->isSubMenuShow_ = true;
+
+    /**
+     * @tc.steps: step3. call OnModifyDone and OnDirtyLayoutWrapperSwap
+     * @tc.expected: isSubMenuShow_ is false
+     */
+    const RefPtr<LayoutWrapperNode> layoutWrapper;
+    subMenuPattern->OnModifyDone();
+    subMenuPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap);
+    EXPECT_FALSE(subMenuPattern->isSubMenuShow_);
+
+    /**
+     * @tc.steps: step4. call SetSubMenuShow
+     * @tc.expected: isSubMenuShow_ is true
+     */
+    subMenuPattern->SetSubMenuShow();
+    EXPECT_TRUE(subMenuPattern->isSubMenuShow_);
 } // namespace OHOS::Ace::NG
 }
