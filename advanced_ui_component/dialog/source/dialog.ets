@@ -70,7 +70,6 @@ const BUTTON_VERTICAL_BOTTOM_MARGIN: number = getNumberByResource('alert_button_
 const BUTTON_VERTICAL_PADDING: number = getNumberByResource('alert_button_top_padding') ?? 8;
 const BUTTON_VERTICAL_SPACE: number = getNumberByResource('alert_button_vertical_space') ?? 4;
 const MAX_BIG_BUTTON_SIZE: number = 3;
-const MAX_WINDOW_HORIZONTAL_HEIGHT: number = 400;
 const MAX_FONT_SCALE: number = 2;
 const BODY_L = getNumberByResource('Body_L') ?? 16;
 const BODY_M = getNumberByResource('Body_M') ?? 14;
