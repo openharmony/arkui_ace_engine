@@ -52,6 +52,7 @@ constexpr float LARGE_SCALE = 1.75f;
 
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 uint32_t dialogNodePage = 0;
+uint32_t totalPageNum_ = 0;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -133,6 +134,7 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
     const TextPickerSettingData& settingData, const RefPtr<FrameNode>& textPickerNode, uint32_t showCount,
     uint32_t columnCount, RefPtr<PickerTheme> pickerTheme)
 {
+    totalPageNum_ = columnCount;
     if (textPickerNode->GetChildren().empty()) {
         for (size_t i = 0; i < columnCount; i++) {
             auto columnNode = CreateColumnNode(settingData.columnKind,
@@ -1353,7 +1355,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
     std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardFunc;
     dialogMoveBackwardFunc["moveBackwardId"] = moveBackwardFunc;
 
-    uint32_t columnCount = settingData.options.size();
+    uint32_t columnCount = totalPageNum_;
     auto nextCallBack = [weak = WeakPtr<FrameNode>(dialogNode),
         weakText = WeakPtr<FrameNode>(textPickerNode),
         columnCount, weakColumn = WeakPtr<FrameNode>(contentColumn)](const GestureEvent& /* info */) {
