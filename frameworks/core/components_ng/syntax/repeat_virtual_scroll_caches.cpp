@@ -42,9 +42,7 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const std::map<std::string,
       // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // API might need to change to tell which old item to update
-      onCreateNode_(onCreateNode),
-      onUpdateNode_(onUpdateNode),
-      onGetTypes4Range_(onGetTypes4Range),
+      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode), onGetTypes4Range_(onGetTypes4Range),
       onGetKeys4Range_(onGetKeys4Range)
 {}
 
@@ -111,7 +109,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetNode4Index(uint32_t index) const
     const std::string& key4Index = it->second;
     const auto nodeIter = node4key_.find(key4Index);
     if (nodeIter == node4key_.end()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "no UINode for index %{public}d and key %{public}s",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "no UINode for index %{public}d and key %{public}s",
             static_cast<int32_t>(index), key4Index.c_str());
         return nullptr;
     }
@@ -162,7 +160,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     const auto& ttype = iterTType->second;
     const auto iterNewKey = key4index_.find(forIndex);
     if (iterNewKey == key4index_.end()) {
-        TAG_LOGW(AceLogTag::ACE_REPEAT, "no key for index %{public}d", forIndex);
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "no key for index %{public}d", forIndex);
         return nullptr;
     }
     const std::string& forKey = iterNewKey->second;
@@ -170,7 +168,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     const auto& oldKey = GetL2KeyToUpdate(ttype);
     if (!oldKey) {
         // no key for this ttype available to update
-        TAG_LOGW(AceLogTag::ACE_REPEAT, "for index %{public}d, ttype %{public}s, no UINode found to update", forIndex,
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "for index %{public}d, ttype %{public}s, no UINode found to update", forIndex,
             ttype.c_str());
         return nullptr;
     }
