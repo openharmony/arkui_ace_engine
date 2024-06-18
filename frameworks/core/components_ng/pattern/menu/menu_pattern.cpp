@@ -1651,7 +1651,7 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
         nextNode = GetForEachMenuItem(parent, true);
     } else {
         const auto& children = parent->GetChildren();
-        if (index >= children.size() - 1) {
+        if (index >= static_cast<int32_t>(children.size() - 1)) {
             return;
         }
         nextNode = parent->GetChildAtIndex(index + 1);
