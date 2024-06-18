@@ -367,6 +367,8 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level1)
  */
 HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     /**
      * @tc.steps: step1. create dialogNode and dialogTheme instance.
      * @tc.expected: the dialogNode and dialogNode created successfully.
@@ -387,6 +389,7 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty001, TestSize.Level1)
     auto accessibilityProperty = dialog->GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), TITLE + MESSAGE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -456,6 +459,8 @@ HWTEST_F(DialogPatternTestNg, PopDialog, TestSize.Level1)
  */
 HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     /**
      * @tc.steps: step1. create dialogNode and dialogTheme instance.
      * @tc.expected: the dialogNode and dialogNode created successfully.
@@ -476,6 +481,7 @@ HWTEST_F(DialogPatternTestNg, DialogAccessibilityProperty002, TestSize.Level1)
     auto accessibilityProperty = dialog->GetAccessibilityProperty<NG::AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), TITLE + MESSAGE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
