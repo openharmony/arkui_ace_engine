@@ -200,8 +200,8 @@ std::shared_ptr<SimpleDateFormat> GetSimpleDateFormat(const Locale& locale)
 {
     if (simpleDateFormat_) {
         auto timeZone = TimeZone::createDefault();
-        simpleDateFormat_->setTimeZone(*timezone);
-        delete timezone;
+        simpleDateFormat_->setTimeZone(*timeZone);
+        delete timeZone;
         return simpleDateFormat_;
     }
     UErrorCode status = U_ZERO_ERROR;
@@ -225,7 +225,7 @@ std::shared_ptr<Calendar> GetCalendar(const Locale& locale)
     return calendar_;
 }
 
-std::shared_ptr<DateTimePatternGenerator> GetPatternGenerator(const Locale& locale)
+std::shared_ptr<DateTimePatternGenerator> GetTimePatternGenerator(const Locale& locale)
 {
     if (patternGenerator_) {
         return patternGenerator_;
@@ -330,7 +330,7 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
     CHECK_NULL_RETURN(simpleDateFormat, "");
     simpleDateFormat->applyPattern(UnicodeString(engTimeFormat));
     
-    auto timezone = TimeZone::createTimeZone("GMT+0:00");
+    auto timeZone = TimeZone::createTimeZone("GMT+0:00");
     simpleDateFormat->setTimeZone(*timeZone);
     delete(timeZone);
 
@@ -352,7 +352,7 @@ std::string Localization::FormatDuration(uint32_t duration, const std::string& f
     CHECK_NULL_RETURN(simpleDateFormat, "");
     simpleDateFormat->applyPattern(UnicodeString(engTimeFormat));
 
-    auto timezone = TimeZone::createTimeZone("GMT+0:00");
+    auto timeZone = TimeZone::createTimeZone("GMT+0:00");
     simpleDateFormat->setTimeZone(*timeZone);
     delete(timeZone);
 
@@ -377,7 +377,7 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UDate date = calendar->getTime(status);
     CHECK_RETURN(status, "");
 
-    auto patternGenerator = GetPatternGenerator(locale_->instance);
+    auto patternGenerator = GetTimePatternGenerator(locale_->instance);
     CHECK_NULL_RETURN(patternGenerator, "");
     UnicodeString pattern = patternGenerator->getBestPattern(UnicodeString(format.c_str()), status);
     CHECK_RETURN(status, "");
