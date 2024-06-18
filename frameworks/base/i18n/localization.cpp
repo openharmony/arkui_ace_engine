@@ -347,6 +347,7 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
 std::string Localization::FormatDuration(uint32_t duration, const std::string& format)
 {
     WaitingForInit();
+    const char* engTimeFormat = format.c_str();
 
     auto simpleDateFormat = GetSimpleDateFormat(locale_->instance);
     CHECK_NULL_RETURN(simpleDateFormat, "");
