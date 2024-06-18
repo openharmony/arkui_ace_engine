@@ -142,7 +142,7 @@ public:
     void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
     void CleanPopupInSubWindow();
-    void CleanMenuInSubWindowWithAnimation();
+    int32_t CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
 
     void ClearToastInSubwindow();

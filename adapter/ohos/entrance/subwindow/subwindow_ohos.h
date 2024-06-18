@@ -207,6 +207,7 @@ private:
     bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
+    std::set<int32_t> menuTargetId_;
 };
 
 } // namespace OHOS::Ace
