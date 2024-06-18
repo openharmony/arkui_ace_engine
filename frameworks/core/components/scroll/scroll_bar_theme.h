@@ -72,7 +72,6 @@ public:
             theme->scrollBarMargin_ = padding;
             theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
             theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
-            theme->scrollradius_ = pattern->GetAttr<Dimension>("search_text_field_border_radius", 2.0_vp);
             theme->scrollbarbackColor_ =  pattern->GetAttr<Color>("scroll_bar_back_color", Color());
         }
     };
@@ -179,7 +178,6 @@ private:
     Edge padding_;
     double activemagnify_ = 0.0;
     double touchmagnify_ = 0.0;
-    Dimension scrollradius_;
     Color scrollbarbackColor_;
 };
 
