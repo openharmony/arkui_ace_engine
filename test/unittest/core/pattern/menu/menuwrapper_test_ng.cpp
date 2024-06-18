@@ -629,4 +629,29 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg011, TestSize.Level1)
     (*menuItemPattern->longPressEvent_)(gestureEvent);
     ASSERT_FALSE(menuItemPattern->isSubMenuShowed_);
 }
+/**
+ * @tc.name: MenuWrapperPatternTestNg012
+ * @tc.desc: Verify HideMenu(Menu).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     * @tc.expected: wrapper pattern not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::SELECT_OVERLAY_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    /**
+     * @tc.steps: step2. excute HideMenu
+     * @tc.expected: wrapper pattern return
+     */
+    wrapperPattern->HideMenu(mainMenu);
+    EXPECT_TRUE(mainMenu->GetTag() == V2::SELECT_OVERLAY_ETS_TAG);
+}
 } // namespace OHOS::Ace::NG
