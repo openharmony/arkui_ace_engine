@@ -57,7 +57,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
-        option->sections.resize(index + 1);
+        option->sections.resize(static_cast<uint32_t>(index + 1));
         option->sections[index].itemsCount = itemCount;
     } else {
         option->sections[index].itemsCount = itemCount;
@@ -70,7 +70,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
-        option->sections.resize(index + 1);
+        option->sections.resize(static_cast<uint32_t>(index + 1));
         option->sections[index].crossCount = crossCount;
     } else {
         option->sections[index].crossCount = crossCount;
@@ -82,7 +82,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* 
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
-        option->sections.resize(index + 1);
+        option->sections.resize(static_cast<uint32_t>(index + 1));
         option->sections[index].columnsGap = columnGap;
     } else {
         option->sections[index].columnsGap = columnGap;
@@ -94,7 +94,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* opt
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
-        option->sections.resize(index + 1);
+        option->sections.resize(static_cast<uint32_t>(index + 1));
         option->sections[index].rowsGap = rowGap;
     } else {
         option->sections[index].rowsGap = rowGap;
@@ -107,7 +107,7 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
-        option->sections.resize(index + 1);
+        option->sections.resize(static_cast<uint32_t>(index + 1));
         option->sections[index].margin[0] = marginTop;
         option->sections[index].margin[1] = marginRight;
         option->sections[index].margin[2] = marginBottom;
