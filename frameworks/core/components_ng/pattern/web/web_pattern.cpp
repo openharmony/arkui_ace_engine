@@ -761,6 +761,8 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         WebRequestFocus();
     }
 
+    // set touchup false when using mouse
+    isTouchUpEvent_ = false;
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
         if (isReceivedArkDrag_) {
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop Do not reset drag action when dragging,"
@@ -1059,7 +1061,11 @@ void WebPattern::InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub)
         if (!pattern->isDragging_) {
             return;
         }
-        pattern->OnQuickMenuDismissed();
+
+        if (pattern->selectOverlayProxy_ && !pattern->selectOverlayProxy_->IsClosed()) {
+            pattern->needRestoreMenuForDrag_ = true;
+            pattern->OnQuickMenuDismissed();
+        }
 
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
@@ -1158,7 +1164,8 @@ bool WebPattern::NotifyStartDragTask()
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag, and start drag task for web");
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
+        "is mouse event: %{public}d", isMouseEvent_);
     gestureHub->StartDragTaskForWeb();
     return true;
 }
@@ -2978,7 +2985,7 @@ void WebPattern::DragDropSelectionMenu()
         TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_: %{public}d", isDragEndMenuShow_);
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
@@ -2996,7 +3003,8 @@ void WebPattern::DragDropSelectionMenu()
     RegisterSelectOverlayEvent(selectInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!selectOverlayProxy_) {
+    if (!selectOverlayProxy_ && needRestoreMenuForDrag_) {
+        needRestoreMenuForDrag_ = false;
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     }
