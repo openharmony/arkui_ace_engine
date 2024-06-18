@@ -317,6 +317,8 @@ private:
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
 
+    HiddenChangeEvent CreateHiddenChangeEvent();
+
     void SetMediaFullScreen(bool isFullScreen)
     {
         mediaPlayer_->FullScreenChange(isFullScreen);
