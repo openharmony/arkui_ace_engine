@@ -23,9 +23,9 @@
 
 namespace OHOS::Ace::NG {
 struct RendererDumpInfo {
-    int64_t createUiContenTime;
-    int64_t limitedWorkerInitTime;
-    int64_t loadAbcTime;
+    int64_t createUiContenTime = 0;
+    int64_t limitedWorkerInitTime = 0;
+    int64_t loadAbcTime = 0;
 
     void ReSet()
     {
