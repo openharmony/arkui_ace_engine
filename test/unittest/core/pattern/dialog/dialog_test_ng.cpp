@@ -1934,12 +1934,10 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest020, TestSize.Level1)
     ASSERT_NE(dialogPatternOld, nullptr);
 
     EXPECT_EQ(dialogPattern->isSuitableForElderly_, false);
-    EXPECT_EQ(dialogPattern->isThreeButtonsDialog_, false);
-    EXPECT_EQ(dialogPattern->isLandspace_, false);
+    EXPECT_EQ(dialogPattern->notAdapationAging_, false);
 
-    EXPECT_EQ(dialogPatternOld->isSuitableForElderly_, true);
-    EXPECT_EQ(dialogPatternOld->isThreeButtonsDialog_, true);
-    EXPECT_EQ(dialogPatternOld->isLandspace_, true);
+    EXPECT_EQ(dialogPatternOld->isSuitableForElderly_, false);
+    EXPECT_EQ(dialogPatternOld->notAdapationAging_, true);
 }
 
 /**
@@ -1990,6 +1988,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest021, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
     dialogPattern->isSuitableForElderly_ = true;
     dialogPattern->AddButtonAndDivider(btnItems, dialogPattern->buttonContainer_, false);
+    SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     dialogPattern->BuildChild(props);
     EXPECT_EQ(dialogPattern->buttonContainer_->GetTag(), V2::COLUMN_ETS_TAG);
 }
@@ -2019,10 +2018,6 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest022, TestSize.Level1)
             .text = "second button",
             .bgColor = Color::BLUE,
         },
-        ButtonInfo {
-            .text = "three button",
-            .bgColor = Color::BLUE,
-        },
     };
     props.buttons = btnItems;
 
@@ -2033,6 +2028,11 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest022, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    float expectedFontScale = 3.0f;
+    float actualFontScale = 2.0f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetFontScale(expectedFontScale);
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
@@ -2042,14 +2042,14 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest022, TestSize.Level1)
     auto dialogLayoutProps = dialog->GetLayoutProperty<DialogLayoutProperty>();
     auto buttonLayoutConstraint = dialogLayoutProps->GetLayoutConstraint();
     dialog->Measure(buttonLayoutConstraint);
+    CHECK_NULL_VOID(dialogPattern->titleContainer_);
     auto children = dialogPattern->titleContainer_->GetChildren();
     for (auto child : children) {
-        auto textNode = AceType::DynamicCast<FrameNode>(child->GetChildAtIndex(0));
+        auto textNode = AceType::DynamicCast<FrameNode>(dialogPattern->titleContainer_->GetChildAtIndex(0));
         CHECK_NULL_VOID(textNode);
         auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
         CHECK_NULL_VOID(titleProp);
-        std::cout << (titleProp->GetFontSize().value_or(Dimension(10.0))).Value() << std::endl;
-        EXPECT_EQ(titleProp->GetFontSize().value_or(Dimension(10.0)), Dimension(40.0, DimensionUnit::VP));
+        EXPECT_EQ(titleProp->GetMaxFontScale().value_or(1.0), actualFontScale);
     }
 }
 } // namespace OHOS::Ace::NG

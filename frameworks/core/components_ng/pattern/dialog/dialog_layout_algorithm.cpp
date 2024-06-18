@@ -86,8 +86,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
-    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging();
-    if (dialogPattern->GetNeeedUpdateOrientation()) {
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
+                            windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
+                            GreatOrEqual(pipeline->GetFontScale(), 1.75f);
+    if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();

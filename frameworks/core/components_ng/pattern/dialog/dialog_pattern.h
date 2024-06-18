@@ -245,11 +245,6 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
-    bool GetNeeedUpdateOrientation()
-    {
-        return neeedUpdateOrientation_;
-    }
-
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -327,8 +322,9 @@ private:
     void DumpObjectProperty();
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
-    void UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace);
-    void UpdateTitleTextFontSizeForElderly(bool isLandSpace);
+    void OnFontConfigurationUpdate() override;
+    void UpdateTextFontScale();
+    void UpdateTitleTextFontScale();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -348,12 +344,10 @@ private:
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isLandspace_ = false;
-    bool isThreeButtonsDialog_ = false;
-    bool neeedUpdateOrientation_ = false;
-    bool isNeedToVp_ = false;
+    bool notAdapationAging_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

@@ -81,6 +81,17 @@ void DialogTheme::Builder::ParsePattern(
         std::string expandDisplay = dialogPattern->GetAttr<std::string>("dialog_expand_display", "");
         theme->expandDisplay_ = (expandDisplay == "true");
     }
+    theme->titleMaxFontScale_ = dialogPattern->GetAttr<double>("dialog_title_max_scale_aging", 2.0f);
+    theme->dialogDefaultScale_ = dialogPattern->GetAttr<double>("dialog_default_scale_aging", 1.0f);
+    theme->contentMaxFontScale_ = dialogPattern->GetAttr<double>("dialog_content_max_scale_aging", 3.2f);
+    theme->contentLandscapeMaxFontScale_ =
+        dialogPattern->GetAttr<double>("dialog_content_landscape_max_scale_aging", 2.0f);
+    theme->buttonMaxFontScale_ = dialogPattern->GetAttr<double>("dialog_button_max_scale_aging", 3.2f);
+    theme->buttonLandscapeMaxFontScale_ =
+        dialogPattern->GetAttr<double>("dialog_button_landscape_max_scale_aging", 2.0f);
+    theme->minFontScaleForElderly_ = dialogPattern->GetAttr<double>("dialog_min_scale_aging", 1.75f);
+    theme->dialogLandscapeHeightBoundary_ =
+        dialogPattern->GetAttr<Dimension>("dialog_landscape_boundary_aging", 640.0_vp);
     if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
         return;
     }
