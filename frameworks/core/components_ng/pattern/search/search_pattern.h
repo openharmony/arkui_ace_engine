@@ -248,6 +248,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
+    void InitAllEvent();
     void InitHoverEvent();
     void InitTouchEvent();
     void InitSearchTheme();
@@ -308,6 +309,7 @@ private:
     Color normalIconColor_;
     Color focusTextColor_;
     Color normalTextColor_;
+    Color transparentColor_ = Color::TRANSPARENT;
     Dimension focusBorderWidth_;
     Dimension focusBorderPadding_;
 

@@ -204,6 +204,11 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
+    InitAllEvent();
+}
+
+void SearchPattern::InitAllEvent()
+{
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -211,6 +216,8 @@ void SearchPattern::OnModifyDone()
     InitTextFieldClickEvent();
     InitButtonMouseAndTouchEvent();
     HandleTouchableAndHitTestMode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -1078,8 +1085,8 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
-void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
-    int32_t duration, const RefPtr<Curve>& curve)
+void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
+    Color& blendColorFrom, Color& blendColorTo, int32_t duration, const RefPtr<Curve>& curve)
 {
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColorTo);
@@ -1168,8 +1175,8 @@ void SearchPattern::HandleHoverEvent(bool isHover)
     if (!isSearchPress_ && (enabled || !isHover)) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        AnimateSearchTouchAndHover(renderContext, isHover ? searchNormalColor_ : searchHoverColor_,
-            isHover ? searchHoverColor_ : searchNormalColor_, HOVER_DURATION, Curves::FRICTION);
+        AnimateSearchTouchAndHover(renderContext, isHover ? transparentColor_ : searchHoverColor_,
+            isHover ? searchHoverColor_ : transparentColor_, HOVER_DURATION, Curves::FRICTION);
     }
 }
 
