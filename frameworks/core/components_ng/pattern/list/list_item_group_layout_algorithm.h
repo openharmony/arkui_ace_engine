@@ -299,7 +299,7 @@ private:
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
-    void SetActiveChildRange(LayoutWrapper* layoutWrapper);
+    void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem(LayoutWrapper* layoutWrapper);
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,

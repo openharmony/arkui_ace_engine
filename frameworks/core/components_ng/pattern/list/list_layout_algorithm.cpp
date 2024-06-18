@@ -167,12 +167,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) * GetLanes();
-    if (itemPosition_.empty()) {
-        layoutWrapper->SetActiveChildRange(-1, -1);
-    } else {
-        layoutWrapper->SetActiveChildRange(itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheCount, cacheCount);
-    }
+    SetActiveChildRange(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
@@ -195,6 +190,16 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
     layoutWrapper->SetCacheCount(cacheCount);
+}
+
+void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    if (itemPosition_.empty()) {
+        layoutWrapper->SetActiveChildRange(-1, -1);
+        return;
+    }
+    layoutWrapper->SetActiveChildRange(
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheCount, cacheCount);
 }
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
