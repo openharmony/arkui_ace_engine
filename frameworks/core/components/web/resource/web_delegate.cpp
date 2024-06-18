@@ -6910,6 +6910,18 @@ void WebDelegate::SetSurfaceId(const std::string& surfaceId)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceId");
 }
 
+std::string WebDelegate::GetSystemColorMode()
+{
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    CHECK_NULL_RETURN(appMgrClient, "");
+    if (appMgrClient->ConnectAppMgrService()) {
+        return "";
+    }
+    auto systemConfig = OHOS::AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    return systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+}
+
 std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &content)
 {
     std::vector<uint8_t> tempVec(content.begin(), content.end());

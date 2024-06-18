@@ -997,6 +997,8 @@ public:
             keyboardHandler_->Close();
         }
     }
+
+    std::string GetSystemColorMode();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
