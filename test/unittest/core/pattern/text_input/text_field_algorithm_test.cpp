@@ -285,4 +285,203 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph002, TestSize.Level1)
     textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, false);
     EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
 }
+
+/**
+ * @tc.name: AdaptInlineFocusFontSize001
+ * @tc.desc: Test the function AdaptInlineFocusFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(10);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(1);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusFontSize002
+ * @tc.desc: Test the function AdaptInlineFocusFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(0);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusFontSize003
+ * @tc.desc: Test the function AdaptInlineFocusFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(10);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(10);
+    layoutConstraint.selfIdealSize.SetHeight(10);
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusFontSize004
+ * @tc.desc: Test the function AdaptInlineFocusFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(0);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(0);
+    layoutConstraint.selfIdealSize.SetHeight(0);
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusMinFontSize001
+ * @tc.desc: Test the function AdaptInlineFocusMinFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(0);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(0);
+    layoutConstraint.selfIdealSize.SetHeight(0);
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusMinFontSize002
+ * @tc.desc: Test the function AdaptInlineFocusMinFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(10);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(0);
+    layoutConstraint.selfIdealSize.SetHeight(0);
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
+
+/**
+ * @tc.name: AdaptInlineFocusMinFontSize003
+ * @tc.desc: Test the function AdaptInlineFocusMinFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(10);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(10);
+    layoutConstraint.selfIdealSize.SetHeight(10);
+    auto content = "content";
+    textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(content, "content");
+}
 } // namespace OHOS::Ace::NG
