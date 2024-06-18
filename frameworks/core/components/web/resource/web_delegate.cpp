@@ -673,27 +673,27 @@ WebDelegateObserver::~WebDelegateObserver() {}
 
 void WebDelegateObserver::NotifyDestory()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start");
+    TAG_LOGI(AceLogTag::ACE_WEB, "NotifyDestory start");
     if (delegate_) {
         delegate_->UnRegisterScreenLockFunction();
     }
     auto context = context_.Upgrade();
     if (!context) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory context is null, enter EventHandler to destroy");
+        TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory context is null, use EventHandler to destory");
         auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
         if (!currentHandler) {
             TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler currentHandler is null");
             return;
         }
         currentHandler->PostTask(
-            [weak = WeakClaim(this)]() {
+            [weak = WeakClaim(this), currentHandler = currentHandler]() {
                 auto observer = weak.Upgrade();
                 if (!observer) {
-                    TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler observer is null");
+                    TAG_LOGE(AceLogTag::ACE_WEB, "NotifyDestory EventHandler observer is null");
                     return;
                 }
                 if (observer->delegate_) {
-                    TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler start destroy");
+                    TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory EventHandler destorying delegate");
                     observer->delegate_.Reset();
                 }
             },
@@ -702,18 +702,18 @@ void WebDelegateObserver::NotifyDestory()
     }
     auto taskExecutor = context->GetTaskExecutor();
     if (!taskExecutor) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory taskExecutor is null");
+        TAG_LOGE(AceLogTag::ACE_WEB, "NotifyDestory TaskExecutor is null");
         return;
     }
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), taskExecutor = taskExecutor]() {
             auto observer = weak.Upgrade();
             if (!observer) {
-                TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory observer is null");
+                TAG_LOGE(AceLogTag::ACE_WEB, "NotifyDestory TaskExecutor observer is null");
                 return;
             }
             if (observer->delegate_) {
-                TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start destroy");
+                TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory TaskExecutor destorying delegate");
                 observer->delegate_.Reset();
             }
         },
