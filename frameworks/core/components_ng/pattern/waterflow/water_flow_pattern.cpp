@@ -449,13 +449,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         });
         context->RequestFrame();
     };
-    auto callbackNow = [weakPattern = WeakClaim(this)](int32_t start) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnSectionChangedNow(start);
-    };
     sections_->SetOnDataChange(callback);
-    sections_->SetOnDataChangeCAPI(callbackNow);
     return sections_;
 }
 
@@ -470,24 +464,6 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     info->InitSegments(sections_->GetSectionInfo(), start);
     info->margins_.clear();
 
-    MarkDirtyNodeSelf();
-}
-
-void WaterFlowPattern::OnSectionChangedNow(int32_t start)
-{
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    CHECK_NULL_VOID(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (sections_->IsSpecialUpdateCAPI(childUpdateIdx)) {
-        start += static_cast<int32_t>(sections_->GetSectionInfo().size());
-    }
-    info->InitSegments(sections_->GetSectionInfo(), start);
-    info->margins_.clear();
     MarkDirtyNodeSelf();
 }
 
