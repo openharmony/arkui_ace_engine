@@ -448,6 +448,7 @@ export struct FoldSplitContainer {
   @State primaryLayout: Layout = initLayout();
   @State secondaryLayout: Layout = initLayout();
   @State extraLayout: Layout = initLayout();
+  @State extraOpacity: number = 1;
   private windowStatusType: window.WindowStatusType = window.WindowStatusType.UNDEFINED;
   private foldStatus: display.FoldStatus = display.FoldStatus.FOLD_STATUS_UNKNOWN;
   private windowInstance?: window.Window;
@@ -535,20 +536,17 @@ export struct FoldSplitContainer {
       .clip(true)
 
       if (this.extra) {
-        if (this.extraLayout.size.width > 0 && this.extraLayout.size.height > 0) {
-          Column() {
-            this.extra?.();
-          }
-          .size(this.extraLayout.size)
-          .position({
-            start: LengthMetrics.vp(this.extraLayout.position.x),
-            top: LengthMetrics.vp(this.extraLayout.position.y),
-          })
-          .transition(
-            TransitionEffect.OPACITY.animation({ curve: Curve.Linear, duration: 250 })
-          )
-          .clip(true)
+        Column() {
+          this.extra?.();
         }
+        .opacity(this.extraOpacity)
+        .animation({ curve: Curve.Linear, duration: 250 })
+        .size(this.extraLayout.size)
+        .position({
+          start: LengthMetrics.vp(this.extraLayout.position.x),
+          top: LengthMetrics.vp(this.extraLayout.position.y),
+        })
+        .clip(true)
       }
     }
     .id('$$FoldSplitContainer$Stack$$')
@@ -636,6 +634,13 @@ export struct FoldSplitContainer {
         this.extraLayout = regionLayout.extra;
       });
     }
+
+    if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED &&
+      !this.hoverModeLayoutOptions.showExtraRegion) {
+      this.extraOpacity = 0;
+    } else {
+      this.extraOpacity = 1;
+    }
   }
 
   private getExpandedRegionLayouts(): RegionLayout {
@@ -715,7 +720,21 @@ export struct FoldSplitContainer {
       primaryLayout.size.width = width;
       secondaryLayout.size.width = width;
       extraLayout.position.x = width;
-      extraLayout.position.y = 0;
+      const isExpandedExtraRegionPerpendicular = 
+        withDefaultValue(this.expandedLayoutOptions.isExtraRegionPerpendicular, true);
+      if (isExpandedExtraRegionPerpendicular) {
+        extraLayout.size.height = this.extraLayout.size.height;
+      } else {
+        const expandedExtraRegionPosition =
+          withDefaultValue(this.expandedLayoutOptions.extraRegionPosition, ExtraRegionPosition.TOP);
+        if (expandedExtraRegionPosition === ExtraRegionPosition.BOTTOM) {
+          extraLayout.size.height = secondaryLayout.size.height;
+          extraLayout.position.y = secondaryLayout.position.y;
+        } else {
+          extraLayout.size.height = primaryLayout.size.height;
+          extraLayout.position.y = 0;
+        }
+      }
     } else {
       const horizontalSplitRatio =
         getSplitRatio(this.hoverModeLayoutOptions.horizontalSplitRatio, PresetSplitRatio.LAYOUT_3V2);
