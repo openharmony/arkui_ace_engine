@@ -2282,6 +2282,12 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
+    if ((!frameNode->IsActive()) || frameNode->CheckAccessibilityLevelNo()) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "node: %{public}" PRId64 ", is not active or level is no",
+            frameNode->GetAccessibilityId());
+        return;
+    }
+
     AccessibilityEventInfo eventInfo;
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
 
