@@ -1522,6 +1522,8 @@ private:
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
+    bool GetTouchInnerPreviewText(const Offset& offset) const;
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1709,6 +1711,7 @@ private:
     bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
+    bool isTouchPreviewText_ = false;
 };
 } // namespace OHOS::Ace::NG
 

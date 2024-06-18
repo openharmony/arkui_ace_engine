@@ -1685,6 +1685,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto lastCaretIndex = selectController_->GetCaretIndex();
         auto lastCaretRect = selectController_->GetCaretRect();
         isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
+        isTouchPreviewText_ = GetTouchInnerPreviewText(offset);
         if (isTouchCaret_) {
             CloseSelectOverlay(true);
         }
@@ -1708,7 +1709,7 @@ void TextFieldPattern::HandleTouchUp()
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
 {
-    if (isTouchCaret_ || GetIsPreviewText()) {
+    if (isTouchCaret_ || isTouchPreviewText_) {
         UpdateCaretByTouchMove(info);
     }
 }
@@ -2155,6 +2156,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto lastCaretRect = selectController_->GetCaretRect();
     if (mouseStatus_ != MouseStatus::MOVE) {
         selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        UpdateCaretInfoToController();
     }
     StartTwinkling();
     SetIsSingleHandle(true);
@@ -7545,5 +7547,11 @@ void TextFieldPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOption
             textFiledPattern->HiddenMenu();
         };
     }
+}
+
+bool TextFieldPattern::GetTouchInnerPreviewText(const Offset& offset) const
+{
+    auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
+    return GetPreviewTextStart() <= touchDownIndex && touchDownIndex <= GetPreviewTextEnd() && HasFocus();
 }
 } // namespace OHOS::Ace::NG
