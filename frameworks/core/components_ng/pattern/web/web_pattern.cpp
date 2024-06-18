@@ -4734,6 +4734,7 @@ void WebPattern::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
+    isShowAutofillPopup_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
@@ -4777,6 +4778,9 @@ void WebPattern::OnShowAutofillPopup(
 void WebPattern::OnHideAutofillPopup()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
+    if (!isShowAutofillPopup_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
@@ -4794,6 +4798,7 @@ void WebPattern::OnHideAutofillPopup()
     };
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
+    isShowAutofillPopup_ = false;
 }
 
 void WebPattern::CloseKeyboard()
