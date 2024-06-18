@@ -70,6 +70,7 @@ const BUTTON_VERTICAL_BOTTOM_MARGIN: number = getNumberByResource('alert_button_
 const BUTTON_VERTICAL_PADDING: number = getNumberByResource('alert_button_top_padding') ?? 8;
 const BUTTON_VERTICAL_SPACE: number = getNumberByResource('alert_button_vertical_space') ?? 4;
 const MAX_BIG_BUTTON_SIZE: number = 3;
+const MAX_WINDOW_HORIZONTAL_HEIGHT: number = 400;
 const MAX_FONT_SCALE: number = 2;
 const BODY_L = getNumberByResource('Body_L') ?? 16;
 const BODY_M = getNumberByResource('Body_M') ?? 14;
@@ -104,6 +105,7 @@ export struct TipsDialog {
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
+  @State minContentHeight: number = 160;
   updateButtonHeight: (height: number) => void = (height: number) => {
     this.buttonHeight = height;
   }
@@ -119,7 +121,8 @@ export struct TipsDialog {
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize,
-      updateButtonHeight: this.updateButtonHeight
+      updateButtonHeight: this.updateButtonHeight,
+      minContentHeight: this.minContentHeight
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -540,7 +543,7 @@ export struct ConfirmDialog {
               .fontColor(this.fontColorWithTheme)
               .textAlign(this.textAlign)
               .onAreaChange((oldValue: Area, newValue: Area) =>
-                this.getTextAlign(Number(newValue.width))
+              this.getTextAlign(Number(newValue.width))
               )
               .margin({ right: $r('sys.float.padding_level8') })
               .onKeyEvent((event: KeyEvent) => {
@@ -825,6 +828,7 @@ struct CustomDialogContentComponent {
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
+  minContentHeight?: number | undefined;
 
   @Builder
   defaultContentBuilder(): void {
@@ -913,7 +917,7 @@ struct CustomDialogContentComponent {
       if (this.updateTitleHeight) {
         this.updateTitleHeight(this.titleHeight);
       }
-      if (maxHeight - this.buttonHeight - this.titleHeight < MIN_CONTENT_HEIGHT) {
+      if (maxHeight - this.buttonHeight - this.titleHeight < (this.minContentHeight? this.minContentHeight: MIN_CONTENT_HEIGHT)) {
         this.contentMaxHeight = `${MAX_CONTENT_HEIGHT}vp`;
       } else {
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
