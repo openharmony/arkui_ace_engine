@@ -3986,7 +3986,7 @@ void RichEditorPattern::HandlePreviewTextStyle(
         if (isParagraphHead && afterSpanNode) {
             CopyTextSpanStyle(afterSpanNode, spanNode, true);
         } else if (beforeSpanNode) {
-            CopyTextSpanStyle(beforeSpanNode, spanNode, true);
+            CopyTextSpanStyle(beforeSpanNode, spanNode, false);
         }
     }
 }
