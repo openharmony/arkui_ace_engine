@@ -1976,6 +1976,120 @@ HWTEST_F(RichEditorEditTestNg, CreateHandles001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RefreshSelectOverlay001
+ * @tc.desc: test RefreshSelectOverlay and more.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, RefreshSelectOverlay001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t posx = 1;
+    int32_t posy = 3;
+    richEditorPattern->HandleSurfacePositionChanged(posx, posy);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    richEditorPattern->RefreshSelectOverlay(true, false);
+    EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(0, 0, 0, 0));
+
+    EXPECT_EQ(richEditorPattern->IsHandlesShow(), false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    richEditorPattern->selectOverlay_->SetUsingMouse(false);
+    richEditorPattern->UpdateSelectionInfo(posx, posy);
+    EXPECT_EQ(richEditorPattern->sourceType_, SourceType::TOUCH);
+
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    Offset Offset = {1, 4};
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    richEditorPattern->isTextChange_ = false;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: ShowHandles001
+ * @tc.desc: test ShowHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, ShowHandles001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    auto offsetF = OffsetF(0.0f, 0.0f);
+    EXPECT_EQ(richEditorPattern->textSelector_.selectionBaseOffset, offsetF);
+
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+
+    AddImageSpan();
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->ShowHandles(false);
+    EXPECT_EQ(richEditorPattern->showSelect_, true);
+
+    richEditorPattern->isSpanStringMode_ = true;
+    auto pasteStr = richEditorPattern->GetPasteStr();
+    richEditorPattern->InsertValueByPaste(pasteStr);
+    EXPECT_EQ(richEditorPattern->isTextChange_, true);
+
+    richEditorPattern->GetThumbnailCallback();
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnPaste001
+ * @tc.desc: test HandleOnPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, HandleOnPaste001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    richEditorPattern->clipboard_ = clipboard;
+    AddSpan("testHandleOnPaste1");
+    richEditorPattern->HandleOnPaste();
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 8;
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+
+    ClearSpan();
+    AddImageSpan();
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->OnCopyOperation(true);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+}
+
+/**
  * @tc.name: GetTextBoxes001
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC
