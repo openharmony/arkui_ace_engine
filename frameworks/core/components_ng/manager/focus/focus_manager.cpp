@@ -354,27 +354,30 @@ void FocusManager::WindowFocusMoveEnd()
     }
 }
 
-FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub, const RefPtr<PipelineContext>& context)
+void FocusManager::FocusGuard::CreateFocusGuard(const RefPtr<FocusHub>& focusHub,
+    const RefPtr<FocusManager>& focusManager)
 {
     CHECK_NULL_VOID(focusHub);
-    auto mng = focusHub->GetFocusManager();
-    bool useContext = false;
-    if (!mng && context) {
-        auto focusManager = context->GetOrCreateFocusManager();
-        CHECK_NULL_VOID(focusManager);
-        mng = focusManager;
-        useContext = true;
-    }
-    CHECK_NULL_VOID(mng);
-    if (mng->isSwitchingFocus_.value_or(false)) {
+    CHECK_NULL_VOID(focusManager);
+    if (focusManager->isSwitchingFocus_.value_or(false)) {
         return;
     }
-    if (useContext && context && context->GetRootElement()) {
-        mng->FocusSwitchingStart(context->GetRootElement()->GetFocusHub());
-    } else {
-        mng->FocusSwitchingStart(focusHub);
+    focusManager->FocusSwitchingStart(focusHub);
+    focusMng_ = focusManager;
+}
+
+FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub)
+{
+    RefPtr<FocusHub> hub = focusHub;
+    if (!focusHub ||!focusHub->GetFocusManager()) {
+        auto curFocusView = FocusView::GetCurrentFocusView();
+        CHECK_NULL_VOID(curFocusView);
+        auto curFocusViewHub = curFocusView->GetFocusHub();
+        CHECK_NULL_VOID(curFocusViewHub);
+        hub = curFocusViewHub;
     }
-    focusMng_ = mng;
+    auto mng = hub->GetFocusManager();
+    CreateFocusGuard(hub, mng);
 }
 
 FocusManager::FocusGuard::~FocusGuard()

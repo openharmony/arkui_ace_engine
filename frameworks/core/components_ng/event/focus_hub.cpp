@@ -269,7 +269,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
     }
-    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus(), context);
+    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus());
     auto parent = GetParentFocusHub();
     if (parent) {
         if (focusManager) {
