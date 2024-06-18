@@ -46,13 +46,22 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
+constexpr float CHILD_SIZE = 300.0f;
+constexpr float CHILD_SIZE_2 = 600.0f;
+constexpr float OFFSET = 200.0f;
+constexpr float OFFSET_2 = -100.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 const std::string TITLE = "title";
 const std::string SUBTITLE = "subtitle";
 const std::string MESSAGE = "hello world";
 const std::string ICON_SOURCE = "$r('app.media.icon')";
+const std::string BUTTON_TEXT = "button";
 const Dimension BORDER_WIDTH(5.0, DimensionUnit::PX);
+const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
+const Dimension DIMENSION_NEGATIVE(-1.0, DimensionUnit::PX);
+const Dimension DIMENSION_SIZE(100.0, DimensionUnit::PX);
+const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 } // namespace
 
 class DialogModelTestNg : public testing::Test {
@@ -1001,5 +1010,335 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg023, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->topLeftPoint_.GetY(), 0.0);
     EXPECT_EQ(layoutAlgorithm->isShowInSubWindow_, false);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DialogModelTestNg024
+ * @tc.desc: Test dialogPattern.ParseBorderRadius function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg024, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    NG::BorderRadiusProperty borderRadius;
+    dialogPattern->ParseBorderRadius(borderRadius);
+    EXPECT_EQ(borderRadius.radiusTopLeft, dialogTheme->GetRadius().GetX());
+    EXPECT_EQ(borderRadius.radiusTopRight, dialogTheme->GetRadius().GetX());
+    EXPECT_EQ(borderRadius.radiusBottomLeft, dialogTheme->GetRadius().GetX());
+    EXPECT_EQ(borderRadius.radiusBottomRight, dialogTheme->GetRadius().GetX());
+}
+
+/**
+ * @tc.name: DialogModelTestNg025
+ * @tc.desc: Test dialogPattern.HandleBlurEvent/HandleFocusEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg025, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    auto renderContext = dialogPattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+    dialogPattern->HandleBlurEvent();
+    auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme->GetDefaultShadowOff());
+    EXPECT_EQ(renderContext->GetBackShadow().value(), Shadow::CreateShadow(defaultShadowOff));
+    dialogPattern->HandleFocusEvent();
+    auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme->GetDefaultShadowOn());
+    EXPECT_EQ(renderContext->GetBackShadow().value(), Shadow::CreateShadow(defaultShadowOn));
+}
+
+/**
+ * @tc.name: DialogModelTestNg026
+ * @tc.desc: Test dialogPattern.OnLanguageConfigurationUpdate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg026, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    DialogProperties props;
+    props.type = DialogType::COMMON;
+
+    std::function<void(DialogProperties&)> onLanguageChange = [](DialogProperties& props) {};
+    props.onLanguageChange = std::move(onLanguageChange);
+
+    Shadow shadow;
+    shadow.SetBlurRadius(-0.1f);
+    shadow.SetOffsetX(10);
+    shadow.SetOffsetY(10);
+    shadow.SetColor(Color(Color::RED));
+    shadow.SetShadowType(ShadowType::COLOR);
+    props.shadow = shadow;
+
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(BORDER_WIDTH);
+    props.borderWidth = borderWidth;
+
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLUE);
+    props.borderColor = borderColor;
+
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIMENSION_RADIUS);
+    props.borderRadius = borderRadius;
+
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->OnLanguageConfigurationUpdate();
+
+    auto renderContext = dialogPattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+
+    dialogPattern->contentNodeMap_.clear();
+    dialogPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+}
+
+/**
+ * @tc.name: DialogModelTestNg027
+ * @tc.desc: Test dialogPattern.OnLanguageConfigurationUpdate function for AlertDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg027, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    DialogProperties props {
+        .type = DialogType::ALERT_DIALOG,
+        .title = TITLE,
+        .subtitle = SUBTITLE,
+        .content = MESSAGE,
+    };
+    ButtonInfo info { .text = BUTTON_TEXT };
+    props.buttons.push_back(info);
+    std::function<void(DialogProperties&)> onLanguageChange = [](DialogProperties& props) {};
+    props.onLanguageChange = std::move(onLanguageChange);
+
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->OnLanguageConfigurationUpdate();
+
+    EXPECT_EQ(dialogPattern->title_, TITLE);
+    EXPECT_EQ(dialogPattern->subtitle_, SUBTITLE);
+    EXPECT_EQ(dialogPattern->message_, MESSAGE);
+
+    dialogPattern->contentNodeMap_.clear();
+    dialogPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(dialogPattern->title_, TITLE);
+}
+
+/**
+ * @tc.name: DialogModelTestNg028
+ * @tc.desc: Test dialogPattern.OnLanguageConfigurationUpdate/UpdateSheetIconAndText function for ActionSheet
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg028, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    vector<ActionSheetInfo> sheetItems = {
+        ActionSheetInfo {
+            .title = TITLE,
+            .icon = ICON_SOURCE,
+        },
+        ActionSheetInfo {},
+    };
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = TITLE,
+        .sheetsInfo = sheetItems,
+    };
+    std::function<void(DialogProperties&)> onLanguageChange = [](DialogProperties& props) {};
+    props.onLanguageChange = std::move(onLanguageChange);
+
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->OnLanguageConfigurationUpdate();
+
+    dialogPattern->dialogProperties_.sheetsInfo.clear();
+    dialogPattern->UpdateSheetIconAndText();
+    EXPECT_EQ(dialogPattern->title_, TITLE);
+}
+
+/**
+ * @tc.name: DialogModelTestNg029
+ * @tc.desc: Test DialogLayoutAlgorithm.ProcessMaskRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg029, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto dialogContext = dialog->GetRenderContext();
+    ASSERT_NE(dialogContext, nullptr);
+
+    auto dialogLayoutAlgorithm = dialogPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
+    RefPtr<DialogLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->ProcessMaskRect(
+        DimensionRect(DIMENSION_NEGATIVE, DIMENSION_NEGATIVE, DimensionOffset()), dialog, false);
+    EXPECT_FALSE(dialogContext->GetClip());
+
+    layoutAlgorithm->isUIExtensionSubWindow_ = true;
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->ProcessMaskRect(DimensionRect(DIMENSION_SIZE, DIMENSION_SIZE, DimensionOffset()), dialog, true);
+    EXPECT_TRUE(dialogContext->GetClip());
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: DialogModelTestNg030
+ * @tc.desc: Test DialogLayoutAlgorithm.ClipUIExtensionSubWindowContent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
+{
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto dialogContext = dialog->GetRenderContext();
+    ASSERT_NE(dialogContext, nullptr);
+
+    auto dialogLayoutAlgorithm = dialogPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
+    RefPtr<DialogLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, false);
+    EXPECT_FALSE(dialogContext->GetClipShape().value());
+
+    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
+    EXPECT_TRUE(dialogContext->GetClipShape().value());
+
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
+    EXPECT_TRUE(dialogContext->GetClipShape().value());
+}
+
+/**
+ * @tc.name: DialogModelTestNg031
+ * @tc.desc: Test DialogLayoutAlgorithm.AdjustChildPosition function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->keyboardInset_ = KEYBOARD_INSET;
+    auto topLeftOffset = OffsetF(0.f, CHILD_SIZE);
+    auto dialogOffset = OffsetF();
+    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
+
+    auto offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
+    EXPECT_EQ(offset.GetY(), OFFSET);
+
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+
+    topLeftOffset.SetY(-1.f);
+    childSize.SetHeight(CHILD_SIZE_2);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
+    EXPECT_EQ(offset.GetY(), OFFSET_2);
+
+    topLeftOffset.SetY(0.f);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
+    EXPECT_EQ(offset.GetY(), 0.f);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: DialogModelTestNg032
+ * @tc.desc: Test DialogLayoutAlgorithm.SetSubWindowHotarea/GetMaskRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    DialogProperties props;
+    props.isShowInSubWindow = true;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogProp);
+
+    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
+    auto selfSize = SizeF(CHILD_SIZE_2, CHILD_SIZE_2);
+
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    auto maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    EXPECT_FALSE(maskRect.has_value());
+
+    auto offset = DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP));
+    layoutAlgorithm->isUIExtensionSubWindow_ = true;
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    EXPECT_EQ(maskRect.value().GetOffset(), offset);
+    EXPECT_EQ(maskRect.value().GetWidth(), CalcDimension(1, DimensionUnit::PERCENT));
+    EXPECT_EQ(maskRect.value().GetHeight(), CalcDimension(1, DimensionUnit::PERCENT));
+
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(CHILD_SIZE, CHILD_SIZE));
+    layoutAlgorithm->SetSubWindowHotarea(dialogProp, childSize, selfSize, dialog->GetId());
+    maskRect = layoutAlgorithm->GetMaskRect(dialog);
+    offset = DimensionOffset(CalcDimension(0, DimensionUnit::PX), CalcDimension(0, DimensionUnit::PX));
+    EXPECT_EQ(maskRect.value().GetOffset(), offset);
+    EXPECT_EQ(maskRect.value().GetWidth(), Dimension(CHILD_SIZE, DimensionUnit::PX));
+    EXPECT_EQ(maskRect.value().GetHeight(), Dimension(CHILD_SIZE, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG
