@@ -328,9 +328,15 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     if (jumpIdx == LAST_ITEM) {
         jumpIdx = info_->childrenCount_ - 1;
     }
-    if (static_cast<size_t>(jumpIdx) >= info_->itemInfos_.size()) {
+    if (jumpIdx >= static_cast<int32_t>(info_->itemInfos_.size())) {
         // prepare items
         MeasureToTarget(jumpIdx);
+    }
+
+    if (jumpIdx < 0 || jumpIdx >= static_cast<int32_t>(info_->itemInfos_.size())) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "jumpIdx %{public}d is out of range, itemInfos_.size() = %{public}zu",
+            jumpIdx, info_->itemInfos_.size());
+        return;
     }
     // solve offset
     const auto& item = info_->itemInfos_[jumpIdx];
