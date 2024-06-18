@@ -45,6 +45,17 @@ struct ListPredictLayoutParam {
     LayoutConstraintF layoutConstraint;
 };
 
+struct PredictLayoutItem {
+    int32_t index;
+    bool forward;
+};
+
+struct ListPredictLayoutParamV2 {
+    std::list<PredictLayoutItem> items;
+    LayoutConstraintF layoutConstraint;
+    LayoutConstraintF groupLayoutConstraint;
+};
+
 enum class ScrollAutoType {
     NOT_CHANGE = 0,
     START,
@@ -403,6 +414,8 @@ protected:
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
+        const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -433,6 +446,14 @@ private:
     virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+
+    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
+    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
+    std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
+        const LayoutConstraintF& constraint, bool forward, int64_t deadline);
+    static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
+    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
