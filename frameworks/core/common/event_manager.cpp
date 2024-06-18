@@ -238,10 +238,10 @@ void EventManager::RecordHitEmptyMessage(
     CHECK_NULL_VOID(container);
     uint32_t windowId = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    windowId = NG::WindowSceneHelper::GetWindowIdForWindowScene(frameNode);
+    windowId = static_cast<uint32_t>(NG::WindowSceneHelper::GetWindowIdForWindowScene(frameNode));
 #endif
     if (windowId == 0) {
-        windowId = static_cast<int32_t>(container->GetWindowId());
+        windowId = container->GetWindowId();
     }
     hitEmptyMessage->Put("windowId", static_cast<int32_t>(windowId));
     auto pipelineContext = container->GetPipelineContext();
