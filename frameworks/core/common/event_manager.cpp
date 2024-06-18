@@ -633,7 +633,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         CheckUpEvent(event);
-        lastDownFingerNumber_ = downFingerIds_.size();
+        lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
 
@@ -701,7 +701,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     lastEventTime_ = point.time;
-    lastDownFingerNumber_ = downFingerIds_.size();
+    lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
     return true;
 }
 
