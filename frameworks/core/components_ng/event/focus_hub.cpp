@@ -352,7 +352,7 @@ void FocusHub::RemoveSelf(BlurReason reason)
     auto parent = GetParentFocusHub();
     if (parent && parent != screenFocusHub && !focusView) {
         parent->RemoveChild(AceType::Claim(this), reason);
-    } else {
+    } else if (IsCurrentFocus()) {
         FocusManager::FocusGuard guard(parent);
         LostFocus(reason);
     }
