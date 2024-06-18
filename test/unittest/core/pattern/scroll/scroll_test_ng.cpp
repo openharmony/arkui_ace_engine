@@ -27,6 +27,9 @@ void ScrollTestNg::SetUpTestSuite()
     scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
     scrollBarTheme->padding_ = Edge(0.0);
     scrollBarTheme->scrollBarMargin_ = Dimension(0.0);
+    scrollBarTheme->touchWidth_ = Dimension(DEFAULT_TOUCH_WIDTH, DimensionUnit::VP);
+    scrollBarTheme->activeWidth_ = Dimension(DEFAULT_ACTIVE_WIDTH, DimensionUnit::VP);
+    scrollBarTheme->normalWidth_ = Dimension(DEFAULT_NORMAL_WIDTH, DimensionUnit::VP);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
@@ -119,12 +122,6 @@ void ScrollTestNg::CreateContent(int32_t childNumber)
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
-void ScrollTestNg::UpdateCurrentOffset(float offset)
-{
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-}
-
 RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
 {
     auto content = GetChildFrameNode(frameNode_, 0);
@@ -132,8 +129,11 @@ RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
     return contentChild;
 }
 
-void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
+void ScrollTestNg::Touch(TouchType touchType, Offset offset, SourceType sourceType)
 {
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetTouchType(touchType);
+    locationInfo.SetLocalLocation(offset);
     TouchEventInfo eventInfo("touch");
     eventInfo.SetSourceDevice(sourceType);
     eventInfo.AddTouchLocationInfo(std::move(locationInfo));
@@ -141,28 +141,16 @@ void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
     touchEvent(eventInfo);
 }
 
-void ScrollTestNg::Touch(TouchType touchType, Offset offset, SourceType sourceType)
+void ScrollTestNg::Mouse(Offset location, MouseButton mouseButton, MouseAction mouseAction)
 {
-    TouchLocationInfo locationInfo(1);
-    locationInfo.SetTouchType(touchType);
-    locationInfo.SetLocalLocation(offset);
-    Touch(locationInfo, sourceType);
-}
-
-void ScrollTestNg::Mouse(MouseInfo mouseInfo)
-{
+    MouseInfo mouseInfo;
+    mouseInfo.SetLocalLocation(location);
+    mouseInfo.SetButton(mouseButton);
+    mouseInfo.SetAction(mouseAction);
     auto mouseEventHub = frameNode_->GetOrCreateInputEventHub();
     RefPtr<InputEvent> inputEvent = mouseEventHub->mouseEventActuator_->inputEvents_.front();
     auto mouseEvent = inputEvent->GetOnMouseEventFunc();
     mouseEvent(mouseInfo);
-}
-
-void ScrollTestNg::Mouse(Offset moveOffset)
-{
-    MouseInfo mouseInfo;
-    mouseInfo.SetAction(MouseAction::MOVE);
-    mouseInfo.SetLocalLocation(moveOffset);
-    Mouse(mouseInfo);
 }
 
 void ScrollTestNg::Hover(bool isHover)
@@ -273,17 +261,14 @@ HWTEST_F(ScrollTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
      * @tc.steps: step1. Test default value: true
      */
     CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 
     /**
      * @tc.steps: step2. Test set value: false
      */
-    ClearOldNodes();
     ScrollModelNG model = CreateScroll();
     model.SetScrollEnabled(false);
-    CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
 }
@@ -300,7 +285,6 @@ HWTEST_F(ScrollTestNg, ScrollTest002, TestSize.Level1)
     model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
     auto scrollProxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(scrollProxy);
-    CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
     /**
@@ -817,7 +801,7 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step3. scroll to middle
      * @tc.expected: action is correct
      */
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT * 1);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -828,7 +812,7 @@ HWTEST_F(ScrollTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.steps: step4. scroll to bottom
      * @tc.expected: action is correct
      */
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT * 2);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -1872,5 +1856,52 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->currentOffset_, - 2 * ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Model001
+ * @tc.desc: Test scroll model
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Model001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    EXPECT_NE(model.GetOrCreateController(), nullptr);
+    pattern_->positionController_ = nullptr;
+    EXPECT_NE(model.GetOrCreateController(), nullptr);
+    EXPECT_NE(model.GetOrCreateController(AceType::RawPtr(frameNode_)), nullptr);
+    pattern_->positionController_ = nullptr;
+    EXPECT_NE(model.GetOrCreateController(AceType::RawPtr(frameNode_)), nullptr);
+    EXPECT_EQ(model.GetAxis(AceType::RawPtr(frameNode_)), 0);
+    model.SetAxis(Axis::VERTICAL);
+    EXPECT_EQ(model.GetAxis(AceType::RawPtr(frameNode_)), 0);
+    EXPECT_EQ(model.GetScrollEnabled(AceType::RawPtr(frameNode_)), 1);
+    model.SetScrollEnabled(AceType::RawPtr(frameNode_), false);
+    EXPECT_EQ(model.GetScrollEnabled(AceType::RawPtr(frameNode_)), 0);
+    model.SetEnablePaging(AceType::RawPtr(frameNode_), true);
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+    model.SetEnablePaging(AceType::RawPtr(frameNode_), false);
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::NONE);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_TOP);
+    ScrollTo(ITEM_HEIGHT * 1);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
+    ScrollTo(ITEM_HEIGHT * 2);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_BOTTOM);
+
+    ScrollTo(0.f);
+    pattern_->SetAxis(Axis::HORIZONTAL);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_LEFT);
+    ScrollTo(ITEM_HEIGHT * 1);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
+    ScrollTo(ITEM_HEIGHT * 2);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_RIGHT);
+
+    pattern_->SetAxis(Axis::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
 }
 } // namespace OHOS::Ace::NG

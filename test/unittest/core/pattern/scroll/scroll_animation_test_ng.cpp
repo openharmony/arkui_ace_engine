@@ -54,33 +54,6 @@ HWTEST_F(ScrolleAnimationTestNg, StopAnimation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: StopAdaptAnimation001
- * @tc.desc: Test StopAdaptAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(ScrolleAnimationTestNg, StopAdaptAnimation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create scrollBarOverlayModifier, start adapt animation
-     * @tc.expected: Change modifer's MainModeSize to the initial value
-     */
-    double x = 1.00;
-    double y = 1.25;
-    double width = 1.00;
-    double height = 2.00;
-    Rect rect(x, y, width, height);
-    bool needAdaptAnimation = true;
-    ScrollBarOverlayModifier modifer;
-    AnimationOption option;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.314f, 0.95f);
-    option.SetCurve(motion);
-    std::shared_ptr<AnimationUtils::Animation> adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
-    modifer.StartAdaptAnimation(rect, needAdaptAnimation);
-    modifer.StopAdaptAnimation();
-    EXPECT_NE(adaptAnimation_, nullptr);
-}
-
-/**
  * @tc.name: StartHoverAnimation001
  * @tc.desc: Test StartHoverAnimation
  * @tc.type: FUNC
