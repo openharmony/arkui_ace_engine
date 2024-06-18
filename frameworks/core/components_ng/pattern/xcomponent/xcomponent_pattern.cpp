@@ -1609,10 +1609,6 @@ void XComponentPattern::NativeSurfaceShow()
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(nativeXComponent_);
-    auto width = initSize_.Width();
-    auto height = initSize_.Height();
-    nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
-    nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto surfaceShowCallback = nativeXComponentImpl_->GetSurfaceShowCallback();
     CHECK_NULL_VOID(surfaceShowCallback);
