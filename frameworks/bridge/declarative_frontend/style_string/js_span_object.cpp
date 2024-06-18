@@ -1243,9 +1243,9 @@ void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanPara
     JSRef<JSVal> args = obj->GetProperty("wordBreak");
     int32_t index = WORD_BREAK_TYPES_DEFAULT;
     if (args->IsNumber()) {
-        index = static_cast<uint32_t>(args->ToNumber<int32_t>());
+        index = args->ToNumber<int32_t>();
     }
-    if (index < 0 || index >= WORD_BREAK_TYPES.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
         index = 0;
     }
     paragraphStyle.wordBreak = WORD_BREAK_TYPES[index];
