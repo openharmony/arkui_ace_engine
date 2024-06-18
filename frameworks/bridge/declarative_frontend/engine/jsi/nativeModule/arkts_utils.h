@@ -82,6 +82,8 @@ public:
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     template <class T>
