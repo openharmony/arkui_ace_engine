@@ -2431,13 +2431,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
 
     auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-
-    if (event.button == MouseButton::RIGHT_BUTTON &&
-        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
-        manager->SetIsDragCancel(true);
+    if (manager) {
+        if (event.button == MouseButton::RIGHT_BUTTON &&
+            (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
+            manager->SetIsDragCancel(true);
+        } else {
+            manager->SetIsDragCancel(false);
+        }
     } else {
-        manager->SetIsDragCancel(false);
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
+            event.touchEventId);
     }
 
     auto container = Container::Current();
@@ -3021,6 +3024,7 @@ void PipelineContext::Destroy()
     overlayManager_.Reset();
     sharedTransitionManager_.Reset();
     dragDropManager_.Reset();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "PipelineContext::Destroy Reset dragDropManager_");
     focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
