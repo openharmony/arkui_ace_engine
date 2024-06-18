@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 110
+#define ARKUI_FULL_API_VERSION 111
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 110
+#define ARKUI_NODE_API_VERSION 111
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -3853,6 +3853,8 @@ struct ArkUIGridRowModifier {
     void (*resetColumns)(ArkUINodeHandle node);
     void (*setGutter)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetGutter)(ArkUINodeHandle node);
+    void (*setOnBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnBreakpointChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIPanelModifier {

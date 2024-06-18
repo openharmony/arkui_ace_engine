@@ -5156,6 +5156,19 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
   }
 }
 GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
+class GridRowOnBreakpointChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetOnBreakpointChange(node);
+    } else {
+      getUINativeModule().gridRow.setOnBreakpointChange(node, this.value);
+    }
+  }
+}
+GridRowOnBreakpointChangeModifier.identity = Symbol('gridRowOnBreakpointChange');
 class SetDirectionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5257,7 +5270,8 @@ class ArkGridRowComponent extends ArkComponent {
     return ["GridCol"];
   }
   onBreakpointChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridRowOnBreakpointChangeModifier.identity, GridRowOnBreakpointChangeModifier, callback);
+    return this;
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);

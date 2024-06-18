@@ -1550,6 +1550,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetGutter));
     gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGutter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetGutter));
+    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBreakpointChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::SetOnBreakpointChange));
+    gridRow->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBreakpointChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridRowBridge::ResetOnBreakpointChange));
 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridRow"), gridRow);
 
