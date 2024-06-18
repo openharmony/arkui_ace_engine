@@ -110,6 +110,7 @@ export class FoldSplitContainer extends ViewPU {
       this,
       "extraLayout"
     );
+    this.__extraOpacity = new ObservedPropertySimplePU(1, this, "extraOpacity");
     this.windowStatusType = window.WindowStatusType.UNDEFINED;
     this.foldStatus = display.FoldStatus.FOLD_STATUS_UNKNOWN;
     this.windowInstance = undefined;
@@ -168,6 +169,9 @@ export class FoldSplitContainer extends ViewPU {
     if (s2.extraLayout !== undefined) {
       this.extraLayout = s2.extraLayout;
     }
+    if (s2.extraOpacity !== undefined) {
+      this.extraOpacity = s2.extraOpacity;
+    }
     if (s2.windowStatusType !== undefined) {
       this.windowStatusType = s2.windowStatusType;
     }
@@ -204,6 +208,7 @@ export class FoldSplitContainer extends ViewPU {
     this.__primaryLayout.purgeDependencyOnElmtId(q2);
     this.__secondaryLayout.purgeDependencyOnElmtId(q2);
     this.__extraLayout.purgeDependencyOnElmtId(q2);
+    this.__extraOpacity.purgeDependencyOnElmtId(q2);
   }
   aboutToBeDeleted() {
     this.__expandedLayoutOptions.aboutToBeDeleted();
@@ -213,6 +218,7 @@ export class FoldSplitContainer extends ViewPU {
     this.__primaryLayout.aboutToBeDeleted();
     this.__secondaryLayout.aboutToBeDeleted();
     this.__extraLayout.aboutToBeDeleted();
+    this.__extraOpacity.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -257,6 +263,12 @@ export class FoldSplitContainer extends ViewPU {
   }
   set extraLayout(k2) {
     this.__extraLayout.set(k2);
+  }
+  get extraOpacity() {
+    return this.__extraOpacity.get();
+  }
+  set extraOpacity(l1) {
+    this.__extraOpacity.set(l1);
   }
   aboutToAppear() {
     this.listener = mediaQuery.matchMediaSync("(width<=600vp)");
@@ -369,35 +381,19 @@ export class FoldSplitContainer extends ViewPU {
       if (this.extra) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((n3, o3) => {
-            If.create();
-            if (
-              this.extraLayout.size.width > 0 &&
-              this.extraLayout.size.height > 0
-            ) {
-              this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((s3, t3) => {
-                  Column.create();
-                  Column.size(this.extraLayout.size);
-                  Column.position({
-                    start: LengthMetrics.vp(this.extraLayout.position.x),
-                    top: LengthMetrics.vp(this.extraLayout.position.y),
-                  });
-                  Column.transition(
-                    TransitionEffect.OPACITY.animation({
-                      curve: Curve.Linear,
-                      duration: 250,
-                    })
-                  );
-                  Column.clip(true);
-                }, Column);
-                this.extra?.bind(this)?.(this);
-                Column.pop();
-              });
-            } else {
-              this.ifElseBranchUpdateFunction(1, () => {});
-            }
-          }, If);
-          If.pop();
+            Column.create();
+            Context.animation({ curve: Curve.Linear, duration: 250 });
+            Column.opacity(this.extraOpacity);
+            Context.animation(null);
+            Column.size(this.extraLayout.size);
+            Column.position({
+              start: LengthMetrics.vp(this.extraLayout.position.x),
+              top: LengthMetrics.vp(this.extraLayout.position.y),
+            });
+            Column.clip(true);
+          }, Column);
+          this.extra?.bind(this)?.(this);
+          Column.pop();
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {});
@@ -481,6 +477,14 @@ export class FoldSplitContainer extends ViewPU {
         this.extraLayout = g1.extra;
       });
     }
+    if (
+      this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED &&
+      !this.hoverModeLayoutOptions.showExtraRegion
+    ) {
+      this.extraOpacity = 0;
+    } else {
+      this.extraOpacity = 1;
+    }
   }
   getExpandedRegionLayouts() {
     const x = this.containerSize.width;
@@ -562,7 +566,25 @@ export class FoldSplitContainer extends ViewPU {
       q.size.width = o;
       r.size.width = o;
       s.position.x = o;
-      s.position.y = 0;
+      const h1 = withDefaultValue(
+        this.expandedLayoutOptions.isExtraRegionPerpendicular,
+        true
+      );
+      if (h1) {
+        s.size.height = this.extraLayout.size.height;
+      } else {
+        const k1 = withDefaultValue(
+          this.expandedLayoutOptions.extraRegionPosition,
+          ExtraRegionPosition.TOP
+        );
+        if (k1 === ExtraRegionPosition.BOTTOM) {
+          s.size.height = r.size.height;
+          s.position.y = r.position.y;
+        } else {
+          s.size.height = q.size.height;
+          s.position.y = 0;
+        }
+      }
     } else {
       const v = getSplitRatio(
         this.hoverModeLayoutOptions.horizontalSplitRatio,
