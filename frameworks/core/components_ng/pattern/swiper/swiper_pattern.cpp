@@ -2849,15 +2849,16 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
     return false;
 }
 
-void SwiperPattern::PlayDisplacementAnimation(SwiperLayoutAlgorithm::PositionMap &positionMap, const OffsetF& offset)
+void SwiperPattern::InitialFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode, const OffsetF& offset)
 {
-    for (auto &item : positionMap) {
-        auto frameNode = item.second.node;
-        if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
-            item.second.finalOffset = offset;
-        }
-    }
+    CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
+}
+
+void SwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->CancelTranslateXYAnimation();
 }
 
 void SwiperPattern::PlayPropertyTranslateAnimation(
@@ -2968,7 +2969,13 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
             offset.GetY());
         ACE_SCOPED_TRACE("Swiper start property animation, X: %f, Y: %f", offset.GetX(), offset.GetY());
-        swiperPattern->PlayDisplacementAnimation(swiperPattern->itemPosition_, offset);
+        for (auto& item : swiperPattern->itemPosition_) {
+            auto frameNode = item.second.node;
+            if (frameNode) {
+                frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
+                item.second.finalOffset = offset;
+            }
+        }
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
         if (swiperPattern->IsCaptureNodeValid()) {
             swiperPattern->GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
@@ -3061,7 +3068,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
             if (!frameNode) {
                 continue;
             }
-            frameNode->GetRenderContext()->CancelTranslateXYAnimation();
+            swiper->CancelFrameNodePropertyAnimation(frameNode);
         }
         if (swiper->IsCaptureNodeValid()) {
             swiper->GetLeftCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
@@ -3076,7 +3083,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
             continue;
         }
         currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
-        frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        InitialFrameNodePropertyAnimation(frameNode, OffsetF());
         item.second.finalOffset = OffsetF();
     }
     itemPositionInAnimation_.clear();
