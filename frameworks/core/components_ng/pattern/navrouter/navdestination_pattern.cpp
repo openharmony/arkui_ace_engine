@@ -277,7 +277,7 @@ bool NavDestinationPattern::NeedIgnoreKeyboard()
     auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto& opts = layoutProperty->GetSafeAreaExpandOpts();
-    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && (opts->edges & SAFE_AREA_EDGE_BOTTOM)) {
         return true;
     }
     return false;

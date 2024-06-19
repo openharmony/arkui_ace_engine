@@ -305,6 +305,12 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
     // if parent already expanded into keyboard, offset shouldn't be applied again
     auto parent = GetHostNode()->GetAncestorNodeOfFrame();
     while (parent) {
+        auto pattern = parent->GetPattern();
+        if (pattern && pattern->CheckCustomAvoidKeyboard()) {
+            // if parent need avoid keyboard and child need expand into keyboard,
+            // keep child expand into keyboard
+            break;
+        }
         auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
         if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
             return OffsetF();
