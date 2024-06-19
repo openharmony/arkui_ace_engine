@@ -1301,6 +1301,11 @@ public:
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
+    bool IsPressSelectedBox()
+    {
+        return isPressSelectedBox_;
+    }
+
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
     void HiddenMenu();
 
@@ -1578,6 +1583,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     bool scrollable_ = true;
     bool blockPress_ = false;
+    bool isPressSelectedBox_ = false;
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;

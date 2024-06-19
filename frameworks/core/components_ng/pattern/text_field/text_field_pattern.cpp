@@ -3130,7 +3130,7 @@ void TextFieldPattern::InitPanEvent()
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
     gestureHub->SetPanEventType(GestureTypeName::TEXTFIELD_BOXSELECT);
-    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+    gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
             gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON) {
@@ -3138,6 +3138,15 @@ void TextFieldPattern::InitPanEvent()
         }
         if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
             gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
+        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, GestureJudgeResult::CONTINUE);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, GestureJudgeResult::CONTINUE);
+        if (gestureInfo->GetType() == GestureTypeName::TEXTFIELD_BOXSELECT &&
+            gestureInfo->GetInputEventType() == InputEventType::MOUSE_BUTTON &&
+            host->IsDraggable() && pattern->IsPressSelectedBox()) {
             return GestureJudgeResult::REJECT;
         }
         return GestureJudgeResult::CONTINUE;
@@ -3303,7 +3312,8 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    if ((IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation())) || GetIsPreviewText()) {
+    isPressSelectedBox_ = (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation()));
+    if (isPressSelectedBox_ || GetIsPreviewText()) {
         blockPress_ = true;
         return;
     }
