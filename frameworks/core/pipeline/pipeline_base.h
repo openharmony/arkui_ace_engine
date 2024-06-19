@@ -1251,6 +1251,7 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
 
     virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}

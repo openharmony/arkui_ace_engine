@@ -116,6 +116,8 @@ public:
     }
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    
+    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;

@@ -25,4 +25,6 @@ void Window::RequestFrame() {}
 void Window::SetRootRenderNode(const RefPtr<RenderNode>& root) {}
 
 void Window::SetVsyncCallback(AceVsyncCallback&& callback) {}
+
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 } // namespace OHOS::Ace
