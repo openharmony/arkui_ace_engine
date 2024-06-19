@@ -1221,37 +1221,28 @@ void TextPickerDialogView::SetDividerNodeActive(RefPtr<UINode>& contentRow, bool
     auto firstDivider = contentRow->GetChildAtIndex(1);
     auto firstDividerNode = AceType::DynamicCast<FrameNode>(firstDivider);
     CHECK_NULL_VOID(firstDividerNode);
-    firstDividerNode->SetActive(firstDividerActive);
-    auto firstDividerLayoutProperty = firstDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(firstDividerLayoutProperty);
-    if (firstDividerActive) {
-        firstDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    } else {
-        firstDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
-
     auto secondDivider = contentRow->GetChildAtIndex(SECOND_DIVEDER_NODE_INDEX);
     auto secondDividerNode = AceType::DynamicCast<FrameNode>(secondDivider);
     CHECK_NULL_VOID(secondDividerNode);
-    secondDividerNode->SetActive(secondDividerActive);
-    auto secondDividerLayoutProperty = secondDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(secondDividerLayoutProperty);
-    if (secondDividerActive) {
-        secondDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    } else {
-        secondDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    }
-
     auto thirdDivider = contentRow->GetChildAtIndex(THIRD_DIVEDER_NODE_INDEX);
     auto thirdDividerNode = AceType::DynamicCast<FrameNode>(thirdDivider);
     CHECK_NULL_VOID(thirdDividerNode);
-    thirdDividerNode->SetActive(thirdDividerActive);
-    auto thirdDividerLayoutProperty = thirdDividerNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(thirdDividerLayoutProperty);
-    if (thirdDividerActive) {
-        thirdDividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+
+    SetSingleDividerNodeActive(firstDividerNode, firstDividerActive);
+    SetSingleDividerNodeActive(secondDividerNode, secondDividerActive);
+    SetSingleDividerNodeActive(thirdDividerNode, thirdDividerActive);
+}
+
+void TextPickerDialogView::SetSingleDividerNodeActive(RefPtr<FrameNode>& dividerNode, bool dividerActive)
+{
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->SetActive(dividerActive);
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    if (dividerActive) {
+        dividerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     } else {
-        thirdDividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        dividerLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
 }
 
