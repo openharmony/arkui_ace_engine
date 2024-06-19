@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
@@ -58,6 +59,7 @@ public:
 
     void OnModifyDone() override;
     void OnRebuildFrame() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     uint32_t GetKey();
