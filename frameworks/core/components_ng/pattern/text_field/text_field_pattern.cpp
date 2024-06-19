@@ -2663,6 +2663,8 @@ void TextFieldPattern::OnModifyDone()
             CloseSelectOverlay();
             StartTwinkling();
         }
+    } else if (HasFocus() && !IsSelected()) {
+        StartTwinkling();
     } else {
         needToRefreshSelectOverlay_ = false;
     }
