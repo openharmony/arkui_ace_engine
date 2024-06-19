@@ -96,6 +96,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
     dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
     dotIndicatorModifier_->SetGestureState(gestureState_);
     dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
+    dotIndicatorModifier_->SetTouchBottomTypeLoop(touchBottomTypeLoop_);
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         dotIndicatorModifier_->PlayIndicatorAnimation(

@@ -407,6 +407,10 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
             if (pattern->dotIndicatorModifier_) {
                 pattern->dotIndicatorModifier_->StopAnimation(ifImmediately);
             }
+
+            if (pattern->overlongDotIndicatorModifier_) {
+                pattern->overlongDotIndicatorModifier_->StopAnimation(ifImmediately);
+            }
         }
     };
     swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
@@ -1093,5 +1097,88 @@ OffsetF SwiperIndicatorPattern::CalculateRectLayout(
         height = oneAngleLength;
     }
     return hotRegionOffset;
+}
+
+RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlongDotIndicatorPaintMethod(
+    RefPtr<SwiperPattern> swiperPattern)
+{
+    if (dotIndicatorModifier_) {
+        dotIndicatorModifier_ = nullptr;
+    }
+
+    if (!overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    }
+
+    overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
+    overlongDotIndicatorModifier_->SetLongPointHeadCurve(
+        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    auto overlongPaintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(overlongDotIndicatorModifier_);
+    auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
+    SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethodTemp, swiperLayoutProperty);
+    overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+    overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
+    overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+
+    overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+    return overlongPaintMethod;
+}
+
+RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintMethod(
+    RefPtr<SwiperPattern> swiperPattern)
+{
+    if (overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_ = nullptr;
+    }
+
+    if (!dotIndicatorModifier_) {
+        dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+    }
+
+    dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
+    dotIndicatorModifier_->SetLongPointHeadCurve(
+        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
+    SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethod, swiperLayoutProperty);
+
+    dotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+
+    return paintMethod;
+}
+
+RectF SwiperIndicatorPattern::CalcBoundsRect() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, RectF());
+    auto geometryNode = swiperNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+    auto indicatorGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(indicatorGeometryNode, RectF());
+    auto boundsValue = (geometryNode->GetFrameSize().Width() - indicatorGeometryNode->GetFrameSize().Width()) * 0.5f;
+    auto boundsRectOriginX = -boundsValue;
+    auto boundsRectOriginY = 0.0f;
+    auto boundsRectWidth = geometryNode->GetFrameSize().Width();
+    auto boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, RectF());
+    if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+        boundsValue = (geometryNode->GetFrameSize().Height() - indicatorGeometryNode->GetFrameSize().Height()) * 0.5f;
+        boundsRectOriginX = 0.0f;
+        boundsRectOriginY = -boundsValue;
+        boundsRectWidth = indicatorGeometryNode->GetFrameSize().Width();
+        boundsRectHeight = geometryNode->GetFrameSize().Height();
+    }
+    RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+
+    return boundsRect;
 }
 } // namespace OHOS::Ace::NG

@@ -146,13 +146,18 @@ public:
         isCustomSizeValue_ = isCustomSizeValue;
     }
 
+    void SetTouchBottomTypeLoop(TouchBottomTypeLoop touchBottomTypeLoop)
+    {
+        touchBottomTypeLoop_ = touchBottomTypeLoop;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
+    void StopAnimation(bool ifImmediately) override;
 
 private:
     void PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes);
-    void StopAnimation(bool ifImmediately) override;
     void CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes);
     void CalcTargetStatusOnLongPointMove(const LinearVector<float>& itemHalfSizes);
     void CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes);
@@ -194,6 +199,7 @@ private:
     float longPointLeftCenterMoveRate_ = 0.0f;
     float longPointRightCenterMoveRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
+    TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     bool isCustomSizeValue_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
