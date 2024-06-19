@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H
 
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-
 namespace OHOS::Ace::NG {
 constexpr int32_t ARC_SWIPER_PROPORTION = 4;    //The critical point of arc_swiper is 1/4 screen
 class ArcSwiperPattern : public SwiperPattern {
@@ -27,6 +26,8 @@ public:
     {
         swiperProportion_ = ARC_SWIPER_PROPORTION;
     }
+
+    ~ArcSwiperPattern() {}
     void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) override;
     void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) override;
     std::string GetArcDotIndicatorStyle() const override;
@@ -53,8 +54,27 @@ private:
         Color backColor;
         OffsetF offset;
     };
-    
-    void PlayDisplacementAnimation(SwiperLayoutAlgorithm::PositionMap &positionMap, const OffsetF& offset) override;
+    enum AnimationFinishType {
+        EXIT_SCALE,
+        EXIT_OFFSET,
+        EXIT_BLUR,
+        EXIT_ALPHA,
+        EXIT_BACKGROUND,
+
+        ENTRY_SCALE,
+        ENTRY_OFFSET,
+        ENTRY_BLUR,
+        ENTRY_ALPHA,
+        ENTRY_BACKGROUND
+    };
+
+    void ClearAnimationFinishList() override;
+    void InitialFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode, const OffsetF& offset) override;
+    void CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode) override;
+    void PlayPropertyTranslateAnimation(
+        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
+    void PlayPropertyTranslateFlipAnimation(const OffsetF& offset);
+
     void PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     void PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     
@@ -64,14 +84,22 @@ private:
     void PlayAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
     void PlayHorizontalAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
     void PlayVerticalAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
+   
+    void AnimationFinish();
+    void BuildAnimationFinishCallback(const AnimationParam& param, const RefPtr<RenderContext>& renderContext,
+        bool exit, FinishCallback& finishCallback);
+    void HandlePropertyTranslateCallback(float translate, int32_t nextIndex, float velocity);
+    void AddFinishAnimation(const AnimationFinishType& animationFinishType);
 
-    std::shared_ptr<AnimationUtils::Animation> Animation(const AnimationParam &param);
     bool IsPreItem(int32_t index);
     bool IsScrollOverCritical();
-    
     Color GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<AnimationUtils::Animation> Animation(const AnimationParam& param, bool exit);
 
     Color preNodeBackgroundColor_;
+    OffsetF offset_;
+    std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
+    std::vector<AnimationFinishType> animationFinishList_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H
