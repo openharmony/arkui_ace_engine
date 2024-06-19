@@ -344,6 +344,16 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
     backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
+RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigationStack = pattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, nullptr);
+    auto topNavdestination = AceType::DynamicCast<FrameNode>(GetNavDestinationNode(navigationStack->Get()));
+    return topNavdestination;
+}
+
 bool NavigationGroupNode::CheckCanHandleBack()
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
