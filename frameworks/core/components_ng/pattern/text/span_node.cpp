@@ -910,7 +910,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     if (!NearZero(placeholderStyle.baselineOffset)) {
-        run.baseline_offset = placeholderStyle.height + placeholderStyle.baselineOffset;
+        run.baseline_offset = placeholderStyle.baselineOffset;
         run.alignment = PlaceholderAlignment::BASELINE;
     } else {
         switch (placeholderStyle.verticalAlign) {

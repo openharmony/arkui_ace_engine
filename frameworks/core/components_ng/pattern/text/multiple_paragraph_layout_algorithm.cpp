@@ -35,7 +35,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
-constexpr double IMAGE_SPAN_BASELINE_OFFSET = 1.25;
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -545,7 +544,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
-        placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
+        placeholderStyle.baselineOffset = baselineOffset.ConvertToPx();
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
