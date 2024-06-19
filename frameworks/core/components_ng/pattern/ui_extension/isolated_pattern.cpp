@@ -92,6 +92,7 @@ void IsolatedPattern::InitializeRender(void* runtime)
         dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(),
             curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->CreateContent();
     }
 #else
@@ -160,13 +161,13 @@ void IsolatedPattern::OnAttachToFrameNode()
 
 bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto rect = host->GetTransformRectRelativeToWindow();
-    Ace::ViewportConfig vpConfig;
-    vpConfig.SetSize(rect.Width(), rect.Height());
-    vpConfig.SetPosition(0, 0);
+    auto& node = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(node, false);
+    auto size = node->GetContentSize();
     float density = 1.0f;
     int32_t orientation = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -174,9 +175,7 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         density = defaultDisplay->GetVirtualPixelRatio();
         orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
     }
-    vpConfig.SetDensity(density);
-    vpConfig.SetOrientation(orientation);
-    dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation);
     return false;
 }
 
@@ -185,6 +184,20 @@ void IsolatedPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(dynamicComponentRenderer_);
     dynamicComponentRenderer_->DestroyContent();
     dynamicComponentRenderer_ = nullptr;
+}
+
+void IsolatedPattern::SetAdaptiveWidth(bool state)
+{
+    adaptiveWidth_ = state;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+}
+
+void IsolatedPattern::SetAdaptiveHeight(bool state)
+{
+    adaptiveHeight_ = state;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
 }
 
 void IsolatedPattern::SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,

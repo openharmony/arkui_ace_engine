@@ -45,7 +45,8 @@ public:
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
     void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
-    void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged) override;
+    void SetAdaptiveWidth(bool state) override;
+    void SetAdaptiveHeight(bool state) override;
 
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;

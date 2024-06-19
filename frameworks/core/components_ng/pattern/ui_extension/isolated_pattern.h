@@ -45,17 +45,8 @@ public:
         const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
-    void OnSizeChanged(int32_t width, int32_t height)
-    {
-        if (onSizeChanged_) {
-            onSizeChanged_(width, height);
-        }
-    }
-
-    void SetOnSizeChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
-    {
-        onSizeChanged_ = std::move(callback);
-    }
+    void SetAdaptiveWidth(bool state);
+    void SetAdaptiveHeight(bool state);
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -83,10 +74,9 @@ private:
 
     void OnAttachToFrameNode() override;
 
-    int32_t ApplyIsolatedId();
-
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
-    std::function<void(int32_t, int32_t)> onSizeChanged_;
+    bool adaptiveWidth_ = true;
+    bool adaptiveHeight_ = true;
     IsolatedInfo curIsolatedInfo_;
     IsolatedDumpInfo isolatedDumpInfo_;
 

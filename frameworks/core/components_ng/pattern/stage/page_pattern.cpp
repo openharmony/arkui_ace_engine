@@ -76,8 +76,11 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
     return false;
 }
 
-void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return;
+    }
     CHECK_NULL_VOID(dynamicPageSizeCallback_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
