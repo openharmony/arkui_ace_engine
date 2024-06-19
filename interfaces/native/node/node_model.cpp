@@ -640,6 +640,7 @@ int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeH
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->addChild(
         reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
 }
@@ -648,6 +649,7 @@ int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_No
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
         reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle, position);
 }
@@ -656,6 +658,7 @@ int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_No
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
         reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
 }
