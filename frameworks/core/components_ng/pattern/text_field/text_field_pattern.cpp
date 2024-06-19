@@ -855,10 +855,7 @@ void TextFieldPattern::HandleFocusEvent()
     ProcessFocusStyle();
     SetFocusStyle();
     AddIsFocusActiveUpdateEvent();
-    if (!isTouchDownRequestFocus_) {
-        RequestKeyboardOnFocus();
-    }
-    isTouchDownRequestFocus_ = false;
+    RequestKeyboardOnFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1664,19 +1661,6 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
-    auto focusHub = GetFocusHub();
-    if (!focusHub->IsFocusable()) {
-        return;
-    }
-    if (!HasFocus()) {
-        if (!focusHub->IsFocusOnTouch().value_or(true)) {
-            return;
-        }
-        isTouchDownRequestFocus_ = true;
-        if (!focusHub->RequestFocusImmediately()) {
-            return;
-        }
-    }
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
     }

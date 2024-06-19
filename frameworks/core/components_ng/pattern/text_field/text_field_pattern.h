@@ -1706,7 +1706,6 @@ private:
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
-    bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
 };
