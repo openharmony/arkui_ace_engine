@@ -514,7 +514,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE_COMMERCIAL(
-        "UIVsyncTask[timestamp:%" PRIu64"][visyncID:%" PRIu64"]", nanoTimestamp, static_cast<uint64_t>(frameCount));
+        "UIVsyncTask[timestamp:%" PRIu64"][vsyncID:%" PRIu64"]", nanoTimestamp, static_cast<uint64_t>(frameCount));
     window_->Lock();
     auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
@@ -2222,6 +2222,10 @@ void PipelineContext::NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t er
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     ACE_DCHECK(!params.empty());
+    if (window_) {
+        DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+    }
+    DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     if (params[0] == "-element") {
         if (params.size() > 1 && params[1] == "-lastpage") {
             auto lastPage = stageManager_->GetLastPage();
