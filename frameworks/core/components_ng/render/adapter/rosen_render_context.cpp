@@ -6188,4 +6188,12 @@ void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkSuggestOpincNode(isOpincNode, isNeedCalculate);
 }
+
+void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector2f destinationPoint(effect.destinationX.ConvertToPx(), effect.destinationY.ConvertToPx());
+    rsNode_->SetAttractionEffect(effect.fraction, destinationPoint);
+    RequestNextFrame();
+}
 } // namespace OHOS::Ace::NG
