@@ -171,6 +171,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
 
 void JSXComponent::Create(const JSCallbackInfo& info)
 {
+    ACE_SCOPED_TRACE("XComponent Create");
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
