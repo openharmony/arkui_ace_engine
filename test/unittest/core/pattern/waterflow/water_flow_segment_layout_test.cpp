@@ -1391,7 +1391,7 @@ HWTEST_F(WaterFlowSegmentTest, Illegal003, TestSize.Level1)
     for (int i = 0; i < 10; ++i) {
         frameNode_->RemoveChildAtIndex(0);
     }
-    frameNode_->childrenUpdatedFrom_ = 0;
+    frameNode_->ChildrenUpdatedFrom(0);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
 
