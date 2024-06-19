@@ -109,6 +109,7 @@ void RichEditorSelectOverlay::OnResetTextSelection()
 void RichEditorSelectOverlay::AfterCloseOverlay()
 {
     RemoveAreaChangeInner();
+    CloseMagnifier();
 }
 
 void RichEditorSelectOverlay::RemoveAreaChangeInner()
@@ -116,6 +117,13 @@ void RichEditorSelectOverlay::RemoveAreaChangeInner()
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->RemoveAreaChangeInner();
+}
+
+void RichEditorSelectOverlay::CloseMagnifier()
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->magnifierController_->UpdateShowMagnifier();
 }
 
 void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
