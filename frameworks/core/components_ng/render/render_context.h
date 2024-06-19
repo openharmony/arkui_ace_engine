@@ -34,6 +34,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -651,6 +652,9 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
+    // AttractionEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
@@ -780,6 +784,7 @@ protected:
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
+    virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
     friend class ViewAbstract;

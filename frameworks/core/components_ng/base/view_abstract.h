@@ -374,6 +374,7 @@ public:
     static void SetUseEffect(bool useEffect);
 
     static void SetFreeze(bool freeze);
+    static void SetAttractionEffect(const AttractionEffect& effect);
 
     static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
 
