@@ -549,12 +549,12 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
-            ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
             eventHub->FireDestroyEvent();
         }        
         eventHub->FireDetachEvent(id_);
         {
-            ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
             eventHub->FireControllerDestroyedEvent(surfaceId_);
         }
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -739,7 +739,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
 
 void XComponentPattern::NativeXComponentDestroy()
 {
-    ACE_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", id_.c_str());
+    ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", id_.c_str());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
@@ -809,11 +809,11 @@ void XComponentPattern::XComponentSizeInit()
         AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
     {
-        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", id_.c_str());
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", id_.c_str());
         eventHub->FireLoadEvent(id_);
     }
     {
-        ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", id_.c_str());
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", id_.c_str());
         eventHub->FireControllerCreatedEvent(surfaceId_);
     }
 }
