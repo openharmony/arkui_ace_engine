@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
 #include "include/encode/SkJpegEncoder.h"
@@ -37,57 +38,6 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-#ifndef ACE_UNITTEST
-constexpr double DEFAULT_QUALITY = 0.92;
-constexpr int32_t MAX_LENGTH = 2048 * 2048;
-constexpr double HANGING_PERCENT = 0.8;
-#endif
-constexpr int32_t DEFAULT_SAVE_COUNT = 1;
-const std::string UNSUPPORTED = "data:image/png";
-const std::string URL_PREFIX = "data:";
-const std::string URL_SYMBOL = ";base64,";
-const std::string IMAGE_PNG = "image/png";
-const std::string IMAGE_JPEG = "image/jpeg";
-const std::string IMAGE_WEBP = "image/webp";
-
-#ifndef ACE_UNITTEST
-std::string GetMimeType(const std::string& args)
-{
-    // Args example: ["image/png"]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if (values.size() > 2) {
-        return IMAGE_PNG;
-    }
-    // Convert to lowercase string.
-    for (size_t i = 0; i < values[0].size(); ++i) {
-        values[0][i] = static_cast<uint8_t>(tolower(values[0][i]));
-    }
-    return values[0];
-}
-
-// Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string& args)
-{
-    // Args example: ["image/jpeg", 0.8]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if (values.size() < 2) {
-        return DEFAULT_QUALITY;
-    }
-    auto mimeType = GetMimeType(args);
-    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
-        return DEFAULT_QUALITY;
-    }
-    double quality = StringUtils::StringToDouble(values[1]);
-    if (quality < 0.0 || quality > 1.0) {
-        return DEFAULT_QUALITY;
-    }
-    return quality;
-}
-#endif
-} // namespace
 
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
@@ -427,7 +377,7 @@ void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, 
         CHECK_NULL_VOID(success);
         PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, true);
     }
-
+    // need to process again for non-shadow case
     auto success = UpdateParagraph(text, true);
     CHECK_NULL_VOID(success);
     PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);

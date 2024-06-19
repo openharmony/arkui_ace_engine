@@ -91,6 +91,7 @@ build_component_ng("pattern_ng") {
     "custom_paint/canvas_paint_op.cpp",
     "custom_paint/canvas_pattern.cpp",
     "custom_paint/custom_paint_paint_method.cpp",
+    "custom_paint/custom_paint_util.cpp",
     "custom_paint/offscreen_canvas_paint_method.cpp",
     "custom_paint/offscreen_canvas_pattern.cpp",
     "data_panel/data_panel_layout_algorithm.cpp",
