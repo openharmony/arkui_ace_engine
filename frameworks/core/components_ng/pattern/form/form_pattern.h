@@ -202,7 +202,7 @@ private:
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
-
+    bool IsMaskEnableForm(const RequestFormInfo &info);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -231,7 +231,6 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
-    bool isFormBundleForbidden_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
 };
 } // namespace NG

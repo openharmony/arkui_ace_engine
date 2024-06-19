@@ -70,10 +70,11 @@ constexpr int32_t DOUBLE = 2;
 constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 constexpr double TIME_LIMIT_FONT_SIZE_BASE = 18.0;
-constexpr double TIME_LIMIT_TRANSPARENT_VAL = 0.3;
-constexpr int32_t TIME_LIMIT_RADIUS_SIZE = 60;
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr float MAX_FONT_SCALE = 1.3f;
+constexpr uint32_t FORBIDDEN_BG_COLOR_DARK = 0xFF2E3033;
+constexpr uint32_t FORBIDDEN_BG_COLOR_LIGHT = 0xFFD1D1D6;
+constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -281,7 +282,6 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 void FormPattern::HandleEnableForm(const bool enable)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::HandleEnableForm, enable = %{public}d", enable);
-    isFormBundleForbidden_ = !enable;
     if (enable) {
         RemoveDisableFormStyle(cardInfo_);
     } else {
@@ -650,7 +650,6 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
     if (formManagerBridge_->CheckFormBundleForbidden(info.bundleName)) {
-        isFormBundleForbidden_ = true;
         LoadDisableFormStyle(info);
     }
 }
@@ -749,12 +748,17 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 
 void FormPattern::UpdateTimeLimitFontCfg()
 {
+    auto columnNode = GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    CHECK_NULL_VOID(columnNode);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(SystemProperties::GetColorMode() == ColorMode::DARK ?
+        Color(FORBIDDEN_BG_COLOR_DARK) : Color(FORBIDDEN_BG_COLOR_LIGHT));
+
     auto textNode = GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    // font color is white for any time.
-    textLayoutProperty->UpdateTextColor(Color::WHITE);
 
     Dimension fontSize(GetTimeLimitFontSize());
     if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
@@ -764,11 +768,13 @@ void FormPattern::UpdateTimeLimitFontCfg()
 
 void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh)
 {
-    if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
-        || info.shape == FORM_SHAPE_CIRCLE || info.renderingMode ==
-        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR)) {
-        LoadFormSkeleton();
-        return;
+    if (IsMaskEnableForm(info)) {
+        if (!formManagerBridge_) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "LoadDisableFormStyle failed, form manager deleget is null!");
+            return;
+        }
+
+        formManagerBridge_->SetObscured(false);
     }
 
     if (!isRefresh && GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE) != nullptr &&
@@ -791,16 +797,8 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    BlurOption blurOption;
-    blurOption.grayscale.assign(blurOption.grayscale.data(),
-        blurOption.grayscale.data() + blurOption.grayscale.size());
-    CalcDimension dimensionRadius(TIME_LIMIT_RADIUS_SIZE, DimensionUnit::PX);
-    renderContext->UpdateFrontBlur(dimensionRadius, blurOption);
-    if (renderContext->GetFrontBlurStyle().has_value()) {
-        renderContext->UpdateFrontBlurStyle(std::nullopt);
-    }
-    renderContext->UpdateBackgroundColor(Color(CONTENT_BG_COLOR_DARK));
-    renderContext->UpdateOpacity(TIME_LIMIT_TRANSPARENT_VAL);
+    renderContext->UpdateBackgroundColor(SystemProperties::GetColorMode() == ColorMode::DARK ?
+        Color(FORBIDDEN_BG_COLOR_DARK) : Color(FORBIDDEN_BG_COLOR_LIGHT));
 
     auto textNode = CreateTimeLimitNode();
     CHECK_NULL_VOID(textNode);
@@ -819,14 +817,16 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
 
 void FormPattern::RemoveDisableFormStyle(const RequestFormInfo& info)
 {
-    if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
-        || info.shape == FORM_SHAPE_CIRCLE || info.renderingMode ==
-        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR)) {
-        RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
-    } else {
+    if (!IsMaskEnableForm(info)) {
         RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
         RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+        return;
     }
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "RemoveDisableFormStyle failed, form manager deleget is null!");
+        return;
+    }
+    formManagerBridge_->SetObscured(false);
 }
 
 void FormPattern::LoadFormSkeleton(bool isRefresh)
@@ -952,11 +952,13 @@ RefPtr<FrameNode> FormPattern::CreateTimeLimitNode()
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLDER);
     Dimension fontSize(GetTimeLimitFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateTextColor(Color::WHITE);
+    textLayoutProperty->UpdateTextColor(SystemProperties::GetColorMode() == ColorMode::DARK ?
+        Color::WHITE : Color::BLACK);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(textNode->GetRenderContext());
     CHECK_NULL_RETURN(externalContext, nullptr);
     externalContext->SetVisible(true);
+    externalContext->SetOpacity(TEXT_TRANSPARENT_VAL);
     host->AddChild(textNode);
     return textNode;
 }
@@ -1306,12 +1308,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
     node->CreateNodeInRenderThread();
 
     AttachRSNode(node, want);
-    if (!isFormBundleForbidden_ ||
-        (isFormBundleForbidden_ && cardInfo_.shape != FORM_SHAPE_CIRCLE && cardInfo_.renderingMode !=
-        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) &&
-        cardInfo_.dimension != static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1))) {
-        RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
-    }
+    RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1784,5 +1781,12 @@ double FormPattern::GetTimeLimitFontSize()
     TAG_LOGD(AceLogTag::ACE_FORM, "Density is %{public}f, font scale is %{public}f.",
         density, fontScale);
     return TIME_LIMIT_FONT_SIZE_BASE * density * fontScale;
+}
+
+bool FormPattern::IsMaskEnableForm(const RequestFormInfo& info)
+{
+    return info.shape == FORM_SHAPE_CIRCLE || info.renderingMode ==
+        static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) ||
+        info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1);
 }
 } // namespace OHOS::Ace::NG
