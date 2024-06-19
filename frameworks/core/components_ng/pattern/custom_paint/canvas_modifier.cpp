@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
 
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -40,7 +41,12 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
     drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
-
+    if (SystemProperties::GetCanvasDebugMode() > 0) {
+        TAG_LOGI(AceLogTag::ACE_CANVAS,
+            "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
+            rsDrawCmdList->GetHeight(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
+            drawCmdList->GetOpItemSize());
+    }
     if (needResetSurface_) {
         CHECK_NULL_VOID(renderContext_.Upgrade());
         int surfaceWidth = static_cast<int>(drawCmdList->GetWidth());
@@ -48,11 +54,7 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
         renderContext_.Upgrade()->ResetSurface(surfaceWidth, surfaceHeight);
         needResetSurface_ = false;
     }
-
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "Playback %{public}zu drawing commands.", drawCmdList->GetOpItemSize());
-    if (drawCmdList->IsEmpty()) {
-        return;
-    }
+    CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
 }
