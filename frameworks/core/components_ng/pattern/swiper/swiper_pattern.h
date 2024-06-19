@@ -969,6 +969,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation);
     void SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex);
+    bool ParseTabsIsRtl();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
