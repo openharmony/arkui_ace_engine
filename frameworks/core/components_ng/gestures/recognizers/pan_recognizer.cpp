@@ -947,6 +947,8 @@ void PanRecognizer::UpdateFingerListInfo()
 {
     MultiFingersRecognizer::UpdateFingerListInfo();
     if (lastInputEventType_ == InputEventType::AXIS) {
+        fingerList_.clear();
+        lastPointEvent_.reset();
         PointF localPoint(lastAxisEvent_.x, lastAxisEvent_.y);
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, false);
         FingerInfo fingerInfo = { lastAxisEvent_.originalId, lastAxisEvent_.GetOffset(),
