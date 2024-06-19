@@ -234,9 +234,6 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     CHECK_NULL_VOID(textFieldPattern);
     auto magnifierController = textFieldPattern->GetMagnifierController();
     CHECK_NULL_VOID(magnifierController);
-    if (magnifierController->GetShowMagnifier()) {
-        cursorVisible_->Set(true);
-    }
     if (!cursorVisible_->Get() || textFieldPattern->IsSelected()) {
         return;
     }
