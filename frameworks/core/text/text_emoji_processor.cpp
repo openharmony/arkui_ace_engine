@@ -220,7 +220,11 @@ std::wstring TextEmojiProcessor::SubWstring(
     int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
 {
     TextEmojiSubStringRange range = CalSubWstringRange(index, length, content, includeHalf);
-    return content.substr(range.startIndex, range.endIndex - range.startIndex);
+    int32_t rangeLength = range.endIndex - range.startIndex;
+    if (rangeLength == 0) {
+        return L"";
+    }
+    return content.substr(range.startIndex, rangeLength);
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
@@ -233,7 +237,15 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     std::string curStr = StringUtils::ToString(content);
-    // clamp left emoji
+    // exclude right overflow emoji
+    if (!includeHalf && IsIndexInEmoji(endIndex - 1, curStr, emojiStartIndex, emojiEndIndex) &&
+        emojiEndIndex > index + length) {
+        emojiEndIndex = emojiStartIndex;
+        length = emojiEndIndex - index;
+        length = std::max(length, 0);
+        endIndex = index + length;
+    }
+    // process left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, curStr, emojiStartIndex, emojiEndIndex)) {
         if (startIndex != emojiStartIndex && !includeHalf) {
             startIndex = emojiEndIndex; // exclude current emoji
@@ -242,7 +254,7 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
             startIndex = emojiStartIndex; // include current emoji
         }
     }
-    // clamp right emoji
+    // process right emoji
     if (IsIndexAfterOrInEmoji(endIndex, curStr, emojiStartIndex, emojiEndIndex)) {
         if (endIndex != emojiEndIndex && !includeHalf) {
             endIndex = emojiStartIndex; // exclude current emoji
