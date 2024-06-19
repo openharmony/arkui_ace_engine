@@ -45,7 +45,8 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
-constexpr double NEW_FRICTION = 0.7;
+constexpr double API11_FRICTION = 0.7;
+constexpr double API12_FRICTION = 0.75;
 constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
