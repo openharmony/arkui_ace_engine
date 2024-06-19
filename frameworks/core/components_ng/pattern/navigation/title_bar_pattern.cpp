@@ -1094,10 +1094,6 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
         CHECK_NULL_VOID(backButton);
     }
-    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
-    CHECK_NULL_VOID(backButtonImgNode);
-    auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(backButtonImgRender);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto iconColor = theme->GetBackButtonIconColor();
@@ -1113,7 +1109,13 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackgroundColor(backButtonColor);
         backButton->MarkModifyDone();
     }
-    backButtonImgRender->UpdateSvgFillColor(iconColor);
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    if (backButtonImgNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(backButtonImgRender);
+        backButtonImgRender->UpdateSvgFillColor(iconColor);
+    }
     backButtonImgNode->MarkModifyDone();
 }
 
