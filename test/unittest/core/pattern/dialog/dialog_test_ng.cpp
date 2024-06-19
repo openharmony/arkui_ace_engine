@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -59,6 +61,9 @@ const double_t WIDTH_E = 112.0;
 const double_t DIVISOR = 2.0;
 const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
 const Dimension DIMENSION_WIDTH(2.0, DimensionUnit::PX);
+const Color DEFAULT_COLOR(0xFF000000);
+BorderWidthProperty BORDER_WIDTH_TEST = { 0.0_px, 0.0_px, 0.0_px, 0.0_px };
+const int32_t ALIGN_CENTER = 1;
 constexpr int BUTTONINDEX_TEST_1 = 1;
 constexpr int BUTTONINDEX_TEST_2 = -1;
 constexpr int BUTTONINDEX_TEST_3 = -2;
@@ -2086,7 +2091,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest023, TestSize.Level1)
     EXPECT_TRUE(dialogNode->GetRenderContext()->GetBorderWidth().value() == BORDER_WIDTH_TEST);
     //borderColor
     NG::BorderColorProperty defaultColor;
-    defaultColor.SetColor(Color(0xFF000000));
+    defaultColor.SetColor(DEFAULT_COLOR);
     std::cout << dialogNode->GetRenderContext()->GetBorderColor().value().ToString() << std::endl;
     EXPECT_TRUE(dialogNode->GetRenderContext()->GetBorderColor().has_value());
     EXPECT_TRUE(dialogNode->GetRenderContext()->GetBorderColor().value() == defaultColor);
@@ -2158,7 +2163,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest024, TestSize.Level1)
     DialogProperties emptyProps;
     pattern->UpdateBgBlurStyle(dialogNode->GetRenderContext(), emptyProps);
     EXPECT_TRUE(dialogNode->GetRenderContext()->GetBackgroundColor().has_value());
-    EXPECT_TRUE(dialogNode->GetRenderContext()->GetBackgroundColor().value() == Color(0xFF000000));
+    EXPECT_TRUE(dialogNode->GetRenderContext()->GetBackgroundColor().value() == DEFAULT_COLOR);
     /**
      * @tc.steps: step6. if API set VERSION_TWELVE.
      * @tc.expected: update blur style.
