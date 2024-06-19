@@ -9230,17 +9230,18 @@ const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
 
 void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
 {
+    CHECK_EQUAL_VOID(IsPreviewTextInputting(), true);
+    CHECK_EQUAL_VOID(IsDragging(), true);
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     CHECK_EQUAL_VOID(focusHub->IsFocusable(), false);
-
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     int32_t pos = paragraphs_.GetIndex(textOffset);
 
-    int start = 0;
-    int end = 0;
+    int32_t start = 0;
+    int32_t end = 0;
     auto& paragraphInfoList = paragraphs_.GetParagraphs();
     if (pos == paragraphInfoList.back().end) {
         start = paragraphInfoList.back().start;
@@ -9257,28 +9258,10 @@ void RichEditorPattern::HandleTripleClickEvent(OHOS::Ace::GestureEvent& info)
     if (paragraphInfoList.back().end != end) {
         --end;
     }
-    CHECK_NULL_VOID(end > start);
-
-    UpdateSelector(start, end);
-    AdjustCursorPosition(pos);
-    SetCaretPosition(pos);
-    if (textSelector_.SelectNothing()) {
-        if (!caretTwinkling_) {
-            StartTwinkling();
-        }
-    } else {
-        StopTwinkling();
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    if (textSelector_.IsValid() && info.GetSourceTool() == SourceTool::FINGER && IsSelected()) {
-        showSelect_ = true;
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    }
+    end = std::min(GetTextContentLength(), end);
+    start = std::min(GetTextContentLength(), start);
+    CHECK_EQUAL_VOID(start > end, true);
+    TripleClickSection(info, start, end, pos);
 }
 
 void RichEditorPattern::ShowCaretNoTwinkling(const Offset& textOffset)
@@ -9415,5 +9398,31 @@ void RichEditorPattern::PreferredParagraph()
     presetParagraph_->AddText(StringUtils::Str8ToStr16(textContent));
     presetParagraph_->Build();
     presetParagraph_->Layout(std::numeric_limits<double>::infinity());
+}
+
+void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    textSelector_.Update(start, end);
+    if (info.GetSourceTool() == SourceTool::FINGER) {
+        showSelect_ = true;
+        RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
+    if (info.GetSourceTool() == SourceTool::FINGER && start == end) {
+        selectOverlay_->SetIsSingleHandle(true);
+    }
+    if (textSelector_.SelectNothing()) {
+        textSelector_.Update(pos, pos);
+        if (!caretTwinkling_) {
+            StartTwinkling();
+        }
+    } else {
+        StopTwinkling();
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

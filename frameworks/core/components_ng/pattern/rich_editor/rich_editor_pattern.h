@@ -1055,6 +1055,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
     void NotifyExitTextPreview();
+    void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
