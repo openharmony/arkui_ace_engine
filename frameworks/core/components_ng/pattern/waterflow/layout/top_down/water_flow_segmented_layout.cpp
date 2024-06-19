@@ -35,6 +35,7 @@ namespace {
 bool IsDataValid(const RefPtr<WaterFlowLayoutInfo>& info)
 {
     if (info->segmentTails_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Sections are not initialized.");
         return false;
     }
     if (info->childrenCount_ - 1 != info->segmentTails_.back()) {
@@ -171,7 +172,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             postJumpOffset_ = PrepareJump(info_);
         }
         info_->ClearCacheAfterIndex(updateIdx - 1);
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
 
