@@ -4376,9 +4376,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 {
     for (auto& item : itemPosition_) {
         if (auto frameNode = item.second.node) {
-            auto context = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            context->UpdateSuggestedRenderGroup(itemRenderGroup);
+            groupedItems_.insert(frameNode);
         }
     }
     auto host = GetHost();
@@ -4388,9 +4386,17 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
         if (!frameNode || child->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
             continue;
         }
-        auto context = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->UpdateSuggestedRenderGroup(itemRenderGroup);
+        groupedItems_.insert(frameNode);
+    }
+    for (auto iter = groupedItems_.begin(); iter != groupedItems_.end();) {
+        if (auto node = iter->Upgrade()) {
+            auto context = node->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateSuggestedRenderGroup(itemRenderGroup);
+            ++iter;
+        } else {
+            iter = groupedItems_.erase(iter);
+        }
     }
 }
 
