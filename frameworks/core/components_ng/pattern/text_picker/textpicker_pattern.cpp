@@ -153,8 +153,11 @@ void TextPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    SetLayoutDirection(layoutDirection);
+
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    if (layoutDirection != TextDirection::AUTO) {
+        SetLayoutDirection(layoutDirection);
+    }
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
