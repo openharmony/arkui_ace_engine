@@ -70,7 +70,6 @@ const BUTTON_VERTICAL_BOTTOM_MARGIN: number = getNumberByResource('alert_button_
 const BUTTON_VERTICAL_PADDING: number = getNumberByResource('alert_button_top_padding') ?? 8;
 const BUTTON_VERTICAL_SPACE: number = getNumberByResource('alert_button_vertical_space') ?? 4;
 const MAX_BIG_BUTTON_SIZE: number = 3;
-const MAX_WINDOW_HORIZONTAL_HEIGHT: number = 540;
 const MAX_FONT_SCALE: number = 2;
 const BODY_L = getNumberByResource('Body_L') ?? 16;
 const BODY_M = getNumberByResource('Body_M') ?? 14;
@@ -105,6 +104,7 @@ export struct TipsDialog {
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State windowSize: Size = { width: 0, height: 0 };
+  @State minContentHeight: number = 160;
   updateButtonHeight: (height: number) => void = (height: number) => {
     this.buttonHeight = height;
   }
@@ -120,7 +120,8 @@ export struct TipsDialog {
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       windowSize: this.windowSize,
-      updateButtonHeight: this.updateButtonHeight
+      updateButtonHeight: this.updateButtonHeight,
+      minContentHeight: this.minContentHeight
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -160,7 +161,7 @@ export struct TipsDialog {
         })
         .margin({ right: $r('sys.float.padding_level4') })
       Text(content)
-        .fontSize(this.getCheckBoxFontSize())
+        .fontSize($r('sys.float.Body_L'))
         .fontWeight(FontWeight.Regular)
         .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
@@ -212,7 +213,7 @@ export struct TipsDialog {
         if (this.title != null) {
           Row() {
             Text(this.title)
-              .fontSize(this.getTitleFontSize())
+              .fontSize($r('sys.float.Title_S'))
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
@@ -245,7 +246,7 @@ export struct TipsDialog {
       }
       .margin({ right: $r('sys.float.padding_level8') })
     }
-    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
+    .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
     .margin({ right: `${this.marginOffset}vp` })
   }
 
@@ -272,25 +273,8 @@ export struct TipsDialog {
     }
   }
 
-  getTitleFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return TITLE_S * MAX_FONT_SCALE + 'vp';
-    }
-    return TITLE_S + 'fp';
-  }
-
   getContentFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_L * MAX_FONT_SCALE + 'vp';
-    }
     return BODY_L + 'fp';
-  }
-
-  getCheckBoxFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_M * MAX_FONT_SCALE + 'vp';
-    }
-    return BODY_M + 'fp';
   }
 
   private getTextHeight(textSize: SizeOptions): number {
@@ -366,7 +350,7 @@ export struct SelectDialog {
         if (this.content) {
           Row() {
             Text(this.content)
-              .fontSize(this.getContentFontSize())
+              .fontSize($r('sys.float.Body_M'))
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -379,7 +363,7 @@ export struct SelectDialog {
                 Button() {
                   Row() {
                     Text(item.title)
-                      .fontSize(this.getListFontSize())
+                      .fontSize($r('sys.float.Body_L'))
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
@@ -431,7 +415,7 @@ export struct SelectDialog {
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
     }.scrollBar(BarState.Auto)
-    .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
+    .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
     .onDidScroll((xOffset: number, yOffset: number) => {
       let scrollHeight: number = (this.itemHeight - this.radioHeight) / 2
       if (this.isFocus) {
@@ -509,20 +493,6 @@ export struct SelectDialog {
       this.buttons.push(this.confirm);
     }
   }
-
-  getContentFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_M * MAX_FONT_SCALE + 'vp';
-    }
-    return BODY_M + 'fp';
-  }
-
-  getListFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_L * MAX_FONT_SCALE + 'vp';
-    }
-    return BODY_L + 'fp';
-  }
 }
 
 @CustomDialog
@@ -540,6 +510,7 @@ export struct ConfirmDialog {
   onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
+  @State textAlign: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
   @State titleHeight: number = 0;
   @State buttonHeight: number = 0;
@@ -569,7 +540,10 @@ export struct ConfirmDialog {
               .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
-              .textAlign(TextAlign.Start)
+              .textAlign(this.textAlign)
+              .onAreaChange((oldValue: Area, newValue: Area) =>
+              this.getTextAlign(Number(newValue.width))
+              )
               .margin({ right: $r('sys.float.padding_level8') })
               .onKeyEvent((event: KeyEvent) => {
                 if (event) {
@@ -578,7 +552,7 @@ export struct ConfirmDialog {
               })
               .width(`calc(100% - ${getNumberByResource('padding_level8')}vp)`)
           }
-          .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
+          .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
           .width('100%')
         }
         .padding({ bottom: 8 })
@@ -601,7 +575,7 @@ export struct ConfirmDialog {
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
         Text(this.checkTips)
-          .fontSize(this.getCheckBoxFontSize())
+          .fontSize($r('sys.float.Body_M'))
           .fontWeight(FontWeight.Medium)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -614,7 +588,8 @@ export struct ConfirmDialog {
       }
       .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.checkBoxHeight = Number(newValue.height);
-        this.maxContentHeight = `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+        this.maxContentHeight =
+          `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
       })
       .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
       .width('100%')
@@ -623,18 +598,30 @@ export struct ConfirmDialog {
   }
 
   getContentFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_L * MAX_FONT_SCALE + 'vp';
-    }
     return BODY_L + 'fp';
-
   }
 
-  getCheckBoxFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_M * MAX_FONT_SCALE + 'vp';
+  getTextAlign(maxWidth: number): void {
+    let fontSize: Length = this.getContentFontSize();
+    let contentSize: SizeOptions = measure.measureTextSize({
+      textContent: this.content,
+      fontSize: fontSize,
+      constraintWidth: maxWidth,
+    });
+    let oneLineSize: SizeOptions = measure.measureTextSize({
+      textContent: this.content,
+      fontSize: fontSize,
+    });
+    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
+      this.textAlign = TextAlign.Center;
     }
-    return BODY_M + 'fp';
+  }
+
+  getTextHeight(textSize: SizeOptions): number {
+    if (textSize && textSize.height !== null && textSize.height !== undefined) {
+      return Number(textSize.height);
+    }
+    return 0;
   }
 
   build() {
@@ -735,7 +722,7 @@ export struct AlertDialog {
             }
           })
       }
-      .nestedScroll({scrollForward:NestedScrollMode.PARALLEL,scrollBackward:NestedScrollMode.PARALLEL})
+      .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
     .margin({ right: `${this.getMargin()}vp`, })
@@ -748,11 +735,7 @@ export struct AlertDialog {
   }
 
   private getContentFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_L * MAX_FONT_SCALE + 'vp';
-    } else {
-      return BODY_L + 'fp';
-    }
+    return BODY_L + 'fp';
   }
 
   private getTextAlign(maxWidth: number): void {
@@ -845,6 +828,7 @@ struct CustomDialogContentComponent {
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
+  minContentHeight?: number | undefined;
 
   @Builder
   defaultContentBuilder(): void {
@@ -859,7 +843,6 @@ struct CustomDialogContentComponent {
   @Link fontSizeScale: number;
   @Link windowSize: Size;
   @State customStyle: boolean = false;
-  @State needResponseScale: boolean = true;
   screenSize: Size = { width: 0, height: 0 };
   initCustomStyle: boolean = false;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
@@ -880,7 +863,6 @@ struct CustomDialogContentComponent {
             windowSize: this.windowSize,
             fontSizeScale: this.fontSizeScale,
             titleHeight: this.titleHeight,
-            needResponseScale: this.needResponseScale,
             theme: this.theme,
             primaryTitleMaxFontSize: this.primaryTitleMaxFontSize,
             primaryTitleMinFontSize: this.primaryTitleMinFontSize,
@@ -925,7 +907,6 @@ struct CustomDialogContentComponent {
     let maxHeight: number = Number(constraint.maxHeight);
     this.windowSize = { width: maxWidth, height: maxHeight };
     this.updateFontScale();
-    this.updateNeedResponseScale();
     this.updateCustomStyle(Number(constraint.maxWidth), Number(constraint.maxHeight));
     this.updateFontSize();
     children.forEach((child) => {
@@ -936,7 +917,8 @@ struct CustomDialogContentComponent {
       if (this.updateTitleHeight) {
         this.updateTitleHeight(this.titleHeight);
       }
-      if (maxHeight - this.buttonHeight - this.titleHeight < MIN_CONTENT_HEIGHT) {
+      if (maxHeight - this.buttonHeight - this.titleHeight <
+        (this.minContentHeight ? this.minContentHeight : MIN_CONTENT_HEIGHT)) {
         this.contentMaxHeight = `${MAX_CONTENT_HEIGHT}vp`;
       } else {
         this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
@@ -963,46 +945,25 @@ struct CustomDialogContentComponent {
     this.initCustomStyle = true;
   }
 
-  updateNeedResponseScale() {
-    if (this.buttons && this.buttons.length >= MAX_BIG_BUTTON_SIZE &&
-      this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      this.needResponseScale = false;
-    } else {
-      this.needResponseScale = true;
-    }
-  }
-
   aboutToAppear(): void {
     this.initEnvInfo();
   }
 
   private updateFontSize(): void {
-    if (this.needResponseScale) {
-      if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-        this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
-      } else {
-        this.buttonMaxFontSize = BODY_L + 'fp';
-        this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
-      }
-      if (this.fontSizeScale > MAX_FONT_SCALE) {
-        this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
-        this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-        this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
-        this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
-      } else {
-        this.primaryTitleMaxFontSize = TITLE_S + 'fp';
-        this.primaryTitleMinFontSize = BODY_L + 'fp';
-        this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
-        this.secondaryTitleMinFontSize = BODY_S + 'fp';
-      }
+    if (this.fontSizeScale > MAX_FONT_SCALE) {
+      this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
+      this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
+      this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
+      this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
+      this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
     } else {
-      this.buttonMaxFontSize = BODY_L + 'vp';
-      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'vp';
-      this.primaryTitleMaxFontSize = TITLE_S + 'vp';
-      this.primaryTitleMinFontSize = BODY_L + 'vp';
-      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'vp';
-      this.secondaryTitleMinFontSize = BODY_S + 'vp';
+      this.primaryTitleMaxFontSize = TITLE_S + 'fp';
+      this.primaryTitleMinFontSize = BODY_L + 'fp';
+      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
+      this.secondaryTitleMinFontSize = BODY_S + 'fp';
+      this.buttonMaxFontSize = BODY_L + 'fp';
+      this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
     }
   }
 
@@ -1092,7 +1053,6 @@ struct TitleComponent {
   @Link primaryTitleMinFontSize: Length;
   @Link secondaryTitleMaxFontSize: Length;
   @Link secondaryTitleMinFontSize: Length;
-  @Link needResponseScale: boolean;
   @Link fontSizeScale: number;
   @Link windowSize: Size;
   @Link titleHeight: Length;
@@ -1374,7 +1334,6 @@ struct ButtonComponent {
     return Color.Transparent;
   }
 
-
   /**
    * is button buttonStyle and role properties high priority
    *
@@ -1539,7 +1498,7 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize(this.getFontSize())
+          .fontSize($r('sys.float.Body_L'))
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
@@ -1554,14 +1513,6 @@ export struct LoadingDialog {
           .margin({ start: LengthMetrics.vp(LOADING_TEXT_MARGIN_LEFT) })
       }
       .constraintSize({ minHeight: LOADING_MIN_HEIGHT })
-    }
-  }
-
-  getFontSize(): Length {
-    if (this.fontSizeScale > MAX_FONT_SCALE && this.windowSize.height < MAX_WINDOW_HORIZONTAL_HEIGHT) {
-      return BODY_L * MAX_FONT_SCALE + 'vp';
-    } else {
-      return BODY_L;
     }
   }
 
