@@ -1748,6 +1748,11 @@ void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t 
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
     CHECK_NULL_VOID(menu);
+    if (menu->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->UpdateMenuAnimation(menu);
+    }
     PopMenuAnimation(menu);
 }
 
