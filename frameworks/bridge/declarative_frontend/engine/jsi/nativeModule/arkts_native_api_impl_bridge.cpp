@@ -3725,6 +3725,10 @@ void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullToRefresh));
     refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullToRefresh"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullToRefresh));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPullDownRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullDownRatio));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullDownRatio"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullDownRatio));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
 }
 
