@@ -242,22 +242,8 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
     return false;
 }
 
-OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap,
-    const MenuPreviewMode& previewMode)
+OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
-    if (previewMode == MenuPreviewMode::NONE) {
-        CHECK_NULL_RETURN(frameNode, OffsetF());
-        auto centerPosition = frameNode->GetPaintRectCenter(true);
-        float width = 0.0f;
-        float height = 0.0f;
-        if (pixelMap) {
-            width = pixelMap->GetWidth();
-            height = pixelMap->GetHeight();
-        }
-        auto offsetX = centerPosition.GetX() - width / 2.0f;
-        auto offsetY = centerPosition.GetY() - height / 2.0f;
-        return OffsetF(offsetX, offsetY);
-    }
     auto offsetToWindow = frameNode->GetPaintRectOffset();
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
@@ -476,7 +462,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
         } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId());
+            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
         }
     };
     auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -543,7 +529,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     SetHoverImageCustomPreviewInfo(previewNode, menuParam, width, height);
-    auto imageOffset = GetFloatImageOffset(target, pixelMap, menuParam.previewMode);
+    auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
