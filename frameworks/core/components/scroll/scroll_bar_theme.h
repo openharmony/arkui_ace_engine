@@ -150,10 +150,6 @@ public:
     {
         return touchmagnify_;
     }
-    const Dimension& GetScrollRadius() const
-    {
-        return scrollradius_;
-    }
     const Color& GetScrollBarBackColor() const
     {
         return scrollbarbackColor_;
