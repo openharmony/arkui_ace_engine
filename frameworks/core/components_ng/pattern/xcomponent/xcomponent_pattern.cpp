@@ -553,7 +553,10 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
             eventHub->FireDestroyEvent();
         }        
         eventHub->FireDetachEvent(id_);
-        eventHub->FireControllerDestroyedEvent(surfaceId_);
+        {
+            ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
+            eventHub->FireControllerDestroyedEvent(surfaceId_);
+        }
 #ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -805,8 +808,14 @@ void XComponentPattern::XComponentSizeInit()
     TAG_LOGI(
         AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
-    eventHub->FireLoadEvent(id_);
-    eventHub->FireControllerCreatedEvent(surfaceId_);
+    {
+        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", id_.c_str());
+        eventHub->FireLoadEvent(id_);
+    }
+    {
+        ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", id_.c_str());
+        eventHub->FireControllerCreatedEvent(surfaceId_);
+    }
 }
 
 void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
@@ -1320,7 +1329,6 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
 {
     return [weak = AceType::WeakClaim(this)](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        ACE_SCOPED_TRACE("XComponent[%s] FireSurfaceInitEvent", componentId.c_str());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         ContainerScope scope(pattern->GetHostInstanceId());

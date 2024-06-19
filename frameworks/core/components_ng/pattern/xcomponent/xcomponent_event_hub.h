@@ -43,7 +43,6 @@ public:
 
     void FireLoadEvent(const std::string& xcomponentId) const
     {
-        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", xcomponentId.c_str());
         if (loadEvent_) {
             loadEvent_(xcomponentId);
         }
@@ -92,7 +91,6 @@ public:
 
     void FireControllerCreatedEvent(const std::string& surfaceId) const
     {
-        ACE_SCOPED_TRACE("XComponent surface[%s] FireControllerCreatedEvent", surfaceId.c_str());
         if (controllerCreatedEvent_) {
             controllerCreatedEvent_(surfaceId);
         }
@@ -117,7 +115,6 @@ public:
 
     void FireControllerDestroyedEvent(const std::string& surfaceId) const
     {
-        ACE_SCOPED_TRACE("XComponent surface[%s] FireControllerDestroyedEvent", surfaceId.c_str());
         if (controllerDestroyedEvent_) {
             controllerDestroyedEvent_(surfaceId);
         }

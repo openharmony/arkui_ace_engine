@@ -121,6 +121,7 @@ public:
 
     void NativeXComponentInit()
     {
+        ACE_SCOPED_TRACE("XComponent[%s] NativeXComponentInit", id_.c_str());
         CHECK_RUN_ON(UI);
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
