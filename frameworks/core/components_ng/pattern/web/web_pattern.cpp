@@ -4518,10 +4518,11 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 }
 
 
-void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action) const
+void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
+    const std::map<std::string, std::string>& actionArguments) const
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(accessibilityId, action);
+    delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
 void WebPattern::SetAccessibilityState(bool state)
