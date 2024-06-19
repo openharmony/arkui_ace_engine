@@ -548,7 +548,10 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         NativeXComponentDestroy();
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireDestroyEvent();
+        {
+            ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
+            eventHub->FireDestroyEvent();
+        }        
         eventHub->FireDetachEvent(id_);
         eventHub->FireControllerDestroyedEvent(surfaceId_);
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -733,6 +736,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
 
 void XComponentPattern::NativeXComponentDestroy()
 {
+    ACE_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", id_.c_str());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
@@ -1038,6 +1042,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
+    LOGE("XComponent HandleTouchEvent x = %{public}f, y = %{public}f, id = %{public}d, type = %{public}zu, size = "
+         "%{public}ld",
+        touchEventPoint_.x, touchEventPoint_.y, touchEventPoint_.id, touchType, info.GetTouches().size());
 #ifdef OHOS_PLATFORM
     // increase cpu frequency
     if (touchType == TouchType::MOVE) {
@@ -1313,6 +1320,7 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
 {
     return [weak = AceType::WeakClaim(this)](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+        ACE_SCOPED_TRACE("XComponent[%s] FireSurfaceInitEvent", componentId.c_str());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         ContainerScope scope(pattern->GetHostInstanceId());
