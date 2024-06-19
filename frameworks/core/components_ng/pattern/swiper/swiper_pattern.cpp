@@ -3212,15 +3212,18 @@ void SwiperPattern::PlayTranslateAnimation(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, 0, [weak](float value) {
-        auto swiper = weak.Upgrade();
-        CHECK_NULL_VOID(swiper);
-        if (swiper->IsHorizontalAndRightToLeft()) {
-            swiper->UpdateCurrentOffset(-static_cast<float>(value - swiper->currentOffset_));
-        } else {
-            swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
-        }
-    });
+    host->CreateAnimatablePropertyFloat(
+        TRANSLATE_PROPERTY_NAME, 0,
+        [weak](float value) {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            if (swiper->IsHorizontalAndRightToLeft()) {
+                swiper->UpdateCurrentOffset(-static_cast<float>(value - swiper->currentOffset_));
+            } else {
+                swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
+            }
+        },
+        PropertyUnit::PIXEL_POSITION);
 
     AnimationOption option;
     motionVelocity_ = velocity / (endPos - startPos);
