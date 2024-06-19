@@ -266,4 +266,135 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage012
     auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage013
+ * @tc.desc: Test UpdatePreviewOptionDefaultAttr with default shadow and radius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage013, TestSize.Level1)
+{
+    DragPreviewOption option;
+    option.isDefaultShadowEnabled = true;
+    option.isDefaultRadiusEnabled = true;
+
+    DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(option);
+
+    EXPECT_EQ(option.options.opacity, 0.95f);
+    EXPECT_EQ(option.options.shadow, DragDropFuncWrapper::GetDefaultShadow());
+    EXPECT_EQ(option.options.borderRadius, DragDropFuncWrapper::GetDefaultBorderRadius());
+}
+
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage014
+ * @tc.desc: Test UpdateExtraInfo with blur background effect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage014, TestSize.Level1)
+{
+    DragPreviewOption option;
+    option.options.opacity = 0.8f;
+    option.options.blurbgEffect.backGroundEffect = EffectOption();
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, option);
+
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("dip_opacity"), 0);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage015
+ * @tc.desc: Test PrepareRadiusParametersForDragData with valid radius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage015, TestSize.Level1)
+{
+    DragPreviewOption option;
+    option.options.borderRadius->radiusTopLeft = 12.0_vp;
+    option.options.borderRadius->radiusTopRight = 12.0_vp;
+    option.options.borderRadius->radiusBottomRight = 12.0_vp;
+    option.options.borderRadius->radiusBottomLeft = 12.0_vp;
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::PrepareRadiusParametersForDragData(arkExtraInfoJson, option);
+    
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius1"), 0);
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius2"), 0);
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius3"), 0);
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius4"), 0);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage016
+ * @tc.desc: Test PrepareShadowParametersForDragData with valid shadow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage016, TestSize.Level1)
+{
+    DragPreviewOption option;
+    Shadow shadow;
+    shadow.SetIsFilled(true);
+    option.options.shadow = shadow;
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::PrepareShadowParametersForDragData(arkExtraInfoJson, option);
+
+    EXPECT_FALSE(arkExtraInfoJson->GetBool("shadow_enable"));
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage017
+ * @tc.desc: Test ParseShadowInfo with valid shadow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage017, TestSize.Level1)
+{
+    Shadow shadow;
+    shadow.SetIsFilled(true);
+    shadow.SetOffset(Offset(5, 5));
+    shadow.SetBlurRadius(10.0);
+    shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::ParseShadowInfo(shadow, arkExtraInfoJson);
+
+    EXPECT_FALSE(arkExtraInfoJson->GetBool("shadow_is_filled"));
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_shadow_OffsetX"), 0);
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_shadow_OffsetY"), 0);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage018
+ * @tc.desc: Test GetDefaultShadow with valid pipeline context
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage018, TestSize.Level1)
+{
+    auto shadow = DragDropFuncWrapper::GetDefaultShadow();
+    EXPECT_FALSE(shadow.has_value());
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage019
+ * @tc.desc: Test BrulStyleToEffection with valid BlurStyleOption
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage019, TestSize.Level1)
+{
+    BlurStyleOption blurStyleOp;
+    blurStyleOp.blurStyle = BlurStyle::BACKGROUND_THICK;
+    blurStyleOp.scale = 0.5;
+    blurStyleOp.colorMode = ThemeColorMode::LIGHT;
+
+    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    EXPECT_FALSE(effection.has_value());
+}
 } // namespace OHOS::Ace::NG
