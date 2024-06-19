@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2666,6 +2667,14 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestGetSecondHandleInfo001, TestSize.Level
  */
 HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: set theme, used in CheckAndAdjustHandle.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto textSelectOverlay = pattern->selectOverlay_;
@@ -2696,6 +2705,14 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle001, TestSize.Leve
  */
 HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: set theme, used in CheckAndAdjustHandle.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
@@ -2862,6 +2879,14 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectedText001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectArea001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: set theme, used in CheckAndAdjustHandle.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
@@ -2898,6 +2923,14 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectArea002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextSelectOverlayTestGetSelectAreaFromHandle001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: set theme, used in CheckAndAdjustHandle.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
