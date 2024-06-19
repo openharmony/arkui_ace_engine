@@ -1739,6 +1739,10 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
      */
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_HEIGHT;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     SystemProperties::SetDeviceType(DeviceType::TABLET);
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
