@@ -4814,9 +4814,6 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
         webPattern->UpdateFocusedAccessibilityId();
         accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
-    } else if (eventType == AccessibilityEventType::CHANGE) {
-        auto accessibilityId = accessibilityManager->GetAccessibilityFocusId();
-        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
     }
     if (accessibilityId <= 0) {
         auto webNode = webPattern->GetHost();
