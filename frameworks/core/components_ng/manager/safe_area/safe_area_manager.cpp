@@ -234,6 +234,15 @@ void SafeAreaManager::ExpandSafeArea()
     ClearNeedExpandNode();
 }
 
+bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+{
+    if (needExpandNodes_.find(node) == needExpandNodes_.end()) {
+        AddNeedExpandNode(node);
+        return true;
+    }
+    return false;
+}
+
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
 {
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {

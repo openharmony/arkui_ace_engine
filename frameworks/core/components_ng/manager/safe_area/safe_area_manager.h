@@ -129,6 +129,8 @@ public:
         needExpandNodes_.insert(node);
     }
 
+    bool AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
+
     void ClearNeedExpandNode()
     {
         needExpandNodes_.clear();
