@@ -548,9 +548,15 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         NativeXComponentDestroy();
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireDestroyEvent();
+        {
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
+            eventHub->FireDestroyEvent();
+        }
         eventHub->FireDetachEvent(id_);
-        eventHub->FireControllerDestroyedEvent(surfaceId_);
+        {
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
+            eventHub->FireControllerDestroyedEvent(surfaceId_);
+        }
 #ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -733,6 +739,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
 
 void XComponentPattern::NativeXComponentDestroy()
 {
+    ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", id_.c_str());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
@@ -801,8 +808,14 @@ void XComponentPattern::XComponentSizeInit()
     TAG_LOGI(
         AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
-    eventHub->FireLoadEvent(id_);
-    eventHub->FireControllerCreatedEvent(surfaceId_);
+    {
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", id_.c_str());
+        eventHub->FireLoadEvent(id_);
+    }
+    {
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", id_.c_str());
+        eventHub->FireControllerCreatedEvent(surfaceId_);
+    }
 }
 
 void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
@@ -1038,6 +1051,10 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
+    LOGD("XComponent HandleTouchEvent x = %{public}f, y = %{public}f, id = %{public}d, type = %{public}zu, size = "
+         "%{public}u",
+        touchEventPoint_.x, touchEventPoint_.y, touchEventPoint_.id, touchType,
+        static_cast<uint32_t>(info.GetTouches().size()));
 #ifdef OHOS_PLATFORM
     // increase cpu frequency
     if (touchType == TouchType::MOVE) {
