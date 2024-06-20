@@ -461,7 +461,9 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             isImage = true;
             pixelMap = jsImage->GetPixelMap();
         } else {
-            pixelMap = CreatePixelMapFromNapiValue(info[0]);
+            auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+            CHECK_NULL_VOID(runtime);
+            pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
         }
         CHECK_NULL_VOID(pixelMap);
     }
@@ -764,10 +766,13 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 // setPixelMap(value?: PixelMap): void
 void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
 #if !defined(PREVIEW)
     if (info[0]->IsObject()) {
         ImageInfo imageInfo;
-        imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0]);
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        CHECK_NULL_VOID(runtime);
+        imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
         CHECK_NULL_VOID(imageInfo.pixelMap);
         renderingContext2DModel_->DrawPixelMap(imageInfo);
     }
