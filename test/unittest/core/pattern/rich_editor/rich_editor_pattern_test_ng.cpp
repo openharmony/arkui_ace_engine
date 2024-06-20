@@ -28,6 +28,7 @@ int32_t testSpanNodeId = 1;
 int32_t testFrameNodeId = 1;
 int32_t testNumber0 = 0;
 int32_t testNumber1 = 1;
+int32_t testNumber2 = 2;
 int32_t testNumber3 = 3;
 int32_t testNumber4 = 4;
 int32_t testNumber5 = 5;
@@ -1593,5 +1594,322 @@ HWTEST_F(RichEditorPatternTestNg, InitScrollablePattern002, TestSize.Level1)
     auto offsetFtemp = OffsetF(5.0f, 6.0f);
     richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
+}
+
+/**
+ * @tc.name: GetPreviewTextDecorationColor001
+ * @tc.desc: test GetPreviewTextDecorationColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetPreviewTextDecorationColor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+
+    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    RichEditorTheme richEditorTheme;
+    EXPECT_EQ(richEditorPattern->GetPreviewTextDecorationColor(), richEditorTheme.GetPreviewUnderLineColor());
+
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    property->UpdatePreviewTextStyle("normal");
+    EXPECT_EQ(richEditorPattern->GetPreviewTextDecorationColor(), Color::TRANSPARENT);
+
+    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
+}
+
+/**
+ * @tc.name: GetPreviewTextUnderlineWidth001
+ * @tc.desc: test GetPreviewTextUnderlineWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetPreviewTextUnderlineWidth001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+
+    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    RichEditorTheme richEditorTheme;
+    EXPECT_EQ(
+        richEditorPattern->GetPreviewTextUnderlineWidth(), richEditorTheme.GetPreviewUnderlineWidth().ConvertToPx()
+    );
+
+    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
+}
+
+/**
+ * @tc.name: MergeSpanContent001
+ * @tc.desc: test MergeSpanContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, MergeSpanContent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto target = AceType::MakeRefPtr<SpanItem>();
+    auto source = AceType::MakeRefPtr<SpanItem>();
+
+    richEditorPattern->MergeSpanContent(target, source, false);
+
+    target->content = PREVIEW_TEXT_VALUE1;
+    source->content = PREVIEW_TEXT_VALUE3;
+    richEditorPattern->MergeSpanContent(target, source, true);
+
+    EXPECT_EQ(target->content, PREVIEW_TEXT_VALUE2);
+}
+
+/**
+ * @tc.name: MergeSameStyleSpan001
+ * @tc.desc: test MergeSameStyleSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, MergeSameStyleSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto target = AceType::MakeRefPtr<SpanItem>();
+    auto source = AceType::MakeRefPtr<SpanItem>();
+
+    richEditorPattern->MergeSameStyleSpan(target, source, false);
+
+    target->content = PREVIEW_TEXT_VALUE1;
+    source->content = PREVIEW_TEXT_VALUE3;
+    richEditorPattern->MergeSameStyleSpan(target, source, true);
+    EXPECT_EQ(target->content, PREVIEW_TEXT_VALUE2);
+}
+
+/**
+ * @tc.name: CallbackAfterSetPreviewText001
+ * @tc.desc: test CallbackAfterSetPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, CallbackAfterSetPreviewText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    std::string previewTextValue = INIT_VALUE_1;
+    PreviewRange previewRange;
+
+    previewRange.start = -1;
+    previewRange.end = -1;
+    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
+
+    int32_t delta = -1;
+    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
+
+    delta = testNumber0;
+    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
+
+    delta = testNumber1;
+    EXPECT_EQ(richEditorPattern->CallbackAfterSetPreviewText(delta), true);
+}
+
+/**
+ * @tc.name: FromStyledString001
+ * @tc.desc: test FromStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, FromStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    Selection selection;
+    RefPtr<SpanString> spanString;
+
+    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
+    EXPECT_EQ(selection.selection[0], 0);
+    EXPECT_EQ(selection.selection[1], 0);
+
+    spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
+    EXPECT_EQ(selection.selection[0], 0);
+    EXPECT_EQ(selection.selection[1], INIT_VALUE_1.size());
+
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    spanString->AppendSpanItem(imageSpanItem);
+    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
+    EXPECT_EQ(selection.selection[0], 0);
+    EXPECT_EQ(selection.selection[1], 0);
+}
+
+/**
+ * @tc.name: ToGestureSpan001
+ * @tc.desc: test ToGestureSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, ToGestureSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+
+    spanItem->onClick = [](GestureEvent& info) {};
+    spanItem->onLongPress = [](GestureEvent& info) {};
+
+    EXPECT_NE(richEditorPattern->ToGestureSpan(spanItem), nullptr);
+}
+
+/**
+ * @tc.name: AddSpanByPasteData001
+ * @tc.desc: test AddSpanByPasteData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, AddSpanByPasteData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+
+    richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->AddSpanByPasteData(spanString);
+    richEditorPattern->SetSpanStringMode(false);
+
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpanByPasteData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + testNumber1);
+
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    spanString->AppendSpanItem(imageSpanItem);
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpanByPasteData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + testNumber2);
+}
+
+/**
+ * @tc.name: FinishTextPreview001
+ * @tc.desc: test FinishTextPreview
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, FinishTextPreview001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    PreviewRange previewRange;
+    previewRange.start = -1;
+    previewRange.end = -1;
+
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
+    richEditorPattern->FinishTextPreview();
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
+    ASSERT_NE(childFrameNode, nullptr);
+    auto childSpanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
+    ASSERT_NE(childSpanNode, nullptr);
+
+    do {
+        auto newHost1 = richEditorPattern->GetHost();
+        auto newHost2 = richEditorPattern->GetHost();
+        ASSERT_EQ(newHost1, newHost2);
+
+        newHost1->children_.emplace_back(childFrameNode);
+        newHost1->children_.emplace_back(childSpanNode);
+        ASSERT_EQ(newHost1, newHost2);
+    } while (0);
+
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE2, previewRange);
+    EXPECT_NE(richEditorPattern->previewTextRecord_.previewTextSpan, nullptr);
+    richEditorPattern->FinishTextPreview();
+    EXPECT_EQ(richEditorPattern->previewTextRecord_.previewTextSpan, nullptr);
+}
+
+/**
+ * @tc.name: BetweenPreviewTextPosition002
+ * @tc.desc: test BetweenPreviewTextPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, BetweenPreviewTextPosition002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    PreviewRange previewRange;
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+    richEditorPattern->previewTextRecord_.previewTextSpan = nullptr;
+
+    Offset globalOffset;
+    globalOffset.SetX(testNumber0);
+    globalOffset.SetY(testNumber5);
+
+    auto firstParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
+    EXPECT_CALL(*firstParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = firstParagraph, .start = testNumber0, .end = testNumber2 });
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = firstParagraph, .start = testNumber2, .end = testNumber4 });
+    EXPECT_EQ(richEditorPattern->BetweenPreviewTextPosition(globalOffset), true);
+
+    auto secondParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> secondRects { RectF(testNumber0, testNumber0, testNumber3, testNumber3) };
+    EXPECT_CALL(*secondParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(secondRects));
+    richEditorPattern->paragraphs_.Reset();
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = secondParagraph, .start = testNumber0, .end = testNumber2 });
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = secondParagraph, .start = testNumber2, .end = testNumber4 });
+    EXPECT_EQ(richEditorPattern->BetweenPreviewTextPosition(globalOffset), false);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    auto func = []() {};
+    richEditorPattern->SetCustomKeyboard(func);
+    richEditorPattern->RequestCustomKeyboard();
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    richEditorPattern->imeShown_ = true;
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 }
 } // namespace
