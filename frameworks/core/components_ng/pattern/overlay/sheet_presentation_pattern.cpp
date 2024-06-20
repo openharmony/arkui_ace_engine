@@ -550,8 +550,8 @@ void SheetPresentationPattern::AvoidSafeArea()
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
-    CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
-    auto heightUp = GetSheetHeightChange();
+    CHECK_NULL_VOID(host->GetFocusHub());
+    auto heightUp = host->GetFocusHub()->IsCurrentFocus() ? GetSheetHeightChange() : 0.0f;
     sheetHeightUp_ = heightUp;
     if (isDismissProcess_) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
