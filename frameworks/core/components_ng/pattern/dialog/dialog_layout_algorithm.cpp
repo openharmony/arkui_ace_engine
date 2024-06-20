@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // Using UX spec: Constrain max height within 4/5 of screen height.
-// TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
