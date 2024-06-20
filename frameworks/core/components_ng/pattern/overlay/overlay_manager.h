@@ -536,6 +536,11 @@ public:
         isMenuShow_ = isMenuShow;
     }
 
+    void SetIsAttachToCustomNode(bool isAttachToCustomNode)
+    {
+        isAttachToCustomNode_ = isAttachToCustomNode;
+    }
+
     void SetIsAllowedBeCovered(bool isAllowedBeCovered = true);
     void DeleteUIExtensionNode(int32_t sessionId);
     bool AddCurSessionId(int32_t curSessionId);
@@ -720,6 +725,7 @@ private:
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
+    bool isAttachToCustomNode_ = false;
 
     // Only used when CreateModalUIExtension
     // No thread safety issue due to they are all run in UI thread
