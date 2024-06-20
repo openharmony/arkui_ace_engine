@@ -138,8 +138,12 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
 {
     // check multi-row item that occupies Row [idx]
-    const auto& mat = info_->gridMatrix_;
-    const auto& row = mat.at(idx);
+    auto it = info_->gridMatrix_.find(idx);
+    if (it == info_->gridMatrix_.end()) {
+        return { -1, -1 };
+    }
+
+    const auto& row = it->second;
     if (row.empty()) {
         return { -1, -1 };
     }
@@ -158,7 +162,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
         }
         if (it->second < 0) {
             // traverse upwards to find the first row occupied by this item
-            while (r > 0 && mat.at(r).at(c) < 0) {
+            while (r > 0 && info_->gridMatrix_.at(r).at(c) < 0) {
                 --r;
             }
             if (r < startLine) {
@@ -168,7 +172,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
         }
 
         // skip the columns occupied by this item
-        int32_t itemIdx = std::abs(it->second);
+        const int32_t itemIdx = std::abs(it->second);
         if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);
