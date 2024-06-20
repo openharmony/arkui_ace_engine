@@ -690,6 +690,11 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& dirtyNode : dirtyPropertyNodes) {
+        dirtyNode->ProcessPropertyDiff();
+    }
     taskScheduler_->FlushTask(triggeredByImplicitAnimation);
     window_->Unlock();
 }
