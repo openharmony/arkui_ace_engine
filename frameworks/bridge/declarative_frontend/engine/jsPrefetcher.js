@@ -90,11 +90,11 @@ class ItemsOnScreenProvider {
             this.firstScreen = false;
         }
         else {
-            const q_delta_t = 0.95;
-            this.meanImagesOnScreen = this.meanImagesOnScreen * q_delta_t + (1 - q_delta_t) * imagesOnScreen;
+            const weight = 0.95;
+            this.meanImagesOnScreen = this.meanImagesOnScreen * weight + (1 - weight) * imagesOnScreen;
             imagesOnScreen = Math.ceil(this.meanImagesOnScreen);
         }
-        const visibleRangeSizeChanged = this.visibleRange.length != imagesOnScreen;
+        const visibleRangeSizeChanged = this.visibleRange.length !== imagesOnScreen;
         this._visibleRange = new IndexRange(minVisible, maxVisible + 1);
         if (visibleRangeSizeChanged) {
             this.notifyObservers();
@@ -253,8 +253,8 @@ class PrefetchRangeRatio {
     }
     updateTiming(prefetchDuration) {
         if (prefetchDuration > 20) {
-            const q_delta_t = 0.95;
-            this.meanPrefetchTime = this.meanPrefetchTime * q_delta_t + (1 - q_delta_t) * prefetchDuration;
+            const weight = 0.95;
+            this.meanPrefetchTime = this.meanPrefetchTime * weight + (1 - weight) * prefetchDuration;
         }
         Logger.log(`prefetchDifference prefetchDur=${prefetchDuration}, meanPrefetchDur=${this.meanPrefetchTime}`);
     }

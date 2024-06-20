@@ -71,12 +71,12 @@ class ItemsOnScreenProvider implements IItemsOnScreenProvider {
       this.meanImagesOnScreen = imagesOnScreen;
       this.firstScreen = false;
     } else {
-      const q_delta_t = 0.95;
-      this.meanImagesOnScreen = this.meanImagesOnScreen * q_delta_t + (1 - q_delta_t) * imagesOnScreen;
+      const weight = 0.95;
+      this.meanImagesOnScreen = this.meanImagesOnScreen * weight + (1 - weight) * imagesOnScreen;
       imagesOnScreen = Math.ceil(this.meanImagesOnScreen);
     }
 
-    const visibleRangeSizeChanged = this.visibleRange.length != imagesOnScreen;
+    const visibleRangeSizeChanged = this.visibleRange.length !== imagesOnScreen;
     this._visibleRange = new IndexRange(minVisible, maxVisible + 1);
 
     if (visibleRangeSizeChanged) {

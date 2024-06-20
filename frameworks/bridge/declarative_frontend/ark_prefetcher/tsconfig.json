@@ -1,4 +1,7 @@
 {
+    "include": [
+        "../state_mgmt/src/lib/sdk/i_data_source.d.ts"
+    ],
     "files": [
         "src/BasicPrefetcher.ts",
         "src/IDataSourcePrefetching.ts",
