@@ -2107,10 +2107,11 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest023, TestSize.Level1)
     borderColor.SetColor(Color::BLUE);
     NG::BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(DIMENSION_WIDTH);
+    Shadow shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
     DialogProperties props;
     props.borderWidth = borderWidth;
     props.borderColor = borderColor;
-    props.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
+    props.shadow = shadow;
     pattern->UpdateContentRenderContext(dialogNode, props);
     /**
      * @tc.steps: step6. test dialogNode's RenderContext's borderWidth value.
@@ -2122,7 +2123,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest023, TestSize.Level1)
     //borderColor
     EXPECT_TRUE(dialogNode->GetRenderContext()->GetBorderColor().value() == borderColor);
     //shadow
-    EXPECT_TRUE(dialogNode->GetRenderContext()->GetBackShadow().value() == Shadow::CreateShadow(ShadowStyle::OuterDefaultXS));
+    EXPECT_TRUE(dialogNode->GetRenderContext()->GetBackShadow().value() == shadow);
 }
 
 /**
