@@ -535,10 +535,13 @@ bool WebPattern::CheckZoomStatus(const double& curScale)
 
 bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
 {
+    int32_t curScaleNew = (int32_t)(curScale * 100);
+    int32_t preScaleNew = (int32_t)(preScale_ * 100);
+
     // zoom out
     if (curScale - preScale_ >= 0) {
         if (preScale_ >= DEFAULT_PINCH_SCALE) {
-            if (startPinchScale_  >= DEFAULT_PINCH_SCALE) {
+            if (startPinchScale_ >= DEFAULT_PINCH_SCALE) {
                 scale = curScale;
             } else {
                 scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
@@ -573,15 +576,12 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                                          "than the previous scale value, ignore data.");
             return false;
         }
-        // The scale is from 1.x to 0.9, zomm in
-        if (preScale_ > DEFAULT_PINCH_SCALE) {
-            scale = curScale;
 
-            // reset
-            startPinchScale_ = curScale;
-        } else {
-            scale = ZOOMIN_SMOOTH_SCALE;
+        if (curScaleNew == preScaleNew) {
+            return false;
         }
+
+        scale = ZOOMIN_SMOOTH_SCALE;
 
         zoomStatus_ = STATUS_ZOOMIN;
     }
