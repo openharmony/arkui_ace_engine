@@ -284,6 +284,21 @@ public:
         return targetStartPos_;
     }
 
+    void SetCachedCount(int32_t cachedCount)
+    {
+        cachedCount_ = cachedCount > realTotalCount_ ? realTotalCount_ : cachedCount;
+    }
+
+    const std::set<int32_t>& GetCachedItems() const
+    {
+        return cachedItems_;
+    }
+
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -315,6 +330,8 @@ private:
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
+
+    void CheckCachedItem();
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -363,8 +380,12 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     std::set<int32_t> measuredItems_;
+    std::set<int32_t> activeItems_;
+    std::set<int32_t> cachedItems_;
     // only be used in AutoLinear mode
     float targetStartPos_ = 0.0f;
+    int32_t cachedCount_ = 0;
+    LayoutConstraintF childLayoutConstraint_;
 };
 
 } // namespace OHOS::Ace::NG

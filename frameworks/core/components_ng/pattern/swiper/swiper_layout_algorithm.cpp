@@ -190,6 +190,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate child layout constraint and check if need to reset prevMargin,nextMargin,itemspace.
     auto childLayoutConstraint =
         SwiperUtils::CreateChildConstraint(swiperLayoutProperty, contentIdealSize, getAutoFill);
+    childLayoutConstraint_ = childLayoutConstraint;
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
     if (totalItemCount_ > 0) {
@@ -222,7 +223,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else if (itemPositionInAnimation_.empty()) {
         int32_t startIndex = std::min(GetLoopIndex(GetStartIndex()), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(GetEndIndex()), realTotalCount_ - 1);
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex);
+        CheckCachedItem();
+        if (isLoop_) {
+            layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
+                ActiveChildRange({ startIndex, endIndex, cachedCount_, cachedCount_ }));
+        } else {
+            layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
+        }
     } else {
         int32_t startIndex = std::min(GetLoopIndex(itemPositionInAnimation_.begin()->first), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(itemPositionInAnimation_.rbegin()->first), realTotalCount_ - 1);
@@ -1384,5 +1391,51 @@ bool SwiperLayoutAlgorithm::IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) c
         return false;
     }
     return true;
+}
+
+void SwiperLayoutAlgorithm::CheckCachedItem()
+{
+    int32_t startIndex = GetLoopIndex(GetStartIndex());
+    int32_t endIndex = GetLoopIndex(GetEndIndex());
+    if (startIndex <= endIndex) {
+        for (uint32_t i = startIndex; i <= endIndex; ++i) {
+            activeItems_.insert(i);
+        }
+    } else {
+        for (uint32_t i = 0; i <= endIndex; ++i) {
+            activeItems_.insert(i);
+        }
+        for (uint32_t i = startIndex; i < realTotalCount_; ++i) {
+            activeItems_.insert(i);
+        }
+    }
+    uint32_t cachedCount = cachedCount_;
+    while (cachedCount > 0) {
+        --startIndex;
+        if (!isLoop_ && startIndex < 0) {
+            break;
+        }
+        if (isLoop_ && startIndex < 0) {
+            startIndex = GetLoopIndex(startIndex);
+        }
+        if (activeItems_.find(startIndex) == activeItems_.end()) {
+            cachedItems_.insert(startIndex);
+        }
+        --cachedCount;
+    }
+    cachedCount = cachedCount_;
+    while (cachedCount > 0) {
+        ++endIndex;
+        if (!isLoop_ && endIndex >= realTotalCount_) {
+            break;
+        }
+        if (isLoop_ && endIndex >= realTotalCount_) {
+            endIndex = GetLoopIndex(endIndex);
+        }
+        if (activeItems_.find(endIndex) == activeItems_.end()) {
+            cachedItems_.insert(endIndex);
+        }
+        --cachedCount;
+    }
 }
 } // namespace OHOS::Ace::NG
