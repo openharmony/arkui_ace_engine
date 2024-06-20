@@ -101,6 +101,7 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    RefPtr<FrameNode> GetPreviewMenuWrapper2();
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -199,6 +200,32 @@ RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper(
     return menuWrapperNode;
 }
 
+RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper2()
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    targetNode->GetOrCreateGestureEventHub();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
+}
 /**
  * @tc.name: MenuWrapperPatternTestNg001
  * @tc.desc: Verify HideMenu(Menu).
@@ -653,5 +680,18 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg012, TestSize.Level1)
      */
     wrapperPattern->HideMenu(mainMenu);
     EXPECT_TRUE(mainMenu->GetTag() == V2::SELECT_OVERLAY_ETS_TAG);
+}
+/**
+ * @tc.name: MenuViewTestNg001
+ * @tc.desc: Test Verify Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuViewTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API12.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto menuWrapperNode = GetPreviewMenuWrapper2();
 }
 } // namespace OHOS::Ace::NG
