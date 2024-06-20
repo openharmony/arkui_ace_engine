@@ -491,8 +491,11 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleScaleGestureChange(event);
-        TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ", event.GetScale());
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            pattern->HandleScaleGestureChange(event);
+            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ",
+                event.GetScale());
+        }
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
