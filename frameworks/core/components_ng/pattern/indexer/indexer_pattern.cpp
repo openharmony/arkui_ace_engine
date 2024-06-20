@@ -22,8 +22,10 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -693,6 +695,9 @@ void IndexerPattern::ApplyIndexChanged(
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    auto customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
     int32_t index = 0;
     auto total = host->GetTotalChildCount();
     auto childrenNode = host->GetChildren();
@@ -764,9 +769,15 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
             }
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
+            if ((!layoutProperty->GetSelectedFont().has_value() ||
+                    layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
+                !customFonts.empty()) {
+                selectedFont.SetFontFamilies(customFonts);
+            }
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
+            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childNode->MarkModifyDone();
             if (isTextNodeInTree) {
@@ -799,7 +810,12 @@ void IndexerPattern::ApplyIndexChanged(
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+        if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
+            !customFonts.empty()) {
+            defaultFont.SetFontFamilies(customFonts);
+        }
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
+        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
         nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
@@ -1058,6 +1074,8 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto letterNode = GetLetterNode();
@@ -1066,9 +1084,15 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    if ((!layoutProperty->GetPopupFont().has_value() ||
+            layoutProperty->GetPopupFont().value().GetFontFamilies().empty()) &&
+        fontManager->IsUseAppCustomFont()) {
+        popupTextFont.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    }
     letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
+    letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
     letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
