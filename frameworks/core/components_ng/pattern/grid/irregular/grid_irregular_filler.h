@@ -188,7 +188,7 @@ private:
     /**
      * @brief Implementation of MeasureBackward algorithm on each row.
      *
-     * @param measured unordered_set to record irregular items that are already measured.
+     * @param measured unordered_set to record items that are already measured.
      * @param params Fill Parameters needed for measure.
      */
     void BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params);

@@ -270,7 +270,6 @@ float GridIrregularFiller::MeasureBackward(const FillParameters& params, float t
 {
     float len = 0.0f;
     posY_ = startingLine;
-    // only need to record irregular items
     std::unordered_set<int32_t> measured;
 
     for (; posY_ >= 0 && LessNotEqual(len, targetLen); --posY_) {
@@ -303,30 +302,21 @@ void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, co
 {
     auto it = info_->gridMatrix_.find(posY_);
     if (it == info_->gridMatrix_.end()) {
-        TAG_LOGW(AceLogTag::ACE_GRID, "positionY %{public}d not found in matrix. ", posY_);
+        TAG_LOGW(AceLogTag::ACE_GRID, "positionY %{public}d not found in matrix in backward measure.", posY_);
         return;
     }
     const auto& row = it->second;
-    for (int c = 0; c < info_->crossCount_; ++c) {
-        auto it = row.find(c);
-        if (it == row.end()) {
-            continue;
-        }
-        const int32_t itemIdx = std::abs(it->second);
+    for (const auto& colIt : row) {
+        const int32_t& c = colIt.first;
+        const int32_t itemIdx = std::abs(colIt.second);
         if (measured.count(itemIdx)) {
-            // skip all columns of a measured irregular item
-            c += GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx).columns - 1;
             continue;
         }
 
-        int32_t topRow = FindItemTopRow(posY_, c);
+        const int32_t topRow = FindItemTopRow(posY_, c);
         MeasureItem(params, itemIdx, c, topRow);
-        if (topRow < posY_) {
-            // measure irregular items only once from the bottom-left tile
-            measured.insert(itemIdx);
-        }
-        // skip all columns of this item
-        c += GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx).columns - 1;
+        // measure irregular items only once from the bottom-left tile
+        measured.insert(itemIdx);
     }
 }
 

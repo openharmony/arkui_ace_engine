@@ -379,7 +379,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
     MinusPaddingToSize(padding, frameSize);
     const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
-    auto endIt = info.gridMatrix_.upper_bound(info.endMainLineIndex_);
+    auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_, info.startMainLineIndex_));
     for (auto it = info.gridMatrix_.lower_bound(info.startMainLineIndex_); it != endIt; ++it) {
         auto lineHeightIt = info.lineHeightMap_.find(it->first);
         if (lineHeightIt == info.lineHeightMap_.end()) {
