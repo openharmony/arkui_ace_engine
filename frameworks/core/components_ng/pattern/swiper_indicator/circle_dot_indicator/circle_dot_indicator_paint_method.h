@@ -141,6 +141,7 @@ private:
                                    int32_t indicatorStartIndex);
     float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex);
     int32_t CalculateIndicatorStartIndex();
+    int32_t CalculateInitIndicatorPosition();
 
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;

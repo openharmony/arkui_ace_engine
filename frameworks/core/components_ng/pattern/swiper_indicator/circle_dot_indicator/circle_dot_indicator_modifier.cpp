@@ -473,9 +473,12 @@ void CircleDotIndicatorModifier::PlayBlackPointsAnimation(
     option.SetCurve(curve);
     option.SetDuration(BLACK_POINT_DURATION);
 
-    blackPointsAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
-        vectorBlackPointAngle_->Set(vectorBlackPointAngle);
-        vectorBlackPointRadius_->Set(vectorBlackPointRadius);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this),
+                                    vectorBlackPointAngle, vectorBlackPointRadius]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointAngle_->Set(vectorBlackPointAngle);
+        modifier->vectorBlackPointRadius_->Set(vectorBlackPointRadius);
     });
 }
 
@@ -495,7 +498,8 @@ void CircleDotIndicatorModifier::PlayLongPointAnimation(const std::pair<float, f
     AnimationOption optionLeft = optionTail;
     AnimationOption optionRight = optionHead;
 
-    if (gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+    if (gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT ||
+        gestureState == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         optionLeft = optionHead;
         optionRight = optionTail;
     }

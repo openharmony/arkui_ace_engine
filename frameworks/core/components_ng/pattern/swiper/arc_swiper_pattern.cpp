@@ -692,4 +692,9 @@ void ArcSwiperPattern::PlayPropertyTranslateAnimation(
     SetLazyLoadFeature(true);
     UpdateItemRenderGroup(true);
 }
+
+bool ArcSwiperPattern::IsLoop() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

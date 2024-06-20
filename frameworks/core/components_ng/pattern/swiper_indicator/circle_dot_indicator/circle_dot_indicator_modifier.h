@@ -187,6 +187,16 @@ public:
         return indicatorStartIndex_;
     }
 
+    void SetInitState(bool initState)
+    {
+        initState_ = initState;
+    }
+
+    bool GetInitState()
+    {
+        return initState_;
+    }
+
 private:
     void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointAngle,
                                   const LinearVector<float>& vectorBlackPointRadius);
@@ -220,6 +230,7 @@ private:
     float centerY_ = 0.0;
     float circleRadius_ = 0.0;
     int32_t indicatorStartIndex_ = 0;
+    bool initState_ = true;
 
     SwiperArcDirection arcDirection_ = SwiperArcDirection::SIX_CLOCK_DIRECTION;
 

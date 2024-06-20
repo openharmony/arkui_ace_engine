@@ -524,7 +524,7 @@ public:
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
-    bool IsLoop() const;
+    virtual bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
     void OnWindowHide() override;
