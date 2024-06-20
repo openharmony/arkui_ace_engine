@@ -58,13 +58,15 @@ using std::chrono::milliseconds;
 
 ScrollablePattern::ScrollablePattern()
 {
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
 }
 
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
     : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
 {
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
 }
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -913,7 +915,10 @@ void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExt
 void ScrollablePattern::SetFriction(double friction)
 {
     if (LessOrEqual(friction, 0.0)) {
-        friction = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+        friction =
+            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+        friction =
+            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction;
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);
