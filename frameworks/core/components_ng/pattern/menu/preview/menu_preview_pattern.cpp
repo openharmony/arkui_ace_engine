@@ -40,57 +40,15 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
     return menuNode->GetPattern<MenuPattern>();
 }
 
-bool ShowPreviewAnimationAfterHoverImage(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
-    const RefPtr<MenuPattern>& menuPattern, float scaleFrom, float scaleTo)
-{
-    CHECK_NULL_RETURN(menuPattern, false);
-    if (!menuPattern->GetIsShowHoverImage()) {
-        return false;
-    }
-    CHECK_NULL_RETURN(context, false);
-    CHECK_NULL_RETURN(menuTheme, false);
-    context->UpdateOpacity(0.0);
-    // custom preview update opacity
-    AnimationOption option;
-    option.SetDuration(menuTheme->GetHoverImageSwitchToPreviewOpacityDuration());
-    option.SetDelay(menuTheme->GetHoverImageDelayDuration());
-    option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(
-        option, [context]() {
-            CHECK_NULL_VOID(context);
-            context->UpdateOpacity(1.0);
-        },
-        option.GetOnFinishEvent());
-
-    // custom preview update scale from hover image size to final scale
-    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleFrom;
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleTo;
-    context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
-
-    AnimationOption scaleOption = AnimationOption();
-    scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
-    AnimationUtils::Animate(
-        scaleOption,
-        [context, scaleAfter]() {
-            CHECK_NULL_VOID(context);
-            context->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
-        },
-        scaleOption.GetOnFinishEvent());
-    return true;
-}
-
 void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
-    const RefPtr<MenuPattern>& menuPattern, float scaleFrom, float scaleTo)
+    const RefPtr<MenuPattern>& menuPattern)
 {
-    if (ShowPreviewAnimationAfterHoverImage(context, menuTheme, menuPattern, scaleFrom, scaleTo)) {
-        return;
-    }
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(menuTheme);
     auto scaleBefore { -1.0f };
     auto scaleAfter { -1.0f };
     if (menuPattern != nullptr) {
+        CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
         scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
         scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     }
@@ -205,7 +163,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         auto menuWrapper = GetMenuWrapper();
         auto menuPattern = GetMenuPattern(menuWrapper);
         ShowGatherAnimation(host, menuWrapper);
-        ShowScaleAnimation(context, menuTheme, menuPattern, customPreviewScaleFrom_, customPreviewScaleTo_);
+        ShowScaleAnimation(context, menuTheme, menuPattern);
     }
     isFirstShow_ = false;
     return false;
@@ -273,43 +231,5 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->HideMenu();
-}
-
-void MenuPreviewPattern::ShowHoverImagePreviewDisAppearAnimation(const RefPtr<RenderContext>& context,
-    float scaleFrom, float scaleTo, int32_t duration)
-{
-    CHECK_NULL_VOID(isShowHoverImage_);
-    CHECK_NULL_VOID(context);
-
-    // custom preview update disappear opacity
-    context->UpdateOpacity(1.0);
-    AnimationOption option;
-    option.SetDuration(duration);
-    option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(
-        option, [context]() {
-            CHECK_NULL_VOID(context);
-            context->UpdateOpacity(0.0);
-        },
-        option.GetOnFinishEvent());
-
-    // custom preview update scale from final scale to hover image size
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleFrom;
-    auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
-    context->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
-
-    AnimationOption scaleOption = AnimationOption();
-    scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
-    AnimationUtils::Animate(
-        scaleOption,
-        [context, scaleAfter]() {
-            CHECK_NULL_VOID(context);
-            context->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
-        },
-        scaleOption.GetOnFinishEvent());
 }
 } // namespace OHOS::Ace::NG
