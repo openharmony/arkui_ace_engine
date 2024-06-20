@@ -58,16 +58,21 @@ namespace OHOS::Ace {
 using namespace icu;
 
 struct LocaleProxy final {
+
+    std::shared_ptr<SimpleDateFormat> simpleDateFormat_;
+    std::shared_ptr<Calendar> calendar_;
+    std::shared_ptr<DateTimePatternGenerator> patternGenerator_;
+
     LocaleProxy(const char* language, const char* countryOrRegion, const char* variant, const char* keywordsAndValues)
         : instance(language, countryOrRegion, variant, keywordsAndValues)
-    {}
+    {
+        simpleDateFormat_ = nullptr;
+        calendar_ = nullptr;
+        patternGenerator_ = nullptr;
+    }
     ~LocaleProxy() = default;
 
     Locale instance;
-
-    std::shared_ptr<SimpleDateFormat> simpleDateFormat_ = nullptr;
-    std::shared_ptr<Calendar> calendar_ = nullptr;
-    std::shared_ptr<DateTimePatternGenerator> patternGenerator_ = nullptr;
 
     std::mutex proxyMutex_;
 
@@ -81,6 +86,7 @@ struct LocaleProxy final {
             return simpleDateFormat_;
         }
         UErrorCode status = U_ZERO_ERROR;
+        char DEFAULT_FORMAT[] = "HH:mm:ss";
         auto temp = std::make_shared<SimpleDateFormat>(UnicodeString(DEFAULT_FORMAT), locale, status);
         if (U_SUCCESS(status)) {
             simpleDateFormat_ = temp;
@@ -136,7 +142,6 @@ namespace {
 
 const char JSON_PATH_CARVE = '.';
 const char DEFAULT_LANGUAGE[] = "en-US";
-const char DEFAULT_FORMAT[] = "HH:mm:ss";
 constexpr uint32_t SEXAGENARY_CYCLE_SIZE = 60;
 constexpr uint32_t GUIHAI_YEAR_RECENT = 3;
 constexpr uint32_t SECONDS_IN_HOUR = 3600;
@@ -291,9 +296,6 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
         selectLanguage_ = "b+sr+Latn";
     }
 
-    simpleDateFormat_ = nullptr;
-    calendar_ = nullptr;
-    patternGenerator_ = nullptr;
     LOGI("SetLocale language tag: %{public}s, select language: %{public}s", languageTag_.c_str(),
         selectLanguage_.c_str());
     if (!isPromiseUsed_) {
