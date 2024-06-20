@@ -36,8 +36,7 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScrollNode, ForEachBaseNode);
 
 public:
-    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId,
-        uint32_t totalCount,
+    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
         const std::map<std::string, uint32_t>& templateCachedCountMap,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
@@ -125,7 +124,7 @@ public:
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
-            child->SetJSViewActive(active);
+            child.item->SetJSViewActive(active);
         }
         isActive_ = active;
     }
@@ -133,7 +132,7 @@ public:
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
-            child->PaintDebugBoundaryTreeAll(flag);
+            child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
 
