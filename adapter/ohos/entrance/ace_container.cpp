@@ -1550,6 +1550,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
             DumpLog::GetInstance().Print(1, "ViewScale: " + std::to_string(pipelineContext_->GetViewScale()));
             DumpLog::GetInstance().Print(
                 1, "DisplayWindowRect: " + pipelineContext_->GetDisplayWindowRectInfo().ToString());
+            DumpLog::GetInstance().Print(1, "vsyncID: " + std::to_string(pipelineContext_->GetFrameCount()));
         }
         DumpLog::GetInstance().Print(1, "ApiVersion: " + SystemProperties::GetApiVersion());
         DumpLog::GetInstance().Print(1, "ReleaseType: " + SystemProperties::GetReleaseType());
