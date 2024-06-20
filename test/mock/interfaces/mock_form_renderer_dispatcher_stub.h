@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_FROM_RENDERER_DISPATCHER_STUB_H_
-#define MOCK_FROM_RENDERER_DISPATCHER_STUB_H_
+#ifndef MOCK_FROM_RENDERER_DISPATCHER_STUB_H
+#define MOCK_FROM_RENDERER_DISPATCHER_STUB_H
 #include <gmock/gmock.h>
 #include "form_renderer_dispatcher_stub.h"
 
@@ -42,4 +42,4 @@ public:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif // MOCK_FROM_RENDERER_DISPATCHER_STUB_H_
+#endif // MOCK_FROM_RENDERER_DISPATCHER_STUB_H
