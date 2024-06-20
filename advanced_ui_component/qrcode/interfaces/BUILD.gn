@@ -20,23 +20,19 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 es2abc_gen_abc("gen_qrcode_abc") {
   src_js = rebase_path("qrcode.js")
   dst_file = rebase_path(target_out_dir + "/qrcode.abc")
-  in_puts = [ 
-     "qrcode.js",
-   ]
+  in_puts = [ "qrcode.js" ]
   out_puts = [ target_out_dir + "/qrcode.abc" ]
   extra_args = [ "--module" ]
 }
 
 gen_js_obj("qrcode_abc") {
-  input = get_label_info(":gen_qrcode_abc", "target_out_dir") +
-          "/qrcode.abc"
+  input = get_label_info(":gen_qrcode_abc", "target_out_dir") + "/qrcode.abc"
   output = target_out_dir + "/qrcode_abc.o"
   dep = ":gen_qrcode_abc"
 }
 
 gen_obj("qrcode_abc_preview") {
-  input = get_label_info(":gen_qrcode_abc", "target_out_dir") +
-          "/qrcode.abc"
+  input = get_label_info(":gen_qrcode_abc", "target_out_dir") + "/qrcode.abc"
   output = target_out_dir + "/qrcode_abc.c"
   snapshot_dep = [ ":gen_qrcode_abc" ]
 }
