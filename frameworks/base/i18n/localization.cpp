@@ -58,7 +58,6 @@ namespace OHOS::Ace {
 using namespace icu;
 
 struct LocaleProxy final {
-
     std::shared_ptr<SimpleDateFormat> simpleDateFormat_;
     std::shared_ptr<Calendar> calendar_;
     std::shared_ptr<DateTimePatternGenerator> patternGenerator_;
@@ -86,8 +85,8 @@ struct LocaleProxy final {
             return simpleDateFormat_;
         }
         UErrorCode status = U_ZERO_ERROR;
-        char DEFAULT_FORMAT[] = "HH:mm:ss";
-        auto temp = std::make_shared<SimpleDateFormat>(UnicodeString(DEFAULT_FORMAT), locale, status);
+        char defaultFormat[] = "HH:mm:ss";
+        auto temp = std::make_shared<SimpleDateFormat>(UnicodeString(defaultFormat), locale, status);
         if (U_SUCCESS(status)) {
             simpleDateFormat_ = temp;
         }
