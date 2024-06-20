@@ -313,7 +313,6 @@ void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, co
             continue;
         }
         const int32_t itemIdx = std::abs(it->second);
-
         if (measured.count(itemIdx)) {
             // skip all columns of a measured irregular item
             c += GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx).columns - 1;
