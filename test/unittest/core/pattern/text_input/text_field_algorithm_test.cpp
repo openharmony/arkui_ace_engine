@@ -285,4 +285,43 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph002, TestSize.Level1)
     textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, false);
     EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
 }
+
+/**
+ * @tc.name: TextInputLayoutWithFaduout
+ * @tc.desc: Test the text layout when support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, TextInputLayoutWithFaduout, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+
+    /**
+     * @tc.steps: step2. Set theme textFadeoutEnabled_.
+     */
+    auto pipelineContext = frameNode_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    theme->textFadeoutEnabled_ = true;
+
+    /**
+     * @tc.steps: step3. Create algorithm class.
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step4. Construct TextStyles object.
+     * @tc.expected: Check the node textStyle with fadeout should be clip.
+     */
+    TextStyle textStyle;
+    std::string textContent(DEFAULT_TEXT);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
+}
 } // namespace OHOS::Ace::NG
