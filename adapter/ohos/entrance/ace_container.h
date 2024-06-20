@@ -636,7 +636,9 @@ public:
     OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
+    bool NeedFullUpdate(uint32_t limitKey);
     void NotifyDensityUpdate();
+    void NotifyDirectionUpdate();
 
 private:
     virtual bool MaybeRelease() override;

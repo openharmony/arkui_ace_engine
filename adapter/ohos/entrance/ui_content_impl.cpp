@@ -2100,6 +2100,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
                 pipelineContext->StartWindowAnimation();
+                container->NotifyDirectionUpdate();
             }
         }
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
