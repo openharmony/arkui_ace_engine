@@ -551,7 +551,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         {
             ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
             eventHub->FireDestroyEvent();
-        }        
+        }
         eventHub->FireDetachEvent(id_);
         {
             ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
