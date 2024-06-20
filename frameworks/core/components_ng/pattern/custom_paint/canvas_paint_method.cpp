@@ -89,6 +89,16 @@ double GetQuality(const std::string& args)
 #endif
 } // namespace
 
+CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
+    : frameNode_(frameNode)
+{
+    matrix_.Reset();
+    context_ = frameNode ? frameNode->GetContextRefPtr() : nullptr;
+    imageShadow_ = std::make_unique<Shadow>();
+    contentModifier_ = contentModifier;
+    InitImageCallbacks();
+}
+
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {

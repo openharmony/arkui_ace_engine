@@ -44,13 +44,10 @@ void CanvasPattern::OnAttachToFrameNode()
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
     renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
-    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_, host);
+    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(contentModifier_, host);
 #endif
 }
 

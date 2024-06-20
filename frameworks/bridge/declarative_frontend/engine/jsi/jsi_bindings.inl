@@ -73,7 +73,6 @@ void JsiClass<C>::Method(const char* name, FunctionBinding<Base, R, Args...>* bi
     customFunctions_.emplace(
         name, panda::Global<panda::FunctionRef>(
                   vm, panda::FunctionRef::New(vm, MethodCallback<Base, R, Args...>, nullptr, (void*)binding)));
-
 }
 
 template<typename C>
