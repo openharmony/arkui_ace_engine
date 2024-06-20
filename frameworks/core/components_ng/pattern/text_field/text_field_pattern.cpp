@@ -391,6 +391,9 @@ TextFieldPattern::~TextFieldPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
 }
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
@@ -1255,7 +1258,7 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     if (((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFile on blur, close custom keyboard");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d on blur, close custom keyboard", host->GetId());
     }
 #ifndef OHOS_PLATFORM
     if (HasConnection()) {
@@ -2065,7 +2068,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         return;
     }
     if (!HasFocus()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field request focus currently");
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d request focus currently", host->GetId());
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             CloseSelectOverlay(true);
             StopTwinkling();
@@ -2451,8 +2456,8 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     bool needToResetKeyboard = false;
     // check unspecified  for first time entrance
     if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard type changed to %{public}d",
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type changed to %{public}d",
+            tmpHost->GetId(), layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
         needToResetKeyboard = true;
     }
@@ -2460,7 +2465,8 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
     }
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard action is %{public}d", action_);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard action is %{public}d",
+        tmpHost->GetId(), action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard) {
         // if keyboard attached and keyboard is shown, pull up keyboard again
@@ -3648,10 +3654,12 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
             StopTwinkling();
         }
         CloseSelectOverlay(true);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Will Close Soft keyboard.", host->GetId());
         if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
         }
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Request close soft keyboard.");
 #if defined(ENABLE_STANDARD_INPUT)
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {
@@ -3853,12 +3861,15 @@ void TextFieldPattern::UpdateObscure(const std::string& insertValue, bool hasIns
 
 void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (!HasFocus()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "text field on blur, can't insert value");
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", host->GetId());
         return;
     }
     if (!isEdit_) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NOT allow physical keyboard input in preview state");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "textfield %{public}d NOT allow physical keyboard input in preview state", host->GetId());
         return;
     }
     if (focusIndex_ != FocuseIndex::TEXT && insertValue == " ") {
@@ -3866,8 +3877,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     inputOperations_.emplace(InputOperation::INSERT);
     SourceAndValueInfo info;
     info.insertValue = insertValue;
@@ -4579,10 +4588,15 @@ void TextFieldPattern::HandleParentGlobalOffsetChange()
 
 void TextFieldPattern::RequestKeyboardOnFocus()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "textfield %{public}d requestKeyboardOnFocus: onFocus_: %{public}d Inner: %{public}d modalCovered: %{public}d",
+        host->GetId(), needToRequestKeyboardOnFocus_, needToRequestKeyboardInner_, IsModalCovered());
     if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_ || IsModalCovered()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto textField = weak.Upgrade();
@@ -6175,7 +6189,9 @@ void TextFieldPattern::StopEditing()
     if (!HasFocus()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Stop Editing");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (HasConnection() || isCustomKeyboardAttached_) {
 #else
@@ -6186,8 +6202,6 @@ void TextFieldPattern::StopEditing()
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
     CloseKeyboard(true);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
