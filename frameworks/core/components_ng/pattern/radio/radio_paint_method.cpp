@@ -99,6 +99,7 @@ void RadioModifier::InitializeParam()
     clickEffectColor_ = radioTheme->GetClickEffectColor();
     hoverColor_ = radioTheme->GetHoverColor();
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
+    defaultPadding_ = radioTheme->GetDefaultPaddingSize();
     hoverDuration_ = radioTheme->GetHoverDuration();
     hoverToTouchDuration_ = radioTheme->GetHoverToTouchDuration();
     touchDuration_ = radioTheme->GetTouchDuration();
