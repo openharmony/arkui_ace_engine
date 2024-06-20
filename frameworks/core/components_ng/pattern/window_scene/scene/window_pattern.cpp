@@ -206,6 +206,7 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
         ImageSourceInfo sourceInfo;
         if (session_->GetScenePersistence()->IsSavingSnapshot()) {
