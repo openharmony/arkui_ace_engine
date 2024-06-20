@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_ALGORITHM_H
 
+#include <cstdint>
 #include <map>
 #include <optional>
 
@@ -48,6 +49,7 @@ struct ListPredictLayoutParam {
 struct PredictLayoutItem {
     int32_t index;
     bool forward;
+    int32_t cached;
 };
 
 struct ListPredictLayoutParamV2 {
@@ -451,7 +453,7 @@ private:
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-        const LayoutConstraintF& constraint, bool forward, int64_t deadline);
+        const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
     static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
 

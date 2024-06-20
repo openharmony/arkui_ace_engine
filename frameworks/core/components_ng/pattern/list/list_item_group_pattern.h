@@ -208,7 +208,7 @@ public:
     void CalculateItemStartIndex();
     int32_t GetForwardCachedIndex(int32_t cacheCount);
     int32_t GetBackwardCachedIndex(int32_t cacheCount);
-    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline);
+    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
