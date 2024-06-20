@@ -67,6 +67,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
@@ -1817,6 +1818,7 @@ bool PipelineContext::OnBackPressed()
 
 RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
 {
+    CHECK_NULL_RETURN(node, nullptr);
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
@@ -1828,14 +1830,37 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
                 continue;
             }
         }
+        if (childNode && childNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(childNode);
+            auto topChild = navigationGroupNode->GetTopDestination();
+            // find navigation from top destination
+            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild);
+            if (targetNodeFromDestination) {
+                return targetNodeFromDestination;
+            }
+            targetNodeFromDestination = childNode;
+            auto targetNavigation = AceType::DynamicCast<NavigationGroupNode>(targetNodeFromDestination);
+            // check if the destination responds
+            if (targetNavigation && targetNavigation->CheckCanHandleBack()) {
+                return targetNavigation;
+            }
+            // if the destination does not responds, find navigation from navbar
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+            auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+            CHECK_NULL_RETURN(navigationLayoutProperty, nullptr);
+            if (navigationLayoutProperty->GetHideNavBarValue(false)) {
+                return nullptr;
+            }
+            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode);
+            if (targetNodeFromNavbar) {
+                return targetNodeFromNavbar;
+            }
+            return nullptr;
+        }
         auto target = FindNavigationNodeToHandleBack(child);
         if (target) {
             return target;
         }
-    }
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
-    if (navigationGroupNode && navigationGroupNode->CheckCanHandleBack()) {
-        return navigationGroupNode;
     }
     return nullptr;
 }
