@@ -788,6 +788,7 @@ private:
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
+    void SetUiDvsyncSwitch(bool on);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -815,6 +816,8 @@ private:
     bool isAnimateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
     bool isScrollToSafeAreaHelper_ = true;
+    bool inScrollingStatus_ = false;
+    bool switchOnStatus_ = false;
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
