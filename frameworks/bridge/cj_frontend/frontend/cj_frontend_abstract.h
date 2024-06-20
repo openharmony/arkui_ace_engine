@@ -65,11 +65,6 @@ public:
         return pageRouterManager_->GetParams();
     }
 
-    bool IsForeground() const
-    {
-        return foregroundFrontend_;
-    }
-
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override { return accessibilityManager_; }
     WindowConfig& GetWindowConfig() override { return manifestParser_->GetWindowConfig(); }
     bool IsForeground() override { return foregroundFrontend_; }
