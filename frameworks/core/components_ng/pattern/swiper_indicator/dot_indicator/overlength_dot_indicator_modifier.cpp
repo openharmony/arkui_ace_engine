@@ -271,25 +271,44 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag()
         gestureState_ != GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         return;
     }
-    
+
+    auto leftMoveRate = longPointLeftCenterMoveRate_;
+    auto rightMoveRate = longPointRightCenterMoveRate_;
+    auto blackPointMoveRate = blackPointCenterMoveRate_;
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
+        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
+        blackPointMoveRate = 1.0f - blackPointCenterMoveRate_;
+    }
+
+    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        overlongSelectedEndCenterX_.first =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * leftMoveRate;
+
+        overlongSelectedEndCenterX_.second =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * (1.0f - rightMoveRate);
+    } else {
+        overlongSelectedEndCenterX_.first =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first) * leftMoveRate;
+
+        overlongSelectedEndCenterX_.second =
+            overlongSelectedStartCenterX_.second +
+            (overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second) * rightMoveRate;
+    }
+
     animationEndCenterX_[currentSelectedIndex_] =
         animationStartCenterX_[currentSelectedIndex_] +
         (animationEndCenterX_[currentSelectedIndex_] - animationStartCenterX_[currentSelectedIndex_]) *
-            blackPointCenterMoveRate_;
+            blackPointMoveRate;
 
     animationEndCenterX_[targetSelectedIndex_] =
         animationStartCenterX_[targetSelectedIndex_] +
         (animationEndCenterX_[targetSelectedIndex_] - animationStartCenterX_[targetSelectedIndex_]) *
-            blackPointCenterMoveRate_;
-
-    overlongSelectedEndCenterX_.first =
-        overlongSelectedStartCenterX_.first +
-        (overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first) * longPointLeftCenterMoveRate_;
-
-    overlongSelectedEndCenterX_.second =
-        overlongSelectedStartCenterX_.second +
-        (overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second) * longPointRightCenterMoveRate_;
-
+            blackPointMoveRate;
     targetSelectedIndex_ = currentSelectedIndex_;
     targetOverlongType_ = currentOverlongType_;
 }
@@ -317,7 +336,14 @@ int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
     }
 
     if (animationStartIndex_ == animationEndIndex_) {
+        if (animationStartIndex_ == realItemCount_ - 1) {
+            return animationStartIndex_;
+        }
         return animationStartIndex_ + 1;
+    }
+
+    if (animationStartIndex_ == 0 && animationEndIndex_ == realItemCount_ - 1) {
+        return animationStartIndex_;
     }
 
     return animationEndIndex_;
@@ -473,6 +499,8 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     std::vector<std::pair<float, float>> pointCenterX;
     if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
         (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+        overlongSelectedStartCenterX_.first = animationEndCenterX_[currentSelectedIndex_];
+        overlongSelectedStartCenterX_.second = animationEndCenterX_[currentSelectedIndex_];
         pointCenterX.emplace_back(overlongSelectedStartCenterX_);
         pointCenterX.emplace_back(overlongSelectedEndCenterX_);
     } else {
@@ -484,6 +512,7 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     }
     longPointWithAnimation_ = true;
 }
+
 void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
 {
     if (ifImmediately) {
@@ -507,6 +536,8 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
         modifier->vectorBlackPointCenterX_->Set(modifier->vectorBlackPointCenterX_->Get());
         modifier->firstPointOpacity_->Set(modifier->firstPointOpacity_->Get());
         modifier->newPointOpacity_->Set(modifier->newPointOpacity_->Get());
+        modifier->unselectedIndicatorWidth_->Set(modifier->unselectedIndicatorWidth_->Get());
+        modifier->unselectedIndicatorHeight_->Set(modifier->unselectedIndicatorHeight_->Get());
     });
 
     longPointLeftAnimEnd_ = true;
