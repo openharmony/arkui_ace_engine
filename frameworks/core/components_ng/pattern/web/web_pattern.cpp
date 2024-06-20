@@ -295,7 +295,6 @@ void WebPattern::OnAttachToFrameNode()
     SetRotation(pipeline->GetTransformHint());
 
     host->GetRenderContext()->SetClipToFrame(true);
-    host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -2232,6 +2231,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        UpdateBackgroundColorRightNow();
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -2273,6 +2273,7 @@ void WebPattern::OnModifyDone()
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
+        UpdateBackgroundColorRightNow();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -3999,6 +4000,27 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::UpdateBackgroundColorRightNow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto color = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    if (color == Color::TRANSPARENT && delegate_) {
+        auto colorMode = delegate_->GetSystemColorMode();
+        color = Color::WHITE;
+        if (colorMode == "dark") {
+            color = Color::BLACK;
+        }
+    }
+    renderContext->UpdateBackgroundColor(color);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(color);
 }
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
