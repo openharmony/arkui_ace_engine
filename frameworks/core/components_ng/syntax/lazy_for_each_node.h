@@ -170,6 +170,18 @@ private:
         RegisterBuilderListener();
     }
 
+    void OnDetachFromMainTree(bool recursive) override
+    {
+        UINode::OnDetachFromMainTree(recursive);
+        if (builder_) {
+            for (const auto& item : builder_->GetCachedUINodeMap()) {
+                if (item.second.second != nullptr) {
+                    item.second.second->DetachFromMainTree(recursive);
+                }
+            }
+        }
+    }
+
     void OnOffscreenProcess(bool recursive) override
     {
         UINode::OnOffscreenProcess(recursive);
