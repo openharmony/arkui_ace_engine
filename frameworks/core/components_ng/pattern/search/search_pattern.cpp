@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -846,14 +847,14 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == FocusChoice::SEARCH) {
+        auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateTextColor(focusTextColor_);
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(true); // Select all text
                 textFieldPattern->StopTwinkling();         // Hide caret
-                auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-                CHECK_NULL_VOID(textFieldLayoutProperty);
-                textFieldLayoutProperty->UpdateTextColor(focusTextColor_);
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
             }
@@ -1119,6 +1120,10 @@ void SearchPattern::InitSearchTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    focusBorderColor_ = appTheme->GetFocusColor();
+    focusBorderWidth_ = appTheme->GetFocusWidthVp();
+    focusBorderPadding_ = appTheme->GetFocusOutPaddingVp();
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     searchNormalColor_ = textFieldTheme->GetBgColor();
@@ -1127,12 +1132,9 @@ void SearchPattern::InitSearchTheme()
     searchHoverColor_ = searchTheme->GetHoverColor();
     searchTouchColor_ = searchTheme->GetTouchColor();
     focusBoxGlow_ = searchTheme->IsFocusBoxGlow();
-    focusBorderColor_ = searchTheme->GetFocusBorderColor();
     focusBgColor_ = searchTheme->GetFocusBgColor();
     normalIconColor_ = searchTheme->GetSearchIconColor();
     focusIconColor_ = searchTheme->GetFocusIconColor();
-    focusBorderWidth_ = searchTheme->GetFocusBorderWidth();
-    focusBorderPadding_ = searchTheme->GetFocusBorderPadding();
     normalTextColor_ = searchTheme->GetTextColor();
     focusTextColor_ = searchTheme->GetFocusTextColor();
 }
@@ -1144,8 +1146,6 @@ void SearchPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
     auto eventHub = host->GetEventHub<SearchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
@@ -1192,13 +1192,9 @@ void SearchPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            pattern->OnTouchDownOrUp(true);
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            pattern->OnTouchDownOrUp(false);
-        }
+        auto infoTouches = info.GetTouches();
+        CHECK_EQUAL_VOID(infoTouches.empty(), true);
+        pattern->OnTouchDownOrUp(infoTouches.front().GetTouchType() == TouchType::DOWN);
     };
     searchTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(searchTouchListener_);
@@ -1206,7 +1202,7 @@ void SearchPattern::InitTouchEvent()
 
 void SearchPattern::OnTouchDownOrUp(bool isDown)
 {
-    isSearchPress_ = isDown ? true : false;
+    isSearchPress_ = isDown;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto searchEventHub = GetEventHub<SearchEventHub>();

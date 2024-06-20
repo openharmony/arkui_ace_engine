@@ -94,9 +94,6 @@ public:
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
-            theme->focusBorderColor_ = pattern->GetAttr<Color>("search_focus_border_color", Color(0xFF007DFF));
-            theme->focusBorderWidth_ = pattern->GetAttr<Dimension>("search_focus_border_width", 2.0_vp);
-            theme->focusBorderPadding_ = pattern->GetAttr<Dimension>("search_focus_border_padding", 2.0_vp);
             theme->focusBoxGlow_ = static_cast<bool>(pattern->GetAttr<double>("search_focus_effect_type", 0.0));
             theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
             theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
@@ -193,21 +190,6 @@ public:
     const Dimension& GetBorderWidth() const
     {
         return borderWidth_;
-    }
-
-    const Dimension& GetFocusBorderWidth() const
-    {
-        return focusBorderWidth_;
-    }
-
-    const Dimension& GetFocusBorderPadding() const
-    {
-        return focusBorderPadding_;
-    }
-
-    const Color& GetFocusBorderColor() const
-    {
-        return focusBorderColor_;
     }
 
     bool IsFocusBoxGlow() const
@@ -315,7 +297,6 @@ private:
     Color focusTextColor_;
     Color touchColor_;
     Color hoverColor_;
-    Color focusBorderColor_;
     Color focusBgColor_;
     Color focusIconColor_;
     Dimension height_;
@@ -338,8 +319,6 @@ private:
     Dimension iconHeight_;
     Dimension searchIconLeftSpace_;
     Dimension searchIconRightSpace_;
-    Dimension focusBorderWidth_;
-    Dimension focusBorderPadding_;
     Color searchDividerColor_;
     Color searchButtonTextColor_;
     Color searchIconColor_;
