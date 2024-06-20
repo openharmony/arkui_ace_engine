@@ -47,7 +47,7 @@ private:
     void PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
 
-    bool needPaintFade_;
+    bool needPaintFade_ = false;
     bool needClipPadding_ = false;
     Axis axis_;
     float mainDelta_ = 0.0f;
