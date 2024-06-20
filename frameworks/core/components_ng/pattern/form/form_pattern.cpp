@@ -775,6 +775,7 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
         }
 
         formManagerBridge_->SetObscured(false);
+        return;
     }
 
     if (!isRefresh && GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE) != nullptr &&
