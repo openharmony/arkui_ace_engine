@@ -1079,6 +1079,9 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    TAG_LOGD(AceLogTag::ACE_DRAG, "The info of opacity update to the framework is %{public}s",
+        arkExtraInfoJson->ToString().c_str());
+
     if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
         optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
     }

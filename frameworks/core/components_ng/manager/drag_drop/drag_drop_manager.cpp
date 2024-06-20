@@ -489,9 +489,9 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     if (isDragFwkShow_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Transform to MSDP DragWindow.");
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(windowContainerId);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
