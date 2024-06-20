@@ -31,11 +31,14 @@ public:
     static void TearDownTestCase() {};
 };
 
+<<<<<<< HEAD
 /**
   * @tc.number: DispatchPointerEvent_001
   * @tc.name: DispatchPointerEvent_001
   * @tc.desc: Verify the DispatchPointerEvent function when remoteObject is not nullptr.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -46,11 +49,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_001, TestSize.Lev
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: DispatchPointerEvent_002
   * @tc.name: DispatchPointerEvent_002
   * @tc.desc: Verify the DispatchPointerEvent function when remoteObject is nullptr.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_002, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -61,11 +67,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchPointerEvent_002, TestSize.Lev
     EXPECT_FALSE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: SetAllowUpdate_001
   * @tc.name: SetAllowUpdate_001
   * @tc.desc: Verify the SetAllowUpdate function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, SetAllowUpdate_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -75,11 +84,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, SetAllowUpdate_001, TestSize.Level1)
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: DispatchSurfaceChangeEvent_001
   * @tc.name: DispatchSurfaceChangeEvent_001
   * @tc.desc: Verify the DispatchSurfaceChangeEvent function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -91,11 +103,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, DispatchSurfaceChangeEvent_001, TestSi
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: SetObscured_001
   * @tc.name: SetObscured_001
   * @tc.desc: Verify the SetObscured function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, SetObscured_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -105,11 +120,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, SetObscured_001, TestSize.Level1)
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: OnAccessibilityChildTreeRegister_001
   * @tc.name: OnAccessibilityChildTreeRegister_001
   * @tc.desc: Verify the OnAccessibilityChildTreeRegister function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeRegister_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -121,11 +139,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeRegister_001, 
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: OnAccessibilityChildTreeDeregister_001
   * @tc.name: OnAccessibilityChildTreeDeregister_001
   * @tc.desc: Verify the OnAccessibilityChildTreeDeregister function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeDeregister_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -134,11 +155,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityChildTreeDeregister_001
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: OnAccessibilityDumpChildInfo_001
   * @tc.name: OnAccessibilityDumpChildInfo_001
   * @tc.desc: Verify the OnAccessibilityDumpChildInfo function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityDumpChildInfo_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
@@ -149,11 +173,14 @@ HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityDumpChildInfo_001, Test
     EXPECT_TRUE(mockStub->SendRequest_called);
 }
 
+<<<<<<< HEAD
 /**
   * @tc.number: OnAccessibilityTransferHoverEvent_001
   * @tc.name: OnAccessibilityTransferHoverEvent_001
   * @tc.desc: Verify the OnAccessibilityTransferHoverEvent function when it send request.
 */
+=======
+>>>>>>> dbdda286fe8b2835c07a1e8d3085b9ba60fa2ff2
 HWTEST_F(FormRendererDispatcherProxyTest, OnAccessibilityTransferHoverEvent_001, TestSize.Level1)
 {
     sptr<AppExecFwk::MockFormRendererDispatherStub> mockStub(new AppExecFwk::MockFormRendererDispatherStub());
