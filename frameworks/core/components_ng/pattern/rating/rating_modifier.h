@@ -39,6 +39,7 @@ public:
         HOVERTOPRESS,
         PRESSTOHOVER,
         PRESS,
+        FOCUS,
     };
 
     void PaintBoard(DrawingContext& context);
@@ -162,9 +163,17 @@ public:
         }
     }
 
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+        SetHoverState(state_);
+    }
+
     void SetHoverState(const RatingAnimationType& state)
     {
-        if (state_ == state) {
+        RatingAnimationType proxyState = isFocus_? RatingAnimationType::FOCUS : state;
+
+        if (state_ == proxyState) {
             return;
         }
         state_ = state;
@@ -177,6 +186,9 @@ public:
         switch (state) {
             case RatingAnimationType::HOVER:
                 SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), hoverDuration, Curves::FRICTION);
+                break;
+            case RatingAnimationType::FOCUS:
+                SetBoardColor(LinearColor(Color::WHITE), hoverDuration, Curves::FRICTION);
                 break;
             case RatingAnimationType::HOVERTOPRESS:
                 SetBoardColor(LinearColor(ratingTheme->GetPressColor()), pressDuration, Curves::SHARP);
@@ -202,9 +214,17 @@ public:
         }
     }
 
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
 private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
+    bool isFocus_ = false;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
@@ -220,9 +240,11 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
+    RefPtr<PropertyBool> isFocused_;
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
     RefPtr<PropertyBool> reverse_;
+    RefPtr<RatingTheme> ratingTheme_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);
 };
 } // namespace OHOS::Ace::NG

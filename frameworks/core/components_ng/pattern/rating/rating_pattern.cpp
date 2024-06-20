@@ -457,6 +457,42 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddClickEvent(clickEvent_);
 }
 
+void RatingPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void RatingPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(ratingModifier_);
+    ratingModifier_->SetIsFocused(true);
+}
+
+void RatingPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(ratingModifier_);
+    ratingModifier_->SetIsFocused(false);
+}
+
 void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -575,11 +611,39 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
             pattern->GetInnerFocusPaintRect(paintRect);
         }
     });
+    focusHub->SetOnFocusInternal([wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto pipline = pattern->GetContext();
+        CHECK_NULL_VOID(pipline);
+        pipline->AddIsFocusActiveUpdateEvent(pattern->GetHost(), [weak = wp](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetModifierFocus(isFocusAcitve);
+        });
+
+        pattern->OnFocusEvent();
+    });
+
     focusHub->SetOnBlurInternal([wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto pipline = pattern->GetContext();
+        CHECK_NULL_VOID(pipline);
+        pipline->RemoveIsFocusActiveUpdateEvent(pattern->GetHost());
         pattern->OnBlurEvent();
     });
+}
+
+void RatingPattern::SetModifierFocus(bool isFocus)
+{
+    ratingModifier_->SetIsFocus(isFocus);
+    MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::OnFocusEvent()
+{
+    SetModifierFocus(true);
 }
 
 void RatingPattern::OnBlurEvent()
@@ -793,6 +857,7 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    InitFocusEvent(focusHub);
 }
 
 // XTS inspector code

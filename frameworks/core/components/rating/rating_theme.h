@@ -74,6 +74,8 @@ public:
                 theme->borderRadius_ = pattern->GetAttr<Dimension>("hover_radius_size", BORDER_RADIUS);
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
+                theme->iconSubSize_ = pattern->GetAttr<double>("rating_icon_sub_size", 0.0);
+                theme->iconBoardDistance_ = pattern->GetAttr<double>("rating_icon_board_distance", 0.0);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -86,6 +88,16 @@ public:
     int32_t GetStarNum() const
     {
         return starNum_;
+    }
+
+    double GetIconBoardDistance() const
+    {
+        return iconBoardDistance_;
+    }
+
+    double GetIconSubSize() const
+    {
+        return iconSubSize_;
     }
 
     const Dimension& GetRatingWidth() const
@@ -213,6 +225,8 @@ private:
     Dimension ratingMiniWidth_;
     Dimension ratingMiniHeight_;
     Dimension paddingVertical_;
+    double iconSubSize_ = 0.0;
+    double iconBoardDistance_ = 0.0;
     double stepSize_ = 0.0;
     double ratingScore_ = 0.0;
     double ratingMiniScore_ = 0.0;

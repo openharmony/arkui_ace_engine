@@ -28,12 +28,14 @@ RatingModifier::RatingModifier()
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
+      isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT))),
       reverse_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(needDraw_);
     AttachProperty(starNum_);
     AttachProperty(touchStar_);
+    AttachProperty(isFocused_);
     AttachProperty(drawScore_);
     AttachProperty(stepSize_);
     AttachProperty(useContentModifier_);
@@ -41,6 +43,11 @@ RatingModifier::RatingModifier()
     AttachProperty(contentSize_);
     AttachProperty(boardColor_);
     AttachProperty(reverse_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    ratingTheme_ = ratingTheme;
 }
 
 void RatingModifier::onDraw(DrawingContext& context)
@@ -112,7 +119,12 @@ void RatingModifier::PaintStar(DrawingContext& context)
     // step3: draw the foreground images.
     canvas.Save();
     auto offsetTemp = offset;
-    auto contentSize = SizeF(singleStarWidth, singleStarHeight);
+    auto distance = ratingTheme_->GetIconBoardDistance();
+    offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
+    offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
+    auto size = ratingTheme_->GetIconSubSize();
+    auto contentSize = SizeF(singleStarWidth - size, singleStarHeight - size);
+
     // step2.1: calculate the clip area in order to display the secondary image.
     auto clipRect1 = RSRect(offset.GetX(), offsetTemp.GetY(),
         static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
