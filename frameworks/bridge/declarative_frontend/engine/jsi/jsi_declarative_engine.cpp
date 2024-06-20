@@ -80,16 +80,19 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
+extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
+extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
+extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 extern const char* _binary_arkTheme_abc_end;
 #endif
@@ -189,6 +192,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
 #endif
+}
+
+inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
+{
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
+    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
@@ -476,6 +486,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
+            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
             PreloadArkTheme(runtime_);
         }
@@ -504,6 +515,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
         PreloadArkTheme(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -620,6 +632,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
