@@ -708,6 +708,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     CalcDimension length;
     ParseJsDimensionVp(jsValue, length);
     if (length.IsNegative()) {
+        TextFieldModel::GetInstance()->SetPadding(NG::PaddingProperty(), Edge(), true);
         return;
     }
     bool tmp = !jsValue->IsString() && !jsValue->IsNumber() && !jsValue->IsObject();

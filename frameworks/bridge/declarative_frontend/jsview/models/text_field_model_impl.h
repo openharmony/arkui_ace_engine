@@ -76,7 +76,7 @@ public:
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;
-    void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetBackBorder() override;
     void SetHoverEffect(HoverEffectType value) override;
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
