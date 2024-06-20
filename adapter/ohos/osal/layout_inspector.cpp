@@ -161,10 +161,8 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
     if (jsStateProfilerStatusCallback_) {
-        auto taskExecutor = Container::CurrentTaskExecutorSafely();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([callback = jsStateProfilerStatusCallback_, status]() { callback(status); },
-            TaskExecutor::TaskType::UI, "ArkUITriggerJsStateProfilerStatusCallback");
+        stateProfilerStatus_ = status;
+        jsStateProfilerStatusCallback_(status);
     }
 }
 
@@ -185,8 +183,10 @@ void LayoutInspector::SendStateProfilerMessage(const std::string& message)
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
 {
-    stateProfilerStatus_ = status;
-    TriggerJsStateProfilerStatusCallback(status);
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [status]() { LayoutInspector::TriggerJsStateProfilerStatusCallback(status); };
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
