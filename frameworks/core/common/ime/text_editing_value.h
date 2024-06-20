@@ -77,7 +77,7 @@ struct TextEditingValue {
     std::string text;
     std::string hint;
     TextSelection selection;
-    bool isDelete;
+    bool isDelete = false;
     std::string appendText;
 
 #if defined(IOS_PLATFORM)
