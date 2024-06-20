@@ -106,6 +106,11 @@ public:
         return currentOverlongType_;
     }
 
+    void SetCurrentOverlongType(OverlongType currentOverlongType)
+    {
+        currentOverlongType_ = currentOverlongType;
+    }
+
     void SetAnimationStartIndex(int32_t animationStartIndex)
     {
         animationStartIndex_ = animationStartIndex;
@@ -114,6 +119,11 @@ public:
     void SetAnimationEndIndex(int32_t animationEndIndex)
     {
         animationEndIndex_ = animationEndIndex;
+    }
+
+    int32_t GetAnimationEndIndex() const
+    {
+        return animationEndIndex_;
     }
 
     void SetTurnPageRate(float turnPageRate)

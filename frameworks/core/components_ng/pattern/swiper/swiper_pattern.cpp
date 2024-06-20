@@ -1575,9 +1575,18 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
     }
 
     if (useAnimation) {
+        if (GetMaxDisplayCount() > 0) {
+            SetIndicatorChangeIndexStatus(true);
+        }
+
         SwipeTo(targetIndex);
     } else {
         needFireCustomAnimationEvent_ = translateAnimationIsRunning_;
+
+        if (GetMaxDisplayCount() > 0) {
+            SetIndicatorChangeIndexStatus(false);
+        }
+
         SwipeToWithoutAnimation(targetIndex);
     }
 }
@@ -2405,6 +2414,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     HandleTouchBottomLoop();
 
     if (!indicatorDoingAnimation_) {
+        SetIndicatorJumpIndex(child, jumpIndex_);
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if (GetLoopIndex(currentIndex_) != currentFirstIndex_) {
@@ -5567,5 +5577,30 @@ int32_t SwiperPattern::GetMaxDisplayCount() const
     }
 
     return maxDisplayCount;
+}
+
+void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    if (!indicatorNode || indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        return;
+    }
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+
+    indicatorPattern->SetChangeIndexWithAnimation(withAnimation);
+}
+
+void SwiperPattern::SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+
+    indicatorPattern->SetJumpIndex(jumpIndex);
 }
 } // namespace OHOS::Ace::NG
