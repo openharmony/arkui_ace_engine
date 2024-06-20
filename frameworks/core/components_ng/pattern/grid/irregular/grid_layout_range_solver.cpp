@@ -66,7 +66,12 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
             return { res.row, res.idx, res.pos, endLineIdx, endIdx };
         }
         case ScrollAlign::END: {
-            auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
+            auto it = info_->lineHeightMap_.find(jumpLineIdx);
+            if (it == info_->lineHeightMap_.end()) {
+                TAG_LOGW(AceLogTag::ACE_GRID, "line height at %{public}d not prepared during jump", jumpLineIdx);
+                return {};
+            }
+            auto res = SolveBackward(mainGap, mainSize - it->second, jumpLineIdx);
             return { res.row, res.idx, res.pos, jumpLineIdx, info_->FindEndIdx(jumpLineIdx).itemIdx };
         }
         default:
@@ -93,34 +98,6 @@ Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, const
         len -= it->second + mainGap;
     }
     return { startRow, startIdx, len - targetLen + mainGap };
-}
-
-std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
-{
-    int32_t rowCnt = 1;
-
-    const auto& irregulars = opts_->irregularIndexes;
-    // consider irregular items occupying multiple rows
-    const auto& row = info_->gridMatrix_.at(idx);
-    for (int32_t c = 0; c < info_->crossCount_; ++c) {
-        auto it = row.find(c);
-        if (it == row.end()) {
-            continue;
-        }
-        const auto& itemIdx = it->second;
-        if (itemIdx < 0) {
-            continue;
-        }
-        if (itemIdx == 0 && (idx > 0 || c > 0)) {
-            continue;
-        }
-        if (opts_->getSizeByIndex && irregulars.find(itemIdx) != irregulars.end()) {
-            auto size = opts_->getSizeByIndex(itemIdx);
-            rowCnt = std::max(rowCnt, info_->axis_ == Axis::VERTICAL ? size.rows : size.columns);
-        }
-    }
-
-    return { rowCnt, info_->GetHeightInRange(idx, idx + rowCnt, mainGap) };
 }
 
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line)
