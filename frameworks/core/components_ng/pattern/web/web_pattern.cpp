@@ -4394,6 +4394,9 @@ void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetX());
     if (fitContentOffset_.GetX() >= 0) {
+        if (isNeedReDrawRect_) {
+            SetDrawRect(0, 0, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, drawRectHeight_, isNeedReset);
+        }
         isNeedReDrawRect_ = false;
         return;
     }
@@ -4416,6 +4419,9 @@ void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetY());
     if (fitContentOffset_.GetY() >= 0) {
+        if (isNeedReDrawRect_) {
+            SetDrawRect(0, 0, drawRectWidth_, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, isNeedReset);
+        }
         isNeedReDrawRect_ = false;
         return;
     }
