@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,9 +35,19 @@ protected:
         bool isCloseButton = false, bool canDrag = false);
     static void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
     static void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
+    static void AddButtonStyleMouseEvent(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
+    static void SetContainerModalPattern(RefPtr<ContainerModalPattern> containerModalPattern)
+    {
+        containerModalPattern_ = containerModalPattern;
+    }
+    static void AddButtonHoverEvent(
+        RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
+    static void AddButtonOnEvent(
+        RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
 
 private:
     static float baseScale;
+    static RefPtr<ContainerModalPattern> containerModalPattern_;
 };
 
 } // namespace OHOS::Ace::NG

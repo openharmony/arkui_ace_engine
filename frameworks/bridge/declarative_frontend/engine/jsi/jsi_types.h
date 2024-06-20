@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_TYPES_H
 
+#include <string>
+
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -31,6 +33,7 @@
 namespace OHOS::Ace::Framework {
 
 using JsiFunctionCallback = panda::Local<panda::JSValueRef> (*)(panda::JsiRuntimeCallInfo*);
+using EcmaVM = panda::ecmascript::EcmaVM;
 
 template<typename T>
 class JsiType {
@@ -42,6 +45,7 @@ public:
 
     explicit JsiType(panda::Local<T> val);
     explicit JsiType(const panda::CopyableGlobal<T>& other);
+    explicit JsiType(const EcmaVM *vm, panda::Local<T> val);
 
     template<typename S>
     explicit JsiType(panda::Local<S> val);
@@ -56,7 +60,7 @@ public:
     }
 
     template<class... Args>
-    static JsiType<T> New(Args&&... args);
+    static JsiType<T> New(Args &&... args);
 
     void SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback);
     const panda::CopyableGlobal<T>& GetHandle() const;
@@ -78,6 +82,7 @@ public:
     JsiValue() = default;
     explicit JsiValue(const panda::CopyableGlobal<panda::JSValueRef>& val);
     explicit JsiValue(panda::Local<panda::JSValueRef> val);
+    explicit JsiValue(const EcmaVM *vm, panda::Local<panda::JSValueRef> val);
     ~JsiValue() override = default;
 
     bool IsEmpty() const;
@@ -109,11 +114,15 @@ public:
  * @brief A wrapper around a panda::StringRef
  *
  */
-class JsiString : public JsiValue {
+class JsiString : public JsiType<panda::StringRef> {
 public:
-    explicit JsiString(const char* str);
-    explicit JsiString(JsiValue str);
-    static JsiString New(const char* str);
+    JsiString() = default;
+    explicit JsiString(panda::Local<panda::StringRef> val);
+    explicit JsiString(const panda::CopyableGlobal<panda::StringRef>& val);
+    ~JsiString() override = default;
+
+    static panda::Local<panda::StringRef> New(const char* str);
+    static panda::Local<panda::StringRef> New(const std::string& str);
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiString)
 };
 
@@ -125,11 +134,13 @@ class JsiArray : public JsiType<panda::ArrayRef> {
 public:
     JsiArray();
     explicit JsiArray(panda::Local<panda::ArrayRef> val);
+    explicit JsiArray(const EcmaVM *vm, panda::Local<panda::ArrayRef> val);
     explicit JsiArray(const panda::CopyableGlobal<panda::ArrayRef>& val);
     ~JsiArray() override = default;
     JsiRef<JsiValue> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> GetProperty(int32_t propertyIndex) const;
     size_t Length() const;
     void SetLength(size_t length) const;
     bool IsArray() const;
@@ -175,7 +186,8 @@ class JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
     explicit JsiObject(panda::Local<panda::ObjectRef> val);
-    explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
+    explicit JsiObject(const EcmaVM *vm, panda::Local<panda::ObjectRef> val);
+    ACE_FORCE_EXPORT explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
     bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };
@@ -188,11 +200,19 @@ public:
 
     JsiRef<JsiArray> GetPropertyNames() const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> GetProperty(int32_t propertyIndex) const;
+    bool HasProperty(int32_t propertyIndex) const;
     bool HasProperty(const char* prop) const;
     JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
+    T GetPropertyValue(int32_t propertyIndex, T defaultValue) const;
+
+    template<typename T>
     T GetPropertyValue(const char* prop, T defaultValue) const;
+
+    template<typename T>
+    void SetProperty(int32_t propertyIndex, const T value) const;
 
     template<typename T>
     void SetProperty(const char* prop, const T value) const;
@@ -210,6 +230,7 @@ class JsiFunction : public JsiType<panda::FunctionRef> {
 public:
     JsiFunction();
     explicit JsiFunction(panda::Local<panda::FunctionRef> val);
+    explicit JsiFunction(const EcmaVM *vm, panda::Local<panda::FunctionRef> val);
     explicit JsiFunction(const panda::CopyableGlobal<panda::FunctionRef>& val);
     ~JsiFunction() override = default;
 
@@ -289,7 +310,10 @@ public:
     template<typename T>
     T* UnwrapArg(size_t index) const;
     bool GetBooleanArg(size_t index, bool& value) const;
+    bool GetInt32Arg(size_t index, int32_t& value) const;
+    bool GetUint32Arg(size_t index, uint32_t& value) const;
     bool GetDoubleArg(size_t index, double& value) const;
+    bool GetDoubleArrayArg(size_t index, std::vector<double>& valueArr) const;
     bool GetStringArg(size_t index, std::string& value) const;
 
 private:

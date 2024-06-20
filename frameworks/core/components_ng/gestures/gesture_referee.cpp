@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/gestures/gesture_referee.h"
+#include "recognizers/gesture_recognizer.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -76,8 +77,17 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
         if (gesture == recognizer) {
             continue;
         }
-        if (gesture) {
-            gesture->OnRejected();
+        if (!gesture || gesture->IsBridgeMode()) {
+            continue;
+        }
+        gesture->OnRejected();
+        auto bridgeObjList = gesture->GetBridgeObj();
+        for (const auto& item : bridgeObjList) {
+            auto bridgeObj = item.Upgrade();
+            if (bridgeObj) {
+                bridgeObj->OnRejected();
+                bridgeObj->OnRejectBridgeObj();
+            }
         }
     }
     if (queryStateFunc_) {
@@ -199,15 +209,26 @@ bool GestureScope::CheckRecognizerState()
     return false;
 }
 
-bool GestureScope::CheckGestureScopeState()
+bool GestureScope::IsReady()
 {
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
-        if (recognizer && recognizer->IsPending()) {
+        if (recognizer && recognizer->GetRefereeState() != RefereeState::READY) {
             return false;
         }
     }
     return true;
+}
+
+bool GestureScope::HasFailRecognizer()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && recognizer->GetRefereeState() == RefereeState::FAIL) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void GestureScope::ForceCleanGestureScope()
@@ -315,14 +336,27 @@ void GestureReferee::CleanRedundanceScope()
     }
 }
 
-bool GestureReferee::CheckGestureRefereeState()
+bool GestureReferee::IsReady()
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        if (!iter->second->CheckGestureScopeState()) {
+        if (!iter->second->IsReady()) {
             return false;
         }
     }
     return true;
+}
+
+bool GestureReferee::HasFailRecognizer(int32_t touchId)
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+
+    return scope->HasFailRecognizer();
 }
 
 void GestureReferee::ForceCleanGestureReferee()

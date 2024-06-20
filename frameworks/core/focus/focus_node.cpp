@@ -387,7 +387,6 @@ void FocusNode::RefreshFocus()
 
     // lost current focus and request another focus
     auto parent = GetParent().Upgrade();
-
     // current node is root node
     if (!parent) {
         LostFocus();

@@ -82,22 +82,27 @@ public:
     }
     bool ShowUIExtensionMenu(const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
     void ResponseBestMatchItem(const AISpan& aiSpan);
+    void StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams);
 
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
 
     std::function<void(const AAFwk::WantParams&)> GetOnReceive(
-        const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
+        NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
+    std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
     void SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& want);
 
+    RefPtr<NG::FrameNode> uiExtNode_;
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
     bool hasClickedAISpan_ = false;
     bool pressedByLeftMouse_ = false;
+    bool typeChanged_ = false;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
     std::string textForAI_;
+    std::string lastTextForAI_;
     std::set<std::string> textDetectTypesSet_;
     std::optional<TextDataDetectResult> textDetectResult_;
     std::function<void(const std::string&)> onResult_;
@@ -108,6 +113,7 @@ private:
     std::string uiExtensionAbilityName_;
     std::unordered_map<int32_t, std::string> entityJson_;
     TimeStamp startDetectorTimeStamp_;
+    std::vector<std::string> detectTexts;
 };
 } // namespace OHOS::Ace
 

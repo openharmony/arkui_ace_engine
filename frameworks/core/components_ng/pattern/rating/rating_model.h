@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 using ChangeEvent = std::function<void(const std::string&)>;
-class ACE_EXPORT RatingModel {
+class ACE_FORCE_EXPORT RatingModel {
 public:
     static RatingModel* GetInstance();
     virtual ~RatingModel() = default;

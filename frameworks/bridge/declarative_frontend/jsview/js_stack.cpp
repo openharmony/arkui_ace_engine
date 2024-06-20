@@ -214,7 +214,9 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSStack>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSStack>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSStack>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSStack>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSStack>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);

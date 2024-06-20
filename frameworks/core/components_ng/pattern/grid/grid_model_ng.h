@@ -96,6 +96,11 @@ public:
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, double friction);
+    static std::string GetColumnsTemplate(FrameNode* frameNode);
+    static std::string GetRowsTemplate(FrameNode* frameNode);
+    static float GetColumnsGap(FrameNode* frameNode);
+    static float GetRowsGap(FrameNode* frameNode);
+    static int32_t GetCachedCount(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -155,8 +155,7 @@ void RosenRenderTextField::PaintCaret(RSCanvas& canvas, const Rect& caretRect)
         const SkScalar radius = SkDoubleToScalar(NormalizeToPx(cursorRadius_));
         SkRRect rrect;
         rrect.setRectXY(SkRect::MakeLTRB(SkDoubleToScalar(caretRect.Left()), SkDoubleToScalar(caretRect.Top()),
-                            SkDoubleToScalar(caretRect.Right()), SkDoubleToScalar(caretRect.Bottom())),
-            radius, radius);
+            SkDoubleToScalar(caretRect.Right()), SkDoubleToScalar(caretRect.Bottom())), radius, radius);
         canvas.drawRRect(rrect, paint);
     }
 #else

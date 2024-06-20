@@ -33,7 +33,7 @@ int32_t MULTI_FINGER_TIMEOUT = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
-constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
+constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
@@ -102,7 +102,8 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
@@ -111,6 +112,12 @@ ClickInfo ClickRecognizer::GetClickInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -147,7 +154,8 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -180,9 +188,10 @@ void ClickRecognizer::OnRejected()
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch down event, begin to detect click "
+        "event, current finger info: "
         "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
+        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -242,6 +251,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, click recognizer receives %{public}d touch up event",
+        event.touchEventId, event.id);
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -329,6 +340,9 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "InputTracking id:%{public}d, click recognizer receives %{public}d touch cancel event", event.touchEventId,
+        event.id);
     if (IsRefereeFinished()) {
         return;
     }
@@ -401,7 +415,8 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
@@ -409,6 +424,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetForce(touchPoint.force);
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    info.SetPatternName(patternName.c_str());
+    
     if (touchPoint.tiltX.has_value()) {
         info.SetTiltX(touchPoint.tiltX.value());
     }
@@ -420,7 +442,8 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetDisplayX(touchPoint.screenX);
     info.SetDisplayY(touchPoint.screenY);
 #endif
-    info.SetPointerEvent(touchPoint.pointerEvent);
+    info.SetPointerEvent(lastPointEvent_);
+    info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
     return info;
 }
 
@@ -438,8 +461,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
+    auto gestureRecognizerJudgeFunc = targetComponent->GetOnGestureRecognizerJudgeBegin();
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    if (!callback && !sysJudge_) {
+    if (!callback && !sysJudge_ && !gestureRecognizerJudgeFunc) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<TapGestureEvent>();
@@ -461,6 +485,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
+    }
+    if (gestureRecognizerJudgeFunc) {
+        return gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_);
     }
     return callback(gestureInfo_, info);
 }
@@ -499,7 +526,9 @@ RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 
 void ClickRecognizer::CleanRecognizerState()
 {
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         tappedCount_ = 0;
         refereeState_ = RefereeState::READY;

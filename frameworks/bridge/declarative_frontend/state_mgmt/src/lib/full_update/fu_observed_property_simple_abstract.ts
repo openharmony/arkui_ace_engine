@@ -20,7 +20,7 @@
  * all definitions in this file are framework internal
  */
 
-abstract class ObservedPropertySimpleAbstract<T> extends ObservedPropertyAbstract<T>  {
+abstract class ObservedPropertySimpleAbstract<T> extends ObservedPropertyAbstract<T> {
 
   constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);

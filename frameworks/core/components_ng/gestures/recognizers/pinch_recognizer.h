@@ -66,6 +66,7 @@ private:
     TouchEvent lastTouchEvent_;
     bool isFlushTouchEventsEnd_ = false;
     bool isPinchEnd_ = false;
+    AxisEvent lastAxisEvent_;
 };
 
 } // namespace OHOS::Ace::NG

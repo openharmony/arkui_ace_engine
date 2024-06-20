@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 enum class CheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE };
 enum class OriginalCheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE, NONE };
-class CheckBoxModel {
+class ACE_FORCE_EXPORT CheckBoxModel {
 public:
     static CheckBoxModel* GetInstance();
     virtual ~CheckBoxModel() = default;

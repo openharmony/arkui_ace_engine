@@ -130,7 +130,6 @@ void DrawCalendarText(RSCanvas* canvas,
     Rect textRect;
     DrawCalendarText(canvas, text, textStyle, boxRect, textRect);
 }
-
 } // namespace
 
 void RosenRenderCalendar::Update(const RefPtr<Component>& component)
@@ -320,7 +319,7 @@ void RosenRenderCalendar::DrawFocusedArea(
         type_ == CalendarType::SIMPLE
             ? Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_, y + focusedAreaRadius_)
             : Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
-                  y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
+                y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
     canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint);
 #else

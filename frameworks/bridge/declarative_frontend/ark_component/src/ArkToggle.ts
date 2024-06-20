@@ -18,6 +18,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   toggleNode: BuilderNode<[ToggleConfiguration]> | null = null;
   modifier: ContentModifier<ToggleConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -56,9 +57,18 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<ToggleConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<ToggleConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -66,10 +76,11 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   }
   makeContentModifierNode(context: UIContext, toggleConfiguration: ToggleConfiguration): FrameNode | null {
     toggleConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.toggleNode)) {
+    if (isUndefined(this.toggleNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.toggleNode = new xNode.BuilderNode(context);
       this.toggleNode.build(this.builder, toggleConfiguration);
+      this.needRebuild = false;
     } else {
       this.toggleNode.update(toggleConfiguration);
     }
@@ -271,7 +282,7 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
         this.stageValue.unselectedColor === this.value.unselectedColor &&
         this.stageValue.pointColor === this.value.pointColor &&
         this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
-    } else if (isResource(this.stageValue) && isResource(this.value)){
+    } else if (isResource(this.stageValue) && isResource(this.value)) {
       return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
       isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
       isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
@@ -290,11 +301,12 @@ globalThis.Toggle.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 // @ts-ignore
-globalThis.Toggle.contentModifier = function (modifier) {
+globalThis.Toggle.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
+  component.setNodePtr(nativeNode);
   component.setContentModifier(modifier);
 };

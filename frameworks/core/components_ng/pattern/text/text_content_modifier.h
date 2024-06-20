@@ -23,11 +23,22 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
+struct FadeoutInfo {
+    bool isLeftFadeout = false;
+    bool isRightFadeout = false;
+    double fadeoutPercent = 0;
+    bool IsFadeount()
+    {
+        return isLeftFadeout || isRightFadeout;
+    }
+};
+
 class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
@@ -57,13 +68,10 @@ public:
 
     void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
+    void ResumeAnimation();
+    void PauseAnimation();
     void SetIsFocused(const bool& isFocused);
     void SetIsHovered(const bool& isHovered);
-
-    void SetParagraph(RefPtr<Paragraph> paragraph)
-    {
-        paragraph_ = std::move(paragraph);
-    }
 
     void SetPrintOffset(const OffsetF& paintOffset)
     {
@@ -143,12 +151,15 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
-    void UpdateFadeout(const DrawingContext& drawingContext);
+    void DrawNormal(DrawingContext& drawingContext);
+    void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal);
+    FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
 
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;
@@ -206,7 +217,6 @@ private:
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyBool> dragStatus_;
-    RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 

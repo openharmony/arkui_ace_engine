@@ -179,6 +179,9 @@ public:
 
     bool IsInRegion(const PointT<T>& point) const
     {
+        if (NearZero(width_) || NearZero(height_)) {
+            return false;
+        }
         return GreatOrEqual(point.GetX(), x_) && LessOrEqual(point.GetX(), x_ + width_) &&
                GreatOrEqual(point.GetY(), y_) && LessOrEqual(point.GetY(), y_ + height_);
     }
@@ -237,6 +240,24 @@ public:
         return *this;
     }
 
+    RectT& operator+=(const RectT<T>& rect)
+    {
+        x_ += rect.x_;
+        y_ += rect.y_;
+        width_ += rect.Width();
+        height_ += rect.Height();
+        return *this;
+    }
+
+    RectT& operator-=(const RectT<T>& rect)
+    {
+        x_ -= rect.x_;
+        y_ -= rect.y_;
+        width_ -= rect.Width();
+        height_ -= rect.Height();
+        return *this;
+    }
+
     RectT& operator-=(const SizeT<T>& size)
     {
         width_ -= size.Width();
@@ -257,6 +278,16 @@ public:
     RectT operator+(const SizeT<T>& size) const
     {
         return RectT(x_, y_, width_ + size.Width(), height_ + size.Height());
+    }
+
+    RectT operator+(const RectT<T>& rect) const
+    {
+        return RectT(x_ + rect.x_, y_ + rect.y_, width_ + rect.Width(), height_ + rect.Height());
+    }
+
+    RectT operator-(const RectT<T>& rect) const
+    {
+        return RectT(x_ - rect.x_, y_ - rect.y_, width_ - rect.Width(), height_ - rect.Height());
     }
 
     RectT operator-(const SizeT<T>& size) const
@@ -289,6 +320,12 @@ public:
     {
         return !(LessOrEqual(other.Right(), Left()) || GreatOrEqual(other.Left(), Right()) ||
                  LessOrEqual(other.Bottom(), Top()) || GreatOrEqual(other.Top(), Bottom()));
+    }
+
+    bool IsInnerIntersectWithRound(const RectT& other) const
+    {
+        return !(LessOrEqual(other.Right(), Left() + 1.0) || GreatOrEqual(other.Left() + 1.0, Right()) ||
+                 LessOrEqual(other.Bottom(), Top() + 1.0) || GreatOrEqual(other.Top() + 1.0, Bottom()));
     }
 
     RectT IntersectRectT(const RectT& other) const

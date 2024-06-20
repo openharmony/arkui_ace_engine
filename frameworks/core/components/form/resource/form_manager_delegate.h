@@ -52,14 +52,17 @@ public:
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
+    using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool)>;
-    using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+        const AAFwk::Want&)>;
+    using OnFormSurfaceChangeCallback = std::function<void(float width, float height, float borderWidth)>;
     using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
     using SnapshotCallback = std::function<void(const uint32_t&)>;
+    using EnableFormCallback = std::function<void(const bool enable)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -97,9 +100,11 @@ public:
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback);
     void AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback);
+    void AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback && callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void AddSnapshotCallback(SnapshotCallback&& callback);
+    void AddEnableFormCallback(EnableFormCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -109,8 +114,15 @@ public:
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
+    void OnGetRectRelativeToWindow(int32_t &top, int32_t &left);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
+    void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs);
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    void OnAccessibilityChildTreeDeregister();
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -118,15 +130,16 @@ public:
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
-    void OnFormSurfaceChange(float width, float height);
+    void OnFormSurfaceChange(float width, float height, float borderWidth = 0.0);
     void OnFormSurfaceDetach();
     void ResetForm();
     void ReleaseForm();
-    void NotifySurfaceChange(float width, float height);
+    void NotifySurfaceChange(float width, float height, float borderWidth = 0.0);
     static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();
 #endif
+    void HandleCachedClickEvents();
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
@@ -142,13 +155,14 @@ private:
     void HandleUnTrustFormCallback();
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
-    void HandleCachedClickEvents();
+    void HandleEnableFormCallback(const bool enable);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormLinkInfoUpdateCallback onFormLinkInfoUpdateCallback_;
+    OnGetRectRelativeToWindowCallback onGetRectRelativeToWindowCallback_;
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
@@ -157,6 +171,7 @@ private:
     ActionEventHandle actionEventHandle_;
     UnTrustFormCallback unTrustFormCallback_;
     SnapshotCallback snapshotCallback_;
+    EnableFormCallback enableFormCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;

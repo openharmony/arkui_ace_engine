@@ -26,6 +26,18 @@
 #include "core/components_ng/svg/svg_dom.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
+} // namespace
+
 constexpr int32_t ASTC_FRAME_COUNT = 1;
 DrawingImageData::DrawingImageData(const void* data, size_t length)
 {
@@ -67,7 +79,8 @@ std::shared_ptr<RSData> DrawingImageData::GetRSData() const
 RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
 {
     CHECK_NULL_RETURN(rsData_, nullptr);
-    auto skData = SkData::MakeWithoutCopy(rsData_->GetData(), rsData_->GetSize());
+    RSDataWrapper* wrapper = new RSDataWrapper{rsData_};
+    auto skData = SkData::MakeWithProc(rsData_->GetData(), rsData_->GetSize(), RSDataWrapperReleaseProc, wrapper);
     const auto svgStream = std::make_unique<SkMemoryStream>(skData);
     CHECK_NULL_RETURN(svgStream, nullptr);
     if (SystemProperties::GetSvgMode() <= 0) {
@@ -103,7 +116,8 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
         return { imageSize, ASTC_FRAME_COUNT };
     }
 
-    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData_->GetSize());
+    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, {});
     switch (codec->getOrigin()) {

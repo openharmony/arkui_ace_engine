@@ -56,6 +56,8 @@ public:
 
     void UpdateSelectArea(const RectF& selectArea);
 
+    void SetIsNewAvoid(bool isNewAvoid);
+
     int32_t GetSelectOverlayId() const
     {
         return selectOverlayId_;

@@ -506,7 +506,6 @@ void DOMButton::PrepareChildren()
     innerPaddingChild_->SetChild(textChild_);
     innerPaddingChild_->SetPadding(edge);
     PrepareChildrenLayout();
-
 }
 
 void DOMButton::PrepareChildrenLayout()

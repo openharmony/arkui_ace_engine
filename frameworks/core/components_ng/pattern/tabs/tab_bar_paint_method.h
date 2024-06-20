@@ -28,10 +28,10 @@ class TabBarPaintMethod : public NodePaintMethod {
 public:
     TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier,
         const std::vector<bool>& gradientRegions, const Color& backgroundColor,
-        const IndicatorStyle& indicatorStyle, float currentIndicatorOffset, SelectedMode selectedMode)
+        const IndicatorStyle& indicatorStyle, const OffsetF& indicatorOffset, bool hasIndicator)
         : tabBarModifier_(tabBarModifier), gradientRegions_(gradientRegions),
         backgroundColor_(backgroundColor), indicatorStyle_(indicatorStyle),
-        currentIndicatorOffset_(currentIndicatorOffset), selectedMode_(selectedMode) {}
+        indicatorOffset_(indicatorOffset), hasIndicator_(hasIndicator) {}
     ~TabBarPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
@@ -56,8 +56,8 @@ private:
     std::vector<bool> gradientRegions_;
     Color backgroundColor_;
     IndicatorStyle indicatorStyle_;
-    float currentIndicatorOffset_ = 0.0f;
-    SelectedMode selectedMode_ = SelectedMode::INDICATOR;
+    OffsetF indicatorOffset_;
+    bool hasIndicator_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPaintMethod);
 };
 } // namespace OHOS::Ace::NG

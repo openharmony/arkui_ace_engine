@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 using VideoEventFunc = std::function<void(const std::string&)>;
-class VideoModel {
+class ACE_FORCE_EXPORT VideoModel {
 public:
     static VideoModel* GetInstance();
     virtual ~VideoModel() = default;
@@ -51,6 +51,9 @@ public:
     virtual void SetOnUpdate(VideoEventFunc&& onUpdate) = 0;
     virtual void SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange) = 0;
     virtual void SetOnStop(VideoEventFunc&& onStop) {};
+    virtual void EnableAnalyzer(bool enable) {}
+    virtual void SetImageAnalyzerConfig(void* config) {}
+    virtual void SetImageAIOptions(void* options) {}
 private:
     static std::unique_ptr<VideoModel> instance_;
     static std::mutex mutex_;

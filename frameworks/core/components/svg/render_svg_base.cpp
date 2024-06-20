@@ -329,8 +329,7 @@ void RenderSvgBase::PrepareTransformValueAnimation(const RefPtr<SvgAnimate>& svg
         return;
     }
 
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this), type, fromVec, toVec](double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this), type, fromVec, toVec](double value) {
         auto svgBase = weak.Upgrade();
         if (!svgBase) {
             LOGE("svgBase is null");
@@ -368,8 +367,7 @@ void RenderSvgBase::PrepareTransformFrameAnimation(const RefPtr<SvgAnimate>& svg
     svgAnimate->Copy(instance);
     instance->SetValues(indices);
 
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this), type, frames](double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this), type, frames](double value) {
         auto svgBase = weak.Upgrade();
         if (!svgBase) {
             LOGE("svgBase is null");
@@ -493,9 +491,8 @@ bool RenderSvgBase::PrepareAnimateMotion(const RefPtr<SvgAnimate>& svgAnimate)
         LOGE("create motion animation failed, svgAnimate is null");
         return false;
     }
-    std::function<void(double)> callback;
-    callback = [weak = AceType::WeakClaim(this), path = svgAnimate->GetPath(), rotate = svgAnimate->GetRotate()](
-                   double value) {
+    std::function<void(double)> callback = [weak = AceType::WeakClaim(this), path = svgAnimate->GetPath(),
+                                               rotate = svgAnimate->GetRotate()](double value) {
         auto sharp = weak.Upgrade();
         if (!sharp) {
             LOGE("sharp is null");

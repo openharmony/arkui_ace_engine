@@ -63,6 +63,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         std::string alignItems;
         auto flexAlignItems = GetCrossAxisAlign().value_or(FlexAlign::CENTER);
         if (isVertical_) {

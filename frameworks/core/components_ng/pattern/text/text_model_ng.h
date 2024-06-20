@@ -19,6 +19,8 @@
 #include <functional>
 #include <string>
 
+#include "interfaces/native/node/styled_string.h"
+
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -48,6 +50,7 @@ public:
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
+    void SetTextSelectableMode(TextSelectableMode value) override;
     void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -77,9 +80,12 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
+    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
+    static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
+    static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
@@ -105,9 +111,14 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
+    static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
     static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
@@ -137,6 +148,19 @@ public:
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
     static Ace::WordBreak GetWordBreak(FrameNode* frameNode);
     static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
+    static bool GetTextDetectEnable(FrameNode* frameNode);
+    static std::string GetTextDetectConfig(FrameNode* frameNode);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
+    static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetSelectedBackgroundColor(FrameNode* frameNode);
+    static void ResetSelectedBackgroundColor(FrameNode* frameNode);
+    static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
+    static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
+    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+        std::function<void(const std::string&)>&& onResult);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
 };
 } // namespace OHOS::Ace::NG
 

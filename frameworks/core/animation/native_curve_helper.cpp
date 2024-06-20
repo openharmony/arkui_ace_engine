@@ -33,7 +33,7 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     } else if (auto interpolatingSpringCurve = AceType::DynamicCast<InterpolatingSpring>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateInterpolatingSpring(interpolatingSpringCurve->GetMass(),
             interpolatingSpringCurve->GetStiffness(), interpolatingSpringCurve->GetDamping(),
-            interpolatingSpringCurve->GetVelocity());
+            interpolatingSpringCurve->GetVelocity(), interpolatingSpringCurve->GetMinimumAmplitudeRatio());
     } else if (auto customCurve = AceType::DynamicCast<CustomCurve>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateCustomCurve(customCurve->interpolateFunc_);
     } else if (auto springMotionCurve = AceType::DynamicCast<ResponsiveSpringMotion>(curve)) {

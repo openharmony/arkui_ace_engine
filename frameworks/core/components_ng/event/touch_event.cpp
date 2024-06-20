@@ -47,20 +47,23 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (point.type == TouchType::DOWN && !firstInputTime_.has_value()) {
-        firstInputTime_ = point.time;
+    if (point.type == TouchType::DOWN &&
+        firstInputTimeWithId_.find(point.id) == firstInputTimeWithId_.end()) {
+        firstInputTimeWithId_[point.id] = point.time;
     }
-    if (point.type == TouchType::UP) {
+    if (point.type == TouchType::UP &&
+        firstInputTimeWithId_.find(point.id) != firstInputTimeWithId_.end()) {
         int64_t overTime = GetSysTimestamp();
-        int64_t inputTime = overTime;
-        if (firstInputTime_.has_value()) {
-            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-        }
+        int64_t inputTime = static_cast<int64_t>(firstInputTimeWithId_[point.id].time_since_epoch().count());
         if (SystemProperties::GetTraceInputEventEnabled()) {
             ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
-        firstInputTime_.reset();
+        if (SystemProperties::GetTraceInputEventEnabled()) {
+            ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:TouchEvent",
+                static_cast<long long>(inputTime), static_cast<long long>(overTime));
+        }
+        firstInputTimeWithId_.erase(point.id);
     }
 
     if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
@@ -75,9 +78,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
-    TouchLocationInfo changedInfo("onTouch", lastPoint.id);
+    TouchLocationInfo changedInfo("onTouch", lastPoint.originalId);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
-    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        isPostEventResult_, point.postEventNodeId);
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
@@ -94,6 +98,12 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     changedInfo.SetSourceTool(lastPoint.sourceTool);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
     event.SetTarget(GetEventTarget().value_or(EventTarget()));
+    auto frameNode = GetAttachedNode().Upgrade();
+    std::string patternName = "";
+    if (frameNode) {
+        patternName = frameNode->GetTag();
+    }
+    event.SetPatternName(patternName.c_str());
 
     // all fingers collection
     for (const auto& item : lastPoint.pointers) {
@@ -102,10 +112,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float screenX = item.screenX;
         float screenY = item.screenY;
         PointF localPoint(globalX, globalY);
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(),
+            false, isPostEventResult_, point.postEventNodeId);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
-        TouchLocationInfo info("onTouch", item.id);
+        TouchLocationInfo info("onTouch", item.originalId);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
@@ -118,7 +129,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             info.SetTiltY(item.tiltY.value());
         }
         info.SetSourceTool(item.sourceTool);
-        info.SetOriginalId(item.originalId);
         event.AddTouchLocationInfo(std::move(info));
     }
     event.SetSourceDevice(lastPoint.sourceType);
@@ -129,10 +139,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float screenX = item.screenX;
         float screenY = item.screenY;
         PointF localPoint(globalX, globalY);
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+            isPostEventResult_, point.postEventNodeId);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
-        TouchLocationInfo historyInfo("onTouch", item.id);
+        TouchLocationInfo historyInfo("onTouch", item.originalId);
         historyInfo.SetTimeStamp(item.time);
         historyInfo.SetGlobalLocation(Offset(globalX, globalY));
         historyInfo.SetLocalLocation(Offset(localX, localY));
@@ -146,7 +157,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             historyInfo.SetTiltY(item.tiltY.value());
         }
         historyInfo.SetSourceTool(item.sourceTool);
-        historyInfo.SetOriginalId(item.originalId);
         event.AddHistoryLocationInfo(std::move(historyInfo));
         event.AddHistoryPointerEvent(item.pointerEvent);
     }
@@ -157,6 +167,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         event.SetTiltY(lastPoint.tiltY.value());
     }
     event.SetSourceTool(lastPoint.sourceTool);
+    event.SetPressedKeyCodes(lastPoint.pressedKeyCodes_);
     if (isFlushTouchEventsEnd_) {
         // trigger callback of the last touch event during one vsync period
         event.SetTouchEventsEnd(true);

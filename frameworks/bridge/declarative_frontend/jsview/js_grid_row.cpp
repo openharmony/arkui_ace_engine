@@ -326,7 +326,9 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
     JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
+    JSClass<JSGridRow>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSGridRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGridRow>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSGridRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridRow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridRow>::InheritAndBind<JSContainerBase>(globalObj);

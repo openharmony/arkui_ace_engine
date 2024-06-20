@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
+
+#include "want.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/form/form_component.h"
@@ -116,5 +117,12 @@ void FormModelImpl::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
 void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
 {
     LOGE("Not support SetObscured in old pipeline");
+}
+
+int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
+    const std::string& formBindingDataStr, int64_t& formId)
+{
+    LOGE("Not support RequestPublishFormWithSnapshot in old pipeline");
+    return 0;
 }
 } // namespace OHOS::Ace::Framework

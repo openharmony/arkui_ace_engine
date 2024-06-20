@@ -27,6 +27,14 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+struct GroupDividerInfo {
+    float strokeWidth = 0.0f;
+    float startMargin = 0.0f;
+    float endMargin = 0.0f;
+    Color color = Color::TRANSPARENT;
+    float width = 0.0f;
+    float topMargin = 0.0f;
+};
 class ACE_EXPORT MenuItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(MenuItemGroupPaintMethod, NodePaintMethod)
 public:
@@ -36,7 +44,7 @@ public:
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isHeader);
+    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, GroupDividerInfo info);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintMethod);
 };

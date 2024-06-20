@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_event_hub.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 
@@ -56,11 +56,11 @@ void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void LoadingProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto paintProperty = GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     enableLoading_ = paintProperty->GetEnableLoadingValue(true);
     enableLoading_ ? StartAnimation() : StopAnimation();
-    FireBuilder();
 }
 
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
@@ -133,15 +133,30 @@ void LoadingProgressPattern::OnWindowShow()
     StartAnimation();
 }
 
+void LoadingProgressPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("IsInVisibleArea: ").append(isVisibleArea_ ? "true" : "false"));
+}
+
 void LoadingProgressPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAtIndex(0);
+        host->GetRenderContext()->SetClipToFrame(true);
+        host->GetRenderContext()->SetClipToBounds(true);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->GetRenderContext()->SetClipToFrame(false);
+    host->GetRenderContext()->SetClipToBounds(false);
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);

@@ -290,4 +290,35 @@ int FlexModelNG::GetFlexAlignContent(FrameNode* frameNode)
     return static_cast<int>(value);
 }
 
+void FlexModelNG::SetMainSpace(const std::optional<Dimension>& space)
+{
+    CHECK_NULL_VOID(space);
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Space, space.value());
+    }
+}
+
+void FlexModelNG::SetCrossSpace(const std::optional<Dimension>& space)
+{
+    CHECK_NULL_VOID(space);
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossSpace, space.value());
+    }
+}
+
+void FlexModelNG::SetMainSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
+{
+    CHECK_NULL_VOID(space);
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Space, space.value(), frameNode);
+    }
+}
+
+void FlexModelNG::SetCrossSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
+{
+    CHECK_NULL_VOID(space);
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossSpace, space.value(), frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

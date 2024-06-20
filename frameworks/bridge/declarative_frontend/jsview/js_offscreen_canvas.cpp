@@ -50,6 +50,7 @@ void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
     auto result = new (std::nothrow) JSOffscreenCanvas();
     result->SetWidth(workCanvas->GetWidth());
     result->SetHeight(workCanvas->GetHeight());
+    result->SetUnit(workCanvas->GetUnit());
     return result;
 }
 
@@ -128,9 +129,9 @@ void JSOffscreenCanvas::JSBind(BindingTarget globalObj, void* nativeEngine)
 napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
-    size_t argc = 2;
+    size_t argc = 3;
     napi_value thisVar = nullptr;
-    napi_value argv[2] = { nullptr };
+    napi_value argv[3] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
     if (argc < ARGS_COUNT_TWO || argv[0] == nullptr || argv[1] == nullptr) {
         LOGW("Invalid args.");
@@ -139,12 +140,21 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fWidth = 0.0;
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
+    CHECK_NULL_RETURN(workCanvas, nullptr);
+    if (argv[2] != nullptr) {
+        int32_t unit = 0;
+        napi_get_value_int32(env, argv[2], &unit);
+        if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
+            workCanvas->SetUnit(CanvasUnit::PX);
+        }
+    }
+    double density = workCanvas->GetDensity();
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
-        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+        fWidth *= density;
         workCanvas->SetWidth(fWidth);
     }
     if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
-        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
+        fHeight *= density;
         workCanvas->SetHeight(fHeight);
     }
     workCanvas->offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
@@ -224,7 +234,9 @@ napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info
 
 napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
 {
-    double fWidth = PipelineBase::Px2VpWithCurrentDensity(GetWidth());
+    double fWidth = GetWidth();
+    double density = GetDensity();
+    fWidth /= density;
     napi_value width = nullptr;
     napi_create_double(env, fWidth, &width);
     return width;
@@ -232,7 +244,9 @@ napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
 
 napi_value JSOffscreenCanvas::OnGetHeight(napi_env env)
 {
-    double fHeight = PipelineBase::Px2VpWithCurrentDensity(GetHeight());
+    double fHeight = GetHeight();
+    double density = GetDensity();
+    fHeight /= density;
     napi_value height = nullptr;
     napi_create_double(env, fHeight, &height);
     return height;
@@ -254,7 +268,8 @@ napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
     }
     double width = 0.0;
     if (napi_get_value_double(env, argv, &width) == napi_ok) {
-        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        double density = GetDensity();
+        width *= density;
     } else {
         return nullptr;
     }
@@ -282,7 +297,8 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
     }
     double height = 0.0;
     if (napi_get_value_double(env, argv, &height) == napi_ok) {
-        height = PipelineBase::Vp2PxWithCurrentDensity(height);
+        double density = GetDensity();
+        height *= density;
     } else {
         return nullptr;
     }
@@ -296,7 +312,7 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    if (offscreenCanvasContext_ == nullptr) {
+    if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
     napi_value global = nullptr;
@@ -321,7 +337,23 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
-    jsImage->SetContextId(offscreenCanvasContext_->GetId());
+    CHECK_NULL_RETURN(jsImage, nullptr);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (pixelMap == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetPixelMap(pixelMap);
+#else
+    auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
+    if (imageData == nullptr) {
+        return nullptr;
+    }
+    jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
+#endif
+    jsImage->SetUnit(GetUnit());
+    jsImage->SetWidth(GetWidth());
+    jsImage->SetHeight(GetHeight());
     return renderImage;
 }
 
@@ -375,6 +407,7 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
                 offscreenCanvasContext_->SetAntiAlias();
             }
         }
+        offscreenCanvasContext_->SetUnit(GetUnit());
         return contextObj;
     }
     return nullptr;

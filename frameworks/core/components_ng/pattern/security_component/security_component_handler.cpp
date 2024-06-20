@@ -391,20 +391,26 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
         buttonInfo.fontSize_ = textProp->GetFontSize().value_or(theme->GetFontSize()).ConvertToVp();
-        buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
+        if (textProp->GetTextColor().has_value()) {
+            buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
+        }
     }
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     if (buttonNode != nullptr) {
         const auto& renderContext = buttonNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
-        buttonInfo.bgColor_.value = renderContext->GetBackgroundColor().value().GetValue();
+        if (renderContext->GetBackgroundColor().has_value()) {
+            buttonInfo.bgColor_.value = renderContext->GetBackgroundColor().value().GetValue();
+        }
 
         auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_RETURN(bgProp, false);
         const auto& borderWidth = bgProp->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
-            buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
+            if (borderWidth->leftDimen.has_value()) {
+                buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
+            }
         }
     }
     if (!InitBaseInfo(buttonInfo, node)) {
@@ -525,7 +531,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    auto data = event.GetPointerEvent()->GetEnhanceData();
+    auto pointerEvent = event.GetPointerEvent();
+    if (pointerEvent == nullptr) {
+        LOGE("Receive a NULL pointerEvent");
+        return -1;
+    }
+    auto data = pointerEvent->GetEnhanceData();
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();

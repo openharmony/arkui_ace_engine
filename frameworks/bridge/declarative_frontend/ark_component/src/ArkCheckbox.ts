@@ -18,11 +18,13 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   checkboxNode: BuilderNode<[CheckBoxConfiguration]> | null = null;
   modifier: ContentModifier<CheckBoxConfiguration>;
+  needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   shape(value: CheckBoxShape): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CheckBoxShapeModifier.identity, CheckBoxShapeModifier, value);
+    return this;
   }
   width(value: Length): this {
     modifierWithKey(
@@ -84,9 +86,18 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
       this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
     return this;
   }
+  contentModifier(value: ContentModifier<CheckBoxConfiguration>): this {
+    this.setContentModifier(value);
+    return this;
+  }
   setContentModifier(modifier: ContentModifier<CheckBoxConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -94,10 +105,11 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   }
   makeContentModifierNode(context: UIContext, checkBoxConfiguration: CheckBoxConfiguration): FrameNode | null {
     checkBoxConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.checkboxNode)) {
+    if (isUndefined(this.checkboxNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.checkboxNode = new xNode.BuilderNode(context);
       this.checkboxNode.build(this.builder, checkBoxConfiguration);
+      this.needRebuild = false;
     } else {
       this.checkboxNode.update(checkBoxConfiguration);
     }
@@ -160,6 +172,24 @@ class CheckBoxResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | 
     } else {
       return true;
     }
+  }
+}
+
+class CheckBoxShapeModifier extends ModifierWithKey<CheckBoxShape> {
+  constructor(value: CheckBoxShape) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkboxShape');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxShape(node);
+    } else {
+      getUINativeModule().checkbox.setCheckboxShape(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

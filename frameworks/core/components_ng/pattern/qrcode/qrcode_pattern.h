@@ -53,6 +53,7 @@ public:
         return MakeRefPtr<QRCodePaintMethod>(qrCodeSize_, qrCodeModifier_);
     }
     void OnModifyDone() override;
+    void DumpInfo() override;
     FocusPattern GetFocusPattern() const override;
 
 private:

@@ -98,7 +98,9 @@ public:
                 theme->markerSize_ = pattern->GetAttr<Dimension>("marker_size", 4.0_vp);
                 theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
                 theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
-                theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
+                theme->blockShadowColor_ = pattern->GetAttr<Color>("block_shadow_color", BLOCK_SHADOW_COLOR);
+                theme->controlFocusFrame_ = pattern->GetAttr<double>("control_focus_frame", 0.0);
+                theme->scaleValue_ = pattern->GetAttr<double>("scale_value", 1.0);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -256,6 +258,16 @@ public:
         return moveAnimationDuration_;
     }
 
+    double GetControlFocusFrame() const
+    {
+        return controlFocusFrame_;
+    }
+
+    double GetScaleValue() const
+    {
+        return scaleValue_;
+    }
+
 protected:
     SliderTheme() = default;
 
@@ -299,6 +311,8 @@ private:
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
     double moveAnimationDuration_ = 0.0;
+    double controlFocusFrame_ = 0.0;
+    double scaleValue_ = 1.0;
 };
 
 } // namespace OHOS::Ace

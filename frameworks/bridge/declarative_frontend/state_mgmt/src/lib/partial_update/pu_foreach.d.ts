@@ -39,4 +39,5 @@ declare class RepeatNative {
   static moveChild(fromIndex: number): void;
   static createNewChildStart(id: string): void;
   static createNewChildFinish(id: string): void;
+  static onMove(handler: (from: number, to: number) => void);
 }

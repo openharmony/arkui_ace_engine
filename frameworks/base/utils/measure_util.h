@@ -40,9 +40,10 @@ struct MeasureContext {
     TextOverflow textOverlayFlow = TextOverflow::CLIP;
     TextCase textCase = TextCase::NORMAL;
     WordBreak wordBreak = WordBreak::BREAK_WORD;
+    LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
 };
 
-class MeasureUtil {
+class ACE_FORCE_EXPORT MeasureUtil {
 public:
     static double MeasureText(const MeasureContext& context);
     static Size MeasureTextSize(const MeasureContext& context);

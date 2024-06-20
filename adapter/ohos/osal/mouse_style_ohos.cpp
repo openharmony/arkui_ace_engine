@@ -22,6 +22,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -32,6 +33,9 @@ RefPtr<MouseStyle> MouseStyle::CreateMouseStyle()
 
 bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const
 {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto isUIExtension = container->IsUIExtensionWindow() && pointerStyle != MouseFormat::DEFAULT;
     auto inputManager = MMI::InputManager::GetInstance();
     CHECK_NULL_RETURN(inputManager, false);
     static const LinearEnumMapNode<MouseFormat, int32_t> mouseFormatMap[] = {
@@ -87,7 +91,9 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     }
     MMI::PointerStyle style;
     style.id = MMIPointStyle;
-    int32_t setResult = inputManager->SetPointerStyle(windowId, style);
+    TAG_LOGI(AceLogTag::ACE_MOUSE, "SetPointerStyle windowId=%{public}d style=%{public}d isUIExtension=%{public}d",
+        windowId, static_cast<int32_t>(pointerStyle), isUIExtension);
+    int32_t setResult = inputManager->SetPointerStyle(windowId, style, isUIExtension);
     if (setResult == -1) {
         LOGW("SetPointerStyle result is false");
         return false;
@@ -97,10 +103,13 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
 
 int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const
 {
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, -1);
+    auto isUIExtension = container->IsUIExtensionWindow();
     auto inputManager = MMI::InputManager::GetInstance();
     CHECK_NULL_RETURN(inputManager, -1);
     MMI::PointerStyle style;
-    int32_t getResult = inputManager->GetPointerStyle(windowId, style);
+    int32_t getResult = inputManager->GetPointerStyle(windowId, style, isUIExtension);
     if (getResult == -1) {
         LOGW("GetPointerStyle result is false");
         return -1;

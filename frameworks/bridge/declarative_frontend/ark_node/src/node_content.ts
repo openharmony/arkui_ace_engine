@@ -19,10 +19,35 @@ declare class ArkUINativeNodeContent {
 
 class NodeContent extends Content {
     nativeContent_: ArkUINativeNodeContent;
-    nativePtr_: Object;
+    nativePtr_: NodePtr;
+    nativeRef_: NativeStrongRef;
+    nodeArray_: Array<FrameNode>;
+
     constructor() {
         super();
-        this.nativeContent_ = new ArkUINativeNodeContent();
-        this.nativePtr_ = ArkUINativeNodeContent.getNativeContent(this.nativeContent_);
+        this.nativeRef_ = getUINativeModule().frameNode.createNodeContent();
+        this.nativePtr_ = this.nativeRef_.getNativeHandle();
+        this.nodeArray_ = new Array<FrameNode>();
+    }
+
+    addFrameNode(node: FrameNode): void {
+        if (this.nodeArray_.includes(node)) {
+            return;
+        }
+        if (getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            this.nodeArray_.push(node);
+        }
+    }
+
+    removeFrameNode(node: FrameNode): void {
+        if (!this.nodeArray_.includes(node)) {
+            return;
+        }
+        if (getUINativeModule().frameNode.removeFrameNodeFromNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            let index = this.nodeArray_.indexOf(node);
+            if (index > -1) {
+                this.nodeArray_.splice(index, 1);
+            }
+        }
     }
 }

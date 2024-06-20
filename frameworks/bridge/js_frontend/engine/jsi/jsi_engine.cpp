@@ -571,12 +571,14 @@ void Terminate(const shared_ptr<JsRuntime>& runtime)
     auto delegate = GetFrontendDelegate(runtime);
     WeakPtr<PipelineBase> pipelineContextWeak = delegate->GetPipelineContext();
     auto uiTaskExecutor = delegate->GetUiTask();
-    uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
-        auto pipelineContext = pipelineContextWeak.Upgrade();
-        if (pipelineContext) {
-            pipelineContext->Finish();
-        }
-    }, "ArkUIJsTerminate");
+    uiTaskExecutor.PostTask(
+        [pipelineContextWeak]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                pipelineContext->Finish();
+            }
+        },
+        "ArkUIJsTerminate");
 }
 
 void GetPackageInfoCallback(
@@ -657,12 +659,14 @@ void RequestFullWindow(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     auto delegate = GetFrontendDelegate(runtime);
     WeakPtr<PipelineBase> pipelineContextWeak = delegate->GetPipelineContext();
     auto uiTaskExecutor = delegate->GetUiTask();
-    uiTaskExecutor.PostTask([pipelineContextWeak, duration]() mutable {
-        auto pipelineContext = pipelineContextWeak.Upgrade();
-        if (pipelineContext) {
-            pipelineContext->RequestFullWindow(duration);
-        }
-    }, "ArkUIJsRequestFullWindow");
+    uiTaskExecutor.PostTask(
+        [pipelineContextWeak, duration]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                pipelineContext->RequestFullWindow(duration);
+            }
+        },
+        "ArkUIJsRequestFullWindow");
 }
 
 void SetScreenOnVisible(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
@@ -3116,19 +3120,21 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
             return;
         }
 
-        delegate->PostJsTask([weakEngine, needSync, id]() {
-            auto jsEngine = weakEngine.Upgrade();
-            if (jsEngine == nullptr) {
-                LOGW("jsEngine is nullptr");
-                return;
-            }
-            auto nativeEngine = jsEngine->GetNativeEngine();
-            if (nativeEngine == nullptr) {
-                return;
-            }
-            ContainerScope scope(id);
-            nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        }, "ArkUISetNativeEngineLoop");
+        delegate->PostJsTask(
+            [weakEngine, needSync, id]() {
+                auto jsEngine = weakEngine.Upgrade();
+                if (jsEngine == nullptr) {
+                    LOGW("jsEngine is nullptr");
+                    return;
+                }
+                auto nativeEngine = jsEngine->GetNativeEngine();
+                if (nativeEngine == nullptr) {
+                    return;
+                }
+                ContainerScope scope(id);
+                nativeEngine->Loop(LOOP_NOWAIT, needSync);
+            },
+            "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -3208,7 +3214,7 @@ void JsiEngine::RegisterOffWorkerFunc()
 void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
+    auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
         std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();

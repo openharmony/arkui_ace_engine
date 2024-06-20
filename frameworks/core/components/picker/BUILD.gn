@@ -29,6 +29,7 @@ build_component("picker") {
     "picker_option_component.cpp",
     "picker_option_element.cpp",
     "picker_text_component.cpp",
+    "picker_theme.cpp",
     "picker_time_component.cpp",
     "picker_value_element.cpp",
     "render_picker_base.cpp",

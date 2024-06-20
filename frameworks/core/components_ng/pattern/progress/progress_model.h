@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ProgressModel {
+class ACE_FORCE_EXPORT ProgressModel {
 public:
     static ProgressModel* GetInstance();
     virtual ~ProgressModel() = default;

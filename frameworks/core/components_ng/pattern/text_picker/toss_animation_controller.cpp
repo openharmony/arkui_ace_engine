@@ -89,7 +89,6 @@ void TextPickerTossAnimationController::StartSpringMotion()
     auto columnNode = column->GetHost();
     CHECK_NULL_VOID(columnNode);
     auto offset = column->GetOffset();
-    auto speed = column->GetMainVelocity() / VELOCTY_TRANS;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto springCurve = UpdatePlayAnimationValue();
@@ -97,7 +96,7 @@ void TextPickerTossAnimationController::StartSpringMotion()
     double midIndex = column->GetShowOptionCount() / 2;
     auto optionProperties = column->GetMidShiftDistance();
     auto midShiftDistance =
-        (speed) < 0.0 ? optionProperties[midIndex].prevDistance : optionProperties[midIndex].nextDistance;
+        column->IsDownScroll() ? optionProperties[midIndex].nextDistance : optionProperties[midIndex].prevDistance;
     column->SetYLast(0);
     end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();
@@ -105,12 +104,15 @@ void TextPickerTossAnimationController::StartSpringMotion()
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     property_->Set(0);
+    isManualStopToss_ = false;
     renderContext->AttachNodeAnimatableProperty(property_);
     property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     auto finishCallback = [weak, column]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        column->UpdateToss(static_cast<int>(ref->end_));
+        if (ref->isManualStopToss_) {
+            return;
+        }
         column->TossAnimationStoped();
         auto isTouchBreak = column->GetTouchBreakStatus();
         if (isTouchBreak == false) {
@@ -142,6 +144,7 @@ void TextPickerTossAnimationController::StopTossAnimation()
     option.SetDelay(0);
     AnimationUtils::Animate(option, [weak]() {
         auto ref = weak.Upgrade();
+        ref->isManualStopToss_ = true;
         ref->property_->Set(0.0);
     });
 }
@@ -181,9 +184,18 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
         if ((isTouchBreak) || (static_cast<int32_t>(position) == DISMIN)) {
             return;
         }
-        column->UpdateToss(static_cast<int>(position));
+        column->UpdateToss(position);
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));
+}
+
+double TextPickerTossAnimationController::GetTossOffset() const
+{
+    if (!property_) {
+        return 0.0;
+    }
+
+    return end_ - property_->Get();
 }
 } // namespace OHOS::Ace::NG

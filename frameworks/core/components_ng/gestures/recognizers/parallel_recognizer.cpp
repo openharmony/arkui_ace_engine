@@ -207,11 +207,24 @@ void ParallelRecognizer::CleanRecognizerState()
             child->CleanRecognizerState();
         }
     }
-    if ((refereeState_ == RefereeState::SUCCEED || refereeState_ == RefereeState::FAIL) &&
+    if ((refereeState_ == RefereeState::SUCCEED ||
+        refereeState_ == RefereeState::FAIL ||
+        refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+    currentBatchRecognizer_ = nullptr;
+}
+
+void ParallelRecognizer::ForceCleanRecognizer()
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->ForceCleanRecognizer();
+        }
+    }
+    MultiFingersRecognizer::ForceCleanRecognizer();
     currentBatchRecognizer_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

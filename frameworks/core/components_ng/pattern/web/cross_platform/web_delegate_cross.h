@@ -406,6 +406,8 @@ public:
     bool LoadDataWithRichText() override;
 
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
+
+    void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
@@ -425,6 +427,7 @@ private:
     bool OnShowFileChooser(void* object);
     void OnGeolocationPermissionsShowPrompt(void* object);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
+    void RegisterWebEventInternalForAdsBlock();
 
     WeakPtr<NG::WebPattern> webPattern_;
     WeakPtr<PipelineBase> context_;

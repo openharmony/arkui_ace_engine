@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -55,6 +57,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOTAL_NUMBER = 1000;
 constexpr double PERCENT_100 = 100.0;
+constexpr int32_t MODE_SEVEN = 6; // items is divided into 6 groups in (7 + #) mode
+constexpr int32_t MODE_FIVE = 4; // items is divided into 4 groups in (5 + #) mode
 }
 void IndexerPattern::OnModifyDone()
 {
@@ -64,6 +68,7 @@ void IndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    enableHapticFeedback_ = layoutProperty->GetEnableHapticFeedback().value_or(true);
     auto itemCountChanged = false;
     bool autoCollapseModeChanged = true;
     if (!isNewHeightCalculated_) {
@@ -79,10 +84,15 @@ void IndexerPattern::OnModifyDone()
         fullArrayValue_ = newArray;
     }
 
+    auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
+            if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
+                lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
+                propSelect = GetAutoCollapseIndex(propSelect);
+            }
         } else {
             sharpItemCount_ = 0;
             BuildFullArrayValue();
@@ -110,11 +120,6 @@ void IndexerPattern::OnModifyDone()
         RemoveBubble();
     }
 
-    auto propSelect = layoutProperty->GetSelected().value();
-    if (propSelect < 0 || propSelect >= itemCount_) {
-        propSelect = 0;
-        layoutProperty->UpdateSelected(propSelect);
-    }
     if (propSelect != selected_) {
         selected_ = propSelect;
         selectChanged_ = true;
@@ -325,6 +330,31 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
     }
 }
 
+int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
+{
+    int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
+    int32_t index = sharpItemCount_;
+    int32_t mode = MODE_FIVE;
+    propSelect -= sharpItemCount_;
+    if (lastCollapsingMode_ == IndexerCollapsingMode::SEVEN) {
+        mode = MODE_SEVEN;
+    }
+    // minimum items in one group including
+    // visible character in the group and excluding the first always visible item and # item if exists
+    auto cmin = static_cast<int32_t>((fullArraySize - 1 - sharpItemCount_) / mode);
+    auto gmax = (fullArraySize - 1 - sharpItemCount_) - cmin * mode; // number of groups with maximum items count
+    auto cmax = cmin + 1; // maximum items in one group including visible character in the group
+    auto gmin = mode - gmax; // number of groups with minimum items count
+    if (propSelect > gmin * cmin) {
+        index += gmin * 2; // one group includes two index
+        propSelect -= gmin * cmin;
+        index += propSelect / cmax * 2 + (propSelect % cmax == 0 ? 0 : 1);
+    } else {
+        index += propSelect / cmin * 2 + (propSelect % cmin == 0 ? 0 : 1);
+    }
+    return  index;
+}
+
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (panEvent_) {
@@ -447,6 +477,17 @@ void IndexerPattern::InitPopupInputEvent()
     auto popupOnHoverEvent = MakeRefPtr<InputEvent>(popupHoverCallback);
     auto popupInputEventHub = popupNode_->GetOrCreateInputEventHub();
     popupInputEventHub->AddOnHoverEvent(popupOnHoverEvent);
+}
+
+void IndexerPattern::InitPopupPanEvent()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto gestureHub = popupNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, 0.0_vp);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
@@ -723,7 +764,6 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
-            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childNode->MarkModifyDone();
             if (isTextNodeInTree) {
@@ -758,7 +798,6 @@ void IndexerPattern::ApplyIndexChanged(
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
         nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
         nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         index++;
@@ -769,6 +808,9 @@ void IndexerPattern::ApplyIndexChanged(
     }
     if (selectChanged) {
         ShowBubble();
+        if (enableHapticFeedback_) {
+            VibratorImpl::StartVibraFeedback();
+        }
     }
 }
 
@@ -785,6 +827,7 @@ void IndexerPattern::ShowBubble()
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         InitPopupInputEvent();
+        InitPopupPanEvent();
         UpdatePopupOpacity(0.0f);
     }
     if (!layoutProperty->GetIsPopupValue(false)) {
@@ -1020,9 +1063,9 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterLayoutProperty);
     letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    letterLayoutProperty->UpdateMaxLines(1);
     letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
     letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
-    letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
     letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -1338,9 +1381,7 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateContent(currentListData.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
-        if (autoCollapse_) textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateTextOverflow(autoCollapse_ ? TextOverflow::ELLIPSIS : TextOverflow::NONE);
-        textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+        textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextColor(i == popupClickedIndex_ ?
             popupSelectedTextColor : popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -1443,9 +1484,10 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
     CHECK_NULL_VOID(popupNode);
     auto gesture = popupNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
+        info.SetStopPropagation(true);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN) {
             indexerPattern->isTouch_ = true;
@@ -1807,11 +1849,11 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
         auto onChangeEvent = indexerEventHub->GetChangeEvent();
         if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onChangeEvent(selected_);
+            onChangeEvent(actualIndex);
         }
         auto onCreatChangeEvent = indexerEventHub->GetCreatChangeEvent();
         if (onCreatChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {
-            onCreatChangeEvent(selected_);
+            onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
         if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
@@ -1909,5 +1951,21 @@ void IndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(pattern);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
     pattern->SetIsMeasureBoundary(isMeasureBoundary);
+}
+
+void IndexerPattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    DumpLog::GetInstance().AddDesc(
+        "AlignStyle: ", static_cast<int32_t>(layoutProperty->GetAlignStyleValue(AlignStyle::END)));
+    auto offset = layoutProperty->GetPopupHorizontalSpace();
+    DumpLog::GetInstance().AddDesc("Offset: ", offset.has_value() ? offset.value().ToString() : "undefined");
+    DumpLog::GetInstance().AddDesc("PopupPositionX: ",
+        layoutProperty->GetPopupPositionXValue(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("PopupPositionY: ",
+        layoutProperty->GetPopupPositionYValue(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ToString());
+    DumpLog::GetInstance().AddDesc("AutoCollapse: ", autoCollapse_ ? "true" : "false");
+    DumpLog::GetInstance().AddDesc(std::string("EnableHapticFeedback: ").append(std::to_string(enableHapticFeedback_)));
 }
 } // namespace OHOS::Ace::NG

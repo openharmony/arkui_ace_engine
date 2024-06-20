@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "unicode/uchar.h"
 
 namespace {
 constexpr float HALF = 2.0f;
@@ -298,11 +299,16 @@ void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
     }
 }
 
-void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(OffsetF& offsetIcon,
-    OffsetF& offsetText)
+void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* layoutWrapper,
+    OffsetF& offsetIcon, OffsetF& offsetText)
 {
-    offsetText = offsetIcon +
-        OffsetF(icon_.width_ + middle_.width_, 0.0);
+    if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
+        offsetIcon = offsetText +
+            OffsetF(text_.width_ + middle_.width_, 0.0);
+    } else {
+        offsetText = offsetIcon +
+            OffsetF(icon_.width_ + middle_.width_, 0.0);
+    }
     if (icon_.height_ > text_.height_) {
         offsetText +=
             OffsetF(0.0, (icon_.height_ - text_.height_) / HALF);
@@ -320,7 +326,7 @@ void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (isVertical_) {
         UpdateVerticalOffset(offsetIcon, offsetText);
     } else {
-        UpdateHorizontalOffset(offsetIcon, offsetText);
+        UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
     }
 
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
@@ -414,5 +420,42 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     icon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+}
+
+TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    // default return LTR
+    CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
+    std::string text = "";
+    // get button string
+    for (const auto& child : frameNode->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode, UINode>(child);
+        if (node == nullptr) {
+            continue;
+        }
+        if (node->GetTag() == V2::TEXT_ETS_TAG) {
+            auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
+            if (textLayoutProperty == nullptr) {
+                continue;
+            }
+            text = textLayoutProperty->GetContentValue(text);
+            break;
+        }
+    }
+    if (text.empty()) {
+        return TextDirection::LTR;
+    }
+    auto wString = StringUtils::ToWstring(text);
+    for (const auto& charInStr : wString) {
+        auto direction = u_charDirection(charInStr);
+        if (direction == UCharDirection::U_LEFT_TO_RIGHT) {
+            return TextDirection::LTR;
+        }
+        if (direction == UCharDirection::U_RIGHT_TO_LEFT || direction == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
+            return TextDirection::RTL;
+        }
+    }
+    return TextDirection::LTR;
 }
 } // namespace OHOS::Ace::NG

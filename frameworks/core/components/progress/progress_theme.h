@@ -94,7 +94,8 @@ public:
                 .BlendOpacity(pattern->GetAttr<double>("progress_border_color_alpha", 1.0));
             theme->maskColor_ = pattern->GetAttr<Color>("progress_mask_color", Color::RED);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("progress_border_width", 1.0_vp);
-
+            theme->fontScalePadding_ = pattern->GetAttr<Dimension>("progress_aging_padding_height", 8.0_vp);
+            theme->fontScale_ = pattern->GetAttr<double>("progress_aging_font_scale", 1.75);
             theme->textColor_ = pattern->GetAttr<Color>("progress_text_color", defaultColor);
             theme->textSize_ = pattern->GetAttr<Dimension>("progress_text_size", 12.0_fp);
             theme->capsuleSelectColor_ = pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED);
@@ -300,6 +301,16 @@ public:
         return textMargin_;
     }
 
+    float GetFontScale() const
+    {
+        return fontScale_;
+    }
+    
+    const Dimension& GetfontScalePadding() const
+    {
+        return fontScalePadding_;
+    }
+    
     const Color& GetCapsuleBgColor() const
     {
         return capsuleBgColor_;
@@ -373,6 +384,8 @@ private:
     Color ringProgressEndSideColor_;
     Color ringProgressBeginSideColor_;
     Color ringProgressBackgroundColor_;
+    float fontScale_ = 1.75f;
+    Dimension fontScalePadding_;
 };
 
 } // namespace OHOS::Ace

@@ -58,7 +58,8 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+                .edges = SAFE_AREA_EDGE_ALL };
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
     }
@@ -143,13 +144,17 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 
 void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("title", GetTitleString().c_str(), filter);
     json->PutExtAttr("subtitle", GetSubtitleString().c_str(), filter);
     json->PutExtAttr("menus", GetBarItemsString(true).c_str(), filter);
     json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
-    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ToJsonValue(json, filter);
 }
 
 } // namespace OHOS::Ace::NG

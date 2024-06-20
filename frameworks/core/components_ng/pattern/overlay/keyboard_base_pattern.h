@@ -34,6 +34,8 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    bool CheckChildPosition(const RefPtr<FrameNode>& frameNode);
+
     int32_t GetTargetId()
     {
         return targetId_;
@@ -58,7 +60,7 @@ private:
     int32_t targetId_ = -1;
     float keyboardHeight_ = 0.0f;
     bool supportAvoidance_;
-    float safeHeight_;
+    float safeHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

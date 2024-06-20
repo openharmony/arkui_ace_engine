@@ -1247,6 +1247,23 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarMonthPatternTest004
+ * @tc.desc: Test CalendarMonthPattern GetDaySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest004, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    EXPECT_EQ(calendarMonthPattern->GetDaySize(theme).ConvertToVp(), 0.0);
+}
+
+/**
  * @tc.name: CalendarLayoutAlgorithmTest001
  * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
  * @tc.type: FUNC

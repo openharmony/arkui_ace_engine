@@ -288,7 +288,8 @@ void TextFieldElement::Delete()
             textField->Delete(start == end ? start - 1 : start, end);
         }
     } else {
-        textField->Delete(value.GetWideText().size() - 1, value.GetWideText().size());
+        textField->Delete(static_cast<int32_t>(value.GetWideText().size()) - 1,
+            static_cast<int32_t>(value.GetWideText().size()));
     }
     LOGI("Delete, request keyboard");
     RequestKeyboard(true);

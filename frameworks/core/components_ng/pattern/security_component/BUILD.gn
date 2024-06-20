@@ -13,12 +13,6 @@
 
 import("../../components.gni")
 
-if (is_standard_system) {
-  config("ohos_security_component_config") {
-    include_dirs = [ "//third_party/json/include" ]
-  }
-}
-
 build_component_ng("security_component_pattern_ng") {
   sources = [
     "location_button/location_button_model_ng.cpp",
@@ -32,9 +26,7 @@ build_component_ng("security_component_pattern_ng") {
   ]
 
   if (is_standard_system) {
-    configs = [ ":ohos_security_component_config" ]
     external_deps = []
-
     if (security_component_enable) {
       sources += [
         "security_component_handler.cpp",

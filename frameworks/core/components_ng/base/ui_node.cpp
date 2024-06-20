@@ -90,6 +90,10 @@ UINode::~UINode()
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     context_ = context;
+    instanceId_ = context->GetInstanceId();
+    if (updateJSInstanceCallback_) {
+        updateJSInstanceCallback_(instanceId_);
+    }
     if (recursive) {
         for (auto& child : children_) {
             child->AttachContext(context, recursive);
@@ -99,7 +103,10 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+    CHECK_NULL_VOID(context_);
+    context_->DetachNode(Claim(this));
     context_ = nullptr;
+    instanceId_ = INSTANCE_ID_UNDEFINED;
     if (recursive) {
         for (auto& child : children_) {
             child->DetachContext(recursive);
@@ -110,6 +117,12 @@ void UINode::DetachContext(bool recursive)
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
 {
     CHECK_NULL_VOID(child);
+    if (isProhibitedAddChildNode_) {
+        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d)",
+            GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         return;
@@ -210,7 +223,7 @@ void UINode::RemoveChildAtIndex(int32_t index)
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
-    auto children = GetChildren();
+    auto& children = GetChildren();
     if ((index < 0) || (index >= static_cast<int32_t>(children.size()))) {
         return nullptr;
     }
@@ -250,11 +263,13 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 void UINode::Clean(bool cleanDirectly, bool allowTransition)
 {
     bool needSyncRenderTree = false;
+    std::vector<RefPtr<UINode>> nodesWithGeometryTransition;
     int32_t index = 0;
     for (const auto& child : children_) {
         // traverse down the child subtree to mark removing and find needs to hold subtree, if found add it to pending
-        if (!cleanDirectly && child->MarkRemoving()) {
+        if (!cleanDirectly && child->MarkRemoving(false)) {
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
+            nodesWithGeometryTransition.emplace_back(child);
         }
         // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to
         // the disappearing children. This ensures that the child remains alive and the tree hierarchy is preserved
@@ -270,6 +285,11 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         }
         ++index;
     }
+
+    for (const auto& node : nodesWithGeometryTransition) {
+        node->ApplyGeometryTransition();
+    }
+
     if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
         children_.clear();
     }
@@ -335,6 +355,56 @@ void UINode::DoAddChild(
         child->AttachToMainTree(!addDefaultTransition, context_);
     }
     MarkNeedSyncRenderTree(true);
+}
+
+void UINode::GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent)
+{
+    while (breakPointParent && !breakPointChild->IsDisappearing()) {
+        // recursively looking up the node tree, until we reach the breaking point (IsDisappearing() == true).
+        // Because when trigger transition, only the breakPoint will be marked as disappearing and
+        // moved to disappearingChildren.
+        breakPointChild = breakPointParent;
+        breakPointParent = breakPointParent->GetParent();
+    }
+    RefPtr<UINode> betterChild = breakPointChild;
+    RefPtr<UINode> betterParent = breakPointParent;
+    // when current breakPointParent is UINode, looking up the node tree to see whether there is a better breakPoint.
+    while (betterParent && !InstanceOf<FrameNode>(betterParent)) {
+        if (betterChild->IsDisappearing()) {
+            if (!betterChild->RemoveImmediately()) {
+                break;
+            }
+            breakPointChild = betterChild;
+            breakPointParent = betterParent;
+        }
+        betterChild = betterParent;
+        betterParent = betterParent->GetParent();
+    }
+}
+
+void UINode::RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent)
+{
+    if (!parent->RemoveDisappearingChild(child)) {
+        auto& children = parent->ModifyChildren();
+        auto iter = std::find(children.begin(), children.end(), child);
+        if (iter != children.end()) {
+            children.erase(iter);
+        }
+    }
+    auto frameChild = DynamicCast<FrameNode>(child);
+    if (frameChild->GetRenderContext()->HasTransitionOutAnimation()) {
+        // delete the real breakPoint.
+        RefPtr<UINode> breakPointChild = child;
+        RefPtr<UINode> breakPointParent = parent;
+        GetBestBreakPoint(breakPointChild, breakPointParent);
+        if (breakPointParent && breakPointChild->RemoveImmediately()) {
+            // Result of RemoveImmediately of the breakPointChild is true and
+            // result of RemoveImmediately of the child is false,
+            // so breakPointChild must be different from child in this branch.
+            breakPointParent->RemoveDisappearingChild(breakPointChild);
+            breakPointParent->MarkNeedSyncRenderTree();
+        }
+    }
 }
 
 RefPtr<FrameNode> UINode::GetParentFrameNode() const
@@ -417,12 +487,27 @@ void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
     }
 }
 
+void UINode::GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
+{
+    for (const auto& uiChild : children_) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            const auto focusHub = frameChild->GetFocusHub();
+            if (focusHub) {
+                focusNodes.emplace_back(focusHub);
+            }
+        } else {
+            uiChild->GetCurrentChildrenFocusHub(focusNodes);
+        }
+    }
+}
+
 void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
 {
     if (onMainTree_) {
         return;
     }
-    context_ = context;
+    AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
@@ -464,7 +549,7 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    context_ = nullptr;
+    DetachContext(false);
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -531,10 +616,10 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
-void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag, bool childExpansiveAndMark)
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     for (const auto& child : GetChildren()) {
-        child->MarkDirtyNode(extraFlag, childExpansiveAndMark);
+        child->MarkDirtyNode(extraFlag);
     }
 }
 
@@ -566,19 +651,24 @@ void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
-    decltype(attachToMainTreeTasks_) tasks(std::move(attachToMainTreeTasks_));
-    for (const auto& task : tasks) {
-        if (task) {
-            task();
-        }
-    }
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+bool UINode::IsAutoFillContainerNode()
+{
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
+}
+
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
 {
     DumpViewDataPageNode(viewDataWrap);
     for (const auto& item : GetChildren()) {
-        item->DumpViewDataPageNodes(viewDataWrap);
+        if (!item) {
+            continue;
+        }
+        if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
+            continue;
+        }
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
     }
 }
 
@@ -686,6 +776,33 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
     }
 }
 
+void UINode::GenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    if (disappearingChildren_.empty()) {
+        // normal child
+        for (const auto& child : GetChildren()) {
+            child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+        }
+        return;
+    }
+    // generate the merged list of children_ and disappearingChildren_
+    auto allChildren = GetChildren();
+    for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
+        auto& [disappearingChild, index] = *iter;
+        if (index >= allChildren.size()) {
+            allChildren.emplace_back(disappearingChild);
+        } else {
+            auto insertIter = allChildren.begin();
+            std::advance(insertIter, index);
+            allChildren.insert(insertIter, disappearingChild);
+        }
+    }
+    for (const auto& child : allChildren) {
+        child->OnGenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
+    }
+}
+
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
     for (const auto& child : GetChildren()) {
@@ -709,14 +826,14 @@ RefPtr<PipelineContext> UINode::GetContextRefPtr()
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
-    bool isDispatch)
+    TouchTestResult& responseLinkResult, bool isDispatch)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult =
-            child->TouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId);
+        auto hitResult = child->TouchTest(
+            globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId, responseLinkResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -776,6 +893,15 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
+int32_t UINode::CurrentFrameCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->CurrentFrameCount();
+    }
+    return count;
+}
+
 int32_t UINode::GetChildIndexById(int32_t id)
 {
     int32_t pos = 0;
@@ -823,7 +949,7 @@ bool UINode::RenderCustomChild(int64_t deadline)
 
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
+    ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     for (const auto& child : GetChildren()) {
         if (InstanceOf<CustomNode>(child)) {
@@ -842,6 +968,7 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
             child->Build(extraInfos);
         }
     }
+    ACE_LAYOUT_TRACE_END()
 }
 
 void UINode::CreateExportTextureInfoIfNeeded()
@@ -890,14 +1017,14 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
 
 void UINode::OnRecycle()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnReuse();
     }
 }
@@ -934,13 +1061,13 @@ void UINode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
-bool UINode::MarkRemoving()
+bool UINode::MarkRemoving(bool applyGeometryTransition)
 {
     bool pendingRemove = false;
     isRemoving_ = true;
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving() || pendingRemove;
+        pendingRemove = child->MarkRemoving(applyGeometryTransition) || pendingRemove;
     }
     return pendingRemove;
 }
@@ -996,6 +1123,12 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     GenerateOneDepthVisibleFrameWithTransition(visibleList);
+}
+
+void UINode::OnGenerateOneDepthVisibleFrameWithOffset(
+    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+{
+    GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
 }
 
 bool UINode::RemoveImmediately() const
@@ -1060,34 +1193,44 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index, needBuild, isCache);
+            return child->GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
         }
         index -= count;
     }
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
+{
+    for (const auto& child : GetChildren()) {
+        uint32_t count = static_cast<uint32_t>(child->CurrentFrameCount());
+        if (count > index) {
+            return child->GetFrameChildByIndexWithoutExpanded(index);
+        }
+        index -= count;
+    }
+    return nullptr;
+}
+
+int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {
         if (InstanceOf<FrameNode>(child)) {
             if (child == node) {
                 return index;
-            } else {
-                return -1;
             }
         }
-        int32_t childIndex = child->GetFrameNodeIndex(node);
+        int32_t childIndex = child->GetFrameNodeIndex(node, isExpanded);
         if (childIndex >= 0) {
             return index + childIndex;
         }
-        index += static_cast<uint32_t>(child->FrameCount());
+        index += isExpanded ? child->FrameCount() : child->CurrentFrameCount();
     }
     return -1;
 }
@@ -1135,13 +1278,18 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append("at (").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append(")\n");
+                extraInfo.append("    ")
+                    .append("at (")
+                    .append(child.page)
+                    .append(":")
+                    .append(std::to_string(child.line))
+                    .append(":")
+                    .append(std::to_string(child.col))
+                    .append(")\n");
             }
             break;
         }
         parent = parent->GetParent();
-       
     }
     return extraInfo;
 }

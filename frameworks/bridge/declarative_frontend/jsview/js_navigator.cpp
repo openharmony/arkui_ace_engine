@@ -107,7 +107,9 @@ void JSNavigator::JSBind(BindingTarget globalObj)
     JSClass<JSNavigator>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSNavigator>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSNavigator>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSNavigator>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSNavigator>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavigator>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSNavigator>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigator>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSNavigator>::InheritAndBind<JSContainerBase>(globalObj);

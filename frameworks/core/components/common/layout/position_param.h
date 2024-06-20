@@ -28,6 +28,8 @@ namespace OHOS::Ace {
 
 constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
 constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
+constexpr int32_t HORIZONTAL_DIRECTION_START_INDEX = 7;
+constexpr int32_t HORIZONTAL_DIRECTION_END_INDEX = 8;
 
 struct PositionParam {
     std::pair<AnimatableDimension, bool> left = { AnimatableDimension(0.0, DimensionUnit::PX), false };
@@ -90,6 +92,8 @@ enum class AlignDirection {
     TOP,
     CENTER,
     BOTTOM,
+    START,
+    END,
 };
 struct AlignRule {
     std::string anchor;
@@ -121,6 +125,8 @@ enum class BarrierDirection {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 struct GuidelineInfo {

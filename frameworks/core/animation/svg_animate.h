@@ -80,7 +80,7 @@ public:
     {
         std::vector<std::string> params;
         StringUtils::SplitStr(paramStr, " ", params);
-        if (params.size() != 4) {
+        if (params.size() != 4) { // 4: the limited number of parameters
             LOGE("cubic curve accept only 4 parameters");
             return Curves::LINEAR;
         }

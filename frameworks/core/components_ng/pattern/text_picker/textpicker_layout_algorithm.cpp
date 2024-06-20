@@ -26,7 +26,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const int32_t DIVIDER_SIZE = 2;
-const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float PICKER_HEIGHT_HALF = 3.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t MAX_HALF_DISPLAY_COUNT = 2;
@@ -119,10 +118,9 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
         }
     }
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+    uint32_t showCount_ = pickerTheme->GetShowCountPortrait();
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = pickerTheme->GetShowCountLandscape();
     }
 
     if (isDefaultPickerItemHeight_) {
@@ -207,6 +205,33 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
+    UpdateContentSize(frameSize, childLayoutWrapper);
+}
+
+void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
+{
+    SizeF frameSize = size;
+    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    CHECK_NULL_VOID(!children.empty());
+    for (const auto& child : children) {
+        if (child == children.back()) {
+            auto frameNode  = child->GetHostNode();
+            CHECK_NULL_VOID(frameNode);
+            auto overlayNode = frameNode ->GetOverlayNode();
+            CHECK_NULL_VOID(overlayNode);
+            auto geometryNode = frameNode->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto overlayGeometryNode = overlayNode->GetGeometryNode();
+            CHECK_NULL_VOID(overlayGeometryNode);
+            auto textRect = geometryNode->GetFrameRect();
+            contentWrapper.selfIdealSize = { frameSize.Width() - textRect.Left(), textRect.Height() };
+            child->Measure(contentWrapper);
+            auto textFrameSize_ = geometryNode->GetMarginFrameSize();
+            overlayGeometryNode->SetFrameSize(textFrameSize_);
+            overlayNode->Layout();
+        }
+    }
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

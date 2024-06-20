@@ -22,7 +22,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class QRCodeModel {
+class ACE_FORCE_EXPORT QRCodeModel {
 public:
     static QRCodeModel* GetInstance();
     virtual ~QRCodeModel() = default;

@@ -89,6 +89,7 @@ public:
 
     void FireChangeEvent(int32_t index) const
     {
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d eventSize: %zu", index, changeEvents_.size());
         if (!changeEvents_.empty()) {
             std::for_each(
                 changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
@@ -143,6 +144,21 @@ public:
                     auto event = *animationEndEvent;
                     event(index, info);
                 });
+        }
+    }
+
+    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
+    {
+        if (!animationEndEvents_.empty()) {
+            auto context = GetFrameNode()->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddBuildFinishCallBack([this, index, info]() {
+                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                        auto event = *animationEndEvent;
+                        event(index, info);
+                    });
+            });
         }
     }
 

@@ -369,7 +369,7 @@ bool RenderSlider::MouseHoverTest(const Point& parentLocalPoint)
         return false;
     }
     if (blockTouchRegion_.ContainsInRegion(
-            parentLocalPoint.GetX() - GetPosition().GetX(), parentLocalPoint.GetY() - GetPosition().GetY())) {
+        parentLocalPoint.GetX() - GetPosition().GetX(), parentLocalPoint.GetY() - GetPosition().GetY())) {
         if (mouseState_ == MouseState::NONE) {
             OnMouseHoverEnterTest();
             mouseState_ = MouseState::HOVER;

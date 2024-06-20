@@ -40,6 +40,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         PaintSwitch(canvas, offset_->Get(), size_->Get());
     }
@@ -68,10 +71,12 @@ public:
         if (!actualSize_.IsPositive()) {
             return;
         }
+        bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
+                                                   : direction_ == TextDirection::RTL;
         // Animation is not displayed when created for the first time.
         if (isFirstCreated_) {
             animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            if (direction_ == TextDirection::RTL) {
+            if (isRtl) {
                 pointOffset_->Set(isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height());
             } else {
                 pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
@@ -90,7 +95,7 @@ public:
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
-            if (direction_ == TextDirection::RTL) {
+            if (isRtl) {
                 newPointOffset = isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height();
             } else {
                 newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
@@ -116,7 +121,6 @@ public:
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
-    void DrawFocusBorder(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap);
     void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
 
@@ -180,6 +184,13 @@ public:
     {
         if (offset_) {
             offset_->Set(offset);
+        }
+    }
+
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
         }
     }
 
@@ -292,6 +303,7 @@ private:
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
 

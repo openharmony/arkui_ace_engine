@@ -29,6 +29,7 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo);
 class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
     static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
         int32_t duration, int32_t iterations);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
@@ -49,6 +50,8 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
     static void SetSmoothEdge(const JSCallbackInfo& info);
+    static void SetDynamicRangeMode(const JSCallbackInfo& info);
+    static void SetEnhancedImageQuality(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
@@ -72,6 +75,7 @@ public:
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
+    static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
 };
 
 class JSColorFilter : public AceType {

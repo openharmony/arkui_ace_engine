@@ -129,6 +129,12 @@ public:
         positionMode_ = positionMode;
     }
 
+    void SetScrollable(bool isScrollable)
+    {
+        isScrollable_ = isScrollable;
+    }
+    void SetScrollRadius(const Dimension& filletRadius);
+
 private:
     Offset GetHoverOffset(const Size& size) const;
     // Animatable
@@ -137,6 +143,7 @@ private:
     RefPtr<AnimatablePropertyFloat> barHeight_;
     RefPtr<AnimatablePropertyFloat> barX_;
     RefPtr<AnimatablePropertyFloat> barY_;
+    Dimension filletRadius_;
 
     // no Animatable
     RefPtr<PropertyColor> barColor_;
@@ -148,6 +155,8 @@ private:
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
     PositionMode positionMode_ = PositionMode::RIGHT;
+
+    bool isScrollable_ = true;
 };
 } // namespace OHOS::Ace::NG
 

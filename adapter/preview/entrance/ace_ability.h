@@ -37,6 +37,8 @@
 
 namespace OHOS::Rosen {
 class Window;
+class IAvoidAreaChangedListener;
+class IIgnoreViewSafeAreaListener;
 }
 
 namespace OHOS::Ace::Platform {
@@ -108,6 +110,8 @@ private:
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
     sptr<OHOS::Rosen::Window> rsWindow_;
+    sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_;
+    sptr<OHOS::Rosen::IIgnoreViewSafeAreaListener> ignoreViewSafeAreaListener_;
 
     std::string bundleName_;
     std::string moduleName_;

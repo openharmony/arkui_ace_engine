@@ -137,8 +137,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
-        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
-        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM };
+        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_STACK, ARKUI_SWIPER,
+        ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
+        ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM };
     // already check in entry point.
     int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -160,14 +161,39 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     return arkUINode;
 }
 
+void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
+{
+    CHECK_NULL_VOID(nativePtr);
+    if (nativePtr->customEventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+        nativePtr->customEventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->customEventListeners = nullptr;
+    }
+    if (nativePtr->eventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(
+        nativePtr->eventListeners);
+        if (eventListenersSet) {
+            eventListenersSet->clear();
+        }
+        delete eventListenersSet;
+        nativePtr->eventListeners = nullptr;
+    }
+}
+
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
     delete nativePtr;
+    nativePtr = nullptr;
 }
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
@@ -249,6 +275,9 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
+    if (node == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (node->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -257,6 +286,9 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    if (node == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (node->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -265,6 +297,9 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    if (node == nullptr) {
+        return nullptr;
+    }
     return GetNodeAttribute(node, attribute);
 }
 
@@ -275,6 +310,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
+    if (nodePtr == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
     if (originEventType < 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event is not supported %{public}d", eventType);
@@ -299,13 +337,33 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
         extraData->eventMap[eventType] = extraParam;
     }
-    impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
+    if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
+        auto radio = static_cast<ArkUI_AttributeItem*>(userData);
+        ArkUI_Int32 radioLength = radio->size;
+        if (radioLength <= 0) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        ArkUI_Float32 radioList[radioLength];
+        for (int i = 0; i < radioLength; ++i) {
+            if (LessNotEqual(radio->value[i].f32, 0.0f) || GreatNotEqual(radio->value[i].f32, 1.0f)) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            radioList[i] = radio->value[i].f32;
+        }
+        impl->getNodeModifiers()->getCommonModifier()->setOnVisibleAreaChange(
+            nodePtr->uiNodeHandle, reinterpret_cast<int64_t>(nodePtr), radioList, radioLength);
+    } else {
+        impl->getBasicAPI()->registerNodeAsyncEvent(
+            nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType), reinterpret_cast<int64_t>(nodePtr));
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
+    if (nodePtr == nullptr) {
+        return;
+    }
     if (!nodePtr->extraData) {
         return;
     }
@@ -324,6 +382,14 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         delete extraData;
         nodePtr->extraData = nullptr;
     }
+    if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
+        auto* impl = GetFullImpl();
+        impl->getNodeModifiers()->getCommonModifier()->resetVisibleAreaChange(nodePtr->uiNodeHandle);
+    }
+    if (eventType == NODE_EVENT_ON_AREA_CHANGE) {
+        auto* impl = GetFullImpl();
+        impl->getNodeModifiers()->getCommonModifier()->resetAreaChange(nodePtr->uiNodeHandle);
+    }
 }
 
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
@@ -341,6 +407,24 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
 void UnregisterOnEvent()
 {
     g_eventReceiver = nullptr;
+}
+
+void SetNodeEvent(ArkUINodeEvent* innerEvent)
+{
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
+    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    auto innerEventExtraParam = extraData->eventMap.find(eventType);
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent nodeEvent;
+        nodeEvent.node = nodePtr;
+        nodeEvent.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &nodeEvent)) {
+            g_compatibleEventReceiver(&nodeEvent);
+            ConvertEventResult(&nodeEvent, innerEvent);
+        }
+    }
 }
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
@@ -379,20 +463,17 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->touchEvent);
             event.origin = &uiEvent;
+        } else if (eventType == NODE_ON_MOUSE) {
+            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+            uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+            uiEvent.inputEvent = &(innerEvent->mouseEvent);
+            event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
         }
         HandleNodeEvent(&event);
     }
-    if (g_compatibleEventReceiver) {
-        ArkUI_CompatibleNodeEvent event;
-        event.node = nodePtr;
-        event.eventId = innerEventExtraParam->second->targetId;
-        if (ConvertEvent(innerEvent, &event)) {
-            g_compatibleEventReceiver(&event);
-            ConvertEventResult(&event, innerEvent);
-        }
-    }
+    SetNodeEvent(innerEvent);
 }
 
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
@@ -416,6 +497,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case TOUCH_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchEvent.subKind);
+            break;
+        case MOUSE_INPUT_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->mouseEvent.subKind);
             break;
         default:
             break; /* Empty */
@@ -449,8 +533,24 @@ void HandleNodeEvent(ArkUI_NodeEvent* event)
 
 int32_t CheckEvent(ArkUI_NodeEvent* event)
 {
-    // TODO.
     return 0;
+}
+
+int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
+{
+    if (!node) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!userData) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->userData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+void* GetUserData(ArkUI_NodeHandle node)
+{
+    return node->userData;
 }
 
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
@@ -459,7 +559,7 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
-            static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+        static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     nodePtr->lengthMetricUnit = unit;
@@ -536,6 +636,23 @@ int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(
         nodePtr->eventListeners = nullptr;
     }
     return ERROR_CODE_NO_ERROR;
+}
+
+void* GetParseJsMedia()
+{
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    void (*parseJsMedia)(void* value, void* resource) = nullptr;
+    parseJsMedia = reinterpret_cast<void (*)(void*, void*)>(
+        FindFunction(module, "OHOS_ACE_ParseJsMedia"));
+    if (!parseJsMedia) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find OHOS_ACE_ParseJsMedia");
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(parseJsMedia);
 }
 } // namespace OHOS::Ace::NodeModel
 

@@ -18,14 +18,15 @@
 
 #include "gtest/gtest.h"
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,25 +40,12 @@ constexpr int32_t CHILD_COUNT_1 = 1;
 
 class CustomTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
+    static void SetUpTestSuite() {};
+    static void TearDownTestSuite() {};
     void SetUp() override;
     void TearDown() override;
     RefPtr<FrameNode> CreateNode(const std::string& tag);
 };
-
-void CustomTestNg::SetUpTestSuite()
-{
-    GTEST_LOG_(INFO) << "CustomTestNg SetUpTestCase";
-    MockPipelineContext::SetUp();
-}
-
-void CustomTestNg::TearDownTestSuite()
-{
-    GTEST_LOG_(INFO) << "CustomTestNg TearDownTestCase";
-    MockPipelineContext::TearDown();
-}
-
 void CustomTestNg::SetUp()
 {
     MockPipelineContext::SetUp();

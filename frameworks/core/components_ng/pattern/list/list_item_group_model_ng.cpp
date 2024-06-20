@@ -118,4 +118,21 @@ RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSi
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetOrCreateListChildrenMainSize();
 }
+
+void ListItemGroupModelNG::SetListChildrenMainSize(
+    FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListChildrenMainSize(defaultSize, mainSize);
+}
+
+void ListItemGroupModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetChildrenSize();
+}
 } // namespace OHOS::Ace::NG

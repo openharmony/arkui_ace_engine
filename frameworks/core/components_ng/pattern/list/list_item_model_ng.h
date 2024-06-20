@@ -42,7 +42,13 @@ public:
     void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea) override;
-
+        
+    static void SetDeleteArea(FrameNode* frameNode, FrameNode* footerNode, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea);
+    static void SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
+        std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
+        V2::SwipeEdgeEffect edgeEffect);
     static void SetSelected(FrameNode* frameNode, bool selected);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

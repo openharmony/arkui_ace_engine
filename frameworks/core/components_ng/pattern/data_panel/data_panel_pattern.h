@@ -75,6 +75,7 @@ private:
     std::optional<DataPanelMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     RefPtr<DataPanelModifier> dataPanelModifier_;
+    RectF boundsRect_;
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelPattern);
 };
 

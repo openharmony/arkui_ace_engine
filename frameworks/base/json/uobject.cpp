@@ -236,7 +236,7 @@ size_t UObject::Hash()
 
 int32_t UObject::EstimateBufferSize()
 {
-    int32_t buffsize = 0;
+    size_t buffsize = 0;
 
     for (auto& item : stringItems_) {
         buffsize += sizeof(uint8_t) + sizeof(int32_t) + item.first.length() + sizeof(int32_t) + item.second.length();
@@ -258,10 +258,10 @@ int32_t UObject::EstimateBufferSize()
     }
     for (auto& child : children_) {
         buffsize += sizeof(uint8_t) + sizeof(int32_t) + child.first.length() + sizeof(int32_t) +
-                    child.second->EstimateBufferSize();
+                    static_cast<size_t>(child.second->EstimateBufferSize());
     }
 
-    return buffsize;
+    return static_cast<int32_t>(buffsize);
 }
 
 void UObject::WriteChar(char value)
@@ -277,7 +277,7 @@ void UObject::WriteInt32(int32_t value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(int32_t);
+    offset_ += static_cast<int32_t>(sizeof(int32_t));
     buffer_ += sizeof(int32_t);
 }
 
@@ -287,7 +287,7 @@ void UObject::WriteSizeT(size_t value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(size_t);
+    offset_ += static_cast<int32_t>(sizeof(size_t));
     buffer_ += sizeof(size_t);
 }
 
@@ -297,7 +297,7 @@ void UObject::WriteInt64(int64_t value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(int64_t);
+    offset_ += static_cast<int32_t>(sizeof(int64_t));
     buffer_ += sizeof(int64_t);
 }
 
@@ -307,7 +307,7 @@ void UObject::WriteDouble(double value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += sizeof(double);
+    offset_ += static_cast<int32_t>(sizeof(double));
     buffer_ += sizeof(double);
 }
 
@@ -320,7 +320,7 @@ void UObject::WriteString(const std::string& value)
         LOGE("memcpy overflow.");
         return;
     }
-    offset_ += value.length();
+    offset_ += static_cast<int32_t>(value.length());
     buffer_ += value.length();
 }
 
@@ -400,7 +400,7 @@ int32_t UObject::ReadInt32()
         LOGE("memcpy overflow.");
         return 0;
     }
-    offset_ += sizeof(int32_t);
+    offset_ += static_cast<int32_t>(sizeof(int32_t));
     constBuffer_ += sizeof(int32_t);
     return result;
 }
@@ -412,7 +412,7 @@ int64_t UObject::ReadInt64()
         LOGE("memcpy overflow.");
         return 0;
     }
-    offset_ += sizeof(int64_t);
+    offset_ += static_cast<int32_t>(sizeof(int64_t));
     constBuffer_ += sizeof(int64_t);
     return result;
 }
@@ -424,7 +424,7 @@ size_t UObject::ReadSizeT()
         LOGE("memcpy overflow.");
         return 0;
     }
-    offset_ += sizeof(size_t);
+    offset_ += static_cast<int32_t>(sizeof(size_t));
     constBuffer_ += sizeof(size_t);
     return result;
 }
@@ -436,7 +436,7 @@ double UObject::ReadDouble()
         LOGE("memcpy overflow.");
         return 0;
     }
-    offset_ += sizeof(double);
+    offset_ += static_cast<int32_t>(sizeof(double));
     constBuffer_ += sizeof(double);
     return result;
 }

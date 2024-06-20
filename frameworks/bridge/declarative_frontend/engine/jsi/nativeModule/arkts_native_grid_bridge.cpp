@@ -584,5 +584,29 @@ ArkUINativeModuleValue GridBridge::ResetFriction(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getGridModifier()->resetFriction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue GridBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> arg_flingSpeedLimit = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+
+    double flingSpeedLimit = -1.0f;
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    if (!ArkTSUtils::ParseJsDouble(vm, arg_flingSpeedLimit, flingSpeedLimit)) {
+        flingSpeedLimit = -1.0f;
+    }
+    GetArkUINodeModifiers()->getGridModifier()->setFlingSpeedLimit(nativeNode, flingSpeedLimit);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue GridBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetFlingSpeedLimit(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 } // namespace OHOS::Ace::NG

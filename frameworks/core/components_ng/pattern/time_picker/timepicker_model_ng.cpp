@@ -104,7 +104,9 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
-        stackMinuteNode->MountToParent(timePickerNode);
+        auto language = AceApplicationInfo::GetInstance().GetLanguage();
+        language == "ug" ? stackMinuteNode->MountToParent(timePickerNode, 0)
+                            : stackMinuteNode->MountToParent(timePickerNode);
         minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
@@ -254,6 +256,12 @@ void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);
 }
 
+void TimePickerModelNG::SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled, frameNode);
+}
+
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -383,11 +391,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     dialogLifeCycleEvent["willDisappearId"] = timePickerDialogEvent.onWillDisappear;
     DialogProperties properties;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-            properties.alignment = DialogAlignment::BOTTOM;
-        } else {
-            properties.alignment = DialogAlignment::CENTER;
-        }
+        properties.alignment = theme->GetAlignment();
     }
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
@@ -419,20 +423,21 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, buttonInfos, timePickerProperty, dialogEvent,
-                dialogCancelEvent, dialogLifeCycleEvent);
+            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+                dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
+        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog");
 }
 
 void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetSelectedTime(value);
 }
 
@@ -574,7 +579,10 @@ void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType&
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -593,7 +601,10 @@ PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -612,7 +623,10 @@ PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(

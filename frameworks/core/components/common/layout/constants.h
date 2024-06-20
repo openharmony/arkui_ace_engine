@@ -240,6 +240,13 @@ enum class TextOverflow {
     CLIP,
     ELLIPSIS,
     MARQUEE,
+    DEFAULT,
+};
+
+enum class TextSelectableMode {
+    SELECTABLE_UNFOCUSABLE = 0,
+    SELECTABLE_FOCUSABLE,
+    UNSELECTABLE,
 };
 
 namespace StringUtils {
@@ -330,6 +337,18 @@ enum class ImageFit {
     SCALE_DOWN,
     TOP_LEFT,
     COVER_TOP_LEFT,
+};
+
+enum class DynamicRangeMode {
+    HIGH = 0,
+    CONSTRAINT,
+    STANDARD,
+};
+
+enum class AIImageQuality {
+    NONE = 1,
+    NORMAL,
+    HIGH,
 };
 
 enum class ImageRenderMode {
@@ -552,6 +571,13 @@ enum class TabBarMode {
     FIXED_START,
 };
 
+enum class TabAnimateMode {
+    CONTENT_FIRST = 0,
+    ACTION_FIRST,
+    NO_ANIMATION,
+    MAX_VALUE,
+};
+
 enum class ShowInNavigationBar {
     SHOW = 0,
     POPUP,
@@ -569,6 +595,11 @@ enum class VerticalAlign {
     BOTTOM,
     BASELINE,
     NONE,
+};
+
+enum class SwiperDynamicSyncSceneType {
+    GESTURE = 0,
+    ANIMATE,
 };
 
 namespace StringUtils {
@@ -691,7 +722,16 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
+enum class XComponentType {
+    UNKNOWN = -1,
+    SURFACE = 0,
+    COMPONENT,
+    TEXTURE,
+    NODE,
+#ifdef PLATFORM_VIEW_SUPPORTED
+    PLATFORM_VIEW = 999,
+#endif
+};
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
@@ -727,6 +767,7 @@ enum class GestureTypeName {
     CLICK = 7,
     BOXSELECT = 8,
     WEBSCROLL = 9,
+    TEXTFIELD_BOXSELECT = 10
 };
 
 enum class ModifierKey {

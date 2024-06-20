@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,9 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -39,6 +41,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
+#include "core/image/image_source_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 
@@ -53,6 +56,7 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
+RefPtr<ContainerModalPattern> ContainerModalView::containerModalPattern_;
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -84,12 +88,13 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
     column->AddChild(stack);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
+    containerModalPattern_ = containerPattern;
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(controlButtonsRow));
 
-    auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_RETURN(containerPattern, nullptr);
     containerPattern->Init();
 
     return containerModalNode;
@@ -128,7 +133,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
-        renderContext->UpdateBackgroundColor(CONTAINER_BACKGROUND_COLOR);
+        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(true));
     }
     return containerTitleRow;
 }
@@ -196,6 +202,8 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, CLOSE_KEY },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, CLOSE_KEY },
     };
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
     // button image icon
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
@@ -209,6 +217,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         imageFocus->SetFocusable(false);
     }
     imageSourceInfo.SetResourceId(icon);
+    imageSourceInfo.SetFillColor(theme->GetControlBtnColor(isCloseButton, ControlBtnColorType::NORMAL_FILL));
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
@@ -233,28 +242,18 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     AddButtonHover(buttonNode, imageIcon);
     AddButtonMouse(buttonNode, imageIcon);
+    AddButtonStyleMouseEvent(buttonNode, imageIcon, isCloseButton);
 
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);
-
-    auto buttonPattern = DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
+    renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseButton, ControlBtnColorType::NORMAL));
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     auto clickGesture = MakeRefPtr<TapGesture>();
     clickGesture->SetOnActionId(clickCallback);
-    auto gestureGroup = MakeRefPtr<NG::GestureGroup>(GestureMode::Parallel);
-    gestureGroup->AddGesture(clickGesture);
-    if (!canDrag) {
-        // if can not be drag, cover father panEvent
-        PanDirection panDirection;
-        auto panGesture = MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0.0);
-        gestureGroup->AddGesture(panGesture);
-    }
-    buttonEventHub->AddGesture(gestureGroup);
+    buttonEventHub->AddGesture(clickGesture);
+    buttonNode->SetDraggable(canDrag);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
@@ -353,6 +352,77 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
+}
+
+void ContainerModalView::AddButtonStyleMouseEvent(
+    RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
+{
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    AddButtonHoverEvent(inputHub, buttonNode, imageNode, isCloseBtn);
+    AddButtonOnEvent(inputHub, buttonNode, imageNode, isCloseBtn);
+}
+
+void ContainerModalView::AddButtonHoverEvent(
+    RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
+{
+    auto task = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)),
+                    containerModalPatternWK = WeakClaim(RawPtr(containerModalPattern_)), isCloseBtn](bool isHover) {
+        auto containerModalPattern = containerModalPatternWK.Upgrade();
+        CHECK_NULL_VOID(containerModalPattern);
+        bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
+        auto buttonNode = buttonWk.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
+        auto imageNode = imageWk.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+        ControlBtnColorType isHoverFillType = ControlBtnColorType::HOVER_FILL;
+        ControlBtnColorType isHoverType = ControlBtnColorType::HOVER;
+        if (!isHover) {
+            isHoverFillType = isFocus ? ControlBtnColorType::NORMAL_FILL : ControlBtnColorType::UNFOCUS_FILL;
+            isHoverType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;
+        }
+        sourceInfo->SetFillColor(theme->GetControlBtnColor(isCloseBtn, isHoverFillType));
+        auto renderContext = buttonNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        buttonNode->MarkModifyDone();
+        imageNode->MarkModifyDone();
+    };
+    auto hoverCallBack = MakeRefPtr<InputEvent>(std::move(task));
+    inputHub->AddOnHoverEvent(hoverCallBack);
+}
+
+void ContainerModalView::AddButtonOnEvent(
+    RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
+{
+    auto wkTask = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)), isCloseBtn](
+                      MouseInfo& info) {
+        auto buttonNode = buttonWk.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
+        auto imageNode = imageWk.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        if (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::RELEASE) {
+            auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+            CHECK_NULL_VOID(sourceInfo);
+            auto isHoverFillType = info.GetAction() == MouseAction::PRESS ? ControlBtnColorType::PRESS_FILL
+                                                                          : ControlBtnColorType::NORMAL_FILL;
+            sourceInfo->SetFillColor(theme->GetControlBtnColor(isCloseBtn, isHoverFillType));
+            auto renderContext = buttonNode->GetRenderContext();
+            auto isHoverType =
+                info.GetAction() == MouseAction::PRESS ? ControlBtnColorType::PRESS : ControlBtnColorType::NORMAL;
+            renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
+            buttonNode->MarkModifyDone();
+            imageNode->MarkModifyDone();
+        }
+    };
+    auto onclickCallback = MakeRefPtr<InputEvent>(std::move(wkTask));
+    inputHub->AddOnMouseEvent(onclickCallback);
 }
 
 } // namespace OHOS::Ace::NG

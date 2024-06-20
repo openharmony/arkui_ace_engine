@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 
 namespace OHOS::Ace::NG {
 class XComponentNodeBridge {
@@ -26,6 +27,7 @@ public:
     static ArkUINativeModuleValue RegisterOnDestroyCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ChangeRenderType(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Framework::XComponentParams SetXComponentNodeParams(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 

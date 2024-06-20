@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace {
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)
     : fontFamilies_(fontFamilies), fontSize_(fontSize), fontWeight_(fontWeight), fontStyle_(fontStyle),

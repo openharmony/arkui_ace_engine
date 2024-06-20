@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class RenderRefreshTarget: public virtual AceType {
+class RenderRefreshTarget : public virtual AceType {
     DECLARE_ACE_TYPE(RenderRefreshTarget, AceType)
 
 public:

@@ -25,7 +25,8 @@
 #include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
-
+constexpr Dimension DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD = 10.0_vp;
+constexpr float DEFAULT_DRAG_START_SCALE = 0.2;
 class PasteData : public AceType {
     DECLARE_ACE_TYPE(PasteData, AceType);
 
@@ -256,6 +257,16 @@ public:
         return sourceTool_;
     }
 
+    const std::vector<KeyCode>& GetPressedKeyCodes() const
+    {
+        return pressedKeyCodes_;
+    }
+
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -276,6 +287,7 @@ private:
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 class NotifyDragEvent : public DragEvent {

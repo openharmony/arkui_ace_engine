@@ -627,7 +627,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest005, TestSize.Level1)
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
-    RefPtr<FrameNode> optionNode = OptionView::CreateSelectOption("optiontest", " ", 2);
+    SelectParam param = { "optiontest", " " };
+    RefPtr<FrameNode> optionNode = OptionView::CreateSelectOption(param, 2);
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(optionNode, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(optionNode, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
@@ -668,10 +669,10 @@ HWTEST_F(OptionTestNg, PerformActionTest003, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
     ASSERT_EQ(menuNode->GetChildren().size(), 1);
 
-    params.emplace_back("content1", "icon1");
-    params.emplace_back("content2", "");
-    params.emplace_back("", "icon3");
-    params.emplace_back("", "");
+    params.push_back({ "content1", "icon1" });
+    params.push_back({ "content2", "" });
+    params.push_back({ "", "icon3" });
+    params.push_back({ "", "" });
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);

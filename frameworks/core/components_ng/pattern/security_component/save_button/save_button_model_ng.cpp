@@ -27,7 +27,8 @@ std::mutex SaveButtonModelNG::mutex_;
 
 static const std::vector<uint32_t> ICON_RESOURCE_TABLE = {
     static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_FILLED_SVG),
-    static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG)
+    static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG),
+    static_cast<uint32_t>(InternalResource::ResourceId::SAVE_BUTTON_PICTURE_SVG)
 };
 
 SaveButtonModelNG* SaveButtonModelNG::GetInstance()
@@ -42,10 +43,10 @@ SaveButtonModelNG* SaveButtonModelNG::GetInstance()
 }
 
 void SaveButtonModelNG::Create(int32_t text, int32_t icon,
-    int32_t backgroundType)
+    int32_t backgroundType, bool isArkuiComponent)
 {
     SecurityComponentModelNG::CreateCommon(V2::SAVE_BUTTON_ETS_TAG,
-        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+        text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); }, isArkuiComponent);
 }
 
 bool SaveButtonModelNG::GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)

@@ -32,6 +32,12 @@ public:
         auto paintProperty = MakeRefPtr<MenuItemGroupPaintProperty>();
         paintProperty->propNeedHeaderPadding_ = CloneNeedHeaderPadding();
         paintProperty->propNeedFooterPadding_ = CloneNeedFooterPadding();
+        paintProperty->propNeedHeaderDivider_ = CloneNeedHeaderDivider();
+        paintProperty->propNeedFooterDivider_ = CloneNeedFooterDivider();
+        paintProperty->propStrokeWidth_ = CloneStrokeWidth();
+        paintProperty->propDividerColor_ = CloneDividerColor();
+        paintProperty->propStartMargin_ = CloneStartMargin();
+        paintProperty->propEndMargin_ = CloneEndMargin();
         return paintProperty;
     }
 
@@ -40,10 +46,23 @@ public:
         PaintProperty::Reset();
         ResetNeedHeaderPadding();
         ResetNeedFooterPadding();
+        ResetNeedHeaderDivider();
+        ResetNeedFooterDivider();
+        ResetStrokeWidth();
+        ResetDividerColor();
+        ResetStartMargin();
+        ResetEndMargin();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedHeaderPadding, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFooterPadding, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedHeaderDivider, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFooterDivider, bool, PROPERTY_UPDATE_RENDER);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndMargin, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintProperty);
 };

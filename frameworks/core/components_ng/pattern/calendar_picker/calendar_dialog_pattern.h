@@ -129,6 +129,9 @@ private:
     void UpdateDialogBackgroundColor();
     void UpdateTitleArrowsColor();
     void UpdateOptionsButtonColor();
+    void OnEnterKeyEvent(const KeyEvent& event);
+    void UpdateTitleArrowsImage();
+    void UpdateImage(const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId);
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();
@@ -151,6 +154,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);
+    bool hasTabKeyDown_ = false;
 };
 } // namespace OHOS::Ace::NG
 

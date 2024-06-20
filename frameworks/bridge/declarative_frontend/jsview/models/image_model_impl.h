@@ -36,8 +36,7 @@ public:
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
-    void Create(const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
-        const std::string& moduleName, bool isUriPureNumber = false) override;
+    void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation iterpolation) override;
@@ -60,7 +59,10 @@ public:
     void EnableAnalyzer(bool isEnableAnalyzer) override {}
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
     void SetImageAnalyzerConfig(void* config) override {}
+    void SetImageAIOptions(void* config) override {}
     void SetSmoothEdge(float value)  override {}
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
     bool GetIsAnimation() override;
 };

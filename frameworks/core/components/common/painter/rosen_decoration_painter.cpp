@@ -3033,7 +3033,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
             shadowPen.SetMiterLimit(pen->GetMiterLimit());
             shadowPen.SetCapStyle(pen->GetCapStyle());
             shadowPen.SetJoinStyle(pen->GetJoinStyle());
-            shadowPen.SetAlphaF(pen->GetAlphaF());
+            shadowPen.SetAlphaF(pen->GetAlphaF() * shadowPen.GetAlphaF());
             shadowPen.SetFilter(filter);
             canvas->AttachPen(shadowPen);
         }
@@ -3041,7 +3041,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path, const Shadow& shado
             RSBrush shadowBrush;
             shadowBrush.SetColor(spotColor);
             shadowBrush.SetAntiAlias(true);
-            shadowBrush.SetAlphaF(brush->GetAlphaF());
+            shadowBrush.SetAlphaF(brush->GetAlphaF() * shadowBrush.GetAlphaF());
             shadowBrush.SetFilter(filter);
             canvas->AttachBrush(shadowBrush);
         }

@@ -20,10 +20,13 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 class LeadingMarginSize {
@@ -64,14 +67,14 @@ private:
 };
 
 struct LineMetrics {
-    float ascender;
-    float descender;
-    float capHeight;
-    float xHeight;
-    float width;
-    float height;
-    float x;
-    float y;
+    float ascender = 0.0f;
+    float descender = 0.0f;
+    float capHeight = 0.0f;
+    float xHeight = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
 };
 
 struct LeadingMargin {
@@ -87,17 +90,30 @@ struct LeadingMargin {
     {
         auto jsonValue = JsonUtil::Create(true);
         JSON_STRING_PUT_STRINGABLE(jsonValue, size);
-        jsonValue->Put("pixmap", pixmap
-            ? ("size=" + std::to_string(pixmap->GetWidth()) + "," + std::to_string(pixmap->GetHeight())).c_str()
-            : "nullptr");
+        jsonValue->Put("pixmap",
+            pixmap ? ("size=" + std::to_string(pixmap->GetWidth()) + "," + std::to_string(pixmap->GetHeight())).c_str()
+                   : "nullptr");
         return jsonValue->ToString();
+    }
+
+    bool CheckLeadingMargin(const LeadingMargin& other) const
+    {
+        auto flag = size == other.size;
+        if (pixmap && other.pixmap) {
+            flag &= pixmap->GetRawPixelMapPtr() == other.pixmap->GetRawPixelMapPtr();
+        } else if (!other.pixmap && !pixmap) {
+            flag &= true;
+        } else {
+            flag &= false;
+        }
+        return flag;
     }
 };
 
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
-    uint32_t maxLines = 1;
+    uint32_t maxLines = UINT32_MAX;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
     EllipsisMode ellipsisMode = EllipsisMode::TAIL;
@@ -105,6 +121,41 @@ struct ParagraphStyle {
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
+    Dimension lineHeight;
+    Dimension indent;
+    Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+
+    bool operator==(const ParagraphStyle others) const
+    {
+        return direction == others.direction && align == others.align && maxLines == others.maxLines &&
+               fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
+               ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
+               leadingMargin == others.leadingMargin && fontSize == others.fontSize && indent == others.indent;
+    }
+
+    bool operator!=(const ParagraphStyle others) const
+    {
+        return !(*this == others);
+    }
+
+    std::string ToString() const
+    {
+        std::string result = "TextAlign: ";
+        result += V2::ConvertWrapTextAlignToString(align);
+        result += ", maxLines: ";
+        result += std::to_string(maxLines);
+        result += ", wordBreak: ";
+        result += V2::ConvertWrapWordBreakToString(wordBreak);
+        result += ", textOverflow: ";
+        result += V2::ConvertWrapTextOverflowToString(textOverflow);
+        result += ", leadingMargin: ";
+        result += leadingMargin.has_value() ? leadingMargin.value().ToString().c_str() : "nullptr";
+        result += ", fontSize: ";
+        result += std::to_string(fontSize);
+        result += ", indent: ";
+        result += indent.ToString();
+        return result;
+    }
 };
 
 struct CaretMetricsF {
@@ -133,6 +184,16 @@ struct CaretMetricsF {
     }
 };
 
+struct PositionWithAffinity {
+    PositionWithAffinity(size_t pos, TextAffinity affinity)
+    {
+        position_ = pos;
+        affinity_ = affinity;
+    }
+    size_t position_;
+    TextAffinity affinity_;
+};
+
 // Paragraph is interface for drawing text and text paragraph.
 class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
@@ -140,6 +201,7 @@ class Paragraph : public virtual AceType {
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
+    static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build
     virtual bool IsValid() = 0;
 
@@ -164,6 +226,11 @@ public:
     virtual float GetAlphabeticBaseline() = 0;
     virtual float GetCharacterWidth(int32_t index) = 0;
     virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) = 0;
+    virtual PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset)
+    {
+        PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+        return finalResult;
+    }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
@@ -186,6 +253,8 @@ public:
 #endif
     virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
+    virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
+    virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
 };
 } // namespace OHOS::Ace::NG
 

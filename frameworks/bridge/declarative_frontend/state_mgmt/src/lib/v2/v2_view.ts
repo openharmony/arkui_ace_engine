@@ -28,19 +28,39 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
+    // Set of elements for delayed update
+    private elmtIdsDelayedUpdate: Set<number> = new Set();
+    private monitorIdsDelayedUpdate: Set<number> = new Set();
+    private computedIdsDelayedUpdate: Set<number> = new Set();
+
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
-        stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
+        stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
-    protected finalizeConstruction(): void {
 
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
-        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
+    /**
+     * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
+     * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
+     * or it may be called with `undefined` depending on how the UI compiler works.
+     *
+     * @param freezeState Only the value `true` will be used to set the freeze state,
+     * otherwise it inherits from its parent instance if its freezeState is true
+     */
+    protected finalizeConstruction(freezeState?: boolean | undefined): void {
+
+        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
+        ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
 
-        // Always use ID_REFS in ViewPU
+        // Always use ID_REFS in ViewV2
         this[ObserveV2.ID_REFS] = {};
+
+        // set to true if freeze parameter set for this @ComponentV2 to true
+        // otherwise inherit from its parentComponent (if it exists).
+        this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
+        stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
+
     }
 
     public debugInfo__(): string {
@@ -63,23 +83,19 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.setDeleteStatusRecursively();
         }
         // tell UINodeRegisterProxy that all elmtIds under
-        // this ViewPU should be treated as already unregistered
+        // this ViewV2 should be treated as already unregistered
 
         stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
-        // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
+        // purge the elmtIds owned by this ViewV2 from the updateFuncByElmtId and also the state variable dependent elmtIds
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
             // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
 
-        /*if this hasRecycleManager() {
-           this getRecycleManager() purgeAllCachedRecycleNode();
-        }*/
-
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
 
-        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        // it will unregister removed elementids from all the ViewV2, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
 
         // unregisters its own id once its children are unregistered above
@@ -116,7 +132,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            ObserveV2.getObserve().startBind(this, elmtId);
+            ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
@@ -128,7 +144,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 (node as ArkComponent).cleanStageValue();
             }
 
-            ObserveV2.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
 
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
@@ -139,7 +155,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // needs to move set before updateFunc.
         // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
-        // add element id -> owning ViewPU
+        // add element id -> owning ViewV2
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
@@ -191,6 +207,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
+        if(!this.isActive_) {
+            this.scheduleDelayedUpdate(elmtId);
+            return;
+        }
+
         if (!this.dirtDescendantElementIds_.size) { //  && !this runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
@@ -198,14 +219,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             this.markNeedUpdate();
             this.restoreInstanceId();
         }
-        /*  if (this hasRecycleManager()) {
-              this dirtDescendantElementIds_ add(this.recycleManager_.proxyNodeId(elmtId));
-            } else {
-        */
         this.dirtDescendantElementIds_.add(elmtId);
-        /*
-            }
-        */
         stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
 
         stateMgmtProfiler.end();
@@ -220,7 +234,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public updateDirtyElements(): void {
         stateMgmtProfiler.begin('ViewV2.updateDirtyElements');
         do {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber)}, starting ....`);
+            stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewV2.compareNumber)}, starting ....`);
 
             // see which elmtIds are managed by this View
             // and clean up all book keeping for them
@@ -229,18 +243,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
-            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
+            const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewV2.compareNumber);
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
-                /*if (this hasRecycleManager()) {
-                   this UpdateElement (this recycleManager_ proxyNodeId(elmtId));
-                 } else {
-                    */
                 this.UpdateElement(elmtId);
-                /*
-                 }
-                */
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
 
@@ -248,16 +255,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
             }
         } while (this.dirtDescendantElementIds_.size);
-        stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
+        stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE`);
         stateMgmtProfiler.end();
     }
 
 
     public UpdateElement(elmtId: number): void {
-        stateMgmtProfiler.begin('ViewPU.UpdateElement');
+        stateMgmtProfiler.begin('ViewV2.UpdateElement');
         if (elmtId === this.id__()) {
-            // do not attempt to update itself.
-            // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            // do not attempt to update itself
             stateMgmtProfiler.end();
             return;
         }
@@ -309,8 +315,101 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return retVal;
     }
 
+    /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
+        once the view gets active
+    */
+    public scheduleDelayedUpdate(elmtId: number) : void {
+        this.elmtIdsDelayedUpdate.add(elmtId);
+    }
+
+    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+    // monitor fireChange will be triggered for all these watchIds once this view gets active
+    public addDelayedMonitorIds(watchId: number) {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
+        this.monitorIdsDelayedUpdate.add(watchId);
+    }
+
+    public addDelayedComputedIds(watchId: number) {
+        stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
+        this.computedIdsDelayedUpdate.add(watchId);
+    }
+
     public setActiveInternal(newState: boolean): void {
-        stateMgmtConsole.error('ViewV2: setActiveInternal is unimplemented');
+        stateMgmtProfiler.begin("ViewV2.setActive");
+
+        if (!this.isCompFreezeAllowed()) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
+            stateMgmtProfiler.end();
+            return;
+        }
+
+        stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
+        this.isActive_ = newState;
+        if (this.isActive_) {
+          this.onActiveInternal()
+        } else {
+          this.onInactiveInternal();
+        }
+        stateMgmtProfiler.end();
+    }
+
+    private onActiveInternal(): void {
+        if (!this.isActive_) {
+          return;
+        }
+
+        stateMgmtConsole.debug(`${this.debugInfo__()}: onActiveInternal`);
+        this.performDelayedUpdate();
+
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+          const childView: IView | undefined = child.deref();
+          if (childView) {
+            childView.setActiveInternal(this.isActive_);
+          }
+        }
+    }
+
+    private onInactiveInternal(): void {
+        if (this.isActive_) {
+          return;
+        }
+        stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
+
+        // Set 'isActive_' state for all descendant child Views
+        for (const child of this.childrenWeakrefMap_.values()) {
+          const childView: IView | undefined = child.deref();
+          if (childView) {
+            childView.setActiveInternal(this.isActive_);
+          }
+        }
+    }
+
+    private performDelayedUpdate(): void {
+        stateMgmtProfiler.begin("ViewV2: performDelayedUpdate");
+        if(this.computedIdsDelayedUpdate.size) {
+            // exec computed functions
+            ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);
+        }
+        if(this.monitorIdsDelayedUpdate.size) {
+          // exec monitor functions
+          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+        }
+        if(this.elmtIdsDelayedUpdate.size) {
+          // update re-render of updated element ids once the view gets active
+          if(this.dirtDescendantElementIds_.size === 0) {
+            this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+          }
+          else {
+            this.elmtIdsDelayedUpdate.forEach((element) => {
+              this.dirtDescendantElementIds_.add(element);
+            });
+          }
+        }
+        this.markNeedUpdate();
+        this.elmtIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdate.clear();
+        stateMgmtProfiler.end();
     }
 
     /*
@@ -357,13 +456,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
         // factory is for future extensions, currently always return the same
         const elmtId = this.getCurrentlyRenderedElmtId();
-        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>
+        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>;
         if (!repeat) {
             repeat = new __RepeatV2<I>(arr);
             this.elmtId2Repeat_.set(elmtId, repeat);
         } else {
-            repeat.updateArr(arr)
+            repeat.updateArr(arr);
         }
         return repeat;
-    }
+    };
 }

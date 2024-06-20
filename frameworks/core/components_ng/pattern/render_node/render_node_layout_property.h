@@ -44,6 +44,10 @@ public:
     {
         LayoutProperty::ToJsonValue(json, filter);
         auto align = Alignment::TOP_LEFT;
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (GetPositionProperty()) {
             align = GetPositionProperty()->GetAlignment().value_or(Alignment::TOP_LEFT);
         }

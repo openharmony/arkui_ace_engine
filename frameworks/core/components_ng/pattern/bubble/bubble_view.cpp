@@ -75,6 +75,14 @@ Dimension GetMaxWith()
         parent->BuildColumnWidth();
     }
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, maxWidth);
+    uint32_t maxColumns = popupTheme->GetMaxColumns();
+    if (maxColumns > 0) {
+        maxWidth = Dimension(gridColumnInfo->GetWidth(maxColumns));
+    }
+
     return maxWidth;
 }
 
@@ -139,6 +147,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupProp->UpdateIsCaretMode(param->IsCaretMode());
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -177,6 +186,8 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto textColor = param->GetTextColor();
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
+    auto popupTheme = GetPopupTheme();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
@@ -201,7 +212,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
         bubblePattern->SetMessageNode(textNode);
-        auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
         PaddingProperty textPadding;
@@ -230,7 +240,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         }
         child = columnNode;
     }
-    // TODO: GridSystemManager is not completed, need to check later.
+    // GridSystemManager is not completed, need to check later.
     auto childLayoutProperty = child->GetLayoutProperty();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
     float popupMaxWidth = 0.0f;
@@ -246,9 +256,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     if (renderContext) {
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
@@ -336,11 +347,14 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (columnRenderContext) {
+        auto popupTheme = GetPopupTheme();
+        CHECK_NULL_RETURN(popupTheme, nullptr);
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProps->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(defaultBGcolor);
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
@@ -528,6 +542,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    popupLayoutProp->UpdateIsCaretMode(param->IsCaretMode());
     if (param->GetErrorArrowHeight()) {
         popupLayoutProp->ResetArrowHeight();
     }

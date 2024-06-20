@@ -131,13 +131,72 @@ void ResetMarqueeUpdateStrategy(ArkUINodeHandle node)
     MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, OHOS::Ace::MarqueeUpdateStrategy::DEFAULT);
 }
 
+void SetMarqueeOnStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStart = reinterpret_cast<std::function<void()>*>(callback);
+        MarqueeModelNG::SetOnStart(frameNode, std::move(*onStart));
+    } else {
+        MarqueeModelNG::SetOnStart(frameNode, nullptr);
+    }
+}
+
+void ResetMarqueeOnStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetOnStart(frameNode, nullptr);
+}
+
+void SetMarqueeOnBounce(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onBounce = reinterpret_cast<std::function<void()>*>(callback);
+        MarqueeModelNG::SetOnBounce(frameNode, std::move(*onBounce));
+    } else {
+        MarqueeModelNG::SetOnBounce(frameNode, nullptr);
+    }
+}
+
+void ResetMarqueeOnBounce(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetOnBounce(frameNode, nullptr);
+}
+
+void SetMarqueeOnFinish(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFinish = reinterpret_cast<std::function<void()>*>(callback);
+        MarqueeModelNG::SetOnFinish(frameNode, std::move(*onFinish));
+    } else {
+        MarqueeModelNG::SetOnFinish(frameNode, nullptr);
+    }
+}
+
+void ResetMarqueeOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetOnFinish(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeModifier()
 {
-    static const ArkUIMarqueeModifier modifier = { SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
+    static const ArkUIMarqueeModifier modifier = {
+        SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
         ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
         ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
-        ResetMarqueeUpdateStrategy };
+        ResetMarqueeUpdateStrategy, SetMarqueeOnStart, ResetMarqueeOnStart,
+        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish };
     return &modifier;
 }
 }

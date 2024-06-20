@@ -69,6 +69,7 @@ public:
         paintProperty->propIndicatorIconSourceInfo_ = CloneIndicatorIconSourceInfo();
         paintProperty->propIndicatorSpace_ = CloneIndicatorSpace();
         paintProperty->propIndicatorChange_ = CloneIndicatorChange();
+        paintProperty->propIsSensitive_ = CloneIsSensitive();
         return paintProperty;
     }
 
@@ -89,16 +90,27 @@ public:
         ResetIsShowIndicator();
         ResetIndicatorIconSourceInfo();
         ResetIndicatorSpace();
+        ResetIsSensitive();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                ToJsonColor(json, filter);
+                ToJsonIndicator(json, filter);
+                ToJsonTrackShadow(json, filter);
+            }
+            return;
+        }
         json->PutExtAttr("value", StringUtils::DoubleToString(propValue_.value_or(0)).c_str(), filter);
         json->PutExtAttr("max", StringUtils::DoubleToString(propMax_.value_or(100)).c_str(), filter);
         json->PutExtAttr("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str(), filter);
         json->PutExtAttr("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str(), filter);
         json->PutExtAttr("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str(), filter);
+        json->PutExtAttr("isSensitive", std::to_string(GetIsSensitive().value_or(false)).c_str(), filter);
         if (propStrokeWidth_.has_value()) {
             json->PutExtAttr("strokeWidth", propStrokeWidth_.value().ToString().c_str(), filter);
         } else {
@@ -126,6 +138,10 @@ public:
 
     void ToJsonColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (!propGaugeType_.has_value()) {
             auto jsonColor = JsonUtil::CreateArray(true);
             for (size_t j = 0; j < GAUGE_DEFAULT_COLOR.size(); j++) {
@@ -183,6 +199,10 @@ public:
 
     void ToJsonIndicator(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         if (!propIsShowIndicator_.value_or(true)) {
             json->PutExtAttr("indicator", "null", filter);
             return;
@@ -204,6 +224,10 @@ public:
 
     void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         GaugeShadowOptions trackShadow;
         if (propShadowOptions_.has_value()) {
             trackShadow.radius = propShadowOptions_.value().radius;
@@ -244,6 +268,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorIconSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorChange, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSensitive, bool, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

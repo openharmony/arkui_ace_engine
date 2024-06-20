@@ -18,9 +18,10 @@
 
 #include <memory>
 #include <mutex>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class EllipseModel {
+class ACE_FORCE_EXPORT EllipseModel {
 public:
     static EllipseModel* GetInstance();
     virtual ~EllipseModel() = default;

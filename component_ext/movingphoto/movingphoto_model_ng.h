@@ -34,6 +34,7 @@ public:
     void SetObjectFit(ImageFit objectFit);
     void SetOnStart(MovingPhotoEventFunc&& onStart);
     void SetOnStop(MovingPhotoEventFunc&& onStop);
+    void SetOnPause(MovingPhotoEventFunc&& onPause);
     void SetOnFinish(MovingPhotoEventFunc&& onFinish);
     void SetOnError(MovingPhotoEventFunc&& onError);
 

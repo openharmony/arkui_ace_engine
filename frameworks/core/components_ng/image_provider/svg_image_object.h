@@ -37,8 +37,8 @@ public:
     }
 
 private:
-    void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+    void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
+        bool syncLoad, bool loadInVipChannel = false) override;
     // return true if process is successful
     bool MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src);
     RefPtr<SvgDomBase> svgDomBase_;

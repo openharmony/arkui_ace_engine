@@ -56,7 +56,7 @@ class SynchedPropertyNesedObject<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || 'unknown'}']: contained ObservedObject hasChanged'.`);
     this.notifyHasChanged(this.obsObject_);
   }
 
@@ -64,19 +64,19 @@ class SynchedPropertyNesedObject<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`)
+    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || 'unknown'}']: get`);
     this.notifyPropertyRead();
     return this.obsObject_;
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
-    if (this.obsObject_ == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
+    if (this.obsObject_ === newValue) {
+      stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || 'unknown'}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || 'unknown'}']: set to newValue: '${newValue}'.`);
 
     // unsubscribe from the old value ObservedObject
     ObservedObject.removeOwningProperty(this.obsObject_, this);
@@ -98,7 +98,7 @@ class SynchedPropertyNesedObject<C extends Object>
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
-    throw new Error("Method not supported for property linking to a nested objects.");
+    throw new Error('Method not supported for property linking to a nested objects.');
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {

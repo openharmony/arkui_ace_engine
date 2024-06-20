@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
@@ -51,7 +52,7 @@ public:
     }
 
 private:
-    RefPtr<NG::UINode> viewNode_;
+    RefPtr<NG::FrameNode> viewNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;

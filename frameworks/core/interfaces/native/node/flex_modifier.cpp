@@ -145,10 +145,25 @@ void GetFlexOptions(ArkUINodeHandle node, ArkUIFlexOptions* options)
     }
 }
 
+void setFlexCrossSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FlexModelNG::SetCrossSpace(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void SetMainSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    FlexModelNG::SetMainSpace(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
-    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions, GetFlexOptions };
+    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace,
+        SetMainSpace };
     return &modifier;
 }
 }

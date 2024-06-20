@@ -25,7 +25,14 @@
 
 namespace OHOS::Ace::NG {
 
-void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
+FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
+{
+    if (pipeline && pipeline->GetRootElement()) {
+        currentFocus_ = pipeline->GetRootElement()->GetFocusHub();
+    }
+}
+
+void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
 {
     CHECK_NULL_VOID(focusView);
     if (!focusView->HasParentFocusHub()) {
@@ -49,6 +56,18 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView)
     }
     focusViewStack_.emplace_back(focusViewWeak);
     lastFocusView_ = focusViewWeak;
+
+    // do not set LastWeakFocus to Previous node/scope in focusView when FocusViewShow trigger by FocusStep
+    if (!isTriggerByStep) {
+        lastFocusView = lastFocusView_.Upgrade();
+        if (!lastFocusView) {
+            return;
+        }
+        auto lastFocusViewHub = lastFocusView->GetFocusHub();
+        if (lastFocusViewHub) {
+            lastFocusViewHub->SetLastWeakFocusToPreviousInFocusView();
+        }
+    }
 }
 
 void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
@@ -84,6 +103,28 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
     if (focusViewStack_.back() != lastFocusView_) {
         lastFocusView_ = focusViewStack_.back();
     }
+}
+
+void FocusManager::FlushFocusView()
+{
+    auto lastFocusView = lastFocusView_.Upgrade();
+    auto lastFocusViewHub = lastFocusView ? lastFocusView->GetFocusHub() : nullptr;
+    if (lastFocusViewHub && lastFocusViewHub->IsCurrentFocus()) {
+        return;
+    }
+    RefPtr<FocusView> currFocusView = nullptr;
+    for (const auto& weakView : focusViewStack_) {
+        auto view = weakView.Upgrade();
+        auto viewHub = view ? view->GetFocusHub() : nullptr;
+        if (!viewHub || !viewHub->IsCurrentFocus()) {
+            continue;
+        }
+        if (currFocusView && currFocusView->IsChildFocusViewOf(view)) {
+            continue;
+        }
+        currFocusView = view;
+    }
+    lastFocusView_ = currFocusView ? AceType::WeakClaim(AceType::RawPtr(currFocusView)) : nullptr;
 }
 
 void FocusManager::GetFocusViewMap(FocusViewMap& focusViewMap)
@@ -191,11 +232,16 @@ void FocusManager::RemoveFocusScope(const std::string& focusScopeId)
     }
 }
 
-void FocusManager::AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub)
+void FocusManager::AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub,
+    bool pushFront)
 {
     auto iter = focusHubScopeMap_.find(focusScopeId);
     if (iter != focusHubScopeMap_.end()) {
-        iter->second.second.emplace_back(priorFocusHub);
+        if (pushFront) {
+            iter->second.second.emplace_front(priorFocusHub);
+        } else {
+            iter->second.second.emplace_back(priorFocusHub);
+        }
     } else {
         focusHubScopeMap_[focusScopeId] = { nullptr, { priorFocusHub } };
     }
@@ -225,5 +271,105 @@ std::optional<std::list<WeakPtr<FocusHub>>*> FocusManager::GetFocusScopePriority
         }
     }
     return std::nullopt;
+}
+
+void FocusManager::UpdateCurrentFocus(const RefPtr<FocusHub>& current)
+{
+    if (isSwitchingFocus_.value_or(false)) {
+        switchingFocus_ = current;
+    }
+}
+
+RefPtr<FocusHub> FocusManager::GetCurrentFocus()
+{
+    return currentFocus_.Upgrade();
+}
+
+int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
+{
+    // max callbacks count: INT32_MAX - 1
+    if (listeners_.size() == std::numeric_limits<int32_t>::max() - 1) {
+        return -1;
+    }
+    int32_t handler = nextListenerHdl_;
+    listeners_.emplace(handler, std::move(callback));
+
+    do {
+        nextListenerHdl_ = (nextListenerHdl_ == std::numeric_limits<int32_t>::max()) ? 0 : ++nextListenerHdl_;
+    } while (listeners_.count(nextListenerHdl_) != 0);
+    return handler;
+}
+
+void FocusManager::RemoveFocusListener(int32_t handler)
+{
+    listeners_.erase(handler);
+}
+
+RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)
+{
+    auto context = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto focusManager = context->GetFocusManager();
+    return focusManager;
+}
+
+void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub)
+{
+    isSwitchingFocus_ = true;
+    switchingFocus_ = focusHub;
+}
+
+void FocusManager::FocusSwitchingEnd()
+{
+    // While switching window, focus may move by steps.(WindowFocus/FlushFocus)
+    // Merge all steps together as a single movement.
+    if (!isSwitchingFocus_.value_or(false)) {
+        return;
+    }
+    if (!isSwitchingWindow_) {
+        for (auto& [_, cb] : listeners_) {
+            cb(currentFocus_, switchingFocus_);
+        }
+        currentFocus_ = switchingFocus_;
+        isSwitchingFocus_.reset();
+    } else {
+        isSwitchingFocus_ = false;
+    }
+}
+
+void FocusManager::WindowFocusMoveStart()
+{
+    isSwitchingWindow_ = true;
+}
+
+void FocusManager::WindowFocusMoveEnd()
+{
+    isSwitchingWindow_ = false;
+    if (!isSwitchingFocus_.value_or(true)) {
+        for (auto& [_, cb] : listeners_) {
+            cb(currentFocus_, switchingFocus_);
+        }
+        currentFocus_ = switchingFocus_;
+        isSwitchingFocus_.reset();
+    }
+}
+
+FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    auto mng = focusHub->GetFocusManager();
+    CHECK_NULL_VOID(mng);
+    if (mng->isSwitchingFocus_.value_or(false)) {
+        return;
+    }
+    mng->FocusSwitchingStart(focusHub);
+    focusMng_ = mng;
+}
+
+FocusManager::FocusGuard::~FocusGuard()
+{
+    if (focusMng_) {
+        focusMng_->FocusSwitchingEnd();
+    }
 }
 } // namespace OHOS::Ace::NG

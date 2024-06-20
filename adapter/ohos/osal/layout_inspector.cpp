@@ -30,6 +30,8 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "base/json/json_util.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
@@ -154,6 +156,13 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
+void LayoutInspector::SetArkUIStateProfilerStatus(bool status)
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    context->SetStateProfilerStatus(status);
+}
+
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -167,12 +176,19 @@ void LayoutInspector::SetCallback(int32_t instanceId)
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
             [](bool status) { return SetStatus(status); });
     }
+
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
+        [](bool status) { return SetArkUIStateProfilerStatus(status); });
 }
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
     auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
     containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
@@ -200,6 +216,8 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -215,6 +233,11 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
+    auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
+    jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+    jsonTree->Put("ProcessID", getpid());
+    jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+    treeJsonStr = jsonTree->ToString();
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)

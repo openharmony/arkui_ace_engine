@@ -257,6 +257,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
+        info.SetPressedKeyCodes(trackPoint.pressedKeyCodes_);
         (*callback)(info);
     }
 }

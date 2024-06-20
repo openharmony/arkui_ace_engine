@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT StorageProxy : public StorageInterface {
+class ACE_FORCE_EXPORT StorageProxy : public StorageInterface {
 public:
     ACE_EXPORT static StorageProxy* GetInstance();
     void SetDelegate(std::unique_ptr<StorageInterface>&& delegate);

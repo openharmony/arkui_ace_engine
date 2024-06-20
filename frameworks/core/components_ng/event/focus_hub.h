@@ -18,8 +18,12 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -158,12 +162,21 @@ public:
     {
         focusPadding = padding;
     }
+    void SetFocusBoxGlow(bool focusBoxGlow)
+    {
+        focusBoxGlow_ = focusBoxGlow;
+    }
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
 
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;
     std::optional<Dimension> paintWidth;
     std::optional<Dimension> focusPadding;
+    bool focusBoxGlow_ = false;
 };
 
 class ACE_EXPORT FocusPattern : public virtual AceType {
@@ -193,6 +206,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
     FocusPattern(const FocusPattern& focusPattern)
     {
@@ -254,6 +268,7 @@ public:
         if (paintParams.HasFocusPadding()) {
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
+        paintParams_->SetFocusBoxGlow(paintParams.IsFocusBoxGlow());
     }
 
     bool GetIsFocusActiveWhenFocused() const
@@ -273,6 +288,12 @@ private:
     bool isFocusActiveWhenFocused_ = false;
 };
 
+enum class ScopeFocusDirection {
+    VERTICAL = 0,
+    HORIZONTAL,
+    UNIVERSAL,
+};
+
 struct ScopeFocusAlgorithm final {
     ScopeFocusAlgorithm() = default;
     ScopeFocusAlgorithm(bool isVertical, bool isLeftToRight, ScopeType scopeType)
@@ -282,8 +303,18 @@ struct ScopeFocusAlgorithm final {
         : isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
           getNextFocusNode(std::move(function))
     {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType)
+    {}
+    ScopeFocusAlgorithm(ScopeFocusDirection direction, bool isVertical, bool isLeftToRight, ScopeType scopeType,
+        GetNextFocusNodeFunc&& function)
+        : direction(direction), isVertical(isVertical), isLeftToRight(isLeftToRight), scopeType(scopeType),
+          getNextFocusNode(std::move(function))
+    {}
     ~ScopeFocusAlgorithm() = default;
 
+    // isVertical will be deleted
+    ScopeFocusDirection direction { ScopeFocusDirection::VERTICAL };
     bool isVertical { true };
     bool isLeftToRight { true };
     ScopeType scopeType { ScopeType::OTHERS };
@@ -301,6 +332,9 @@ public:
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownCallbackFunc onCrownEventCallback_;
+#endif
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     OnKeyPreImeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
@@ -347,14 +381,6 @@ public:
         return focusStyleType_;
     }
 
-    static void CloseKeyboard();
-
-    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
-
-    static void PushPageCloseKeyboard();
-
-    static void NavCloseKeyboard();
-
     BlurReason GetBlurReason() const
     {
         return blurReason_;
@@ -378,6 +404,7 @@ public:
         if (paramsPtr->HasFocusPadding()) {
             focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
         }
+        focusPaintParamsPtr_->SetFocusBoxGlow(paramsPtr->IsFocusBoxGlow());
     }
 
     bool HasPaintRect() const
@@ -408,6 +435,12 @@ public:
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
         return focusPaintParamsPtr_->GetPaintWidth();
+    }
+
+    bool IsFocusBoxGlow() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, false);
+        return focusPaintParamsPtr_->IsFocusBoxGlow();
     }
 
     bool HasFocusPadding() const
@@ -469,6 +502,14 @@ public:
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
+    void SetFocusBoxGlow(bool isFocusBoxGlow)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetFocusBoxGlow(isFocusBoxGlow);
+    }
+
     RefPtr<FocusManager> GetFocusManager() const;
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
@@ -478,13 +519,16 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool HandleCrownEvent(const CrownEvent& CrownEvent);
+#endif
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
-    void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
     static void LostFocusToViewRoot();
 
+    bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
@@ -542,6 +586,8 @@ public:
         return currentFocus_;
     }
     bool IsCurrentFocusWholePath();
+
+    bool HasFocusedChild();
 
     void ClearUserOnFocus()
     {
@@ -625,6 +671,43 @@ public:
         }
         focusCallbackEvents_->onKeyEventCallback_ = std::move(onKeyCallback);
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback)
+    {
+        if (!focusCallbackEvents_) {
+            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
+        }
+        focusCallbackEvents_->onCrownEventCallback_ = std::move(onCrownCallback);
+    }
+
+    void ClearUserOnCrown()
+    {
+        if (focusCallbackEvents_ && focusCallbackEvents_->onCrownEventCallback_) {
+            focusCallbackEvents_->onCrownEventCallback_ = nullptr;
+        }
+    }
+
+    OnCrownCallbackFunc GetOnCrownCallback()
+    {
+        return focusCallbackEvents_ ? focusCallbackEvents_->onCrownEventCallback_ : nullptr;
+    }
+
+    void SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback)
+    {
+        onCrownEventsInternal_ = std::move(onCrownEventCallback);
+    }
+
+    bool ProcessOnCrownEventInternal(const CrownEvent& event)
+    {
+        bool result = false;
+        if (onCrownEventsInternal_) {
+            onCrownEventsInternal_(event);
+            result = true;
+        }
+        return result;
+    }
+#endif
 
     void ClearUserOnKey()
     {
@@ -742,6 +825,9 @@ public:
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
+
+    // Only for the currently loaded children, do not expand.
+    std::list<RefPtr<FocusHub>>::iterator FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     std::list<RefPtr<FocusHub>> GetChildren()
     {
@@ -953,6 +1039,8 @@ public:
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
+    bool SetLastWeakFocusNodeToPreviousNode();
+    void SetLastWeakFocusToPreviousInFocusView();
     bool GetIsFocusGroup() const
     {
         return isGroup_;
@@ -968,10 +1056,26 @@ public:
         return focusScopeId_;
     }
 
+    FocusBox& GetFocusBox()
+    {
+        return box_;
+    }
+
+    FocusPriority GetFocusPriority() const
+    {
+        return focusPriority_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool OnCrownEvent(const CrownEvent& CrownEvent);
+    bool OnCrownEventNode(const CrownEvent& CrownEvent);
+    bool OnCrownEventScope(const CrownEvent& CrownEvent);
+#endif
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
+    bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
     bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
@@ -1026,6 +1130,8 @@ private:
     bool IsNestingFocusGroup();
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
+    void RaiseZIndex(); // Recover z-index in ClearFocusState
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1033,7 +1139,9 @@ private:
     OnPreFocusFunc onPreFocusCallback_;
     OnClearFocusStateFunc onClearFocusStateCallback_;
     OnPaintFocusStateFunc onPaintFocusStateCallback_;
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownEventFunc onCrownEventsInternal_;
+#endif
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 
     RefPtr<TouchEventImpl> focusOnTouchListener_;
@@ -1053,11 +1161,13 @@ private:
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
+    bool isRaisedZIndex_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
     std::function<void(RoundRect&)> getInnerFocusRectFunc_;
+    FocusBox box_;
 
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;

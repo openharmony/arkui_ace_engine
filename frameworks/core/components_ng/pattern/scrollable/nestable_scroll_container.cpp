@@ -66,6 +66,10 @@ void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedS
         }
     }
     SetIsFixedNestedScrollMode(isFixedNestedScrollMode);
+    auto parent = parent_.Upgrade();
+    if (parent && !nestedScroll.NeedParent() && nestedScroll_.NeedParent()) {
+        isNestedInterrupt_ = true;
+    }
     nestedScroll_ = nestedScroll;
 }
 

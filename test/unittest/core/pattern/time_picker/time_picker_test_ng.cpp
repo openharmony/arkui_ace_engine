@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -44,6 +45,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -96,6 +98,9 @@ namespace {
 const InspectorFilter filter;
 constexpr double TOSS_DELTA = 20.0;
 const int CURRENT_VALUE1 = 3;
+const int CURRENT_VALUE3 = 4;
+const int CURRENT_VALUE4 = 5;
+const int CURRENT_VALUE5 = 6;
 const int CURRENT_VALUE2 = 10;
 const int MIDDLE_OF_COUNTS = 2;
 const int SHOW_COUNT = 7;
@@ -104,6 +109,8 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
+const std::string TIME_AMPM = "01";
+const std::string AMPM_TIME = "10";
 const PickerTime TIME_PICKED = PickerTime(14, 9, 10);
 const PickerTime TIME_PICKED_PREFIXZERO = PickerTime(3, 3, 3);
 const int32_t AM_PM_PICKED = 1;
@@ -136,7 +143,7 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
-const SizeF TEST_FRAME_SIZE { 20, 50 };
+const SizeF TEST_FRAME_SIZE { 20, 30 };
 constexpr double COLUMN_VELOCITY = 2000.0;
 const double FONT_SIZE_5 = 5.0;
 const double FONT_SIZE_10 = 10.0;
@@ -179,11 +186,13 @@ public:
 void TimePickerPatternTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void TimePickerPatternTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void TimePickerPatternTestNg::SetUp()
@@ -197,6 +206,8 @@ void TimePickerPatternTestNg::SetUp()
                 return AceType::MakeRefPtr<DialogTheme>();
             } else if (type == PickerTheme::TypeId()) {
                 return MockThemeDefault::GetPickerTheme();
+            } else if (type == ButtonTheme::TypeId()) {
+                return AceType::MakeRefPtr<ButtonTheme>();
             } else {
                 return nullptr;
             }
@@ -953,10 +964,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     ZeroPrefixType showType = ZeroPrefixType::SHOW;
     ZeroPrefixType hideType = ZeroPrefixType::HIDE;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
     TimePickerModelNG::GetInstance()->SetHour24(true);
@@ -992,7 +1003,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, Test
         std::to_string(CURRENT_VALUE1) + COLON +
         ZERO + std::to_string(CURRENT_VALUE1) + COLON +
         std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -1003,10 +1014,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, Test
 HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, TestSize.Level1)
 {
     int32_t setApiVersion = 12;
-    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     ZeroPrefixType showType = ZeroPrefixType::SHOW;
     ZeroPrefixType hideType = ZeroPrefixType::HIDE;
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme, false);
     TimePickerModelNG::GetInstance()->SetHour24(false);
@@ -1044,7 +1055,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, Test
     amPmPickerColumnPattern->SetCurrentIndex(1);
     EXPECT_EQ(accessibilityProperty->GetText(),
         PM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -1663,7 +1674,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
-    frameNode->GetChildren().front()->children_.clear();
+    frameNode->RemoveChildAtIndex(0);
     timePickerRowPattern->HandleHourColumnBuilding();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(allChildNode["amPm"].Upgrade(), nullptr);
@@ -2794,5 +2805,1876 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow003, TestSize.Level1)
     auto dialogNode = TimePickerDialogView::Show(
         dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus002
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    buttonInfos.push_back(info1);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus003
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow004
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow004, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE1));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow005
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow005, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE1));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow006
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow006, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE1));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow007
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow007, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 3, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE1));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow008
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow008, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow009
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow009, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow010
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow010, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow011
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow011, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow012
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow012, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow013
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow013, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow014
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow014, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow015
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow015, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow016
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow016, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow017
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow017, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow018
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow018, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow019
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow019, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(3, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE1) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow020
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow020, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow021
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow021, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow022
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow022, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow023
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow023, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow024
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow024, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow025
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow025, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow026
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow026, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow027
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow027, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 4, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE3));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow028
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow028, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow029
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow029, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow030
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow030, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow031
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow031, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow032
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow032, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow033
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow033, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow034
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow034, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow035
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow035, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(4, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE3) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow036
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow036, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow037
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow037, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow038
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow038, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE4) + COLON + ZERO + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow039
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow039, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(5, 5, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE4) + COLON + std::to_string(CURRENT_VALUE4));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow040
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow040, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(6, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow041
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow041, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(6, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE5) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow042
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow042, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(6, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE5) + COLON + ZERO + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow043
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow043, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::HIDE;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::HIDE;
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(6, 6, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps2: Test the time of timePicker.
+     * @tc.expected: The texts of timePicker are equal to selected time
+     */
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto accessibilityProperty = timePickerNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + std::to_string(CURRENT_VALUE5) + COLON + std::to_string(CURRENT_VALUE5));
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

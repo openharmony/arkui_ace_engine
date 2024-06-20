@@ -18,7 +18,6 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/search/search_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/render/drawing.h"
@@ -39,58 +38,100 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    if (isSearchButtonEnabled_) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto searchTheme = pipeline->GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(searchTheme);
-        auto iconHeight = searchTheme->GetIconHeight();
-        auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
-        auto searchSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
-        auto searchDividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
-        auto searchDividerColor = searchTheme->GetSearchDividerColor();
-        auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-        float rightOffset = 0.0f;
-        float topPadding = 0.0f;
-        float bottomPadding = 0.0f;
-        const auto& padding = paintWrapper->GetGeometryNode()->GetPadding();
-        if (padding) {
-            rightOffset = padding->right.value_or(0.0f);
-            topPadding = padding->top.value_or(0.0f);
-            bottomPadding = padding->bottom.value_or(0.0f);
-        }
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            rightOffset = 0.0f;
-        }
-        // Paint divider.
-        float dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        float dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace -
-                                        searchDividerWidth / 2 - rightOffset;
-        dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0f);
-        auto dividerHeight =
-            std::min(searchSize.Height() - topPadding - bottomPadding, static_cast<float>(iconHeight.ConvertToPx()));
-        dividerVerticalOffset = topPadding;
-        if (NearEqual(iconHeight.ConvertToPx(), dividerHeight)) {
-            auto dividerInterval = (searchSize.Height() - iconHeight.ConvertToPx()) / 2;
-            if (topPadding <= dividerInterval && bottomPadding <= dividerInterval) {
-                dividerVerticalOffset = dividerInterval;
-            } else if (topPadding <= dividerInterval && bottomPadding > dividerInterval) {
-                dividerVerticalOffset = searchSize.Height() - (bottomPadding + dividerHeight);
-            }
-        }
-        float originX = dividerHorizontalOffset;
-        float originY = dividerVerticalOffset;
-
-        RSRect rect(originX, originY, originX + searchDividerWidth, originY + dividerHeight);
-        canvas.Save();
-        RSPen pen;
-        pen.SetWidth(searchDividerWidth);
-        pen.SetColor(ToRSColor(searchDividerColor));
-        canvas.AttachPen(pen);
-        canvas.DrawRect(rect);
-        canvas.DetachPen();
-        canvas.Restore();
+    if (!isSearchButtonEnabled_) {
+        return;
     }
+
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+
+    // GetThemeAttributes logic inlined here
+    auto [iconHeight, dividerSpace, searchSpace, searchDividerWidth, searchDividerColor] =
+        GetThemeAttributes(searchTheme);
+    auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto [rightOffset, leftOffset, topPadding, bottomPadding] = GetPaddingOffsets(paintWrapper);
+
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        rightOffset = 0.0f;
+    }
+    DividerOffsetsParams params = { isRTL, searchSize, iconHeight, dividerSpace, searchSpace, searchDividerWidth,
+                                    rightOffset, leftOffset, topPadding, bottomPadding };
+
+    // CalculateDividerOffsets logic inlined here
+    auto [dividerHorizontalOffset, dividerVerticalOffset, dividerHeight] = CalculateDividerOffsets(params);
+
+    // DrawDivider logic inlined here
+    RSRect rect(dividerHorizontalOffset, dividerVerticalOffset, dividerHorizontalOffset + searchDividerWidth,
+        dividerVerticalOffset + dividerHeight);
+    canvas.Save();
+    RSPen pen;
+    pen.SetWidth(searchDividerWidth);
+    pen.SetColor(ToRSColor(searchDividerColor));
+    canvas.AttachPen(pen);
+    canvas.DrawRect(rect);
+    canvas.DetachPen();
+    canvas.Restore();
 }
 
+std::tuple<OHOS::Ace::Dimension, double, double, double, OHOS::Ace::Color> SearchPaintMethod::GetThemeAttributes(
+    const RefPtr<OHOS::Ace::SearchTheme>& searchTheme) const
+{
+    OHOS::Ace::Dimension iconHeight = searchTheme->GetIconHeight();
+    auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
+    auto searchSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto searchDividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
+    OHOS::Ace::Color searchDividerColor = searchTheme->GetSearchDividerColor();
+    return { iconHeight, dividerSpace, searchSpace, searchDividerWidth, searchDividerColor };
+}
+
+std::tuple<float, float, float, float> SearchPaintMethod::GetPaddingOffsets(PaintWrapper* paintWrapper) const
+{
+    auto rightOffset = 0.0f;
+    auto leftOffset = 0.0f;
+    auto topPadding = 0.0f;
+    auto bottomPadding = 0.0f;
+    const auto &padding = paintWrapper->GetGeometryNode()->GetPadding();
+    if (padding) {
+        rightOffset = padding->right.value_or(0.0f);
+        topPadding = padding->top.value_or(0.0f);
+        bottomPadding = padding->bottom.value_or(0.0f);
+        leftOffset = padding->left.value_or(0.0f);
+    }
+    return { rightOffset, leftOffset, topPadding, bottomPadding };
+}
+
+std::tuple<float, float, float> SearchPaintMethod::CalculateDividerOffsets(const DividerOffsetsParams& params) const
+{
+    auto dividerVerticalOffset = (params.searchSize.Height() - params.iconHeight.ConvertToPx()) / 2.0f;
+    auto dividerHorizontalOffset = 0.0f;
+    if (params.isRTL) {
+        dividerHorizontalOffset = params.leftOffset + buttonSize_.Width() + params.dividerSpace + params.searchSpace +
+            params.searchDividerWidth / 2.0f;
+    } else {
+        dividerHorizontalOffset = params.searchSize.Width() - buttonSize_.Width() - params.dividerSpace -
+            params.searchSpace - params.searchDividerWidth / 2.0f - params.rightOffset;
+    }
+    dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0f);
+    auto dividerHeight = std::min(params.searchSize.Height() - params.topPadding - params.bottomPadding,
+        static_cast<float>(params.iconHeight.ConvertToPx()));
+    dividerVerticalOffset = params.topPadding;
+    if (NearEqual(params.iconHeight.ConvertToPx(), dividerHeight)) {
+        auto dividerInterval = (params.searchSize.Height() - params.iconHeight.ConvertToPx()) / 2.0f;
+        if (params.topPadding <= dividerInterval && params.bottomPadding <= dividerInterval) {
+            dividerVerticalOffset = dividerInterval;
+        } else if (params.topPadding <= dividerInterval && params.bottomPadding > dividerInterval) {
+            dividerVerticalOffset = params.searchSize.Height() - (params.bottomPadding + dividerHeight);
+        }
+    }
+    return { dividerHorizontalOffset, dividerVerticalOffset, dividerHeight };
+}
 } // namespace OHOS::Ace::NG

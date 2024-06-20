@@ -111,6 +111,10 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
 
+// navigation page info
+constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
+constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
@@ -121,10 +125,12 @@ enum class NavToolbarItemStatus {
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;
+    std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> iconSymbol;
     std::optional<bool> isEnabled;
     std::function<void()> action;
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
+    std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> activeIconSymbol;
     std::string ToString() const
     {
         std::string result;
@@ -177,6 +183,11 @@ enum class ChildNodeOperation {
     NONE
 };
 
+enum class BarStyle {
+    STANDARD = 0,
+    STACK,
+};
+
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };
 
 enum class NavRouteMode {
@@ -202,10 +213,9 @@ enum NavDestinationLifecycle {
     ON_DISAPPEAR
 };
 
-struct NavContentInfo {
-    std::string name;
-    int32_t index = 0;
-    NavDestinationMode mode;
+struct NavSafeArea {
+    float top = 0.0f;
+    float bottom = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

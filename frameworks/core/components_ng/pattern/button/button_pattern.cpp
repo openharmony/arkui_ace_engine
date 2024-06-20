@@ -62,6 +62,31 @@ void ButtonPattern::OnAttachToFrameNode()
     renderContext->SetAlphaOffscreen(true);
 }
 
+bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, false);
+    auto fontScale = pipeline->GetFontScale();
+
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize()->Unit() != DimensionUnit::FP) {
+        return false;
+    }
+    auto layoutContraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutContraint, false);
+    if (layoutContraint->selfIdealSize.Width().has_value() || layoutContraint->selfIdealSize.Height().has_value()) {
+        return false;
+    }
+    if (!(NearEqual(fontScale, buttonTheme->GetBigFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetLargeFontSizeScale()) ||
+            NearEqual(fontScale, buttonTheme->GetMaxFontSizeScale()))) {
+        return false;
+    }
+    return true;
+}
+
 void ButtonPattern::UpdateTextLayoutProperty(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
@@ -85,6 +110,17 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFamily().has_value()) {
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
+
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetAgingTextMaxLines());
+    } else {
+        textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
+    }
+
     if (layoutProperty->GetTextOverflow().has_value()) {
         textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
     }
@@ -162,19 +198,9 @@ void ButtonPattern::InitButtonLabel()
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     isTextFadeOut_ = textTheme->GetIsTextFadeout();
-    auto && graphics = buttonRenderContext->GetOrCreateGraphics();
-    CHECK_NULL_VOID(graphics);
-    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow()) {
-        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
-        Shadow shadow = Shadow::CreateShadow(shadowStyle);
-        buttonRenderContext->UpdateBackShadow(shadow);
-    }
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
@@ -183,7 +209,7 @@ void ButtonPattern::InitButtonLabel()
     }
 }
 
-void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
+void ButtonPattern::HandleFocusStyleTask(RefPtr<ButtonLayoutProperty> layoutProperty,
     RefPtr<RenderContext> buttonRenderContext, RefPtr<ButtonTheme> buttonTheme,
     RefPtr<TextLayoutProperty> textLayoutProperty, RefPtr<FrameNode> textNode)
 {
@@ -213,29 +239,33 @@ void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty
     if (scaleModify_) {
         buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
-    if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
-        bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
-        if (bgColorModify_) {
+    bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    if (bgColorModify_) {
+        if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
             buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::NORMAL) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
         }
     }
 
     if (buttonStyle != ButtonStyleMode::EMPHASIZE) {
         focusTextColorModify_ =
-            textLayoutProperty->GetTextColor() == buttonTheme->GetFocusTextColor(buttonStyle, buttonRole);
+            textLayoutProperty->GetTextColor() == buttonTheme->GetTextColor(buttonStyle, buttonRole);
         if (focusTextColorModify_) {
             textLayoutProperty->UpdateTextColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
-            textNode->MarkDirtyNode();
+            auto textRenderContext = textNode->GetRenderContext();
+            CHECK_NULL_VOID(textRenderContext);
+            textRenderContext->UpdateForegroundColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
         }
     }
     isFocus_ = true;
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextMarqueeStart(true);
-        textNode->MarkDirtyNode();
     }
+    textNode->MarkDirtyNode();
 }
 
-void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
+void ButtonPattern::HandleBlurStyleTask(RefPtr<ButtonLayoutProperty> layoutProperty,
     RefPtr<RenderContext> buttonRenderContext, RefPtr<ButtonTheme> buttonTheme,
     RefPtr<TextLayoutProperty> textLayoutProperty, RefPtr<FrameNode> textNode)
 {
@@ -259,7 +289,10 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
         focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
-        textNode->MarkDirtyNode();
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     isFocus_ = false;
     if (isTextFadeOut_) {
@@ -268,41 +301,34 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
     }
 }
 
-void ButtonPattern::InitFocusEvent()
+void ButtonPattern::HandleFocusStatusStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+    RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
 {
     CHECK_NULL_VOID(!focusEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    auto buttonRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(buttonRenderContext);
-    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
     auto focusHub = host->GetOrCreateFocusHub();
-    auto focusTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
+    auto focusTask = [weak = WeakClaim(this), property = layoutProperty, buttonRenderContext = renderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle focus event");
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleFocusEvent(property, renderContext, theme, textPorerty, node);
+            pattern->HandleFocusStyleTask(property, buttonRenderContext, theme, textPorerty, node);
         }
     };
     focusHub->SetOnFocusInternal(focusTask);
 
-    auto blurTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
+    auto blurTask = [weak = WeakClaim(this), property = layoutProperty, buttonRenderContext = renderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle blur event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent(property, renderContext, theme, textPorerty, node);
+        pattern->HandleBlurStyleTask(property, buttonRenderContext, theme, textPorerty, node);
     };
     focusHub->SetOnBlurInternal(blurTask);
 }
@@ -312,19 +338,14 @@ void ButtonPattern::OnModifyDone()
     Pattern::OnModifyDone();
     FireBuilder();
     InitButtonLabel();
-    HandleBackgroundColor();
-    HandleBorderColorAndWidth();
+    HandleButtonStyle();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
-    InitFocusEvent();
 }
 
-void ButtonPattern::HandleBackgroundColor()
+void ButtonPattern::HandleButtonStyle()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -335,8 +356,30 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(layoutProperty);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
+
+    HandleBackgroundStyle(layoutProperty, renderContext, buttonTheme);
+    HandleBorderStyle(layoutProperty, renderContext, buttonTheme);
+    HandleFocusStatusStyle(layoutProperty, renderContext, buttonTheme);
+}
+
+void ButtonPattern::HandleBackgroundStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+    RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
+{
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        renderContext->UpdateBackShadow(shadow);
+    }
+    if (UseContentModifier()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->ResetBackgroundColor();
+        return;
+    }
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
@@ -344,43 +387,32 @@ void ButtonPattern::HandleBackgroundColor()
     themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
 }
 
-void ButtonPattern::HandleBorderColorAndWidth()
+void ButtonPattern::HandleBorderStyle(RefPtr<ButtonLayoutProperty>& layoutProperty,
+    RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
 {
     if (UseContentModifier()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-
-    Color color;
-    Dimension width;
-    BorderColorProperty borderColor;
-    BorderWidthProperty borderWidth;
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     if (buttonStyle == ButtonStyleMode::NORMAL) {
-        color =
+        ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        BorderColorProperty borderColor;
+        BorderWidthProperty borderWidth;
+        Color color =
             (controlSize == ControlSize::NORMAL) ? buttonTheme->GetBorderColor() : buttonTheme->GetBorderColorSmall();
-        width =
+        Dimension width =
             (controlSize == ControlSize::NORMAL) ? buttonTheme->GetBorderWidth() : buttonTheme->GetBorderWidthSmall();
         borderColor.SetColor(color);
         borderWidth.SetBorderWidth(width);
-    }
-
-    if (!renderContext->HasBorderWidth()) {
-        layoutProperty->UpdateBorderWidth(borderWidth);
-        renderContext->UpdateBorderWidth(borderWidth);
-    }
-    if (!renderContext->HasBorderColor()) {
-        renderContext->UpdateBorderColor(borderColor);
+        if (!layoutProperty->GetBorderWidthProperty()) {
+            if (!renderContext->HasBorderWidth()) {
+                layoutProperty->UpdateBorderWidth(borderWidth);
+                renderContext->UpdateBorderWidth(borderWidth);
+            }
+            if (!renderContext->HasBorderColor()) {
+                renderContext->UpdateBorderColor(borderColor);
+            }
+        }
     }
 }
 
@@ -399,11 +431,13 @@ void ButtonPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
+            buttonPattern->UpdateTexOverflow(!(buttonPattern->isPress_));
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->OnTouchUp();
+            buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -524,18 +558,21 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
+    UpdateTexOverflow(isHover || isFocus_);
+}
+
+void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
+{
     if (isTextFadeOut_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        if (isHover) {
-            textLayoutProperty->UpdateTextMarqueeStart(isHover);
-        } else {
-            textLayoutProperty->UpdateTextMarqueeStart(isFocus_);
-        }
+        textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
         textNode->MarkDirtyNode();
     }
 }
@@ -559,6 +596,7 @@ void ButtonPattern::HandleEnabled()
     auto alpha = theme->GetBgDisabledAlpha();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
     renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
+    renderContext->UpdateLightIlluminated(theme->GetDefaultLightIlliminated());
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
@@ -614,22 +652,35 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
 
 void ButtonPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (!makeFunc_) {
+    if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
+        if (nodeId_ == -1) {
+            return;
+        }
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+                break;
+            }
+        }
         return;
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    auto builderNode = BuildContentModifierNode();
+    if (contentModifierNode_ == builderNode) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = builderNode;
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
     clickEventFunc_ = gestureEventHub->GetClickEvent();
@@ -637,10 +688,6 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
-        return nullptr;
-    }
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
@@ -681,5 +728,24 @@ void ButtonPattern::OnColorConfigurationUpdate()
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
+}
+
+void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
+{
+    if (makeFunc == nullptr) {
+        makeFunc_ = std::nullopt;
+        contentModifierNode_ = nullptr;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto child : host->GetChildren()) {
+            auto childNode = DynamicCast<FrameNode>(child);
+            if (childNode) {
+                childNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+            }
+        }
+        OnModifyDone();
+        return;
+    }
+    makeFunc_ = std::move(makeFunc);
 }
 } // namespace OHOS::Ace::NG

@@ -34,7 +34,7 @@ public:
 
     ~TabBarModifier() override = default;
     
-    void SetIndicator(const RectF& indicator);
+    void SetIndicatorOffset(const OffsetF& indicatorOffset);
 
     void SetIndicatorColor(const LinearColor& indicatorColor);
 
@@ -46,13 +46,13 @@ public:
 
     void SetIndicatorMarginTop(float indicatorMarginTop);
 
-    void SetSelectedMode(SelectedMode selectedMode);
+    void SetHasIndicator(bool hasIndicator);
 
     void onDraw(DrawingContext& context) override;
 
 private:
 
-    void PaintIndicator(DrawingContext& context, RectF indicator);
+    void PaintIndicator(DrawingContext& context);
 
     RefPtr<AnimatablePropertyColor> indicatorColor_;
     RefPtr<AnimatablePropertyFloat> indicatorLeft_;
@@ -62,7 +62,6 @@ private:
     RefPtr<AnimatablePropertyFloat> indicatorBorderRadius_;
     RefPtr<AnimatablePropertyFloat> indicatorMarginTop_;
     RefPtr<PropertyBool> hasIndicator_;
-    RectF indicator_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabBarModifier);
 };

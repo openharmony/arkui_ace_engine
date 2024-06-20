@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,10 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_SHEET,
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_SHADOW,
-    THEME_PATTERN_RICH_EDITOR
+    THEME_PATTERN_RICH_EDITOR,
+    THEME_PATTERN_LINEAR_LAYOUT,
+    THEME_PATTERN_STACK,
+    THEME_PATTERN_CONTAINER_MODAL
 };
 } // namespace
 
@@ -513,6 +516,20 @@ uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
 {
     uint32_t result = 0;
     resourceManager_->GetSymbolById(resId, result);
+    return result;
+}
+
+uint32_t ResourceAdapterImpl::GetSymbolByName(const char* resName) const
+{
+    uint32_t result = 0;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetSymbolByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
+                resName, state);
+        }
+    }
     return result;
 }
 } // namespace OHOS::Ace

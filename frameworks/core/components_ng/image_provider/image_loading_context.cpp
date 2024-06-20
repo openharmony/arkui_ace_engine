@@ -85,6 +85,9 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
 ImageLoadingContext::~ImageLoadingContext()
 {
     // cancel background task
+    if (Downloadable()) {
+        RemoveDownloadTask(src_.GetSrc());
+    }
     if (!syncLoad_) {
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
@@ -150,12 +153,26 @@ void ImageLoadingContext::OnDataReady()
     }
 }
 
+void ImageLoadingContext::OnDataReadyOnCompleteCallBack()
+{
+    if (notifiers_.onDataReadyComplete_) {
+        notifiers_.onDataReadyComplete_(src_);
+    }
+}
+
+void ImageLoadingContext::SetOnProgressCallback(
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress)
+{
+    onProgressCallback_ = onProgress;
+}
+
 void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
             TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s Hit the Cache, not need Create imageObject.",
                 src_.GetSrc().c_str());
+            ImageProvider::PrepareImageData(obj);
             DataReadyCallback(obj);
             return;
         }
@@ -241,7 +258,24 @@ void ImageLoadingContext::PerformDownload()
         async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadFailed") : callback();
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (onProgressCallback_) {
+        downloadCallback.onProgressCallback = [weak = AceType::WeakClaim(this)](
+            uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
+            ContainerScope scope(instanceId);
+            auto callback = [weak = weak, dlTotal = dlTotal, dlNow = dlNow]() {
+                auto ctx = weak.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DownloadOnProgress(dlNow, dlTotal);
+            };
+            async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadOnProcess") : callback();
+        };
+    }
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
+}
+
+bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
+{
+    return DownloadManager::GetInstance()->RemoveDownloadTask(src);
 }
 
 void ImageLoadingContext::CacheDownloadedImage()
@@ -256,6 +290,7 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{public}s, ImageData length=%{public}zu",
         GetSrc().ToString().c_str(), imageData.size());
+    ACE_LAYOUT_SCOPED_TRACE("DownloadImageSuccess[src:%s]", GetSrc().ToString().c_str());
     auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
@@ -275,6 +310,13 @@ void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
 {
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{public}s", errorMessage.c_str());
     FailCallback(errorMessage);
+}
+
+void ImageLoadingContext::DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal)
+{
+    if (onProgressCallback_) {
+        onProgressCallback_(dlNow, dlTotal);
+    }
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()
@@ -311,7 +353,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_, GetLoadInVipChannel());
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()
@@ -337,6 +379,11 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj->Clone();
+    if (measureFinish_) {
+        OnDataReadyOnCompleteCallBack();
+    } else {
+        needDataReadyCallBack_ = true;
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 
@@ -350,12 +397,27 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
+    needErrorCallBack_ = true;
+    CHECK_NULL_VOID(measureFinish_);
     TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
+    needErrorCallBack_ = false;
+}
+
+void ImageLoadingContext::CallbackAfterMeasureIfNeed()
+{
+    if (needErrorCallBack_) {
+        stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
+        needErrorCallBack_ = false;
+    }
+    if (needDataReadyCallBack_) {
+        OnDataReadyOnCompleteCallBack();
+        needDataReadyCallBack_ = false;
+    }
 }
 
 const RectF& ImageLoadingContext::GetDstRect() const
@@ -397,7 +459,7 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
 bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
     const std::optional<SizeF>& sourceSize, bool hasValidSlice)
 {
-    bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize();
+    bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize() || firstLoadImage_;
 
     /* When function is called with a changed dstSize, assume the image will be resized frequently. To minimize
      * MakeCanvasImage operations, map dstSize to size levels in log_2. Only Remake when the size level changes.
@@ -433,9 +495,10 @@ void ImageLoadingContext::MakeCanvasImage(
     updateParamsCallback_ = [wp = WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
         auto ctx = wp.Upgrade();
         CHECK_NULL_VOID(ctx);
-        if (ctx->SizeChanging(dstSize)) {
+        if (ctx->SizeChanging(dstSize) || ctx->firstLoadImage_) {
             ctx->sizeLevel_ = ctx->RoundUp(dstSize.Width());
         }
+        ctx->firstLoadImage_ = false;
         ctx->dstSize_ = dstSize;
         ctx->imageFit_ = imageFit;
         ctx->autoResize_ = autoResize;

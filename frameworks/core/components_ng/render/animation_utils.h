@@ -29,12 +29,14 @@ namespace {
 using PropertyCallback = std::function<void()>;
 using FinishCallback = std::function<void()>;
 using RepeatCallback = std::function<void()>;
-
+using InteractiveAnimationCallback = std::function<void()>;
 } // namespace
 
 class ACE_FORCE_EXPORT AnimationUtils {
 public:
     class Animation;
+
+    class InteractiveAnimation;
 
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
@@ -61,6 +63,21 @@ public:
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ExecuteWithoutAnimation(const PropertyCallback& callback);
+
+    static std::shared_ptr<AnimationUtils::InteractiveAnimation> CreateInteractiveAnimation(
+        const InteractiveAnimationCallback& addCallback, const FinishCallback& callback);
+
+    static void UpdateInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress);
+
+    static void ContinueInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static void StartInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static void ReverseInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
 };
 } // namespace OHOS::Ace
 

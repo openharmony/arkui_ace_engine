@@ -23,7 +23,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT HyperlinkModel {
+class ACE_FORCE_EXPORT HyperlinkModel {
 public:
     static HyperlinkModel* GetInstance();
     virtual ~HyperlinkModel() = default;

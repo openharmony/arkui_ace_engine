@@ -34,6 +34,8 @@ const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
+constexpr static int32_t EMOJI_RANGE_LEFT = 150;
+constexpr static int32_t EMOJI_RANGE_RIGHT = 150;
 } // namespace
 
 std::string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value)
@@ -65,7 +67,8 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto addLength = static_cast<uint32_t>(wideTmp.length());
     auto delLength = static_cast<uint32_t>(std::abs(endIndex - startIndex));
     addLength = std::min(addLength, maxLength - curLength + delLength);
-    tmp = StringUtils::ToString(wideTmp.substr(0, addLength));
+    wideTmp = TextEmojiProcessor::SubWstring(0, addLength, wideTmp); // clamp emoji
+    tmp = StringUtils::ToString(wideTmp);
     return tmp;
 }
 
@@ -84,8 +87,10 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     auto len = content_.length();
     FilterValue();
+    insertValue_ = tmp;
     if (value.length() == 1 && content_.length() < len) {
         content_ = str;
+        insertValue_ = "";
     }
     return !tmp.empty();
 }
@@ -339,6 +344,21 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
 {
     return TextEmojiProcessor::Delete(startIndex, length, content_, isBackward);
+}
+
+int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, bool isBackward)
+{
+    auto content = content_;
+    return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
+}
+
+bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
+{
+    int32_t startIndex = index - EMOJI_RANGE_LEFT;
+    int32_t endIndex = index + EMOJI_RANGE_RIGHT;
+    FormatIndex(startIndex, endIndex);
+    index = index - startIndex;
+    return TextEmojiProcessor::IsIndexBeforeOrInEmoji(index, GetSelectedValue(startIndex, endIndex));
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)

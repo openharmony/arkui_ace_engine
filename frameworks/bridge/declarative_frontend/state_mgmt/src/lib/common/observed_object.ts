@@ -210,7 +210,7 @@ class SubscribableHandler {
       default:
         const result = Reflect.get(target, property, receiver);
         let propertyStr : string = String(property);
-        if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ != undefined) {
+        if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ !== undefined) {
           let isTracked = this.isPropertyTracked(target, propertyStr);
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? '@Track ' : ''}${propertyStr}' notifying read.`);
           this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
@@ -248,7 +248,7 @@ class SubscribableHandler {
       default:
         // this is added for stability test: Reflect.get target is not object
         try {
-          if (Reflect.get(target, property) == newValue) {
+          if (Reflect.get(target, property) === newValue) {
             return true;
           }
         } catch (error) {
@@ -506,7 +506,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns false if given object is not an ObservedObject 
    */
   public static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
-    if (!ObservedObject.IsObservedObject(obj) || subscriber == undefined) {
+    if (!ObservedObject.IsObservedObject(obj) || subscriber === undefined) {
       return false;
     }
 
@@ -629,7 +629,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (ObservedObject.IsObservedObject(obj)) {
       stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
     }
-    if (objectOwningProperty != undefined) {
+    if (objectOwningProperty !== undefined) {
       this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
     }
   } // end of constructor

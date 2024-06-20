@@ -53,7 +53,9 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSScrollBar>::StaticMethod("create", &JSScrollBar::Create, opt);
 
+    JSClass<JSScrollBar>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSScrollBar>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSScrollBar>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSScrollBar>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSScrollBar>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScrollBar>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

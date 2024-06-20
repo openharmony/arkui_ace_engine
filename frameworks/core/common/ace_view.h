@@ -53,6 +53,9 @@ public:
     virtual void RegisterMouseEventCallback(MouseEventCallback&& callback) = 0;
     virtual void RegisterAxisEventCallback(AxisEventCallback&& callback) = 0;
     virtual void RegisterRotationEventCallback(RotationEventCallBack&& callback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void RegisterCrownEventCallback(CrownEventCallback&& callback) = 0;
+#endif
     virtual void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) = 0;
     virtual void Launch() = 0;
     virtual int32_t GetInstanceId() const = 0;
@@ -70,6 +73,9 @@ public:
 
     using DensityChangeCallback = std::function<void(double density)>;
     virtual void RegisterDensityChangeCallback(DensityChangeCallback&& callback) = 0;
+
+    using TransformHintChangeCallback = std::function<void(uint32_t transform)>;
+    virtual void RegisterTransformHintChangeCallback(TransformHintChangeCallback&& callback) = 0;
 
     using SystemBarHeightChangeCallback = std::function<void(double statusBar, double navigationBar)>;
     virtual void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) = 0;
@@ -187,6 +193,7 @@ protected:
     int32_t height_ = 0;
     int32_t posX_ = 0;
     int32_t posY_ = 0;
+    uint32_t transform_ = 0;
 
 private:
     std::mutex backgroundColorMutex_;

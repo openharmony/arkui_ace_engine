@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
+constexpr int32_t DATA_REQUIRED_ARGS = 2;
 
 void JSPersistent::JSBind(BindingTarget globalObj)
 {
@@ -61,7 +62,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 2 || !args[0]->IsString()) {
+    if (args.Length() < DATA_REQUIRED_ARGS || !args[0]->IsString()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few or key type is not a string");
         return;
     }

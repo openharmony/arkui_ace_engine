@@ -25,10 +25,13 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -38,6 +41,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -45,7 +49,6 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -87,6 +90,8 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
@@ -120,18 +125,18 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     font.fontWeight = theme->GetTextStyle().GetFontWeight();
     font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
     font.fontStyle = theme->GetTextStyle().GetFontStyle();
-    
+
     if (!tmpInfo->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
-    auto fontSize = paramObject->GetProperty("size");
+    auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
     }
     std::string weight;
-    auto fontWeight = paramObject->GetProperty("weight");
+    auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
@@ -140,14 +145,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
-    auto fontFamily = paramObject->GetProperty("family");
+    auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
-    auto style = paramObject->GetProperty("style");
+    auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
     if (!style->IsNull() || style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
@@ -307,6 +312,24 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
+void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(TEXT_SELECTABLE_MODE.size())) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    TextModel::GetInstance()->SetTextSelectableMode(TEXT_SELECTABLE_MODE[index]);
+}
+
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
@@ -380,7 +403,7 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseLengthMetricsToDimension(args, value)) {
+    if (!ParseLengthMetricsToPositiveDimension(args, value)) {
         value.Reset();
     }
     if (value.IsNegative()) {
@@ -479,6 +502,11 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
+    if (tmpInfo->IsUndefined()) {
+        TextModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        info.ReturnSelf();
+        return;
+    }
     if (!tmpInfo->IsObject()) {
         info.ReturnSelf();
         return;
@@ -596,6 +624,9 @@ void JSText::Create(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
         auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+        if (spanString == nullptr) {
+            return;
+        }
         auto spanStringController = spanString->GetController();
         if (spanStringController) {
             TextModel::GetInstance()->Create(spanStringController);
@@ -607,6 +638,7 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
+    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -614,7 +646,7 @@ void JSText::Create(const JSCallbackInfo& info)
     JSTextController* jsController = nullptr;
     auto paramObject = JSRef<JSObject>::Cast(info[1]);
     auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
         jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextController>();
     }
 
@@ -852,8 +884,9 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     NG::SelectMenuParam menuParam;
     if (info.Length() > resquiredParameterCount) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
-        if (argsMenuOptions->IsObject())
-        ParseMenuParam(info, argsMenuOptions, menuParam);
+        if (argsMenuOptions->IsObject()) {
+            ParseMenuParam(info, argsMenuOptions, menuParam);
+        }
     }
 
     TextModel::GetInstance()->BindSelectionMenu(testSpanType, responseType, buildFunc, menuParam);
@@ -881,9 +914,6 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
-        return;
-    }
 
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
@@ -905,6 +935,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
+    JSClass<JSText>::StaticMethod("textSelectable", &JSText::SetTextSelectableMode, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
@@ -929,7 +960,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
+    JSClass<JSText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
     JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);
@@ -948,6 +981,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
+    JSClass<JSText>::StaticMethod("selectionMenuOptions", &JSText::SelectionMenuOptions);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -956,6 +990,19 @@ void JSTextController::CloseSelectionMenu()
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     controller->CloseSelectionMenu();
+}
+
+void JSTextController::GetLayoutManager(const JSCallbackInfo& args)
+{
+    JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
+    auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
+    CHECK_NULL_VOID(jsLayoutManager);
+    jsLayoutManager->IncRefCount();
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto layoutInfoInterface = controller->GetLayoutInfoInterface();
+    jsLayoutManager->SetLayoutInfoInterface(layoutInfoInterface);
+    args.SetReturnValue(obj);
 }
 
 void JSTextController::SetStyledString(const JSCallbackInfo& info)
@@ -981,6 +1028,7 @@ void JSTextController::JSBind(BindingTarget globalObj)
     JSClass<JSTextController>::Declare("TextController");
     JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
     JSClass<JSTextController>::CustomMethod("setStyledString", &JSTextController::SetStyledString);
+    JSClass<JSTextController>::CustomMethod("getLayoutManager", &JSTextController::GetLayoutManager);
     JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
 }
 
@@ -1101,7 +1149,7 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                             int32_t value) {
+                                    int32_t value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Text.onMarqueeStateChange");
         PipelineContext::SetCallBackNode(node);
@@ -1112,4 +1160,12 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
 }
 
+void JSText::SelectionMenuOptions(const JSCallbackInfo& info)
+{
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
+        return;
+    }
+    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+}
 } // namespace OHOS::Ace::Framework

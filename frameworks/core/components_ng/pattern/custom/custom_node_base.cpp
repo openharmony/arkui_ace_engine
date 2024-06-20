@@ -33,6 +33,7 @@ CustomNodeBase::~CustomNodeBase()
         }
     }
     if (destroyFunc_) {
+        ACE_SCOPED_TRACE("CustomNodeBase:Destroy [%s]", GetJSViewName().c_str());
         destroyFunc_();
     }
 }
@@ -85,5 +86,10 @@ void CustomNodeBase::FireRecycleRenderFunc()
 void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func)
 {
     onDumpInfoFunc_ = func;
+}
+
+void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
+{
+    onDumpInspectorFunc_ = func;
 }
 } // namespace OHOS::Ace::NG

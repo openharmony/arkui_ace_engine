@@ -33,7 +33,7 @@ namespace OHOS::Ace::Framework {
 // Each AcePage corresponding to only one DOMDocument, each DomDocument contains some [Node]s,
 // each [Node] maybe corresponding only one Ace [Component], like Text/Image/..., or a
 // [ComposedComponent] with some other components.
-class ACE_EXPORT DOMDocument final : public virtual AceType {
+class ACE_FORCE_EXPORT DOMDocument final : public virtual AceType {
     DECLARE_ACE_TYPE(DOMDocument, AceType);
 
 public:

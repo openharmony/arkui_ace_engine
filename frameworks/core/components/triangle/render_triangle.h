@@ -23,7 +23,6 @@
 namespace OHOS::Ace {
 
 class TriangleRotationCalculator {
-
 public:
     void SetPointOne(double x, double y)
     {

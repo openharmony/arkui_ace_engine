@@ -24,7 +24,8 @@ ImageAnalyzerManager::ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNod
     isAnalyzerOverlayBuild_ = false;
 }
 
-void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    const NG::OffsetF& offset)
 {
 }
 
@@ -55,6 +56,10 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
 }
 
 void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
+{
+}
+
+void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
 }
 

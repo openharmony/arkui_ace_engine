@@ -16,14 +16,13 @@
 #include "base/log/ace_trace.h"
 
 namespace OHOS::Ace {
-bool AceTraceEnabled()
-{
-    return false;
-}
 
 void AceTraceBegin(const char* name) {}
 
 void AceTraceEnd() {}
+
+void AceTraceBeginCommercial(const char* name) {}
+void AceTraceEndCommercial() {}
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace) {}
 
@@ -43,18 +42,17 @@ bool AceTraceBeginWithArgs(const char* /* format */, ...)
 
 void AceCountTraceWidthArgs(int32_t count, const char* format, ...) {}
 
-AceScopedTrace::AceScopedTrace(const char* /* format */, ...) : traceEnabled_(AceTraceEnabled()) {}
+AceScopedTrace::AceScopedTrace(const char* /* format */, ...) {}
 
 AceScopedTrace::~AceScopedTrace() = default;
 
+AceScopedTraceCommercial::AceScopedTraceCommercial(const char* format, ...) {}
+
+AceScopedTraceCommercial::~AceScopedTraceCommercial() {}
+
 AceScopedTraceFlag::AceScopedTraceFlag(bool /* flag */, const char* /* format */, ...) {}
 
-AceScopedTraceFlag::~AceScopedTraceFlag()
-{
-    if (flagTraceEnabled_) {
-        AceTraceEnd();
-    }
-}
+AceScopedTraceFlag::~AceScopedTraceFlag() {}
 
 std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t /* taskId */, const char* /* format */, va_list /* args */)
 {
@@ -68,13 +66,7 @@ std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t /* taskId */, char* /*
 
 std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
 
-AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...)
-{
-    id_++;
-    if (asyncTraceEnabled_) {
-        taskId_ = id_;
-    }
-}
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...) {}
 
 AceAsyncScopedTrace::~AceAsyncScopedTrace() = default;
 } // namespace OHOS::Ace

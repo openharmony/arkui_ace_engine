@@ -199,6 +199,7 @@ private:
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
     void DealReplacePage(const RouterPageInfo& target);
+    void ReplacePageInNewLifecycle(const RouterPageInfo& target);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);
@@ -226,6 +227,7 @@ private:
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
     std::list<std::string> restorePageStack_;
     RouterPageInfo ngBackTarget_;
+    bool isNewPageReplacing_ = false;
 #if defined(PREVIEW)
     IsComponentPreviewCallback isComponentPreview_;
 #endif

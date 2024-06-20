@@ -24,7 +24,7 @@
 #include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT GaugeModel {
+class ACE_FORCE_EXPORT GaugeModel {
 public:
     static GaugeModel* GetInstance();
     virtual ~GaugeModel() = default;

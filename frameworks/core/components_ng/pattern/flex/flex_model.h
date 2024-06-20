@@ -22,6 +22,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
 
@@ -41,7 +42,7 @@ constexpr int32_t MAIN_ALIGN_MAX_VALUE = 8;
 constexpr int32_t CROSS_ALIGN_MAX_VALUE = 5;
 constexpr int32_t DIRECTION_MAX_VALUE = 3;
 
-class ACE_EXPORT FlexModel {
+class ACE_FORCE_EXPORT FlexModel {
 public:
     static FlexModel* GetInstance();
     virtual ~FlexModel() = default;
@@ -70,6 +71,8 @@ public:
     virtual void SetJustifyContent(int32_t value) = 0;
 
     virtual void SetAlignContent(int32_t value) = 0;
+    virtual void SetMainSpace(const std::optional<Dimension>& space) = 0;
+    virtual void SetCrossSpace(const std::optional<Dimension>& space) = 0;
 
 private:
     static std::unique_ptr<FlexModel> instance_;

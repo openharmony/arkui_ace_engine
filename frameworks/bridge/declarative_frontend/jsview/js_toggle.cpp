@@ -21,6 +21,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -77,7 +78,9 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSToggle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSToggle>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -131,6 +134,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
     }
+    JSToggleTheme::ApplyTheme(NG::ToggleType(toggleType_));
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)

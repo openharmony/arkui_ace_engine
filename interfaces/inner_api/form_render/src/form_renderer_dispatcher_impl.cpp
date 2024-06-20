@@ -23,7 +23,8 @@
 
 namespace OHOS {
 namespace Ace {
-constexpr int32_t PROCESS_WAIT_TIME = 10;
+constexpr int32_t PROCESS_WAIT_TIME = 20;
+constexpr float DOUBLE = 2.0;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -43,6 +44,7 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
     serializedGesture.data.clear();
 
     if (pointerEvent && pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        HILOG_INFO("renderer receive down event");
         auto uiContent = uiContent_.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
@@ -92,7 +94,7 @@ void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
     allowUpdate_ = allowUpdate;
 }
 
-void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height)
+void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height, float borderWidth)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {
@@ -100,16 +102,18 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
-    handler->PostTask([content = uiContent_, width, height]() {
+    handler->PostTask([content = uiContent_, width, height, borderWidth]() {
         HILOG_INFO("Root node update, width: %{public}f, height: %{public}f.", width, height);
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        uiContent->SetFormWidth(width);
-        uiContent->SetFormHeight(height);
-        uiContent->OnFormSurfaceChange(width, height);
+        float uiWidth = width - borderWidth * DOUBLE;
+        float uiHeight = height - borderWidth * DOUBLE;
+        uiContent->SetFormWidth(uiWidth);
+        uiContent->SetFormHeight(uiHeight);
+        uiContent->OnFormSurfaceChange(uiWidth, uiHeight);
     });
 
     auto formRenderer = formRenderer_.lock();
@@ -117,7 +121,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         HILOG_ERROR("formRenderer is nullptr");
         return;
     }
-    formRenderer->OnSurfaceChange(width, height);
+    formRenderer->OnSurfaceChange(width, height, borderWidth);
 }
 
 void FormRendererDispatcherImpl::SetObscured(bool isObscured)
@@ -135,6 +139,90 @@ void FormRendererDispatcherImpl::SetObscured(bool isObscured)
         }
         HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
         uiContent->ChangeSensitiveNodes(isObscured);
+    });
+}
+
+void FormRendererDispatcherImpl::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+
+    handler->PostTask([content = uiContent_, formRenderer = formRenderer_, windowId, treeId, accessibilityId]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
+        uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
+        uiContent->SetAccessibilityGetParentRectHandler([formRenderer](int32_t &top, int32_t &left) {
+            auto formRendererPtr = formRenderer.lock();
+            if (!formRendererPtr) {
+                HILOG_ERROR("formRenderer is nullptr");
+                return;
+            }
+            formRendererPtr->GetRectRelativeToWindow(top, left);
+        });
+    });
+}
+
+void FormRendererDispatcherImpl::OnAccessibilityChildTreeDeregister()
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityChildTreeDeregister");
+        uiContent->DeregisterAccessibilityChildTree();
+    });
+}
+
+void FormRendererDispatcherImpl::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostSyncTask([content = uiContent_, params, &info]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityDumpChildInfo");
+        uiContent->AccessibilityDumpChildInfo(params, info);
+    });
+}
+
+void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, pointX, pointY, sourceType, eventType, timeMs]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnAccessibilityTransferHoverEvent");
+        uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     });
 }
 } // namespace Ace

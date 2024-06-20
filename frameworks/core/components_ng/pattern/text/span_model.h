@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SpanModel {
+class ACE_FORCE_EXPORT SpanModel {
 public:
     static SpanModel* GetInstance();
     virtual ~SpanModel() = default;

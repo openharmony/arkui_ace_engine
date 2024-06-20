@@ -74,6 +74,7 @@ private:
         TimeStamp time);
 
     void ResetHoverState();
+    bool IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node);
     static void NotifyHoverEventToNodeSession(
         const RefPtr<FrameNode>& node,
         const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,

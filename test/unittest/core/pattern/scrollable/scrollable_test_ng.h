@@ -21,6 +21,9 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+using namespace testing;
+using namespace testing::ext;
+
 class ScrollableTestNg : public testing::Test {
 public:
     void SetUp() override;

@@ -46,9 +46,19 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
         }
         renderContext->FlushContentModifier(contentModifier);
     }
-    auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);
+    auto overlayModifier = AceType::DynamicCast<OverlayModifier>(nodePaintImpl_->GetOverlayModifier(this));
     if (overlayModifier) {
+        if (extensionHandler_) {
+            overlayModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+        }
         renderContext->FlushOverlayModifier(overlayModifier);
+    }
+    auto foregroundModifier = AceType::DynamicCast<ForegroundModifier>(nodePaintImpl_->GetForegroundModifier(this));
+    if (foregroundModifier) {
+        if (extensionHandler_) {
+            foregroundModifier->SetExtensionHandler(AceType::RawPtr(extensionHandler_));
+        }
+        renderContext->FlushForegroundModifier(foregroundModifier);
     }
 }
 
@@ -89,6 +99,17 @@ void PaintWrapper::FlushRender()
     auto overlayModifier = nodePaintImpl_ ? nodePaintImpl_->GetOverlayModifier(this) : nullptr;
     if (overlayModifier) {
         nodePaintImpl_->UpdateOverlayModifier(this);
+        if (extensionHandler_) {
+            extensionHandler_->InvalidateRender();
+        }
+    }
+
+    auto foregroundModifier = nodePaintImpl_ ? nodePaintImpl_->GetForegroundModifier(this) : nullptr;
+    if (foregroundModifier) {
+        nodePaintImpl_->UpdateForegroundModifier(this);
+        if (extensionHandler_) {
+            extensionHandler_->InvalidateRender();
+        }
     }
 
     renderContext->StartRecording();
@@ -112,16 +133,18 @@ void PaintWrapper::FlushRender()
                     extensionHandler->Draw(context);
                 });
         }
-        if (foregroundDraw) {
-            extensionHandler_->SetInnerForegroundDrawImpl(
-                [foregroundDraw = std::move(foregroundDraw)](
-                    DrawingContext& context) { foregroundDraw(context.canvas); });
+        if (!foregroundModifier) {
+            if (foregroundDraw) {
+                extensionHandler_->SetInnerForegroundDrawImpl(
+                    [foregroundDraw = std::move(foregroundDraw)](
+                        DrawingContext& context) { foregroundDraw(context.canvas); });
+            }
+            renderContext->FlushForegroundDrawFunction(
+                [extensionHandler = RawPtr(extensionHandler_), width, height](RSCanvas& canvas) {
+                    DrawingContext context = { canvas, width, height };
+                    extensionHandler->ForegroundDraw(context);
+                });
         }
-        renderContext->FlushForegroundDrawFunction(
-            [extensionHandler = RawPtr(extensionHandler_), width, height](RSCanvas& canvas) {
-                DrawingContext context = { canvas, width, height };
-                extensionHandler->ForegroundDraw(context);
-            });
         if (!overlayModifier) {
             if (overlayDraw) {
                 extensionHandler_->SetInnerOverlayDrawImpl(
@@ -138,7 +161,7 @@ void PaintWrapper::FlushRender()
         if (contentDraw && !contentModifier) {
             renderContext->FlushContentDrawFunction(std::move(contentDraw));
         }
-        if (foregroundDraw) {
+        if (foregroundDraw && !foregroundModifier) {
             renderContext->FlushForegroundDrawFunction(std::move(foregroundDraw));
         }
         if (overlayDraw && !overlayModifier) {

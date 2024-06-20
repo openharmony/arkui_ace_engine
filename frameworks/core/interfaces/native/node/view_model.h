@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_VIEW_MODEL_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_VIEW_MODEL_H
 
 #pragma once
 
@@ -59,3 +61,4 @@ void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode);
 void* GetAttachNodePtr(ArkUINodeHandle nodePtr);
 
 } // namespace OHOS::Ace::NG::ViewModel
+#endif

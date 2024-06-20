@@ -72,12 +72,14 @@ void UIDisplaySync::JudgeWhetherSkip()
 void UIDisplaySync::OnFrame()
 {
     ACE_SCOPED_TRACE("DisplaySyncId[%" PRIu64 "] Timestamp[%" PRIu64 "] TargetTimestamp[%" PRIu64 "]"
-                     "Preferred[%d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
-                     GetId(), data_->timestamp_, data_->targetTimestamp_,
-                     data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Preferred[%{public}d] DrawFPS[%{public}d]"
-        "VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
-        data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+                     "FrameRateRange[%d, %d, %d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
+                     GetId(), data_->timestamp_, data_->targetTimestamp_, data_->rateRange_->min_,
+                     data_->rateRange_->max_, data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_,
+                     data_->rate_, data_->noSkip_);
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FrameRateRange[%{public}d, %{public}d, %{public}d], "
+        "DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
+        data_->rateRange_->min_, data_->rateRange_->max_, data_->rateRange_->preferred_,
+        drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }

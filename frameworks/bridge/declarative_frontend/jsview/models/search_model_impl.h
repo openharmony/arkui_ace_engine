@@ -61,6 +61,10 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override {};
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override {};

@@ -50,6 +50,10 @@ void GridLayoutProperty::ResetPositionFlags() const
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);
@@ -95,5 +99,30 @@ void GridLayoutProperty::OnRowsGapUpdate(const Dimension& /* rowsGap */) const
     if (SystemProperties::GetGridIrregularLayoutEnabled() && HasLayoutOptions()) {
         ResetGridLayoutInfoAndMeasure();
     }
+}
+
+void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIrregular(false);
+    CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
+
+    bool vertical = IsVertical();
+    for (int32_t idx : layoutOptions.irregularIndexes) {
+        auto size = layoutOptions.getSizeByIndex(idx);
+        if ((!vertical && size.columns > 1) || (vertical && size.rows > 1)) {
+            pattern->SetIrregular(true);
+            return;
+        }
+    }
+}
+
+void GridLayoutProperty::OnLayoutOptionsUpdate(const GridLayoutOptions& layoutOptions) const
+{
+    UpdateIrregularFlag(layoutOptions);
+    ResetGridLayoutInfoAndMeasure();
 }
 } // namespace OHOS::Ace::NG

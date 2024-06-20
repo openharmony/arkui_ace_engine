@@ -91,12 +91,13 @@ public:
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
-    void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const Point& point,
+    void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
         const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
     void RequestDragSummaryInfoAndPrivilege();
     RefPtr<UnifiedData> RequestUDMFDataWithUDKey(const std::string& udKey);
     void TryGetDataBackGround(
-        const RefPtr<FrameNode>& dragFrameNode, const Point& point, const std::string& udKey, int32_t count = 0);
+        const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
+        const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode, const Point& point);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
     bool CheckRemoteData(
@@ -129,15 +130,14 @@ public:
     uint32_t GetRecordSize() const;
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
-    void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
     void HideDragPreviewOverlay();
-    bool IsMsdpDragging() const;
+    bool IsMSDPDragging() const;
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
-    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const Point& point,
+    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
         const std::string& extraInfo);
 
     bool IsWindowConsumed() const
@@ -161,6 +161,16 @@ public:
             notifyInDraggedCallback_();
         }
         isDragged_ = isDragged;
+    }
+
+    void SetDragDampStartPoint(const Point& point)
+    {
+        dragDampStartPoint_ = point;
+    }
+
+    const Point& GetDragDampStartPoint() const
+    {
+        return dragDampStartPoint_;
     }
 
     void SetIsDragCancel(bool isDragCancel)
@@ -200,6 +210,9 @@ public:
 
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+    
+    RefPtr<FrameNode> FindTargetDropNode(const RefPtr<UINode> parentNode,
+        const std::map<int32_t, WeakPtr<FrameNode>>& frameNodes, PointF localPoint);
 
     std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
 
@@ -288,7 +301,8 @@ public:
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event);
+    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
+        const GestureEvent& event, bool isSubwindowOverlay = false);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
@@ -327,7 +341,7 @@ public:
     }
 
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        OffsetF gatherNodeCenter, float scale);
+        const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -342,9 +356,9 @@ public:
         gatherPixelMaps_.clear();
     }
 
-    void GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
-    void PushGatherPixelMap(DragDataCore& dragData, float scale);
-    bool HasGatherNode()
+    void PushGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
+    void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
+    bool HasGatherNode() const
     {
         return hasGatherNode_;
     }
@@ -352,6 +366,16 @@ public:
     void SetHasGatherNode(bool hasGatherNode)
     {
         hasGatherNode_ = hasGatherNode;
+    }
+
+    const PointerEvent& GetDragDropPointerEvent() const
+    {
+        return dragDropPointerEvent_;
+    }
+
+    void SetDragDropPointerEvent(const PointerEvent& dragDropPointerEvent)
+    {
+        dragDropPointerEvent_ = dragDropPointerEvent;
     }
 
     void SetIsShowBadgeAnimation(bool isShowBadgeAnimation)
@@ -379,17 +403,30 @@ public:
         isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
     }
 
+    bool IsDragWithContextMenu() const
+    {
+        return isDragWithContextMenu_;
+    }
+
+    void SetIsDragWithContextMenu(bool isDragWithContextMenu)
+    {
+        isDragWithContextMenu_ = isDragWithContextMenu;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     Offset CalcDragMoveOffset(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
-    bool GetDragPreviewInfo(
-        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager, DragPreviewInfo& dragPreviewInfo);
+    bool UpdateDragMovePositionFinished(
+        bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
+    bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
+        DragPreviewInfo& dragPreviewInfo, bool isSubwindowOverlay = false);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
-        const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
+        const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent,
+        DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
         const ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex = 0);
     bool FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
@@ -425,7 +462,7 @@ private:
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
-    int64_t preTimeStamp_ = 0L;
+    uint64_t preTimeStamp_ = 0L;
     int64_t nanoPreDragMoveAnimationTime_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
@@ -455,15 +492,18 @@ private:
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
+    PointerEvent dragDropPointerEvent_;
     bool isDragFwkShow_ { false };
-    OffsetF pixelMapOffset_ {0.0f, 0.0f};
-    OffsetF prePointerOffset_ {0.0f, 0.0f};
+    OffsetF pixelMapOffset_;
+    OffsetF prePointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
     bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
+    bool isDragWithContextMenu_ = false;
+    Point dragDampStartPoint_ { 1, 1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

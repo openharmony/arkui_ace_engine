@@ -50,6 +50,10 @@ struct WebEvent : Event {
     EventMarker overScrollId;
     EventMarker nativeEmbedLifecycleChangeId;
     EventMarker nativeEmbedGestureEventId;
+    EventMarker renderProcessNotRespondingId;
+    EventMarker renderProcessRespondingId;
+    EventMarker viewportFitChangedId;
+    EventMarker adsBlockedEventId;
 };
 
 struct WebMethod : Method {
@@ -352,6 +356,54 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.nativeEmbedGestureEventId;
+    }
+
+    void SetRenderProcessNotRespondingId(const EventMarker& renderProcessNotRespondingId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.renderProcessNotRespondingId = renderProcessNotRespondingId;
+    }
+
+    const EventMarker& GetRenderProcessNotRespondingId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.renderProcessNotRespondingId;
+    }
+
+    void SetRenderProcessRespondingId(const EventMarker& renderProcessRespondingId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.renderProcessRespondingId = renderProcessRespondingId;
+    }
+
+    const EventMarker& GetRenderProcessRespondingId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.renderProcessRespondingId;
+    }
+
+    void SetViewportFitChangedId(const EventMarker& viewportFitChangedId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.viewportFitChangedId = viewportFitChangedId;
+    }
+
+    const EventMarker& GetViewportFitChangedId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.viewportFitChangedId;
+    }
+
+    void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.adsBlockedEventId = adsBlockedEventId;
+    }
+
+    const EventMarker& GetAdsBlockedEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.geolocationShowEventId;
     }
 
 protected:

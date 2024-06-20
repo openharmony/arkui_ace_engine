@@ -16,7 +16,9 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
+#include <vector>
 
 #include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
@@ -112,6 +114,11 @@ public:
         return handle_;
     }
 
+    void SetNeedUpdateEvent(bool needUpdateEvent)
+    {
+        needUpdateEvent_ = needUpdateEvent;
+    }
+
 protected:
     int32_t OnGetTotalCount() override;
 
@@ -149,8 +156,71 @@ private:
     uint32_t totalCount_ = 0;
     void* userData_ = nullptr;
     void (*receiver_)(ArkUINodeAdapterEvent* event) = nullptr;
+    bool needUpdateEvent_ = false;
     ArkUINodeAdapterHandle handle_ = nullptr;
 };
+
+class UINodeAdapter : public AceType {
+public:
+    explicit UINodeAdapter(ArkUINodeAdapterHandle handle);
+    ~UINodeAdapter() override;
+
+    void OnEventReceived(ArkUINodeAdapterEvent* event);
+
+    void SetOnAttachToNodeFunc(std::function<void(ArkUINodeHandle)>&& func)
+    {
+        attachToNodeFunc_ = func;
+    }
+
+    void SetOnDetachFromNodeFunc(std::function<void()>&& func)
+    {
+        detachFromNodeFunc_ = func;
+    }
+
+    void SetOnGetChildIdFunc(std::function<int32_t(uint32_t)>&& func)
+    {
+        getChildIdFunc_ = func;
+    }
+
+    void SetOnCreateNewChild(std::function<ArkUINodeHandle(uint32_t)>&& func)
+    {
+        createNewChildFunc_ = func;
+    }
+
+    void SetOnDisposeChild(std::function<void(ArkUINodeHandle, int32_t)>&& func)
+    {
+        disposeChildFunc_ = func;
+    }
+
+    void SetOnUpdateChind(std::function<void(ArkUINodeHandle, int32_t)>&& func)
+    {
+        updateChildFunc_ = func;
+    }
+
+    ArkUINodeAdapterHandle GetHandle() const
+    {
+        return handle_;
+    }
+
+    void SetTotalNodeCount(uint32_t count);
+    uint32_t GetTotalNodeCount() const;
+    void NotifyItemReloaded();
+    void NotifyItemChanged(uint32_t start, uint32_t count);
+    void NotifyItemRemoved(uint32_t start, uint32_t count);
+    void NotifyItemInserted(uint32_t start, uint32_t count);
+    void NotifyItemMoved(uint32_t from, uint32_t to);
+    std::vector<ArkUINodeHandle> GetAllItems();
+
+private:
+    ArkUINodeAdapterHandle handle_;
+    std::function<void(ArkUINodeHandle)> attachToNodeFunc_;
+    std::function<void()> detachFromNodeFunc_;
+    std::function<int32_t(uint32_t)> getChildIdFunc_;
+    std::function<ArkUINodeHandle(uint32_t)> createNewChildFunc_;
+    std::function<void(ArkUINodeHandle, int32_t)> disposeChildFunc_;
+    std::function<void(ArkUINodeHandle, int32_t)> updateChildFunc_;
+};
+
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NodeAdapter {

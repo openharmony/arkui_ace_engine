@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -70,11 +71,12 @@ protected:
 
 void ContainerModelTestNg::SetUpTestSuite()
 {
+    MockPipelineContext::SetUp();
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
     EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
@@ -499,6 +501,43 @@ HWTEST_F(ContainerModelTestNg, Test006, TestSize.Level1)
     pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
     bool bResult = pattern_->CanShowFloatingTitle();
     EXPECT_FALSE(bResult);
+}
+/**
+ * @tc.name: Test007
+ * @tc.desc: SetIsHoveredMenu GetIsHoveredMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
+{
+    CreateContainerModal();
+    pattern_->SetIsHoveredMenu(true);
+    bool bResult = pattern_->GetIsHoveredMenu();
+    EXPECT_TRUE(bResult);
+}
+/**
+ * @tc.name: Test008
+ * @tc.desc: SetContainerModalPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test008, TestSize.Level1)
+{
+    CreateContainerModal();
+    ContainerModalView::SetContainerModalPattern(pattern_);
+    EXPECT_EQ(ContainerModalView::containerModalPattern_, pattern_);
+}
+/**
+ * @tc.name: Test009
+ * @tc.desc: AddButtonStyleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, Test009, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AccessibilityManager::MakeRefPtr<ButtonPattern>());
+    auto imageIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AccessibilityManager::MakeRefPtr<ImagePattern>());
+    ContainerModalView::AddButtonStyleMouseEvent(buttonNode, imageIcon, false);
 }
 
 /**

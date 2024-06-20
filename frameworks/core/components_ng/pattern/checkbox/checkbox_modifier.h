@@ -42,6 +42,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
@@ -79,8 +82,6 @@ public:
                 isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
             animatableShadowColor_->Set(
                 isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
-            opacityScale_->Set(isSelect_->Get() ? 1.0f : 0.0f);
-            borderOpacityScale_->Set(isSelect_->Get() ? 0.0f : 1.0f);
         });
     }
 
@@ -159,6 +160,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetSize(SizeF& size)
     {
         if (size_) {
@@ -199,7 +207,14 @@ public:
 
     void SetHasBuilder(bool hasBuilder)
     {
-        hasBuilder_ = hasBuilder;
+        if (hasBuilder_) {
+            hasBuilder_->Set(hasBuilder);
+        }
+    }
+
+    void SetHasUnselectedColor(bool hasUnselectedColor)
+    {
+        hasUnselectedColor_ = hasUnselectedColor;
     }
 
 private:
@@ -222,13 +237,14 @@ private:
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
+    Dimension defaultPaddingSize_;
     Dimension shadowWidth_;
     Dimension focusBoardSize_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
-    bool hasBuilder_ = false;
+    bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -237,6 +253,8 @@ private:
     RefPtr<PropertyInt> checkBoxShape_;
 
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> hasBuilder_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;
@@ -248,8 +266,6 @@ private:
     RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
-    RefPtr<AnimatablePropertyFloat> opacityScale_;
-    RefPtr<AnimatablePropertyFloat> borderOpacityScale_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };

@@ -69,7 +69,8 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, TouchTestResult& responseLinkResult,
+        bool isDispatch = false) override
     {
         return hitTestResult_;
     }
@@ -783,79 +784,22 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
      * @tc.expected: the return value is meetings expectations
      */
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     TouchRestrict restrict;
     const PointF GLOBAL_POINT { 20.0f, 20.0f };
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    HitTestResult retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
+    retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
     testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
-    ZERO->Clean();
-}
-
-/**
- * @tc.name: UINodeTestNg024
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. CreateFrameNode and call MouseTest
-     * @tc.expected: the return value is meetings expectations
-     */
-    MouseTestResult result;
-    const PointF GLOBAL_POINT { 20.0f, 20.0f };
-    const PointF LOCAL_POINT { 15.0f, 15.0f };
-    RefPtr<FrameNode> TEST_HOVERNODE =
-        FrameNode::CreateFrameNode("hovernode", 100, AceType::MakeRefPtr<Pattern>(), true);
-    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
-    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
-    testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
-    ZERO->Clean();
-}
-
-/**
- * @tc.name: UINodeTestNg025
- * @tc.desc: Test ui node method
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg025, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. add one child for ZERO and call AxisTest
-     * @tc.expected: the return value is OUT_OF_REGION
-     */
-    /**
-     * @tc.steps: step1. CreateFrameNode and call MouseTest
-     * @tc.expected: the return value is meetings expectations
-     */
-    AxisTestResult result;
-    TouchRestrict restrict;
-    const PointF GLOBAL_POINT { 20.0f, 20.0f };
-    const PointF LOCAL_POINT { 15.0f, 15.0f };
-    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
-    testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
-    EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
-    testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::AxisTest(GLOBAL_POINT, LOCAL_POINT, result);
+    retResult =
+        ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, restrict, result, 1, responseLinkResult);
     EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }
@@ -1178,11 +1122,16 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
      * @tc.steps: step1. set onMainTree_ is true and call AddChild
      * @tc.expected: children_.size() is 2
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     auto it = std::find(ZERO->children_.begin(), ZERO->children_.end(), ZERO);
     ZERO->onMainTree_ = true;
+    ZERO->context_ = AceType::RawPtr(context);
     ZERO->DoAddChild(it, ONE, false);
     ZERO->DoAddChild(it, TWO, true);
     EXPECT_EQ(ZERO->children_.size(), 2);
+    ZERO->onMainTree_ = false;
+    ZERO->context_ = nullptr;
 }
 
 /**
@@ -1247,6 +1196,41 @@ HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
     parent->UINode::GetFrameChildByIndex(0, false);
     EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
     EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
+}
+
+/**
+ * @tc.name: UINodeTestNg044
+* @tc.desc: Test ui node method of instanceid
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ASSERT_NE(testNode, nullptr);
+
+    int32_t testId = 0;
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) {
+        testId = newId;
+    });
+
+    /**
+     * @tc.steps: step2. attach context
+     */
+    testNode->AttachContext(AceType::RawPtr(context), true);
+    EXPECT_EQ(testNode->context_, AceType::RawPtr(context));
+    EXPECT_EQ(testNode->instanceId_, context->GetInstanceId());
+    EXPECT_EQ(testId, context->GetInstanceId());
+
+    /**
+     * @tc.steps: step3. detach context
+     */
+    testNode->DetachContext(true);
+    EXPECT_EQ(testNode->context_, nullptr);
 }
 
 /**

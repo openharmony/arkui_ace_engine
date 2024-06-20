@@ -37,6 +37,28 @@ public:
     float MoveInternal(float time) override;
     const std::string ToString() override;
 
+    float GetX0() const
+    {
+        return x0_;
+    }
+
+    float GetY0() const
+    {
+        return y0_;
+    }
+
+    float GetX1() const
+    {
+        return x1_;
+    }
+
+    float GetY1() const
+    {
+        return y1_;
+    }
+
+    bool IsEqual(const RefPtr<Curve>& curve) const override;
+
 private:
     // Bx(m) or By(m) = 3m(1-m)^2*a + 3m^2*b + m^3, where a = x0_ ,b = x1_ or a = y0_ ,b = y1_
     static float CalculateCubic(float a, float b, float m);

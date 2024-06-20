@@ -24,14 +24,16 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
 constexpr Dimension SHEET_BLANK_FLOATING_STATUS_BAR = 32.0_vp;
+constexpr Dimension SHEET_SPLIT_AI_BAR = 24.0_vp;
+constexpr Dimension SHEET_SPLIT_STATUS_BAR = 24.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_PADDING = 8.0_vp;
-constexpr Dimension SHEET_OPERATION_AREA_HEIGHT = 56.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_HEIGHT_DOUBLE = 72.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_WIDTH = 40.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_HEIGHT = 40.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_IMAGE_HEIGHT = 18.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_IMAGE_WIDTH = 18.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_TITLE_SPACE = 32.0_vp;
+constexpr Dimension SHEET_CLOSE_ICON_TITLE_SPACE_NEW = 8.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_RADIUS = 20.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_WIDTH = 64.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_HEIGHT = 16.0_vp;
@@ -45,9 +47,12 @@ constexpr Dimension SHEET_ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension SHEET_TARGET_SPACE = 8.0_vp;
 constexpr Dimension SHEET_DEVICE_WIDTH_BREAKPOINT = 600.0_vp;
 constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
-constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 15.0_vp;
+constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
+constexpr float SHEET_NORMAL_SCALE = 1.0f;
+constexpr float SHEET_MAX_SCALE = 1.75f;
+constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -88,9 +93,14 @@ public:
             theme->sheetBackgoundColor_ = sheetPattern->GetAttr<Color>("sheet_background_color", Color(0xfff1f3f5));
             theme->dragBarColor_ = sheetPattern->GetAttr<Color>("drag_bar_color", Color(0x33182431));
             theme->sheetType_ = sheetPattern->GetAttr<std::string>("sheet_type", "auto");
+            theme->sheetBottom_ = sheetPattern->GetAttr<std::string>("sheet_bottom", "auto");
             theme->maskColor_ = sheetPattern->GetAttr<Color>("mask_color", Color(0x33182431));
             theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
             theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
+            theme->sheetBackgroundBlurStyle_ = sheetPattern->GetAttr<int>("sheet_background_blur_style", 0);
+            theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
+            theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
+            theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
         }
     };
     ~SheetTheme() override = default;
@@ -118,6 +128,11 @@ public:
     const Dimension& GetSubtitleTextMargin() const
     {
         return subtitleTextMargin_;
+    }
+
+    const Dimension& GetOperationAreaHeight() const
+    {
+        return operationAreaHeight_;
     }
 
     const Color& GetTitleTextFontColor() const
@@ -155,9 +170,29 @@ public:
         return closeIconImageColor_;
     }
 
+    bool IsOnlyBottom() const
+    {
+        return sheetBottom_ == "bottom";
+    }
+
     const std::string& GetSheetType() const
     {
         return sheetType_;
+    }
+
+    const int& GetSheetBackgroundBlurStyle() const
+    {
+        return sheetBackgroundBlurStyle_;
+    }
+
+    const double& GetLargePercent() const
+    {
+        return largePercent_;
+    }
+
+    const double& GetMediumPercent() const
+    {
+        return mediumPercent_;
     }
 
 protected:
@@ -169,6 +204,9 @@ private:
     Dimension titleTextMargin_;
     Dimension subtitleTextFontSize_;
     Dimension subtitleTextMargin_;
+    Dimension operationAreaHeight_;
+    double largePercent_ = 0.0f;
+    double mediumPercent_ = 0.0f;
     Color titleTextFontColor_;
     Color subtitleTextFontColor_;
     Color sheetBackgoundColor_;
@@ -177,6 +215,8 @@ private:
     Color closeIconColor_;
     Color closeIconImageColor_;
     std::string sheetType_;
+    std::string sheetBottom_;
+    int sheetBackgroundBlurStyle_;
 };
 } // namespace OHOS::Ace::NG
 

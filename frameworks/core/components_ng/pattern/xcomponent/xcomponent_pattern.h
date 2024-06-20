@@ -39,9 +39,14 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_paint_method.h"
 #include "core/components_ng/property/property.h"
+#ifdef PLATFORM_VIEW_SUPPORTED
+#include "core/common/platformview/platform_view_interface.h"
+#include "core/common/platformview/platform_view_proxy.h"
+#endif
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
+#include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -60,7 +65,12 @@ public:
 
     bool IsAtomicNode() const override
     {
+#ifdef PLATFORM_VIEW_SUPPORTED
+        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE ||
+               type_ == XComponentType::NODE || type_ == XComponentType::PLATFORM_VIEW;
+#else
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
+#endif
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -116,9 +126,6 @@ public:
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SetExpectedRateRangeInit();
-        OnFrameEventInit();
-        UnregisterOnFrameEventInit();
         auto width = initSize_.Width();
         auto height = initSize_.Height();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
@@ -258,13 +265,23 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    void Initialize(int32_t instanceId = -1);
+    void Initialize();
 
     bool ChangeRenderType(NodeRenderType renderType);
 
     void SetRenderType(NodeRenderType renderType)
     {
         renderType_ = renderType;
+    }
+
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId()
+    {
+        return transformHintChangedCallbackId_.has_value();
     }
 
     void SetExportTextureSurfaceId(const std::string& surfaceId);
@@ -279,6 +296,7 @@ public:
     void ClearIdealSurfaceOffset(bool isXAxis);
     void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
+    void SetImageAIOptions(void* options);
     void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
@@ -297,6 +315,8 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
@@ -323,7 +343,6 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
-    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -334,12 +353,26 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
-    void SetRotation();
+    void SetRotation(uint32_t rotation);
+#ifdef OHOS_PLATFORM
+    float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
+    int GetFlingDuration(float velocity);
+    void ReportSlideToRss();
+#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
     void RegisterRenderContextCallBack();
     void RequestFocus();
+#ifdef PLATFORM_VIEW_SUPPORTED
+    void PlatformViewInitialize();
+    void* GetNativeWindow(int32_t instanceId, int64_t textureId);
+    void OnTextureRefresh(void* surface);
+    void PrepareSurface();
+    void RegisterPlatformViewEvent();
+    void PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint);
+    void UpdatePlatformViewLayoutIfNeeded();
+#endif
 #endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
@@ -353,6 +386,14 @@ private:
     RefPtr<RenderContext> renderContextForSurface_;
     RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
+#if defined(RENDER_EXTRACT_SUPPORTED) && defined(PLATFORM_VIEW_SUPPORTED)
+    WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
+    RefPtr<RenderContext> renderContextForPlatformView_;
+    WeakPtr<RenderContext> renderContextForPlatformViewWeakPtr_;
+    RefPtr<PlatformViewInterface> platformView_;
+    SizeF lastDrawSize_;
+    OffsetF lastOffset_;
+#endif
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
@@ -366,8 +407,6 @@ private:
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
-    WeakPtr<NG::PipelineContext> context_;
-    int32_t instanceId_;
     SizeF initSize_;
     OffsetF localPosition_;
     OffsetF globalPosition_;
@@ -389,9 +428,13 @@ private:
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    Rotation rotation_ = Rotation::ROTATION_0;
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
+    OH_NativeXComponent_TouchEvent lastTouchInfo_;
+    std::atomic<int32_t> slideCount_ {0};
+    double physicalCoeff_ = 0.0;
 #endif
 };
 } // namespace OHOS::Ace::NG

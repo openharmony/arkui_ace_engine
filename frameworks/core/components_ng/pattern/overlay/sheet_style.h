@@ -27,7 +27,7 @@ constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;
 constexpr float CURVE_MASS = 1.0f;
 constexpr float CURVE_STIFFNESS = 328.0f;
 constexpr float CURVE_DAMPING = 36.0f;
-constexpr float MEDIUM_SIZE = 0.6f;
+constexpr float LARGE_SIZE = 1.0f;
 constexpr float MEDIUM_SIZE_PRE = 0.5f;
 constexpr float POPUP_LARGE_SIZE = 0.9f;
 enum SheetMode {

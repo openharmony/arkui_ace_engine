@@ -47,6 +47,12 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
+    enum class ImageType {
+        BASE,
+        ANIMATION,
+        UNDEFINED,
+    };
+
     ImagePattern();
     ~ImagePattern() override;
 
@@ -90,6 +96,11 @@ public:
         return image_;
     }
 
+    const RefPtr<CanvasImage>& GetAltCanvasImage()
+    {
+        return altImage_;
+    }
+
     RefPtr<FrameNode> GetClientHost() const override
     {
         return GetHost();
@@ -118,6 +129,17 @@ public:
         return true;
     }
 
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        isImageQualityChange_ = (imageQuality_ != imageQuality);
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -142,6 +164,20 @@ public:
         }
     }
 
+    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
+    {
+        switch (dynamicMode) {
+            case DynamicRangeMode::HIGH:
+                return "HIGH";
+            case DynamicRangeMode::CONSTRAINT:
+                return "CONSTRAINT";
+            case DynamicRangeMode::STANDARD:
+                return "STANDARD";
+            default:
+                return "STANDARD";
+        }
+    }
+
     std::string GetImageFitStr(ImageFit value);
 
     std::string GetImageRepeatStr(ImageRepeat value);
@@ -158,8 +194,14 @@ public:
         return syncLoad_;
     }
 
+    void SetNeedBorderRadius(bool needBorderRadius)
+    {
+        needBorderRadius_ = needBorderRadius;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -177,6 +219,7 @@ public:
     }
     void EnableAnalyzer(bool value);
     bool hasSceneChanged();
+    void OnSensitiveStyleChange(bool isSensitive) override;
 
     //animation
     struct CacheImageStruct {
@@ -191,6 +234,7 @@ public:
     void ImageAnimatorPattern();
     void SetImages(std::vector<ImageProperties>&& images)
     {
+        CHECK_NULL_VOID(images.size());
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
@@ -206,7 +250,8 @@ public:
     {
         images_.clear();
     }
-
+    void ResetImage();
+    void ResetAltImage();
     void ResetImageProperties();
 
     void ResetImageAndAlt();
@@ -229,14 +274,19 @@ public:
         OnAnimatedModifyDone();
     }
 
-    void SetIsAnimation(bool isAnimation)
+    void SetImageType(ImageType imageType)
     {
-        isAnimation_ = isAnimation;
+        imageType_ = imageType;
+    }
+
+    ImageType GetImageType()
+    {
+        return imageType_;
     }
 
     bool GetIsAnimation() const
     {
-        return isAnimation_;
+        return imageType_ == ImageType::ANIMATION;
     }
 
     bool IsAtomicNode() const override
@@ -261,15 +311,53 @@ public:
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
 
+    void SetSrcUndefined(bool isUndefined)
+    {
+        isSrcUndefined_ = isUndefined;
+    }
+
     void SetImageAnimator(bool isImageAnimator)
     {
         isImageAnimator_ = isImageAnimator;
     }
 
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+
+    SizeF GetRawImageSize()
+    {
+        if (!loadingCtx_) {
+            return SizeF(-1.0, -1.0);
+        }
+        return loadingCtx_->GetImageSize();
+    }
+
+    void OnVisibleAreaChange(bool visible);
+
+    bool GetDefaultAutoResize()
+    {
+        InitDefaultValue();
+        return autoResizeDefault_;
+    }
+    ImageInterpolation GetDefaultInterpolation()
+    {
+        InitDefaultValue();
+        return interpolationDefault_;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     bool isShow_ = true;
+    bool gifAnimation_ = false;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -307,6 +395,7 @@ private:
     void StartDecoding(const SizeF& dstSize);
     bool CheckIfNeedLayout();
     void OnImageDataReady();
+    void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
@@ -333,6 +422,7 @@ private:
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
+    OnCompleteInDataReadyNotifyTask CreateCompleteCallBackInDataReady();
 
     DataReadyNotifyTask CreateDataReadyCallbackForAlt();
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
@@ -343,7 +433,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -374,9 +464,11 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
+    void ControlAnimation(int32_t index);
+    void SetObscured();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    ImageInterpolation interpolation_ = ImageInterpolation::NONE;
+    ImageInterpolation interpolation_ = ImageInterpolation::LOW;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -399,15 +491,20 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool needBorderRadius_ = false;
+    bool loadInVipChannel_ = false;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
+    bool isImageQualityChange_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
+    bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
     //animation
-    bool isAnimation_ = false;
+    ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
@@ -424,6 +521,10 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
     bool hasSizeChanged = false;
+    bool isPixelMapChanged_ = true;
+    bool isSrcUndefined_ = false;
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

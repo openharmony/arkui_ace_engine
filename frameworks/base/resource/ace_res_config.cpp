@@ -240,6 +240,9 @@ bool IsOnBacktrackingPath(const std::string& bestConfigTag, const std::string& c
     FindBacktrackPath(candidateLocaleConfig, candidateConfigBacktrackPaths, candidateConfigTag);
     int32_t bestConfigIndex = -1;
     int32_t candidateConfigIndex = -1;
+    if (backtrackPath.empty()) {
+        return false;
+    }
     for (std::size_t i = 0; i < backtrackPath.size(); i++) {
         for (const auto& bestConfigPath : bestConfigBacktrackPaths) {
             if (bestConfigPath == backtrackPath[i] && bestConfigIndex == -1) {

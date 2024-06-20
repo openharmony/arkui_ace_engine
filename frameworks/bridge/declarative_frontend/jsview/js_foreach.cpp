@@ -111,7 +111,9 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
-
+    if (!info[0]->IsNumber()) {
+        return;
+    }
     const auto elmtId = info[0]->ToNumber<int32_t>();
     std::list<std::string> idList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
 
@@ -161,7 +163,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         JSRef<JSVal> strId = jsArr->GetValueAt(i);
         // Save return value of insert to know was it duplicate...
         std::pair<std::unordered_set<std::string>::iterator, bool> ret = newIds.insert(strId->ToString());
-
         // Duplicate Id detected. Will return index of those to caller.
         if (!ret.second) {
             duplicateIds->SetValueAt(duplicateIndx++, JSRef<JSVal>::Make(ToJSValue(i)));

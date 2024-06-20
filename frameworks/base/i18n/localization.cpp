@@ -45,6 +45,7 @@
 #include "unicode/utypes.h"
 #include "unicode/uversion.h"
 
+#include "date_time_sequence.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
@@ -385,6 +386,40 @@ bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
     return true;
 }
 
+bool Localization::GetDateOrder(std::vector<std::string>& outOrder)
+{
+    std::string dateOrder;
+    DateTimeSequence sequence;
+    std::string language = locale_->instance.getLanguage();
+    OrderResult orderResult = sequence.GetDateOrder(language);
+    dateOrder = orderResult.dateOrder;
+
+    std::map<std::size_t, std::string> order;
+    std::size_t position = dateOrder.find("y");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "year";
+
+    position = dateOrder.find("M");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "month";
+
+    position = dateOrder.find("d");
+    if (position == std::string::npos) {
+        return false;
+    }
+    order[position] = "day";
+    
+    for (auto it = order.begin(); it != order.end(); ++it) {
+        outOrder.emplace_back(it->second);
+    }
+
+    return true;
+}
+
 bool Localization::Contain(const std::string& str, const std::string& tag)
 {
     auto pos = str.find(tag);
@@ -560,8 +595,12 @@ LunarDate Localization::GetLunarDate(Date date)
     auto cal = Calendar::createInstance(locale, status);
     CHECK_RETURN(status, dateRet);
     // 0 means January,  1 means February, so month - 1
-    cal->set(date.year, date.month - 1, date.day);
-
+    if (date.month == 0u) {
+        date.month = 11u;
+        cal->set(date.year, date.month, date.day);
+    } else {
+        cal->set(date.year, date.month - 1u, date.day);
+    }
     UDate udate = cal->getTime(status);
     delete cal;
     CHECK_RETURN(status, dateRet);

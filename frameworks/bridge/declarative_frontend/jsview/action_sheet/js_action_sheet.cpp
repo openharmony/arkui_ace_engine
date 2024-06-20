@@ -185,6 +185,110 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
     }
 }
 
+void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse shadow.
+    auto shadowValue = obj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSActionSheet::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
+}
+
+void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto borderWidthValue = obj->GetProperty("borderWidth");
+    NG::BorderWidthProperty borderWidth;
+    if (JSActionSheet::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
+        properties.borderWidth = borderWidth;
+        auto colorValue = obj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (JSActionSheet::ParseBorderColorProps(colorValue, borderColor)) {
+            properties.borderColor = borderColor;
+        } else {
+            borderColor.SetColor(Color::BLACK);
+            properties.borderColor = borderColor;
+        }
+    }
+}
+
+void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto cornerRadiusValue = obj->GetProperty("cornerRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSActionSheet::ParseBorderRadius(cornerRadiusValue, radius)) {
+        properties.borderRadius = radius;
+    }
+}
+
+void UpdateDialogAlignment(DialogAlignment& alignment)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_END;
+        }
+    } else if (alignment == DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_START;
+        }
+    } else if (alignment == DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
+void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse alignment
+    auto alignmentValue = obj->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            properties.alignment = DIALOG_ALIGNMENT[alignment];
+            UpdateDialogAlignment(properties.alignment);
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            properties.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
+        }
+    }
+}
+
+void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse offset
+    auto offsetValue = obj->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSActionSheet::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSActionSheet::ParseJsDimensionVp(dyValue, dy);
+        properties.offset = DimensionOffset(dx, dy);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        double xValue = isRtl ? properties.offset.GetX().Value() * (-1) : properties.offset.GetX().Value();
+        Dimension offsetX = Dimension(xValue);
+        properties.offset.SetX(offsetX);
+    }
+}
+
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -207,9 +311,16 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 
     ParseTitleAndMessage(properties, obj);
     ParseConfirmButton(execContext, properties, obj);
+    ParseShadow(properties, obj);
+    ParseBorderWidthAndColor(properties, obj);
+    ParseRadius(properties, obj);
+    ParseDialogAlignment(properties, obj);
+    ParseOffset(properties, obj);
 
     auto onLanguageChange = [execContext, obj, parseContent = ParseTitleAndMessage, parseButton = ParseConfirmButton,
-                                node = dialogNode](DialogProperties& dialogProps) {
+                                parseShadow = ParseShadow, parseBorderProps = ParseBorderWidthAndColor,
+                                parseRadius = ParseRadius, parseAlignment = ParseDialogAlignment,
+                                parseOffset = ParseOffset, node = dialogNode](DialogProperties& dialogProps) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
         ACE_SCORING_EVENT("ActionSheet.property.onLanguageChange");
         auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -217,6 +328,11 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         pipelineContext->UpdateCurrentActiveNode(node);
         parseContent(dialogProps, obj);
         parseButton(execContext, dialogProps, obj);
+        parseShadow(dialogProps, obj);
+        parseBorderProps(dialogProps, obj);
+        parseRadius(dialogProps, obj);
+        ParseDialogAlignment(dialogProps, obj);
+        parseOffset(dialogProps, obj);
         // Parse sheets
         auto sheetsVal = obj->GetProperty("sheets");
         if (sheetsVal->IsArray()) {
@@ -264,33 +380,6 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
             sheetsInfo.emplace_back(ParseSheetInfo(execContext, sheetsArr->GetValueAt(index)));
         }
         properties.sheetsInfo = std::move(sheetsInfo);
-    }
-
-    // Parse alignment
-    auto alignmentValue = obj->GetProperty("alignment");
-    if (alignmentValue->IsNumber()) {
-        auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
-            properties.alignment = DIALOG_ALIGNMENT[alignment];
-        }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            properties.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
-        }
-    }
-
-    // Parse offset
-    auto offsetValue = obj->GetProperty("offset");
-    if (offsetValue->IsObject()) {
-        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-        CalcDimension dx;
-        auto dxValue = offsetObj->GetProperty("dx");
-        ParseJsDimensionVp(dxValue, dx);
-        CalcDimension dy;
-        auto dyValue = offsetObj->GetProperty("dy");
-        ParseJsDimensionVp(dyValue, dy);
-        properties.offset = DimensionOffset(dx, dy);
     }
 
     // Parse maskRect.

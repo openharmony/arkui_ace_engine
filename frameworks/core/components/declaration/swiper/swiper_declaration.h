@@ -37,6 +37,13 @@ enum class SwiperDisplayMode {
 enum class SwiperIndicatorType {
     DOT = 0,
     DIGIT,
+    ARC_DOT,
+};
+
+enum class SwiperArcDirection {
+    THREE_CLOCK_DIRECTION = 0,
+    SIX_CLOCK_DIRECTION,
+    NINE_CLOCK_DIRECTION,
 };
 
 struct SwiperAttribute : Attribute {

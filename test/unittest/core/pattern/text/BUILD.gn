@@ -16,8 +16,14 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("text_test_ng") {
   type = "new"
   sources = [
+    "paragraph_manager_test_ng.cpp",
     "span_string_test_ng.cpp",
+    "span_sub_test_ng.cpp",
     "span_test_ng.cpp",
+    "text_base.cpp",
     "text_test_ng.cpp",
+    "text_testfour_ng.cpp",
+    "text_testthree_ng.cpp",
+    "text_testtwo_ng.cpp",
   ]
 }

@@ -238,6 +238,16 @@ public:
         weakButtonCancel_ = buttonCancelNode;
     }
 
+    void SetForwardNode(WeakPtr<FrameNode> buttonForwardNode)
+    {
+        weakButtonForward_ = buttonForwardNode;
+    }
+
+    void SetBackwardNode(WeakPtr<FrameNode> buttonBackwardNode)
+    {
+        weakButtonBackward_ = buttonBackwardNode;
+    }
+
     void OnLanguageConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
@@ -246,6 +256,16 @@ public:
         for (auto& value : values) {
             values_.emplace_back(value);
         }
+    }
+
+    const std::vector<std::string>& GetValues()
+    {
+        return values_;
+    }
+
+    const std::vector<uint32_t>& GetSelecteds()
+    {
+        return selecteds_;
     }
 
     void SetHasSelectAttr(bool value)
@@ -341,6 +361,9 @@ public:
     {
         return value_;
     }
+
+    void SetCanLoop(bool isLoop);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -386,6 +409,8 @@ private:
     bool isHasSelectAttr_ = false;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> weakButtonForward_;
+    WeakPtr<FrameNode> weakButtonBackward_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;

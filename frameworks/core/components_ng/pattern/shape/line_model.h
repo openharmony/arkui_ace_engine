@@ -22,7 +22,7 @@
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
-class LineModel {
+class ACE_FORCE_EXPORT LineModel {
 public:
     static LineModel* GetInstance();
     virtual ~LineModel() = default;

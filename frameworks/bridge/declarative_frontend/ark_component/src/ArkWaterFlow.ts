@@ -194,6 +194,77 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect
   }
 }
 
+
+class WaterFlowScrollBarWidthModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowScrollBarWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetScrollBarWidth(node);
+    } else {
+      getUINativeModule().waterFlow.setScrollBarWidth(node, this.value);
+    }
+  }
+}
+
+class WaterFlowScrollBarModifier extends ModifierWithKey<BarState> {
+  constructor(value: BarState) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowScrollBar');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetScrollBar(node);
+    } else {
+      getUINativeModule().waterFlow.setScrollBar(node, this.value);
+    }
+  }
+}
+
+class WaterFlowScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
+  constructor(value: string | number | Color) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowScrollBarColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetScrollBarColor(node);
+    } else {
+      getUINativeModule().waterFlow.setScrollBarColor(node, this.value);
+    }
+  }
+}
+
+class WaterFlowCachedCountModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowCachedCount');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetCachedCount(node);
+    } else {
+      getUINativeModule().waterFlow.setCachedCount(node, this.value);
+    }
+  }
+}
+
+class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowFlingSpeedLimit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().waterFlow.setFlingSpeedLimit(node, this.value);
+    }
+  }
+}
+
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -255,7 +326,8 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     return this;
   }
   cachedCount(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
+    return this;
   }
   onReachStart(event: () => void): this {
     throw new Error('Method not implemented.');
@@ -275,6 +347,22 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     effect.value = value;
     effect.options = options;
     modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
+    return this;
+  }
+  scrollBarWidth(value: string | number): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarWidthModifier.identity, WaterFlowScrollBarWidthModifier, value);
+    return this;
+  }
+  scrollBarColor(value: string | number | Color): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarColorModifier.identity, WaterFlowScrollBarColorModifier, value);
+    return this;
+  }
+  scrollBar(value: BarState): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarModifier.identity, WaterFlowScrollBarModifier, value);
+    return this;
+  }
+  flingSpeedLimit(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
     return this;
   }
 }

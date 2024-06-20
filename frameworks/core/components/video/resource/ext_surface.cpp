@@ -52,11 +52,13 @@ ExtSurface::~ExtSurface()
         resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONCREATE));
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(SURFACE_METHOD_ONCREATE), weak] {
-            auto resRegister = weak.Upgrade();
-            CHECK_NULL_VOID(resRegister);
-            resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [eventHash = MakeEventHash(SURFACE_METHOD_ONCREATE), weak] {
+                auto resRegister = weak.Upgrade();
+                CHECK_NULL_VOID(resRegister);
+                resRegister->UnregisterEvent(eventHash);
+            },
+            "ArkUIVideoExtSurfaceUnregisterEvent");
     }
 }
 
@@ -66,12 +68,14 @@ void ExtSurface::Create(const std::function<void(int64_t)>& onCreate)
     CHECK_NULL_VOID(context);
 
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), onCreate] {
-        auto surface = weak.Upgrade();
-        if (surface) {
-            surface->CreateExtSurface(onCreate);
-        }
-    }, "ArkUIVideoCreateExtSurface");
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), onCreate] {
+            auto surface = weak.Upgrade();
+            if (surface) {
+                surface->CreateExtSurface(onCreate);
+            }
+        },
+        "ArkUIVideoCreateExtSurface");
 }
 
 void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)

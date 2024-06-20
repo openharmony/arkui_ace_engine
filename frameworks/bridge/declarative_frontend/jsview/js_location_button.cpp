@@ -69,7 +69,7 @@ bool JSLocationButton::ParseComponentStyle(const JSCallbackInfo& info,
             return false;
         }
     } else {
-        bg = BUTTON_TYPE_NULL;
+        bg = static_cast<int32_t>(ButtonType::CAPSULE);
     }
     return true;
 }
@@ -83,10 +83,10 @@ void JSLocationButton::Create(const JSCallbackInfo& info)
         LocationButtonModelNG::GetInstance()->Create(
             static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION),
             static_cast<int32_t>(LocationButtonIconStyle::ICON_LINE),
-            static_cast<int32_t>(ButtonType::CAPSULE));
+            static_cast<int32_t>(ButtonType::CAPSULE), false);
     } else {
         LocationButtonModelNG::GetInstance()->Create(static_cast<int32_t>(textDesc),
-            static_cast<int32_t>(iconType), backgroundType);
+            static_cast<int32_t>(iconType), backgroundType, false);
     }
 }
 
@@ -103,12 +103,8 @@ void JsLocationButtonClickFunction::Execute(GestureEvent& info)
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     clickEventParam->SetProperty<double>("pressure", info.GetForce());
-    if (info.GetTiltX().has_value()) {
-        clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value());
-    }
-    if (info.GetTiltY().has_value()) {
-        clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value());
-    }
+    clickEventParam->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
+    clickEventParam->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);

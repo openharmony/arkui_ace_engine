@@ -72,7 +72,7 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     SerializedGesture& serializedGesture) {}
 
-void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
+void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth) {}
 
 void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback) {}
 
@@ -80,7 +80,11 @@ void FormManagerDelegate::AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallba
 
 void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback) {}
 
+void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback&& callback) {}
+
 void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
+
+void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {}
 
 void FormManagerDelegate::ResetForm() {}
 
@@ -90,7 +94,19 @@ void FormManagerDelegate::ReleaseRenderer() {}
 
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 
+void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left) {}
+
 void FormManagerDelegate::SetObscured(bool isObscured) {}
+
+void FormManagerDelegate::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId) {}
+void FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
+void FormManagerDelegate::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info) {}
+void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs) {}
+
+void FormManagerDelegate::HandleCachedClickEvents() {}
 
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,

@@ -34,6 +34,13 @@ RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(const st
         Rosen::Drawing::ColorFilter::CreateMatrixColorFilter(colorMatrix));
 }
 
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNative(void* sptrAddr)
+{
+    CHECK_NULL_RETURN(sptrAddr, nullptr);
+    auto* colorFilter = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(sptrAddr);
+    return AceType::MakeRefPtr<DrawingColorFilterOhos>(*colorFilter);
+}
+
 void* DrawingColorFilterOhos::GetDrawingColorFilterSptrAddr()
 {
     return static_cast<void*>(&colorFilter_);

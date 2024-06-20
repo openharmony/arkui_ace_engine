@@ -23,10 +23,8 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-
-bool AceTraceEnabled()
-{
-    return SystemProperties::GetTraceEnabled();
+namespace {
+static constexpr uint64_t ACE_TRACE_COMMERCIAL = HITRACE_TAG_ACE | HITRACE_TAG_COMMERCIAL;
 }
 
 void AceTraceBegin(const char* name)
@@ -39,6 +37,16 @@ void AceTraceBegin(const char* name)
 void AceTraceEnd()
 {
     FinishTrace(HITRACE_TAG_ACE);
+}
+
+void AceTraceBeginCommercial(const char* name)
+{
+    StartTrace(ACE_TRACE_COMMERCIAL, name);
+}
+
+void AceTraceEndCommercial()
+{
+    FinishTrace(ACE_TRACE_COMMERCIAL);
 }
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace)

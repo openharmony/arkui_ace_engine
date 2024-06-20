@@ -94,6 +94,10 @@ public:
     void SetShowPasswordText(bool value) override {}
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override {};
+    void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
+    void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
+    void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

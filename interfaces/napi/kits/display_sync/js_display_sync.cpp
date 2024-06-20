@@ -140,7 +140,9 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, Fr
         return NapiGetUndefined(env);
     }
 
-    int32_t minFPS, maxFPS, expectedFPS;
+    int32_t minFPS = 0;
+    int32_t maxFPS = 0;
+    int32_t expectedFPS = 0;
     ParseJsValue(env, nativeObj, "min", minFPS);
     ParseJsValue(env, nativeObj, "max", maxFPS);
     ParseJsValue(env, nativeObj, "expected", expectedFPS);

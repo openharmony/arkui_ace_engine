@@ -165,13 +165,22 @@ public:
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
+    void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
+    {}
+    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
+#endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override {}
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override {}
     void SetOnAccessibility(std::function<void(const std::string&)>&& onAccessibilityCallback) override;
     void SetOnRemoteMessage(RemoteCallback&& onRemoteCallback) override;
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
@@ -219,10 +228,15 @@ public:
     void DisableOnClick() override {};
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override {};
+#endif
     void DisableOnHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
+    void DisableOnAttach() override {};
+    void DisableOnDetach() override {};
     void DisableOnAreaChange() override {};
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};

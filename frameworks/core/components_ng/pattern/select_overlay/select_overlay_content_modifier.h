@@ -126,6 +126,12 @@ public:
         handleRadius_->Set(radius);
     }
 
+    void SetHandleStrokeWidth(float width)
+    {
+        CHECK_NULL_VOID(handleStrokeWidth_);
+        handleStrokeWidth_->Set(width);
+    }
+
     void SetInnerHandleRadius(float radius)
     {
         CHECK_NULL_VOID(innerHandleRadius_);
@@ -173,6 +179,9 @@ private:
     void PaintDoubleHandle(RSCanvas& canvas);
 
     void ClipViewPort(RSCanvas& canvas);
+    RectF ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const;
+    RectF GetFirstPaintRect() const;
+    RectF GetSecondPaintRect() const;
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;
@@ -187,6 +196,7 @@ private:
     RefPtr<PropertyColor> handleColor_;
     RefPtr<PropertyColor> innerHandleColor_;
     RefPtr<PropertyFloat> handleRadius_;
+    RefPtr<PropertyFloat> handleStrokeWidth_;
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
     bool isUsingMouse_ = false;

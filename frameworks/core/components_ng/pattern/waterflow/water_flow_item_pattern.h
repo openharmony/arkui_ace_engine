@@ -38,6 +38,16 @@ public:
     {
         return true;
     }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    OPINC_TYPE_E OpIncType() override
+    {
+        return OPINC_NODE;
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H

@@ -68,7 +68,9 @@ void JSRichText::JSBind(BindingTarget globalObj)
     JSClass<JSRichText>::StaticMethod("create", &JSRichText::Create);
     JSClass<JSRichText>::StaticMethod("onStart", &JSRichText::OnStart);
     JSClass<JSRichText>::StaticMethod("onComplete", &JSRichText::OnComplete);
+    JSClass<JSRichText>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRichText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRichText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSRichText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRichText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRichText>::InheritAndBind<JSViewAbstract>(globalObj);

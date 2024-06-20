@@ -32,7 +32,6 @@ void GeometryNode::Reset()
     parentGlobalOffset_.Reset();
     parentAbsoluteOffset_.Reset();
     parentLayoutConstraint_.reset();
-    previousState_.reset();
 }
 
 RefPtr<GeometryNode> GeometryNode::Clone() const
@@ -50,7 +49,6 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
-    node->previousState_ = previousState_ ? std::make_unique<RectF>(*previousState_) : nullptr;
     node->parentAbsoluteOffset_ = parentAbsoluteOffset_;
     return node;
 }
@@ -69,25 +67,166 @@ void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
 #endif
 }
 
-void GeometryNode::Restore()
+RectF GeometryNode::GetParentAdjust() const
 {
-    CHECK_NULL_VOID(previousState_);
-    restoreCache_ = std::make_unique<RectF>(frame_.rect_);
-    frame_.rect_ = *previousState_;
-    previousState_ = nullptr;
+    return parentAdjust_;
 }
 
-bool GeometryNode::RestoreCache()
+void GeometryNode::SetParentAdjust(RectF parentAdjust)
 {
-    CHECK_NULL_RETURN(restoreCache_, false);
-    frame_.rect_ = *restoreCache_;
-    restoreCache_ = nullptr;
-    return true;
+    parentAdjust_ = parentAdjust;
 }
 
-void GeometryNode::Save()
+RectF GeometryNode::GetSelfAdjust() const
 {
-    // INVARIANT: previousState_ is null when Save() is called (only allow 1 layer of save/restore)
-    previousState_ = std::make_unique<RectF>(frame_.rect_);
+    return selfAdjust_;
+}
+
+void GeometryNode::SetSelfAdjust(RectF selfAdjust)
+{
+    selfAdjust_ = selfAdjust;
+}
+
+float GeometryNode::OnePixelValueRounding(float value)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+        return (value - fractials + 1.0f);
+    } else {
+        return (value - fractials);
+    }
+}
+
+float GeometryNode::OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
+}
+
+void GeometryNode::OnePixelRounding()
+{
+    float relativeLeft = GetPixelGridRoundOffset().GetX();
+    float relativeTop = GetPixelGridRoundOffset().GetY();
+    float nodeWidth = GetFrameSize().Width();
+    float nodeHeight = GetFrameSize().Height();
+    float roundToPixelErrorX = 0.0f;
+    float roundToPixelErrorY = 0.0f;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+
+    float nodeLeftI = OnePixelValueRounding(relativeLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    pixelGridRoundOffset_ = OffsetF(nodeLeftI, nodeTopI);
+
+    float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+    pixelGridRoundSize_ = SizeF(nodeWidthI, nodeHeightI);
+}
+
+void GeometryNode::OnePixelRounding(bool isRound, uint8_t flag)
+{
+    float relativeLeft = GetPixelGridRoundOffset().GetX();
+    float relativeTop = GetPixelGridRoundOffset().GetY();
+    float nodeWidth = GetFrameSize().Width();
+    float nodeHeight = GetFrameSize().Height();
+    float roundToPixelErrorX = 0.0f;
+    float roundToPixelErrorY = 0.0f;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+
+    float nodeLeftI = OnePixelValueRounding(relativeLeft, isRound, ceilLeft, floorLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    pixelGridRoundOffset_ = OffsetF(nodeLeftI, nodeTopI);
+
+    float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, isRound, ceilRight, floorRight);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, isRound, ceilBottom, floorBottom);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+    pixelGridRoundSize_ = SizeF(nodeWidthI, nodeHeightI);
 }
 } // namespace OHOS::Ace::NG

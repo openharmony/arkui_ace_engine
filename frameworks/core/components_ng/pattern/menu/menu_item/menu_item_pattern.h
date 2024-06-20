@@ -19,11 +19,14 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -63,6 +66,16 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<MenuItemPaintMethod>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuItemPaintProperty>();
     }
 
     void MarkIsSelected(bool isSelected);
@@ -152,6 +165,7 @@ public:
     {
         return bgBlendColor_;
     }
+    bool IsDisabled();
 
     RefPtr<FrameNode> GetMenu(bool needTopMenu = false);
     RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
@@ -170,12 +184,43 @@ public:
         return startIcon_ != nullptr;
     }
 
+    void SetClickMenuItemId(int32_t id)
+    {
+        clickMenuItemId_ = id;
+    }
+
+    int32_t GetClickMenuItemId() const
+    {
+        return clickMenuItemId_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
+    void InitLongPressEvent();
+    void UpdateNeedDivider(bool need);
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+    float GetDividerStroke();
+
+    SubMenuExpandingMode GetExpandingMode()
+    {
+        return expandingMode_;
+    }
+    bool IsSubMenu();
+    void SetIsStackSubmenuHeader()
+    {
+        isStackSubmenuHeader_ = true;
+    }
+    bool IsStackSubmenuHeader() {
+        return isStackSubmenuHeader_;
+    }
 
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
+    RefPtr<FrameNode> GetMenuWrapper();
 
 private:
     // register menu item's callback
@@ -189,34 +234,51 @@ private:
 
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
+    void AddExpandIcon(RefPtr<FrameNode>& row);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    bool IsTextFadeOut();
     void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void UpdateExpandableArea();
+    void BuildEmbeddedMenuItems(RefPtr<UINode>& node, bool needNextLevel = true);
+    void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
+    RefPtr<FrameNode> GetClickableArea();
+    void ShowEmbeddedSubMenu(bool hasFurtherExpand);
 
-    bool IsDisabled();
     void UpdateDisabledStyle();
 
-    RefPtr<FrameNode> GetMenuWrapper();
-
     void ShowSubMenu();
+    void UpdateStackSubmenuNode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
+    void HideSubMenu();
+    void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
 
-    OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
+    OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
-
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
+    void ModifyDivider();
 
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
 
+    void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_);
+    void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon_);
+    void UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
+    void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
+        std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;
@@ -226,6 +288,9 @@ private:
     bool isFocused_ = false;
     bool isFocusShadowSet_ = false;
     bool isFocusBGColorSet_ = false;
+    bool isExpanded_ = false;
+    int32_t clickMenuItemId_ = -1;
+    int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 
@@ -236,6 +301,15 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
+    RefPtr<FrameNode> expandIcon_ = nullptr;
+    RefPtr<LongPressEvent> longPressEvent_;
+    std::vector<RefPtr<FrameNode>> expandableItems_;
+    bool onTouchEventSet_ = false;
+    bool onHoverEventSet_ = false;
+    bool onKeyEventSet_ = false;
+    bool onClickEventSet_ = false;
+    SubMenuExpandingMode expandingMode_ = SubMenuExpandingMode::SIDE;
+    bool isStackSubmenuHeader_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
 

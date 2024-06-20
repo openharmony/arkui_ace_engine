@@ -33,6 +33,12 @@ enum UIContentErrorCode : uint16_t {
     NO_STAGE,
     INVALID_URL,
 };
+
+enum class ContentInfoType : int32_t {
+    NONE = 0,           // invalid contentInfo
+    CONTINUATION = 1,   // distribute
+    APP_RECOVERY = 2,   // app recovery
+};
 } // namespace OHOS::Ace
 
 #endif // INTERFACES_INNER_API_ACE_CONSTANTS_H

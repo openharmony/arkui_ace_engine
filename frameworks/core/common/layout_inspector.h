@@ -29,6 +29,7 @@ public:
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
+    static void SetArkUIStateProfilerStatus(bool status);
 
 private:
     static bool layoutInspectorStatus_;

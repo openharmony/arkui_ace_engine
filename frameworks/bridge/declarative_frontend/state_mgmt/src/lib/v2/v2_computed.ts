@@ -14,10 +14,10 @@
  */
 
 /**
- * 
- * This file includes only framework internal classes and functions 
+ *
+ * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- * 
+ *
  */
 
 /**
@@ -34,15 +34,15 @@ class ComputedV2 {
   public static readonly MIN_COMPUTED_ID = 0x1000000000;
   private static nextCompId_ = ComputedV2.MIN_COMPUTED_ID;
 
-  // name of @computed property
+  // name of @Computed property
   private prop_: string;
 
-  // owning object of @computed property
-  private target_: object; 
+  // owning object of @Computed property
+  private target_: object;
 
   // computation function for property
   private propertyComputeFunc_: () => any;
-  private computedId_: number; 
+  private computedId_: number;
 
   public static readonly COMPUTED_PREFIX = '___comp_';
   public static readonly COMPUTED_CACHED_PREFIX = '___comp_cached_';
@@ -88,9 +88,9 @@ class ComputedV2 {
 
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
-    ObserveV2.getObserve().startBind(this, this.computedId_);
+    ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
     let ret = this.propertyComputeFunc_.call(this.target_);
-    ObserveV2.getObserve().startBind(null, 0);
+    ObserveV2.getObserve().stopRecordDependencies();
     return ret;
   }
 }

@@ -71,6 +71,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
+        frameNode->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -205,7 +206,9 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto paintReverse = sliderLayoutProperty->GetReverseValue(false);
     auto direction = sliderLayoutProperty->GetLayoutDirection();
-    auto reverse = direction == TextDirection::RTL ? !paintReverse : paintReverse;
+    auto isRTL = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
+        direction == TextDirection::RTL;
+    auto reverse = isRTL ? !paintReverse : paintReverse;
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension hotBlockShadowWidth = mode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetHotBlockShadowWidth()
                                                                             : theme->GetInsetHotBlockShadowWidth();

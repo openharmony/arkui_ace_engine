@@ -15,14 +15,33 @@
 #include "core/common/recorder/event_controller.h"
 
 #include <algorithm>
+#include <queue>
 
 #include "base/json/json_util.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
+#include "base/thread/task_executor.h"
+#include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Recorder {
+constexpr int32_t PAGE_URL_SUFFIX_LENGTH = 3;
+constexpr uint32_t EXPOSURE_REGISTER_DELAY = 500;
+
+struct ExposureWrapper {
+    WeakPtr<NG::FrameNode> node;
+    RefPtr<ExposureProcessor> processor;
+
+    ExposureWrapper(const WeakPtr<NG::FrameNode>& node, RefPtr<ExposureProcessor>&& processor)
+        : node(node), processor(processor)
+    {}
+};
+
 EventController& EventController::Get()
 {
     static EventController eventController;
@@ -40,7 +59,12 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
     std::unique_lock<std::shared_mutex> lock(cacheLock_);
     clientList_.emplace_back(std::move(client));
     lock.unlock();
+    bool isOriginEnable = EventRecorder::Get().IsExposureRecordEnable();
     NotifyConfigChange();
+    bool isCurrentEnable = EventRecorder::Get().IsExposureRecordEnable();
+    if (!isOriginEnable && isCurrentEnable) {
+        ApplyNewestConfig();
+    }
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
 }
 
@@ -85,6 +109,88 @@ void EventController::NotifyConfigChange()
     }
     NodeDataCache::Get().UpdateConfig(std::move(mergedConfig));
     EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+}
+
+std::string GetPageUrlByContainerId(const int32_t containerId)
+{
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, "");
+    if (!container->IsUseNewPipeline()) {
+        return "";
+    }
+    auto frontEnd = container->GetFrontend();
+    CHECK_NULL_RETURN(frontEnd, "");
+    auto pageUrl = frontEnd->GetCurrentPageUrl();
+    if (StringUtils::EndWith(pageUrl, ".js")) {
+        pageUrl = pageUrl.substr(0, pageUrl.length() - PAGE_URL_SUFFIX_LENGTH);
+    }
+    return pageUrl;
+}
+
+void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
+    const std::unordered_set<ExposureCfg, ExposureCfgHash>& exposureSet, std::list<ExposureWrapper>& outputList)
+{
+    std::queue<RefPtr<NG::UINode>> elements;
+    ExposureCfg targetCfg = { "", 0.0, 0 };
+    elements.push(root);
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        targetCfg.id = current->GetInspectorIdValue("");
+        if (!targetCfg.id.empty() && AceType::InstanceOf<NG::FrameNode>(current)) {
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+            auto cfgIter = exposureSet.find(targetCfg);
+            if (cfgIter != exposureSet.end()) {
+                outputList.emplace_back(ExposureWrapper(Referenced::WeakClaim(Referenced::RawPtr(frameNode)),
+                    Referenced::MakeRefPtr<ExposureProcessor>(
+                        pageUrl, targetCfg.id, cfgIter->ratio, cfgIter->duration)));
+            }
+        }
+        for (const auto& child : current->GetChildren()) {
+            elements.push(child);
+        }
+    }
+}
+
+void EventController::ApplyNewestConfig() const
+{
+    if (clientList_.empty()) {
+        return;
+    }
+    auto containerId = EventRecorder::Get().GetContainerId();
+    auto pageUrl = GetPageUrlByContainerId(containerId);
+    if (pageUrl.empty()) {
+        return;
+    }
+    auto config = clientList_.back().config.GetConfig();
+    auto pageIter = config->find(pageUrl);
+    if (pageIter == config->end()) {
+        return;
+    }
+    if (pageIter->second.exposureCfgs.empty()) {
+        return;
+    }
+    auto context = NG::PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    std::unordered_set<ExposureCfg, ExposureCfgHash> exposureSet;
+    std::for_each(pageIter->second.exposureCfgs.begin(), pageIter->second.exposureCfgs.end(),
+        [&exposureSet](const std::list<ExposureCfg>::value_type& cfg) { exposureSet.emplace(cfg); });
+    std::list<ExposureWrapper> targets;
+    GetMatchedNodes(pageUrl, rootNode, exposureSet, targets);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [containerId, wrapperList = std::move(targets)]() {
+            for (auto& item : wrapperList) {
+                item.processor->SetContainerId(containerId);
+                auto node = item.node.Upgrade();
+                CHECK_NULL_VOID(node);
+                node->SetExposureProcessor(item.processor);
+            }
+        },
+        TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
 }
 
 void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observer)

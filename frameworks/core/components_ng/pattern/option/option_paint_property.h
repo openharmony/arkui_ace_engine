@@ -60,6 +60,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("hover", propHover_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("needDivider", propNeedDivider_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("hasIcon", propHasIcon_.value_or(false) ? "true" : "false", filter);

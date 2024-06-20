@@ -18,7 +18,7 @@
 
 #include <mutex>
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace {
 class CanvasModel {
@@ -31,6 +31,7 @@ public:
     virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
     virtual void SetOnReady(std::function<void()>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};
+    virtual void SetImageAIOptions(void* options) {};
 
 private:
     static std::unique_ptr<CanvasModel> instance_;

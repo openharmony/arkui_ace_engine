@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 // RenderElement will have a RenderNode and displays in the screen.
-class ACE_EXPORT RenderElement : public Element {
+class ACE_FORCE_EXPORT RenderElement : public Element {
     DECLARE_ACE_TYPE(RenderElement, Element);
 
 public:

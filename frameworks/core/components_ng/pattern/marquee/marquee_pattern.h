@@ -51,7 +51,7 @@ class MarqueePattern : public Pattern {
 
 public:
     MarqueePattern() = default;
-    ~MarqueePattern() override = default;
+    ~MarqueePattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -82,6 +82,9 @@ public:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
+    void OnVisibleChange(bool isVisible) override;
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -97,8 +100,6 @@ private:
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart);
     void SetTextOffset(float offsetX);
-    void RegistVisibleAreaChangeCallback();
-    void OnVisibleAreaChange(bool visible);
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
@@ -106,21 +107,19 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    void RegistOritationListener();
     float GetTextOffset();
     float GetTextNodeWidth();
+    float GetTextStart();
     double GetScrollAmount();
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
-    bool isRegistedAreaCallback_ = false;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     bool playStatus_ = false;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
-    bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;

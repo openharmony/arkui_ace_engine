@@ -100,7 +100,7 @@ void OH_ArkUI_AnimateOption_SetDuration(ArkUI_AnimateOption* option, int32_t val
     if (value < 0) {
         value = 0;
     }
-    option->duration = value;
+    option->duration = static_cast<uint32_t>(value);
 }
 
 void OH_ArkUI_AnimateOption_SetTempo(ArkUI_AnimateOption* option, float value)

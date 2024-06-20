@@ -17,10 +17,29 @@
 
 #include "base/json/json_util.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
+#include "core/common/font_manager.h"
 #include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
-void HyperlinkPattern::OnAttachToFrameNode() {}
+void HyperlinkPattern::OnAttachToFrameNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->AddFontNodeNG(host);
+    }
+}
+
+void HyperlinkPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = WeakClaim(node);
+    pipeline->RemoveFontNodeNG(frameNode);
+}
 
 void HyperlinkPattern::EnableDrag()
 {

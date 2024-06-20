@@ -617,7 +617,7 @@ HWTEST_F(OverlayTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_TRUE(rootNode->GetChildren().empty());
+    EXPECT_FALSE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove one popupNode at a time
@@ -841,8 +841,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, true);
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
     EXPECT_EQ(rootNode->GetChildren().size(), 0);
 
     menuNode->MountToParent(menuWrapperNode);
@@ -902,8 +902,8 @@ HWTEST_F(OverlayTestNg, MenuTest004, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindowWithAnimation();
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
 }
 
 /**
@@ -1445,7 +1445,6 @@ HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
     auto fontSize = Dimension(10.0);
     theme->textStyle_.fontSize_ = fontSize;
     toastPattern->UpdateTextSizeConstraint(textNode);
-    EXPECT_EQ(textLayoutProperty->GetAdaptMaxFontSize().value().value_, fontSize.value_);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 
     // restore mock theme manager
@@ -1475,8 +1474,6 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
-    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
-    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1600,10 +1597,9 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step2. create overlayManager and call ShowDateDialog.
      * @tc.expected: dateDialogNode is created successfully
      */
-    std::vector<ButtonInfo> buttonInfos;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
@@ -1617,8 +1613,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
     std::map<std::string, PickerTime> timePickerProperty;
     timePickerProperty["selected"] = PickerTime(1, 1, 1);
 
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
@@ -1632,13 +1628,13 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
      * @tc.expected: remove  successfully
      */
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, buttonInfos, timePickerProperty,
-        dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
+        dialogCancelEvent, dialogLifeCycleEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 

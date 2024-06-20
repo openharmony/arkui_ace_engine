@@ -36,12 +36,16 @@ const Dimension DEFAULT_CIRCLE_SIZE = 16.0_vp;
 
 void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
 
-    LayoutProperty::ToJsonValue(json, filter);
     json->PutExtAttr("position",
         GetBadgePositionString(GetBadgePosition().value_or(badgeTheme->GetBadgePosition())).c_str(), filter);
     json->PutExtAttr("count", std::to_string(GetBadgeCount().value_or(DEFAULT_COUNT)).c_str(), filter);

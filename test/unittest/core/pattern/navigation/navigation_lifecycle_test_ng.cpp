@@ -18,60 +18,17 @@
 #include "gtest/gtest.h"
 #include "mock_navigation_stack.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/animation/geometry_transition.h"
-
 #define protected public
 #define private public
-#include "base/json/json_util.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "core/animation/animator.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
-#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
-#include "core/components_ng/pattern/navigator/navigator_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -98,6 +55,10 @@ void NavigationLifecycleTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = nullptr;
+    }
 }
 
 void NavigationLifecycleTestNg::TearDownTestSuite()
@@ -208,6 +169,8 @@ struct TestProperty {
  */
 HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Level1)
 {
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -216,7 +179,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
     navigationModel.SetNavigationStack(stack);
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.step1. create destinationA and set destinationA lifecycle
@@ -268,6 +231,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
  */
 HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest002, TestSize.Level1)
 {
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -276,7 +241,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest002, TestSize.Leve
     navigationModel.SetNavigationStack(stack);
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.step1. create destinationA and set destinationA lifecycle
@@ -322,6 +287,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest002, TestSize.Leve
  */
 HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest003, TestSize.Level1)
 {
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -330,7 +297,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest003, TestSize.Leve
     navigationModel.SetNavigationStack(stack);
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.step1. create destinationA and set destinationA lifecycle
@@ -372,6 +339,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest004, TestSize.Lev
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -380,7 +349,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest004, TestSize.Lev
     navigationModel.SetNavigationStack(stack);
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.step2. push and create destination A, and set destination event.
@@ -416,6 +385,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest005, TestSize.Leve
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -425,7 +396,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest005, TestSize.Leve
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
         ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
 
@@ -474,6 +445,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -483,7 +456,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
         ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
 
@@ -545,6 +518,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest007, TestSize.Lev
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -553,7 +528,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest007, TestSize.Lev
     navigationModel.SetNavigationStack(stack);
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
 
     /**
      * @tc.step2. push and create destination A, and set destination event.
@@ -590,6 +565,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest008, TestSize.Leve
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -599,7 +576,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest008, TestSize.Leve
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
         ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
 
@@ -645,6 +622,8 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.
     /**
      * @tc.steps:step1.create navDestination
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     MockPipelineContextGetTheme();
 
     NavigationModelNG navigationModel;
@@ -654,7 +633,7 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.
     navigationModel.SetTitle("navigationModel", false);
     RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
         ViewStackProcessor::GetInstance()->Finish());
-    navigationNode->AttachToMainTree();
+    navigationNode->AttachToMainTree(false, AceType::RawPtr(context));
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
 

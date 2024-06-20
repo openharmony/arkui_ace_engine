@@ -122,14 +122,14 @@ class Environment {
       return false;
     }
     let tmp;
-    switch(key) {
+    switch (key) {
       case "accessibilityEnabled":
         tmp = Environment.envBackend_ .getAccessibilityEnabled();
         break;
       case "colorMode":
         tmp = Environment.envBackend_ .getColorMode();
         break;
-      case "fontScale":
+      case 'fontScale':
         tmp = Environment.envBackend_ .getFontScale();
         break;
       case "fontWeightScale":

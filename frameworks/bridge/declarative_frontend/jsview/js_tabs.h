@@ -53,6 +53,7 @@ protected:
     static void SetScrollableBarModeOptions(const JSRef<JSVal>& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentWillChange(const JSCallbackInfo& info);
+    static void SetAnimateMode(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

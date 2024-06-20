@@ -84,6 +84,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::PASTE_BUTTON_LINE_SVG, "paste_button_line"},
     { InternalResource::ResourceId::SAVE_BUTTON_FILLED_SVG, "save_button_filled"},
     { InternalResource::ResourceId::SAVE_BUTTON_LINE_SVG, "save_button_line"},
+    { InternalResource::ResourceId::SAVE_BUTTON_PICTURE_SVG, "save_button_picture"},
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG, "ic_public_arrow_left" },
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG, "ic_public_arrow_right" },
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG, "ic_public_arrow_up" },
@@ -110,7 +111,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
     { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
     { InternalResource::ResourceId::RADIO_TICK_SVG, "radio_tick_svg" },
-    { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" }
+    { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" },
+    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" }
 };
 }
 

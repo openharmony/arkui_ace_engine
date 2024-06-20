@@ -30,11 +30,6 @@ build_component("xcomponent") {
   rosen_sources = [ "rosen_render_xcomponent.cpp" ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    include_dirs = [
-      "//drivers/peripheral/display/interfaces/include",
-      "//foundation/graphic/graphic_2d/interfaces/innerkits/wmclient",
-      "//foundation/graphic/graphic_2d/interfaces/innerkits/wm",
-    ]
     external_deps = [
       "graphic_2d:librender_service_client",
       "ipc:ipc_core",

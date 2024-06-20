@@ -15,14 +15,15 @@
 
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 
+#include "base/thread/task_executor.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
-void PixelMapImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
+void PixelMapImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/,
+    bool /*forceResize*/, bool syncLoad, bool loadInVipChannel)
 {
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
@@ -40,7 +41,8 @@ void PixelMapImageObject::MakeCanvasImage(
             CHECK_NULL_VOID(pixelmapObject);
             ctx->SuccessCallback(CanvasImage::Create(pixelmapObject->pixmap_));
         };
-        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess");
+        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess", ctx->GetContainerId(),
+            loadInVipChannel ? PriorityType::VIP : PriorityType::LOW);
     }
 }
 

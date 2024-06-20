@@ -31,6 +31,8 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
+    hoverInfo.SetSourceTool(event.sourceTool);
+    hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     onHoverEventCallback_(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }

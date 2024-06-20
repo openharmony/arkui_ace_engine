@@ -37,8 +37,7 @@
 #ifndef ARKUI_NATIVE_COMPATIBLE
 #define ARKUI_NATIVE_COMPATIBLE
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "native_node.h"
 #include "native_type.h"

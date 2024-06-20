@@ -40,13 +40,16 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
     return this;
   }
   onStart(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnStartModifier.identity, MarqueeOnStartModifier, event);
+    return this;
   }
   onBounce(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnBounceModifier.identity, MarqueeOnBounceModifier, event);
+    return this;
   }
   onFinish(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MarqueeOnFinishModifier.identity, MarqueeOnFinishModifier, event);
+    return this;
   }
   marqueeUpdateStrategy(value: MarqueeUpdateStrategy): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
@@ -144,6 +147,49 @@ class MarqueeUpdateStrategyModifier extends ModifierWithKey<MarqueeUpdateStrateg
     }
   }
 }
+
+class MarqueeOnStartModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeOnStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnStart(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnStart(node, this.value);
+    }
+  }
+}
+
+class MarqueeOnBounceModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeOnBounce');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnBounce(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnBounce(node, this.value);
+    }
+  }
+}
+
+class MarqueeOnFinishModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeOnFinish');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.resetMarqueeOnFinish(node);
+    } else {
+      getUINativeModule().marquee.setMarqueeOnFinish(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Marquee.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

@@ -48,7 +48,7 @@ struct PickerDialogEvent {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
 };
-class DatePickerModel {
+class ACE_FORCE_EXPORT DatePickerModel {
 public:
     static DatePickerModel* GetInstance();
     virtual ~DatePickerModel() = default;

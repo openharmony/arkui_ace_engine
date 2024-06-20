@@ -16,11 +16,51 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DRAW_CMD_LIST_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DRAW_CMD_LIST_H
 
+#include <cstdint>
+
+#include "testing_canvas.h"
+#include "testing_rect.h"
 namespace OHOS::Ace::Testing {
 class TestingDrawCmdList {
 public:
     TestingDrawCmdList() = default;
     virtual ~TestingDrawCmdList() = default;
+
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
+
+    void SetWidth(int32_t width)
+    {
+        width_ = width;
+    }
+
+    void SetHeight(int32_t height)
+    {
+        height_ = height;
+    }
+
+    bool IsEmpty() const
+    {
+        return false;
+    }
+
+    size_t GetOpItemSize() const
+    {
+        return 0;
+    }
+
+    void Playback(TestingCanvas& canvas, const TestingRect* rect = nullptr) {}
+
+private:
+    int32_t width_ = 0;
+    int32_t height_ = 0;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_DRAW_CMD_LIST_H

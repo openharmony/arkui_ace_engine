@@ -83,6 +83,11 @@ enum LengthUnit {
   LPX = 4,
 }
 
+enum LengthMetricsUnit {
+  DEFAULT = 0,
+  PX = 1,
+}
+
 type EdgeWidths = EdgesT<Number>;
 
 type EdgeColors = EdgesT<Number>;
@@ -151,6 +156,184 @@ class LengthMetrics {
   }
   static lpx(value: number) {
       return new LengthMetrics(value, LengthUnit.LPX);
+  }
+  static resource(res: Resource) {
+    let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+    return new LengthMetrics(length[0], length[1]);
+  }
+}
+
+declare interface Resource {}
+declare type BusinessError = any
+
+declare enum Color {
+  White,
+  Black,
+  Blue,
+  Brown,
+  Gray,
+  Green,
+  Grey,
+  Orange,
+  Pink,
+  Red,
+  Yellow,
+  Transparent,
+}
+
+declare type ResourceColor = Color | number | string | Resource;
+
+const MAX_CHANNEL_VALUE = 0xFF;
+const MAX_ALPHA_VALUE = 1;
+const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
+const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
+
+class ColorMetrics {
+  private red_: number;
+  private green_: number;
+  private blue_: number;
+  private alpha_: number;
+  private static clamp(value: number): number {
+    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
+  }
+  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+    this.red_ = ColorMetrics.clamp(red);
+    this.green_ = ColorMetrics.clamp(green);
+    this.blue_ = ColorMetrics.clamp(blue);
+    this.alpha_ = ColorMetrics.clamp(alpha);
+  }
+  private toNumeric() {
+    return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
+  }
+  static numeric(value: number): ColorMetrics {
+    const red = (value >> 16) & 0x000000FF;
+    const green = (value >> 8) & 0x000000FF;
+    const blue = value & 0x000000FF;
+    const alpha = (value >> 24) & 0x000000FF;
+    if (alpha === 0) {
+      return new ColorMetrics(red, green, blue);
+    }
+    return new ColorMetrics(red, green, blue, alpha);
+  }
+  static rgba(red: number, green: number, blue: number, alpha: number = MAX_ALPHA_VALUE): ColorMetrics {
+    return new ColorMetrics(red, green, blue, alpha * MAX_CHANNEL_VALUE);
+  }
+
+  private static rgbOrRGBA(format: string): ColorMetrics {
+    const rgbPattern = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
+    const rgbaPattern = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+(\.\d+)?)\s*\)$/i;
+
+    const rgbMatch = rgbPattern.exec(format);
+    const rgbaMatch = rgbaPattern.exec(format);
+
+    if (rgbMatch) {
+      const [, red, green, blue] = rgbMatch;
+      return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10));
+    } else if (rgbaMatch) {
+      const [, red, green, blue, alpha] = rgbaMatch;
+      return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
+    } else {
+      const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
+    }
+  }
+
+  static resourceColor(color: ResourceColor): ColorMetrics {
+    if (color === undefined || color === null) {
+      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
+    }
+    let chanels: Array<number> = [];
+    if (typeof color === 'object') {
+      chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
+      if (chanels === undefined) {
+        const error = new Error("Get color resource failed.") as BusinessError;
+        error.code = ERROR_CODE_RESOURCE_GET_FAILED;
+        throw error;
+      }
+      const red = chanels[0];
+      const green = chanels[1];
+      const blue = chanels[2];
+      const alpha = chanels[3];
+      return new ColorMetrics(red, green, blue, alpha);
+    } else if (typeof color === 'number') {
+      return ColorMetrics.numeric(color);
+    } else if (typeof color === 'string') {
+      if (ColorMetrics.isHexFormat(color)) {
+        return ColorMetrics.hex(color);
+      } else {
+        return ColorMetrics.rgbOrRGBA(color);
+      }
+    } else {
+      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
+    }
+  }
+  private static isHexFormat(format: string): boolean {
+    return /#(([0-9A-Fa-f]{3})|([0-9A-Fa-f]{6})|([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8}))/.test(format);
+  }
+
+  private static hex(hexFormat: string): ColorMetrics {
+    let r: number = 0;
+    let g: number = 0;
+    let b: number = 0;
+    let a: number = 255;
+    if (hexFormat.length === 4) {
+      r = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+      g = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+      b = parseInt(hexFormat.slice(3).repeat(2), 16);
+    } else if (hexFormat.length === 7) {
+      r = parseInt(hexFormat.slice(1, 3), 16);
+      g = parseInt(hexFormat.slice(3, 5), 16);
+      b = parseInt(hexFormat.slice(5), 16);
+    } else if (hexFormat.length === 5) {
+      a = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+      r = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+      g = parseInt(hexFormat.slice(3, 4).repeat(2), 16);
+      b = parseInt(hexFormat.slice(4).repeat(2), 16);
+    } else if (hexFormat.length === 9) {
+      a = parseInt(hexFormat.slice(1, 3), 16);
+      r = parseInt(hexFormat.slice(3, 5), 16);
+      g = parseInt(hexFormat.slice(5, 7), 16);
+      b = parseInt(hexFormat.slice(7), 16);
+    }
+    return new ColorMetrics(r, g, b, a);
+  }
+  blendColor(overlayColor: ColorMetrics): ColorMetrics {
+    if (overlayColor === undefined || overlayColor === null) {
+      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
+    }
+    const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
+    if (chanels === undefined) {
+      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
+      throw error;
+    }
+    const red = chanels[0];
+    const green = chanels[1];
+    const blue = chanels[2];
+    const alpha = chanels[3];
+    return new ColorMetrics(red, green, blue, alpha);
+  }
+  get color(): string {
+    return `rgba(${this.red_}, ${this.green_}, ${this.blue_}, ${this.alpha_ / MAX_CHANNEL_VALUE})`;
+  }
+  get red(): number {
+    return this.red_;
+  }
+  get green(): number {
+    return this.green_;
+  }
+  get blue(): number {
+    return this.blue_;
+  }
+  get alpha(): number {
+    return this.alpha_;
   }
 }
 
@@ -226,13 +409,20 @@ class RenderNode {
   private shapeMaskValue: ShapeMask;
   private _nativeRef: NativeStrongRef;
   private _frameNode: WeakRef<FrameNode>;
+  private lengthMetricsUnitValue: LengthMetricsUnit;
+  private markNodeGroupValue: boolean;
+  private apiTargetVersion: number;
 
   constructor(type: string) {
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
+    this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
     this.clipToFrameValue = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+        this.clipToFrameValue = false;
+    }
     this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     this.opacityValue = 1.0;
     this.pivotValue = { x: 0.5, y: 0.5 };
@@ -248,12 +438,18 @@ class RenderNode {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
+    this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+    this.markNodeGroupValue = false;
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
     this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     this.nodePtr = this._nativeRef?.getNativeHandle();
-    this.clipToFrame = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+      this.clipToFrame = false;
+  } else {
+      this.clipToFrame = true;
+  }
   }
 
   set backgroundColor(color: number) {
@@ -293,7 +489,7 @@ class RenderNode {
       this.frameValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(position.x, 0);
       this.frameValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(position.y, 0);
     }
-    getUINativeModule().common.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y);
+    getUINativeModule().renderNode.setPosition(this.nodePtr, this.frameValue.x, this.frameValue.y, this.lengthMetricsUnitValue);
   }
   set rotation(rotation: Vector3) {
     if (rotation === undefined || rotation === null) {
@@ -303,7 +499,7 @@ class RenderNode {
       this.rotationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.y, 0);
       this.rotationValue.z = this.checkUndefinedOrNullWithDefaultValue<number>(rotation.z, 0);
     }
-    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z);
+    getUINativeModule().renderNode.setRotation(this.nodePtr, this.rotationValue.x, this.rotationValue.y, this.rotationValue.z, this.lengthMetricsUnitValue);
   }
   set scale(scale: Vector2) {
     if (scale === undefined || scale === null) {
@@ -325,7 +521,7 @@ class RenderNode {
       this.shadowOffsetValue.x = this.checkUndefinedOrNullWithDefaultValue<number>(offset.x, 0);
       this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(offset.y, 0);
     }
-    getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y);
+    getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
   }
   set shadowAlpha(alpha: number) {
     this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(alpha, 0);
@@ -347,7 +543,7 @@ class RenderNode {
       this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0);
       this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0);
     }
-      getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
+      getUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height, this.lengthMetricsUnitValue);
   }
   set transform(transform: Transform) {
     if (transform === undefined || transform === null) {
@@ -376,6 +572,21 @@ class RenderNode {
       this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(translation.y, 0);
     }
     getUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+  }
+  set lengthMetricsUnit(unit: LengthMetricsUnit) {
+    if (unit === undefined || unit == null) {
+      this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+    } else {
+      this.lengthMetricsUnit = unit;
+    }
+  }
+  set markNodeGroup(isNodeGroup) {
+    if (isNodeGroup === undefined || isNodeGroup === null) {
+        this.markNodeGroupValue = false;
+    } else {
+        this.markNodeGroupValue = isNodeGroup;
+    }
+    getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
   }
   get backgroundColor(): number {
     return this.backgroundColorValue;
@@ -424,6 +635,12 @@ class RenderNode {
   }
   get translation(): Vector2 {
     return this.translationValue;
+  }
+  get lengthMetricsUnit() {
+    return this.lengthMetricsUnitValue;
+  }
+  get markNodeGroup() {
+    return this.markNodeGroupValue;
   }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {
@@ -570,7 +787,7 @@ class RenderNode {
     } else {
       this.borderWidthValue = width;
     }
-    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
   }
   get borderWidth(): EdgeWidths {
     return this.borderWidthValue;
@@ -592,7 +809,7 @@ class RenderNode {
     } else {
       this.borderRadiusValue = radius;
     }
-    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
   }
   get borderRadius(): BorderRadiuses {
     return this.borderRadiusValue;

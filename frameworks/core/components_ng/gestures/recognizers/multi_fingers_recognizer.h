@@ -47,13 +47,16 @@ public:
 
     void ForceCleanRecognizer() override
     {
-        touchPoints_.clear();
+        for (const auto& iter : touchPoints_) {
+            touchPoints_[iter.first] = {};
+        }
         fingersId_.clear();
         fingerList_.clear();
         activeFingers_.clear();
         currentFingers_ = 0;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        lastPointEvent_.reset();
     }
 
     void CleanRecognizerState() override;
@@ -64,11 +67,18 @@ public:
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
     }
 
+    int32_t GetTouchPointsSize() const
+    {
+        return static_cast<int32_t>(touchPoints_.size());
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
     }
+
+    void UpdateTouchPointWithAxisEvent(const AxisEvent& event);
 
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override;
 
@@ -78,6 +88,7 @@ protected:
         fingersId_.clear();
         fingerList_.clear();
         activeFingers_.clear();
+        lastPointEvent_.reset();
     }
 
     bool IsNeedResetStatus();
@@ -91,7 +102,7 @@ protected:
     std::list<FingerInfo> fingerList_;
     std::list<int32_t> activeFingers_;
     std::set<int32_t> fingersId_;
-
+    std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
 };
 

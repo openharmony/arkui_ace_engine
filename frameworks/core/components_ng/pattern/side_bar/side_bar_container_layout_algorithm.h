@@ -187,6 +187,7 @@ private:
     void AdjustMinAndMaxSideBarWidth(LayoutWrapper* layoutWrapper);
     RefPtr<LayoutWrapper> GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const;
     void GetAllPropertyValue(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
+    Dimension GetSideBarWidth(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void InitSideBarWidth(float parentWidth);
     void MeasureRealSideBarWidth(float parentWidth);
     void MeasureTypeUpdateWidth();

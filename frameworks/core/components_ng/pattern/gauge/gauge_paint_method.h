@@ -33,8 +33,8 @@ public:
         : pattern_(pattern), gaugeModifier_(gaugeModifier)
     {}
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    void UpdateForegroundModifier(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetForegroundModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(gaugeModifier_, nullptr);
         return gaugeModifier_;

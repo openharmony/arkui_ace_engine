@@ -31,6 +31,7 @@ public:
     ~RichEditorPaintMethod() override = default;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+    void SetPreviewTextDecoration(PaintWrapper* paintWrapper);
     void SetCaretOffsetAndHeight(PaintWrapper* paintWrapper);
 
 private:

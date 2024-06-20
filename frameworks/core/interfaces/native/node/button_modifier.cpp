@@ -581,19 +581,25 @@ void ResetButtonControlSize(ArkUINodeHandle node)
     ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
 }
 
+ArkUI_Int32 GetButtonType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(ButtonModelNG::GetType(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel,
-        SetButtonType, ResetButtonType, SetButtonStateEffect,
-        ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
-        SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
-        ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
-        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonFontWeightEnum,
-        SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight, GetButtonFontColor,
-        SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize, ResetButtonControlSize
-        };
+    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
+        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
+        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
+        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
+        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
+        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
+        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
+        ResetButtonControlSize, GetButtonType };
     return &modifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

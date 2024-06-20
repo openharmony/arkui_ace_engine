@@ -19,14 +19,16 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
     super(nativePtr, classType);
   }
   prevLabel(value: string): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PrevLabelModifier.identity, PrevLabelModifier, value);
+    return this;
   }
   nextLabel(value: string): this {
     modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
     return this;
   }
   status(value?: ItemState | undefined): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StatusModifier.identity, StatusModifier, value);
+    return this;
   }
 }
 
@@ -45,6 +47,35 @@ class NextLabelModifier extends ModifierWithKey<string> {
   }
 }
 
+class PrevLabelModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('prevLabel');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().stepperItem.resetPrevLabel(node);
+    } else {
+      getUINativeModule().stepperItem.setPrevLabel(node, this.value);
+    }
+  }
+}
+
+class StatusModifier extends ModifierWithKey<ItemState | undefined> {
+  constructor(value: ItemState | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('status');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().stepperItem.resetStatus(node);
+    } else {
+      getUINativeModule().stepperItem.setStatus(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.StepperItem.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

@@ -60,12 +60,14 @@ RefPtr<RenderNode> RichTextComponent::CreateRenderNode()
             auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
                 TaskExecutor::TaskType::UI);
             auto weakRender = AceType::WeakClaim(AceType::RawPtr(renderRichText));
-            uiTaskExecutor.PostTask([weakRender, width, height, contentHeight] {
-                auto renderRichText = weakRender.Upgrade();
-                if (renderRichText) {
-                    renderRichText->UpdateLayoutParams(width, height, contentHeight);
-                }
-            }, "ArkUIRichTextUpdateLayoutParams");
+            uiTaskExecutor.PostTask(
+                [weakRender, width, height, contentHeight] {
+                    auto renderRichText = weakRender.Upgrade();
+                    if (renderRichText) {
+                        renderRichText->UpdateLayoutParams(width, height, contentHeight);
+                    }
+                },
+                "ArkUIRichTextUpdateLayoutParams");
     });
 
     renderRichText->SetDelegate(delegate_);
@@ -83,7 +85,4 @@ RefPtr<Element> RichTextComponent::CreateElement()
     elementNode->SetDelegate(delegate_);
     return elementNode;
 }
-
-
-
 } // namespace OHOS::Ace

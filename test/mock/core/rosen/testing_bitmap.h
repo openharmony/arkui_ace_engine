@@ -16,7 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_TESTING_BITMAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_TESTING_BITMAP_H
 
+#include <cstddef>
+#include <cstdint>
+
+#include "testing_rect.h"
+
 namespace OHOS::Ace::Testing {
+class TestingImageInfo;
+typedef uint32_t ColorQuad;
+
 enum ColorType {
     COLORTYPE_UNKNOWN = 0,
     COLORTYPE_ALPHA_8,
@@ -47,6 +55,27 @@ public:
     {
         return nullptr;
     }
+
+    void SetPixels(void* pixel) {}
+
+    void ClearWithColor(const ColorQuad& color) const {}
+    size_t ComputeByteSize() const
+    {
+        return 0;
+    }
+
+    bool ExtractSubset(TestingBitmap& dst, const TestingRect& subset) const
+    {
+        return false;
+    }
+
+    bool ReadPixels(
+        const TestingImageInfo& dstInfo, void* dstPixels, size_t dstRowBytes, int32_t srcX, int32_t srcY) const
+    {
+        return false;
+    }
+
+    void Free() {}
 
     virtual void Build(const int width, const int height, const BitmapFormat& format) {}
 };

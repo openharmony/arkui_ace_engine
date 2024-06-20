@@ -85,6 +85,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)),
+      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(enableLoading_);
@@ -100,6 +101,9 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     if (!enableLoading_->Get()) {
         return;
     }

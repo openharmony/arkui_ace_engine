@@ -41,4 +41,11 @@ void TextController::SetStyledString(const RefPtr<SpanStringBase>& value)
         }
     }
 }
+
+WeakPtr<LayoutInfoInterface> TextController::GetLayoutInfoInterface()
+{
+    auto textPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(textPattern, nullptr);
+    return textPattern->GetLayoutInfoInterface();
+}
 } // namespace OHOS::Ace::NG

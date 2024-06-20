@@ -123,6 +123,9 @@ public:
 
     LunarDate GetCurrentLunarDate(uint32_t lunarYear) const;
 
+    void OrderCurrentLunarDate(
+        RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
+
     void HandleSolarMonthChange(bool isAdd, uint32_t index);
 
     void HandleDayChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
@@ -160,6 +163,8 @@ public:
     int LunarDateCompare(const LunarDate& left, const LunarDate& right) const;
 
     std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode();
+
+    void OrderAllChildNode(RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay);
 
     RefPtr<FrameNode> GetColumn(const int32_t& tag) const
     {
@@ -295,6 +300,11 @@ public:
     void SetShowCount(uint32_t showCount)
     {
         showCount_ = showCount;
+    }
+
+    void SetDateOrder(std::string dateOrder)
+    {
+        dateOrder_ = dateOrder;
     }
 
     static std::string GetYearFormatString(uint32_t year)
@@ -596,6 +606,8 @@ private:
     bool HandleDirectionKey(KeyCode code);
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
+    void OrderCurrentDateByYearMonthDayColumn(
+        RefPtr<FrameNode>& stackYear, RefPtr<FrameNode>& stackMonth, RefPtr<FrameNode>& stackDay) const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
@@ -605,6 +617,7 @@ private:
     int32_t focusKeyID_ = 0;
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     uint32_t showCount_ = 0;
+    std::string dateOrder_ = "";
     std::vector<WeakPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
     bool showMonthDays_ = false;

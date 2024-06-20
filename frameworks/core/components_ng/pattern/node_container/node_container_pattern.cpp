@@ -39,6 +39,14 @@ void NodeContainerPattern::RemakeNode()
     host->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
+void NodeContainerPattern::CleanChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    host->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+}
+
 bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {

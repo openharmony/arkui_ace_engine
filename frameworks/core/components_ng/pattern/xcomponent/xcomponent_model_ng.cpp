@@ -301,4 +301,17 @@ void XComponentModelNG::EnableAnalyzer(bool enable)
     CHECK_NULL_VOID(xcPattern);
     xcPattern->EnableAnalyzer(enable);
 }
+
+void XComponentModelNG::SetImageAIOptions(void* options)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetImageAIOptions(options);
+}
 } // namespace OHOS::Ace::NG

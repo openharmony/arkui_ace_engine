@@ -26,6 +26,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
@@ -38,6 +40,7 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -97,6 +100,8 @@ void JSSwiper::Create(const JSCallbackInfo& info)
             jsController->SetController(controller);
         }
     }
+
+    JSSwiperTheme::ApplyThemeInConstructor();
 }
 
 void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
@@ -139,7 +144,9 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSwiper>::StaticMethod("remoteMessage", &JSSwiper::JsRemoteMessage);
     JSClass<JSSwiper>::StaticMethod("onClick", &JSSwiper::SetOnClick);
+    JSClass<JSSwiper>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSwiper>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSwiper>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSwiper>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSwiper>::StaticMethod("indicatorStyle", &JSSwiper::SetIndicatorStyle);
     JSClass<JSSwiper>::StaticMethod("enabled", &JSSwiper::SetEnabled);
@@ -298,13 +305,15 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 
 void JSSwiper::SetIndex(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
+    auto length = info.Length();
+    if (length < 1 || length > 2) {
         return;
     }
 
     int32_t index = 0;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        index = info[0]->ToNumber<int32_t>();
+    auto jsIndex = info[0];
+    if (length > 0 && jsIndex->IsNumber()) {
+        index = jsIndex->ToNumber<int32_t>();
     }
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -316,7 +325,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetIndex(index);
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
+    if (length > 1 && info[1]->IsFunction()) {
         ParseSwiperIndexObject(info, info[1]);
     }
 }
@@ -431,17 +440,20 @@ std::optional<Dimension> JSSwiper::ParseIndicatorDimension(const JSRef<JSVal>& v
 
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> leftValue = obj->GetProperty("leftValue");
-    JSRef<JSVal> topValue = obj->GetProperty("topValue");
-    JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
-    JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
-    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
-    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
-    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
-    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeightValue");
-    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
-    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
-    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
+    JSRef<JSVal> leftValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT_VALUE));
+    JSRef<JSVal> topValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP_VALUE));
+    JSRef<JSVal> rightValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT_VALUE));
+    JSRef<JSVal> bottomValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_VALUE));
+    JSRef<JSVal> startValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::START_VALUE));
+    JSRef<JSVal> endValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::END_VALUE));
+    JSRef<JSVal> itemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::ITEM_WIDTH_VALUE));
+    JSRef<JSVal> itemHeightValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::ITEM_HEIGHT_VALUE));
+    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_WIDTH_VALUE));
+    JSRef<JSVal> selectedItemHeightValue =
+        obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
+    JSRef<JSVal> maskValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MASK_VALUE));
+    JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
+    JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -451,6 +463,12 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimTop = ParseIndicatorDimension(topValue);
     swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    std::optional<Dimension> indicatorDimension;
+    swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     CalcDimension dimPosition;
     bool parseItemWOk =
         ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
@@ -479,12 +497,40 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     return swiperParameters;
 }
 
+bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
+    return false;
+}
+
 SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> dotLeftValue = obj->GetProperty("leftValue");
     JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
     JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
@@ -498,6 +544,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
     digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+    std::optional<Dimension> indicatorDimension;
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
     digitalParameters.fontColor =
@@ -592,6 +644,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDisplayArrow(false);
             return;
         }
+        JSSwiperTheme::ApplyThemeToDisplayArrow(swiperArrowParameters, obj);
         SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
         SwiperModel::GetInstance()->SetDisplayArrow(true);
     } else if (info[0]->IsBoolean()) {
@@ -607,6 +660,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
             swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
             swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
             swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+            JSSwiperTheme::ApplyThemeToDisplayArrowForce(swiperArrowParameters);
             SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
             SwiperModel::GetInstance()->SetDisplayArrow(true);
         } else {
@@ -633,8 +687,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
-    auto obj = JSRef<JSObject>::Cast(info[0]);
     if (info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
@@ -642,26 +696,30 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
             auto type = typeParam->ToString();
             if (type == "DigitIndicator") {
                 SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDigitIndicator(digitalParameters, obj);
                 SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
             } else {
                 SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                JSSwiperTheme::ApplyThemeToDotIndicator(swiperParameters, obj);
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
             SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
+        JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
         SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }
     if (info[0]->IsBoolean()) {
         bool showIndicator = false;
-        ParseJsBool(obj, showIndicator);
+        ParseJsBool(info[0], showIndicator);
         SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
     } else {
         SwiperModel::GetInstance()->SetShowIndicator(true);
@@ -1120,12 +1178,13 @@ void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
     }
 
     RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
-    auto onPreloadFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Swiper.preloadItems");
-        TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
-        func->Execute(errorCode);
-    };
+    auto onPreloadFinish =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode, std::string message) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.preloadItems");
+            TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+            func->Execute(errorCode);
+        };
 
     controller_->SetPreloadFinishCallback(onPreloadFinish);
     controller_->PreloadItems(indexSet);

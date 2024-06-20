@@ -156,9 +156,28 @@ HWTEST_F(ScrolleBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
     OffsetF coordinateOffset;
     GetEventTargetImpl getEventTargetImpl;
     TouchTestResult result;
+    TouchTestResult responseLinkResult;
     pattern_->scrollableEvent_->BarCollectTouchTarget(
-        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr);
+        coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrolleBarTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    CreateWithBar();
+    GestureEvent info;
+    info.SetMainDelta(10);
+    scrollBar_->SetReverse(false);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_EQ(info.GetMainDelta(), 10);
+    scrollBar_->SetReverse(true);
+    scrollBar_->HandleDragUpdate(info);
+    EXPECT_NE(info.GetMainDelta(), -100);
 }
 
 /**
@@ -256,11 +275,11 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     pattern_->SetScrollBar(DisplayMode::ON);
+    scrollBarOverlayModifier->SetScrollable(true);
     EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
     EXPECT_TRUE(scrollBar->NeedPaint());
     ASSERT_NE(scrollBarOverlayModifier, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), UINT8_MAX);
-    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**
@@ -280,6 +299,7 @@ HWTEST_F(ScrolleBarTestNg, ScrollBarAnimation002, TestSize.Level1)
      */
     scrollBar->PlayScrollBarAppearAnimation();
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_NE(scrollBarOverlayModifier->opacityAnimation_, nullptr);
     EXPECT_EQ(scrollBarOverlayModifier->opacityAnimatingType_, OpacityAnimationType::NONE);
 
     /**

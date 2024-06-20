@@ -95,4 +95,22 @@ void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animat
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback) {}
+
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)
+{
+    return nullptr;
+}
+
+void AnimationUtils::UpdateInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress) {}
+
+void AnimationUtils::ContinueInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation) {}
+
+void AnimationUtils::StartInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation) {}
+
+void AnimationUtils::ReverseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation) {}
 } // namespace OHOS::Ace

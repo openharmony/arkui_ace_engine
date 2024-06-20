@@ -34,33 +34,17 @@ enum class CalloutType {
 class ComponentObserver {
 public:
     explicit ComponentObserver(const std::string& componentId) : componentId_(componentId) {}
-    ~ComponentObserver()
-    {
-        if (env_ == nullptr) {
-            return;
-        }
-        for (auto& layoutitem : cbLayoutList_) {
-            napi_delete_reference(env_, layoutitem);
-        }
-        for (auto& drawitem : cbDrawList_) {
-            napi_delete_reference(env_, drawitem);
-        }
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->UnregisterLayoutInspectorCallback(layoutEvent_, componentId_);
-        jsEngine->UnregisterDrawInspectorCallback(drawEvent_, componentId_);
-    }
+    ~ComponentObserver() {}
 
     void Initialize(napi_env env, napi_value thisVar);
-    void callUserFunction(std::list<napi_ref>& cbList);
-    std::list<napi_ref>::iterator FindCbList(napi_value cb, CalloutType calloutType);
+    void callUserFunction(napi_env env, std::list<napi_ref>& cbList);
+    std::list<napi_ref>::iterator FindCbList(napi_env env, napi_value cb, CalloutType calloutType);
     void NapiSerializer(napi_env& env, napi_value& result);
     void AddCallbackToList(
         napi_value cb, std::list<napi_ref>& cbList, CalloutType calloutType, napi_env env, napi_handle_scope scope);
     void DeleteCallbackFromList(
         size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env);
+    void Destroy(napi_env env);
 
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
@@ -71,7 +55,6 @@ public:
 private:
     void FunctionOn(napi_env& env, napi_value result, const char* funName);
     void FunctionOff(napi_env& env, napi_value result, const char* funName);
-    napi_env env_ = nullptr;
 };
 } // namespace OHOS::Ace::Napi
 #endif

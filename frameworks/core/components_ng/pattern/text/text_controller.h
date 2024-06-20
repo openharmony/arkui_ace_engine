@@ -29,6 +29,7 @@ public:
     void SetPattern(const WeakPtr<TextPattern>& pattern);
     void CloseSelectionMenu() override;
     void SetStyledString(const RefPtr<SpanStringBase>& value) override;
+    WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
 
 private:
     WeakPtr<TextPattern> pattern_;

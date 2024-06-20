@@ -57,6 +57,7 @@ template<typename T>
 class JsiRef {
 public:
     using wrappedT = panda::Local<panda::ObjectRef>;
+    using EcmaVM = panda::ecmascript::EcmaVM;
 
     JsiRef() {}
     explicit JsiRef(const T& val) : value_(val) {}
@@ -79,6 +80,13 @@ public:
     static JsiRef<T> Make(Args&&... args)
     {
         auto obj = T { args... };
+        return JsiRef<T>(obj);
+    }
+
+    template<typename... Args>
+    static JsiRef<T> FastMake(const EcmaVM *vm, Args&&... args)
+    {
+        auto obj = T { vm, args... };
         return JsiRef<T>(obj);
     }
 

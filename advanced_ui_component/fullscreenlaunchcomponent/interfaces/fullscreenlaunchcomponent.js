@@ -18,6 +18,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const hilog = requireNapi('hilog');
 const abilityManager = requireNapi('app.ability.abilityManager');
+const commonEventManager = requireNapi('commonEventManager');
 
 export class FullScreenLaunchComponent extends ViewPU {
     constructor(v, w, x, y = -1, z = undefined, a1) {
@@ -30,6 +31,7 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.appId = "";
         this.options = undefined;
         this.__isShow = new ObservedPropertySimplePU(false, this, "isShow");
+        this.subscriber = null;
         this.setInitiallyProvidedValue(w);
         this.finalizeConstruction();
     }
@@ -49,6 +51,9 @@ export class FullScreenLaunchComponent extends ViewPU {
         }
         if (u.isShow !== undefined) {
             this.isShow = u.isShow;
+        }
+        if (u.subscriber !== undefined) {
+            this.subscriber = u.subscriber;
         }
     }
 
@@ -73,6 +78,45 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.__isShow.set(r);
     }
 
+    aboutToAppear() {
+        let r = {
+            events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
+        };
+        commonEventManager.createSubscriber(r, (t, u) => {
+            if (t) {
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, err: %{public}s.', JSON.stringify(t));
+                return;
+            }
+            if (u == null || u == undefined) {
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.');
+                return;
+            }
+            this.subscriber = u;
+            commonEventManager.subscribe(this.subscriber, (w, x) => {
+                if (w) {
+                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to subscribe common event, err: %{public}s.', JSON.stringify(w));
+                    return;
+                }
+                hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.');
+                this.isShow = false;
+            });
+        });
+    }
+
+    aboutToDisappear() {
+        if (this.subscriber !== null) {
+            commonEventManager.unsubscribe(this.subscriber, (s) => {
+                if (s) {
+                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(s));
+                }
+                else {
+                    hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe success.');
+                    this.subscriber = null;
+                }
+            });
+        }
+    }
+
     doNothingBuilder(q = null) {
     }
 
@@ -80,13 +124,15 @@ export class FullScreenLaunchComponent extends ViewPU {
         if (this.options?.parameters) {
             this.options.parameters['ohos.extra.param.key.showMode'] = 1;
             this.options.parameters['ability.want.params.IsNotifyOccupiedAreaChange'] = true;
+            this.options.parameters['ability.want.params.IsModal'] = true;
             hilog.info(0x3900, 'FullScreenLaunchComponent', 'replaced options is %{public}s !', JSON.stringify(this.options));
         }
         else {
             this.options = {
                 parameters: {
                     'ohos.extra.param.key.showMode': 1,
-                    'ability.want.params.IsNotifyOccupiedAreaChange': true
+                    'ability.want.params.IsNotifyOccupiedAreaChange': true,
+                    'ability.want.params.IsModal': true
                 }
             };
         }

@@ -34,6 +34,10 @@ struct SwitchPaintParagraph {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str(), filter);
         json->PutExtAttr("switchPointColor",
             propSwitchPointColor.value_or(Color()).ColorToString().c_str(), filter);
@@ -89,9 +93,13 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("type", "ToggleType.Switch", filter);
         json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
-        ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SwitchAnimationStyle, SwitchAnimationStyle);

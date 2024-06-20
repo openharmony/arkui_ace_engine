@@ -27,8 +27,8 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override
     {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
         auto child = layoutWrapper->GetChildByIndex(0);
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
         CHECK_NULL_VOID(child);
         auto layoutNode = AceType::DynamicCast<CustomMeasureLayoutNode>(child->GetHostNode());
         CHECK_NULL_VOID(layoutNode);

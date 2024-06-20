@@ -413,6 +413,26 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
     return TextOverflow::CLIP;
 }
 
+inline MarqueeDirection ConvertWrapStringToMarqueeDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeDirection> uMap {
+        { "MarqueeDirection.LEFT", MarqueeDirection::LEFT },
+        { "MarqueeDirection.RIGHT", MarqueeDirection::RIGHT },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeDirection::LEFT;
+}
+
+inline MarqueeStartPolicy ConvertWrapStringToMarqueeStartPolicy(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeStartPolicy> uMap {
+        { "MarqueeStartPolicy.DEFAULT", MarqueeStartPolicy::DEFAULT },
+        { "MarqueeStartPolicy.ON_FOCUS", MarqueeStartPolicy::ON_FOCUS },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeStartPolicy::DEFAULT;
+}
+
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 {
     static const LinearEnumMapNode<FontStyle, std::string> fontStyleTable[] = {
@@ -521,6 +541,18 @@ inline std::string ConvertWrapLineBreakStrategyToString(LineBreakStrategy lineBr
 
     auto index = BinarySearchFindIndex(lineBreakStrategyTable, ArraySize(lineBreakStrategyTable), lineBreakStrategy);
     return index < 0 ? "line-break-strategy" : lineBreakStrategyTable[index].value;
+}
+
+inline std::string ConvertWrapTextSelectableToString(TextSelectableMode textSelectable)
+{
+    static const LinearEnumMapNode<TextSelectableMode, std::string> textSelectableTable[] = {
+        { TextSelectableMode::SELECTABLE_UNFOCUSABLE, "selectable-unfocusable" },
+        { TextSelectableMode::SELECTABLE_FOCUSABLE, "selectable-focusable" },
+        { TextSelectableMode::UNSELECTABLE, "unselectable" }
+    };
+
+    auto index = BinarySearchFindIndex(textSelectableTable, ArraySize(textSelectableTable), textSelectable);
+    return index < 0 ? "text-selectable" : textSelectableTable[index].value;
 }
 
 inline std::string ConvertColorToString(Color color)

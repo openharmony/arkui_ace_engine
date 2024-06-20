@@ -90,7 +90,9 @@ void JSBlank::JSBind(BindingTarget globalObj)
     JSClass<JSBlank>::StaticMethod("create", &JSBlank::Create, opt);
     JSClass<JSBlank>::StaticMethod("height", &JSBlank::Height, opt);
     JSClass<JSBlank>::StaticMethod("color", &JSBlank::Color, opt);
+    JSClass<JSBlank>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSBlank>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSBlank>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSBlank>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSBlank>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSBlank>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

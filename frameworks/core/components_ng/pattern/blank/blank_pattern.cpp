@@ -64,6 +64,10 @@ std::string BlankPattern::GetColorString() const
 
 void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     json->PutExtAttr("color", GetColorString().c_str(), filter);
 }
 

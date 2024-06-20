@@ -135,6 +135,7 @@ private:
     void ThumbnailTimer(int32_t time);
     RefPtr<DragEventActuator> GetDragEventActuator();
 
+    TouchEvent lastTouchEvent_;
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
     int32_t thumbnailDeadline = 150;

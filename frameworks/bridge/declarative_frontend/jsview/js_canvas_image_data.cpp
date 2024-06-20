@@ -28,11 +28,16 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     }
     int32_t width = 0;
     int32_t height = 0;
+    int32_t unit = 0;
+    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsCanvasImageData->SetUnit(CanvasUnit::PX);
+    }
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
         JSViewAbstract::ParseJsInteger(args[0], width);
         JSViewAbstract::ParseJsInteger(args[1], height);
-        width = PipelineBase::Vp2PxWithCurrentDensity(width);
-        height = PipelineBase::Vp2PxWithCurrentDensity(height);
+        double density = jsCanvasImageData->GetDensity();
+        width *= density;
+        height *= density;
         jsCanvasImageData->width_ = width;
         jsCanvasImageData->height_ = height;
     }

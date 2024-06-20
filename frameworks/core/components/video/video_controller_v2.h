@@ -35,6 +35,7 @@ public:
     using SeekToImpl = std::function<void(float, SeekMode)>;
     using RequestFullscreenImpl = std::function<void(bool)>;
     using ExitFullscreenImpl = std::function<void(bool)>;
+    using ResetImpl = std::function<void()>;
 
     void Start()
     {
@@ -47,6 +48,13 @@ public:
     {
         if (pauseImpl_) {
             pauseImpl_();
+        }
+    }
+
+    void Reset()
+    {
+        if (resetImpl_) {
+            resetImpl_();
         }
     }
 
@@ -76,6 +84,11 @@ public:
         if (exitFullscreenImpl_) {
             exitFullscreenImpl_(isSync);
         }
+    }
+
+    void SetResetImpl(ResetImpl&& resetImpl)
+    {
+        resetImpl_ = std::move(resetImpl);
     }
 
     void SetStartImpl(StartImpl&& startImpl)
@@ -115,6 +128,7 @@ private:
     SeekToImpl seekToImpl_;
     RequestFullscreenImpl requestFullscreenImpl_;
     ExitFullscreenImpl exitFullscreenImpl_;
+    ResetImpl resetImpl_;
 };
 
 class VideoControllerV2 : public virtual AceType {
@@ -132,6 +146,13 @@ public:
     {
         for (const auto& item : controllers_) {
             item->Pause();
+        }
+    }
+
+    void Reset()
+    {
+        for (const auto& item : controllers_) {
+            item->Reset();
         }
     }
 

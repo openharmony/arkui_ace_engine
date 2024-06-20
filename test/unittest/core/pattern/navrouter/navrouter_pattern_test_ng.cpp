@@ -22,44 +22,17 @@
 #define private public
 #define protected public
 
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "test/mock/base/mock_pixel_map.h"
-#include "base/window/drag_window.h"
-#include "core/components/counter/counter_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
-#include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model.h"
-#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -802,15 +775,15 @@ HWTEST_F(NavrouterPatternTestNg, MeasureContentChild001, TestSize.Level1)
     EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
     algorithm->Measure(layoutWrapper);
 
-    // Make IsAutoHeight true
+    // Make IsAutoHeight false
     navDestinationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     auto& calcLayoutConstraint = navDestinationLayoutProperty->GetCalcLayoutConstraint();
     ASSERT_NE(calcLayoutConstraint, nullptr);
     auto calcSize = CalcSize();
-    calcSize.height_ = CalcLength("auto");
+    calcSize.height_ = CalcLength(200);
     calcLayoutConstraint->selfIdealSize = calcSize;
-    // Make sure IsAutoHeight is true
-    EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
+    // Make sure IsAutoHeight is false
+    EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty));
     algorithm->Measure(layoutWrapper);
 }
 
@@ -1075,5 +1048,85 @@ HWTEST_F(NavrouterPatternTestNg, AddNavDestinationToNavigation005, TestSize.Leve
     // Make sure destinationContent is true
     EXPECT_NE(navDestinationNode->GetContentNode(), nullptr);
     navRouterNode->AddNavDestinationToNavigation();
+}
+
+/**
+ * @tc.name: NavrouterTestNg0033
+ * @tc.desc: Test TitleBarPattern::OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterPatternTestNg, NavrouterTestNg0033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navBar titleBarNode etc.
+     */
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto menu = FrameNode::CreateFrameNode("menu", 34, AceType::MakeRefPtr<ButtonPattern>());
+    auto subtitle = FrameNode::CreateFrameNode("subtitle", 35, AceType::MakeRefPtr<TextPattern>());
+    auto title = FrameNode::CreateFrameNode("title", 36, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarNode = FrameNode::CreateFrameNode("toolBar", 44, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto buttonNode = FrameNode::CreateFrameNode("BackButton", 55, AceType::MakeRefPtr<ButtonPattern>());
+    auto backButtonImageNode = FrameNode::CreateFrameNode("Image", 66, AceType::MakeRefPtr<ImagePattern>());
+
+    navBar->AddChild(titleBarNode);
+    auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
+    titleBarNode->backButton_ = buttonNode;
+    titleBarNode->AddChild(titleBarNode->GetBackButton());
+    titleBarNode->title_ = title;
+
+    ASSERT_TRUE(buttonNode->children_.empty());
+    backButtonImageNode->MountToParent(buttonNode);
+    backButtonImageNode->MarkModifyDone();
+    buttonNode->MarkModifyDone();
+    /**
+     * @tc.steps: step2. set properties then call pattern->OnModifyDone();.
+     * @tc.expected: check whether the properties is correct.
+     */
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ =
+        TitleBarParentType::NAV_DESTINATION;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleMode_ = NavigationTitleMode::MINI;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = std::nullopt;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propNoPixMap_ = true;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = ImageSourceInfo();
+    pattern->OnModifyDone();
+    ASSERT_NE(titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_.value(),
+        TitleBarParentType::NAVBAR);
+
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propImageSource_ = std::nullopt;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = false;
+    pattern->OnModifyDone();
+
+    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propPixelMap_ = mockPixelMap;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propHideBackButton_ = true;
+    titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>()->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    navBar->GetLayoutProperty<NavBarLayoutProperty>()->propHideBackButton_ = true;
+    pattern->OnModifyDone();
+    EXPECT_EQ(buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode)), geometryNode, layoutProperty);
+    DirtySwapConfig config;
+    auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    /**
+     * @tc.steps: step1. call pattern->OnDirtyLayoutWrapperSwap();.
+     * @tc.expected: check whether the res is correct.
+     */
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    auto res = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_FALSE(res);
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    res = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    ASSERT_FALSE(res);
 }
 } // namespace OHOS::Ace::NG

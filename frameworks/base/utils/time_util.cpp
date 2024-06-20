@@ -67,12 +67,22 @@ int64_t GetCurrentTimestamp()
     return static_cast<int64_t>(currentTime.tv_sec) * SEC_TO_MILLISEC + currentTime.tv_usec / MILLISEC_TO_MICROSEC;
 }
 
+int64_t GetCurrentTimestampMicroSecond()
+{
+    struct timeval currentTime;
+    gettimeofday(&currentTime, nullptr);
+    return static_cast<int64_t>(currentTime.tv_sec) * SEC_TO_MILLISEC * MILLISEC_TO_MICROSEC + currentTime.tv_usec;
+}
+
 std::string ConvertTimestampToStr(int64_t timestamp)
 {
     char timeStr[MAX_TIME_STR_LEN];
     // timestamp is in millisecond unit, divide 1000 to second
     auto t = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&t);
+    if (!local) {
+        return "";
+    }
     std::strftime(timeStr, MAX_TIME_STR_LEN, "%Y-%m-%d %H:%M:%S", local);
     std::stringstream oss;
     // milliseconds in timestr should be 3 characters length

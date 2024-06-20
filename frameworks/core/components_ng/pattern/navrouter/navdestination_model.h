@@ -34,8 +34,9 @@ public:
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
-    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-        const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
+        const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
+        const std::vector<std::string>& nameList) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
@@ -51,6 +52,7 @@ public:
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
+    virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;
@@ -60,6 +62,8 @@ public:
     {
         return false;
     }
+
+    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

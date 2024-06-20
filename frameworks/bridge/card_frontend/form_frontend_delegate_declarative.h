@@ -113,6 +113,9 @@ public:
         }
     }
 
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const std::string& bundleName = "",
+        const std::string& moduleName = "") override;
+
 private:
     UpdateCardDataCallback updateCardData_;
     std::string cardData_;

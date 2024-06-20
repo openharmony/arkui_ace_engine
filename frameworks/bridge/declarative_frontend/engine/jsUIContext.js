@@ -201,6 +201,9 @@ class MeasureUtils {
     }
 }
 
+class FrameCallback {
+}
+
 class UIContext {
     /**
      * Construct new instance of UIContext.
@@ -492,6 +495,73 @@ class UIContext {
         const windowName = getUINativeModule().common.getWindowName();
         __JSScopeUtil__.restoreInstanceId();
         return windowName
+    }
+
+    clearResourceCache() {
+        getUINativeModule().resource.clearCache();
+    }
+
+    postFrameCallback(frameCallback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.postFrameCallback(frameCallback, 0);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    postDelayedFrameCallback(frameCallback, delayMillis) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.postFrameCallback(frameCallback, delayMillis);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    requireDynamicSyncScene(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dynamicSceneInfo = getUINativeModule().requireDynamicSyncScene(id);
+        if (!dynamicSceneInfo) {
+            __JSScopeUtil__.restoreInstanceId();
+            return [];
+        }
+        if (dynamicSceneInfo.tag == 'Swiper') {
+            __JSScopeUtil__.restoreInstanceId();
+            let nodeRef = dynamicSceneInfo.nativeRef;
+            return SwiperDynamicSyncScene.Create(nodeRef);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
+class DynamicSyncScene {
+    /**
+     * Construct new instance of DynamicSyncScene.
+     * initialize with instanceId.
+     * @param nodeRef obtained on the c++ side.
+     * @param frameRateRange frameRateRange
+     * @since 12
+     */
+    constructor(nodeRef, frameRateRange) {
+        this.frameRateRange = frameRateRange;
+        this.nodeRef = nodeRef;
+        this.nodePtr = this.nodeRef.getNativeHandle();
+    }
+
+    getFrameRateRange() {
+        return this.frameRateRange;
+    }
+}
+
+class SwiperDynamicSyncScene extends DynamicSyncScene {
+    static Create(nodeRef) {
+        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
+        return swiperDynamicSyncScene;
+    }
+
+    constructor(nodeRef, type) {
+        super(nodeRef, { min: 0, max: 120, expected: 120 });
+        this.type = type;
+    }
+
+    setFrameRateRange(frameRateRange) {
+        this.frameRateRange = frameRateRange;
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
     }
 }
 
@@ -916,11 +986,11 @@ function __getUIContext__(instanceId) {
 
 /**
  * Get FrameNode by id of UIContext instance.
- * @param nodeId the id of frameNode.
  * @param instanceId obtained on the C++ side.
+ * @param nodeId the id of frameNode.
  * @returns FrameNode instance.
  */
-function __getFrameNodeByNodeId__(nodeId, instanceId) {
+function __getFrameNodeByNodeId__(instanceId, nodeId) {
     const uiContext = __getUIContext__(instanceId);
     return uiContext.getFrameNodeByNodeId(nodeId);
 }
@@ -942,7 +1012,7 @@ function __checkRegexValid__(pattern) {
 }
 
 export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
-    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager };
+    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager, FrameCallback };
 
 globalThis.__getUIContext__ = __getUIContext__;
 globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;

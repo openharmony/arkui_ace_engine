@@ -367,6 +367,7 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
         LinearData segmentLinearData;
         segmentLinearData.offset = offset;
         segmentLinearData.height = context.height;
+        segmentLinearData.totalWidth = totalWidth;
 
         if (isFirstValidDate) {
             segmentLinearData.isFirstData = true;
@@ -478,6 +479,10 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
         segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
 #endif
     canvas.AttachBrush(brush);
+    if (isRtl_) {
+        canvas.Translate(segmentLinearData.totalWidth, 0);
+        canvas.Scale(-1, 1);
+    }
     canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
     canvas.Restore();
@@ -526,6 +531,10 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     brush.SetFilter(filter);
     brush.SetAlpha(SHADOW_ALPHA);
     canvas.AttachBrush(brush);
+    if (isRtl_) {
+        canvas.Translate(segmentLinearData.totalWidth, 0);
+        canvas.Scale(-1, 1);
+    }
     canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
     canvas.Restore();
@@ -535,13 +544,19 @@ void DataPanelModifier::PaintSpace(RSCanvas& canvas, const LinearData& segmentLi
 {
     float xSpace = segmentLinearData.xSegment + segmentLinearData.segmentWidth;
     auto offset = segmentLinearData.offset;
+    canvas.Save();
     RSBrush brush;
     RSRect rect(xSpace, offset.GetY(), xSpace + spaceWidth, offset.GetY() + segmentLinearData.height);
     brush.SetColor(ToRSColor(Color::WHITE));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
+    if (isRtl_) {
+        canvas.Translate(segmentLinearData.totalWidth, 0);
+        canvas.Scale(-1, 1);
+    }
     canvas.DrawRect(rect);
     canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void DataPanelModifier::PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const

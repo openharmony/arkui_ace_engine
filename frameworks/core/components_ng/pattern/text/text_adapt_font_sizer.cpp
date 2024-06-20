@@ -91,34 +91,22 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
         return false;
     }
-    auto tag = static_cast<int32_t>((maxFontSize - minFontSize) / stepSize);
-    auto length = tag + 1 + (GreatNotEqual(maxFontSize, minFontSize + stepSize * tag) ? 1 : 0);
-    int32_t left = 0;
-    int32_t right = length - 1;
-    float fontSize = 0.0f;
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
-    while (left <= right) {
-        int32_t mid = left + (right - left) / 2;
-        fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));
-        textStyle.SetFontSize(Dimension(fontSize));
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
             return false;
         }
         if (!DidExceedMaxLines(maxSize)) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
+            break;
         }
+        maxFontSize -= stepSize;
     }
-    fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
-    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
-    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
-    textStyle.SetFontSize(Dimension(fontSize));
-    return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+    return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -134,7 +122,7 @@ bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(TextStyle& textStyle, double& ma
     return true;
 }
 
-bool TextAdaptFontSizer::GetAdaptFontSizeStep(TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
     const LayoutConstraintF& contentConstraint)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -174,5 +162,23 @@ bool TextAdaptFontSizer::IsAdaptExceedLimit(const SizeF& maxSize)
     CHECK_NULL_RETURN(paragraph, false);
     return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const double& maxFontSize, const double& minFontSize)
+{
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        return false;
+    }
+    return true;
+}
+
+bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
+    return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
 } // namespace OHOS::Ace::NG

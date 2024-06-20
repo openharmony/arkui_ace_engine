@@ -27,7 +27,8 @@ public:
     void Create() override;
     void Pop() override;
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
-        std::function<void()>&& builder, bool useContentOnly) override;
+        const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder,
+        bool useContentOnly) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override {}
     void SetIndicator(const IndicatorStyle& indicator) override {}
     void SetBoard(const BoardStyle& board) override {}

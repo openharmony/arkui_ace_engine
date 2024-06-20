@@ -58,7 +58,16 @@ public:
     void SetNavPathList(const NavPathList& navPathList)
     {
         navPathList_ = navPathList;
+    }
+
+    void SetPreNavPathList(const NavPathList& navPathList)
+    {
         preNavPathList_ = navPathList;
+    }
+
+    NavPathList GetPreNavPathList() const
+    {
+        return preNavPathList_;
     }
 
     bool Empty() const
@@ -177,6 +186,9 @@ public:
     {
         navigationNode_ = navigationNode;
     }
+
+    virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
+    virtual void RecoveryNavigationStack() {}
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);

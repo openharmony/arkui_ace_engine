@@ -38,6 +38,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ANIMATION_TIME = 400;
 constexpr int32_t DELAY_TIME = 300;
+const RefPtr<Curve> FOLDER_STACK_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
 } // namespace
 
 void FolderStackPattern::OnAttachToFrameNode()
@@ -210,7 +212,7 @@ void FolderStackPattern::StartOffsetEnteringAnimation()
     }
     AnimationOption optionPosition;
     optionPosition.SetDuration(ANIMATION_TIME);
-    optionPosition.SetCurve(Curves::ELASTICS);
+    optionPosition.SetCurve(FOLDER_STACK_ANIMATION_CURVE);
     auto renderContext = GetRenderContext();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

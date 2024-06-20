@@ -124,6 +124,8 @@ public:
 
     virtual void SetRequestFocusCallback(std::function<void(NG::RequestFocusResult result)> callback);
 
+    virtual void ResetRequestFocusCallback();
+
     // distribute
     virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {

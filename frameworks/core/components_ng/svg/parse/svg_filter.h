@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "include/core/SkPaint.h"
 
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_quote.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,7 @@ public:
     SvgFilter();
     ~SvgFilter() override = default;
     static RefPtr<SvgNode> Create();
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 protected:
     void OnInitStyle() override;
@@ -39,16 +41,12 @@ protected:
     void OnAsPaint();
 
 private:
-    Dimension x_;
-    Dimension y_;
-    Dimension height_;
-    Dimension width_;
-
 #ifndef USE_ROSEN_DRAWING
     SkPaint filterPaint_;
 #else
     RSBrush filterBrush_;
 #endif
+    SvgFilterAttribute filterAttr_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -49,21 +49,20 @@ constexpr size_t CANCEL_BUTTON_FONT_COLOR_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
 constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
+    TextDirection direction)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<CalendarDialogPattern>());
-    auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEntryNode(settingData.entryNode);
-    pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
-    DisableResetOptionButtonColor(pattern, buttonInfos);
+    OperationsToPattern(contentColumn, settingData, dialogProperties, buttonInfos);
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(direction);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
@@ -78,11 +77,17 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(calendarNode, nullptr);
     auto titleNode = CreateTitleNode(calendarNode);
     CHECK_NULL_RETURN(titleNode, nullptr);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
+    titleLayoutProperty->UpdateLayoutDirection(direction);
     titleNode->MountToParent(contentColumn);
     calendarNode->MountToParent(contentColumn);
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
+    dialogLayoutProperty->UpdateLayoutDirection(direction);
 
     auto childNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     CHECK_NULL_RETURN(childNode, nullptr);
@@ -102,12 +107,24 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         auto contentRow =
             CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
         contentRow->MountToParent(contentColumn);
+        UpdateDialogDefaultFocus(contentRow, contentColumn);
     }
 
     contentColumn->MarkModifyDone();
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::OperationsToPattern(
+    const RefPtr<FrameNode>& frameNode, const CalendarSettingData& settingData,
+    const DialogProperties& dialogProperties, const std::vector<ButtonInfo>& buttonInfos)
+{
+    auto pattern = frameNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEntryNode(settingData.entryNode);
+    pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
+    DisableResetOptionButtonColor(pattern, buttonInfos);
 }
 
 void CalendarDialogView::DisableResetOptionButtonColor(
@@ -137,6 +154,24 @@ void CalendarDialogView::DisableResetOptionButtonColor(
     }
 }
 
+void CalendarDialogView::SetTitleIdealSize(
+    const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontSizeScale = pipeline->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleRowHeight())));
+    } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleLargerRowHeight())));
+    } else {
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleLargeRowHeight())));
+    }
+}
+
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -155,7 +190,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     margin.left = CalcLength(theme->GetCalendarTitleRowLeftRightPadding());
     margin.right = CalcLength(theme->GetCalendarTitleRowLeftRightPadding());
     layoutProps->UpdateMargin(margin);
-    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleRowHeight())));
+    SetTitleIdealSize(theme, layoutProps);
 
     // left year arrow
     auto leftYearArrowNode =
@@ -256,6 +291,25 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     return buttonNode;
 }
 
+void CalendarDialogView::SetCalendarIdealSize(
+    const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontSizeScale = pipeline->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+            std::nullopt, CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+    } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
+        calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+            CalcLength(theme->GetCalendarLargerContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+    } else {
+        calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+            CalcLength(theme->GetCalendarLargeContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+    }
+}
+
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
     const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent)
 {
@@ -276,8 +330,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
         .top = CalcLength(theme->GetDistanceBetweenTitleAndDate()),
     };
     calendarLayoutProperty->UpdateMargin(margin);
-    calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-        CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+    SetCalendarIdealSize(theme, calendarLayoutProperty);
 
     auto swiperNode = CreateCalendarSwiperNode();
     CHECK_NULL_RETURN(swiperNode, nullptr);
@@ -411,13 +464,47 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    
+    auto fontSizeScale = pipeline->GetFontScale();
+    if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    } else if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale()) {
+        textLayoutProperty->UpdateFontSize(calendarTheme->GetCalendarDayLargerFontSize());
+    } else {
+        textLayoutProperty->UpdateFontSize(calendarTheme->GetCalendarDayLargeFontSize());
+    }
+
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textNode->MountToParent(buttonNode);
 
+    UpdateButtonLayoutProperty(buttonNode, isConfirm, buttonInfos, pipeline);
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonEventHub, nullptr);
+    buttonEventHub->SetStateEffect(true);
+
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    auto defaultBGColor =
+        calendarTheme->GetIsButtonTransparent() ? Color::TRANSPARENT : calendarTheme->GetDialogButtonBackgroundColor();
+    buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+    UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
+    buttonNode->MarkModifyDone();
+    return buttonNode;
+}
+
+void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& buttonNode, bool isConfirm,
+    const std::vector<ButtonInfo>& buttonInfos, const RefPtr<PipelineContext>& pipeline)
+{
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     if (index < buttonInfos.size() &&
         (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
@@ -430,22 +517,22 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonLayoutProperty->UpdateFlexShrink(1.0);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(calendarTheme->GetCalendarActionRowHeight())));
-
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetStateEffect(true);
-
-    auto buttonRenderContext = buttonNode->GetRenderContext();
-    auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
-                              ? Color::TRANSPARENT
-                              : calendarTheme->GetDialogButtonBackgroundColor();
-    buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
-    UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
-    UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
-    buttonNode->MarkModifyDone();
-    return buttonNode;
+    CalcLength width;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        width = CalcLength(1.0, DimensionUnit::PERCENT);
+    } else {
+        width = CalcLength(pickerTheme->GetButtonWidth());
+    }
+    
+    auto fontSizeScale = pipeline->GetFontScale();
+    if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() >= DEVICE_HEIGHT_LIMIT) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(width, CalcLength(calendarTheme->GetCalendarActionLargeRowHeight())));
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(width, CalcLength(calendarTheme->GetCalendarActionRowHeight())));
+    }
 }
 
 void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
@@ -571,13 +658,27 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
     dividerLayoutProperty->UpdateVertical(true);
     auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-    dividerRenderProperty->UpdateDividerColor(SystemProperties::GetDeviceType() == DeviceType::PHONE ?
-        theme->GetDialogDividerColor() : Color::TRANSPARENT);
+    dividerRenderProperty->UpdateDividerColor(
+        theme->GetIsDividerTransparent() ? Color::TRANSPARENT : theme->GetDialogDividerColor());
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));
 
     dividerNode->MarkModifyDone();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto dividerWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_RETURN(dividerWrapper, nullptr);
+        auto layoutProps = dividerWrapper->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(dialogTheme->GetActionsPadding().Bottom()), CalcLength(theme->GetCalendarActionRowHeight())));
+        dividerNode->MountToParent(dividerWrapper);
+        return dividerWrapper;
+    }
     return dividerNode;
 }
 
@@ -589,21 +690,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    MarginProperty margin;
-    margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
-    margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
-    margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
-    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
-    layoutProps->UpdateMargin(margin);
-    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
+    UpdateOptionLayoutProps(contentRow, pipelineContext);
 
     auto cancelIter = dialogCancelEvent.find("cancelId");
     DialogGestureEvent cancelEvent = nullptr;
@@ -612,14 +701,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     auto buttonCancelNode = CreateCancelNode(cancelEvent, buttonInfos);
     auto acceptIter = dialogEvent.find("acceptId");
-    DialogEvent acceptEvent = nullptr;
-    if (acceptIter != dialogEvent.end()) {
-        acceptEvent = acceptIter->second;
-    }
+    DialogEvent acceptEvent = (acceptIter != dialogEvent.end()) ? acceptIter->second : nullptr;
     auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent, buttonInfos);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
+    UpdateDefaultFocusByButtonInfo(contentRow, buttonConfirmNode, buttonCancelNode);
 
     auto event = [weakDialogNode = WeakPtr<FrameNode>(dialogNode),
                  weakPipelineContext = WeakPtr<PipelineContext>(pipelineContext)](const GestureEvent& /* info */) {
@@ -641,20 +728,61 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     return contentRow;
 }
 
+void CalendarDialogView::UpdateOptionLayoutProps(
+    const RefPtr<FrameNode>& contentRow, const RefPtr<PipelineContext>& pipelineContext)
+{
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    MarginProperty margin;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    } else {
+        margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    }
+    margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
+    layoutProps->UpdateMargin(margin);
+    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
+}
+
 void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& settingData)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayWidthOrHeight());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayWidthOrHeight());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayFontSize());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayWidthOrHeight());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayWidthOrHeight());
-    ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayFontSize());
 
-    auto defaultDayRadius = theme->GetCalendarDayRadius();
+    auto fontSizeScale = pipelineContext->GetFontScale();
+    Dimension defaultDayRadius;
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(SystemProperties::GetDeviceHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayFontSize());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayFontSize());
+        defaultDayRadius = theme->GetCalendarDayRadius();
+    } else {
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayLargeWidthOrHeight());
+        defaultDayRadius = theme->GetCalendarPickerDayLargeWidthOrHeight() / 2;
+        if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
+            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayLargerFontSize());
+            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayLargerFontSize());
+        } else {
+            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, theme->GetCalendarDayLargeFontSize());
+            ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayLargeFontSize());
+        }
+    }
+
     if (settingData.dayRadius.has_value() && NonNegative(settingData.dayRadius.value().ConvertToPx()) &&
         LessOrEqual(settingData.dayRadius.value().ConvertToPx(), defaultDayRadius.ConvertToPx())) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayRadius, settingData.dayRadius.value());
@@ -749,6 +877,32 @@ void CalendarDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>&
         if (focusHub) {
             focusHub->SetIsDefaultFocus(true);
         }
+    }
+}
+
+void CalendarDialogView::UpdateDialogDefaultFocus(const RefPtr<FrameNode>& contentRow,
+    const RefPtr<FrameNode>& contentColumn)
+{
+    auto contentRowFocusHub = contentRow->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(contentRowFocusHub);
+    if (contentRowFocusHub->IsDefaultFocus()) {
+        auto contentColumnFocusHub = contentColumn->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(contentColumnFocusHub);
+        contentColumnFocusHub->SetIsDefaultFocus(true);
+    }
+}
+
+void CalendarDialogView::UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>& optionsNode,
+    const RefPtr<FrameNode>& accept, const RefPtr<FrameNode>& cancel)
+{
+    auto acceptFocusHub = accept->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(acceptFocusHub);
+    auto cancelFocusHub = cancel->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(cancelFocusHub);
+    if (acceptFocusHub->IsDefaultFocus() || cancelFocusHub->IsDefaultFocus()) {
+        auto optionsNodeFocusHub = optionsNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(optionsNodeFocusHub);
+        optionsNodeFocusHub->SetIsDefaultFocus(true);
     }
 }
 } // namespace OHOS::Ace::NG

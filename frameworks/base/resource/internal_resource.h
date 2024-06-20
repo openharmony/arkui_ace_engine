@@ -110,6 +110,7 @@ public:
         PASTE_BUTTON_LINE_SVG,
         SAVE_BUTTON_FILLED_SVG,
         SAVE_BUTTON_LINE_SVG,
+        SAVE_BUTTON_PICTURE_SVG,
         IC_PUBLIC_ARROW_LEFT_SVG,
         IC_PUBLIC_ARROW_RIGHT_SVG,
         IC_PUBLIC_ARROW_UP_SVG,
@@ -127,6 +128,7 @@ public:
         IC_CANCEL_SVG,
         RADIO_TICK_SVG,
         RADIO_DOT_SVG,
+        IC_TAKEPHOTO_SVG,
         SVG_END = 20000,
 
         // 20001 - 30000 is reserved for i18n resource.

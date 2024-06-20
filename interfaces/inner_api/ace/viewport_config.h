@@ -80,6 +80,16 @@ public:
         return orientation_;
     }
 
+    void SetTransformHint(uint32_t transform)
+    {
+        transform_ = transform;
+    }
+
+    uint32_t TransformHint() const
+    {
+        return transform_;
+    }
+
     std::string ToString() const
     {
         std::string config = "Viewport config:";
@@ -87,6 +97,7 @@ public:
         config.append(" orientation: " + std::to_string(orientation_));
         config.append(" density: " + std::to_string(density_));
         config.append(" position: (" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
+        config.append(" transformHint: " + std::to_string(transform_));
         return config;
     }
 
@@ -97,6 +108,7 @@ private:
     int32_t posY_ = 0;
     int32_t orientation_ = 0;
     float density_ = 1.0f;
+    uint32_t transform_ = 0;
 };
 
 } // namespace OHOS::Ace

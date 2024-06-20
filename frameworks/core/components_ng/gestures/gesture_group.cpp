@@ -150,4 +150,19 @@ void GestureGroup::RemoveChildrenByTag(const std::string& gestureTag, bool& need
         }
     }
 }
+
+void GestureGroup::RemoveGesture(RefPtr<Gesture> gesture)
+{
+    for (auto iter = gestures_.begin(); iter != gestures_.end();) {
+        if (*iter == gesture) {
+            iter = gestures_.erase(iter);
+        } else {
+            auto group = AceType::DynamicCast<GestureGroup>(*iter);
+            if (group) {
+                group->RemoveGesture(gesture);
+            }
+            iter++;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

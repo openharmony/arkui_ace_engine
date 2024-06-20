@@ -351,6 +351,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkChainMode {
+  direction: Axis | undefined;
+  style: ChainStyle  | undefined;
+  constructor() {
+    this.direction = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkChainMode): boolean {
+    return (this.direction === another.direction) && (this.style === another.style);
+  }
+}
+
 class ArkListEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -863,6 +875,16 @@ class ArkKeyBoardShortCut {
   }
 }
 
+class ArkCustomProperty {
+  key: string;
+  value: object;
+
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
+  }
+}
+
 class ArkBlendMode {
   blendMode: number;
   blendApplyType: number;
@@ -924,16 +946,31 @@ class ArkConstraintSizeOptions {
   }
 }
 
-class ArkTextAreaShowCounter {
+class ArkTextFieldShowCounter {
   value: boolean;
-  options?: any;
+  highlightBorder?: any;
+  thresholdPercentage?: any;
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.highlightBorder = undefined;
+    this.thresholdPercentage = undefined;
   }
-  isEqual(another: ArkTextAreaShowCounter): boolean {
+  isEqual(another: ArkTextFieldShowCounter): boolean {
     return (this.value === another.value) &&
-      (this.options === another.options);
+      (this.highlightBorder === another.highlightBorder) &&
+      (this.thresholdPercentage === another.thresholdPercentage);
+  }
+}
+
+class ArkTextInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
   }
 }
 
@@ -1069,6 +1106,20 @@ class ArkDisplayArrow {
   }
 }
 
+class ArkDisplayCount {
+  value: string | number | SwiperAutoFill;
+  swipeByGroup: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.swipeByGroup = undefined;
+  }
+
+  isEqual(another: ArkDisplayCount): boolean {
+    return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
+
 class ArkGridEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -1152,6 +1203,19 @@ class ArkGeometryTransition {
   }
 }
 
+class ArkSymbolEffect {
+  symbolEffect: SymbolEffect;
+  action: boolean | number | undefined;
+
+  constructor() {
+    this.symbolEffect = undefined;
+    this.action = undefined;
+  }
+  isEqual(another: ArkSymbolEffect): boolean {
+    return (this.symbolEffect === another.symbolEffect) && (this.action === another.action);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1191,6 +1255,18 @@ class ArkTextBackGroundStyle {
       }
     }
     return true;
+  }
+}
+
+class ArkScrollOffsetOptions {
+  xOffset: Dimension;
+  yOffset: Dimension;
+  constructor() {
+    this.xOffset = undefined;
+    this.yOffset = undefined;
+  }
+  isEqual(another: ArkScrollOffsetOptions): boolean {
+    return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
   }
 }
 
@@ -1245,5 +1321,118 @@ class ArkPositionType {
     } else {
       return false;
     }
+  }
+}
+
+class ArkSelection {
+  selectionStart: number;
+  selectionEnd: number;
+  constructor() {
+    this.selectionStart = undefined;
+    this.selectionEnd = undefined;
+  }
+  isEqual(another: ArkSelection): boolean {
+    return this.selectionStart === another.selectionStart &&
+      this.selectionEnd === another.selectionEnd;
+  }
+}
+
+class TextDataDetectorConfig {
+  types: TextDataDetectorType;
+  onDetectResultUpdate: (result: string) => void;
+  constructor() {
+    this.types = undefined;
+    this.onDetectResultUpdate = undefined;
+  }
+  isEqual(another: TextDataDetectorConfig): boolean {
+    return (this.types === another.types) &&
+      (this.onDetectResultUpdate === another.onDetectResultUpdate);
+  }
+}
+
+class ArkDragPreviewOptions {
+  mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  numberBadge: boolean | number | undefined;
+  isMultiSelectionEnabled: boolean | undefined;
+  defaultAnimationBeforeLifting: boolean | undefined;
+
+  constructor() {
+    this.mode = undefined;
+    this.numberBadge = undefined;
+    this.isMultiSelectionEnabled = undefined;
+    this.defaultAnimationBeforeLifting = undefined;
+  }
+
+  isEqual(another: ArkDragPreviewOptions): boolean {
+    return (
+      this.mode === another.mode &&
+      this.numberBadge === another.numberBadge &&
+      this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+    );
+  }
+}
+
+class ArkRelativeContainerGuideLine {
+  ids: Array<string> | undefined;
+  directions: Array<Axis> | undefined;
+  positions: Array<GuideLinePosition> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.positions = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.positions === another.positions
+    );
+  }
+}
+
+class ArkRelativeContainerBarrier {
+  ids: Array<string> | undefined;
+  directions: Array<BarrierDirection> | undefined;
+  referencedIds: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.ids = undefined;
+    this.directions = undefined;
+    this.referencedIds = undefined;
+  }
+
+  isEqual(another: ArkRelativeContainerGuideLine): boolean {
+    return (
+      this.ids === another.ids &&
+      this.directions === another.directions &&
+      this.referencedIds === another.positions
+    );
+  }
+}
+
+class ArkFocusScopeId {
+  id: string | undefined;
+  isGroup: boolean | undefined;
+  constructor() {
+    this.id = undefined;
+    this.isGroup = undefined;
+  }
+  isEqual(another: ArkFocusScopeId): boolean {
+    return (this.id === another.id) && (this.isGroup === another.isGroup);
+  }
+}
+
+class ArkFocusScopePriority {
+  scopeId: string | undefined;
+  priority: number | undefined;
+  constructor() {
+    this.scopeId = undefined;
+    this.priority = undefined;
+  }
+  isEqual(another: ArkFocusScopePriority): boolean {
+    return (this.scopeId === another.scopeId) && (this.priority === another.priority);
   }
 }

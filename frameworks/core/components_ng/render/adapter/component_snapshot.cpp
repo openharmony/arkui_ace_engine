@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
+#include <iterator>
 #include <memory>
 
 #include "transaction/rs_interfaces.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -81,6 +83,21 @@ private:
 };
 } // namespace
 
+void ProcessImageNode(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageNode = AceType::DynamicCast<FrameNode>(node);
+        if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
+            auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+            imagePattern->OnVisibleAreaChange(true);
+        }
+    }
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        ProcessImageNode(child);
+    }
+}
+
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -100,6 +117,28 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
             componentId.c_str());
         return;
     }
+
+    if (node->GetIsLayoutNode()) {
+        std::list<RefPtr<FrameNode>> children;
+        node->GetOneDepthVisibleFrame(children);
+        if (children.empty()) {
+            return;
+        }
+
+        auto rsNode = GetRsNode(children.front());
+        if (!rsNode) {
+            callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "RsNode is null from FrameNode(id=%{public}s)",
+                componentId.c_str());
+            return;
+        }
+        auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+        rsInterface.TakeSurfaceCaptureForUI(
+            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
+        return;
+    }
+
     auto rsNode = GetRsNode(node);
     if (!rsNode) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
@@ -113,7 +152,7 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 }
 
 void ComponentSnapshot::Create(
-    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime)
+    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime, bool flag)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -133,6 +172,8 @@ void ComponentSnapshot::Create(
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
 
+    ProcessImageNode(node);
+
     if (enableInspector) {
         Inspector::AddOffscreenNode(node);
     }
@@ -141,9 +182,10 @@ void ComponentSnapshot::Create(
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    pipeline->FlushUITasks();
-    pipeline->FlushMessages();
-
+    if (flag) {
+        pipeline->FlushUITasks();
+        pipeline->FlushMessages();
+    }
     executor->PostDelayedTask(
         [callback, node, enableInspector]() mutable {
             auto rsNode = GetRsNode(node);

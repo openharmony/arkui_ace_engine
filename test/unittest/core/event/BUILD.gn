@@ -24,6 +24,7 @@ ace_unittest("event_manager_test_ng") {
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_manager_test_ng.cpp",
+    "event_manager_test_ng_new.cpp",
   ]
 }
 
@@ -48,13 +49,19 @@ ace_unittest("event_hub_test_ng") {
 ace_unittest("focus_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "focus_hub_test_ng.cpp" ]
+  sources = [
+    "focus_hub_test_ng.cpp",
+    "focus_hub_test_ng_new.cpp",
+  ]
 }
 
 ace_unittest("gesture_event_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "gesture_event_hub_test_ng.cpp" ]
+  sources = [
+    "gesture_event_hub_test_ng.cpp",
+    "gesture_event_hub_test_ng_new.cpp",
+  ]
 }
 
 ace_unittest("input_event_hub_test_ng") {

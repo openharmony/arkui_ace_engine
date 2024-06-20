@@ -180,6 +180,10 @@ void JSSpan::SetTextCase(int32_t value)
 
 void JSSpan::SetDecoration(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined()) {
+        SpanModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }

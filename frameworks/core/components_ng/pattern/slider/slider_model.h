@@ -29,7 +29,7 @@
 #include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SliderModel {
+class ACE_FORCE_EXPORT SliderModel {
 public:
     enum class SliderMode {
         OUTSET,  // block on track, track is thin
@@ -47,6 +47,30 @@ public:
     enum class SliderInteraction {
         SLIDE_AND_CLICK,
         SLIDE_ONLY,
+        SLIDE_AND_CLICK_UP,
+    };
+
+    class SliderValidRange final : public AceType {
+    public:
+        SliderValidRange() = default;
+        SliderValidRange(float from, float to) : fromValue(from), toValue(to) {}
+        ~SliderValidRange() = default;
+        float GetFromValue() const
+        {
+            return fromValue;
+        }
+        float GetToValue() const
+        {
+            return toValue;
+        }
+        bool HasValidValues() const
+        {
+            return std::isfinite(fromValue) && std::isfinite(toValue);
+        }
+
+    private:
+        float fromValue = std::numeric_limits<float>::quiet_NaN();
+        float toValue = std::numeric_limits<float>::quiet_NaN();
     };
 
     static SliderModel* GetInstance();
@@ -60,6 +84,7 @@ public:
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
+    virtual void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};
@@ -80,6 +105,7 @@ public:
     virtual void SetSliderInteractionMode(SliderInteraction mode) {};
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
+    virtual void SetValidSlideRange(float fromValue, float toValue) {};
 
     virtual void ResetBlockBorderColor() = 0;
     virtual void ResetBlockBorderWidth() = 0;
@@ -93,6 +119,7 @@ public:
     virtual void ResetStepSize() = 0;
     virtual void ResetSliderInteractionMode() = 0;
     virtual void ResetMinResponsiveDistance() = 0;
+    virtual void ResetValidSlideRange() = 0;
 
 private:
     static std::unique_ptr<SliderModel> instance_;

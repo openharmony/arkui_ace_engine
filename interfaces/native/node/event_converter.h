@@ -54,4 +54,7 @@ int32_t ConvertToCInputEventToolType(int32_t originSourceType);
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event);
 bool ConvertEventResult(ArkUI_CompatibleNodeEvent* event, ArkUINodeEvent* origin);
 
+int32_t ConvertToCMouseActionType(int32_t originActionType);
+int32_t ConvertToCMouseEventButtonType(int32_t originButtonType);
+
 }; // namespace OHOS::Ace::NodeModel

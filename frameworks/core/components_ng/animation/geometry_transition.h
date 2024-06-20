@@ -43,6 +43,12 @@ public:
     {
         return id_;
     }
+    
+    bool GetFollowWithoutTransition() const
+    {
+        return followWithoutTransition_;
+    }
+
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
     void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr, const AnimationOption& option = AnimationOption());
@@ -68,6 +74,8 @@ private:
     bool IsParent(const WeakPtr<FrameNode>& parent, const WeakPtr<FrameNode>& child) const;
     void RecordAnimationOption(const WeakPtr<FrameNode>& trigger, const AnimationOption& option);
     RectF GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos = std::nullopt) const;
+    void AnimateWithSandBox(const OffsetF& inNodeParentPos, bool inNodeParentHasScales,
+        const std::function<void()>& propertyCallback, const AnimationOption& option);
 
     static constexpr int32_t RESYNC_DURATION = 1;
     std::string id_;

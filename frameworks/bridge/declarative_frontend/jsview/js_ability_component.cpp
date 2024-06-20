@@ -74,6 +74,9 @@ void JSAbilityComponent::Create(const JSCallbackInfo& info)
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     // Parse want
+    if (!obj->GetProperty("want")->IsObject()) {
+        return;
+    }
     auto want = JSRef<JSObject>::Cast(obj->GetProperty("want"));
     if (want->GetProperty("bundleName")->IsNull() || want->GetProperty("bundleName")->IsUndefined() ||
         want->GetProperty("abilityName")->IsNull() || want->GetProperty("abilityName")->IsUndefined()) {

@@ -50,7 +50,6 @@ void JsParseAnimationFramesInternal(
         }
         auto key = item->GetKey();
         auto value = item->IsString() ? item->GetString() : item->ToString();
-
         if (!key.empty() && !value.empty()) {
             // in js api offset in range in [0, 1], but keyframe time range in range [0, 100]
             if (key == DOM_ANIMATION_OFFSET) {

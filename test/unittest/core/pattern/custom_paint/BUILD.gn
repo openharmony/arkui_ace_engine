@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("custom_paint_test_ng") {
@@ -34,7 +33,7 @@ ohos_unittest("custom_paint_test_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+    external_deps += [ "graphic_2d:librender_service_client" ]
   }
 
   external_deps = [

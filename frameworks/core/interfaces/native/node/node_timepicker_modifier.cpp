@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,6 +166,20 @@ void ResetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     TimePickerModelNG::SetHour24(frameNode, false);
 }
 
+void SetTimepickerLoop(ArkUINodeHandle node, int isLoop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, isLoop);
+}
+
+void ResetTimepickerLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, true);
+}
+
 void SetTimepickerDateTimeOptions(
     ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType)
 {
@@ -310,7 +324,8 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
-        ResetTimepickerUseMilitaryTime, SetTimepickerDateTimeOptions, ResetTimepickerDateTimeOptions };
+        ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
+        ResetTimepickerDateTimeOptions };
 
     return &modifier;
 }
@@ -329,14 +344,15 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
         if (!argsPtr) {
             event.componentAsyncEvent.data[0].i32 = 0;
             event.componentAsyncEvent.data[1].i32 = 0;
-        }
-        auto hour = argsPtr->GetValue("hour");
-        auto minute = argsPtr->GetValue("minute");
-        if (hour && hour->IsNumber()) {
-            event.componentAsyncEvent.data[0].i32 = hour->GetInt();
-        }
-        if (minute && minute->IsNumber()) {
-            event.componentAsyncEvent.data[1].i32 = minute->GetInt();
+        } else {
+            auto hour = argsPtr->GetValue("hour");
+            auto minute = argsPtr->GetValue("minute");
+            if (hour && hour->IsNumber()) {
+                event.componentAsyncEvent.data[0].i32 = hour->GetInt();
+            }
+            if (minute && minute->IsNumber()) {
+                event.componentAsyncEvent.data[1].i32 = minute->GetInt();
+            }
         }
         SendArkUIAsyncEvent(&event);
     };

@@ -26,6 +26,15 @@
 namespace OHOS::Ace::Framework {
 class JSCanvasRenderer;
 
+#define DELETE_RETURN_NULL(var) \
+    do {                        \
+        if (!(var)) {             \
+            delete var;         \
+            var = nullptr;      \
+        }                       \
+        return nullptr;         \
+    } while (0)                 \
+
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
 void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info);
 
@@ -35,6 +44,7 @@ public:
     ~JSRenderImage() override = default;
 
     static void JSBind(BindingTarget globalObj, void* nativeEngine = nullptr);
+    static void Finalizer(napi_env env, void* data, void* hint);
 
     static napi_value InitImageBitmap(napi_env env);
     static napi_value Constructor(napi_env env, napi_callback_info info);
@@ -45,12 +55,29 @@ public:
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
 
     double GetWidth();
+    void SetWidth(double width);
     double GetHeight();
+    void SetHeight(double height);
     std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
-    RefPtr<PixelMap> GetPixelMap()
+    RefPtr<PixelMap> GetPixelMap() const
     {
         return pixelMap_;
+    }
+
+    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    std::shared_ptr<Ace::ImageData> GetImageData() const
+    {
+        return imageData_;
+    }
+
+    void SetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
+    {
+        imageData_ = imageData;
     }
 
     RefPtr<NG::SvgDomBase> GetSvgDom()
@@ -83,14 +110,20 @@ public:
         return imageSize_;
     }
 
-    void SetContextId(uint32_t id)
+    void SetUnit(CanvasUnit unit)
     {
-        contextId_ = id;
+        unit_ = unit;
     }
-    
-    uint32_t GetContextId()
+
+    CanvasUnit GetUnit()
     {
-        return contextId_;
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
@@ -102,15 +135,22 @@ private:
     napi_value OnSetHeight();
 
     void LoadImage(const std::string& src);
+    void LoadImage(const RefPtr<PixelMap>& pixmap);
     void LoadImage(const ImageSourceInfo& src);
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
+    static bool NotFormSupport(const std::string& textString);
+    static std::string GetSrcString(napi_env env, napi_value value, size_t textLen);
+    #ifdef PIXEL_MAP_SUPPORTED
+    static RefPtr<PixelMap> GetPixelMap(napi_env env, napi_value value);
+    #endif
 
     RefPtr<NG::CanvasImage> image_;
     RefPtr<NG::ImageObject> imageObj_;
     RefPtr<NG::ImageLoadingContext> loadingCtx_;
     RefPtr<PixelMap> pixelMap_;
+    std::shared_ptr<Ace::ImageData> imageData_;
     RefPtr<NG::SvgDomBase> svgDom_;
     ImageSourceInfo sourceInfo_;
     ImageFit imageFit_ = ImageFit::NONE;
@@ -121,7 +161,7 @@ private:
     double width_ = 0;
     double height_ = 0;
     int32_t instanceId_ = 0;
-    uint32_t contextId_ = 0;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
 } // namespace OHOS::Ace::Framework

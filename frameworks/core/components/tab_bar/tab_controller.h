@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 using TabBarChangeListener = std::function<void(int32_t)>;
 
-class ACE_EXPORT TabController : public AceType {
+class ACE_FORCE_EXPORT TabController : public AceType {
     DECLARE_ACE_TYPE(TabController, AceType);
 
 public:

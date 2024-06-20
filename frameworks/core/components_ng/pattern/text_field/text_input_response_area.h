@@ -62,7 +62,10 @@ class PasswordResponseArea : public TextInputResponseArea {
 public:
     PasswordResponseArea(const WeakPtr<Pattern>& hostPattern, bool isObscured)
         : TextInputResponseArea(hostPattern), isObscured_(isObscured) {}
-    ~PasswordResponseArea() = default;
+    ~PasswordResponseArea()
+    {
+        ClearArea();
+    }
 
     void InitResponseArea() override;
 

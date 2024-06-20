@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -31,7 +30,6 @@
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -48,10 +46,17 @@ public:
     {
         auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
-        ProgressType progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
+        progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
         if (!progressModifier_) {
-            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+            ProgressAnimatableProperty progressAnimatableProperty{};
+            InitAnimatableProperty(progressAnimatableProperty);
+            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(progressAnimatableProperty);
         }
+        bool isRtl = progressLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (isRightToLeft_ != isRtl) {
+            isRightToLeft_ = isRtl;
+        }
+        progressModifier_->SetIsRightToLeft(isRightToLeft_);
         progressModifier_->SetVisible(visibilityProp_);
         progressModifier_->SetUseContentModifier(UseContentModifier());
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
@@ -117,9 +122,13 @@ public:
     }
 
 private:
+    void InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty);
+    void CalculateStrokeWidth(const SizeF& contentSize);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void DumpInfo() override;
+    void OnLanguageConfigurationUpdate() override;
     void InitTouchEvent();
     void RemoveTouchEvent();
     void OnPress(const TouchEventInfo& info);
@@ -129,21 +138,24 @@ private:
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
+    void OnSensitiveStyleChange(bool isSensitive) override;
+    void ObscureText(bool isSensitive);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 
-    double strokeWidth_ = 2;
+    float strokeWidth_ = Dimension(4.0_vp).ConvertToPx();
     RefPtr<ProgressModifier> progressModifier_;
     RefPtr<TouchEventImpl> touchListener_;
     Color backgroundColor_;
     Color selectColor_;
     Color borderColor_;
     Color fontColor_;
+    ProgressType progressType_ = ProgressType::LINEAR;
     bool isTextFromUser_ = false;
     bool visibilityProp_ = true;
-
+    bool isRightToLeft_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG

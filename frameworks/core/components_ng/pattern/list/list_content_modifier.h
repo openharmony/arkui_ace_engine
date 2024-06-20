@@ -29,7 +29,6 @@ namespace OHOS::Ace::NG {
 class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
-    using DividerMap = ListDividerArithmetic::DividerMap;
     ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize);
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
@@ -56,17 +55,12 @@ public:
         color_->Set(LinearColor(color));
     }
 
-    void SetDividerMap(const DividerMap& dividerMap)
+    void SetDividerMap(const ListDividerMap& dividerMap)
     {
-        RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap);
+        CHECK_NULL_VOID(refDivider_);
+        refDivider_->SetMap(dividerMap);
+        RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap, refDivider_);
         CHECK_NULL_VOID(dividerList_);
-        auto dividerlist = dividerList_->Get();
-        CHECK_NULL_VOID(dividerlist);
-        auto lastLda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
-        CHECK_NULL_VOID(lastLda);
-        if (lastLda->IsSurfaceChange(lda)) {
-            dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lastLda));
-        }
         dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
     }
 
@@ -76,6 +70,7 @@ private:
     RefPtr<AnimatablePropertySizeF> clipSize_;
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<PropertyBool> clip_;
+    RefPtr<RefDividerMap> refDivider_;
 
     float width_ = 0.0f;
     bool isVertical_ = true;

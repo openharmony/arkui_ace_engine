@@ -49,7 +49,7 @@ public:
         paragraph_->Reset();
     }
 
-    const RefPtr<Paragraph>& GetParagraph() const override;
+    RefPtr<Paragraph> GetParagraph() const override;
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
@@ -126,8 +126,14 @@ protected:
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool IsNeedAdaptFontSize(const TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint);
+    bool AdaptFontSizeForLineHeight(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
@@ -153,13 +159,20 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
+    static void UpdateTextFadeoutTextStyle(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+    void UpdateParagraphTextFadeoutWidth(
+        const LayoutConstraintF& contentConstraint, const RefPtr<FrameNode>& frameNode);
     void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
         bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     void ApplyIndent(double width);
     bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
+    bool IsInlineFocusAdaptMinExceedLimit(const SizeF& maxSize, uint32_t maxViewLines);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
+    LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

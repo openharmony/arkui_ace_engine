@@ -15,5 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("checkboxgroup_test_ng") {
   type = "new"
-  sources = [ "checkboxgroup_test_ng.cpp" ]
+  sources = [
+    "checkboxgroup_layout_algorithm_test_ng.cpp",
+    "checkboxgroup_paint_property_test_ng.cpp",
+    "checkboxgroup_pattern_test_ng.cpp",
+    "checkboxgroup_test_ng.cpp",
+  ]
 }

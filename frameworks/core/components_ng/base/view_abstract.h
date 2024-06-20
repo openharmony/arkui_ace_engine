@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+
 #include "modifier.h"
 
 #include "base/geometry/dimension.h"
@@ -37,12 +38,14 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -53,6 +56,7 @@ struct OptionParam {
     std::string icon;
     bool enabled = true;
     std::function<void()> action;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -65,48 +69,22 @@ struct OptionParam {
     OptionParam(const std::string &valueParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(""), enabled(true), action(actionParam)
     {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam,
+        const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
+        : value(valueParam), icon(iconParam), enabled(true), action(actionParam), symbol(symbol)
+    {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
+        const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
+        : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
+    {}
 
     ~OptionParam() = default;
-};
-
-enum class ContextMenuRegisterType : char {
-    NORMAL_TYPE = 0,
-    CUSTOM_TYPE = 1,
 };
 
 enum class OverlayType {
     BUILDER = 0,
     TEXT = 1,
     RESET = 2,
-};
-
-struct MenuParam {
-    std::string title;
-    OffsetF positionOffset;
-    bool setShow = false;
-    bool isShow = false;
-    ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
-    std::function<void(const std::string&)> onStateChange;
-    std::optional<Placement> placement;
-    std::function<void()> onAppear;
-    std::function<void()> onDisappear;
-    std::function<void()> aboutToAppear;
-    std::function<void()> aboutToDisappear;
-    std::optional<bool> enableArrow;
-    std::optional<Dimension> arrowOffset;
-    bool isAboveApps = false;
-    bool isShowInSubWindow = false;
-    bool hasTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> transition;
-    bool hasPreviewTransitionEffect = false;
-    RefPtr<NG::ChainedTransitionEffect> previewTransition;
-    MenuType type = MenuType::MENU;
-    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
-    MenuPreviewAnimationOptions previewAnimationOptions;
-    std::optional<EffectOption> backgroundEffectOption;
-    std::optional<Color> backgroundColor;
-    std::optional<int32_t> backgroundBlurStyle;
-    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -153,6 +131,10 @@ public:
     static void SetBorderWidth(const BorderWidthProperty &value);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
+    static void SetDashGap(const Dimension &value);
+    static void SetDashGap(const BorderWidthProperty &value);
+    static void SetDashWidth(const Dimension &value);
+    static void SetDashWidth(const BorderWidthProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
@@ -161,6 +143,12 @@ public:
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
+
+    // visual
+    static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
+    static void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter);
+    static void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter);
+    static void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter);
 
     // outer border
     static void SetOuterBorderRadius(const BorderRadiusProperty& value);
@@ -203,6 +191,7 @@ public:
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
     static void SetSystemBarEffect(bool systemBarEffect);
+    static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -245,6 +234,9 @@ public:
     static void SetOnClick(GestureEventFunc &&clickEventFunc);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
+    static void SetShouldBuiltInRecognizerParallelWith(
+        NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
+    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -255,12 +247,18 @@ public:
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
     static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback);
+#endif
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
     static void SetGroupDefaultFocus(bool isSet);
+    static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
+    static void SetOnAttach(std::function<void()> &&onAttach);
+    static void SetOnDetach(std::function<void()> &&onDetach);
     static void SetOnAreaChanged(std::function<void(const RectF &oldRect, const OffsetF &oldOrigin, const RectF &rect,
         const OffsetF &origin)> &&onAreaChanged);
     static void SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
@@ -309,8 +307,8 @@ public:
     static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
-    static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
-        const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
+    static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
+        const NG::OffsetF& offset, MenuParam menuParam, std::function<void()>&& previewBuildFunc);
     static void ShowMenu(
         int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector
@@ -349,20 +347,30 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent();
+#endif
     static void DisableOnHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
+    static void DisableOnAttach();
+    static void DisableOnDetach();
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent(FrameNode* frameNode);
+#endif
     static void DisableOnHover(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
     static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnAttach(FrameNode* frameNode);
+    static void DisableOnDetach(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -403,6 +411,13 @@ public:
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
+    static void SetLightPosition(FrameNode* frameNode,
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
+    static void SetLightIntensity(FrameNode* frameNode, float value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
+    static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
@@ -424,6 +439,10 @@ public:
     static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const Dimension& value);
+    static void SetDashWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
@@ -465,6 +484,7 @@ public:
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
+    static const std::string GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
@@ -508,6 +528,8 @@ public:
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
+    static ChainInfo GetChainStyle(FrameNode* frameNode);
+    static void ResetChainStyle(FrameNode* frameNode);
     static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
         GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
@@ -517,6 +539,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
+    static void SetForegroundEffect(FrameNode* frameNode, float radius);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
@@ -545,6 +568,8 @@ public:
 
     static void SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear);
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
+    static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
+    static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
@@ -598,6 +623,9 @@ public:
     static void SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc);
     static void SetJSFrameNodeOnSizeChange(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
+    static void SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode,
+        const std::function<void(bool, double)>&& jsCallback, const std::vector<double>& ratioList,
+        int32_t expectedUpdateInterval = 1000);
     static void ClearJSFrameNodeOnClick(FrameNode* frameNode);
     static void ClearJSFrameNodeOnTouch(FrameNode* frameNode);
     static void ClearJSFrameNodeOnAppear(FrameNode* frameNode);
@@ -608,6 +636,7 @@ public:
     static void ClearJSFrameNodeOnHover(FrameNode* frameNode);
     static void ClearJSFrameNodeOnMouse(FrameNode* frameNode);
     static void ClearJSFrameNodeOnSizeChange(FrameNode* frameNode);
+    static void ClearJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frameNode);
 
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
@@ -644,12 +673,30 @@ public:
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
     static float GetLayoutWeight(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
-    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     static int32_t GetDisplayIndex(FrameNode* frameNode);
     static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
     static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
     static BiasPair GetBias(FrameNode* frameNode);
+    static RenderFit GetRenderFit(FrameNode* frameNode);
+    static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
+    static bool GetRenderGroup(FrameNode* frameNode);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
+        const uint32_t focusPriority);
+    static void ResetBias(FrameNode* frameNode);
+    static void ResetAlignRules(FrameNode* frameNode);
+    static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+        const std::vector<double> &ratioList);
+    static Color GetColorBlend(FrameNode* frameNode);
+    static void ResetAreaChanged(FrameNode* frameNode);
+    static void ResetVisibleChange(FrameNode* frameNode);
+    static void SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect);
+    static void ResetLayoutRect(FrameNode* frameNode);
+    static NG::RectF GetLayoutRect(FrameNode* frameNode);
+    static bool GetFocusOnTouch(FrameNode* frameNode);
+    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
 
 private:
     static void AddDragFrameNodeToManager();

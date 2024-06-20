@@ -332,6 +332,65 @@ HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest007
+ * @tc.desc: Test basic function of CustomSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString007, TestSize.Level1)
+{
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 1);
+    auto span = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span->GetStartIndex(), 0);
+    EXPECT_EQ(span->GetEndIndex(), 1);
+    EXPECT_EQ(span->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span->GetOnDraw(), std::nullopt);
+
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 2);
+    auto span0 = AceType::DynamicCast<CustomSpan>(spans[0]);
+    EXPECT_EQ(span0->GetStartIndex(), 0);
+    EXPECT_EQ(span0->GetEndIndex(), 1);
+    EXPECT_EQ(span0->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span0->GetOnDraw(), std::nullopt);
+    auto span1 = AceType::DynamicCast<CustomSpan>(spans[1]);
+    EXPECT_EQ(span1->GetStartIndex(), 1);
+    EXPECT_EQ(span1->GetEndIndex(), 2);
+    EXPECT_EQ(span1->GetOnMeasure(), std::nullopt);
+    EXPECT_EQ(span1->GetOnDraw(), std::nullopt);
+    EXPECT_FALSE(span0->IsAttributesEqual(span1));
+    spanString->RemoveSpans(0, spanString->GetLength());
+    EXPECT_EQ(spanString->GetLength(), 0);
+}
+
+/**
+ * @tc.name: SpanStringTest008
+ * @tc.desc: Test basic function of CustomSpan/Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString008, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+    auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>();
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
+    spanString->AppendSpanString(mutableStr);
+    auto spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 3);
+    spanString->AppendSpanString(spanString);
+    spans = spanString->GetSpans(0, spanString->GetLength());
+    EXPECT_EQ(spans.size(), 6);
+}
+
+/**
  * @tc.name: SpanStringTest001
  * @tc.desc: Test basic function of ReplaceString/InsertString/RemoveString
  * @tc.type: FUNC
@@ -981,5 +1040,301 @@ HWTEST_F(SpanStringTestNg, MutableSpanString013, TestSize.Level1)
     mutableStr->RemoveSpans(0, 7);
     spans = mutableStr->GetSpans(0, 7);
     EXPECT_EQ(spans.size(), 0);
+}
+
+/**
+ * @tc.name: MutableSpanString014
+ * @tc.desc: Test basic function of LineHeightSpan/ParagraphStyleSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString014, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanString->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto lineHeightSpan = AceType::DynamicCast<LineHeightSpan>(firstSpans[0]);
+    EXPECT_NE(lineHeightSpan, nullptr);
+    EXPECT_EQ(lineHeightSpan->GetStartIndex(), 2);
+    EXPECT_EQ(lineHeightSpan->GetEndIndex(), 3);
+    EXPECT_EQ(lineHeightSpan->GetLineHeight(), Dimension(30));
+
+    auto paraSpans = spanString->GetSpans(0, 2, SpanType::ParagraphStyle);
+    EXPECT_EQ(paraSpans.size(), 1);
+    auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(paraSpans[0]);
+    EXPECT_NE(paraSpan, nullptr);
+    EXPECT_EQ(paraSpan->GetStartIndex(), 0);
+    EXPECT_EQ(paraSpan->GetEndIndex(), 1);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().align, TextAlign::END);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().maxLines, 4);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().wordBreak, WordBreak::BREAK_ALL);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textOverflow, TextOverflow::ELLIPSIS);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textIndent, Dimension(23));
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Width().ConvertToVp(), 25);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Height().ConvertToVp(), 26);
+    auto secondSpans = spanString->GetSpans(0, 3);
+    EXPECT_EQ(secondSpans.size(), 3);
+    auto thirdSpans = spanString->GetSpans(0, 1);
+    EXPECT_EQ(thirdSpans.size(), 2);
+    auto fourthSpans = spanString->GetSpans(3, 1);
+    EXPECT_EQ(fourthSpans.size(), 0);
+    auto fifthSpans = spanString->GetSpans(0, 9);
+    EXPECT_EQ(fifthSpans.size(), 3);
+}
+
+/**
+ * @tc.name: MutableSpanString015
+ * @tc.desc: Test isAttributesEqual of LineHeightSpan/ParagraphStyleSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString015, TestSize.Level1)
+{
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
+    auto paraSpan2 = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
+    EXPECT_TRUE(paraSpan->IsAttributesEqual(paraSpan2));
+
+    auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
+    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
+    auto lineHeightSpan3 = AceType::MakeRefPtr<LineHeightSpan>(Dimension(25), 0, 3);
+    EXPECT_TRUE(lineHeightSpan->IsAttributesEqual(lineHeightSpan2));
+    EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(lineHeightSpan3));
+}
+
+/**
+ * @tc.name: MutableSpanString016
+ * @tc.desc: Test AppendSpanString/ReplaceSpanString of LineHeightSpan/ParagraphStyleSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
+{
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
+    auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3);
+
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>("123456");
+    mutableStr->AddSpan(paraSpan);
+    mutableStr2->AddSpan(lineHeightSpan);
+    mutableStr->AppendSpanString(mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 123456");
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 3);
+    mutableStr->ReplaceSpanString(1, 1, mutableStr2);
+    EXPECT_EQ(mutableStr->GetString(), " 12345623456");
+}
+
+/**
+ * @tc.name: MutableSpanString017
+ * @tc.desc: Test InsertSpanString of LineHeightSpan/ParagraphStyleSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString017, TestSize.Level1)
+{
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1);
+
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+
+    auto spanStr = AceType::MakeRefPtr<SpanString>("123");
+    spanStr->AddSpan(paraSpan);
+    mutableStr->InsertSpanString(0, spanStr);
+    auto text = mutableStr->GetString();
+    EXPECT_EQ(text, "123 ");
+    auto length = mutableStr->GetLength();
+    EXPECT_EQ(length, 4);
+
+    spanStr = AceType::MakeRefPtr<SpanString>("456");
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    mutableStr->InsertSpanString(4, spanStr);
+    text = mutableStr->GetString();
+    EXPECT_EQ(text, "123 456");
+    length = mutableStr->GetLength();
+    EXPECT_EQ(length, 7);
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 3);
+}
+
+/**
+ * @tc.name: MutableSpanString018
+ * @tc.desc: Test serialization and unserialization of SpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
+{
+    std::vector<uint8_t> buff;
+    Font testFont { OHOS::Ace::FontWeight::BOLD, Dimension(29.0, DimensionUnit::PX), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
+    Font testFont2 { OHOS::Ace::FontWeight::W300, Dimension(49.0, DimensionUnit::VP), OHOS::Ace::FontStyle::ITALIC,
+    std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd当地经的123456");
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont, 1, 2));
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 4, 5));
+    spanStr->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(15), 8, 9));
+    spanStr->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(16), 9, 10));
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::END;
+    spanParagraphStyle.maxLines = 4;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(23);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanStr->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 10, 11));
+    spanStr->EncodeTlv(buff);
+    auto spanString2 = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
+    
+    EXPECT_EQ(spans.size(), 10);
+    EXPECT_EQ(spanStr->GetString(), "dddd当地经的123456");
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 0);
+    EXPECT_EQ((*it)->interval.second, 1);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 1);
+    EXPECT_EQ((*it)->interval.second, 2);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(29));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::RED);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::BOLD);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 2);
+    EXPECT_EQ((*it)->interval.second, 3);
+    EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(30));
+    ++it;
+    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ((*it)->interval.first, 3);
+    EXPECT_EQ((*it)->interval.second, 4);
+    ++it;
+    EXPECT_EQ((*it)->content, "当");
+    EXPECT_EQ((*it)->interval.first, 4);
+    EXPECT_EQ((*it)->interval.second, 5);
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(49, OHOS::Ace::DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), OHOS::Ace::Color::BLUE);
+    EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
+    EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::W300);
+    ++it;
+    EXPECT_EQ((*it)->content, "地经的");
+    EXPECT_EQ((*it)->interval.first, 5);
+    EXPECT_EQ((*it)->interval.second, 8);
+    ++it;
+    EXPECT_EQ((*it)->content, "1");
+    EXPECT_EQ((*it)->interval.first, 8);
+    EXPECT_EQ((*it)->interval.second, 9);
+    EXPECT_EQ((*it)->fontStyle->GetLetterSpacing().value(), Dimension(15));
+    ++it;
+    EXPECT_EQ((*it)->content, "2");
+    EXPECT_EQ((*it)->interval.first, 9);
+    EXPECT_EQ((*it)->interval.second, 10);
+    EXPECT_EQ((*it)->textLineStyle->GetBaselineOffset().value(), Dimension(16));
+    ++it;
+    EXPECT_EQ((*it)->content, "3");
+    EXPECT_EQ((*it)->interval.first, 10);
+    EXPECT_EQ((*it)->interval.second, 11);
+    EXPECT_EQ((*it)->textLineStyle->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ((*it)->textLineStyle->GetTextAlign().value(), TextAlign::END);
+    EXPECT_EQ((*it)->textLineStyle->GetMaxLines().value(), 4);
+    EXPECT_EQ((*it)->textLineStyle->GetTextIndent().value(), Dimension(23));
+    EXPECT_EQ((*it)->textLineStyle->GetWordBreak().value(), WordBreak::BREAK_ALL);
+    ++it;
+    EXPECT_EQ((*it)->content, "456");
+    EXPECT_EQ((*it)->interval.first, 11);
+    EXPECT_EQ((*it)->interval.second, 14);
+}
+
+/**
+ * @tc.name: SpanStringTest009
+ * @tc.desc: Test basic function of span object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
+{
+    std::string buffer;
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10);
+    buffer = fontSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("FontSpan"), 0);
+
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan =
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan));
+    decorationSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+    EXPECT_FALSE(decorationSpan->IsAttributesEqual(fontSpan));
+
+    auto baselineOffsetSpan = AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2);
+    EXPECT_FALSE(baselineOffsetSpan->IsAttributesEqual(decorationSpan));
+    baselineOffsetSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = baselineOffsetSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("BaselineOffsetSpan"), 0);
+
+    auto letterSpacingSpan = AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3);
+    EXPECT_FALSE(letterSpacingSpan->IsAttributesEqual(decorationSpan));
+    letterSpacingSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = letterSpacingSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
+
+    Shadow textShadow;
+    textShadow.SetBlurRadius(1.0);
+    textShadow.SetColor(Color::BLACK);
+    textShadow.SetOffsetX(6.0);
+    textShadow.SetOffsetY(6.0);
+    vector<Shadow> textShadows { textShadow };
+    auto textShadowSpan = AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9);
+    EXPECT_FALSE(textShadowSpan->IsAttributesEqual(decorationSpan));
+    textShadowSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = textShadowSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("TextShadowSpan"), 0);
 }
 } // namespace OHOS::Ace::NG

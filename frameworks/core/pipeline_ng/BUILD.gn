@@ -43,10 +43,7 @@ template("ace_core_pipeline_ng_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
-      "$skia_root_new:skia_$platform",
-    ]
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     external_deps = []
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -62,12 +59,8 @@ template("ace_core_pipeline_ng_source_set") {
       }
 
       deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform" ]
-      include_dirs = [
-        "//foundation/window/window_manager",
-        "//foundation/window/window_manager/interfaces/innerkits",
-      ]
       if (is_arkui_x) {
-        include_dirs += [
+        include_dirs = [
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
         ]

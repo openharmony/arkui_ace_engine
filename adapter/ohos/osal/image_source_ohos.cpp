@@ -81,15 +81,22 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     return value;
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
-    return CreatePixelMap(0, size);
+    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed);
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
+    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
 {
     Media::DecodeOptions options;
     options.preferDma = true;
+    // only hdr image need to decoder in hdr mode
+    if (isHdrDecoderNeed) {
+        options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
+    }
+    options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
+    // Pass imageQuality to imageFramework
     if (size.first > 0 && size.second > 0) {
         options.desiredSize = { size.first, size.second };
     }

@@ -26,6 +26,11 @@ const Dimension DEFAULT_CHECKMARK_SIZE = Dimension(0, DimensionUnit::VP);
 
 void CheckBoxGroupPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        PaintProperty::ToJsonValue(json, filter);
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();

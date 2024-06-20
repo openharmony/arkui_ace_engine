@@ -77,6 +77,13 @@ private:
     SizeF GetLeftSize(float crossLength, float mainLeftLength, float crossLeftLength);
     void LayoutWholeWrap(
         OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, LayoutWrapper* layoutWrapper);
+    void LayoutWholeColumnWrap(
+        OffsetF& startPosition, OffsetF& spaceBetweenContentsOnCrossAxis, LayoutWrapper* layoutWrapper);
+    void UpdateStartPositionByAlign(OffsetF& startPosition, float crossAxisRemainSpace,
+        OffsetF& spaceBetweenContentsOnCrossAxis, int32_t contentNum);
+    void TraverseColumnContent(const OffsetF& startPosition, const OffsetF& spaceBetweenContentsOnCrossAxis);
+    void AddPaddingToStartPositionForColumn(OffsetF& startPosition) const;
+    void LayoutColumnContent(const ContentInfo& content, const OffsetF& position);
 
     float GetItemMainAxisLength(const RefPtr<GeometryNode>& item) const;
     float GetItemCrossAxisLength(const RefPtr<GeometryNode>& item) const;
@@ -107,9 +114,12 @@ private:
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;
     WrapAlignment crossAlignment_ = WrapAlignment::START;
+    TextDirection textDir_ = TextDirection::LTR;
 
     bool isHorizontal_ = true;
     bool isReverse_ = false;
+    bool isColumnReverse_ = false;
+    bool isRightDirection_ = false;
     bool isDialogStretch_ = false;
     float totalMainLength_ = 0.0f;
     float totalCrossLength_ = 0.0f;

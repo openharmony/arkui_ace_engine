@@ -55,12 +55,10 @@ public:
         if (!GetHost() || !GetHost()->IsActive()) {
             return nullptr;
         }
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         if (!radioModifier_) {
             radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
         }
+        radioModifier_->SetUseContentModifier(UseContentModifier());
         auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
         paintMethod->SetTotalScale(totalScale_);
         paintMethod->SetPointScale(pointScale_);
@@ -141,6 +139,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
@@ -153,6 +155,12 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void SetBuilderFunc(RadioMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            customNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -162,6 +170,7 @@ public:
     }
 
     void SetRadioChecked(bool check);
+    RefPtr<GroupManager> GetGroupManager();
 
 private:
     void OnAttachToFrameNode() override;
@@ -179,7 +188,8 @@ private:
     void SetBuilderState();
     void UpdateIndicatorType();
     void UpdateState();
-    void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check);
+    void UpdateGroupCheckStatus(
+        const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check);
     void OnTouchDown();
     void OnTouchUp();
     void CheckPageNode();
@@ -201,13 +211,18 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    void SetPrePageIdToLastPageId();
     RefPtr<FrameNode> BuildContentModifierNode();
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<FrameNode> customNode_;
+    WeakPtr<GroupManager> groupManager_;
 
     std::function<void()> builder_;
     bool isFirstCreated_ = true;
@@ -237,6 +252,7 @@ private:
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
     bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

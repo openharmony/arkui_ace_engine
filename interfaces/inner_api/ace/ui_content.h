@@ -32,7 +32,6 @@
 #include "serializeable_object.h"
 #include "viewport_config.h"
 #include "constants.h"
-
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -119,10 +118,11 @@ public:
     virtual void Destroy() = 0;
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
-    // distribute
-    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
-                                       napi_value storage) = 0;
-    virtual std::string GetContentInfo() const = 0;
+    // restore
+    virtual UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
+    virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
     virtual void DestroyUIDirector() = 0;
 
     // UI content event process
@@ -136,9 +136,11 @@ public:
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
+    virtual void ProcessFormVisibleChange(bool isVisible) {};
     virtual void NotifyRotationAnimationEnd() {};
 
     // only vaild in ContainerModalPatternEnhance
@@ -190,7 +192,11 @@ public:
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
-
+    virtual void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
+    virtual void DeregisterAccessibilityChildTree() {};
+    virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -403,6 +409,15 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+    
+    virtual sptr<IRemoteObject> GetRemoteObj()
+    {
+        return {};
+    }
+
+    virtual void PreLayout() {};
+    
+    virtual void SetStatusBarItemColor(uint32_t color) {};
 };
 
 } // namespace OHOS::Ace

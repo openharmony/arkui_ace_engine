@@ -85,7 +85,7 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        size_t length = 2;
+        int length = 2;
         if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
             return;
         }
@@ -110,7 +110,7 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        size_t length = 2;
+        int length = 2;
         if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
             return;
         }
@@ -154,8 +154,10 @@ private:
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(args[0]);
         std::list<V2::Operation> DataOperations;
         for (size_t i = 0; i < jsArr->Length(); i++) {
-            JSRef<JSObject> value = JSRef<JSObject>::Cast(jsArr->GetValueAt(i));
-            TransferJSInfoType(DataOperations, value);
+            if (jsArr->GetValueAt(i)->IsObject()) {
+                JSRef<JSObject> value = JSRef<JSObject>::Cast(jsArr->GetValueAt(i));
+                TransferJSInfoType(DataOperations, value);
+            }
         }
         if (allocateMoreKeys) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",

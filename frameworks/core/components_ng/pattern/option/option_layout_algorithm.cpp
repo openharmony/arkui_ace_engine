@@ -25,6 +25,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -88,12 +89,16 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto optionNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(optionNode);
+    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    auto layoutProps = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
     auto optionSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto optionHeight = optionSize.Height();
-
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
         child->GetGeometryNode()->SetMarginFrameOffset(
@@ -101,8 +106,30 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         return;
     }
+
+    auto direction = layoutProps->GetNonAutoLayoutDirection();
+    bool isRtl = direction == TextDirection::RTL;
+    const auto& selectTheme = optionPattern->GetSelectTheme();
+    CHECK_NULL_VOID(selectTheme);
+    auto calcLength = CalcLength(selectTheme->GetIconContentPadding());
+    MarginProperty margin;
+    isRtl ? margin.left = calcLength : margin.right = calcLength;
+    Alignment align = isRtl ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
+    for (auto iconChild : child->GetAllChildrenWithBuild()) {
+        if (iconChild->GetHostTag() != V2::IMAGE_ETS_TAG) continue;
+        auto iconProps = iconChild->GetLayoutProperty();
+        iconProps->UpdateAlignment(align);
+        iconProps->UpdateMargin(margin);
+        iconChild->Layout();
+    }
+
+    float horInterval = horInterval_;
+    if (isRtl) {
+        SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        horInterval = optionSize.Width() - childSize.Width() - horInterval_;
+    }
     child->GetGeometryNode()->SetMarginFrameOffset(
-        OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+        OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
     child->Layout();
 }
 

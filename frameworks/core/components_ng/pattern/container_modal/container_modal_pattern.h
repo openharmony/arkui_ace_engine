@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,8 @@ class ACE_EXPORT ContainerModalPattern : public Pattern {
 public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
+
+     void OnColorConfigurationUpdate() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
@@ -150,6 +152,7 @@ public:
         return AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(2));
     }
 
+    void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
@@ -163,14 +166,22 @@ public:
         return false;
     }
 
-    void OnLanguageConfigurationUpdate() override
-    {
-        InitTitle();
-    }
+    void OnLanguageConfigurationUpdate() override;
 
     void InitColumnTouchTestFunc();
 
+    void SetIsHoveredMenu(bool isHoveredMenu)
+    {
+        isHoveredMenu_ = isHoveredMenu;
+    }
+
+    bool GetIsHoveredMenu()
+    {
+        return isHoveredMenu_;
+    }
+
     Dimension GetCustomTitleHeight();
+    Dimension GetStackNodeRadius();
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
@@ -187,7 +198,7 @@ protected:
     virtual void ChangeControlButtons(bool isFocus);
 
     virtual void ChangeTitleButtonIcon(
-        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus);
+        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn);
 
     virtual bool CanHideFloatingTitle()
     {
@@ -195,6 +206,8 @@ protected:
     }
 
     bool CanShowFloatingTitle();
+    bool CanShowCustomTitle();
+    void TrimFloatingWindowLayout();
 
     WindowMode windowMode_;
     bool customTitleSettedShow_ = true;
@@ -212,6 +225,7 @@ private:
     void InitContainerEvent();
     void InitLayoutProperty();
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
+    void InitButtonsLayoutProperty();
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
@@ -221,6 +235,7 @@ private:
     bool hasDeco_ = true;
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
+    bool isHoveredMenu_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

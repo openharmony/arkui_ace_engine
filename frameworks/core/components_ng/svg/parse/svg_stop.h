@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_STOP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_STOP_H
 
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
+#include "core/components_ng/svg/parse/svg_attributes_parser.h"
+#include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,8 +29,11 @@ public:
     ~SvgStop() override = default;
 
     static RefPtr<SvgNode> Create();
-
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
     const GradientColor& GetGradientColor() const;
+
+private:
+    SvgStopAttribute stopAttr_;
 };
 
 } // namespace OHOS::Ace::NG

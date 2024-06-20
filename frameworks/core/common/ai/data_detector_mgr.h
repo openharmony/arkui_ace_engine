@@ -22,10 +22,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 
-namespace OHOS::AAFwk {
-class WantParams;
-} // namespace OHOS::AAFwk
-
 namespace OHOS::Ace {
 class ACE_EXPORT DataDetectorMgr : public DataDetectorInterface {
 public:

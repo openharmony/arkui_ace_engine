@@ -187,7 +187,7 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
     EXPECT_EQ(options.size(), params.size());
     for (size_t i = 0; i < options.size(); ++i) {
         auto optionPattern = options[i]->GetPattern<OptionPattern>();
-        EXPECT_EQ(optionPattern->GetText(), params[i].first);
+        EXPECT_EQ(optionPattern->GetText(), params[i].text);
     }
 }
 
@@ -462,7 +462,7 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
         auto optionPattern = options[i]->GetPattern<OptionPattern>();
         optionPattern->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
         optionPattern->textTheme_ = AceType::MakeRefPtr<TextTheme>();
-        EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].first);
+        EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].text);
         pattern->SetOptionBgColor(BG_COLOR_VALUE);
         EXPECT_EQ(optionPattern->bgColor_, BG_COLOR_VALUE);
         pattern->SetOptionFontFamily(FONT_FAMILY_VALUE);
@@ -1867,16 +1867,16 @@ HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
     SelectModelNG selectModelNG;
     std::vector<SelectParam> params;
     SelectParam sparam_one;
-    sparam_one.first = "100";
-    sparam_one.second = "icon_one";
+    sparam_one.text = "100";
+    sparam_one.icon = "icon_one";
     params.push_back(sparam_one);
     selectModelNG.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     auto node = [params](MenuItemConfiguration config) -> RefPtr<FrameNode> {
-        EXPECT_EQ(params[0].first, config.value_);
-        EXPECT_EQ(params[0].second, config.icon_);
+        EXPECT_EQ(params[0].text, config.value_);
+        EXPECT_EQ(params[0].icon, config.icon_);
     return nullptr;
     };
     selectModelNG.SetBuilderFunc(select, node);
@@ -1924,5 +1924,40 @@ HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
      */
     selectModelInstance.SetControlSize(ControlSize::SMALL);
     EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
+}
+
+/**
+ * @tc.name: SelectLayoutPropertyTest007
+ * @tc.desc: Test Select Create with Symbol.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params;
+    SelectParam sparam_one;
+    sparam_one.text = "100";
+    sparam_one.icon = "icon_one";
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    sparam_one.symbolIcon = onApply;
+    params.push_back(sparam_one);
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+
+    auto options = pattern->GetOptions();
+    EXPECT_EQ(options.size(), params.size());
+    RefPtr<FrameNode> row =
+        options[0]->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(options[0]->GetChildAtIndex(0)) : nullptr;
+    EXPECT_NE(row, nullptr);
+    RefPtr<FrameNode> icon =
+        row->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(0)) : nullptr;
+    EXPECT_NE(icon, nullptr);
+    EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
 }
 } // namespace OHOS::Ace::NG

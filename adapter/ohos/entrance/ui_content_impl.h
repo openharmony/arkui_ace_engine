@@ -20,20 +20,23 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
+#include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "wm/window.h"
-#include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
+#include "core/common/update_config_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -69,14 +72,15 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
-    // distribute
-    UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
-    std::string GetContentInfo() const override;
+    // restore
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
 
     // UI content event process
     bool ProcessBackPressed() override;
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -87,6 +91,7 @@ public:
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
@@ -154,6 +159,12 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
+    void RegisterAccessibilityChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override;
+    void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override;
+    void DeregisterAccessibilityChildTree() override;
+    void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
     void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
 
     SerializeableObjectArray DumpUITree() override
@@ -215,7 +226,8 @@ public:
     AbilityBase::AutoFillType ViewDataToType(const AbilityBase::ViewData& viewData);
     bool DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::AutoFillType& type) override;
     bool CheckNeedAutoSave() override;
-    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
+    bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+        bool skipSubAutoFillContainer = false);
 
     void SearchElementInfoByAccessibilityId(
         int64_t elementId, int32_t mode,
@@ -303,11 +315,22 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void PreLayout() override;
+    
+    sptr<IRemoteObject> GetRemoteObj() override
+    {
+        return instance_;
+    }
+    
+    void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId = 0);
     UIContentErrorCode CommonInitializeForm(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
@@ -329,8 +352,6 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -367,10 +388,13 @@ private:
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
+    sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
+    RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
+        Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
 };
 
 } // namespace OHOS::Ace

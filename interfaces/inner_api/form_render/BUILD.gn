@@ -48,7 +48,6 @@ ohos_shared_library("ace_form_render") {
   configs = [
     "$ace_root:ace_config",
     "$ace_root:ace_coverage_config",
-    "//commonlibrary/c_utils/base:utils_config",
   ]
 
   public_configs = [ ":form_render_config" ]

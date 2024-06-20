@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,19 @@
  */
 
 import display from '@ohos.display';
-import mediaquery from '@ohos.mediaquery'
+import mediaquery from '@ohos.mediaquery';
+import { Theme } from '@ohos.arkui.theme';
+import { LengthMetrics } from '@ohos.arkui.node'
 
 interface IconTheme {
   size: SizeOptions;
-  margin: Margin;
+  margin: LocalizedMargin;
   fillColor: ResourceColor;
   borderRadius: Length;
 }
 
 interface TitleTheme {
-  margin: Margin;
+  margin: LocalizedMargin;
   minFontSize: number;
   fontWeight: FontWeight;
   fontSize: Resource;
@@ -32,11 +34,11 @@ interface TitleTheme {
 }
 
 interface ButtonTheme {
-  margin: Margin;
-  padding: Padding;
+  margin: LocalizedMargin;
+  padding: LocalizedPadding;
   fontSize: Resource;
   fontColor: ResourceColor;
-  textMargin: Margin;
+  textMargin: LocalizedMargin;
   minFontSize: number;
   fontWeight: FontWeight;
   hoverColor: ResourceColor;
@@ -54,15 +56,15 @@ interface CloseButtonTheme {
   size: SizeOptions;
   image: ResourceStr;
   imageSize: SizeOptions;
-  margin: Margin;
-  padding: Padding;
+  margin: LocalizedMargin;
+  padding: LocalizedPadding;
   fillColor: ResourceColor;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
 }
 
 interface WindowsTheme {
-  padding: Padding;
+  padding: LocalizedPadding;
 }
 
 interface PopupTheme {
@@ -77,24 +79,44 @@ interface PopupTheme {
 export const defaultTheme: PopupTheme = {
   icon: {
     size: { width: 32, height: 32 },
-    margin: { top: 12, bottom: 12, left: 12, right: 12 },
+    margin: {
+      top: LengthMetrics.vp(12),
+      bottom: LengthMetrics.vp(12),
+      start: LengthMetrics.vp(12),
+      end: LengthMetrics.vp(12)
+    },
     fillColor: '',
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s')
 
   },
   title: {
-    margin: { bottom: 2 },
+    margin: { bottom: LengthMetrics.vp(2) },
     minFontSize: 12,
     fontWeight: FontWeight.Medium,
     fontSize: $r('sys.float.ohos_id_text_size_sub_title2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary')
+    fontColor: $r('sys.color.font_primary')
   },
   button: {
-    margin: { top: 16, bottom: 16, left: 16, right: 16 },
-    padding: { top: 4, bottom: 4, left: 4, right: 4 },
+    margin: {
+      top: LengthMetrics.vp(16),
+      bottom: LengthMetrics.vp(16),
+      start: LengthMetrics.vp(16),
+      end: LengthMetrics.vp(16)
+    },
+    padding: {
+      top: LengthMetrics.vp(4),
+      bottom: LengthMetrics.vp(4),
+      start: LengthMetrics.vp(4),
+      end: LengthMetrics.vp(4)
+    },
     fontSize: $r('sys.float.ohos_id_text_size_button2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary_activated'),
-    textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
+    fontColor: $r('sys.color.font_emphasize'),
+    textMargin: {
+      top: LengthMetrics.vp(8),
+      bottom: LengthMetrics.vp(8),
+      start: LengthMetrics.vp(8),
+      end: LengthMetrics.vp(8)
+    },
     minFontSize: 9,
     fontWeight: FontWeight.Medium,
     hoverColor: $r('sys.color.ohos_id_color_hover'),
@@ -102,20 +124,35 @@ export const defaultTheme: PopupTheme = {
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
-    fontColor: $r('sys.color.ohos_id_color_text_secondary'),
+    fontColor: $r('sys.color.font_secondary'),
     fontWeight: FontWeight.Regular,
-    plainFontColor: $r('sys.color.ohos_id_color_text_primary')
+    plainFontColor: $r('sys.color.font_primary')
   },
   windows: {
-    padding: { top: 12, bottom: 12, left: 12, right: 12 },
+    padding: {
+      top: LengthMetrics.vp(12),
+      bottom: LengthMetrics.vp(12),
+      start: LengthMetrics.vp(12),
+      end: LengthMetrics.vp(12)
+    },
   },
   closeButton: {
     size: { width: 22, height: 22 },
     imageSize: { width: 18, height: 18 },
-    padding: { top: 2, bottom: 2, left: 2, right: 2 },
-    margin: { top: 12, bottom: 12, left: 12, right: 12 },
+    padding: {
+      top: LengthMetrics.vp(2),
+      bottom: LengthMetrics.vp(2),
+      start: LengthMetrics.vp(2),
+      end: LengthMetrics.vp(2)
+    },
+    margin: {
+      top: LengthMetrics.vp(12),
+      bottom: LengthMetrics.vp(12),
+      start: LengthMetrics.vp(12),
+      end: LengthMetrics.vp(12)
+    },
     image: $r('sys.media.ohos_ic_public_cancel'),
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
+    fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
   },
@@ -147,6 +184,7 @@ export interface PopupOptions {
   icon?: PopupIconOptions;
   title?: PopupTextOptions;
   message: PopupTextOptions;
+  direction?: Direction;
   showClose?: boolean | Resource;
   onClose?: () => void;
   buttons?: [PopupButtonOptions?, PopupButtonOptions?];
@@ -161,6 +199,7 @@ export function Popup(options: PopupOptions) {
     icon: options.icon,
     title: options.title,
     message: options.message,
+    popupDirection: options.direction,
     showClose: options.showClose,
     onClose: options.onClose,
     buttons: options.buttons
@@ -174,19 +213,21 @@ export struct PopupComponent {
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
+  @Prop popupDirection: Direction = Direction.Auto;
   @Prop showClose: boolean | Resource = true;
   @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' }, { text: '' }];
   textHeight: number = 0;
   @State titleHeight: number = 0;
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
-  @State messageMaxWeight: number = 0;
-  @State beforeScreenStatus: boolean = undefined;
+  @State messageMaxWeight: number | undefined = 0;
+  @State beforeScreenStatus: boolean | undefined = undefined;
   @State currentScreenStatus: boolean = true;
-  @State applySizeOptions : ConstraintSizeOptions = undefined;
+  @State applySizeOptions: ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -205,9 +246,11 @@ export struct PopupComponent {
     return this.icon?.borderRadius ?? this.theme.icon.borderRadius
   }
 
-  private getIconMargin(): Margin {
-    return { left: this.theme.button.margin.left as number / 2,
-      right: this.theme.icon.margin.right as number - (this.theme.button.margin.right as number / 2) }
+  private getIconMargin(): LocalizedMargin {
+    return { start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+      end: new LengthMetrics(this.theme.icon.margin.start.value - (this.theme.button.margin.end.value / 2)
+        , this.theme.button.margin.start.unit)
+    }
   }
 
   private getIconImage(): ResourceStr | undefined {
@@ -218,11 +261,12 @@ export struct PopupComponent {
     return this.title?.text
   }
 
-  private getTitlePadding(): Padding {
-    return { left: this.theme.button.margin.left as number / 2, right: this.theme.closeButton.margin.right }
+  private getTitlePadding(): LocalizedPadding {
+    return { start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
+      end: this.theme.closeButton.margin.end }
   }
 
-  private getTitleMargin(): Margin {
+  private getTitleMargin(): LocalizedMargin {
     return this.theme.title.margin
   }
 
@@ -255,7 +299,7 @@ export struct PopupComponent {
   }
 
   private getCloseButtonFillColor(): ResourceColor {
-    return this.theme.closeButton.fillColor
+    return this.closeButtonFillColorWithTheme;
   }
 
   private getCloseButtonHoverColor(): ResourceColor {
@@ -266,7 +310,7 @@ export struct PopupComponent {
     return this.theme.closeButton.backgroundColor
   }
 
-  private getCloseButtonPadding(): Padding {
+  private getCloseButtonPadding(): LocalizedPadding {
     return this.theme.closeButton.padding
   }
 
@@ -300,19 +344,21 @@ export struct PopupComponent {
     return fontColor
   }
 
-  private getMessagePadding(): Padding {
-    let padding: Padding
+  private getMessagePadding(): LocalizedPadding {
+    let padding: LocalizedPadding
     if (this.title.text !== '' && this.title.text !== void (0)) {
-      padding = { left: this.theme.button.margin.left as number / 2 }
-    }
-    else {
-      padding = { left: this.theme.button.margin.left as number / 2, right: this.theme.closeButton.margin.right }
+      padding = { start: LengthMetrics.vp(this.theme.button.margin.start.value / 2) }
+    } else {
+      padding = {
+        start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
+        end: LengthMetrics.vp(this.theme.closeButton.margin.end.value)
+      }
     }
     return padding
   }
 
   private getMessageMaxWeight(): number | undefined {
-    let textMaxWeight: number = undefined
+    let textMaxWeight: number | undefined = undefined;
     let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
     if (this.showClose || this.showClose === void (0)) {
       if (px2vp(defaultDisplaySync.width) > 400) {
@@ -320,9 +366,9 @@ export struct PopupComponent {
       } else {
         textMaxWeight = px2vp(defaultDisplaySync.width) - 40 - 40
       }
-      textMaxWeight -= (this.theme.windows.padding.left as number - (this.theme.button.margin.right as number / 2))
-      textMaxWeight -= this.theme.windows.padding.right as number
-      textMaxWeight -= this.theme.button.margin.left as number / 2
+      textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
+      textMaxWeight -= this.theme.windows.padding.end.value
+      textMaxWeight -= this.theme.button.margin.start.value / 2
       textMaxWeight -= this.getCloseButtonWidth() as number
     }
     return textMaxWeight
@@ -332,19 +378,19 @@ export struct PopupComponent {
     return this.theme.message.fontWeight
   }
 
-  private getButtonMargin(): Margin {
-    return { top: this.theme.button.textMargin.top as number / 2 - 4,
-      bottom: this.theme.button.textMargin.bottom as number / 2 - 4,
-      left: this.theme.button.margin.left as number / 2 - 4,
-      right: this.theme.button.margin.right as number / 2 - 4
+  private getButtonMargin(): LocalizedMargin {
+    return { top: LengthMetrics.vp(this.theme.button.textMargin.top.value / 2 - 4),
+      bottom: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2 - 4),
+      start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
+      end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
     }
   }
 
-  private getButtonTextMargin(): Margin {
-    return { top: this.theme.button.textMargin.bottom as number / 2 }
+  private getButtonTextMargin(): LocalizedMargin {
+    return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom.value / 2) }
   }
 
-  private getButtonTextPadding(): Padding {
+  private getButtonTextPadding(): LocalizedPadding {
     return this.theme.button.padding
   }
 
@@ -388,13 +434,23 @@ export struct PopupComponent {
     return this.theme.button.fontWeight
   }
 
-  private getWindowsPadding(): Padding {
+  private getWindowsPadding(): LocalizedPadding {
     return {
       top: this.theme.windows.padding.top,
-      bottom: this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2),
-      left: this.theme.windows.padding.left as number - (this.theme.button.margin.right as number / 2),
-      right: this.theme.windows.padding.right
+      bottom: LengthMetrics.vp(this.theme.windows.padding.bottom.value -
+        (this.theme.button.textMargin.bottom.value / 2)),
+      start: LengthMetrics.vp(this.theme.windows.padding.start.value -
+        (this.theme.button.margin.end.value / 2)),
+      end: this.theme.windows.padding.end
     }
+  }
+
+  onWillApplyTheme(theme: Theme): void {
+    this.theme.title.fontColor = theme.colors.fontPrimary;
+    this.theme.button.fontColor = theme.colors.fontEmphasize;
+    this.theme.message.fontColor = theme.colors.fontSecondary;
+    this.theme.message.plainFontColor = theme.colors.fontPrimary;
+    this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
   }
 
   aboutToAppear() {
@@ -407,8 +463,8 @@ export struct PopupComponent {
     this.listener.off("change")
   }
 
-  getScrollMaxHeight(): number {
-    let scrollMaxHeight: number = undefined
+  getScrollMaxHeight(): number | undefined {
+    let scrollMaxHeight: number | undefined = undefined;
     if (this.currentScreenStatus !== this.beforeScreenStatus) {
       this.applySizeOptions = this.getApplyMaxSize();
       this.beforeScreenStatus = this.currentScreenStatus
@@ -417,10 +473,11 @@ export struct PopupComponent {
     scrollMaxHeight = this.applyHeight
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
-    scrollMaxHeight -= this.theme.windows.padding.top as number
-    scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
-    scrollMaxHeight -= this.theme.title.margin.bottom as number
-    scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
+    scrollMaxHeight -= this.theme.windows.padding.top.value
+    scrollMaxHeight -= (this.theme.button.textMargin.bottom.value / 2)
+    scrollMaxHeight -= this.theme.title.margin.bottom.value
+    scrollMaxHeight -= (this.theme.windows.padding.bottom.value -
+      (this.theme.button.textMargin.bottom.value / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
       return scrollMaxHeight
     } else {
@@ -443,9 +500,9 @@ export struct PopupComponent {
   }
 
   private getApplyMaxSize(): ConstraintSizeOptions {
-    let applyMaxWidth: number = undefined
-    let applyMaxHeight: number = undefined
-    let applyMaxSize: ConstraintSizeOptions = undefined
+    let applyMaxWidth: number | undefined = undefined;
+    let applyMaxHeight: number | undefined = undefined;
+    let applyMaxSize: ConstraintSizeOptions | undefined = undefined;
     let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
@@ -466,6 +523,7 @@ export struct PopupComponent {
     Row() {
       if (this.icon.image !== '' && this.icon.image !== void (0)) {
         Image(this.getIconImage())
+          .direction(this.popupDirection)
           .width(this.getIconWidth())
           .height(this.getIconHeight())
           .margin(this.getIconMargin())
@@ -476,6 +534,7 @@ export struct PopupComponent {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
+              .direction(this.popupDirection)
               .flexGrow(1)
               .maxLines(2)
               .align(Alignment.Start)
@@ -489,11 +548,13 @@ export struct PopupComponent {
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
+                  .direction(this.popupDirection)
                   .focusable(true)
                   .width(this.getCloseButtonImageWidth())
                   .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
               }
+              .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
               .padding(this.getCloseButtonPadding())
@@ -501,8 +562,7 @@ export struct PopupComponent {
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
-                }
-                else {
+                } else {
                   this.closeButtonBackgroundColor = this.getCloseButtonBackgroundColor()
                 }
               })
@@ -513,6 +573,7 @@ export struct PopupComponent {
               })
             }
           }
+          .direction(this.popupDirection)
           .width("100%")
           .margin(this.getTitleMargin())
           .onAreaChange((_, rect) => {
@@ -521,6 +582,7 @@ export struct PopupComponent {
 
           Scroll() {
             Text(this.getMessageText())
+              .direction(this.popupDirection)
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
@@ -529,6 +591,7 @@ export struct PopupComponent {
                 this.textHeight = rect.height as number
               })
           }
+          .direction(this.popupDirection)
           .width("100%")
           .align(Alignment.TopStart)
           .padding(this.getMessagePadding())
@@ -540,6 +603,7 @@ export struct PopupComponent {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
+                  .direction(this.popupDirection)
                   .maxLines(2)
                   .focusable(true)
                   .fontSize(this.getFirstButtonFontSize())
@@ -548,6 +612,7 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
               .backgroundColor(this.firstButtonBackgroundColor)
@@ -568,6 +633,7 @@ export struct PopupComponent {
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
+                  .direction(this.popupDirection)
                   .maxLines(2)
                   .focusable(true)
                   .fontSize(this.getSecondButtonFontSize())
@@ -576,6 +642,7 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
               .backgroundColor(this.secondButtonBackgroundColor)
@@ -594,6 +661,7 @@ export struct PopupComponent {
               })
             }
           }
+          .direction(this.popupDirection)
           .margin(this.getButtonTextMargin())
           .flexGrow(1)
           .onAreaChange((_, rect) => {
@@ -607,6 +675,7 @@ export struct PopupComponent {
           Row() {
             Scroll() {
               Text(this.getMessageText())
+                .direction(this.popupDirection)
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
@@ -615,6 +684,7 @@ export struct PopupComponent {
                   this.textHeight = rect.height as number
                 })
             }
+            .direction(this.popupDirection)
             .layoutWeight(this.getLayoutWeight())
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
@@ -625,11 +695,13 @@ export struct PopupComponent {
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
+                  .direction(this.popupDirection)
                   .focusable(true)
                   .width(this.getCloseButtonImageWidth())
                   .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
               }
+              .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
               .padding(this.getCloseButtonPadding())
@@ -649,6 +721,7 @@ export struct PopupComponent {
               })
             }
           }
+          .direction(this.popupDirection)
           .alignItems(VerticalAlign.Top)
           .margin(this.getTitleMargin())
 
@@ -656,6 +729,7 @@ export struct PopupComponent {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
+                  .direction(this.popupDirection)
                   .maxLines(2)
                   .focusable(true)
                   .fontSize(this.getFirstButtonFontSize())
@@ -664,6 +738,7 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
               .backgroundColor(this.firstButtonBackgroundColor)
@@ -684,6 +759,7 @@ export struct PopupComponent {
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
+                  .direction(this.popupDirection)
                   .maxLines(2)
                   .focusable(true)
                   .fontSize(this.getSecondButtonFontSize())
@@ -692,6 +768,7 @@ export struct PopupComponent {
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
+              .direction(this.popupDirection)
               .margin(this.getButtonMargin())
               .padding(this.getButtonTextPadding())
               .backgroundColor(this.secondButtonBackgroundColor)
@@ -716,9 +793,11 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
+        .direction(this.popupDirection)
         .layoutWeight(this.getLayoutWeight())
       }
     }
+    .direction(this.popupDirection)
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
     .constraintSize(this.applySizeOptions)

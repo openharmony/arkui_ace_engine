@@ -22,7 +22,7 @@
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace {
-class PolygonModel {
+class ACE_FORCE_EXPORT PolygonModel {
 public:
     static PolygonModel* GetInstance();
     virtual ~PolygonModel() = default;

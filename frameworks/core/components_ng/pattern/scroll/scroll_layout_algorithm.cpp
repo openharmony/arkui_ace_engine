@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,10 +58,11 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childSize = SizeF(0.f, 0.f);
     if (childWrapper) {
         childWrapper->Measure(childLayoutConstraint);
         // Use child size when self idea size of scroll is not setted.
-        auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+        childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
         if (!idealSize.Width()) {
             idealSize.SetWidth(childSize.Width());
         }
@@ -75,9 +76,15 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
     if (scrollPattern->IsSelectScroll() && scrollPattern->GetHasOptionWidth()) {
         auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
         selfSize.SetWidth(selectScrollWidth);
+    }
+    auto lastViewSize = scrollPattern->GetViewSize();
+    auto lastViewPortExtent = scrollPattern->GetViewPortExtent();
+    if (!layoutWrapper->IsConstraintNoChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
+        scrollPattern->AddScrollMeasureInfo(constraint, childLayoutConstraint, selfSize, childSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     //set initial offset
@@ -112,6 +119,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
 
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
     MinusPaddingToSize(padding, size);
@@ -129,6 +137,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
+    if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
+        currentOffset = OffsetF(size.Width() - childSize.Width() - currentOffset_, 0.0f);
+    }
     auto scrollAlignment = Alignment::CENTER;
     if (layoutProperty->GetPositionProperty() && layoutProperty->GetPositionProperty()->HasAlignment()) {
         scrollAlignment = layoutProperty->GetPositionProperty()->GetAlignment().value();

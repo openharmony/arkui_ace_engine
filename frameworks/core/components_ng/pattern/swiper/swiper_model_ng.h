@@ -29,9 +29,9 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
+class ACE_FORCE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
-    RefPtr<SwiperController> Create() override;
+    RefPtr<SwiperController> Create(bool isCreateArc = false) override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
     void SetIndicatorInteractive(bool interactive) override;
@@ -64,6 +64,7 @@ public:
     void SetMainSwiperSizeHeight() override;
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
     void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) override;
     void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
@@ -103,6 +104,7 @@ public:
     static void SetIndicatorIsBoolean(FrameNode* frameNode, bool isBoolean);
     static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
+    static void SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
@@ -110,6 +112,8 @@ public:
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
+    static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
+    static void SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup);
 
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
@@ -124,8 +128,17 @@ public:
     static bool GetShowIndicator(FrameNode* frameNode);
     static int GetShowDisplayArrow(FrameNode* frameNode);
     static EdgeEffect GetEffectMode(FrameNode* frameNode);
+    static int32_t GetNestedScroll(FrameNode* frameNode);
 
     static int32_t RealTotalCount(FrameNode* frameNode);
+    static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
+    static void GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
+    static void GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
+    static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
+    static int32_t GetIndicatorType(FrameNode* frameNode);
+    static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
+    static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

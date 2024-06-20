@@ -19,6 +19,7 @@ template("napi_observer_static") {
 
   ohos_source_set(target_name) {
     defines += invoker.defines
+    defines += ace_common_defines
     cflags_cc += invoker.cflags_cc
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 

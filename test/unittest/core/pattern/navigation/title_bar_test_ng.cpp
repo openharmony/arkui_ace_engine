@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -960,6 +961,40 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
     ASSERT_NE(subtitle, nullptr);
     frameNode_->SetSubtitle(subtitle);
     titleBarPattern_->SetMaxTitleBarHeight();
+}
+
+/**
+ * @tc.name: TitleBarPatternTest039
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest039, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.barStyle = std::make_optional(BarStyle::STACK);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+/**
+ * @tc.name: TitleBarPatternTest040
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest040, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
 
 /**

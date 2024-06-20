@@ -21,6 +21,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr int32_t DEFAULT_DURATION = 1000;
+}
+
 void ImageAnimatorModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -143,6 +147,26 @@ RefPtr<ImageAnimatorPattern> ImageAnimatorModelNG::GetImageAnimatorPattern(Frame
     return AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
 }
 
+RefPtr<FrameNode> ImageAnimatorModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ANIMATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<ImageAnimatorPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetChildren().empty()) {
+        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_RETURN(imageNode, nullptr);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_RETURN(imagePattern, nullptr);
+        imagePattern->SetImageAnimator(true);
+        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->AddChild(imageNode);
+    }
+    return frameNode;
+}
+
 void ImageAnimatorModelNG::SetImages(FrameNode* frameNode, const std::vector<ImageProperties>& images)
 {
     CHECK_NULL_VOID(frameNode);
@@ -181,4 +205,101 @@ void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
 {
     GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
 }
+
+bool ImageAnimatorModelNG::IsReverse(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsReverse();
+}
+
+int32_t ImageAnimatorModelNG::GetDuration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DURATION);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, DEFAULT_DURATION);
+    return pattern->GetDuration();
+}
+
+int32_t ImageAnimatorModelNG::GetState(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, 0);
+    return static_cast<int32_t>(pattern->GetStatus());
+}
+
+bool ImageAnimatorModelNG::IsFixedSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsFixedSize();
+}
+
+int32_t ImageAnimatorModelNG::GetFillMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, 1);
+    return static_cast<int32_t>(pattern->GetFillMode());
+}
+
+int32_t ImageAnimatorModelNG::GetIteration(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 1);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, 1);
+    return pattern->GetIteration();
+}
+
+int32_t ImageAnimatorModelNG::GetImagesSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = AceType::DynamicCast<ImageAnimatorPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetImagesSize();
+}
+
+void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetStartEvent(onStart);
+}
+
+void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetPauseEvent(onPause);
+}
+
+void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetRepeatEvent(onRepeat);
+}
+
+void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void()>&& onCancel)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCancelEvent(onCancel);
+}
+
+void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onFinish)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetStopEvent(onFinish);
+}
+
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -44,8 +45,8 @@ enum class RouterPageState {
 };
 
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public ContentRootPattern, public FocusView {
-    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView);
+class ACE_FORCE_EXPORT PagePattern : public ContentRootPattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     explicit PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
@@ -152,33 +153,13 @@ public:
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
-    void ProcessAutoSave();
+    bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr);
 
     void StopPageTransition();
 
     void MarkRenderDone()
     {
         isRenderDone_ = true;
-    }
-
-    void SetAutoFillPasswordTriggered(bool value)
-    {
-        autoFillPasswordTriggered_ = value;
-    }
-
-    bool IsAutoFillPasswordTriggered() const
-    {
-        return autoFillPasswordTriggered_;
-    }
-
-    void SetAutoFillNewPasswordTriggered(bool value)
-    {
-        autoFillNewPasswordTriggered_ = value;
-    }
-
-    bool IsAutoFillNewPasswordTriggered() const
-    {
-        return autoFillNewPasswordTriggered_;
     }
 
     void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
@@ -203,6 +184,11 @@ public:
         return overlayManager_;
     }
 
+    void DeleteOverlayManager()
+    {
+        overlayManager_.Reset();
+    }
+
     bool RemoveOverlay();
     void MarkDirtyOverlay();
 
@@ -211,10 +197,21 @@ public:
         return isOnShow_;
     }
 
+    bool GetIsModalCovered() const
+    {
+        return isModalCovered_;
+    }
+
+    void SetIsModalCovered(bool isModalCovered)
+    {
+        isModalCovered_ = isModalCovered;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
     void OnAttachToMainTree() override;
@@ -229,6 +226,8 @@ private:
     {
         return true;
     }
+
+    void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
@@ -247,8 +246,7 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
-    bool autoFillPasswordTriggered_ = false;
-    bool autoFillNewPasswordTriggered_ = false;
+    bool isModalCovered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

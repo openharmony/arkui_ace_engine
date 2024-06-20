@@ -148,30 +148,22 @@ HWTEST_F(FocusViewTestNg, FocusViewTest001, TestSize.Level1)
     EXPECT_EQ(FocusView::GetCurrentFocusView(), sheetPattern);
     EXPECT_EQ(sheetPattern->GetEntryFocusView(), sheetPattern);
 
-    navigationPattern->FocusViewShow();
-    EXPECT_EQ(FocusView::GetCurrentFocusView(), navigationPattern);
-    EXPECT_EQ(navigationPattern->GetEntryFocusView(), navigationPattern);
-
     navbarPattern->FocusViewShow();
     EXPECT_EQ(FocusView::GetCurrentFocusView(), navbarPattern);
-    EXPECT_EQ(navbarPattern->GetEntryFocusView(), navigationPattern);
+    EXPECT_EQ(navbarPattern->GetEntryFocusView(), pagePattern);
 
     navdestinationPattern->FocusViewShow();
     EXPECT_EQ(FocusView::GetCurrentFocusView(), navdestinationPattern);
-    EXPECT_EQ(navdestinationPattern->GetEntryFocusView(), navigationPattern);
+    EXPECT_EQ(navdestinationPattern->GetEntryFocusView(), pagePattern);
 
     /**
      * @tc.steps: step2. GetCurrentFocusView expect equal with the last view after FocusViewClose.
      */
     navdestinationPattern->FocusViewClose();
     EXPECT_EQ(FocusView::GetCurrentFocusView(), navbarPattern);
-    EXPECT_EQ(navbarPattern->GetEntryFocusView(), navigationPattern);
+    EXPECT_EQ(navbarPattern->GetEntryFocusView(), pagePattern);
 
     navbarPattern->FocusViewClose();
-    EXPECT_EQ(FocusView::GetCurrentFocusView(), navigationPattern);
-    EXPECT_EQ(navigationPattern->GetEntryFocusView(), navigationPattern);
-
-    navigationPattern->FocusViewClose();
     EXPECT_EQ(FocusView::GetCurrentFocusView(), sheetPattern);
     EXPECT_EQ(sheetPattern->GetEntryFocusView(), sheetPattern);
 

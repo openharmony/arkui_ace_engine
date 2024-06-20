@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class SwipeEventInfo : public BaseEventInfo {
+class ACE_FORCE_EXPORT SwipeEventInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(SwipeEventInfo, BaseEventInfo)
 
 public:

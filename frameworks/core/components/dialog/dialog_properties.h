@@ -77,6 +77,20 @@ enum class DialogAlignment {
     BOTTOM_END,
 };
 
+// Alignment of toast in vertical.
+enum class ToastAlignment {
+    TOP_START = 0,
+    TOP,
+    TOP_END,
+    CENTER_START,
+    CENTER,
+    CENTER_END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
+    DEFAULT,
+};
+
 // Direction of buttons in dialog
 enum class DialogButtonDirection {
     AUTO = 0,
@@ -281,6 +295,7 @@ struct PromptDialogAttr {
     std::function<void()> onDidDisappear;
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
+    std::function<void(DialogProperties&)> onLanguageChange;
 };
 
 } // namespace OHOS::Ace

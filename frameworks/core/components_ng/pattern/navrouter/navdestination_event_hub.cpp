@@ -14,6 +14,7 @@
  */
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
@@ -22,20 +23,35 @@ void NavDestinationEventHub::FireOnDisappear()
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
     if (navDestination->GetIsAnimated()) {
+        auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(pattern);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
         FireDisappearCallback();
+        pattern->SetCustomNode(nullptr);
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddAfterLayoutTask([weakDestination = WeakPtr<NavDestinationGroupNode>(navDestination)]() {
-        auto destination = weakDestination.Upgrade();
-        CHECK_NULL_VOID(destination);
+    pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
         auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireDisappearCallback();
         auto pattern = destination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
+        eventHub->FireDisappearCallback();
         pattern->SetCustomNode(nullptr);
     });
+}
+
+void NavDestinationEventHub::FireAutoSave()
+{
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    if (!node->NeedRequestAutoSave()) {
+        return;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->RequestAutoSave(node);
 }
 }

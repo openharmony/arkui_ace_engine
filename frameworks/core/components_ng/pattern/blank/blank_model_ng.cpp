@@ -117,9 +117,9 @@ void BlankModelNG::SetBlankMin(FrameNode* frameNode, const Dimension& blankMin)
     if (blankMin.IsNegative()) {
         result = Dimension(0.0, DimensionUnit::VP);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result, frameNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -35,26 +35,27 @@ V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        ScrollSnapPropToJsonValue(json, filter);
+        return;
+    }
     json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
     json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
     json->PutExtAttr("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str(), filter);
     json->PutExtAttr("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
-                                   ? "Axis.Vertical"
-                                   : "Axis.Horizontal", filter);
+                                   ? "Axis.Vertical" : "Axis.Horizontal", filter);
     json->PutExtAttr("editMode", propEditMode_.value_or(false), filter);
     json->PutExtAttr("chainAnimation", propChainAnimation_.value_or(false), filter);
+    auto divider = JsonUtil::Create(true);
     if (propDivider_.has_value()) {
-        auto divider = JsonUtil::Create(true);
         divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
         divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
         divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
         divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-        json->PutExtAttr("divider", divider, filter);
-    } else {
-        auto divider = JsonUtil::Create(true);
-        json->PutExtAttr("divider", divider, filter);
     }
+    json->PutExtAttr("divider", divider, filter);
     json->PutExtAttr("lanes", std::to_string(propLanes_.value_or(0)).c_str(), filter);
     json->PutExtAttr("laneMinLength",
         propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
@@ -87,6 +88,10 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
 void ListLayoutProperty::ScrollSnapPropToJsonValue(
     std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
     auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.START", filter);

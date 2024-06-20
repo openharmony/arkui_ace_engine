@@ -20,6 +20,10 @@
 #include "base/utils/measure_util.h"
 #include "core/common/thread_checker.h"
 
+#ifndef PREVIEW
+#include "form_mgr.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 FormFrontendDelegateDeclarative::~FormFrontendDelegateDeclarative()
 {
@@ -73,5 +77,21 @@ void FormFrontendDelegateDeclarative::FireCardAction(const std::string& action)
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIFormFrontendFireAction"); // eTSCard UI == Main JS/UI/PLATFORM
+}
+
+void FormFrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
+{
+#ifndef PREVIEW
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    std::string formBundleName = container->GetBundleName();
+    if (!OHOS::AppExecFwk::FormMgr::GetInstance().IsSystemAppForm(formBundleName)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "%{public}s is not system form", formBundleName.c_str());
+        return;
+    }
+    
+    FrontendDelegateDeclarative::RegisterFont(familyName, familySrc, bundleName, moduleName);
+#endif
 }
 } // namespace OHOS::Ace::Framework

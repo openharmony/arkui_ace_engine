@@ -81,6 +81,9 @@ void JSIfElse::CanRetake(const JSCallbackInfo& info)
 void JSIfElse::SetBranchId(const JSCallbackInfo& info)
 {
     int32_t paramsLength = 2;
+    if (!info[0]->IsNumber()) {
+        return;
+    }
     const int32_t branchid = info[0]->ToNumber<int32_t>();
     std::list<int32_t> removedElmtIds;
     IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds);

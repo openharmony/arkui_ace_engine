@@ -45,4 +45,46 @@ void ContentModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
     extensionHandler_->SetInnerDrawImpl([this](DrawingContext& context) { onDraw(context); });
 }
 
+void OverlayModifier::Draw(DrawingContext& context)
+{
+    if (extensionHandler_) {
+        extensionHandler_->OverlayDraw(context);
+    } else {
+        onDraw(context);
+    }
+}
+
+void OverlayModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+{
+    extensionHandler_ = extensionHandler;
+    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->SetOverlayChange();
+        }
+    });
+    extensionHandler_->SetInnerOverlayDrawImpl([this](DrawingContext& context) { onDraw(context); });
+}
+
+void ForegroundModifier::Draw(DrawingContext& context)
+{
+    if (extensionHandler_) {
+        extensionHandler_->ForegroundDraw(context);
+    } else {
+        onDraw(context);
+    }
+}
+
+void ForegroundModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+{
+    extensionHandler_ = extensionHandler;
+    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->SetForegroundChange();
+        }
+    });
+    extensionHandler_->SetInnerForegroundDrawImpl([this](DrawingContext& context) { onDraw(context); });
+}
+
 } // namespace OHOS::Ace::NG

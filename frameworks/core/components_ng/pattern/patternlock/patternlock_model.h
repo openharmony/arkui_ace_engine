@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class PatternLockModel {
+class ACE_FORCE_EXPORT PatternLockModel {
 public:
     static PatternLockModel* GetInstance();
     virtual ~PatternLockModel() = default;
@@ -39,6 +39,9 @@ public:
     virtual void SetCircleRadius(const Dimension& radius);
     virtual void SetSideLength(const Dimension& sideLength);
     virtual void SetStrokeWidth(const Dimension& lineWidth);
+    virtual void SetActiveCircleColor(const Color& activeCircleColor);
+    virtual void SetActiveCircleRadius(const Dimension& activeCircleRadius);
+    virtual void SetEnableWaveEffect(bool enableWaveEffect);
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;

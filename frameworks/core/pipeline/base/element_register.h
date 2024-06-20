@@ -99,7 +99,7 @@ public:
      */
     void Clear();
 
-    ElementIdType MakeUniqueId()
+    ACE_FORCE_EXPORT ElementIdType MakeUniqueId()
     {
         return nextUniqueElementId_++;
     }

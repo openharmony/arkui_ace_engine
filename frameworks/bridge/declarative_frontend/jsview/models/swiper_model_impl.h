@@ -22,7 +22,7 @@ namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT SwiperModelImpl : public OHOS::Ace::SwiperModel {
 public:
-    RefPtr<SwiperController> Create() override;
+    RefPtr<SwiperController> Create(bool isCreateArc = false) override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
     void SetAutoPlay(bool autoPlay) override;

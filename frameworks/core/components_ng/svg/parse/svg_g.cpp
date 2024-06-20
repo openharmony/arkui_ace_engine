@@ -17,16 +17,9 @@
 
 #include "include/pathops/SkPathOps.h"
 
-#include "frameworks/core/components/declaration/svg/svg_declaration.h"
-
 namespace OHOS::Ace::NG {
 
-SvgG::SvgG() : SvgGroup()
-{
-    declaration_ = AceType::MakeRefPtr<SvgDeclaration>();
-    declaration_->Init();
-    declaration_->InitializeStyle();
-}
+SvgG::SvgG() : SvgGroup() {}
 
 RefPtr<SvgNode> SvgG::Create()
 {

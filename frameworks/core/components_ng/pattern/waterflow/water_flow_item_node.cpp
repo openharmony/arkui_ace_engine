@@ -33,14 +33,14 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
     return node;
 }
 
-bool WaterFlowItemNode::RequestParentDirty(bool /* childExpansiveAndMark */)
+bool WaterFlowItemNode::RequestParentDirty()
 {
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_RETURN(parent, false);
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     auto pattern = parent->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, true);
-    // record index of dirty child, but only when using new Sectioned layout
+    // record index of dirty child, but only when using new layout
     if (pattern->GetSections() || SystemProperties::WaterFlowUseSegmentedLayout()) {
         auto idx = parent->GetChildTrueIndex(Claim(this));
         if (idx > -1) {

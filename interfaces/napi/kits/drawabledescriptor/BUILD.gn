@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,32 +14,76 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ohos_shared_library("drawabledescriptor") {
-  configs = [ "$ace_root:ace_config" ]
+if (is_arkui_x) {
+  import("//plugins/drawable_descriptor/drawable_descriptor.gni")
+  template("napi_drawabledescriptor_static") {
+    forward_variables_from(invoker, "*")
 
-  sources = [ "drawable_register.cpp" ]
+    ohos_source_set(target_name) {
+      defines += invoker.defines
+      cflags_cc += invoker.cflags_cc
 
-  deps = [
-    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-  ]
+      public_configs = [ "$ace_root:ace_config" ]
+      include_dirs = drawable_napi_include
 
-  external_deps = [
-    "graphic_2d:librender_service_client",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
-
-  if (current_os == "ohos") {
-    external_deps += [
-      "graphic_2d:2d_graphics",
-      "image_framework:image",
-      "image_framework:image_native",
-    ]
-  } else {
-    defines = [ "PREVIEW" ]
+      sources = [ "drawable_register.cpp" ]
+      if (platform != "" && is_arkui_x) {
+        deps = [ "//plugins/libs/napi:napi_$platform" ]
+      }
+      subsystem_name = "arkui"
+      part_name = ace_engine_part
+    }
   }
 
-  relative_install_dir = "module/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
+  foreach(item, ace_platforms) {
+    napi_drawabledescriptor_static("drawabledescriptor_static_" + item.name) {
+      defines = []
+      cflags_cc = []
+      platform = item.name
+      config = {
+      }
+
+      if (defined(item.config)) {
+        config = item.config
+      }
+
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
+
+      if (defined(config.cflags_cc)) {
+        cflags_cc = config.cflags_cc
+      }
+    }
+  }
+} else {
+  ohos_shared_library("drawabledescriptor") {
+    configs = [ "$ace_root:ace_config" ]
+
+    sources = [ "drawable_register.cpp" ]
+
+    deps = [
+      "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+    ]
+
+    external_deps = [
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+
+    if (current_os == "ohos") {
+      external_deps += [
+        "graphic_2d:2d_graphics",
+        "image_framework:image",
+        "image_framework:image_native",
+      ]
+    } else {
+      defines = [ "PREVIEW" ]
+    }
+
+    relative_install_dir = "module/arkui"
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
 }

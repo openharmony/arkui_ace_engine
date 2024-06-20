@@ -26,6 +26,11 @@ RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPt
     return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
 }
 
+RefPtr<Paragraph> Paragraph::Create(void* paragraph)
+{
+    return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
+}
+
 RefPtr<MockParagraph> MockParagraph::GetOrCreateMockParagraph()
 {
     if (!paragraph_) {

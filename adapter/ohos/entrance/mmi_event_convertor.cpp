@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
@@ -159,6 +160,10 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         event.screenX = item.GetDisplayXPos();
         event.screenY = item.GetDisplayYPos();
     }
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
     return event;
 }
 
@@ -232,9 +237,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_DOWN;
-            }
+            events.pullAction = MouseAction::PULL_DOWN;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
@@ -242,9 +245,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_UP;
-            }
+            events.pullAction = MouseAction::PULL_UP;
             break;
         default:
             events.action = MouseAction::NONE;
@@ -317,9 +318,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-    auto sourceTool = GetSourceTool(item.GetToolType());
-    if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
-        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    events.sourceTool = GetSourceTool(item.GetToolType());
+    if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
+        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(events.sourceTool);
         // Pen use type double XY position.
         events.x = item.GetWindowXPos();
         events.y = item.GetWindowYPos();
@@ -328,6 +329,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
+    events.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        events.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void GetAxisEventAction(int32_t action, AxisEvent& event)
@@ -385,7 +390,33 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.time = time;
     event.touchEventId = pointerEvent->GetId();
     event.targetDisplayId = pointerEvent->GetTargetDisplayId();
+    event.pressedCodes.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)
+{
+    event.touchEventId = pointerEvent->GetId();
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
+        event.action = Ace::CrownAction::BEGIN;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
+        event.action = Ace::CrownAction::UPDATE;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        event.action = Ace::CrownAction::END;
+    } else {
+        event.action = Ace::CrownAction::UNKNOWN;
+    }
+    event.angularVelocity =  pointerEvent->GetVelocity();
+    event.degree =  pointerEvent->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    event.timeStamp = time;
+}
+#endif
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
@@ -408,9 +439,8 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = keyEvent->GetEnhanceData();
 #endif
-    std::string pressedKeyStr = "Pressed Keys: ";
+    event.pressedCodes.clear();
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
-        pressedKeyStr += (std::to_string(curCode) + " ");
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
 }
@@ -433,6 +463,12 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
+    event.x = event.windowX;
+    event.y = event.windowY;
+    event.pressedKeyCodes_.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+    }
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
@@ -480,6 +516,11 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
     if (ret) {
         float xRelative = item.GetWindowX();
         float yRelative = item.GetWindowY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetWindowXPos();
+            yRelative = item.GetWindowYPos();
+        }
         auto windowX = xRelative;
         auto windowY = yRelative;
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -512,6 +553,8 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(pointerId, item);
     }
 }
@@ -530,6 +573,11 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetDisplayXPos();
+            yRelative = item.GetDisplayYPos();
+        }
         float windowX = xRelative;
         float windowY = yRelative;
         int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
@@ -557,6 +605,8 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
+        item.SetWindowXPos(windowX);
+        item.SetWindowYPos(windowY);
         point->UpdatePointerItem(id, item);
     }
 }

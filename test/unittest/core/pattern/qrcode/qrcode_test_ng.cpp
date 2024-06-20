@@ -538,6 +538,8 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).Times(1).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).Times(1).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Save()).Times(1).WillOnce(Return());
     EXPECT_CALL(rsCanvas, Scale(_, _)).Times(1).WillOnce(Return());
     EXPECT_CALL(rsCanvas, DrawImage(_, _, _, _)).Times(1).WillOnce(Return());

@@ -136,7 +136,7 @@ void RenderToggle::UpdateFocusAnimation()
     double radius = toggleSize_.Height() / 2.0;
     context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), toggleSize_), Radius(radius)),
         Color(), GetGlobalOffset());
-    context->ShowShadow( RRect::MakeRRect(Rect(Offset(0, 0), toggleSize_), Radius(radius)), GetGlobalOffset());
+    context->ShowShadow(RRect::MakeRRect(Rect(Offset(0, 0), toggleSize_), Radius(radius)), GetGlobalOffset());
 }
 
 void RenderToggle::OnMouseHoverEnterTest()

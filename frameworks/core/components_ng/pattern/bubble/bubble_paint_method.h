@@ -26,7 +26,6 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
@@ -55,6 +54,11 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
+                auto context = paintWrapper->GetRenderContext();
+                if (context) {
+                    context->ClearDrawCommands();
+                }
+                bubble->PaintSingleBorder(canvas, paintWrapper);
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -115,6 +119,7 @@ public:
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);

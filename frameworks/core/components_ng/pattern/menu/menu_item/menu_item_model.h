@@ -28,8 +28,10 @@ struct MenuItemProperties {
     std::optional<ImageSourceInfo> endIcon;
     std::optional<std::string> labelInfo;
     std::optional<std::function<void()>> buildFunc;
+    std::function<void(WeakPtr<NG::FrameNode>)> startApply;
+    std::function<void(WeakPtr<NG::FrameNode>)> endApply;
 };
-class MenuItemModel {
+class ACE_FORCE_EXPORT MenuItemModel {
 public:
     static MenuItemModel* GetInstance();
     virtual ~MenuItemModel() = default;
@@ -39,6 +41,7 @@ public:
     virtual void Create(const MenuItemProperties& props);
     virtual void SetSelected(bool isSelected = false);
     virtual void SetSelectIcon(bool isShow = false);
+    virtual void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)> &&symbolApply);
     virtual void SetSelectIconSrc(const std::string& src);
     virtual void SetOnChange(std::function<void(bool)>&& onChange);
     virtual void SetFontSize(const Dimension& fontSize);

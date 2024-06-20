@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -55,7 +56,11 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, Dimension(topMargin, DimensionUnit::PX)));
 
     auto menuBar = GetMenuBar();
-    UpdateMenuBarColor(theme, menuBar, SystemProperties::GetColorMode() != ColorMode::DARK);
+    if (settedColorMode.has_value()) {
+        UpdateMenuBarColor(theme, menuBar, settedColorMode.value());
+    } else {
+        UpdateMenuBarColor(theme, menuBar, SystemProperties::GetColorMode() != ColorMode::DARK);
+    }
 
     menuBarRow->MarkModifyDone();
     menuBarRow->MarkDirtyNode();
@@ -83,7 +88,11 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
-    UpdateColor();
+    if (settedColorMode.has_value()) {
+        UpdateColor(settedColorMode);
+    } else {
+        UpdateColor(SystemProperties::GetColorMode() != ColorMode::DARK);
+    }
 }
 
 RefPtr<FrameNode> AtomicServicePattern::GetMenuBarRow()
@@ -142,27 +151,25 @@ RefPtr<FrameNode> AtomicServicePattern::GetCloseIcon()
     return closeIcon;
 }
 
-void AtomicServicePattern::UpdateColor()
+void AtomicServicePattern::UpdateColor(std::optional<bool> isLight)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
-
-    auto menuBar = GetMenuBar();
-    UpdateMenuBarColor(theme, menuBar, isLight);
-
+    if (!(isLight.has_value())) {
+        isLight = SystemProperties::GetColorMode() != ColorMode::DARK;
+    }
     auto menuButton = GetMenuButton();
-    UpdateButtonColor(theme, menuButton);
+    UpdateButtonColor(theme, menuButton, isLight.value());
     auto divider = GetDivider();
-    UpdateDividerColor(theme, divider, isLight);
+    UpdateDividerColor(theme, divider, isLight.value());
     auto closeButton = GetCloseButton();
-    UpdateButtonColor(theme, closeButton);
+    UpdateButtonColor(theme, closeButton, isLight.value());
 
     auto menuIcon = GetMenuIcon();
-    UpdateIconColor(theme, menuIcon);
+    UpdateIconColor(theme, menuIcon, isLight.value());
     auto closeIcon = GetCloseIcon();
-    UpdateIconColor(theme, closeIcon);
+    UpdateIconColor(theme, closeIcon, isLight.value());
 }
 
 void AtomicServicePattern::UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isLight)
@@ -188,16 +195,24 @@ void AtomicServicePattern::UpdateMenuBarColor(RefPtr<AppBarTheme>& theme, RefPtr
     menuBar->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void AtomicServicePattern::UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button)
+void AtomicServicePattern::UpdateButtonColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLight)
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(button);
     // pressed color
     auto buttonPattern = button->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetClickedColor(theme->GetClickEffectColor());
+    if (isLight) {
+        buttonPattern->SetClickedColor(theme->GetClickEffectColorLight());
+    } else {
+        buttonPattern->SetClickedColor(theme->GetClickEffectColorDark());
+    }
     // focus border color
-    buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColor());
+    if (isLight) {
+        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorLight());
+    } else {
+        buttonPattern->SetFocusBorderColor(theme->GetFocusedOutlineColorDark());
+    }
 
     button->MarkModifyDone();
     button->MarkDirtyNode();
@@ -219,16 +234,14 @@ void AtomicServicePattern::UpdateDividerColor(RefPtr<AppBarTheme>& theme, RefPtr
     divider->MarkDirtyNode();
 }
 
-void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon)
+void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLight)
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(icon);
     // fill color
-    auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
-    auto imageSourceInfo = layoutProperty->GetImageSourceInfo();
-    imageSourceInfo->SetFillColor(theme->GetIconColor());
-    layoutProperty->UpdateImageSourceInfo(imageSourceInfo.value());
-
+    auto color = isLight ? theme->GetIconColorLight() : theme->GetIconColorDark();
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, icon);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, icon);
     icon->MarkModifyDone();
     icon->MarkDirtyNode();
 }

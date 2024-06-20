@@ -47,6 +47,7 @@ public:
     }
 
     void CleanRecognizerState() override;
+    void ForceCleanRecognizer() override;
     
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
@@ -63,6 +64,7 @@ private:
     void UpdateCurrentIndex();
 
     int32_t currentIndex_ = 0;
+    std::list<std::string> childTouchTestList_;
     CancelableCallback<void()> deadlineTimer_;
 };
 

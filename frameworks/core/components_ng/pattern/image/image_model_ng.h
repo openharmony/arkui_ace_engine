@@ -27,8 +27,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
-    void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-        const std::string &moduleName, bool isUriPureNumber = false) override;
+    void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
@@ -59,17 +58,24 @@ public:
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
     void SetSmoothEdge(float value) override;
+    void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
+    void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
     void SetImageAnalyzerConfig(void* config) override;
+    void SetImageAIOptions(void* options) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
+        const std::string& moduleName, bool isUriPureNumber = false);
+    static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
+    static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
@@ -81,6 +87,7 @@ public:
     static void SetImageFill(FrameNode *frameNode, const Color &color);
     static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
+    static void ResetImageInterpolation(FrameNode *frameNode);
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);
@@ -88,6 +95,8 @@ public:
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
     static void SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnDownloadProgress(FrameNode* frameNode,
+        std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);
@@ -98,6 +107,19 @@ public:
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
+    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
+    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode *frameNode);
+    static uint32_t GetFillColor(FrameNode *frameNode);
+    static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
+    static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
+    static void SetResource(FrameNode* frameNode, void* resource);
+    static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
+    static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
+    static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
+    static void ResetImageSrc(FrameNode* frameNode);
+    static void ResetImageAlt(FrameNode* frameNode);
 private:
     RefPtr<ImagePattern> GetImagePattern();
 };

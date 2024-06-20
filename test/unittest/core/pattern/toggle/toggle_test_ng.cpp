@@ -744,6 +744,47 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TogglePatternTest0018
+ * @tc.desc: Test toggle OnModifyDone default margin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create switch frameNode, get switchPattern.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    EXPECT_NE(switchPattern, nullptr);
+    auto layoutProperty = switchFrameNode->GetLayoutProperty();
+
+    // set switchTheme to themeManager before using themeManager to get switchTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    MarginProperty margin;
+    margin.left = CalcLength(PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+
+    switchPattern->OnModifyDone();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        EXPECT_EQ(switchPattern->direction_, TextDirection::RTL);
+    } else {
+        EXPECT_EQ(switchPattern->direction_, TextDirection::LTR);
+    }
+}
+
+/**
  * @tc.name: ToggleLayoutTest001
  * @tc.desc: Test toggle layout.
  * @tc.type: FUNC
@@ -969,6 +1010,53 @@ HWTEST_F(ToggleTestNg, TogglePaintTest003, TestSize.Level1)
     SizeF size(80.0f, 20.0f);
     auto switchWidth = switchModifier->GetSwitchWidth(size);
     EXPECT_EQ(switchWidth, 62.0f);
+}
+
+/**
+ * @tc.name: TogglePaintTest005
+ * @tc.desc: Test Toggle UpdateAnimatableProperty and SetDirection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
+{
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    SizeF toggleSize(SWITCH_WIDTH, SWITCH_HEIGHT);
+    switchModifier->SetSize(toggleSize);
+    switchModifier->hoverColor_ = Color::RED;
+    switchModifier->clickEffectColor_ = Color::BLUE;
+    /**
+     * @tc.steps: step1. direction is auto
+     */
+    switchModifier->direction_ = TextDirection::AUTO;
+    switchModifier->isDragEvent_ = false;
+    switchModifier->isFirstCreated_ = true;
+    switchModifier->SetDragOffsetX(0.0f);
+    switchModifier->UpdateAnimatableProperty();
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        EXPECT_EQ(switchModifier->pointOffset_->Get(),
+            switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
+    } else {
+        EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+    }
+    /**
+     * @tc.steps: step2. direction is ltr
+     */
+    switchModifier->direction_ = TextDirection::LTR;
+    switchModifier->isDragEvent_ = false;
+    switchModifier->isFirstCreated_ = true;
+    switchModifier->SetDragOffsetX(0.0f);
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+    /**
+     * @tc.steps: step3. direction is rtl
+     */
+    switchModifier->direction_ = TextDirection::RTL;
+    switchModifier->isDragEvent_ = false;
+    switchModifier->isFirstCreated_ = true;
+    switchModifier->SetDragOffsetX(0.0f);
+    switchModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(switchModifier->pointOffset_->Get(),
+        switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
 }
 
 /**

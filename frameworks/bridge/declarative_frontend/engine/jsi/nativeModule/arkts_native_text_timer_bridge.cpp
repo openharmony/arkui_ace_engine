@@ -26,6 +26,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
+constexpr int32_t NUM_6 = 6;
+constexpr int32_t NUM_7 = 7;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTTIMER_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
@@ -193,6 +199,63 @@ ArkUINativeModuleValue TextTimerBridge::ResetFormat(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextTimerModifier()->resetFormat(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextTimerBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t length = lengthArg->Uint32Value(vm);
+    auto radiusArray = std::make_unique<double[]>(length);
+    auto typeArray = std::make_unique<uint32_t[]>(length);
+    auto colorArray = std::make_unique<uint32_t[]>(length);
+    auto offsetXArray = std::make_unique<double[]>(length);
+    auto offsetYArray = std::make_unique<double[]>(length);
+    auto fillArray = std::make_unique<uint32_t[]>(length);
+    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_1), radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+    bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
+    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_3), colorArray.get(), length, ArkTSUtils::parseShadowColor);
+    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_4), offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_5), offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
+        vm, runtimeCallInfo->GetCallArgRef(NUM_6), fillArray.get(), length, ArkTSUtils::parseShadowFill);
+    if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
+        !offsetYParseResult || !fillParseResult || !typeParseResult) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
+    CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
+    for (uint32_t i = 0; i < length; i++) {
+        textShadowArray[i].radius = radiusArray[i];
+        textShadowArray[i].type = typeArray[i];
+        textShadowArray[i].color = colorArray[i];
+        textShadowArray[i].offsetX = offsetXArray[i];
+        textShadowArray[i].offsetY = offsetYArray[i];
+        textShadowArray[i].fill = fillArray[i];
+    }
+    GetArkUINodeModifiers()->getTextTimerModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextTimerBridge::ResetTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextTimerModifier()->resetTextShadow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

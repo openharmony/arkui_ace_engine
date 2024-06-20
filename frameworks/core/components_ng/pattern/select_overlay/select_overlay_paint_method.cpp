@@ -23,6 +23,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr float AGING_MIN_SCALE = 1.75f;
 void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -39,6 +40,9 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto buttonRadius = sideWidth / 2.0;
 
     auto offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, buttonRadius + top);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        offset = defaultMenuEndOffset_ + OffsetF(-buttonRadius - right, selectMenuHeight_ / 2.0f);
+    }
 
     CheckCirclesAndBackArrowIsShown();
     CheckHasExtensionMenu();
@@ -59,13 +63,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
     auto viewPort = paintWrapper->GetGeometryNode()->GetFrameRect() - offset;
-    auto frameNode = info_.callerFrameNode.Upgrade();
-    if (frameNode) {
-        auto viewPortOption = frameNode->GetViewPort();
-        if (viewPortOption.has_value()) {
-            viewPort = viewPortOption.value();
-        }
-    }
+    info_.GetCallerNodeAncestorViewPort(viewPort);
+
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);
@@ -77,6 +76,7 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
     selectOverlayContentModifier_->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     selectOverlayContentModifier_->SetHandleRadius(textOverlayTheme->GetHandleDiameter().ConvertToPx() / 2.0f);
+    selectOverlayContentModifier_->SetHandleStrokeWidth(textOverlayTheme->GetHandleDiameterStrokeWidth().ConvertToPx());
     selectOverlayContentModifier_->SetInnerHandleRadius(
         textOverlayTheme->GetHandleDiameterInner().ConvertToPx() / 2.0f);
 

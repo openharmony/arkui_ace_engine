@@ -28,6 +28,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
@@ -133,6 +134,7 @@ inline std::string ToString(const EllipsisMode& ellipsisMode)
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
 extern const std::vector<WordBreak> WORD_BREAK_TYPES;
+extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 namespace StringUtils {
 inline std::string ToString(const WordBreak& wordBreak)
 {
@@ -235,6 +237,7 @@ public:
     TextStyle() = default;
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
+    TextStyle(double fontSize) : fontSize_(fontSize) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;
@@ -258,6 +261,11 @@ public:
     void SetTextBaseline(TextBaseline baseline)
     {
         textBaseline_ = baseline;
+    }
+
+    void ResetTextBaseline()
+    {
+        baselineOffset_.Reset();
     }
 
     void SetTextDecoration(TextDecoration textDecoration)
@@ -593,6 +601,46 @@ public:
     {
         return ellipsisMode_;
     }
+    
+    void SetHeightScale(double heightScale)
+    {
+        heightScale_ = heightScale;
+    }
+ 
+    double GetHeightScale() const
+    {
+        return heightScale_;
+    }
+ 
+    void SetHeightOnly(bool heightOnly)
+    {
+        heightOnly_ = heightOnly;
+    }
+ 
+    bool GetHeightOnly() const
+    {
+        return heightOnly_;
+    }
+ 
+    void SetEllipsis(std::u16string ellipsis)
+    {
+        ellipsis_ = ellipsis;
+    }
+ 
+    std::u16string GetEllipsis() const
+    {
+        return ellipsis_;
+    }
+ 
+    void SetLocale(std::string locale)
+    {
+        locale_ = locale;
+    }
+ 
+    std::string GetLocale() const
+    {
+        return locale_;
+    }
 
     bool isSymbolGlyph_ = false;
 
@@ -614,6 +662,11 @@ public:
     void SetSymbolColorList(const std::vector<Color>& renderColors)
     {
         renderColors_ = renderColors;
+    }
+
+    void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
+    {
+        symbolEffectOptions_ = symbolEffectOptions;
     }
 
     std::vector<Color> GetRenderColors()
@@ -656,6 +709,11 @@ public:
         lineBreakStrategy_ = breakStrategy;
     }
 
+    const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
+    {
+        return symbolEffectOptions_;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -686,6 +744,8 @@ public:
         jsonValue->Put("renderColors", ss.str().c_str());
         JSON_STRING_PUT_INT(jsonValue, renderStrategy_);
         JSON_STRING_PUT_INT(jsonValue, effectStrategy_);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
+
         return jsonValue->ToString();
     }
 
@@ -732,8 +792,13 @@ private:
     std::vector<Color> renderColors_;
     int32_t renderStrategy_ = 0;
     int32_t effectStrategy_ = 0;
+    std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    double heightScale_ = 1.0;
+    bool heightOnly_ = false;
+    std::u16string ellipsis_;
+    std::string locale_;
 };
 
 namespace StringUtils {
@@ -782,21 +847,11 @@ inline WordBreak StringToWordBreak(const std::string& wordBreak)
 inline std::string FontWeightToString(const FontWeight& fontWeight)
 {
     static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
-        { FontWeight::W100, "100" },
-        { FontWeight::W200, "200" },
-        { FontWeight::W300, "300" },
-        { FontWeight::W400, "400" },
-        { FontWeight::W500, "500" },
-        { FontWeight::W600, "600" },
-        { FontWeight::W700, "700" },
-        { FontWeight::W800, "800" },
-        { FontWeight::W900, "900" },
-        { FontWeight::BOLD, "bold" },
-        { FontWeight::BOLDER, "bolder" },
-        { FontWeight::LIGHTER, "lighter" },
-        { FontWeight::MEDIUM, "medium" },
-        { FontWeight::NORMAL, "normal" },
-        { FontWeight::REGULAR, "regular" },
+        { FontWeight::W100, "100" }, { FontWeight::W200, "200" }, { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" }, { FontWeight::W500, "500" }, { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" }, { FontWeight::W800, "800" }, { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "bold" }, { FontWeight::BOLDER, "bolder" }, { FontWeight::LIGHTER, "lighter" },
+        { FontWeight::MEDIUM, "medium" }, { FontWeight::NORMAL, "normal" }, { FontWeight::REGULAR, "regular" },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
     return weightIter != -1 ? fontWeightTable[weightIter].value : "";

@@ -187,6 +187,11 @@ void AceContainer::InitializeFrontend()
         EngineHelper::AddEngine(instanceId_, jsEngine);
         declarativeFrontend->SetJsEngine(jsEngine);
         declarativeFrontend->SetPageProfile(pageProfile_);
+        if (PkgContextInfo_) {
+            declarativeFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            declarativeFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            declarativeFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
@@ -200,6 +205,11 @@ void AceContainer::InitializeFrontend()
         cardFrontend->SetRunningCardId(0);
         cardFrontend->SetIsFormRender(true);
         cardFrontend->SetTaskExecutor(taskExecutor_);
+        if (PkgContextInfo_) {
+            cardFrontend->SetPkgNameList(PkgContextInfo_->GetPkgNameMap());
+            cardFrontend->SetPkgAliasList(PkgContextInfo_->GetPkgAliasMap());
+            cardFrontend->SetpkgContextInfoList(PkgContextInfo_->GetPkgContextInfoMap());
+        }
         SetIsFRSCardContainer(true);
     }
     ACE_DCHECK(frontend_);
@@ -291,6 +301,11 @@ void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std:
     }
 }
 
+void AceContainer::SetPkgContextInfo(const RefPtr<StagePkgContextInfo>& PkgContextInfo)
+{
+    PkgContextInfo_ = PkgContextInfo;
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
@@ -353,6 +368,22 @@ void AceContainer::InitializeCallback()
             TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [weak, id = instanceId_](
+        const CrownEvent& event, const std::function<void()>& ignoreMark,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event]() { context->OnCrownEvent(event); },
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -963,6 +994,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         pipelineContext_->SetAppLabelId(labelId_);
     }
     pipelineContext_->OnShow();
+    pipelineContext_->WindowFocus(true);
     InitializeCallback();
 
     auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);

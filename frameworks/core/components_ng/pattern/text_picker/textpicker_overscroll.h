@@ -31,7 +31,6 @@ public:
     void SetColumn(const WeakPtr<Pattern>& value)
     {
         column_ = value;
-        UpdateTossSpring(0.0);
     }
 
     void SetOverScroll(float overScroll)
@@ -62,6 +61,16 @@ public:
     void UpdateTossSpring(float offsetY);
     bool ShouldStartRebound();
 
+    void ResetVelocity()
+    {
+        velocityTracker_.Reset();
+    }
+
+    void SetLoopTossOffset(float offset)
+    {
+        loopTossOffset_ = offset;
+    }
+
     RefPtr<Curve> GetReboundCurve() const;
 
 private:
@@ -73,6 +82,8 @@ private:
     float backScrollOffset_ = 0.0;
     float deltaScrollOffset_ = 0.0;
     float overScrollStartOffsetY_ = 0.0;
+    float loopTossOffset_ = 0.0;
+    bool isFirstStart_ = false;
 
     WeakPtr<Pattern> column_;
     VelocityTracker velocityTracker_;

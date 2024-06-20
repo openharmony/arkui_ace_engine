@@ -29,6 +29,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
@@ -40,8 +41,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto stars =
-        ratingLayoutProperty->GetStarsValue(RatingPattern::GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+    auto stars = ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum());
     // case 2: rating component is only set with valid width or height
     // return height = width / stars, or width = height * stars.
     if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
@@ -71,18 +71,22 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
+
     if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
         return;
     }
     // if layout size has not decided yet, resize target can not be calculated
     CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
     // step1: calculate single star size.
     float singleWidth =
-        ratingSize.Width() / static_cast<float>(ratingLayoutProperty->GetStars().value_or(
-                                 RatingPattern::GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM)));
+        ratingSize.Width() / static_cast<float>(ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum()));
     SizeF singleStarSize(singleWidth, ratingSize.Height());
 
     // step2: make 3 images canvas and set its dst size as single star size.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -111,6 +112,16 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    bool IsOnModeSwitchAnimation()
+    {
+        return isOnModeSwitchAnimation_;
+    }
+
+    void SetDoingModeSwitchAnimationFlag(bool isOnAnimation)
+    {
+        isOnModeSwitchAnimation_ = isOnAnimation;
+    }
+
     std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
     {
         return pushAnimations_;
@@ -173,6 +184,24 @@ public:
 
     float CheckLanguageDirection();
 
+    void RemoveDialogDestination();
+
+    void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
+    {
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
+    }
+
+    const std::string& GetNavigationPathInfo() const
+    {
+        return navigationPathInfo_;
+    }
+
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
@@ -182,18 +211,27 @@ private:
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
     bool FindNavigationParent(const std::string& parentName);
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar);
+
+    void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
+    // dialog hideNodes, if is true, nodes need remove
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
+    std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+    std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

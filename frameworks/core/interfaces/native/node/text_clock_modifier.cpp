@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/text_clock_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
@@ -129,6 +130,52 @@ void ResetFontFamily(ArkUINodeHandle node)
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
+
+void SetTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
+{
+    CHECK_NULL_VOID(shadows);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Shadow> shadowList(length);
+    for (uint32_t i = 0; i < length; i++) {
+        Shadow shadow;
+        ArkUITextShadowStruct* shadowStruct = shadows + i;
+        shadow.SetBlurRadius(shadowStruct->radius);
+        shadow.SetShadowType(static_cast<ShadowType>(shadowStruct->type));
+        shadow.SetColor(Color(shadowStruct->color));
+        shadow.SetOffsetX(shadowStruct->offsetX);
+        shadow.SetOffsetY(shadowStruct->offsetY);
+        shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        shadowList.at(i) = shadow;
+    }
+    TextClockModelNG::SetTextShadow(frameNode, shadowList);
+}
+
+void ResetTextShadow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Shadow shadow;
+    shadow.SetOffsetX(0.0);
+    shadow.SetOffsetY(0.0);
+    TextClockModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
+}
+
+void SetFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = "";
+    TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -146,7 +193,11 @@ const ArkUITextClockModifier* GetTextClockModifier()
         TextClockModifier::SetFontWeight,
         TextClockModifier::ResetFontWeight,
         TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily
+        TextClockModifier::ResetFontFamily,
+        TextClockModifier::SetTextShadow,
+        TextClockModifier::ResetTextShadow,
+        TextClockModifier::SetFontFeature,
+        TextClockModifier::ResetFontFeature
     };
 
     return &modifier;

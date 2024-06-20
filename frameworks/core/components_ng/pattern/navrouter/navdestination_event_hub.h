@@ -90,7 +90,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to hidden state.", name_.c_str());
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_HIDDEN);
+            NavDestinationState::ON_HIDDEN);
         if (onHiddenEvent_) {
             onHiddenEvent_();
         }
@@ -132,14 +132,14 @@ public:
     void FireOnAppear() override
     {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to appear state", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_APPEAR);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto navigationManager = pipeline->GetNavigationManager();
         navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
             auto eventHub = weakEventHub.Upgrade();
             CHECK_NULL_VOID(eventHub);
+            UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
+                NavDestinationState::ON_APPEAR);
             if (eventHub->onAppear_) {
                 auto onAppear = eventHub->onAppear_;
                 onAppear();
@@ -231,6 +231,8 @@ public:
         if (onWillHide_) {
             onWillHide_();
         }
+
+        FireAutoSave();
     }
 
     void SetOnWillDisAppear(std::function<void()>& willDisAppear)
@@ -255,6 +257,8 @@ private:
         CHECK_NULL_RETURN(node, nullptr);
         return node->GetPattern();
     }
+
+    void FireAutoSave();
 
     OnStateChangeEvent onStateChangeEvent_;
     std::function<void()> onShownEvent_;

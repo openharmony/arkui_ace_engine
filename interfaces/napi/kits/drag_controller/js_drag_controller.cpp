@@ -43,9 +43,11 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/base/json/json_util.h"
 #include "drag_preview.h"
 #endif
 namespace OHOS::Ace::Napi {
@@ -96,6 +98,7 @@ struct DragControllerAsyncCtx {
     uint64_t displayId = 0;
     int32_t sourceType = 0;
     float windowScale = 1.0f;
+    float dipScale = 0.0;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -458,7 +461,9 @@ void CallBackForJs(DragControllerAsyncCtx* asyncCtx, napi_value result)
     if (IsExecutingWithDragAction(asyncCtx) && asyncCtx->dragAction) {
         asyncCtx->dragAction->OnNapiCallback(result);
         if (asyncCtx->deferred != nullptr) {
-            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, nullptr);
+            napi_value promiseResult = nullptr;
+            napi_get_undefined(asyncCtx->env, &promiseResult);
+            napi_resolve_deferred(asyncCtx->env, asyncCtx->deferred, promiseResult);
         }
     } else {
         napi_value resultVal[PARAMETER_NUM] = { nullptr };
@@ -612,9 +617,15 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     std::set<Media::PixelMap*> scaledPixelMaps;
+    auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
-            pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+            if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+                scale = minScaleWidth / pixelMap->GetWidth();
+            }
+            auto pixelMapScale = asyncCtx->windowScale * scale;
+            pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);
             scaledPixelMaps.insert(pixelMap.get());
         }
         int32_t width = pixelMap->GetWidth();
@@ -687,13 +698,16 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    int32_t recordSize = (dataSize != 0 ? dataSize : shadowInfos.size());
+    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         recordSize = badgeNumber.value();
     }
     auto windowId = container->GetWindowId();
-    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
+    NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
         recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
@@ -821,7 +835,13 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             if (badgeNumber.has_value()) {
                 dataSize = badgeNumber.value();
             }
-            asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
+            double scale = 1.0;
+            auto minScaleWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+            if (asyncCtx->pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+                scale = minScaleWidth / asyncCtx->pixelMap->GetWidth();
+            }
+            auto pixelMapScale = asyncCtx->windowScale * scale;
+            asyncCtx->pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
             double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -837,11 +857,14 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 return;
             }
             auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+            auto arkExtraInfoJson = JsonUtil::Create(true);
+            arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
+            NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
             auto windowId = container->GetWindowId();
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
-            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams, "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId,
-                windowId, true, false, summary };
+            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
+                arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX,
+                asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
@@ -1120,6 +1143,140 @@ bool ParseDragParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     return ParseDragItemInfoParam(asyncCtx, errMsg);
 }
 
+bool ApplyPreviewOptionsFromModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value modifierObj, NG::DragPreviewOption& option)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(asyncCtx->env, modifierObj, &valueType);
+    if (valueType == napi_undefined) {
+        return true;
+    }
+    if (valueType != napi_object) {
+        return false;
+    }
+
+    napi_value globalObj = nullptr;
+    napi_get_global(asyncCtx->env, &globalObj);
+    napi_value globalFunc = nullptr;
+    napi_get_named_property(asyncCtx->env, globalObj, "applyImageModifierToNode", &globalFunc);
+    napi_typeof(asyncCtx->env, globalFunc, &valueType);
+    if (globalFunc == nullptr || valueType != napi_function) {
+        return false;
+    }
+
+    auto applyOnNodeSync =
+        [modifierObj, globalFunc, asyncCtx](WeakPtr<NG::FrameNode> frameNode) {
+            // convert nodeptr to js value
+            auto nodePtr = frameNode.Upgrade();
+            const size_t size = 64; // fake size for gc
+            napi_value nodeJsValue = nullptr;
+            napi_create_external_with_size(
+                asyncCtx->env, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                [](napi_env env, void* data, void* hint) {}, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                &nodeJsValue, size);
+            if (nodeJsValue == nullptr) {
+                return;
+            }
+            // apply modifier
+            napi_value ret;
+            napi_value params[2];
+            params[0] = modifierObj;
+            params[1] = nodeJsValue;
+            napi_call_function(asyncCtx->env, nullptr, globalFunc, 2, params, &ret);
+        };
+
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+    return true;
+}
+
+bool GetNamedPropertyModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value previewOptionsNApi, std::string& errMsg)
+{
+    napi_value modifierObj = nullptr;
+    napi_get_named_property(asyncCtx->env, previewOptionsNApi, "modifier", &modifierObj);
+    if (!ApplyPreviewOptionsFromModifier(asyncCtx, modifierObj, asyncCtx->dragPreviewOption)) {
+        errMsg = "apply modifier failed.";
+        return false;
+    }
+    return true;
+}
+
+bool SetDragPreviewOptionMode(DragControllerAsyncCtx* asyncCtx, napi_value& modeNApi,
+    std::string& errMsg, bool& isAuto)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(asyncCtx->env, modeNApi, &valueType);
+    if (valueType == napi_undefined) {
+        return true;
+    } else if (valueType != napi_number) {
+        errMsg = "mode type is wrong";
+        return false;
+    } else if (isAuto) {
+        return true;
+    }
+
+    int32_t dragPreviewMode = 0;
+    napi_get_value_int32(asyncCtx->env, modeNApi, &dragPreviewMode);
+    auto mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+    switch (mode) {
+        case NG::DragPreviewMode::AUTO:
+            asyncCtx->dragPreviewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case NG::DragPreviewMode::DISABLE_SCALE:
+            asyncCtx->dragPreviewOption.isScaleEnabled = false;
+            break;
+        case NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW:
+            asyncCtx->dragPreviewOption.isDefaultShadowEnabled = true;
+            break;
+        case NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS:
+            asyncCtx->dragPreviewOption.isDefaultRadiusEnabled = true;
+            break;
+        default:
+            break;
+    }
+    return true;
+}
+
+bool ParseDragPreviewMode(DragControllerAsyncCtx* asyncCtx, napi_value& previewOptionsNApi, std::string& errMsg)
+{
+    napi_value modeNApi = nullptr;
+    napi_get_named_property(asyncCtx->env, previewOptionsNApi, "mode", &modeNApi);
+    bool isArray = false;
+    bool isAuto = false;
+    napi_is_array(asyncCtx->env, modeNApi, &isArray);
+    if (isArray) {
+        uint32_t arrayLength = 0;
+        napi_get_array_length(asyncCtx->env, modeNApi, &arrayLength);
+        for (size_t i = 0; i < arrayLength; i++) {
+            bool hasElement = false;
+            napi_has_element(asyncCtx->env, modeNApi, i, &hasElement);
+            if (!hasElement) {
+                continue;
+            }
+            napi_value element = nullptr;
+            napi_get_element(asyncCtx->env, modeNApi, i, &element);
+            if (!SetDragPreviewOptionMode(asyncCtx, element, errMsg, isAuto)) {
+                return false;
+            }
+        }
+    } else if (!SetDragPreviewOptionMode(asyncCtx, modeNApi, errMsg, isAuto)) {
+        return false;
+    }
+    NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(asyncCtx->dragPreviewOption);
+    return true;
+}
+
+void GetCurrentDipScale(DragControllerAsyncCtx* asyncCtx)
+{
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    asyncCtx->dipScale = pipeline->GetDipScale();
+}
+
 bool ParsePreviewOptions(
     DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType, std::string& errMsg)
 {
@@ -1132,15 +1289,7 @@ bool ParsePreviewOptions(
     napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "previewOptions", &previewOptionsNApi);
     napi_typeof(asyncCtx->env, previewOptionsNApi, &valueType);
     if (valueType == napi_object) {
-        napi_value modeNApi = nullptr;
-        napi_get_named_property(asyncCtx->env, previewOptionsNApi, "mode", &modeNApi);
-        napi_typeof(asyncCtx->env, modeNApi, &valueType);
-        if (valueType == napi_number) {
-            int32_t dragPreviewMode = 0;
-            napi_get_value_int32(asyncCtx->env, modeNApi, &dragPreviewMode);
-            asyncCtx->dragPreviewOption.mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
-        } else if (valueType != napi_undefined) {
-            errMsg = "mode type is wrong";
+        if (!ParseDragPreviewMode(asyncCtx, previewOptionsNApi, errMsg)) {
             napi_close_handle_scope(asyncCtx->env, scope);
             return false;
         }
@@ -1156,6 +1305,11 @@ bool ParsePreviewOptions(
             napi_get_value_bool(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.isShowBadge);
         } else if (valueType != napi_undefined) {
             errMsg = "numberBadge type is wrong.";
+            napi_close_handle_scope(asyncCtx->env, scope);
+            return false;
+        }
+
+        if (!(GetNamedPropertyModifier(asyncCtx, previewOptionsNApi, errMsg))) {
             napi_close_handle_scope(asyncCtx->env, scope);
             return false;
         }
@@ -1215,6 +1369,7 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
         return false;
     }
 
+    GetCurrentDipScale(asyncCtx);
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
     return true;
 }
@@ -1399,7 +1554,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
     InitializeDragControllerCtx(env, info, dragAsyncContext);
 
-    std::string errMsg;
+    std::string errMsg = "";
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
         NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);

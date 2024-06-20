@@ -21,6 +21,7 @@ base_test_output_path = "ace_engine/base"
 image_test_output_path = "ace_engine/image"
 basic_test_output_path = "ace_engine/basic"
 interface_test_output_path = "ace_engine/interfaces"
+adapter_test_output_path = "ace_engine/adapter"
 svg_test_output_path = "ace_engine/svg"
 bridge_test_output_path = "ace_engine/bridge"
 
@@ -75,7 +76,6 @@ template("ace_unittest") {
   }
 
   if (flutter_skia) {
-    ace_unittest_deps += [ "$skia_root_new:skia_ohos" ]
     flutter_external_deps = [ "eventhandler:libeventhandler" ]
   }
 

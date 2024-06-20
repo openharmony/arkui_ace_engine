@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("bridge_unittest") {
   testonly = true
-  deps = [ "common/utils:bridge_utils_test" ]
+  deps = [
+    "common/sourcemap:bridge_source_map_test",
+    "common/utils:bridge_utils_test",
+  ]
 }

@@ -81,7 +81,7 @@ void MediaPlayerImpl::InitListener()
             if (player->stateChangeCallback_) {
                 player->stateChangeCallback_(PlaybackStatus::PREPARED);
             }
-        }, "ArkUIVideoAddPreparedListener");
+        }, "ArkUIVideoPlayerPrepared");
     };
 
     auto onPlayerStatus = [weak = WeakClaim(this), uiTaskExecutor](bool isPlaying) {
@@ -96,7 +96,7 @@ void MediaPlayerImpl::InitListener()
                 player->startRenderFrameCallback_();
             }
 #endif
-        }, "ArkUIVideoAddPlayStatusListener");
+        }, "ArkUIVideoPlayerStatusChanged");
     };
 
     auto onCurrentTimeChange = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
@@ -106,7 +106,7 @@ void MediaPlayerImpl::InitListener()
             if (player->positionUpdateCallback_) {
                 player->positionUpdateCallback_(currentPos);
             }
-        }, "ArkUIVideoAddCurrentPosListener");
+        }, "ArkUIVideoPlayerCurrentTimeChanged");
     };
 
     auto onCompletion = [weak = WeakClaim(this), uiTaskExecutor] {
@@ -116,7 +116,7 @@ void MediaPlayerImpl::InitListener()
             if (player->stateChangeCallback_) {
                 player->stateChangeCallback_(PlaybackStatus::PLAYBACK_COMPLETE);
             }
-        }, "ArkUIVideoAddCompletionListener");
+        }, "ArkUIVideoPlayerCompletion");
     };
 
     player_->AddPreparedListener(onPrepared);

@@ -33,6 +33,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/common_decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
@@ -90,35 +91,11 @@ enum class SpreadMethod {
     REPEAT,
 };
 
-enum class BlurStyle {
-    NO_MATERIAL = 0,
-    THIN,
-    REGULAR,
-    THICK,
-    BACKGROUND_THIN,
-    BACKGROUND_REGULAR,
-    BACKGROUND_THICK,
-    BACKGROUND_ULTRA_THICK,
-    COMPONENT_ULTRA_THIN,
-    COMPONENT_THIN,
-    COMPONENT_REGULAR,
-    COMPONENT_THICK,
-    COMPONENT_ULTRA_THICK,
-};
 
 enum class ThemeColorMode {
     SYSTEM = 0,
     LIGHT,
     DARK,
-};
-
-enum class AdaptiveColor {
-    DEFAULT = 0,
-    AVERAGE,
-};
-
-struct BlurOption {
-    std::vector<float> grayscale;
 };
 
 struct MotionBlurAnchor {
@@ -135,11 +112,11 @@ struct MotionBlurAnchor {
 };
 
 struct MotionBlurOption {
-    Dimension radius;
+    float radius = 0.0f;
     MotionBlurAnchor anchor;
     bool operator==(const MotionBlurOption& other) const
     {
-        return radius == other.radius && anchor == other.anchor;
+        return NearEqual(radius, other.radius) && anchor == other.anchor;
     }
     bool operator!=(const MotionBlurOption& other) const
     {
@@ -160,6 +137,10 @@ struct BlurStyleOption {
     }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
             "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
             "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
@@ -183,40 +164,7 @@ struct MenuPreviewAnimationOptions {
     float scaleTo { -1.0f };
 };
 
-struct EffectOption {
-    Dimension radius;
-    double saturation { 1.0f };
-    double brightness { 1.0f };
-    Color color { Color::TRANSPARENT };
-    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
-    BlurOption blurOption;
-    bool operator==(const EffectOption& other) const
-    {
-        return radius == other.radius && NearEqual(saturation, other.saturation) &&
-               NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
-    }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
-    {
-        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        auto jsonEffect = JsonUtil::Create(true);
-        auto jsonBrightnessOption = JsonUtil::Create(true);
-        jsonBrightnessOption->Put("radius", radius.Value());
-        jsonBrightnessOption->Put("saturation", saturation);
-        jsonBrightnessOption->Put("brightness", brightness);
-        jsonBrightnessOption->Put("color", color.ColorToString().c_str());
-        jsonBrightnessOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int32_t>(adaptiveColor)]);
-        auto grayscale = "[0,0]";
-        if (blurOption.grayscale.size() > 1) {
-            grayscale =
-                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
-                    .c_str();
-        }
-        jsonBrightnessOption->Put("blurOption", grayscale);
-        jsonEffect->Put("options", jsonBrightnessOption);
 
-        json->PutExtAttr("backgroundEffect", jsonEffect, filter);
-    }
-};
 
 struct BrightnessOption {
     double rate { 1.0f };
@@ -224,8 +172,8 @@ struct BrightnessOption {
     double cubicCoeff { 0.0f };
     double quadCoeff { 0.0f };
     double saturation { 1.0f };
-    std::vector<float> posRGB;
-    std::vector<float> negRGB;
+    std::vector<float> posRGB = { 0.0f, 0.0f, 0.0f };
+    std::vector<float> negRGB = { 0.0f, 0.0f, 0.0f };
     double fraction { 1.0f };
     bool operator==(const BrightnessOption& other) const
     {
@@ -234,8 +182,12 @@ struct BrightnessOption {
                NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
                NearEqual(fraction, other.fraction);
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         auto jsonBrightnessOption = JsonUtil::Create(true);
         jsonBrightnessOption->Put("rate", rate);
         jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
@@ -256,7 +208,7 @@ struct BrightnessOption {
         }
         jsonBrightnessOption->Put("negRGB", negRGBstr);
         jsonBrightnessOption->Put("fraction", fraction);
-        json->Put("brightnessEffect", jsonBrightnessOption);
+        json->PutExtAttr("brightnessEffect", jsonBrightnessOption, filter);
     }
 };
 
@@ -447,7 +399,7 @@ struct ACE_EXPORT ConicGradient {
     std::optional<AnimatableDimension> startAngle;
 };
 
-class ACE_EXPORT Gradient final {
+class ACE_FORCE_EXPORT Gradient final {
 public:
     void AddColor(const GradientColor& color);
 
@@ -711,7 +663,7 @@ struct ClickEffectInfo {
     }
 };
 
-class ACE_EXPORT BackgroundImageSize final {
+class ACE_FORCE_EXPORT BackgroundImageSize final {
 public:
     BackgroundImageSize() = default;
     BackgroundImageSize(BackgroundImageSizeType type, double value) : typeX_(type), valueX_(value) {}
@@ -1622,7 +1574,7 @@ struct PathArgs {
     double para8 = 0.0;
 };
 
-class ACE_EXPORT CanvasPath2D : virtual public AceType {
+class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
     DECLARE_ACE_TYPE(CanvasPath2D, AceType)
 public:
     CanvasPath2D() = default;

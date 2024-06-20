@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 class NodeContainerBridge {
 public:
     static ArkUINativeModuleValue Rebuild(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Clean(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

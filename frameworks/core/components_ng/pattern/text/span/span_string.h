@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -49,12 +50,16 @@ public:
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
-    const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
+    std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
-
+    bool EncodeTlv(std::vector<uint8_t>& buff);
+    static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
+    static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
+    void ClearSpans();
+    void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
@@ -74,6 +79,15 @@ protected:
     void RemoveSpecialSpan(int32_t start, int32_t end, SpanType type);
     // For the scene after image remove
     bool CheckRange(const RefPtr<SpanBase>& spanBase) const;
+    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
+    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    std::list<RefPtr<NG::SpanItem>>::iterator SplitSpansAndForward(std::list<RefPtr<NG::SpanItem>>::iterator& it);
+    RefPtr<NG::ImageSpanItem> MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan);
+    RefPtr<NG::CustomSpanItem> MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan);
+    void GetSpecialTypesVector(std::list<int32_t>& indexList, int32_t start, int32_t length);
+    void GetNormalTypesVector(std::list<std::pair<int32_t, int32_t>>& indexList, int32_t start, int32_t length);
+    bool ContainSpecialNode(int32_t start, int32_t length);
+    bool IsSpecialNode(RefPtr<SpanBase> span);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

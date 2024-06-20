@@ -58,6 +58,7 @@ public:
         GetThemeData();
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
+        auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
         color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
@@ -93,7 +94,7 @@ public:
         isItalic_ = paintProperty->GetItalicFontStyle() != Ace::FontStyle::NORMAL;
         progressModifier_->SetIsItalic(isItalic_);
         progressModifier_->SetMaxValue(maxValue_);
-        progressModifier_->SetValue(value_);
+        progressModifier_->SetValue(isSensitive ? 0.0 : value_);
         auto strokeRadius = static_cast<float>(
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);

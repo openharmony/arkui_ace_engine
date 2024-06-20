@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 
 namespace OHOS::Ace {
-class AlertDialogModel {
+class ACE_FORCE_EXPORT AlertDialogModel {
 public:
     static AlertDialogModel* GetInstance();
     virtual ~AlertDialogModel() = default;

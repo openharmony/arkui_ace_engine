@@ -42,4 +42,61 @@ ArkUINativeModuleValue StepperItemBridge::ResetNextLabel(ArkUIRuntimeCallInfo* r
     GetArkUINodeModifiers()->getStepperItemModifier()->resetNextLabel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue StepperItemBridge::SetPrevLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+        GetArkUINodeModifiers()->getStepperItemModifier()->resetPrevLabel(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string prevLabel = valueArg->ToString(vm)->ToString();
+    GetArkUINodeModifiers()->getStepperItemModifier()->setPrevLabel(nativeNode, prevLabel.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue StepperItemBridge::ResetPrevLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getStepperItemModifier()->resetPrevLabel(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue StepperItemBridge::SetStatus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (valueArg->IsUndefined() || !valueArg->IsNumber()) {
+        GetArkUINodeModifiers()->getStepperItemModifier()->resetStatus(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    const std::array<std::string, 4> statusArray = { "normal", "disabled", "waiting", "skip" };
+    std::string status = statusArray[0];
+    int32_t index = valueArg->Int32Value(vm);
+    if (index > 0 && index < statusArray.size()) {
+        status = statusArray.at(index);
+    }
+    GetArkUINodeModifiers()->getStepperItemModifier()->setStatus(nativeNode, status.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue StepperItemBridge::ResetStatus(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getStepperItemModifier()->resetStatus(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

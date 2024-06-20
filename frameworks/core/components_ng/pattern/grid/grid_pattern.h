@@ -142,6 +142,10 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
+    void SetIrregular(bool value) {
+        irregular_ = value;
+    }
+
     void ResetPositionFlags()
     {
         gridLayoutInfo_.ResetPositionFlags();
@@ -163,8 +167,6 @@ public:
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
-
-    bool OutBoundaryCallback() override;
 
     void ScrollPage(bool reverse, bool smooth = false) override;
 
@@ -192,9 +194,13 @@ public:
         return ScrollAlign::AUTO;
     }
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
+        std::optional<float> extraOffset = std::nullopt) override;
     void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -232,7 +238,16 @@ public:
 
     bool IsReverse() const override;
 
+    Axis GetAxis() const override
+    {
+        return gridLayoutInfo_.axis_;
+    }
+
 private:
+    /**
+     * @brief calculate where startMainLine_ should be after spring animation.
+     * @return main axis position relative to viewport, positive when below viewport.
+     */
     float GetEndOffset();
     float GetMainGap() const;
     float GetAllDelta();
@@ -280,9 +295,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
-    float prevHeight_ = 0;
-    float currentHeight_ = 0;
-
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
 
@@ -296,6 +308,7 @@ private:
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
+    bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;

@@ -131,6 +131,9 @@ void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
         auto length = changeArray->Length();
         for (size_t i = 0; i < length; ++i) {
             auto change = changeArray->GetValueAt(i);
+            if (!change->IsObject()) {
+                continue;
+            }
             auto changeObject = JSRef<JSObject>::Cast(change);
             int32_t start = 0;
             int32_t deleteCount = 0;
@@ -165,7 +168,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
             ListItemGroupModel::GetInstance()->SetSpace(space);
         }
 
@@ -221,7 +224,9 @@ void JSListItemGroup::JSBind(BindingTarget globalObj)
     JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
     JSClass<JSListItemGroup>::StaticMethod("childrenMainSize", &JSListItemGroup::SetChildrenMainSize);
     JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
+    JSClass<JSListItemGroup>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSListItemGroup>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSListItemGroup>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSListItemGroup>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSListItemGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 

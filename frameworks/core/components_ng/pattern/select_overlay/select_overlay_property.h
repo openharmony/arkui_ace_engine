@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
+#include "frameworks/core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -216,6 +217,7 @@ struct CallerFrameNodeInfo {
 };
 
 struct SelectOverlayInfo {
+    WeakPtr<Pattern> pattern;
     bool isUsingMouse = false;
     bool isSingleHandle = false;
     // when handleReverse is true, The first one is on the right side of the second.
@@ -263,9 +265,11 @@ struct SelectOverlayInfo {
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
     std::optional<CallerFrameNodeInfo> callerNodeInfo;
+    std::optional<RectF> ancestorViewPort;
 
     bool isHandleLineShow = true;
     std::string selectText;
+    bool isSingleLine = false;
 
     std::string ToString() const
     {
@@ -285,6 +289,8 @@ struct SelectOverlayInfo {
         JSON_STRING_PUT_STRING(jsonValue, selectText);
         return jsonValue->ToString();
     }
+
+    void GetCallerNodeAncestorViewPort(RectF& viewPort);
 };
 
 } // namespace OHOS::Ace::NG

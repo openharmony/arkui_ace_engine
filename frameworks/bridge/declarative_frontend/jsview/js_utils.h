@@ -34,6 +34,11 @@ class WantWrap;
 }
 #endif
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+}
+
 namespace OHOS::Ace::Framework {
 class ScopeRAII {
 public:
@@ -61,6 +66,10 @@ bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<Pi
     int32_t& duration, int32_t& iterations);
 #endif
 
+const Rosen::VisualEffect* CreateRSEffectFromNapiValue(JSRef<JSVal> obj);
+const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj);
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args);
+std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
 bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
 bool IsDrawable(const JSRef<JSVal>& jsValue);

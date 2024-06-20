@@ -89,15 +89,15 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
 }
 
 bool TaskExecutorImpl::PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
-    uint32_t delayTime, const std::string& name) const
+    uint32_t delayTime, const std::string& name, PriorityType priorityType) const
 {
     CHECK_NULL_RETURN(taskRunner, false);
     CHECK_NULL_RETURN(task, false);
 
     if (delayTime > 0) {
-        taskRunner->PostDelayedTask(std::move(task), delayTime, name);
+        taskRunner->PostDelayedTask(std::move(task), delayTime, name, priorityType);
     } else {
-        taskRunner->PostTask(std::move(task), name);
+        taskRunner->PostTask(std::move(task), name, priorityType);
     }
     return true;
 }
@@ -178,7 +178,8 @@ void TaskExecutorImpl::InitOtherThreads(const OHOS::Ace::TaskRunners& taskRunner
         "ArkUIFillTaskTypeTable");
 }
 
-bool TaskExecutorImpl::OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name) const
+bool TaskExecutorImpl::OnPostTask(
+    Task&& task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType) const
 {
     int32_t currentId = Container::CurrentId();
     auto traceIdFunc = [weak = WeakClaim(const_cast<TaskExecutorImpl*>(this)), type]() {
@@ -188,35 +189,20 @@ bool TaskExecutorImpl::OnPostTask(Task&& task, TaskType type, uint32_t delayTime
         }
     };
 
-    TaskExecutor::Task wrappedTask;
-    if (taskWrapper_ != nullptr) {
-        switch (type) {
-            case TaskType::PLATFORM:
-            case TaskType::UI:
-            case TaskType::JS:
-                LOGD("wrap npi task, currentId = %{public}d", currentId);
-                wrappedTask =
-                    WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
-                break;
-            case TaskType::IO:
-            case TaskType::GPU:
-            case TaskType::BACKGROUND:
-                wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
-                                             : std::move(task);
-                break;
-            default:
-                return false;
-        }
-    } else {
-        wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
-                                     : std::move(task);
+    if (taskWrapper_ != nullptr && (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
+        TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
+        taskWrapper_->Call(std::move(wrappedTask));
+        return true;
     }
+
+    TaskExecutor::Task wrappedTask =
+        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
 
     switch (type) {
         case TaskType::PLATFORM:
             return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::UI:
-            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name);
+            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name, priorityType);
         case TaskType::IO:
             return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::GPU:

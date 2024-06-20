@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_IMAGE_H
 
+#include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,10 @@ public:
     std::shared_ptr<RSData> LoadBase64Image(const std::string& uri);
     SrcType ParseHrefAttr(const std::string& uri);
     RSRect CalcDstRect(const Size& realSize, const Rect& viewBox);
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgImageAttribute imageAttr_;
 };
 
 } // namespace OHOS::Ace::NG

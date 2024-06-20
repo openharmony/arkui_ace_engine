@@ -18,7 +18,7 @@
 #include "adapter/preview/entrance/ace_preview_helper.h"
 
 namespace OHOS::Ace {
-void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& caller)
+void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& caller, PriorityType priorityType)
 {
     auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
     if (postTask) {
@@ -34,7 +34,8 @@ void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t
     }
 }
 
-void TaskRunnerAdapterImpl::PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& caller)
+void TaskRunnerAdapterImpl::PostDelayedTask(
+    std::function<void()> task, uint32_t delay, const std::string& caller, PriorityType priorityType)
 {
     auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
     if (postTask) {

@@ -102,6 +102,20 @@ public:
         return "-";
     }
 
+    void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize)
+    {
+        isDefaultFontSize_ = isDefaultFontSize;
+        isDefaultBadgeSize_ = isDefaultBadgeSize;
+    }
+    bool GetFontSizeIsDefault() const
+    {
+        return isDefaultFontSize_;
+    }
+    bool GetBadgeSizeIsDefault() const
+    {
+        return isDefaultBadgeSize_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeValue, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCount, int, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeMaxCount, int, PROPERTY_UPDATE_MEASURE);
@@ -120,6 +134,8 @@ public:
 
 private:
     double badgeCircleRadius_;
+    bool isDefaultFontSize_;
+    bool isDefaultBadgeSize_;
 };
 
 } // namespace OHOS::Ace::NG

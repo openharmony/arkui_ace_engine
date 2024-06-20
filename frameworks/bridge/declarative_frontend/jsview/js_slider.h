@@ -34,11 +34,6 @@ enum class SliderChangeMode {
     END,
 };
 
-enum class SliderInteraction {
-    SLIDE_AND_CLICK = 0,
-    SLIDE_ONLY,
-};
-
 class JSSlider : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
@@ -62,6 +57,7 @@ public:
     static void SetBlockStyle(const JSCallbackInfo& info);
     static void SetStepSize(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+    static void SetValidSlideRange(const JSCallbackInfo& info);
 
 private:
     static void ResetBlockStyle();

@@ -42,11 +42,7 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
                          const RefPtr<DialogTheme>& theme)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-            properties.alignment = DialogAlignment::BOTTOM;
-        } else {
-            properties.alignment = DialogAlignment::CENTER;
-        }
+        properties.alignment = theme->GetAlignment();
     }
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
@@ -106,6 +102,14 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(textPickerNode);
     }
+    PaddingProperty defaultPadding;
+    float horizontalPadding = pickerTheme->GetPaddingHorizontal().ConvertToPx();
+    float verticalPadding = pickerTheme->GetPaddingVertical().ConvertToPx();
+    defaultPadding = { CalcLength(horizontalPadding), CalcLength(horizontalPadding),
+        CalcLength(verticalPadding), CalcLength(verticalPadding) };
+    auto layoutProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePadding(defaultPadding);
     stack->Push(textPickerNode);
     options_.clear();
 }
@@ -269,6 +273,11 @@ void TextPickerModelNG::SetGradientHeight(const Dimension& value)
 
 void TextPickerModelNG::SetCanLoop(const bool value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetCanLoop(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
 }
 
@@ -629,19 +638,22 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(
-                properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
+                properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
+        TaskExecutor::TaskType::UI, "ArkUITextPickerShowTextDialog");
 }
 
 void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetCanLoop(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value, frameNode);
 }
 
@@ -886,7 +898,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
     for (uint32_t i = 0; i < options_.size(); i++) {
-        if (values.size() > 0 && i > values.size() - 1) {
+        if (values.size() > 0 && values.size() < i + 1) {
             if (options_[i].rangeResult.size() > 0) {
                 selectedValues.emplace_back(options_[i].rangeResult[0]);
             } else {
@@ -899,6 +911,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
                 selectedValues[i] = options_[i].rangeResult.front();
                 valuesIndex.emplace_back(0);
             } else {
+                selectedValues.emplace_back(values[i]);
                 valuesIndex.emplace_back(std::distance(options_[i].rangeResult.begin(), valueIterator));
             }
         }
@@ -944,7 +957,10 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
 PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -963,7 +979,10 @@ PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -982,7 +1001,10 @@ PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
 PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(frameNode, pickerTextStyle);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, pickerTextStyle);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -1072,5 +1094,36 @@ void TextPickerModelNG::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChan
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetSelecteds().size();
+}
+
+std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, "");
+    auto values = textPickerPattern->GetValues();
+    std::string result;
+    for (auto& valueRet : values) {
+        result.append(valueRet + ';');
+    }
+    result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+    return result;
+}
+
+std::vector<uint32_t> TextPickerModelNG::getTextPickerSelecteds(FrameNode* frameNode)
+{
+    std::vector<uint32_t> defaultValue = { 0 };
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, defaultValue);
+    return textPickerPattern->GetSelecteds();
 }
 } // namespace OHOS::Ace::NG

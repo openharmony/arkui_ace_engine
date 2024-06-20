@@ -301,6 +301,13 @@ void SpanModelNG::SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundSty
     spanNode->SetTextBackgroundStyle(style);
 }
 
+void SpanModelNG::SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style)
+{
+    auto spanNode = AceType::DynamicCast<BaseSpan>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->SetTextBackgroundStyle(style);
+}
+
 std::string SpanModelNG::GetContent(UINode* uiNode)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
@@ -334,9 +341,11 @@ Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
 TextStyle SpanModelNG::GetDefaultTextStyle()
 {
     TextStyle textStyle;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, textStyle);
-    return pipelineContext->GetTheme<TextTheme>()->GetTextStyle();
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, textStyle);
+    return textTheme->GetTextStyle();
 }
 
 Color SpanModelNG::GetFontColor(UINode* uiNode)

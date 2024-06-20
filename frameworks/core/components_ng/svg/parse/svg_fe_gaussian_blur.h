@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,13 @@ public:
     ~SvgFeGaussianBlur() override = default;
     static RefPtr<SvgNode> Create();
 
-    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-        ColorInterpolationType& currentColor,
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const SvgColorInterpolationType& srcColor,
+        SvgColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
+    bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+
+private:
+    SvgFeGaussianBlurAttribute gaussianBlurAttr_;
 };
 
 } // namespace OHOS::Ace::NG

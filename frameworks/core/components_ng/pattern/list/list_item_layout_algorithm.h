@@ -94,6 +94,9 @@ public:
         hasEndDeleteArea_ = hasEndDeleteArea;
     }
 
+    bool IsRTLAndVertical(LayoutWrapper* layoutWrapper) const;
+    float SetReverseValue(LayoutWrapper* layoutWrapper, float offset);
+
 private:
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;

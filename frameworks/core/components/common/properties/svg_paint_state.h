@@ -313,6 +313,25 @@ public:
         if (!hasStrokeDashOffset_) {
             strokeDashOffset_ = strokeState.GetStrokeDashOffset();
         }
+        if (!hasGradient_) {
+            gradient_ = strokeState.GetGradient();
+        }
+    }
+
+    std::optional<Gradient>& GetGradient()
+    {
+        return gradient_;
+    }
+
+    const std::optional<Gradient>& GetGradient() const
+    {
+        return gradient_;
+    }
+
+    void SetGradient(const Gradient& gradient, bool isSelf = true)
+    {
+        gradient_ = std::make_optional(gradient);
+        hasGradient_ = isSelf;
     }
 
     bool HasColor() const
@@ -360,6 +379,7 @@ private:
     LineDashParam lineDash_;
     std::vector<Dimension> strokeDashArray_;
     AnimatableDimension strokeDashOffset_;
+    std::optional<Gradient> gradient_;
     std::string href_;
     bool hasColor_ = false;
     bool hasOpacity_ = false;
@@ -371,6 +391,7 @@ private:
     bool hasDashOffset_ = false;
     bool hasStrokeDashArray_ = false;
     bool hasStrokeDashOffset_ = false;
+    bool hasGradient_ = false;
 };
 
 class SvgTextStyle {

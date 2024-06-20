@@ -22,9 +22,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT BadgeModelNG : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
+    void SetIsDefault(bool isDefaultFontSize, bool isDefaultBadgeSize) override
+    {
+        isDefaultFontSize_ = isDefaultFontSize;
+        isDefaultBadgeSize_ = isDefaultBadgeSize;
+    };
 
 private:
     static void UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode);
+    bool isDefaultFontSize_ = true;
+    bool isDefaultBadgeSize_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BADGE_BADGE_MODEL_NG_H

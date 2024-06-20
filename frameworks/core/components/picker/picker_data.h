@@ -26,7 +26,7 @@ enum DatePickerType {
     DATE,
 };
 
-class ACE_EXPORT PickerDate final {
+class ACE_FORCE_EXPORT PickerDate final {
 public:
     PickerDate() = default;
     PickerDate(uint32_t year, uint32_t month, uint32_t day) : year_(year), month_(month), day_(day) {}

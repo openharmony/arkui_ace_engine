@@ -30,6 +30,74 @@ using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
 using GuidelineItem = std::vector<GuidelineInfo>;
 using BarrierItem = std::vector<BarrierInfo>;
+namespace {
+constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
+constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
+std::string HorizontalAlignToString(HorizontalAlign align)
+{
+    switch (align) {
+        case HorizontalAlign::CENTER:
+            return "HorizontalAlign::Center";
+        case HorizontalAlign::START:
+            return "HorizontalAlign::Left";
+        case HorizontalAlign::END:
+            return "HorizontalAlign::End";
+        default:
+            return "Unknown";
+    }
+}
+
+std::string VerticalAlignToString(VerticalAlign align)
+{
+    switch (align) {
+        case VerticalAlign::TOP:
+            return "VerticalAlign::Top";
+        case VerticalAlign::CENTER:
+            return "VerticalAlign::Center";
+        case VerticalAlign::BOTTOM:
+            return "VerticalAlign::Bottom";
+        case VerticalAlign::BASELINE:
+            return "VerticalAlign::BaseLine";
+        default:
+            return "Unknown";
+    }
+}
+
+std::string AlignDirectionToString(AlignDirection direction)
+{
+    switch (direction) {
+        case AlignDirection::MIDDLE:
+            return "AlignDirection::Middle";
+        case AlignDirection::LEFT:
+            return "AlignDirection::Left";
+        case AlignDirection::RIGHT:
+            return "AlignDirection::Middle";
+        case AlignDirection::TOP:
+            return "AlignDirection::Top";
+        case AlignDirection::CENTER:
+            return "AlignDirection::Center";
+        case AlignDirection::BOTTOM:
+            return "AlignDirection::Bottom";
+        default:
+            return "Unknown";
+    }
+}
+
+std::string SingleAlignRuleToString(AlignDirection direction, AlignRule rule)
+{
+    std::string result = AlignDirectionToString(direction) + ": {'" + rule.anchor + "', ";
+    if (static_cast<int32_t>(direction) < HORIZONTAL_DIRECTION_RANGE) {
+        result += HorizontalAlignToString(rule.horizontal);
+    } else if (static_cast<int32_t>(direction) < VERTICAL_DIRECTION_RANGE) {
+        result += VerticalAlignToString(rule.vertical);
+    } else {
+        result += "Unknown";
+    }
+    result += "}";
+    return result;
+}
+} // namespace
+
 struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
@@ -53,6 +121,10 @@ struct FlexItemProperty {
     {
         static const char* ITEM_ALIGN[] = { "ItemAlign.Auto", "ItemAlign.Start", "ItemAlign.Center", "ItemAlign.End",
             "ItemAlign.Stretch", "ItemAlign.Baseline" };
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
         json->PutExtAttr("flexBasis",
             propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto", filter);
         json->PutExtAttr("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100, filter);
@@ -60,6 +132,21 @@ struct FlexItemProperty {
         json->PutExtAttr("alignSelf",
             ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
         json->PutExtAttr("displayPriority", propDisplayIndex.value_or(1), filter);
+    }
+
+    std::string AlignRulesToString()
+    {
+        std::string result;
+        if (!HasAlignRules()) {
+            return result;
+        }
+        auto rules = GetAlignRules().value();
+        auto iter = rules.begin();
+        for (; iter != rules.end(); iter++) {
+            result.append(SingleAlignRuleToString(iter->first, iter->second));
+            result.append(", ");
+        }
+        return result;
     }
 
     void ClearAlignValue()

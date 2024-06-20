@@ -35,7 +35,7 @@ using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusNode>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 
-class ACE_EXPORT FocusNode : public virtual AceType {
+class ACE_FORCE_EXPORT FocusNode : public virtual AceType {
     DECLARE_ACE_TYPE(FocusNode, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(FocusNode);
 

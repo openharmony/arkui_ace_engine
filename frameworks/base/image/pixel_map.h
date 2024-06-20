@@ -25,6 +25,9 @@
 
 namespace OHOS {
 
+namespace Ace {
+class Rect;
+}
 namespace Media {
 class PixelMap;
 }
@@ -131,13 +134,15 @@ enum class AceAntiAliasingOption : int32_t {
     HIGH = 3,
 };
 
-class ACE_EXPORT PixelMap : public AceType {
+class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
+    static RefPtr<PixelMap> DecodeTlv(std::vector<uint8_t>& buff);
+    
     /**
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */
@@ -168,6 +173,8 @@ public:
     // passed to SkImage to release PixelMap shared_ptr
     static void ReleaseProc(const void* /* pixels */, void* context);
     virtual void SavePixelMapToFile(const std::string& dst) const = 0;
+    virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
+    virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
 };
 
 } // namespace Ace

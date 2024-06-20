@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rating_test_ng") {
   type = "new"
-  sources = [ "rating_test_ng.cpp" ]
+  sources = [
+    "rating_content_modifier_test_ng.cpp",
+    "rating_test_ng.cpp",
+  ]
 }

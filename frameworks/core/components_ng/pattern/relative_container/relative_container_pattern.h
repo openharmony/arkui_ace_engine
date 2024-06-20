@@ -50,6 +50,16 @@ public:
         topologicalResult_ = result;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return { true, true, ScopeType::PROJECT_AREA };
+    }
+
     void DumpInfo() override
     {
         DumpLog::GetInstance().AddDesc(std::string("topologicalResult:").append(topologicalResult_));

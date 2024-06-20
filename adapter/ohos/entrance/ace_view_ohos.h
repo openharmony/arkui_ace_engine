@@ -49,6 +49,7 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
+    static void TransformHintChanged(AceViewOhos* view, uint32_t transform);
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr,
@@ -67,6 +68,9 @@ public:
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
     void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
+#endif
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
 
@@ -81,7 +85,10 @@ public:
 
     void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
+#endif
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 
     bool ProcessRotationEvent(float rotationValue);
@@ -108,6 +115,11 @@ public:
     void RegisterDensityChangeCallback(DensityChangeCallback&& callback) override
     {
         densityChangeCallback_ = std::move(callback);
+    }
+
+    void RegisterTransformHintChangeCallback(TransformHintChangeCallback&& callback) override
+    {
+        transformHintChangeCallback_ = std::move(callback);
     }
 
     void RegisterSystemBarHeightChangeCallback(SystemBarHeightChangeCallback&& callback) override
@@ -191,6 +203,17 @@ private:
         }
     }
 
+    void NotifyTransformHintChanged(uint32_t transform)
+    {
+        if (transform_ == transform) {
+            return;
+        }
+        if (transformHintChangeCallback_) {
+            transformHintChangeCallback_(transform);
+        }
+        transform_ = transform;
+    }
+
     void NotifySystemBarHeightChanged(double statusBar, double navigationBar) const
     {
         if (systemBarHeightChangeCallback_) {
@@ -208,10 +231,14 @@ private:
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
     AxisEventCallback axisEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
     ViewPositionChangeCallback viewPositionChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
+    TransformHintChangeCallback transformHintChangeCallback_;
     SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
     DragEventCallBack dragEventCallback_;

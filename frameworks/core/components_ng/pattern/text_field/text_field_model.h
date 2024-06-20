@@ -148,6 +148,11 @@ struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
 };
 
+enum class PreviewTextStyle {
+    NORMAL,
+    UNDERLINE,
+};
+
 class ACE_EXPORT TextFieldControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextFieldControllerBase, AceType);
 
@@ -248,7 +253,7 @@ protected:
     std::function<void(void)> stopEditing_;
 };
 
-class ACE_EXPORT TextFieldModel {
+class ACE_FORCE_EXPORT TextFieldModel {
 public:
     static TextFieldModel* GetInstance();
     virtual ~TextFieldModel() = default;
@@ -348,6 +353,12 @@ public:
 
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
+    virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;
+    virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
+    virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
+    virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
+    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+
 private:
     static std::unique_ptr<TextFieldModel> instance_;
     static std::mutex mutex_;

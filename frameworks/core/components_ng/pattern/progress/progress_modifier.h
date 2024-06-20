@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_MODIFIER_H
 
 #include "base/geometry/arc.h"
-#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 struct RingProgressData {
@@ -40,7 +36,8 @@ class ProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ProgressModifier, ContentModifier);
 
 public:
-    ProgressModifier();
+    explicit ProgressModifier(
+        const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {});
     ~ProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
 
@@ -67,6 +64,7 @@ public:
     void SetSmoothEffect(bool value);
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
+    void SetIsRightToLeft(bool value);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -75,7 +73,8 @@ private:
 
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintLinearSweeping(RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const;
+    void PaintLinearSweeping(
+        RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal, const SizeF& contentSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintRingProgressOrShadow(RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const;
@@ -147,6 +146,7 @@ private:
     RefPtr<PropertyBool> isItalic_;
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> isRightToLeft_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

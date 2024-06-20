@@ -152,7 +152,7 @@ struct SafeAreaExpandOpts {
         return "SafeAreaExpandOpts: type:" + TypeToString() + ", edges: " + EdgeToString();
     }
 
-    std::string TypeToString()
+    const std::string TypeToString()
     {
         switch (type) {
             case SAFE_AREA_TYPE_NONE:
@@ -170,7 +170,7 @@ struct SafeAreaExpandOpts {
         }
     }
 
-    std::string EdgeToString()
+    const std::string EdgeToString()
     {
         switch (edges) {
             case SAFE_AREA_EDGE_NONE:

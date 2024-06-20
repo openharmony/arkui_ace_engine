@@ -27,7 +27,7 @@ class ACE_EXPORT ThemeManager : public AceType {
 
 public:
     ThemeManager() = default;
-     ~ThemeManager() override = default;
+    ~ThemeManager() override = default;
 
     virtual void InitResource(const ResourceInfo& resourceInfo) {}
 

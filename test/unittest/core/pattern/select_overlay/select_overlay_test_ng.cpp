@@ -21,6 +21,9 @@
 #define private public
 
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
@@ -37,13 +40,11 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -64,6 +65,7 @@ const Color COLOR_ALPHA_MASK = Color::FromRGB(255, 100, 100);
 constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF offset(10, 10);
 int32_t callBackFlag = 0;
+constexpr float RK356_HEIGHT = 1136.0f;
 } // namespace
 
 class SelectOverlayTestNg : public testing::Test {
@@ -120,6 +122,9 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeCreator001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.isUsingMouse = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     EXPECT_NE(selectOverlayNode, nullptr);
 
@@ -192,6 +197,7 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest001, TestSize.Level1)
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -645,11 +651,11 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator004, TestSize.Level1)
     TouchEventInfo touchInfo("touchDown");
     infoPtr->onTouchDown = [](const TouchEventInfo& info) {
         callBackFlag = 1;
-        return ;
+        return;
     };
     infoPtr->onTouchUp = [](const TouchEventInfo& info) {
         callBackFlag = 2;
-        return ;
+        return;
     };
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::UP);
@@ -686,11 +692,11 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator005, TestSize.Level1)
     TouchEventInfo touchInfo("touchDown");
     infoPtr->onTouchDown = [](const TouchEventInfo& info) {
         callBackFlag = 1;
-        return ;
+        return;
     };
     infoPtr->onTouchMove = [](const TouchEventInfo& info) {
         callBackFlag = 3;
-        return ;
+        return;
     };
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::MOVE);
@@ -965,7 +971,6 @@ HWTEST_F(SelectOverlayTestNg, SelectFrameNodeAnimationTest002, TestSize.Level1)
     }
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
 }
 
 /**
@@ -1053,6 +1058,7 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility001, TestSize.Level1)
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1099,6 +1105,7 @@ HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity001, TestSize.Level1)
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1219,7 +1226,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar001, TestSize.Level1)
         }
         EXPECT_NE(selectOverlayNode->backButton_, nullptr);
         EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-        EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
         auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
         ASSERT_NE(pattern, nullptr);
         auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1271,6 +1277,7 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw001, TestSize.Level1)
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
     EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
@@ -1400,9 +1407,9 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
@@ -1444,374 +1451,6 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
      */
     overlayModifier->onDraw(context);
     EXPECT_EQ(overlayModifier->hasExtensionMenu_, false);
-}
-
-/**
- * @tc.name: UpdateContentModifier001
- * @tc.desc: Test select_ovelay_modifier UpdateContentModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, UpdateContentModifier001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode, pattern and initialize properties.
-     */
-    SelectOverlayInfo selectInfo;
-    selectInfo.menuInfo.menuDisable = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectInfo.menuOptionItems = menuOptionItems;
-    selectInfo.singleLineHeight = NODE_ID;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = pattern->CreatePaintProperty();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
-    EXPECT_NE(selectOverlayPaintMethod, nullptr);
-    selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
-    /**
-     * @tc.steps: step2. call UpdateContentModifier.
-     * @tc.expected: the isCreated_ value is correct.
-     */
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
-    }
-
-/**
- * @tc.name: UpdateContentModifier002
- * @tc.desc: Test select_ovelay_modifier UpdateContentModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, UpdateContentModifier002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
-     */
-    SelectOverlayInfo selectInfo;
-    auto framenode = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    selectInfo.menuInfo.menuDisable = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectInfo.menuOptionItems = menuOptionItems;
-    selectInfo.singleLineHeight = NODE_ID;
-    selectInfo.callerFrameNode = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = pattern->CreatePaintProperty();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
-    EXPECT_NE(selectOverlayPaintMethod, nullptr);
-    selectOverlayPaintMethod->isCreated_ = false;
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
-    /**
-     * @tc.steps: step2. call UpdateContentModifier.
-     * @tc.expected: the isCreated_ value is correct.
-     */
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
-}
-
-/**
- * @tc.name: UpdateContentModifier003
- * @tc.desc: Test select_ovelay_modifier UpdateContentModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, UpdateContentModifier003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
-     */
-    SelectOverlayInfo selectInfo;
-    auto framenode = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    framenode->viewPort_ = RectF(1, 1, 1, 1);
-    selectInfo.menuInfo.menuDisable = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectInfo.menuOptionItems = menuOptionItems;
-    selectInfo.singleLineHeight = NODE_ID;
-    selectInfo.callerFrameNode = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = pattern->CreatePaintProperty();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
-    EXPECT_NE(selectOverlayPaintMethod, nullptr);
-    /**
-     * @tc.steps: step2. call UpdateContentModifier by five situations.
-     * @tc.expected: the hasShowAnimation_ value is correct.
-     */
-    for (int i = 0; i < 5; i++) {
-        switch (i) {
-            case 0:
-                selectOverlayPaintMethod->isCreated_ = true;
-                EXPECT_EQ(selectOverlayPaintMethod->isCreated_, true);
-                selectOverlayPaintMethod->selectOverlayModifier_->SetHasExtensionMenu(true);
-                EXPECT_EQ(selectOverlayPaintMethod->selectOverlayModifier_->hasExtensionMenu_, true);
-                selectOverlayPaintMethod->hasExtensionMenu_ = true;
-                EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, true);
-                break;
-            case 1:
-                selectOverlayPaintMethod->hasExtensionMenu_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, false);
-                break;
-            case 2:
-                selectOverlayPaintMethod->isCreated_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
-                selectOverlayPaintMethod->handleIsShown_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
-                selectOverlayPaintMethod->circlesAndBackArrowIsShown_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, false);
-                selectOverlayPaintMethod->hasExtensionMenu_ = true;
-                EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, true);
-                selectOverlayPaintMethod->hasShowAnimation_ = true;
-                EXPECT_EQ(selectOverlayPaintMethod->hasShowAnimation_, true);
-                break;
-            case 3:
-                selectOverlayPaintMethod->handleIsShown_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->handleIsShown_, false);
-                selectOverlayPaintMethod->hasShowAnimation_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->hasShowAnimation_, false);
-                break;
-            case 4:
-                selectOverlayPaintMethod->hasExtensionMenu_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, false);
-                break;
-            default:
-                break;
-        }
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-        selectOverlayPaintMethod->GetOverlayModifier(paintWrapper);
-        selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
-    }
-    EXPECT_EQ(selectOverlayPaintMethod->hasShowAnimation_, false);
-}
-
-/**
- * @tc.name: UpdateContentModifier004
- * @tc.desc: Test select_ovelay_modifier UpdateContentModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode, pattern and initialize properties.
-     */
-    SelectOverlayInfo selectInfo;
-    selectInfo.menuInfo.menuDisable = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectInfo.menuOptionItems = menuOptionItems;
-    selectInfo.singleLineHeight = NODE_ID;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = pattern->CreatePaintProperty();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
-    EXPECT_NE(selectOverlayPaintMethod, nullptr);
-    /**
-     * @tc.steps: step2. call UpdateContentModifier.
-     * @tc.expected: handleColor equals theme handleColor.
-     */
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
-    selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
-    auto contentModifier = pattern->selectOverlayContentModifier_;
-    ASSERT_NE(contentModifier, nullptr);
-    auto overlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
-    ASSERT_NE(overlayTheme, nullptr);
-    EXPECT_TRUE(contentModifier->handleColor_->Get() == overlayTheme->GetHandleColor());
-    /**
-     * @tc.steps: step3. set handlerColor and call UpdateContentModifier.
-     * @tc.expected: the handleColor equals red.
-     */
-    selectOverlayPaintMethod->info_.handlerColor = Color::RED;
-    selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
-    EXPECT_TRUE(contentModifier->handleColor_->Get() == Color::RED);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: UpdateOverlayModifier001
- * @tc.desc: Test select_ovelay_modifier UpdateOverlayModifier.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
-     */
-    SelectOverlayInfo selectinfo;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectinfo.menuOptionItems = menuOptionItems;
-    selectinfo.singleLineHeight = NODE_ID;
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectinfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode->extensionMenu_, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto paintProperty = pattern->CreatePaintProperty();
-    ASSERT_NE(paintProperty, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    ASSERT_NE(paintWrapper, nullptr);
-    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
-    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
-    EXPECT_NE(selectOverlayPaintMethod, nullptr);
-    /**
-     * @tc.steps: step2. call UpdateContentModifier by five situations.
-     * @tc.expected: the hasExtensionMenu_ value is correct.
-     */
-    for (int i = 0; i < 5; i++) {
-        switch (i) {
-            case 0:
-                selectOverlayPaintMethod->isCreated_ = true;
-                selectOverlayPaintMethod->selectOverlayModifier_->SetHasExtensionMenu(false);
-                selectOverlayPaintMethod->hasExtensionMenu_ = true;
-                break;
-            case 1:
-                selectOverlayPaintMethod->selectOverlayModifier_->SetHasExtensionMenu(true);
-                selectOverlayPaintMethod->hasExtensionMenu_ = false;
-                break;
-            case 2:
-                selectOverlayPaintMethod->isCreated_ = false;
-                selectOverlayPaintMethod->circlesAndBackArrowIsShown_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, false);
-                selectOverlayPaintMethod->hasExtensionMenu_ = true;
-                selectOverlayPaintMethod->hasShowAnimation_ = true;
-                break;
-            case 3:
-                selectOverlayPaintMethod->circlesAndBackArrowIsShown_ = false;
-                EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, false);
-                selectOverlayPaintMethod->hasShowAnimation_ = false;
-                break;
-            case 4:
-                selectOverlayPaintMethod->hasExtensionMenu_ = true;
-                break;
-            default:
-                break;
-        }
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-        selectOverlayPaintMethod->GetContentModifier(paintWrapper);
-        selectOverlayPaintMethod->UpdateOverlayModifier(paintWrapper);
-    }
-    EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, true);
 }
 
 /**
@@ -2055,7 +1694,7 @@ HWTEST_F(SelectOverlayTestNg, OnDetachFromFrameNode001, TestSize.Level1)
     selectInfo.singleLineHeight = NODE_ID;
     auto testCallback = [](bool closedByGlobalTouchEvent_) {
         callBackFlag = static_cast<int32_t>(closedByGlobalTouchEvent_);
-        return ;
+        return;
     };
     selectInfo.onClose = testCallback;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -2188,7 +1827,7 @@ HWTEST_F(SelectOverlayTestNg, ShowOrHiddenMenu001, TestSize.Level1)
                 if (infoPtr->menuInfo.menuIsShow && isHidden) {
                     EXPECT_FALSE(pattern->info_->menuInfo.menuIsShow);
                 } else if (!infoPtr->menuInfo.menuIsShow && !isHidden &&
-                            (infoPtr->firstHandle.isShow || infoPtr->secondHandle.isShow)) {
+                           (infoPtr->firstHandle.isShow || infoPtr->secondHandle.isShow)) {
                     EXPECT_TRUE(pattern->info_->menuInfo.menuIsShow);
                 }
             }
@@ -2283,10 +1922,11 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->isExtensionMenu_ = true;
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
-
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->CreateToolBar();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
@@ -2298,18 +1938,17 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     selectOverlayNode->backButtonStatus_ = FrameNodeStatus::GONETOVISIBLE;
     ASSERT_NE(selectOverlayNode->backButton_, nullptr);
     ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
-    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
 
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     infoPtr->menuCallback.onCut = []() {
         callBackFlag = 1;
-        return ;
+        return;
     };
     infoPtr->menuCallback.onPaste = []() {
         callBackFlag = 2;
-        return ;
+        return;
     };
 
     /**
@@ -2836,6 +2475,75 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NewMenuAvoidStrategy002
+ * @tc.desc: Test NewMenuAvoidStrategy002 in Select Overlay algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuInfo.menuIsShow = false;
+    selectInfo.selectArea = { 100, 500, 200, 50 };
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+    * @tc.steps: step2. Create pattern and geometryNode.
+    */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+    * @tc.steps: step3. Get layoutWrapper and layoutAlgorithm.
+    * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
+    */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+
+    /**
+    * @tc.steps: step4. set keyboardInset_ to button.
+    */
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    RefPtr<SafeAreaManager> safeAreamanager = AceType::MakeRefPtr<SafeAreaManager>();
+    safeAreamanager->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->safeAreaManager_ = safeAreamanager;
+
+    /**
+    * @tc.steps: step5. Test cases.
+    */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
+    auto menuWidth = 200;
+    auto menuHeight = 100;
+    infoPtr->firstHandle.isShow = false;
+    infoPtr->secondHandle.isShow = false;
+    auto ret = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    OffsetF expectRet(100, 200);
+    bool equal = (ret == expectRet);
+    EXPECT_TRUE(equal);
+}
+
+/**
  * @tc.name: UpdateFirstAndSecondHandleInfo001
  * @tc.desc: Test SelectOverlayPattern UpdateFirstAndSecondHandleInfo.
  * @tc.type: FUNC
@@ -2927,7 +2635,7 @@ HWTEST_F(SelectOverlayTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     EXPECT_EQ(callBackFlag, 1);
     pattern->info_->menuInfo.menuBuilder = []() {
         callBackFlag = 2;
-        return ;
+        return;
     };
     pattern->BeforeCreateLayoutWrapper();
     EXPECT_EQ(callBackFlag, 1);
@@ -3021,7 +2729,7 @@ HWTEST_F(SelectOverlayTestNg, GetDefaultLineWidth001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     Dimension dimension = SelectHandleInfo::GetDefaultLineWidth();
-    EXPECT_EQ(dimension.Value(), 1.5);
+    EXPECT_EQ(dimension.Value(), 2);
 }
 
 /**
@@ -3050,7 +2758,7 @@ HWTEST_F(SelectOverlayTestNg, Measure001, TestSize.Level1)
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     auto item = FrameNode::GetOrCreateFrameNode(
-            V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     selectOverlayNode->AddChild(item);
     firstGeometryNode->Reset();
@@ -3095,7 +2803,7 @@ HWTEST_F(SelectOverlayTestNg, Measure002, TestSize.Level1)
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     auto item = FrameNode::GetOrCreateFrameNode(
-            V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     selectOverlayNode->AddChild(item);
     auto layoutProperty = pattern->CreateLayoutProperty();
@@ -3479,5 +3187,94 @@ HWTEST_F(SelectOverlayTestNg, CreateCustomSelectOverlay, TestSize.Level1)
     selectInfo.menuInfo.menuIsShow = false;
     selectOverlayNode->CreateCustomSelectOverlay(infoPtr);
     EXPECT_NE(selectOverlayNode->selectMenuStatus_, FrameNodeStatus::GONE);
+}
+
+/**
+ * @tc.name: SetSelectMenuHeight001
+ * @tc.desc: Test SelectOverlayPattern SetSelectMenuHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetSelectMenuHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and call SetSelectMenuHeight function.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectMenuHeight();
+}
+
+/**
+ * @tc.name: SelectOverlayModifier001
+ * @tc.desc: Test selectOverlay modifier function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(selectOverlayNode->backButton_, nullptr);
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    EXPECT_NE(pattern, nullptr);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+    auto contentModifier = pattern->selectOverlayContentModifier_;
+    EXPECT_NE(contentModifier, nullptr);
+    auto selectOverlayModifier = pattern->selectOverlayModifier_;
+    ASSERT_NE(selectOverlayModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Test selectOverlay modifier SelectOverlayModifier function.
+     */
+    selectOverlayModifier->SetDefaultCircleAndLineEndOffset();
+    Dimension radius = 2.0_vp;
+    selectOverlayModifier->pointRadius_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(Dimension(1.75_vp).ConvertToPx());
+    selectOverlayModifier->SetOtherPointRadius(radius);
+    EXPECT_EQ(radius, 2.0_vp);
 }
 } // namespace OHOS::Ace::NG

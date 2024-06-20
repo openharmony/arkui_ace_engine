@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -27,9 +28,13 @@
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #endif
 #endif
+#ifdef USE_PLATFORM_FONT
+#include "core/common/font/font_platform_proxy.h"
+#endif
 
 namespace OHOS::Ace {
 
+std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
 
@@ -59,7 +64,6 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
 
 void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
-    isDefaultFontChanged_ = true;
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
 }
@@ -73,8 +77,29 @@ bool FontManager::IsDefaultFontChanged()
     return isDefaultFontChanged_;
 }
 
+bool FontManager::IsUseAppCustomFont()
+{
+    return !appCustomFont_.empty();
+}
+
+void FontManager::SetAppCustomFont(const std::string& familyName)
+{
+    appCustomFont_ = familyName;
+}
+
+const std::string& FontManager::GetAppCustomFont() const
+{
+    return appCustomFont_;
+}
+
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 {
+#ifdef USE_PLATFORM_FONT
+    auto fontPlatform = FontPlatformProxy::GetInstance().GetFontPlatform();
+    if (fontPlatform) {
+        fontPlatform->GetSystemFontList(fontList);
+    }
+#else
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
@@ -85,6 +110,7 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
         std::string fontName = systemFontList[i].fullName;
         fontList.emplace_back(fontName);
     }
+#endif
 #endif
 #endif
 }
@@ -135,6 +161,12 @@ void FontManager::GetUIFontConfig(FontConfigJsonInfo& info)
 bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 {
     bool isGetFont = false;
+#ifdef USE_PLATFORM_FONT
+    auto fontPlatform = FontPlatformProxy::GetInstance().GetFontPlatform();
+    if (fontPlatform) {
+        isGetFont = fontPlatform->GetSystemFont(fontName, fontInfo);
+    }
+#else
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
     Rosen::TextEngine::FontParser fontParser;
@@ -148,13 +180,14 @@ bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
         fontInfo.fullName = systemFontDesc->fullName;
         fontInfo.family = systemFontDesc->fontFamily;
         fontInfo.subfamily = systemFontDesc->fontSubfamily;
-        fontInfo.weight = systemFontDesc->weight;
-        fontInfo.width = systemFontDesc->width;
+        fontInfo.weight = static_cast<uint32_t>(systemFontDesc->weight);
+        fontInfo.width = static_cast<uint32_t>(systemFontDesc->width);
         fontInfo.italic = systemFontDesc->italic;
         fontInfo.monoSpace = systemFontDesc->monoSpace;
         fontInfo.symbolic = systemFontDesc->symbolic;
         isGetFont = true;
     }
+#endif
 #endif
 #endif
     return isGetFont;
@@ -164,14 +197,12 @@ bool FontManager::RegisterCallback(
     const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoaded(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 const std::vector<std::string>& FontManager::GetFontNames() const
@@ -234,7 +265,7 @@ void FontManager::RebuildFontNodeNG()
         CHECK_NULL_VOID(fontNode);
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
-            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
             ++iter;
         } else {
             iter = fontNodesNG_.erase(iter);
@@ -294,14 +325,12 @@ bool FontManager::RegisterCallbackNG(
     const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
     CHECK_NULL_RETURN(callback, false);
-    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoadedNG(node, callback);
-            isCustomFont = true;
         }
     }
-    return isCustomFont;
+    return false;
 }
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)

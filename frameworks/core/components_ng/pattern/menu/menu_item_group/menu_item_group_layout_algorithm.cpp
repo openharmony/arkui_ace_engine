@@ -39,8 +39,6 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    groupDividerPadding_ = static_cast<float>(theme->GetDividerPaddingVertical().ConvertToPx()) * 2 +
-                           static_cast<float>(theme->GetDefaultDividerWidth().ConvertToPx());
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -60,7 +58,6 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF menuItemGroupSize;
     menuItemGroupSize.SetWidth(maxChildrenWidth);
     float totalHeight = 0.0f;
-
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
 
     // measure header
@@ -261,11 +258,28 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
     auto iconWidth = selectTheme->GetIconSideLength();
     auto iconContentPadding = selectTheme->GetIconContentPadding();
     auto margin = MarginProperty();
-    if (pattern->HasSelectIcon()) {
-        margin.left = CalcLength(iconWidth + iconContentPadding);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (pattern->HasSelectIcon()) {
+            margin.left = CalcLength(iconWidth + iconContentPadding);
+        } else {
+            // no need to update zero margin.
+            return;
+        }
     } else {
-        // no need to update zero margin.
-        return;
+        if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
+            margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+        } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
+            margin.left = CalcLength(iconWidth + iconContentPadding);
+        } else {
+            // no need to update zero margin.
+            return;
+        }
+    }
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        auto temp = margin.right;
+        margin.right = margin.left;
+        margin.left = margin.right;
     }
 
     if (headerIndex_ >= 0) {

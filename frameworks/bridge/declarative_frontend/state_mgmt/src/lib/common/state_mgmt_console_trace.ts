@@ -21,35 +21,39 @@
 * everything in this file is framework internal
 */
 
+enum LogTag {
+  STATE_MGMT = 0
+}
+
 class stateMgmtConsole {
   public static log(...args: any): void {
-    aceConsole.log(...args);
+    aceConsole.log(LogTag.STATE_MGMT, ...args);
   }
   public static debug(...args: any): void {
-    aceConsole.debug(...args);
+    aceConsole.debug(LogTag.STATE_MGMT, ...args);
   }
   public static info(...args: any): void {
-    aceConsole.info(...args);
+    aceConsole.info(LogTag.STATE_MGMT, ...args);
   }
   public static warn(...args: any): void {
-    aceConsole.warn(...args);
+    aceConsole.warn(LogTag.STATE_MGMT, ...args);
   }
   public static error(...args: any): void {
-    aceConsole.error(...args);
+    aceConsole.error(LogTag.STATE_MGMT, ...args);
   }
   public static propertyAccess(...args: any): void {
     // enable for fine grain debugging variable observation
     // aceConsole.error(...args)
   }
   public static applicationError(...args: any): void {
-    aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+    aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR \n`, ...args);
   }
 
   public static applicationWarn(...args: any): void {
-    aceConsole.warn(...args);
+    aceConsole.warn(LogTag.STATE_MGMT, ...args);
   }
   public static featureCombinationError(msg: string): void {
-    aceConsole.warn(msg);
+    aceConsole.warn(LogTag.STATE_MGMT, msg);
   }
 }
 

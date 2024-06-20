@@ -68,6 +68,7 @@ public:
     void ExecuteAboutToRecycle();
     void ExecuteSetActive(bool active);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
+    std::string ExecuteOnDumpInfo();
     std::string ExecuteOnFormRecycle();
     void ExecuteOnFormRecover(const std::string &statusData);
 
@@ -119,6 +120,7 @@ private:
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
+    JSWeak<JSFunc> jsOnDumpInspetor_;
     JSWeak<JSFunc>jsOnFormRecycleFunc_;
     JSWeak<JSFunc>jsOnFormRecoverFunc_;
 

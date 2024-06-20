@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <map>
 
 #include "base/utils/device_config.h"
 #include "base/utils/device_type.h"
@@ -93,6 +94,10 @@ struct ACE_FORCE_EXPORT AceRunArgs {
     // Container sdk path.
     std::string containerSdkPath = "";
     bool isComponentMode = false;
+
+    // for strict mode
+    std::map<std::string, std::string> pkgContextInfoJsonStringMap;
+    std::map<std::string, std::string> packageNameList;
 };
 
 } // namespace OHOS::Ace::Platform

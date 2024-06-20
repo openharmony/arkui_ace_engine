@@ -46,7 +46,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     trackThickness_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness);
     trackBackgroundColor_ =
         AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.trackBackgroundColor));
-    selectColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.selectColor));
+    selectGradientColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(parameters.selectGradientColor));
     blockColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor));
     trackBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(parameters.trackThickness * HALF);
     selectedBorderRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(trackBorderRadius_->Get());
@@ -64,6 +65,9 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
         AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
     minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isPress_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -76,7 +80,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(blockCenterY_);
     AttachProperty(trackThickness_);
     AttachProperty(trackBackgroundColor_);
-    AttachProperty(selectColor_);
+    AttachProperty(selectGradientColor_);
     AttachProperty(blockColor_);
     AttachProperty(boardColor_);
     AttachProperty(trackBorderRadius_);
@@ -93,6 +97,8 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(sliderInteractionMode_);
     AttachProperty(minResponse_);
     AttachProperty(blockType_);
+    AttachProperty(isHover_);
+    AttachProperty(isPress_);
 
     InitializeShapeProperty();
 }
@@ -129,6 +135,9 @@ void SliderContentModifier::InitializeShapeProperty()
 
 void SliderContentModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     DrawBackground(context);
     DrawStep(context);
     DrawSelect(context);
@@ -156,6 +165,11 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto trackBorderRadius = trackBorderRadius_->Get();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    scaleValue_ = theme->GetScaleValue();
     std::vector<GradientColor> gradientColors = GetTrackBackgroundColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
@@ -188,7 +202,9 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 #endif
     }
     canvas.AttachBrush(brush);
-    RSRoundRect roundRect(trackRect, trackBorderRadius, trackBorderRadius);
+    isPressOrHover_ = isPress_->Get() || isHover_->Get();
+    RSRoundRect roundRect(trackRect, isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius,
+        isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.Save();
@@ -275,9 +291,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         }
 
         RSBrush brush;
-        brush.SetAntiAlias(true);
-        brush.SetColor(ToRSColor(selectColor_->Get()));
-
+        DrawSelectColor(brush, rect);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(RSRoundRect(rect, selectedBorderRadius, selectedBorderRadius));
         canvas.DetachBrush();
@@ -309,7 +323,8 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
         pen.SetColor(ToRSColor(blockBorderColor_->Get()));
         canvas.AttachPen(pen);
     }
-    canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
+    canvas.DrawCircle(
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isPressOrHover_ ? radius * scaleValue_ : radius);
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
@@ -335,7 +350,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     float diameter = std::min(blockSize.Width(), blockSize.Height());
     auto penRadius = (diameter + hotCircleShadowWidth_) * HALF;
     auto blockCenter = GetBlockCenter();
-    canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
+    canvas.DrawCircle(ToRSPoint(blockCenter), isPressOrHover_ ? penRadius * scaleValue_ : penRadius);
     canvas.DetachPen();
 }
 
@@ -511,8 +526,9 @@ RSRect SliderContentModifier::GetTrackRect()
             rect.SetLeft(backStart.GetX());
             rect.SetRight(backEnd.GetX());
         }
-        rect.SetTop(backStart.GetY() - trackThickness * HALF);
-        rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        rect.SetTop(backStart.GetY() - (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
+        rect.SetBottom(
+            backEnd.GetY() + (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
     } else {
         rect.SetLeft(backStart.GetX() - trackThickness * HALF);
         rect.SetRight(backEnd.GetX() + trackThickness * HALF);
@@ -823,6 +839,9 @@ void SliderContentModifier::SetBlockShape(const RefPtr<BasicShape>& shape)
 
 void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -886,5 +905,49 @@ Gradient SliderContentModifier::SortGradientColorsByOffset(const Gradient& gradi
     }
 
     return sortedGradient;
+}
+
+void SliderContentModifier::DrawSelectColor(RSBrush& brush, RSRect& rect)
+{
+    Gradient gradient = SortGradientColorsByOffset(selectGradientColor_->Get().GetGradient());
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+
+    if (gradientColors.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
+        gradientColors = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()).GetColors();
+    }
+
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    RSPoint startPoint;
+    RSPoint endPoint;
+    auto direction = static_cast<Axis>(directionAxis_->Get());
+    SetStartEndPointLocation(direction, rect, startPoint, endPoint);
+
+    brush.SetAntiAlias(true);
+    if (reverse_) {
+#ifndef USE_ROSEN_DRAWING
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+#else
+        brush.SetShaderEffect(
+            RSRecordingShaderEffect::CreateLinearGradient(endPoint, startPoint, colors, pos, RSTileMode::CLAMP));
+#endif
+    } else {
+#ifndef USE_ROSEN_DRAWING
+        brush.SetShaderEffect(
+            RSShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+#else
+        brush.SetShaderEffect(
+            RSRecordingShaderEffect::CreateLinearGradient(startPoint, endPoint, colors, pos, RSTileMode::CLAMP));
+#endif
+    }
 }
 } // namespace OHOS::Ace::NG

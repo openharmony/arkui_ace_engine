@@ -53,7 +53,14 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<Modifier> GetForegroundModifier(PaintWrapper* paintWrapper)
+    {
+        return nullptr;
+    }
+
     virtual void UpdateContentModifier(PaintWrapper* paintWrapper) {}
+
+    virtual void UpdateForegroundModifier(PaintWrapper* paintWrapper) {}
 
     virtual void UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
 };

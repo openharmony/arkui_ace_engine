@@ -30,7 +30,7 @@ using PendingMakeCanvasImageTask = std::function<void()>;
 // [ImageLoadingContext] do two things:
 // 1. Provide interfaces for who owns it, notify it's owner when loading events come.
 // 2. Drive [ImageObject] to load and make [CanvasImage].
-class ImageLoadingContext : public AceType {
+class ACE_FORCE_EXPORT ImageLoadingContext : public AceType {
     DECLARE_ACE_TYPE(ImageLoadingContext, AceType);
 
 public:
@@ -97,6 +97,57 @@ public:
         return containerId_;
     }
 
+    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
+    {
+        dynamicMode_ = dynamicMode;
+    }
+
+    void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
+    {
+        isHdrDecoderNeed_ = isHdrDecoderNeed;
+    }
+
+    bool GetIsHdrDecoderNeed()
+    {
+        return isHdrDecoderNeed_;
+    }
+
+    DynamicRangeMode GetDynamicRangeMode()
+    {
+        return dynamicMode_;
+    }
+
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
+    void FinishMearuse()
+    {
+        measureFinish_ = true;
+    }
+
+    bool GetLoadInVipChannel()
+    {
+        return loadInVipChannel_;
+    }
+
+    void SetLoadInVipChannel(bool loadInVipChannel)
+    {
+        loadInVipChannel_ = loadInVipChannel;
+    }
+
+    void CallbackAfterMeasureIfNeed();
+
+    void OnDataReadyOnCompleteCallBack();
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
+    bool RemoveDownloadTask(const std::string& src);
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -118,6 +169,7 @@ private:
     bool NotifyReadyIfCacheHit();
     void DownloadImageSuccess(const std::string& imageData);
     void DownloadImageFailed(const std::string& errorMessage);
+    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
@@ -140,12 +192,20 @@ private:
     // the container of the creator thread of this image loading context
     const int32_t containerId_ {0};
 
+    bool isHdrDecoderNeed_ = false;
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool loadInVipChannel_ = false;
+
+    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;
     RectF dstRect_;
     SizeF dstSize_;
+    std::atomic<bool> measureFinish_ = false;
+    std::atomic<bool> needErrorCallBack_ = false;
+    std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
 
@@ -157,6 +217,8 @@ private:
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
 
+    bool firstLoadImage_ = true;
+
     // if another makeCanvasImage task arrives and current state cannot handle makeCanvasImage command,
     // save the least recent makeCanvasImage task and trigger it when the previous makeCanvasImage task end
     // and state becomes MAKE_CANVAS_IMAGE_SUCCESS
@@ -164,6 +226,8 @@ private:
 
     friend class ImageStateManager;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

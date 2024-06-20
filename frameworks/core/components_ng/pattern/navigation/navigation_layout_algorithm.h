@@ -74,6 +74,8 @@ private:
     void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
+    float CalculateNavigationWidth(const RefPtr<NavigationGroupNode>& hostNode);
+
     void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
 
     bool ifNeedInit_ = true;

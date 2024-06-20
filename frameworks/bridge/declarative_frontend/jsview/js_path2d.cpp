@@ -27,6 +27,10 @@ void JSPath2D::Constructor(const JSCallbackInfo& args)
     auto jsPath2d = Referenced::MakeRefPtr<JSPath2D>();
     jsPath2d->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsPath2d));
+    int32_t unit = 0;
+    if (args.GetInt32Arg(std::abs(args.Length() - 1), unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+        jsPath2d->SetUnit(CanvasUnit::PX);
+    }
     jsPath2d->SetCanvasPath2d(JSCanvasRenderer::JsMakePath2D(args));
     args.SetSize(sizeof(JSPath2D));
     EcmaVM* vm = args.GetVm();
@@ -71,7 +75,7 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     SetPathSize(args);
 
     // two parameters
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         auto* jsMatrix2d = args.UnwrapArg<JSMatrix2d>(1);
         if (jsMatrix2d) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
@@ -80,11 +84,15 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
         }
         return;
     }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
-    TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
-    path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
-    SetPathSize(args);
+    if (args[1]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
+        TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
+        double density = GetDensity();
+        param.translateX *= density;
+        param.translateY *= density;
+        path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
+        SetPathSize(args);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

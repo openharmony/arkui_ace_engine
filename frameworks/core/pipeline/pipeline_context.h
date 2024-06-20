@@ -96,6 +96,7 @@ struct VisibleCallbackInfo {
     VisibleRatioCallback callback;
     double visibleRatio = 1.0;
     bool isCurrentVisible = false;
+    uint32_t period = 0;
 };
 
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
@@ -223,6 +224,11 @@ public:
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void OnCrownEvent(const CrownEvent& event, const RefPtr<NG::FrameNode>& node) override {};
+    void OnCrownEvent(const CrownEvent& event) override {};
+#endif
+
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override;
@@ -270,6 +276,8 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
+
+    void OnTransformHintChanged(uint32_t transform) override {}
 
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
@@ -805,15 +813,20 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
 
+    bool IsDensityChanged() const override
+    {
+        return isDensityUpdate_;
+    }
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
     void FlushReloadTransition() override;
-    void FlushUITasks() override
+    void FlushUITasks(bool triggeredByImplicitAnimation = false) override
     {
         FlushLayout();
     }

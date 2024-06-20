@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_AREA_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_AREA_MODIFIER_H
 
 #pragma once
 
@@ -23,4 +25,9 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaContentSizeChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif

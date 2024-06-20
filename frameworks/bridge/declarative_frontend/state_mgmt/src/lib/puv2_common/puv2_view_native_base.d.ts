@@ -31,4 +31,5 @@ declare class NativeViewPartialUpdate {
   setCardId(cardId: number): void;
   getCardId(): number;
   resetRecycleCustomNode(): void;
+  sendStateInfo(stateInfo: string): void;
 }

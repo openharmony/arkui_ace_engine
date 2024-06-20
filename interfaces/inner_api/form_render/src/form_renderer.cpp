@@ -58,13 +58,17 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f, borderWidth = %{public}f.",
         width_, height_, borderWidth_);
     SetAllowUpdate(allowUpdate_);
-    uiContent_->SetFormWidth(width_);
-    uiContent_->SetFormHeight(height_);
+    uiContent_->SetFormWidth(width_ - borderWidth_ * DOUBLE);
+    uiContent_->SetFormHeight(height_ - borderWidth_ * DOUBLE);
     lastBorderWidth_ = borderWidth_;
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
     uiContent_->PreInitializeForm(nullptr, formJsInfo.formSrc, nullptr);
+    backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+    if (!backgroundColor_.empty()) {
+        uiContent_->SetFormBackgroundColor(backgroundColor_);
+    }
 }
 
 void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -254,14 +258,17 @@ void FormRenderer::Destroy()
     HILOG_INFO("Destroy FormRenderer finish.");
 }
 
-void FormRenderer::OnSurfaceChange(float width, float height)
+void FormRenderer::OnSurfaceChange(float width, float height, float borderWidth)
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
     HILOG_INFO("Form OnSurfaceChange!");
-    formRendererDelegate_->OnSurfaceChange(width, height);
+    formRendererDelegate_->OnSurfaceChange(width, height, borderWidth);
+    width_ = width;
+    height_ = height;
+    borderWidth_ = borderWidth;
 }
 
 void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
@@ -349,6 +356,15 @@ void FormRenderer::OnFormLinkInfoUpdate(const std::vector<std::string>& formLink
     }
     cachedInfos_ = formLinkInfos;
     formRendererDelegate_->OnFormLinkInfoUpdate(formLinkInfos);
+}
+
+void FormRenderer::OnEnableForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const bool enable)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("formRendererDelegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnEnableForm(formJsInfo, enable);
 }
 
 void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
@@ -440,14 +456,15 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         HILOG_ERROR("rsSurfaceNode is nullptr.");
         return;
     }
-    if (!NearEqual(width_, uiContent_->GetFormWidth()) || !NearEqual(height_, uiContent_->GetFormHeight())
+    float width = width_ - borderWidth_ * DOUBLE;
+    float height = height_ - borderWidth_ * DOUBLE;
+    if (!NearEqual(width, uiContent_->GetFormWidth()) || !NearEqual(height, uiContent_->GetFormHeight())
         || !NearEqual(borderWidth_, lastBorderWidth_)) {
-        uiContent_->SetFormWidth(width_);
-        uiContent_->SetFormHeight(height_);
+        uiContent_->SetFormWidth(width);
+        uiContent_->SetFormHeight(height);
         lastBorderWidth_ = borderWidth_;
-        uiContent_->OnFormSurfaceChange(width_, height_);
-        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, width_ - borderWidth_ * DOUBLE,
-            height_ - borderWidth_ * DOUBLE);
+        uiContent_->OnFormSurfaceChange(width, height);
+        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, width, height);
     }
     auto backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (backgroundColor_ != backgroundColor) {
@@ -460,6 +477,15 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     }
 
     uiContent_->Foreground();
+}
+
+void FormRenderer::GetRectRelativeToWindow(int32_t &top, int32_t &left) const
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnGetRectRelativeToWindow(top, left);
 }
 
 void FormRenderer::RecycleForm(std::string& statusData)

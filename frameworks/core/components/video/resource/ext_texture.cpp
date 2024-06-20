@@ -48,7 +48,7 @@ ExtTexture::~ExtTexture()
             auto resRegister = weak.Upgrade();
             CHECK_NULL_VOID(resRegister);
             resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoUnregisterEvent");
+        }, "ArkUIVideoExtTextureUnregisterEvent");
     }
 }
 

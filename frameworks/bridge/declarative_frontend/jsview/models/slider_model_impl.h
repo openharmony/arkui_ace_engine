@@ -30,6 +30,7 @@ public:
     void SetTrackBackgroundColor(const Color& value) override;
     void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetSelectColor(const Color& value) override;
+    void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
     void SetShowSteps(bool value) override;
@@ -60,6 +61,7 @@ public:
     void ResetStepSize() override {};
     void ResetSliderInteractionMode() override {};
     void ResetMinResponsiveDistance() override {};
+    void ResetValidSlideRange() override {};
 };
 
 } // namespace OHOS::Ace::Framework

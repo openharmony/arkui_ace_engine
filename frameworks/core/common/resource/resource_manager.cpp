@@ -49,4 +49,12 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<Resou
     }
     return resourceAdapter;
 }
+
+void ResourceManager::RegisterMainResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName, const RefPtr<ResourceAdapter>& resAdapter)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto key = MakeCacheKey(bundleName, moduleName);
+    resourceAdapters_.emplace(key, resAdapter);
+}
 } // namespace OHOS::Ace

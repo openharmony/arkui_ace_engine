@@ -105,7 +105,7 @@ struct ScrollableBarModeOptions final {
 
 using TabsCustomAnimationEvent = std::function<TabContentAnimatedTransition(int32_t from, int32_t to)>;
 
-class TabsModel {
+class ACE_FORCE_EXPORT TabsModel {
 public:
     static TabsModel* GetInstance();
     virtual ~TabsModel() = default;
@@ -141,6 +141,7 @@ public:
     virtual void SetIsCustomAnimation(bool isCustom) {}
     virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) {}
     virtual void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) {}
+    virtual void SetAnimateMode(TabAnimateMode mode) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

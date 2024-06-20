@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -97,9 +98,11 @@ struct MouseEvent final {
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
+    SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
     int32_t originalId = 0;
+    std::vector<KeyCode> pressedKeyCodes_;
     bool isInjected = false;
 
     Offset GetOffset() const
@@ -129,34 +132,8 @@ struct MouseEvent final {
         return static_cast<int32_t>(button) + MOUSE_BASE_ID + pointerId;
     }
 
-    MouseEvent CreateScaleEvent(float scale) const
+    MouseEvent CloneWith(float scale) const
     {
-        if (NearZero(scale)) {
-            return { .x = x,
-                .y = y,
-                .z = z,
-                .deltaX = deltaX,
-                .deltaY = deltaY,
-                .deltaZ = deltaZ,
-                .scrollX = scrollX,
-                .scrollY = scrollY,
-                .scrollZ = scrollZ,
-                .screenX = screenX,
-                .screenY = screenY,
-                .action = action,
-                .pullAction = pullAction,
-                .button = button,
-                .pressedButtons = pressedButtons,
-                .time = time,
-                .deviceId = deviceId,
-                .targetDisplayId = targetDisplayId,
-                .sourceType = sourceType,
-                .pointerEvent = pointerEvent,
-                .originalId = originalId,
-                .isInjected = isInjected
-            };
-        }
-
         return { .x = x / scale,
             .y = y / scale,
             .z = z / scale,
@@ -176,10 +153,20 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
+            .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
+    }
+
+    MouseEvent CreateScaleEvent(float scale) const
+    {
+        if (NearZero(scale)) {
+            return CloneWith(1);
+        }
+        return CloneWith(scale);
     }
 
     TouchEvent CreateTouchPoint() const
@@ -198,6 +185,10 @@ struct MouseEvent final {
         if (sourceType == SourceType::MOUSE) {
             pointId = GetPointerId(pointId);
         }
+        auto pointOriginalId = originalId;
+        if (sourceType == SourceType::MOUSE) {
+            pointOriginalId = GetId();
+        }
         TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
@@ -205,7 +196,8 @@ struct MouseEvent final {
             .screenY = screenY,
             .downTime = time,
             .size = 0.0,
-            .isPressed = (type == TouchType::DOWN) };
+            .isPressed = (type == TouchType::DOWN),
+            .originalId = pointOriginalId };
         TouchEvent event;
         event.SetId(pointId)
             .SetX(x)
@@ -218,10 +210,13 @@ struct MouseEvent final {
             .SetDeviceId(deviceId)
             .SetTargetDisplayId(targetDisplayId)
             .SetSourceType(sourceType)
+            .SetSourceTool(sourceTool)
             .SetPointerEvent(pointerEvent)
-            .SetOriginalId(GetId())
+            .SetTouchEventId(touchEventId)
+            .SetOriginalId(pointOriginalId)
             .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
+        event.pressedKeyCodes_ = pressedKeyCodes_;
         return event;
     }
 
@@ -245,8 +240,10 @@ struct MouseEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
+            .sourceTool = sourceTool,
             .pointerEvent = pointerEvent,
             .originalId = originalId,
+            .pressedKeyCodes_ = pressedKeyCodes_,
             .isInjected = isInjected
         };
     }
@@ -277,6 +274,16 @@ public:
     MouseAction GetAction() const
     {
         return action_;
+    }
+
+    void SetPullAction(MouseAction pullAction)
+    {
+        pullAction_ = pullAction;
+    }
+
+    MouseAction GetPullAction() const
+    {
+        return pullAction_;
     }
 
     MouseInfo& SetGlobalLocation(const Offset& globalLocation)
@@ -323,6 +330,7 @@ private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
     MouseAction action_ = MouseAction::NONE;
+    MouseAction pullAction_ = MouseAction::NONE;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
     // Different from global location, The local location refers to the location of the contact point relative to the
@@ -366,6 +374,7 @@ public:
         info.SetPointerEvent(event.pointerEvent);
         info.SetButton(event.button);
         info.SetAction(event.action);
+        info.SetPullAction(event.pullAction);
         info.SetGlobalLocation(event.GetOffset());
         Offset localLocation = Offset(
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
@@ -375,7 +384,9 @@ public:
         info.SetDeviceId(event.deviceId);
         info.SetTargetDisplayId(event.targetDisplayId);
         info.SetSourceDevice(event.sourceType);
+        info.SetSourceTool(event.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetPressedKeyCodes(event.pressedKeyCodes_);
         onMouseCallback_(info);
         return info.IsStopPropagation();
     }

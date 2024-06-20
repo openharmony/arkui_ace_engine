@@ -1137,7 +1137,7 @@ void PluginFrontendDelegate::LoadJS(
                         page->GetDomDocument()->HandlePageLoadFinish();
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish");
+                TaskExecutor::TaskType::UI, "ArkUIPluginPageLoadFinish");
         },
         TaskExecutor::TaskType::JS, "ArkUIPluginLoadJsPage");
 }

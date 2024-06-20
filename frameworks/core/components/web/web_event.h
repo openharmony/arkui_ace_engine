@@ -44,6 +44,17 @@ enum class NavigationType {
     NAVIGATION_TYPE_AUTO_SUBFRAME = 5,
 };
 
+enum class RenderProcessNotRespondingReason {
+    INPUT_TIMEOUT,
+    NAVIGATION_COMMIT_TIMEOUT,
+};
+
+enum class ViewportFit {
+    AUTO,
+    CONTAINS,
+    COVER,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -129,6 +140,7 @@ enum class WebResponseDataType : int32_t {
     STRING_TYPE,
     FILE_TYPE,
     RESOURCE_URL_TYPE,
+    BUFFER_TYPE,
 };
 
 class WebResponseAsyncHandle : public AceType {
@@ -145,6 +157,12 @@ public:
     virtual void HandleMimeType(std::string& mimeType) = 0;
     virtual void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) = 0;
     virtual void HandleResponseStatus(bool isReady) = 0;
+};
+
+struct WebKeyboardOption {
+    bool isSystemKeyboard_ = true;
+    int32_t enterKeyTpye_ = -1;
+    std::function<void()> customKeyboardBuilder_ = nullptr;
 };
 
 class ACE_EXPORT WebResponse : public AceType {
@@ -219,6 +237,23 @@ public:
         data_ = data;
         dataType_ = WebResponseDataType::STRING_TYPE;
         fd_ = 0;
+    }
+
+    void SetBuffer(char* buffer, size_t size)
+    {
+        buffer_ = buffer;
+        dataType_ = WebResponseDataType::BUFFER_TYPE;
+        bufferSize_ = size;
+    }
+
+    char* GetBuffer() const
+    {
+        return buffer_;
+    }
+
+    size_t GetBufferSize() const
+    {
+        return bufferSize_;
     }
 
     void SetFileHandle(int32_t fd)
@@ -301,6 +336,8 @@ private:
     int32_t statusCode_;
     bool isReady_ = true;
     std::shared_ptr<WebResponseAsyncHandle> handle_;
+    char* buffer_ = nullptr;
+    uint64_t bufferSize_ = 0;
 };
 
 class ACE_EXPORT WebRequest : public AceType {
@@ -697,6 +734,20 @@ public:
     virtual void CancelLoad() = 0;
 };
 
+class ACE_EXPORT WebCustomKeyboardHandler : public AceType {
+    DECLARE_ACE_TYPE(WebCustomKeyboardHandler, AceType)
+
+public:
+    WebCustomKeyboardHandler() = default;
+    ~WebCustomKeyboardHandler() = default;
+
+    virtual void InsertText(const std::string &text) = 0;
+    virtual void DeleteForward(int32_t length) = 0;
+    virtual void DeleteBackward(int32_t length) = 0;
+    virtual void SendFunctionKey(int32_t key) = 0;
+    virtual void Close() = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -890,6 +941,32 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT InterceptKeyboardEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(InterceptKeyboardEvent, BaseEventInfo);
+
+public:
+    explicit InterceptKeyboardEvent(const RefPtr<WebCustomKeyboardHandler>& customKeyboardHandler,
+        const std::map<std::string, std::string> attributes) :
+        BaseEventInfo("InterceptKeyboardEvent"),
+        customKeyboardHandler_(customKeyboardHandler),
+        attributes_(attributes) {}
+    ~InterceptKeyboardEvent() = default;
+
+    const RefPtr<WebCustomKeyboardHandler>& GetCustomKeyboardHandler() const
+    {
+        return customKeyboardHandler_;
+    }
+
+    const std::map<std::string, std::string>& GetAttributesMap() const
+    {
+        return attributes_;
+    }
+
+private:
+    RefPtr<WebCustomKeyboardHandler> customKeyboardHandler_;
+    std::map<std::string, std::string> attributes_;
 };
 
 class ACE_EXPORT WebAppLinkEvent : public BaseEventInfo {
@@ -1795,6 +1872,84 @@ private:
     std::string surfaceId_ = "";
     std::string embedId_ = "";
     EmbedInfo embedInfo_;
+};
+
+class ACE_EXPORT RenderProcessNotRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessNotRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessNotRespondingEvent(const std::string& jsStack, int pid, int reason)
+        : BaseEventInfo("RenderProcessNotRespondingEvent"), jsStack_(jsStack), pid_(pid), reason_(reason)
+    {}
+    ~RenderProcessNotRespondingEvent() = default;
+
+    const std::string& GetJsStack() const
+    {
+        return jsStack_;
+    }
+
+    int GetPid() const
+    {
+        return pid_;
+    }
+
+    int GetReason() const
+    {
+        return reason_;
+    }
+
+private:
+    std::string jsStack_;
+    int pid_;
+    int reason_;
+};
+
+class ACE_EXPORT RenderProcessRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessRespondingEvent() : BaseEventInfo("RenderProcessRespondingEvent") {}
+    ~RenderProcessRespondingEvent() = default;
+};
+
+class ACE_EXPORT ViewportFitChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ViewportFitChangedEvent, BaseEventInfo);
+
+public:
+    ViewportFitChangedEvent(int32_t viewportFit)
+        : BaseEventInfo("ViewportFitChangedEvent"), viewportFit_(viewportFit) {}
+    ~ViewportFitChangedEvent() = default;
+
+    int32_t GetViewportFit() const
+    {
+        return viewportFit_;
+    }
+
+private:
+    int32_t viewportFit_;
+};
+
+class ACE_EXPORT AdsBlockedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AdsBlockedEvent, BaseEventInfo);
+
+public:
+    AdsBlockedEvent(const std::string& url, const std::vector<std::string>& adsBlocked) :
+        BaseEventInfo("AdsBlockedEvent"), url_(url), adsBlocked_(adsBlocked) {}
+    ~AdsBlockedEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    const std::vector<std::string>& GetAdsBlocked() const
+    {
+        return adsBlocked_;
+    }
+
+private:
+    std::string url_;
+    std::vector<std::string> adsBlocked_;
 };
 
 } // namespace OHOS::Ace

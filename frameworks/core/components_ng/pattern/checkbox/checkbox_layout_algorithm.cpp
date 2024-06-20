@@ -41,6 +41,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     InitializeParam();
@@ -92,8 +93,31 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             child->GetGeometryNode()->SetFrameSize(SizeF());
         }
         PerformMeasureSelf(layoutWrapper);
+    }  else if (pattern->UseContentModifier()) {
+        const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> list;
+        for (const auto& child : childList) {
+            if (pattern->GetContentModifierNode()->GetId() != child->GetHostNode()->GetId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                list.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
     } else {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+        if (content) {
+            auto contentSize = content->GetRect().GetSize();
+            childConstraint.maxSize.SetSizeT(contentSize);
+            childConstraint.percentReference.SetSizeT(contentSize);
+        }
+        for (auto &&child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->Measure(childConstraint);
+        }
+        PerformMeasureSelf(layoutWrapper);
     }
 }
 
@@ -105,14 +129,26 @@ void CheckBoxLayoutAlgorithm::InitializeParam()
     CHECK_NULL_VOID(checkBoxTheme);
     defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
     defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
-    horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        horizontalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
+        verticalPadding_ = checkBoxTheme->GetDefaultPaddingSize().ConvertToPx();
+    } else {
+        horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    }
 }
 
 void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     BoxLayoutAlgorithm::Layout(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        return;
+    }
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);

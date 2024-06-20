@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 #define MAX_BYTES_SIZE  (1024*1024*10)
-class ACE_EXPORT GestureGroup : public Gesture {
+class ACE_FORCE_EXPORT GestureGroup : public Gesture {
     DECLARE_ACE_TYPE(GestureGroup, Gesture);
 
 public:
@@ -48,6 +48,8 @@ public:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
     void RemoveChildrenByTag(const std::string& gestureTag, bool& needRecollect);
+
+    void RemoveGesture(RefPtr<Gesture> gesture);
 
 private:
     GestureMode mode_;

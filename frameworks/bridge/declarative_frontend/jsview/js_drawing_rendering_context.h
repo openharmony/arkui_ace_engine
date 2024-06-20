@@ -23,7 +23,7 @@
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "frameworks/core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -53,6 +53,22 @@ public:
         instanceId_ = id;
     }
 
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+    double GetDensity()
+    {
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+    }
+
 protected:
     RefPtr<AceType> canvasPattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
@@ -60,6 +76,7 @@ protected:
 private:
     JSRef<JSVal> jsCanvasVal_;
     NG::OptionalSizeF size_;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 } // namespace OHOS::Ace::Framework
 

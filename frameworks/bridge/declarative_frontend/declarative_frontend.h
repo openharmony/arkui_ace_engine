@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_DECLARATIVE_FRONTEND_H
 
 #include <string>
+#include <map>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -94,6 +95,21 @@ public:
     napi_value GetContextValue() override;
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override;
 #if defined(PREVIEW)
+    void SetPkgNameList(const std::map<std::string, std::string>& map)
+    {
+        pkgNameMap_ = map;
+    }
+
+    void SetPkgAliasList(const std::map<std::string, std::string>& map)
+    {
+        pkgAliasMap_ = map;
+    }
+
+    void SetpkgContextInfoList(const std::map<std::string, std::vector<std::vector<std::string>>>& map)
+    {
+        pkgContextInfoMap_ = map;
+    }
+
     void SetPagePath(const std::string& pagePath)
     {
         if (delegate_) {
@@ -241,6 +257,11 @@ private:
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;
     std::string pageProfile_;
+#if defined(PREVIEW)
+    std::map<std::string, std::string> pkgNameMap_;
+    std::map<std::string, std::string> pkgAliasMap_;
+    std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap_;
+#endif
     bool foregroundFrontend_ = false;
     bool isSubWindow_ = false;
 

@@ -67,4 +67,6 @@ std::string PerfMonitor::GetPageUrl()
 void PerfMonitor::SetAppForeground(bool isShow) {}
 
 void PerfMonitor::SetAppStartStatus() {}
+void PerfMonitor::SetPageName(const std::string& pageName) {}
+void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName) {}
 } // namespace OHOS::Ace

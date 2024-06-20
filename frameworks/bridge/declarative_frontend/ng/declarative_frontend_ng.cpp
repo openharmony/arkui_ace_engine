@@ -58,7 +58,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {
-        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngineTask");
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
     } else {
         initJSEngineTask();
     }

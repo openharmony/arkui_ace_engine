@@ -20,22 +20,32 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/select/select_model.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT OptionView {
 public:
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
-        std::function<void()>&& onClickFunc, int32_t index, const std::string& icon = "");
+        const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
+        const std::function<void()>& onClickFunc, int32_t index,
+        const std::function<void(WeakPtr<NG::FrameNode>)>& symbol);
 
-    static RefPtr<FrameNode> CreateSelectOption(const std::string& value, const std::string& icon, int32_t index);
+    static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index);
 
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
-    static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
-    static void CreatePasteButton(const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
-        std::function<void()>&& onClickFunc);
+    static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
+        const RefPtr<FrameNode>& child = nullptr);
+    static void CreatePasteButton(
+        const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc);
+    static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
+        const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr);
     static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
-        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, std::function<void()>&& onClickFunc);
+        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
+    static void CreateOption(bool optionsHasIcon, const std::string& value,
+        const std::function<void(WeakPtr<NG::FrameNode>)>& symbol, const RefPtr<FrameNode>& row,
+        const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
 };
 
 } // namespace OHOS::Ace::NG

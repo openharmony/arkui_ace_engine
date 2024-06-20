@@ -24,7 +24,7 @@ interface __IRepeatItemInternal<T> {
 
     // set new index value, used during  Repeat.each update when
     // - order of item in array has changed  (LazyforEach onDataMoved)
-    // - on child reuse. reuse children to render newItemValue. index of 
+    // - on child reuse. reuse children to render newItemValue. index of
     //   newItemValue is a new one
     updateIndex: (newIndexValue: number) => void;
 }
@@ -34,7 +34,7 @@ interface __RepeatItemFactoryReturn<T> extends RepeatItem<T>, __IRepeatItemInter
 // implementation for existing state observation system
 class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
-    // ObservedPropertyPU is the framework class that implements @State, @Provide 
+    // ObservedPropertyPU is the framework class that implements @State, @Provide
     // and App/LocalStorage properties
     private _observedItem: ObservedPropertyPU<T>;
     private _observedIndex?: ObservedPropertyPU<number>;
@@ -62,25 +62,24 @@ class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
         if (!this._observedIndex?.hasDependencies()) {
             return;
         }
-        if (this._observedIndex?.getUnmonitored() != newIndex) {
+        if (this._observedIndex?.getUnmonitored() !== newIndex) {
             this._observedIndex?.set(newIndex);
         }
     }
 }
 
-// framework internal, deep observation 
-// implementation for deep observation 
-
-@ObservedV2
+// Framework internal, deep observation
+// Using @ObservedV2_Internal instead of @ObservedV2 to avoid forcing V2 usage.
+@ObservedV2_Internal
 class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
     constructor(initialItem: T, initialIndex?: number) {
         this.item = initialItem;
-        this.index = initialIndex
+        this.index = initialIndex;
     }
-
-    @Trace item: T;
-    @Trace index?: number;
+    // Using @Trace_Internal instead of @Trace to avoid forcing V2 usage.
+    @Trace_Internal item: T;
+    @Trace_Internal index?: number;
 
     public updateItem(newItemValue: T): void {
         this.item = newItemValue;
@@ -93,11 +92,10 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 }
 
-
 // helper, framework internal
 interface __RepeatItemInfo<T> {
     key: string;
-    // also repeatItem includes index 
+    // also repeatItem includes index
     // we need separate index because repeatItem set set and updated later than index needs to be set.
     index: number;
     repeatItem?: __RepeatItemFactoryReturn<T>;
@@ -105,15 +103,15 @@ interface __RepeatItemInfo<T> {
 
 // helper
 class __RepeatDefaultKeyGen {
-    private static weakMap_ = new WeakMap<Object|Symbol, number>();
+    private static weakMap_ = new WeakMap<Object | Symbol, number>();
     private static lastKey_ = 0;
 
     // Return the same IDs for the same items
     public static func<T>(item: T): string {
         try {
             return __RepeatDefaultKeyGen.funcImpl(item);
-        } catch(e) {
-            throw new Error (`Repeat(). Default id gen failed. Application Error!`)
+        } catch (e) {
+            throw new Error(`Repeat(). Default id gen failed. Application Error!`);
         }
     }
 
@@ -124,7 +122,7 @@ class __RepeatDefaultKeyGen {
 
     private static funcImpl<T>(item: T) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item != 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -142,6 +140,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     private arr_: Array<T>;
     private itemGenFunc_?: RepeatItemGenFunc<T>;
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
+    private onMoveHandler_?: OnMoveHandler;
     private isVirtualScroll: boolean = false;
     private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
 
@@ -170,18 +169,23 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         return this;
     }
 
+    public onMove(handler: OnMoveHandler): RepeatAPI<T> {
+        this.onMoveHandler_ = handler;
+        return this;
+    }
+
     private genKeys(): Map<string, __RepeatItemInfo<T>> {
         const key2Item = new Map<string, __RepeatItemInfo<T>>();
         this.arr_.forEach((item, index) => {
             const key = this.keyGenFunction_(item, index);
-            key2Item.set(key, { key, index })
+            key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.")
+            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.");
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
-            
+
         }
         return key2Item;
     }
@@ -192,11 +196,10 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
     public render(isInitialRender: boolean): void {
         if (!this.itemGenFunc_) {
-            throw new Error(`itemGen function undefined. Usage error`)
+            throw new Error(`itemGen function undefined. Usage error`);
         }
         if (this.isVirtualScroll) {
-            // TODO haoyu: add render for LazyforEach with child update
-            // there might not any rerender , I am not sure.
+            // TODO: Add render for LazyforEach with child update.
             throw new Error("TODO virtual code path");
         } else {
             isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
@@ -213,9 +216,10 @@ class __RepeatV2<T> implements RepeatAPI<T> {
             itemInfo.repeatItem = this.mkRepeatItem(this.arr_[index], index);
             this.initialRenderItem(key, itemInfo.repeatItem);
             index++;
-        })
+        });
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: initialRenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -225,7 +229,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         const oldKey2Item: Map<string, __RepeatItemInfo<T>> = this.key2Item_;
         this.key2Item_ = this.genKeys();
 
-        // identify array items that have been deleted 
+        // identify array items that have been deleted
         // these are candidates for re-use
         const deletedKeysAndIndex = new Array<__RepeatItemInfo<T>>();
         for (const [key, feInfo] of oldKey2Item) {
@@ -247,21 +251,21 @@ class __RepeatV2<T> implements RepeatAPI<T> {
                 // moved from oldIndex to index
                 const oldIndex = oldItemInfo.index;
                 itemInfo.repeatItem = oldItemInfo!.repeatItem!;
-                stateMgmtConsole.debug(`retained: key ${key} ${oldIndex}->${index}`)
+                stateMgmtConsole.debug(`retained: key ${key} ${oldIndex}->${index}`);
                 itemInfo.repeatItem.updateIndex(index);
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
 
             } else if (deletedKeysAndIndex.length) {
                 // case #2:
-                // new array item, there is an deleted array items whose 
+                // new array item, there is an deleted array items whose
                 // UINode children cab re-used
                 const oldItemInfo = deletedKeysAndIndex.pop();
                 const reuseKey = oldItemInfo!.key;
                 const oldKeyIndex = oldItemInfo!.index;
                 const oldRepeatItem = oldItemInfo!.repeatItem!;
                 itemInfo.repeatItem = oldRepeatItem;
-                stateMgmtConsole.debug(`new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`)
+                stateMgmtConsole.debug(`new: key ${key} reuse key ${reuseKey}  ${oldKeyIndex}->${index}`);
 
                 itemInfo.repeatItem.updateItem(item);
                 itemInfo.repeatItem.updateIndex(index);
@@ -283,7 +287,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         })
 
         // keep  this.id2item_. by removing all entries for remaining
-        // deleted items 
+        // deleted items
         deletedKeysAndIndex.forEach(delItem => {
             this.key2Item_.delete(delItem!.key);
         });
@@ -292,6 +296,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         // C++  tempChildren.clear() , trigger re-layout
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
+        RepeatNative.onMove(this.onMoveHandler_);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`RepeatPU: rerenderNoneVirtual elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -299,7 +304,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
     private initialRenderItem(key: string, repeatItem: __RepeatItemFactoryReturn<T>): void {
         // render new UINode children
-        stateMgmtConsole.debug(`new: key ${key} n/a->${repeatItem.index}`)
+        stateMgmtConsole.debug(`new: key ${key} n/a->${repeatItem.index}`);
 
         // C++: initial render will render to the end of children_
         RepeatNative.createNewChildStart(key);
@@ -314,6 +319,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
+
 class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
     private owningView_ : ViewPU;
 

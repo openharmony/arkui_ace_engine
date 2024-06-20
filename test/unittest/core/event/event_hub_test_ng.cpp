@@ -63,6 +63,7 @@ const std::string STRINGCTER_E = "E";
 constexpr int32_t NUM_CTRL_VALUE = 1;
 constexpr int32_t NUM_SHIFT_VALUE = 2;
 constexpr int32_t NUM_ALT_VALUE = 4;
+constexpr uint32_t MIN_INTERVAL = 100; // 100ms
 
 const std::string RESULT_SUCCESS_ONE = "sucess1";
 const std::string RESULT_SUCCESS_TWO = "sucess2";
@@ -913,5 +914,53 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest004, TestSize.Level1)
     eventHub->onJSFrameNodeDisappear_ = flagFunc;
     eventHub->FireOnDisappear();
     EXPECT_EQ(flag, 2);
+}
+
+/**
+ * @tc.name: EventHubFrameNodeTest005
+ * @tc.desc: test set event about visibleAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubFrameNodeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. set throttledVisibleAreaRatios_, throttledVisibleAreaCallback_.
+     * @tc.expected: HasImmediatelyVisibleCallback is equal to false.
+     */
+    VisibleCallbackInfo callbackInfo;
+    const std::function<void(bool, double)>&& jsCallback = [](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = MIN_INTERVAL;
+    std::vector<double> ratios = { 0, 1.0 };
+    flag = 0;
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
+    EXPECT_EQ(flag, 0);
+    EXPECT_NE(eventHub->HasImmediatelyVisibleCallback(), true);
+    EXPECT_EQ(eventHub->GetThrottledVisibleAreaRatios(), ratios);
+    EXPECT_NE(eventHub->GetThrottledVisibleAreaCallback().callback, nullptr);
+
+    /**
+     * @tc.steps: step3. clear throttledVisibleAreaRatios_, throttledVisibleAreaCallback_.
+     * @tc.expected:throttledVisibleAreaRatios_ is empty, callback in throttledVisibleAreaCallback_ is nullptr.
+     */
+    eventHub->CleanVisibleAreaCallback(true, true);
+    EXPECT_EQ(eventHub->GetThrottledVisibleAreaRatios().empty(), true);
+    EXPECT_EQ(eventHub->GetThrottledVisibleAreaCallback().callback, nullptr);
+
+    /**
+     * @tc.steps: step4. set visibleAreaUserCallback_.
+     * @tc.expected: HasImmediatelyVisibleCallback is equal to true.
+     */
+    callbackInfo.period = 0;
+    eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, true);
+    EXPECT_EQ(flag, 0);
+    EXPECT_EQ(eventHub->HasImmediatelyVisibleCallback(), true);
 }
 } // namespace OHOS::Ace::NG

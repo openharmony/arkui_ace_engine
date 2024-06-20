@@ -81,7 +81,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& jsMake);
     static void TriggerClick(FrameNode* frameNode, double xPos, double yPos);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
-    
+    static ButtonType GetType(FrameNode* frameNode);
 
 private:
     static void CreateWithLabel(const std::string& label);

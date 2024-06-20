@@ -192,7 +192,7 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
                         callback->OnRequestCallBack(pluginTemplate, data, extraData);
                         PluginComponentManager::GetInstance()->UnregisterCallBack(callback);
                     },
-                    TaskExecutor::TaskType::JS, "ArkUIPluginReturnRequest");
+                    TaskExecutor::TaskType::JS, "ArkUIPluginReturnRequestCallback");
                 callbacks_.emplace(iter->first);
                 callbackVec_.erase(iter++);
             } else {

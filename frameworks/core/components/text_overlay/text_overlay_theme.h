@@ -96,8 +96,8 @@ public:
                 theme->moreOrBackIconColor_ = pattern->GetAttr<Color>("more_or_back_icon_color", Color());
                 theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
-                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 0.0_vp);
-                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 0.0_vp);
+                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 18.0_vp);
+                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 16.0_vp);
                 theme->moreButtonHeight_ = pattern->GetAttr<Dimension>("more_button_height", 24.0_vp);
                 theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_overlay_max_width", 280.0_vp);
                 theme->alphaDisabled_ =
@@ -171,6 +171,11 @@ public:
         return handleDiameter_;
     }
 
+    const Dimension GetHandleDiameterStrokeWidth() const
+    {
+        return 2.0_vp;
+    }
+
     const Dimension& GetHandleDiameterInner() const
     {
         return handleDiameterInner_;
@@ -223,7 +228,7 @@ public:
 
     Dimension GetHandleLineWidth() const
     {
-        return 1.5_vp;
+        return 2.0_vp;
     }
 
     Dimension GetHandleHotZoneRadius() const

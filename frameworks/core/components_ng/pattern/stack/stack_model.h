@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT StackModel {
+class ACE_FORCE_EXPORT StackModel {
 public:
     static StackModel* GetInstance();
     virtual ~StackModel() = default;

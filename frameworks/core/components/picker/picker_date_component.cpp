@@ -686,7 +686,6 @@ void PickerDateComponent::LunarColumnsBuilding(const LunarDate& current)
         }
     }
 
-    
     dayColumn->ClearOption();
     // lunar's day start from startDay
     for (uint32_t index = startDay; index <= endDay; ++index) {

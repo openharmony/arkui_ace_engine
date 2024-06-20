@@ -79,6 +79,7 @@ constexpr char EVENT_KEY_HOVER_TIME[] = "HOVER_TIME";
 constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
+constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -359,6 +360,7 @@ void EventReport::ReportEventComplete(DataBase& data)
     const auto& pageUrl = data.baseInfo.pageUrl;
     const auto& versionCode = data.baseInfo.versionCode;
     const auto& versionName = data.baseInfo.versionName;
+    const auto& pageName = data.baseInfo.pageName;
     const auto& sceneId = data.sceneId;
     const auto& sourceType = GetSourceTypeName(data.sourceType);
     auto inputTime = data.inputTime;
@@ -376,6 +378,7 @@ void EventReport::ReportEventComplete(DataBase& data)
         EVENT_KEY_PAGE_URL, pageUrl,
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_SCENE_ID, sceneId,
         EVENT_KEY_SOURCE_TYPE, sourceType,
         EVENT_KEY_INPUT_TIME, static_cast<uint64_t>(inputTime),
@@ -399,6 +402,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& pageUrl = data.baseInfo.pageUrl;
     const auto& versionCode = data.baseInfo.versionCode;
     const auto& versionName = data.baseInfo.versionName;
+    const auto& pageName = data.baseInfo.pageName;
     auto startTime = data.beginVsyncTime;
     ConvertRealtimeToSystime(data.beginVsyncTime, startTime);
     const auto& durition = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
@@ -418,6 +422,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_PAGE_URL, pageUrl,
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_STARTTIME, static_cast<uint64_t>(startTime),
         EVENT_KEY_DURITION, static_cast<uint64_t>(durition),
         EVENT_KEY_TOTAL_FRAMES, totalFrames,
@@ -440,6 +445,7 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
     const auto& pageUrl = info.baseInfo.pageUrl;
     const auto& versionCode = info.baseInfo.versionCode;
     const auto& versionName = info.baseInfo.versionName;
+    const auto& pageName = info.baseInfo.pageName;
     const auto& skippedFrameTime = info.skippedFrameTime;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -449,6 +455,7 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_PAGE_URL, pageUrl,
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
 }
@@ -462,6 +469,7 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
     const auto& pageUrl = info.baseInfo.pageUrl;
     const auto& versionCode = info.baseInfo.versionCode;
     const auto& versionName = info.baseInfo.versionName;
+    const auto& pageName = info.baseInfo.pageName;
     const auto& skippedFrameTime = info.skippedFrameTime;
     const auto& windowName = info.windowName;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
@@ -472,11 +480,18 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         EVENT_KEY_PAGE_URL, pageUrl,
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_FILTERED: skipppedFrameTime=%lld(ms), windowName=%s",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
 }
 
+void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName)
+{
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, "APP_PAGE_INFO_UPDATE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PAGE_URL, pageUrl, EVENT_KEY_BUNDLE_NAME, bundleName);
+}
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)
 {

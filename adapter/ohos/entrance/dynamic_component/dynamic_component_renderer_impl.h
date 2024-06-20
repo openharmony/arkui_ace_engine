@@ -20,6 +20,7 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "core/common/dynamic_component_renderer.h"
@@ -42,7 +43,26 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool TransferKeyEvent(const KeyEvent& event) override;
+    void TransferFocusState(bool isFocus) override;
+    void TransferFocusActiveEvent(bool isFocus) override;
+    void Dump(RendererDumpInfo &rendererDumpInfo) override;
+    void RegisterErrorEventHandler();
+    void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
+    void InitUiContent();
+
+    void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output) override;
+    bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
+    void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
+        int64_t timeMs) override;
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
@@ -50,6 +70,8 @@ private:
 
     void AttachRenderContext();
     void RegisterSizeChangedCallback();
+    void RegisterConfigChangedCallback();
+    void UnRegisterConfigChangedCallback();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;
@@ -62,6 +84,7 @@ private:
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;
     int32_t hostInstanceId_ = -1;
+    RendererDumpInfo rendererDumpInfo_;
 
     SizeF contentSize_;
 

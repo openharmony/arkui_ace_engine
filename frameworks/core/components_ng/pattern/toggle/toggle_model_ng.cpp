@@ -101,12 +101,14 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     CHECK_NULL_VOID(stack);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto frameNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     Color color;
     if (selectedColor.has_value()) {
         color = selectedColor.value();
     }
 
-    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
+    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<CheckboxTheme>();
@@ -117,7 +119,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
         checkBoxModelNG.SetSelectedColor(color);
         return;
     }
-    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<ToggleTheme>();
@@ -149,16 +151,16 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
+    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
     if (checkboxPattern) {
         auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnChange(std::move(onChange));
         return;
     }
-    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
     if (buttonPattern) {
         auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -279,8 +281,24 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
     auto currentNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     CHECK_NULL_VOID(currentNode);
     const auto& children = oldFrameNode->GetChildren();
+    auto switchPattern = oldFrameNode->GetPattern<SwitchPattern>();
+    auto checkboxPattern = oldFrameNode->GetPattern<CheckBoxPattern>();
+    auto toggleButtonPattern = oldFrameNode->GetPattern<ToggleButtonPattern>();
     for (const auto& child : children) {
         if (!child) {
+            continue;
+        }
+        if (switchPattern && switchPattern->UseContentModifier() && switchPattern->GetBuilderId() == child->GetId()) {
+            continue;
+        }
+        if (checkboxPattern && checkboxPattern->UseContentModifier()) {
+            auto modifierNode = checkboxPattern->GetContentModifierNode();
+            if (modifierNode && modifierNode->GetId() == child->GetId()) {
+                continue;
+            }
+        }
+        if (toggleButtonPattern && toggleButtonPattern->UseContentModifier() &&
+            toggleButtonPattern->GetBuilderId() == child->GetId()) {
             continue;
         }
         child->MountToParent(currentNode);

@@ -134,13 +134,9 @@ public:
         return {};
     }
 
-    std::string GetEntryFocusViewName() override
+    bool IsEntryFocusView() override
     {
-        /*
-        |-> Navigation (root focus view)
-          |-> NavBar
-        */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return false;
     }
 
     int32_t GetMaxMenuNum() const
@@ -157,6 +153,16 @@ public:
     {
         return titleMode_ == NavigationTitleMode::FREE;
     }
+    OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
+
+    void SetKeyboardOffset(float keyboardOffset)
+    {
+        keyboardOffset_ = keyboardOffset;
+    }
+    float GetKeyboardOffset()
+    {
+        return keyboardOffset_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -169,6 +175,8 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
+    void OnColorConfigurationUpdate() override;
+    void SetNavBarMask(bool isWindowFocus);
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
@@ -183,6 +191,8 @@ private:
     bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
+    float keyboardOffset_ = 0.0f;
+    bool isWindowFocus_ = true;
 };
 
 } // namespace OHOS::Ace::NG
