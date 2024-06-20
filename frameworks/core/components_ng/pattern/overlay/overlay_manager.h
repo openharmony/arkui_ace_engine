@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/want/want_wrap.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -44,14 +45,7 @@
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-
-namespace OHOS::Ace {
-struct ModalUIExtensionCallbacks;
-} // namespace OHOS::Ace
-
-namespace OHOS::AAFwk {
-class Want;
-} // namespace OHOS::AAFwk
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
 
@@ -439,6 +433,8 @@ public:
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
+    int32_t CreateModalUIExtension(const RefPtr<WantWrap>& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isProhibitBack, bool isAsyncModalBinding = false);
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         bool isProhibitBack, bool isAsyncModalBinding = false, bool isAllowedBeCovered = true);
     void CloseModalUIExtension(int32_t sessionId);
