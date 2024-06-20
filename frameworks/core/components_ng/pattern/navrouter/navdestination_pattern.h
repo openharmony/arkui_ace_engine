@@ -58,6 +58,11 @@ public:
         layout->SetIsShown(isOnShow_);
         return layout;
     }
+    
+    bool CheckCustomAvoidKeyboard() const override
+    {
+        return !NearZero(avoidKeyboardOffset_);
+    }
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -238,14 +243,14 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
-    void SetKeyboardOffset(float keyboardOffset)
+    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
     {
-        keyboardOffset_ = keyboardOffset;
+        avoidKeyboardOffset_ = avoidKeyboardOffset;
     }
 
-    float GetKeyboardOffset()
+    float GetAvoidKeyboardOffset()
     {
-        return keyboardOffset_;
+        return avoidKeyboardOffset_;
     }
 
     bool NeedIgnoreKeyboard();
@@ -280,7 +285,7 @@ private:
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
-    float keyboardOffset_ = 0.0f;
+    float avoidKeyboardOffset_ = 0.0f;
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<FrameNode> dialogNode_;

@@ -103,11 +103,9 @@ public:
         return imeShow_ || uiExtensionImeShow_;
     }
 
-    void AvoidKeyboard();
+    void AvoidKeyBoardInNavigation();
 
-    void NavContentToSafeAreaHelper();
-
-    void SetNavContentKeyboardOffset(RefPtr<FrameNode> navNode);
+    void SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navNode, float avoidKeyboardOffset);
 
     void AddKeyboardChangeCallback(int32_t id, std::function<void(bool, bool)>&& callback)
     {

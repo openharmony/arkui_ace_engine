@@ -1577,12 +1577,14 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         }
         safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        // layout immediately
-        FlushUITasks();
-
         CHECK_NULL_VOID(manager);
-        manager->AvoidKeyboard();
+        manager->AvoidKeyBoardInNavigation();
+        // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
+        bool scrollResult = manager->ScrollTextFieldToSafeArea();
+        if (scrollResult) {
+            FlushUITasks();
+        }
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -1630,12 +1632,14 @@ void PipelineContext::OriginalAvoidanceLogic(
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        // layout immediately
-        FlushUITasks();
-
         CHECK_NULL_VOID(manager);
-        manager->AvoidKeyboard();
+        manager->AvoidKeyBoardInNavigation();
+        // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
+        bool scrollResult = manager->ScrollTextFieldToSafeArea();
+        if (scrollResult) {
+            FlushUITasks();
+        }
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -1704,11 +1708,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             "offset is %{public}f",
             keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
-        // layout immediately
+        manager->AvoidKeyBoardInNavigation();
+        // layout before scrolling textfield to safeArea, because of getting correct position
         context->FlushUITasks();
-
-        manager->AvoidKeyboard();
-        context->FlushUITasks();
+        bool scrollResult = manager->ScrollTextFieldToSafeArea();
+        if (scrollResult) {
+            context->FlushUITasks();
+        }
     };
     FlushUITasks();
     SetIsLayouting(true);
