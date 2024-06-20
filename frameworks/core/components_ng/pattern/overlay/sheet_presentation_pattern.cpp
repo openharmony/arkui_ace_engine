@@ -420,8 +420,8 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         detentsLowerPos = sheetDetentsSize - 1;
         detentsUpperPos = sheetDetentsSize - 1;
     } else {
-        auto lowerPosition = std::distance(sheetDetentHeight_.begin(), lowerIter);
-        auto upperPosition = std::distance(sheetDetentHeight_.begin(), upperIter);
+        uint32_t lowerPosition = std::distance(sheetDetentHeight_.begin(), lowerIter);
+        uint32_t upperPosition = std::distance(sheetDetentHeight_.begin(), upperIter);
         if (lowerPosition == 0) {
             upHeight = sheetDetentHeight_[lowerPosition];
             downHeight = 0;
