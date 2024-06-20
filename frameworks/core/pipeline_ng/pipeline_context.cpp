@@ -1907,10 +1907,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "InputTracking id:%{public}d, touchEvent Process in ace_container: "
-            "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-            "type=%{public}d",
-            scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type);
+            "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f type=%{public}d, "
+            "inject=%{public}d",
+            scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
+            scalePoint.isInjected);
     }
 
     if (scalePoint.type == TouchType::MOVE) {
@@ -3791,7 +3791,7 @@ void PipelineContext::CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, Tou
 
 void PipelineContext::CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type)
 {
-    eventManager_->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+    eventManager_->CheckAndLogLastConsumedTouchEventInfo(eventId, type);
 }
 
 void PipelineContext::CheckAndLogLastReceivedMouseEventInfo(int32_t eventId, MouseAction action)

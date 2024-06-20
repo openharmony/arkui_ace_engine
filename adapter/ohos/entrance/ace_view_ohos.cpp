@@ -130,7 +130,13 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
     auto container = Platform::AceContainer::GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
+    if (!container) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchTouchEvent eventId:%{public}d container is null return.",
+            pointerEvent->GetId());
+        return;
+    }
     container->SetCurPointerEvent(pointerEvent);
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
@@ -295,11 +301,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
             touchPoint.touchEventId);
     }
     auto markProcess = [touchPoint, finallyCallback = callback, enabled = pointerEvent->IsMarkEnabled()]() {
-        if (touchPoint.type != TouchType::MOVE && touchPoint.type != TouchType::PULL_MOVE &&
-            touchPoint.type != TouchType::HOVER_MOVE) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
-                touchPoint.touchEventId);
-        }
         MMI::InputManager::GetInstance()->MarkProcessed(touchPoint.touchEventId,
             std::chrono::duration_cast<std::chrono::microseconds>(touchPoint.time.time_since_epoch()).count(),
             enabled);
@@ -370,11 +371,6 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
             event.y, (int)event.action, event.time.time_since_epoch().count(), event.id, event.touchEventId);
     }
     auto markProcess = [event, markEnabled]() {
-        if (event.action != MouseAction::MOVE && event.action != MouseAction::HOVER_MOVE &&
-            event.action != MouseAction::PULL_MOVE) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "mouseEvent markProcessed in ace_view, eventInfo: id:%{public}d",
-                event.touchEventId);
-        }
         MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
             std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
             markEnabled);
