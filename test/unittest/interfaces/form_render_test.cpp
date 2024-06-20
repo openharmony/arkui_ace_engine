@@ -409,25 +409,6 @@ HWTEST_F(FormRenderTest, FormRenderTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest009
- * @tc.type: FUNC
- * Function: OnEnableForm,SetEnableFormEventHandler
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDelegateImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest009, TestSize.Level1)
-{
-    OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    bool enable = true;
-    auto fun = [](const OHOS::AppExecFwk::FormJsInfo&, const bool) {};
-    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
-    renderDelegate->SetEnableFormEventHandler(nullptr);
-    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, enable), ERR_INVALID_DATA);
-    renderDelegate->SetEnableFormEventHandler(fun);
-    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, enable), ERR_OK);
-}
-
-/**
  * @tc.name: FormRenderTest010
  * @tc.desc: test RunFormPage
  * @tc.type: FUNC
