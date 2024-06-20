@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -1110,6 +1111,10 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         CreateImageBackIcon(backButtonNode, navigationGroupNode);
     }
 
+    //read navigation back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+
     backButtonNode->MarkModifyDone();
     titleBarNode->SetBackButton(backButtonNode);
     titleBarNode->AddChild(backButtonNode, 0);
@@ -1865,6 +1870,10 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
     imageRenderProperty->UpdateMatchTextDirection(true);
+
+    //read navigation back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();
