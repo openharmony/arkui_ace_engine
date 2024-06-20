@@ -688,6 +688,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         tabBarLayoutProperty->UpdateIndicator(index);
         PaintFocusState(false);
     } else {
+        UpdateAnimationDuration();
         if (GetAnimationDuration().has_value()
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             swiperController_->SwipeTo(index);
@@ -1131,6 +1132,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
     } else {
+        UpdateAnimationDuration();
         if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
@@ -1492,6 +1494,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         TriggerTranslateAnimation(layoutProperty, index, swiperPattern->GetCurrentIndex());
     } else {
         TriggerTranslateAnimation(layoutProperty, index, indicator);
+        UpdateAnimationDuration();
         if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
@@ -2073,6 +2076,7 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    UpdateAnimationDuration();
     AnimationOption option = AnimationOption();
     option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(
         tabTheme->GetTabContentAnimationDuration())));
@@ -2172,6 +2176,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     auto curve = DurationCubicCurve;
+    UpdateAnimationDuration();
     AnimationOption option = AnimationOption();
     option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(
         tabTheme->GetTabContentAnimationDuration())));
@@ -2556,6 +2561,7 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     CHECK_NULL_VOID(tabsFrameNode);
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     tabBarLayoutProperty->UpdateIndicator(index);
+    UpdateAnimationDuration();
     if (GetAnimationDuration().has_value()
         && (!tabsPattern || tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION)) {
         swiperController_->SwipeTo(index);
@@ -2888,36 +2894,33 @@ float TabBarPattern::GetLeftPadding() const
     return geometryNode->GetPadding()->left.value_or(0.0f);
 }
 
-std::optional<int32_t> TabBarPattern::GetAnimationDuration()
+void TabBarPattern::UpdateAnimationDuration()
 {
     if (animationDuration_.has_value() && animationDuration_.value() >= 0) {
-        return animationDuration_;
-    }
-    if (!animationDuration_.has_value() && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return animationDuration_;
+        return;
     }
 
     std::optional<int32_t> duration;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, duration);
+    CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_RETURN(tabTheme, duration);
+    CHECK_NULL_VOID(tabTheme);
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, duration);
+    CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsNode, duration);
+    CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_RETURN(swiperNode, duration);
+    CHECK_NULL_VOID(swiperNode);
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, duration);
+    CHECK_NULL_VOID(swiperPaintProperty);
     duration = static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration());
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::BOTTOMTABBATSTYLE)) {
+    if ((Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::BOTTOMTABBATSTYLE)) ||
+        (!animationDuration_.has_value() && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         duration = 0;
     }
     SetAnimationDuration(duration.value());
     swiperPaintProperty->UpdateDuration(duration.value());
-    return duration;
 }
 
 void TabBarPattern::DumpAdvanceInfo()
