@@ -83,7 +83,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     auto cachedCount = props->GetCachedCountValue(1);
     wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cachedCount, cachedCount);
     PreBuildItems(wrapper_, info_,
-        WaterFlowLayoutUtils::CreateChildConstraint({ itemCrossSize_[0], mainLen_, axis_ }, props, nullptr),
+        WaterFlowLayoutUtils::CreateChildConstraint({ itemsCrossSize_[0][0], mainLen_, axis_ }, props, nullptr),
         cachedCount);
 
     if (info_->itemEnd_) {

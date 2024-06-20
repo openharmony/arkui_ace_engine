@@ -673,44 +673,6 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
 }
 
 /**
- * @tc.name: Illegal003
- * @tc.desc: Layout WaterFlow without items.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
-{
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(6);
-        },
-        false);
-    auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    secObj->ChangeData(0, 0, SECTION_9);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    EXPECT_EQ(info->endIndex_, 5);
-
-    auto newSection = SECTION_8;
-    newSection[0].itemsCount = 0;
-    secObj->ChangeData(0, 1, newSection);
-    for (int i = 0; i < 10; ++i) {
-        frameNode_->RemoveChildAtIndex(0);
-    }
-    frameNode_->ChildrenUpdatedFrom(0);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-
-    pattern_->ScrollToIndex(LAST_ITEM);
-    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->childrenCount_, 0);
-}
-
-/**
  * @tc.name: CheckHeight001
  * @tc.desc: Layout WaterFlow and check if callback height is used
  * @tc.type: FUNC
@@ -866,7 +828,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
     UpdateCurrentOffset(-4.0f);
     auto newSec = SECTION_10[1];
     newSec.margin->top = CalcLength(10.0f);
-    secObj->ChangeData(1, 1, {newSec});
+    secObj->ChangeData(1, 1, { newSec });
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 3);
@@ -898,8 +860,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_9);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 5);
 
     auto newSection = SECTION_8;
     newSection[0].itemsCount = 0;
@@ -907,14 +868,13 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
     for (int i = 0; i < 10; ++i) {
         frameNode_->RemoveChildAtIndex(0);
     }
-    frameNode_->childrenUpdatedFrom_ = 0;
+    frameNode_->ChildrenUpdatedFrom(0);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-
     pattern_->ScrollToIndex(LAST_ITEM);
-    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
+    EXPECT_EQ(info_->jumpIndex_, LAST_ITEM);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->childrenCount_, 0);
+    EXPECT_EQ(info_->endIndex_, -1);
+    EXPECT_GT(info_->startIndex_, info_->endIndex_);
 }
 } // namespace OHOS::Ace::NG

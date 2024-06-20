@@ -14,8 +14,6 @@
  */
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/property/property.h"
-
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
 
