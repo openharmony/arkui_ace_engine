@@ -315,5 +315,5 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg005, TestSize.Level1)
      */
     subMenuPattern->SetSubMenuShow();
     EXPECT_TRUE(subMenuPattern->isSubMenuShow_);
-} // namespace OHOS::Ace::NG
 }
+} // namespace OHOS::Ace::NG

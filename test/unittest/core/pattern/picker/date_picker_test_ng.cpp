@@ -2349,6 +2349,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest013, TestSize.Level1)
     yearDatePickerColumnPattern->SetCurrentIndex(123);
     monthDatePickerColumnPattern->SetCurrentIndex(2);
     pickerPattern->HandleReduceLunarDayChange(0);
+
+    pickerPattern->isPicker_ = false;
+    pickerPattern->HandleReduceLunarDayChange(0);
 }
 
 /**
@@ -5710,4 +5713,41 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0049, TestSize.Level1)
     dialogViewNode =
         DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
 }
+
+/**
+ * @tc.name: DatePickerPatternTest001
+ * @tc.desc: Test OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternTest111, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    datePickerNode->MountToParent(pickerStack);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->isFiredDateChange_ = true;
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->isFiredDateChange_ = false;
+    datePickerPattern->showMonthDays_ = true;
+    datePickerPattern->OnModifyDone();
+}
+
 } // namespace OHOS::Ace::NG
