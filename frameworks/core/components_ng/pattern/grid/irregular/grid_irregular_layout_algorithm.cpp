@@ -379,13 +379,13 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
     MinusPaddingToSize(padding, frameSize);
     const bool isRtl = props->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
-    auto endIt = info.gridMatrix_.find(info.endMainLineIndex_ + 1);
-    for (auto it = info.gridMatrix_.find(info.startMainLineIndex_); it != endIt; ++it) {
-        const auto& row = it->second;
+    auto endIt = info.gridMatrix_.upper_bound(info.endMainLineIndex_);
+    for (auto it = info.gridMatrix_.lower_bound(info.startMainLineIndex_); it != endIt; ++it) {
         auto lineHeightIt = info.lineHeightMap_.find(it->first);
         if (lineHeightIt == info.lineHeightMap_.end()) {
             continue;
         }
+        const auto& row = it->second;
         for (const auto& [c, itemIdx] : row) {
             if (itemIdx < 0) {
                 // not top-left tile
