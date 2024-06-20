@@ -242,6 +242,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void InitDefaultParams(const RefPtr<FrameNode>& host);
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
