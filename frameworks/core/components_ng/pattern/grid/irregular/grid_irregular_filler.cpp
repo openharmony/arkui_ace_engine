@@ -186,7 +186,12 @@ bool GridIrregularFiller::AdvancePos()
 bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row, int32_t rowBound, float mainGap) const
 {
     for (; row < rowBound; ++row) {
-        len += info_->lineHeightMap_.at(row) + mainGap;
+        auto lineHeightIt = info_->lineHeightMap_.find(row);
+        if (lineHeightIt == info_->lineHeightMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_GRID, "line height at row %{public}d not prepared after forward measure", posY_);
+            continue;
+        }
+        len += lineHeightIt->second + mainGap;
         if (GreatOrEqual(len, targetLen)) {
             return true;
         }
@@ -221,7 +226,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     child->Measure(constraint);
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
-    // spread height to each row. May be buggy?
+    // spread height to each row.
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
         info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
@@ -268,9 +273,14 @@ float GridIrregularFiller::MeasureBackward(const FillParameters& params, float t
     // only need to record irregular items
     std::unordered_set<int32_t> measured;
 
-    for (; posY_ >= 0 && len < targetLen; --posY_) {
+    for (; posY_ >= 0 && LessNotEqual(len, targetLen); --posY_) {
         BackwardImpl(measured, params);
-        len += params.mainGap + info_->lineHeightMap_.at(posY_);
+        auto lineHeightIt = info_->lineHeightMap_.find(posY_);
+        if (lineHeightIt == info_->lineHeightMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_GRID, "line height at row %{public}d not prepared after backward measure", posY_);
+            continue;
+        }
+        len += params.mainGap + lineHeightIt->second;
     }
     return len;
 }
@@ -291,20 +301,26 @@ void GridIrregularFiller::MeasureBackwardToTarget(
 
 void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params)
 {
-    const auto& row = info_->gridMatrix_.find(posY_)->second;
+    auto it = info_->gridMatrix_.find(posY_);
+    if (it == info_->gridMatrix_.end()) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "positionY %{public}d not found in matrix. ", posY_);
+        return;
+    }
+    const auto& row = it->second;
     for (int c = 0; c < info_->crossCount_; ++c) {
-        if (row.find(c) == row.end()) {
+        auto it = row.find(c);
+        if (it == row.end()) {
             continue;
         }
+        const int32_t itemIdx = std::abs(it->second);
 
-        if (measured.find(row.at(c)) != measured.end()) {
+        if (measured.count(itemIdx)) {
             // skip all columns of a measured irregular item
-            c += GridLayoutUtils::GetItemSize(info_, wrapper_, row.at(c)).columns - 1;
+            c += GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx).columns - 1;
             continue;
         }
 
         int32_t topRow = FindItemTopRow(posY_, c);
-        int32_t itemIdx = info_->gridMatrix_.at(topRow).at(c);
         MeasureItem(params, itemIdx, c, topRow);
         if (topRow < posY_) {
             // measure irregular items only once from the bottom-left tile

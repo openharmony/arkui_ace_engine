@@ -102,7 +102,7 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
     const auto& irregulars = opts_->irregularIndexes;
     // consider irregular items occupying multiple rows
     const auto& row = info_->gridMatrix_.at(idx);
-    for (int c = 0; c < info_->crossCount_; ++c) {
+    for (int32_t c = 0; c < info_->crossCount_; ++c) {
         auto it = row.find(c);
         if (it == row.end()) {
             continue;
@@ -120,12 +120,7 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
         }
     }
 
-    float len = 0.0f;
-    for (int i = 0; i < rowCnt; ++i) {
-        len += info_->lineHeightMap_.at(idx + i) + mainGap;
-    }
-
-    return { rowCnt, len };
+    return { rowCnt, info_->GetHeightInRange(idx, idx + rowCnt, mainGap) };
 }
 
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line)
