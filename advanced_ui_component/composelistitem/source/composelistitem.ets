@@ -337,7 +337,7 @@ struct OperateItemStruct {
       minHeight: BUTTON_SIZE
     })
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
@@ -379,7 +379,7 @@ struct OperateItemStruct {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
@@ -448,7 +448,7 @@ struct OperateItemStruct {
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
@@ -486,7 +486,7 @@ struct OperateItemStruct {
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
-        this.parentCanFocus = false
+        this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
@@ -524,7 +524,7 @@ struct OperateItemStruct {
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
-        this.parentCanFocus = false
+        this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
@@ -567,7 +567,7 @@ struct OperateItemStruct {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
@@ -616,7 +616,7 @@ struct OperateItemStruct {
     .backgroundColor(Color.Transparent)
     .borderRadius($r('sys.float.corner_radius_level8'))
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
