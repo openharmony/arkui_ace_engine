@@ -840,10 +840,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.onTouch((v8) => {
-                if (v8.type == TouchType.Down) {
+                if (v8.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (v8.type == TouchType.Up) {
+                if (v8.type === TouchType.Up || v8.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -889,10 +889,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.onTouch((g8) => {
-                if (g8.type == TouchType.Down) {
+                if (g8.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (g8.type == TouchType.Up) {
+                if (g8.type === TouchType.Up || g8.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -961,10 +961,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.onTouch((i7) => {
-                if (i7.type == TouchType.Down) {
+                if (i7.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (i7.type == TouchType.Up) {
+                if (i7.type === TouchType.Up || i7.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1009,10 +1009,10 @@ class OperateItemStruct extends ViewPU {
             });
             Radio.hitTestBehavior(HitTestMode.Block);
             Radio.onTouch((v6) => {
-                if (v6.type == TouchType.Down) {
+                if (v6.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (v6.type == TouchType.Up) {
+                if (v6.type === TouchType.Up || v6.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1047,10 +1047,10 @@ class OperateItemStruct extends ViewPU {
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
             Checkbox.onTouch((l6) => {
-                if (l6.type == TouchType.Down) {
+                if (l6.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (l6.type == TouchType.Up) {
+                if (l6.type === TouchType.Up || l6.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1083,10 +1083,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Row.onTouch((b6) => {
-                if (b6.type == TouchType.Down) {
+                if (b6.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (b6.type == TouchType.Up) {
+                if (b6.type === TouchType.Up || b6.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1125,10 +1125,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.onTouch((o5) => {
-                if (o5.type == TouchType.Down) {
+                if (o5.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (o5.type == TouchType.Up) {
+                if (o5.type === TouchType.Up || o5.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1795,7 +1795,7 @@ export class ComposeListItem extends ViewPU {
                     if (x1.type === TouchType.Down && this.canTouch) {
                         this.frontColor = this.touchDownColor;
                     }
-                    if (x1.type === TouchType.Up) {
+                    if (x1.type === TouchType.Up || x1.type === TouchType.Cancel) {
                         this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
                     }
                 }
