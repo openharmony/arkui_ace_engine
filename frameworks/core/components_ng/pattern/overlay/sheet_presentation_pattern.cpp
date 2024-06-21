@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -276,6 +277,14 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         }
     };
     targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchTask = [](TouchEventInfo& info) {
+        info.SetStopPropagation(true);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the touch event.");
+    };
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
 }
 
 void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
