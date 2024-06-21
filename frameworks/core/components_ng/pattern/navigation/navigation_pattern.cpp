@@ -2308,7 +2308,7 @@ void NavigationPattern::RecoveryToLastStack()
 
     // update cached node
     auto destinationNodes = navigationStack_->GetAllNavDestinationNodes();
-    for (auto index = 0; index < destinationNodes.size(); index++) {
+    for (uint32_t index = 0; index < destinationNodes.size(); index++) {
         auto childNode = destinationNodes[index];
         if (!childNode.second) {
             continue;
