@@ -2115,6 +2115,8 @@ void WebPattern::OnAttachContext(PipelineContext *context)
         dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
     }
 
+    pipelineContext->AddWindowStateChangedCallback(nodeId);
+    pipelineContext->AddWindowSizeChangeCallback(nodeId);
     pipelineContext->AddOnAreaChangeNode(nodeId);
     RegisterVisibleAreaChangeCallback(pipelineContext);
     needUpdateWeb_= true;
@@ -2130,6 +2132,8 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     auto host = GetHost();
     int32_t nodeId = host->GetId();
 
+    context->RemoveWindowStateChangedCallback(nodeId);
+    context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
     context->RemoveVisibleAreaChangeNode(nodeId);
     context->RemoveVirtualKeyBoardCallback(nodeId);
