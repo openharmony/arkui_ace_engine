@@ -1121,11 +1121,15 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
      */
     pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
     ASSERT_FALSE(tabBarPattern_->GetAnimationDuration().has_value());
+    tabBarPattern_->UpdateAnimationDuration();
+    EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 0);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 1);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(-1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), defaultDuration);
     tabBarPattern_->animationDuration_.reset();
 
@@ -1134,22 +1138,28 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), defaultDuration);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 1);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(-1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), defaultDuration);
     tabBarPattern_->animationDuration_.reset();
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 0);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 1);
     tabBarPattern_->animationDuration_.reset();
     tabBarPattern_->SetAnimationDuration(-1);
+    tabBarPattern_->UpdateAnimationDuration();
     EXPECT_FLOAT_EQ(tabBarPattern_->GetAnimationDuration().value_or(-1), 0);
     tabBarPattern_->animationDuration_.reset();
 }

@@ -410,7 +410,12 @@ public:
 
     void DumpAdvanceInfo() override;
 
-    std::optional<int32_t> GetAnimationDuration();
+    std::optional<int32_t> GetAnimationDuration()
+    {
+        return animationDuration_;
+    }
+
+    void UpdateAnimationDuration();
 
     bool HasSurfaceChangedCallback()
     {
