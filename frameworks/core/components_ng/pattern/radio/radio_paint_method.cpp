@@ -40,6 +40,9 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 628.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 36.0f;
 constexpr int32_t DEFAULT_INDICATOR_ANIMATION_DURATION = 150;
+constexpr int32_t DIVIDER_HALF = 2;
+constexpr int32_t ANIMATION_MIN_SCALE = 0;
+constexpr int32_t ANIMATION_MAX_SCALE = 1;
 } // namespace
 
 RadioModifier::RadioModifier()
@@ -143,31 +146,35 @@ void RadioModifier::UpdateTotalScaleOnAnimatable(
 void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
 {
     AnimationOption delayOption;
-    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION / 2);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / 2);
+    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION / DIVIDER_HALF);
+    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / DIVIDER_HALF);
     delayOption.SetCurve(Curves::FRICTION);
 
     AnimationOption halfDurationOption;
-    halfDurationOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / 2);
+    halfDurationOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION / DIVIDER_HALF);
     halfDurationOption.SetCurve(Curves::FRICTION);
 
     if (isOnAnimationFlag_->Get()) {
-        pointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
-        ringPointScale_->Set(1);
-        AnimationUtils::Animate(halfDurationOption, [&]() { ringPointScale_->Set(0); });
+        pointScale_->Set(ANIMATION_MIN_SCALE);
+        AnimationUtils::Animate(delayOption, [this]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
+        ringPointScale_->Set(ANIMATION_MAX_SCALE);
+        AnimationUtils::Animate(
+            halfDurationOption,
+            [this]() {
+                ringPointScale_->Set(ANIMATION_MIN_SCALE);
+        });
     } else {
         pointScale_->Set(DEFAULT_POINT_SCALE);
-        AnimationUtils::Animate(halfDurationOption, [&]() { pointScale_->Set(0); });
-        ringPointScale_->Set(0);
-        AnimationUtils::Animate(delayOption, [&]() { ringPointScale_->Set(1); });
+        AnimationUtils::Animate(halfDurationOption, [this]() { pointScale_->Set(ANIMATION_MIN_SCALE); });
+        ringPointScale_->Set(ANIMATION_MIN_SCALE);
+        AnimationUtils::Animate(delayOption, [this]() { ringPointScale_->Set(ANIMATION_MAX_SCALE); });
     }
 
     totalScale_->Set(DEFAULT_TOTAL_SCALE);
-    AnimationUtils::Animate(halfDurationOption, [&]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
+    AnimationUtils::Animate(halfDurationOption, [this]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
     AnimationUtils::Animate(
-        delayOption, [&]() { totalScale_->Set(1); },
+        delayOption, [this]() { totalScale_->Set(ANIMATION_MAX_SCALE); },
         [isCheck, weakUiStatus = AceType::WeakClaim(AceType::RawPtr(uiStatus_))]() {
             auto uiStatus = weakUiStatus.Upgrade();
             if (uiStatus) {

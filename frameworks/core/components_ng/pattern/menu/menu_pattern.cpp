@@ -370,7 +370,11 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
+    InitDefaultBorder(host);
+}
 
+void InnerMenuPattern::InitDefaultBorder(const RefPtr<FrameNode>& host)
+{
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeLineContext = PipelineContext::GetCurrentContext();

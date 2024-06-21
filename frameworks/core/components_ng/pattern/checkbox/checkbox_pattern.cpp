@@ -82,6 +82,19 @@ void CheckBoxPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    InitDefaultParams(host);
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::InitDefaultParams(const RefPtr<FrameNode>& host)
+{
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
@@ -111,14 +124,6 @@ void CheckBoxPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
