@@ -196,13 +196,20 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
 
 void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
-    if (itemPosition_.empty()) {
-        layoutWrapper->SetActiveChildRange(-1, -1);
+    if (!itemPosition_.empty()) {
+        auto start = itemStartIndex_ + itemPosition_.begin()->first;
+        auto end = itemStartIndex_ + itemPosition_.rbegin()->first;
+        layoutWrapper->SetActiveChildRange(start, end, cacheCount * lanes_, cacheCount * lanes_);
         return;
     }
-    auto start = itemStartIndex_ + itemPosition_.begin()->first;
-    auto end = itemStartIndex_ + itemPosition_.rbegin()->first;
-    layoutWrapper->SetActiveChildRange(start, end, cacheCount * lanes_, cacheCount * lanes_);
+    auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
+    auto offset = layoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    if (LessNotEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_))) {
+        int32_t index = totalItemCount_ + itemStartIndex_;
+        layoutWrapper->SetActiveChildRange(index, index, cacheCount * lanes_, 0);
+    } else {
+        layoutWrapper->SetActiveChildRange(-1, -1, 0, cacheCount * lanes_);
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF& selfIdealSize,

@@ -370,14 +370,15 @@ int32_t ListItemGroupPattern::GetBackwardCachedIndex(int32_t cacheCount)
     return backwardCachedIndex_;
 }
 
-void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline)
+void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
+    bool forward, int64_t deadline, int32_t cached)
 {
-    ACE_SCOPED_TRACE("Group LayoutCache:%d", forward);
+    ACE_SCOPED_TRACE("Group LayoutCache:%d,%d", forward, cached);
     auto listNode = GetListFrameNode();
     CHECK_NULL_VOID(listNode);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) - cached;
     if (cacheCount < 1) {
         return;
     }
