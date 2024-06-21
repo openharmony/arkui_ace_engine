@@ -39,10 +39,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+const uint8_t PIXEL_ROUND = 18;
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 }
 
