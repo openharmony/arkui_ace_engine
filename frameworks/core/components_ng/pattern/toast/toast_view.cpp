@@ -111,7 +111,49 @@ void ToastView::UpdateTextLayoutProperty(
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
     }
+
+    UpdateTextLayoutBorderShadowProperty(textNode);
 }
+
+void ToastView::UpdateTextLayoutBorderShadowProperty(
+    const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+
+    Color color = toastTheme->GetBorderColor();
+    Dimension width = toastTheme->GetBorderWidth();
+    BorderColorProperty borderColor;
+    BorderWidthProperty borderWidth;
+
+    borderColor.SetColor(color);
+    borderWidth.SetBorderWidth(width);
+
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!textLayoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext->HasBorderWidth()) {
+            textLayoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext->HasBorderColor()) {
+            renderContext->UpdateBorderColor(borderColor);
+        }
+    }
+
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    if (!graphics->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(toastTheme->GetShadowNormal());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        renderContext->UpdateBackShadow(shadow);
+    }
+}
+
 void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
 {
     auto textContext = textNode->GetRenderContext();
