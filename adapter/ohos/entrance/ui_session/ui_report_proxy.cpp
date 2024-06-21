@@ -18,54 +18,66 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
-void UiReportProxy::ReportClickEvent()
+void UiReportProxy::ReportClickEvent(std::string data)
 {
-    MessageParcel data;
+    MessageParcel messageData;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
         LOGW("ReportClickEvent write interface token failed");
     }
-    if (Remote()->SendRequest(REPORT_CLICK_EVENT, data, reply, option) != ERR_NONE) {
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportClickEvent write data failed");
+    }
+    if (Remote()->SendRequest(REPORT_CLICK_EVENT, messageData, reply, option) != ERR_NONE) {
         LOGW("ReportClickEvent send request failed");
     }
 }
 
-void UiReportProxy::ReportRouterChangeEvent()
+void UiReportProxy::ReportRouterChangeEvent(std::string data)
 {
-    MessageParcel data;
+    MessageParcel messageData;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
         LOGW("ReportRouterChangeEvent write interface token failed");
     }
-    if (Remote()->SendRequest(REPORT_SWITCH_EVENT, data, reply, option) != ERR_NONE) {
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportRouterChangeEvent write data failed");
+    }
+    if (Remote()->SendRequest(REPORT_SWITCH_EVENT, messageData, reply, option) != ERR_NONE) {
         LOGW("ReportRouterChangeEvent send request failed");
     }
 }
 
-void UiReportProxy::ReportComponentChangeEvent()
+void UiReportProxy::ReportComponentChangeEvent(std::string data)
 {
-    MessageParcel data;
+    MessageParcel messageData;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
         LOGW("ReportComponentChangeEvent write interface token failed");
     }
-    if (Remote()->SendRequest(REPORT_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportComponentChangeEvent write data failed");
+    }
+    if (Remote()->SendRequest(REPORT_COMPONENT_EVENT, messageData, reply, option) != ERR_NONE) {
         LOGW("ReportComponentChangeEvent send request failed");
     }
 }
 
-void UiReportProxy::ReportSearchEvent()
+void UiReportProxy::ReportSearchEvent(std::string data)
 {
-    MessageParcel data;
+    MessageParcel messageData;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
         LOGW("ReportSearchEvent write interface token failed");
     }
-    if (Remote()->SendRequest(REPORT_SEARCH_EVENT, data, reply, option) != ERR_NONE) {
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportSearchEvent write data failed");
+    }
+    if (Remote()->SendRequest(REPORT_SEARCH_EVENT, messageData, reply, option) != ERR_NONE) {
         LOGW("ReportSearchEvent send request failed");
     }
 }

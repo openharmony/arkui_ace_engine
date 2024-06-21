@@ -49,7 +49,6 @@ int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(EventCall
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance().SetClickEventRegistered(false);
-
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterSearchEventCallback()

@@ -24,21 +24,22 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         LOGW("ui_session InterfaceToken check failed");
         return -1;
     }
+    std::string result = data.ReadString();
     switch (code) {
         case REPORT_CLICK_EVENT: {
-            ReportClickEvent();
+            ReportClickEvent(result);
             break;
         }
         case REPORT_SWITCH_EVENT: {
-            ReportRouterChangeEvent();
+            ReportRouterChangeEvent(result);
             break;
         }
         case REPORT_COMPONENT_EVENT: {
-            ReportRouterChangeEvent();
+            ReportRouterChangeEvent(result);
             break;
         }
         case REPORT_SEARCH_EVENT: {
-            ReportSearchEvent();
+            ReportSearchEvent(result);
             break;
         }
         default: {
@@ -49,24 +50,24 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
     return 0;
 }
 
-void UiReportStub::ReportClickEvent()
+void UiReportStub::ReportClickEvent(std::string data)
 {
-    clickEventCallback_();
+    clickEventCallback_(data);
 }
 
-void UiReportStub::ReportRouterChangeEvent()
+void UiReportStub::ReportRouterChangeEvent(std::string data)
 {
-    RouterChangeEventCallback_();
+    RouterChangeEventCallback_(data);
 }
 
-void UiReportStub::ReportComponentChangeEvent()
+void UiReportStub::ReportComponentChangeEvent(std::string data)
 {
-    ComponentChangeEventCallback_();
+    ComponentChangeEventCallback_(data);
 }
 
-void UiReportStub::ReportSearchEvent()
+void UiReportStub::ReportSearchEvent(std::string data)
 {
-    searchEventCallback_();
+    searchEventCallback_(data);
 }
 
 void UiReportStub::RegisterClickEventCallback(EventCallback eventCallback)

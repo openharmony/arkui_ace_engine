@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ui_session/ui_content_proxy.h"
 
+#include "ipc_skeleton.h"
+
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
@@ -45,12 +47,17 @@ int32_t UIContentServiceProxy::Connect()
         return FAILED;
     }
     report_ = new (std::nothrow) UiReportStub();
+    processId_ = IPCSkeleton::GetCallingRealPid();
     if (report_ == nullptr) {
         LOGW("connect failed,create reportStub failed");
         return FAILED;
     }
     if (!data.WriteRemoteObject(report_)) {
         LOGW("write reportStub failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
         return FAILED;
     }
     if (Remote()->SendRequest(UI_CONTENT_CONNECT, data, reply, option) != ERR_NONE) {
