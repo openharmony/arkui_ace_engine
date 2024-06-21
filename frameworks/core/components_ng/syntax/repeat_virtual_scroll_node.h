@@ -81,6 +81,14 @@ public:
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
+    /**
+     * those items with index in cachedItems are marked active
+     * those items with index in cachedItems are marked inactive
+     * baseIndex is repeat first node index
+     */
+    void DoSetActiveChildRange(
+        const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex) override;
+
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated
     void RecycleItems(int32_t from, int32_t to) override;

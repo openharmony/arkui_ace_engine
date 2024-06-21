@@ -114,6 +114,18 @@ private:
     RecursionGuard guard_;
 };
 
+struct ActiveChildRange {
+    int32_t start = -1;
+    int32_t end = -1;
+    int32_t cacheStart = 0;
+    int32_t cacheEnd = 0;
+};
+
+struct ActiveChildSets {
+    std::set<int32_t> activeItems;
+    std::set<int32_t> cachedItems;
+};
+
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
@@ -138,6 +150,9 @@ public:
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
     virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
+    virtual void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
+        const std::optional<ActiveChildRange>& activeChildRange = std::nullopt)
+    {}
     virtual void RecycleItemsByIndex(int32_t start, int32_t end) = 0;
 
     virtual void SetActiveChildRange(const std::set<int32_t>& activeIndexes, const std::set<int32_t>& cachedIndexes) {}

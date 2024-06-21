@@ -670,6 +670,31 @@ public:
     void UpdateNodeRate();
     int32_t GetMaxDisplayCount() const;
 
+    const std::set<int32_t>& GetCachedItems() const
+    {
+        return cachedItems_;
+    }
+
+    void SetCachedItems(const std::set<int32_t>& cachedItems)
+    {
+        cachedItems_ = cachedItems;
+    }
+
+    LayoutConstraintF GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
+
+    void SetLayoutConstraint(const LayoutConstraintF& layoutConstraint)
+    {
+        layoutConstraint_ = layoutConstraint;
+    }
+
+    bool GetRequestLongPredict() const
+    {
+        return requestLongPredict_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -799,7 +824,7 @@ private:
     bool IsVisibleChildrenSizeLessThanSwiper();
     void BeforeCreateLayoutWrapper() override;
 
-    void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
@@ -970,6 +995,8 @@ private:
     void SetIndicatorChangeIndexStatus(bool withAnimation);
     void SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex);
 
+    void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -1130,6 +1157,10 @@ private:
     bool needFireCustomAnimationEvent_ = true;
     std::optional<bool> isSwipeByGroup_;
     std::set<WeakPtr<FrameNode>> groupedItems_;
+
+    std::set<int32_t> cachedItems_;
+    LayoutConstraintF layoutConstraint_;
+    bool requestLongPredict_ = false;
 };
 } // namespace OHOS::Ace::NG
 

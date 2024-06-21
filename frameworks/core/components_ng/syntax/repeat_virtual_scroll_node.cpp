@@ -110,6 +110,42 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
     }
 }
 
+void RepeatVirtualScrollNode::DoSetActiveChildRange(
+    const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
+{
+    bool needSync =
+        caches_.RebuildL1([&activeItems, &cachedItems, baseIndex, this](int32_t index, RefPtr<UINode> node) -> bool {
+            if (node == nullptr) {
+                return false;
+            }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, true));
+            if (!frameNode) {
+                return false;
+            }
+            if (activeItems.find(index + baseIndex) != activeItems.end()) {
+                frameNode->SetActive(true);
+                return true;
+            } else {
+                frameNode->SetActive(false);
+            }
+            if (cachedItems.find(index + baseIndex) != cachedItems.end()) {
+                return true;
+            }
+            if (node->OnRemoveFromParent(true)) {
+                RemoveDisappearingChild(node);
+            } else {
+                AddDisappearingChild(node);
+            }
+            return false;
+        });
+
+    if (needSync) {
+        UINode::MarkNeedSyncRenderTree(false);
+        children_.clear();
+        PostIdleTask();
+    }
+}
+
 void RepeatVirtualScrollNode::InvalidateKeyCache()
 {
     // empty the cache index -> key
