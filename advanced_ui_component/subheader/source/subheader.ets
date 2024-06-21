@@ -137,7 +137,6 @@ function disabledStyle() {
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
-
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
       instance.width('100%')
@@ -175,8 +174,8 @@ export struct SubHeader {
   @Prop contentMargin: LocalizedMargin;
   @Prop contentPadding: LocalizedPadding;
   @State subHeaderMargin: LocalizedMargin = {
-    start: LengthMetrics.vp(0),
-    end: LengthMetrics.vp(0)
+    start: LengthMetrics.resource($r('sys.float.margin_left')),
+    end: LengthMetrics.resource($r('sys.float.margin_right'))
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   constraintWidth: number = 0;
@@ -211,6 +210,15 @@ export struct SubHeader {
   }
 
   async aboutToAppear(): Promise<void> {
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.fontSize = context.config?.fontSizeScale ?? 1;
+    if (this.isSuitableAging()) {
+      this.ageing = true;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    } else {
+      this.ageing = false;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    }
     if (this.select) {
       this.selectedIndex = this.select.selected;
       this.selectValue = this.select.value;
@@ -281,27 +289,6 @@ export struct SubHeader {
       this.subHeaderModifier.isAgeing = this.ageing;
     }
     children.forEach((child) => {
-      if (Math.abs(this.constraintWidth - Number(constraint.maxWidth)) > Number.EPSILON) {
-        if (!this.contentMargin) {
-          this.constraintWidth = Number(constraint.maxWidth);
-          if (this.constraintWidth < Util.BREAKPOINT_S) {
-            this.subHeaderMargin = {
-              start: LengthMetrics.resource($r('sys.float.padding_level8')),
-              end: LengthMetrics.resource($r('sys.float.padding_level8'))
-            }
-          } else if (this.constraintWidth < Util.BREAKPOINT_M) {
-            this.subHeaderMargin = {
-              start: LengthMetrics.resource($r('sys.float.padding_level12')),
-              end: LengthMetrics.resource($r('sys.float.padding_level12'))
-            }
-          } else {
-            this.subHeaderMargin = {
-              start: LengthMetrics.resource($r('sys.float.padding_level16')),
-              end: LengthMetrics.resource($r('sys.float.padding_level16')),
-            }
-          }
-        }
-      }
       constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
       result.height = child.measure(constraint).height;
       result.width = Number(constraint.maxWidth);
@@ -967,7 +954,7 @@ class Util {
     }
   }
 
-  public static symbolFontSize(fontsize: Length): Length {
-    return Util.numberToSize(fontsize) + 'vp';
+  public static symbolFontSize(fontSize: Length): Length {
+    return Util.numberToSize(fontSize) + 'vp';
   }
 }
