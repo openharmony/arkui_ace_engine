@@ -32,6 +32,7 @@ public:
     void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) override;
     std::string GetArcDotIndicatorStyle() const override;
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
+    bool IsLoop() const override;
 
 private:
     std::string GradientToJson(Gradient colors) const;

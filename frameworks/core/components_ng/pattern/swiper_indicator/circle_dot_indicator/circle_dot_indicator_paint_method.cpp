@@ -59,7 +59,7 @@ constexpr int32_t LEFT_THIRD_DOT_INDEX = 2;
 constexpr int32_t RIGHT_SECOND_DOT_INDEX = 13;
 constexpr int32_t RIGHT_FIRST_DOT_INDEX = 14;
 constexpr int32_t HALF_DIVISOR = 2;
-constexpr int32_t RELATIVE_STEP = 1;
+constexpr int32_t ACTUAL_SUBTRACT_INDEX = 1;
 } // namespace
 
 void CircleDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -147,8 +147,8 @@ void CircleDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* pain
         circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, vectorBlackPointRadius_,
                                                             longPointAngle_, gestureState_);
     } else {
-        circleDotIndicatorModifier_->UpdateNormalToPressPaintProperty(
-            itemSizes, vectorBlackPointAngle_, vectorBlackPointRadius_, longPointAngle_);
+        circleDotIndicatorModifier_->UpdateNormalToPressPaintProperty(itemSizes, vectorBlackPointAngle_,
+                                                                      vectorBlackPointRadius_, longPointAngle_);
     }
 }
 
@@ -237,16 +237,18 @@ int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex()
     if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
         auto priorIndicatorIndex = circleDotIndicatorModifier_->GetIndicatorStartIndex();
         int32_t indicatorStartIndex = priorIndicatorIndex;
-        if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        if ((!isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) ||
+            (isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
             if (currentIndex_ >= MAX_INDICATOR_DOT_COUNT - TRIGGER_BOUNDARY_DISTANCE &&
                 currentIndex_ < itemCount_ - TRIGGER_BOUNDARY_DISTANCE &&
                 currentIndex_ - priorIndicatorIndex >= RIGHT_SECOND_DOT_INDEX) {
                 indicatorStartIndex =
-                    currentIndex_ - (MAX_INDICATOR_DOT_COUNT - TRIGGER_BOUNDARY_DISTANCE) + RELATIVE_STEP;
+                    currentIndex_ - (MAX_INDICATOR_DOT_COUNT - TRIGGER_BOUNDARY_DISTANCE) + ACTUAL_SUBTRACT_INDEX;
             } else if (currentIndex_ >= itemCount_ - TRIGGER_BOUNDARY_DISTANCE) {
                 indicatorStartIndex = itemCount_ - MAX_INDICATOR_DOT_COUNT;
             }
-        } else if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        } else if ((!isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) ||
+                   (isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT)) {
             if (currentIndex_ < itemCount_ - RIGHT_SECOND_DOT_INDEX && currentIndex_ >= LEFT_THIRD_DOT_INDEX &&
                 currentIndex_ - priorIndicatorIndex < LEFT_THIRD_DOT_INDEX) {
                 indicatorStartIndex = currentIndex_ - LEFT_THIRD_DOT_INDEX;
@@ -261,6 +263,24 @@ int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex()
     }
 }
 
+int32_t CircleDotIndicatorPaintMethod::CalculateInitIndicatorPosition()
+{
+    int32_t indicatorStartIndex = 0;
+    if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
+        if (currentIndex_ > MAX_INDICATOR_DOT_COUNT / HALF_DIVISOR &&
+            currentIndex_ < itemCount_ - (MAX_INDICATOR_DOT_COUNT / HALF_DIVISOR)) {
+            indicatorStartIndex = currentIndex_ - (MAX_INDICATOR_DOT_COUNT / HALF_DIVISOR);
+        } else if (currentIndex_ >= itemCount_ - (MAX_INDICATOR_DOT_COUNT / HALF_DIVISOR)) {
+            indicatorStartIndex = itemCount_ - MAX_INDICATOR_DOT_COUNT;
+        } else {
+            indicatorStartIndex = 0;
+        }
+        circleDotIndicatorModifier_->SetInitState(false);
+        circleDotIndicatorModifier_->SetIndicatorStartIndex(indicatorStartIndex);
+    }
+    return indicatorStartIndex;
+}
+
 std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
     const LinearVector<float>& itemSizes, int32_t currentIndex)
 {
@@ -272,7 +292,12 @@ std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         index = startCurrentIndex;
     }
-    int32_t indicatorStartIndex = CalculateIndicatorStartIndex();
+    int32_t indicatorStartIndex = 0;
+    if (circleDotIndicatorModifier_->GetInitState()) {
+        indicatorStartIndex = CalculateInitIndicatorPosition();
+    } else {
+        indicatorStartIndex = CalculateIndicatorStartIndex();
+    }
     vectorBlackPointAngle_.resize(itemCount_);
     vectorBlackPointRadius_.resize(itemCount_);
     float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
@@ -472,6 +497,9 @@ std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetStartAndEndIndex(i
 
 void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 {
+    if (touchBottomType_ == TouchBottomType::NONE) {
+        return;
+    }
     float offset = 0.0;
     auto offSetPoint = vectorBlackPointAngle_;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
