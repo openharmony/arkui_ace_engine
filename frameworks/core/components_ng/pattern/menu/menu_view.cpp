@@ -639,7 +639,8 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    imagePattern->SetSyncLoad(true);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();

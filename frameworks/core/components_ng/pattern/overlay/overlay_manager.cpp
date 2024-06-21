@@ -840,10 +840,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     BlurLowerNode(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    wrapperPattern->CallMenuAboutToAppearCallback();
-    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    SetIsMenuShow(true);
     if (wrapperPattern->HasTransitionEffect()) {
+        wrapperPattern->CallMenuAboutToAppearCallback();
+        wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+        SetIsMenuShow(true);
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
