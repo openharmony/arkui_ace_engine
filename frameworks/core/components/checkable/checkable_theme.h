@@ -196,6 +196,11 @@ public:
         return sizeFocusBg_;
     }
 
+    const Dimension& GetSizeHoverBg() const
+    {
+        return sizeHoverBg_;
+    }
+
     const Color& GetFocusedRingUnchecked() const
     {
         return focusedRingUnchecked_;
@@ -224,6 +229,7 @@ protected:
     Color focusedBGColorUnselected_;
     Color focusedBgColor_;
     Dimension sizeFocusBg_;
+    Dimension sizeHoverBg_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -465,6 +471,7 @@ public:
                 theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
                 theme->height_ = theme->width_;
                 theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
+                theme->sizeHoverBg_ = radioPattern->GetAttr<Dimension>("radio_hover_bg_size", 2.0_vp);
                 theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
             }
