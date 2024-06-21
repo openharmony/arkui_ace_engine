@@ -1214,9 +1214,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg044, TestSize.Level1)
     ASSERT_NE(testNode, nullptr);
 
     int32_t testId = 0;
-    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) {
-        testId = newId;
-    });
+    testNode->RegisterUpdateJSInstanceCallback([&testId](int32_t newId) { testId = newId; });
 
     /**
      * @tc.steps: step2. attach context
@@ -1536,5 +1534,84 @@ HWTEST_F(UINodeTestNg, DumpTreeById002, TestSize.Level1)
      */
     result = parent->UINode::DumpTreeById(1, "");
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: UINodeTestNg045
+ * @tc.desc: IsContextTransparent()、GetPageNodeCountAndDepth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. call IsContextTransparent
+     * @tc.expected: result is True
+     */
+    parent->AddChild(child);
+    EXPECT_TRUE(parent->UINode::IsContextTransparent());
+    int32_t count = 0;
+    int32_t depth = 0;
+
+    parent->GetPageNodeCountAndDepth(&count, &depth);
+    EXPECT_EQ(parent->depth_, INT32_MAX);
+    EXPECT_EQ(parent->depth_, INT32_MAX);
+
+    auto child1 = FrameNode::CreateFrameNode(
+        "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto child2 = FrameNode::CreateFrameNode(
+        "child2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    child2->tag_ = V2::JS_VIEW_ETS_TAG;
+    child1->AddChild(child2);
+    child1->AddChild(ONE);
+    std::list<int32_t> removedElmtId;
+    parent->UINode::CollectRemovedChildren(child1->GetChildren(), removedElmtId, true);
+    parent->UINode::GetFrameChildByIndexWithoutExpanded(0);
+    parent->UINode::SetJSViewActive(false);
+    parent->UINode::RenderCustomChild(0);
+    std::vector<RefPtr<UINode>> res;
+    parent->DFSAllChild(child1, res);
+    EXPECT_EQ(res.size(), 2);
+}
+
+/**
+ * @tc.name: UINodeTestNg046
+ * @tc.desc: IsContextTransparent()、GetPageNodeCountAndDepth()
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. call IsContextTransparent
+     * @tc.expected: result is True
+     */
+    parent->AddChild(child);
+    parent->AddChild(ONE);
+
+    auto child1 = FrameNode::CreateFrameNode(
+        "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto child2 = FrameNode::CreateFrameNode(
+        "child2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    child2->tag_ = V2::JS_VIEW_ETS_TAG;
+    child1->AddChild(child2);
+    std::list<int32_t> removedElmtId;
+    EXPECT_TRUE(parent->UINode::GetContextWithCheck());
+    EXPECT_EQ(parent->UINode::GetFrameNodeIndex(child, true), 0);
+    EXPECT_EQ(parent->UINode::GetFrameNodeIndex(child1, false), -1);
 }
 } // namespace OHOS::Ace::NG
