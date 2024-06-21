@@ -22,11 +22,13 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int POSITION_DIMENSION = 2;
+constexpr char END_CHAR = '\0';
 
 ArkUI_CharPtr ParseStringToCharPtr(std::string str)
 {
-    char* id = static_cast<char*>(malloc((str.length()) * sizeof(char)));
+    char* id = static_cast<char*>(malloc((str.length() + 1) * sizeof(char)));
     str.copy(id, str.length());
+    id[str.length()] = END_CHAR;
     return id;
 }
 
@@ -144,6 +146,7 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
     auto directionsArr = panda::Local<panda::ArrayRef>(directionsArg);
     auto referenceIdsArr = panda::Local<panda::ArrayRef>(referenceIdsArg);
     int32_t size = static_cast<int32_t>(idsArr->Length(vm));
+    std::vector<ArkUI_CharPtr> referencedIds;
     for (int32_t i = 0; i < size; i++) {
         ArkUIBarrierStyle info;
         Local<JSValueRef> idVal = panda::ArrayRef::GetValueAt(vm, idsArr, i);
@@ -159,10 +162,10 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         if (referencedIdVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(referencedIdVal);
             uint32_t referenceSize = array->Length(vm);
-            std::vector<ArkUI_CharPtr> referencedIds;
             ParseReferencedId(vm, referenceSize, array, referencedIds);
             info.referencedId = referencedIds.data();
-            info.referencedIdSize = referenceSize;
+            info.referencedIdSize = referencedIds.size();
+            referencedIds.clear();
         } else {
             info.referencedIdSize = 0;
         }
