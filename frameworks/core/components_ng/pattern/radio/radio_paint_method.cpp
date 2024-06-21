@@ -156,6 +156,7 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
     if (isOnAnimationFlag_->Get()) {
         pointScale_->Set(ANIMATION_MIN_SCALE);
         AnimationUtils::Animate(delayOption, [this]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
+        ringPointScale_->Set(ANIMATION_MAX_SCALE);
         AnimationUtils::Animate(
             halfDurationOption,
             [this]() {
