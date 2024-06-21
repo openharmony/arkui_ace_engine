@@ -834,8 +834,12 @@ void VideoPattern::OnModifyDone()
 
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#endif
         ResetStatus();
     }
 
