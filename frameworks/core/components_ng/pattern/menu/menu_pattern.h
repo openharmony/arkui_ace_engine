@@ -537,6 +537,7 @@ private:
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
+    void CallMenuAboutToAppearCallback();
     void ShowPreviewMenuAnimation();
     void ShowPreviewMenuScaleAnimation();
     void ShowMenuAppearAnimation();
