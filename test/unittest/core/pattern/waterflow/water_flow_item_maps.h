@@ -101,6 +101,21 @@ const std::vector<float> SEGMENT_START_POS_2 = { 0.0f, 502.0f };
 
 const std::vector<int32_t> SEGMENT_TAILS_3 = { 99, 100 };
 
+const decltype(WaterFlowLayoutInfo::items_) ITEM_MAP_3 = { {
+    // segment 0
+    { 0, { { 0, { 0.0f, 0.0f } } } },                           // Column 0
+    { 1, { { 1, { 0.0f, 30.0f } }, { 4, { 35.0f, 20.0f } } } }, // Column 1
+    { 2, { { 2, { 0.0f, 40.0f } } } },                          // Column 2
+    { 3, { { 3, { 0.0f, 60.0f } } } },                          // Column 3
+} };
+
+const std::vector<std::pair<float, int32_t>> END_POS_ARRAY_3 = {
+    { 0.0f, 0 },
+    { 30.0f, 1 },
+    { 40.0f, 2 },
+    { 60.0f, 3 },
+};
+
 const std::function<float(int32_t)> GET_MAIN_SIZE_FUNC = [](int32_t idx) {
     if (idx & 1) {
         return 200.0f;
