@@ -1350,6 +1350,20 @@ bool ParseResponseRegion(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Ark
     }
     return true;
 }
+
+std::function<void(bool)> ParseTransitionCallback(
+    const JSRef<JSFunc>& jsFunc, const JSExecutionContext& context, FrameNode* node)
+{
+    auto jsFuncFinish = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsFunc));
+    auto targetNode = AceType::WeakClaim(node);
+    auto finishCallback = [execCtx = context, jsFuncFinish, targetNode](bool isTransitionIn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        NG::PipelineContext::SetCallBackNode(targetNode);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(isTransitionIn));
+        jsFuncFinish->ExecuteJS(1, &newJSVal);
+    };
+    return finishCallback;
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -4800,7 +4814,7 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     ViewAbstract::CleanTransition(frameNode);
-    ViewAbstract::SetChainedTransition(frameNode, nullptr);
+    ViewAbstract::SetChainedTransition(frameNode, nullptr, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4814,13 +4828,18 @@ ArkUINativeModuleValue CommonBridge::SetTransition(ArkUIRuntimeCallInfo* runtime
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     if (!info[1]->IsObject()) {
         ViewAbstract::CleanTransition(frameNode);
-        ViewAbstract::SetChainedTransition(frameNode, nullptr);
+        ViewAbstract::SetChainedTransition(frameNode, nullptr, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
     auto obj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
     if (!obj->GetProperty("successor_")->IsUndefined()) {
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        ViewAbstract::SetChainedTransition(frameNode, chainedEffect);
+        std::function<void(bool)> finishCallback;
+        if (info.Length() > 2 && info[2]->IsFunction()) {
+            finishCallback =
+                ParseTransitionCallback(JSRef<JSFunc>::Cast(info[2]), info.GetExecutionContext(), frameNode);
+        }
+        ViewAbstract::SetChainedTransition(frameNode, chainedEffect, std::move(finishCallback));
         return panda::JSValueRef::Undefined(vm);
     }
     auto options = ParseJsTransition(info[1]);

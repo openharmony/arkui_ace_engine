@@ -584,9 +584,10 @@ public:
         ViewAbstract::CleanTransition();
     }
 
-    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr) override
     {
-        ViewAbstract::SetChainedTransition(effect);
+        ViewAbstract::SetChainedTransition(effect, std::move(finishCallback));
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,

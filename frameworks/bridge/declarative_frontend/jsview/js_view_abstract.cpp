@@ -1557,6 +1557,19 @@ void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimensi
     }
     ParseEdgeWidthsProps(object, commonCalcDimension, false, true, 0.0_vp);
 }
+
+std::function<void(bool)> ParseTransitionCallback(const JSRef<JSFunc>& jsFunc, const JSExecutionContext& context)
+{
+    auto jsFuncFinish = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsFunc));
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto finishCallback = [execCtx = context, jsFuncFinish, targetNode](bool isTransitionIn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        NG::PipelineContext::SetCallBackNode(targetNode);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(isTransitionIn));
+        jsFuncFinish->ExecuteJS(1, &newJSVal);
+    };
+    return finishCallback;
+}
 } // namespace
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
@@ -1951,17 +1964,21 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseNapiChainedTransition(c
 
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->CleanTransition();
-            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr, nullptr);
         }
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (!obj->GetProperty("successor_")->IsUndefined()) {
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
+        std::function<void(bool)> finishCallback;
+        if (info.Length() > 1 && info[1]->IsFunction()) {
+            finishCallback = ParseTransitionCallback(JSRef<JSFunc>::Cast(info[1]), info.GetExecutionContext());
+        }
+        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
         return;
     }
     auto options = ParseJsTransition(obj);
@@ -7270,9 +7287,6 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 {
-    if (info.Length() > 1) {
-        return;
-    }
     if (info.Length() == 0) {
         ViewAbstractModel::GetInstance()->SetTransition(
             NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
@@ -7281,14 +7295,18 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             ViewAbstractModel::GetInstance()->CleanTransition();
-            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr);
+            ViewAbstractModel::GetInstance()->SetChainedTransition(nullptr, nullptr);
         }
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (!obj->GetProperty("successor_")->IsUndefined()) {
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
+        std::function<void(bool)> finishCallback;
+        if (info.Length() > 1 && info[1]->IsFunction()) {
+            finishCallback = ParseTransitionCallback(JSRef<JSFunc>::Cast(info[1]), info.GetExecutionContext());
+        }
+        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
         return;
     }
     auto options = ParseJsTransition(obj);

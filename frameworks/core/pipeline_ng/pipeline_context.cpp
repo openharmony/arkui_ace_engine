@@ -3745,6 +3745,15 @@ void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects)
     overlayNodePositions_ = rects;
 }
 
+void PipelineContext::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto frameNode = node.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(node);
+}
+
 std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions()
 {
     return overlayNodePositions_;

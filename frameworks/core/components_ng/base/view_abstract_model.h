@@ -178,7 +178,8 @@ public:
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
-    virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
+    virtual void SetChainedTransition(
+        const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback = nullptr) = 0;
     virtual void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
         const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
