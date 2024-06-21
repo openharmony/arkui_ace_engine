@@ -343,6 +343,9 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
+    std::string jsonNodeStr = jsonNode->ToString();
+    ConvertIllegalStr(jsonNodeStr);
+    auto jsonNodeCv = JsonUtil::ParseJsonString(jsonNodeStr);
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId, isLayoutInspector);
@@ -359,13 +362,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive, filter, depth - 1, isLayoutInspector);
         }
         if (jsonChildrenArray->GetArraySize()) {
-            jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
+            jsonNodeCv->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
         }
     }
-    std::string jsonChildStr = jsonNode->ToString();
-    ConvertIllegalStr(jsonChildStr);
-    auto jsonChild = JsonUtil::ParseJsonString(jsonChildStr);
-    jsonNodeArray->PutRef(std::move(jsonChild));
+    jsonNodeArray->PutRef(std::move(jsonNodeCv));
 }
 #endif
 
