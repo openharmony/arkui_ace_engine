@@ -87,16 +87,21 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 } // namespace
 
 #if !defined(PREVIEW)
-RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine)
 {
     if (!obj->IsObject()) {
         return nullptr;
     }
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        return nullptr;
+    NativeEngine* nativeEngine = nullptr;
+    if (localNativeEngine != nullptr) {
+        nativeEngine = localNativeEngine;
+    } else {
+        auto engine = EngineHelper::GetCurrentEngine();
+        if (!engine) {
+            return nullptr;
+        }
+        nativeEngine = engine->GetNativeEngine();
     }
-    auto* nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
         return nullptr;
     }
