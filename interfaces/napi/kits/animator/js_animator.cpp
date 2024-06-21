@@ -273,12 +273,14 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
     animatorResult->ApplyOption();
     napi_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
-        auto onFrameCallback = [env, onframeRef,
+        auto onFrameCallback = [env, onframeRef, id = animator->GetId(),
                                    weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
                                    double value) {
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
+                TAG_LOGW(
+                    AceLogTag::ACE_ANIMATION, "ohos.animator call onFrame failed, scope is null, id:%{public}d", id);
                 return;
             }
             napi_value ret = nullptr;
@@ -287,10 +289,14 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
             auto option = weakOption.lock();
             if (!(result == napi_ok && onframe && option)) {
+                TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                    "ohos.animator call onFrame failed, get reference result:%{public}d, id:%{public}d",
+                    result == napi_ok, id);
                 napi_close_handle_scope(env, scope);
                 return;
             }
-            ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
+            ACE_SCOPED_TRACE(
+                "ohos.animator onframe. duration:%d, curve:%s, id:%d", option->duration, option->easing.c_str(), id);
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
             napi_close_handle_scope(env, scope);
@@ -534,12 +540,13 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     }
     napi_create_reference(env, onframe, 1, &onframeRef);
     animatorResult->SetOnframeRef(onframeRef);
-    auto onFrameCallback = [env, onframeRef,
+    auto onFrameCallback = [env, onframeRef, id = animator->GetId(),
                                weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
                                double value) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator call onFrame failed, scope is null, id:%{public}d", id);
             return;
         }
         napi_value ret = nullptr;
@@ -548,10 +555,14 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
         auto option = weakOption.lock();
         if (!(result == napi_ok && onframe && option)) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "ohos.animator call onFrame failed, get reference result:%{public}d, id:%{public}d", result == napi_ok,
+                id);
             napi_close_handle_scope(env, scope);
             return;
         }
-        ACE_SCOPED_TRACE("ohos.animator onframe. duration:%d, curve:%s", option->duration, option->easing.c_str());
+        ACE_SCOPED_TRACE(
+            "ohos.animator onframe. duration:%d, curve:%s, id:%d", option->duration, option->easing.c_str(), id);
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
         napi_close_handle_scope(env, scope);
@@ -614,7 +625,7 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
                 "ohos.animator call finish callback failed, scope is null, id:%{public}d", id);
             return;
         }
@@ -623,12 +634,14 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
         auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
         if (result != napi_ok || onfinish == nullptr) {
             napi_close_handle_scope(env, scope);
-            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
                 "ohos.animator call finish callback failed, get onFinish failed, id:%{public}d", id);
             return;
         }
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback, id:%{public}d", id);
-        napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
+        ACE_SCOPED_TRACE("ohos.animator finishCallback, id:%d", id);
+        result = napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "ohos.animator call finish callback done, id:%{public}d, succeed:%{public}d",
+            id, result == napi_ok);
         napi_close_handle_scope(env, scope);
     });
     napi_value undefined;
