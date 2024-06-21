@@ -104,6 +104,18 @@ public:
 
     // PC window move
     static constexpr char WINDOW_RECT_MOVE[] = "WINDOW_RECT_MOVE";
+
+    // input method show
+    static constexpr char SHOW_INPUT_METHOD_ANIMATION[] = "SHOW_INPUT_METHOD_ANIMATION";
+
+    // input method hide
+    static constexpr char HIDE_INPUT_METHOD_ANIMATION[] = "HIDE_INPUT_METHOD_ANIMATION";
+
+    // screen rotation
+    static constexpr char SCREEN_ROTATION_ANI[] = "SCREEN_ROTATION_ANI";
+
+    // folder close
+    static constexpr char CLOSE_FOLDER_ANI[] = "CLOSE_FOLDER_ANI";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H
