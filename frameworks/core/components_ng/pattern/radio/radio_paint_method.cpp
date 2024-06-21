@@ -169,7 +169,7 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
     AnimationUtils::Animate(halfDurationOption, [&totalScale_]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
     AnimationUtils::Animate(
-        delayOption, [&]() { totalScale_->Set(ANIMATION_MAX_SCALE); },
+        delayOption, [&totalScale_]() { totalScale_->Set(ANIMATION_MAX_SCALE); },
         [isCheck, weakUiStatus = AceType::WeakClaim(AceType::RawPtr(uiStatus_))]() {
             auto uiStatus = weakUiStatus.Upgrade();
             if (uiStatus) {
