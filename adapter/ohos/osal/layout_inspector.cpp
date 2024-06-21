@@ -242,8 +242,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -259,11 +257,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
-    jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
-    jsonTree->Put("ProcessID", getpid());
-    jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
-    treeJsonStr = jsonTree->ToString();
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
