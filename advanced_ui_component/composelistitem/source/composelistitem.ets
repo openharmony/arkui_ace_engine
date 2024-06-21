@@ -340,11 +340,11 @@ struct OperateItemStruct {
       this.parentCanFocus = false
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -382,11 +382,11 @@ struct OperateItemStruct {
       this.parentCanFocus = false
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -451,11 +451,11 @@ struct OperateItemStruct {
       this.parentCanFocus = false
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -490,11 +490,11 @@ struct OperateItemStruct {
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down) {
-          this.parentCanTouch = false
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
         }
-        if (event.type == TouchType.Up) {
-          this.parentCanTouch = true
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
         }
       })
       .onHover((isHover: boolean) => {
@@ -528,11 +528,11 @@ struct OperateItemStruct {
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down) {
-          this.parentCanTouch = false
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
         }
-        if (event.type == TouchType.Up) {
-          this.parentCanTouch = true
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
         }
       })
       .onHover((isHover: boolean) => {
@@ -570,11 +570,11 @@ struct OperateItemStruct {
       this.parentCanFocus = false
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -619,11 +619,11 @@ struct OperateItemStruct {
       this.parentCanFocus = false
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -954,7 +954,7 @@ export struct ComposeListItem {
             isParentCanTouch: this.isCanTouch,
             parentDirection: this.containerDirection,
           })
-            .flexShrink(this.containerDirection === FLexDirection.Column ? 0 : 1)
+            .flexShrink(this.containerDirection === FlexDirection.Column ? 0 : 1)
             .align(Alignment.End)
             .onFocus(() => {
               this.canFocus = false;
@@ -986,7 +986,7 @@ export struct ComposeListItem {
           if (event.type === TouchType.Down && this.canTouch) {
             this.frontColor = this.touchDownColor;
           }
-          if (event.type === TouchType.Up) {
+          if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
             this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
           }
         }
