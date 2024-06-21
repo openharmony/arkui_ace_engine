@@ -26,13 +26,10 @@ using namespace OHOS::Ace::Framework;
 extern "C" {
 void FfiOHOSAceFrameworkPostTaskToMainThread(void(*callback)())
 {
-    auto currentObj = Container::Current();
+    auto currentObj = Container::CurrentSafely();
     if (!currentObj) {
-        currentObj = Container::GetActive();
-        if (!currentObj) {
-            LOGE("Can not found valid container");
-            return;
-        }
+        LOGE("Can not found valid container");
+        return;
     }
     auto executor = currentObj->GetTaskExecutor();
     if (!executor) {
