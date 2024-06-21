@@ -115,7 +115,7 @@ void AceForwardCompatibility::ReclaimFileCache(int32_t pid)
         LOGE("get invalid pid:%{public}d", pid);
         return;
     }
-    std::string path = "/proc" + std::to_string(pid) +"/reclaim";
+    std::string path = "/proc/" + std::to_string(pid) +"/reclaim";
     std::string content = RECLAIM_FILEPAGE_STRING_FOR_LINUX;
 #ifdef OHOS_PLATFORM
 
