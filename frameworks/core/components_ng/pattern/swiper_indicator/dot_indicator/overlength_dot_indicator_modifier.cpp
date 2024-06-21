@@ -43,6 +43,10 @@ constexpr float HALF_FLOAT = 0.5f;
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 {
+    if (maxDisplayCount_ <= 0) {
+        return;
+    }
+
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.unselectedIndicatorWidth = unselectedIndicatorWidth_->Get();
@@ -602,18 +606,47 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPage
     }
 
     auto step = std::abs(targetPageIndex - currentPageIndex);
+    auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+    auto rightSecondPageIndex = realItemCount_ - 1 - SECOND_POINT_INDEX;
     if (currentPageIndex < targetPageIndex) {
-        if (currentSelectedIndex_ == maxDisplayCount_ - 1 - THIRD_POINT_INDEX &&
-            targetPageIndex < realItemCount_ - 1 - SECOND_POINT_INDEX) {
-            step = 0;
+        if (currentSelectedIndex_ == rightThirdIndicatorIndex) {
+            if (targetPageIndex < rightSecondPageIndex) {
+                step = 0;
+            } else {
+                step = targetPageIndex - currentPageIndex;
+            }
+        } else if (currentSelectedIndex_ < rightThirdIndicatorIndex) {
+            if (targetPageIndex < rightSecondPageIndex) {
+                step = std::min(targetPageIndex - currentPageIndex, rightThirdIndicatorIndex - currentSelectedIndex_);
+            } else if (targetPageIndex == rightSecondPageIndex) {
+                step = rightThirdIndicatorIndex - currentSelectedIndex_ + 1;
+            } else {
+                step = rightThirdIndicatorIndex - currentSelectedIndex_ + THIRD_POINT_INDEX;
+            }
+        } else {
+            step = targetPageIndex - currentPageIndex;
         }
 
         targetSelectedIndex_ = currentSelectedIndex_ + step;
         return;
     }
 
-    if (currentSelectedIndex_ == THIRD_POINT_INDEX && targetPageIndex >= THIRD_POINT_INDEX) {
-        step = 0;
+    if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = std::min(currentPageIndex - targetPageIndex, currentSelectedIndex_ - THIRD_POINT_INDEX);
+        } else if (targetPageIndex == SECOND_POINT_INDEX) {
+            step = currentSelectedIndex_ - SECOND_POINT_INDEX;
+        } else {
+            step = currentSelectedIndex_ - LEFT_FIRST_POINT_INDEX;
+        }
+    } else if (currentSelectedIndex_ == THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = 0;
+        } else {
+            step = currentPageIndex - targetPageIndex;
+        }
+    } else {
+        step = currentPageIndex - targetPageIndex;
     }
 
     targetSelectedIndex_ = currentSelectedIndex_ - step;

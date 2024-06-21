@@ -307,6 +307,11 @@ public:
         return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
     }
 
+    void SetIsOverlong(bool isOverlong)
+    {
+        isOverlong_ = isOverlong;
+    }
+
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -374,6 +379,7 @@ protected:
     Color originalUnselectColor_;
     Color originalSelectColor_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    bool isOverlong_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

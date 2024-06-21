@@ -1103,7 +1103,8 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     RefPtr<SwiperPattern> swiperPattern)
 {
     if (dotIndicatorModifier_) {
-        dotIndicatorModifier_ = nullptr;
+        dotIndicatorModifier_->StopAnimation(true);
+        dotIndicatorModifier_->SetIsOverlong(true);
     }
 
     if (!overlongDotIndicatorModifier_) {
@@ -1122,10 +1123,25 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
     auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
     auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+
+    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
+        animationStartIndex = overlongDotIndicatorModifier_->GetAnimationEndIndex();
+    }
+
+    if (jumpIndex_) {
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+
+        if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+        }
+    }
+
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
-
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+    changeIndexWithAnimation_.reset();
+    jumpIndex_.reset();
+
     return overlongPaintMethod;
 }
 
@@ -1133,13 +1149,15 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
     RefPtr<SwiperPattern> swiperPattern)
 {
     if (overlongDotIndicatorModifier_) {
-        overlongDotIndicatorModifier_ = nullptr;
+        overlongDotIndicatorModifier_->StopAnimation(true);
+        overlongDotIndicatorModifier_->SetMaxDisplayCount(0);
     }
 
     if (!dotIndicatorModifier_) {
         dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
     }
 
+    dotIndicatorModifier_->SetIsOverlong(false);
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     dotIndicatorModifier_->SetLongPointHeadCurve(
         swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());

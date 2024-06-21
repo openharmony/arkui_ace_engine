@@ -179,6 +179,16 @@ public:
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 
+    void SetChangeIndexWithAnimation(bool withAnimation)
+    {
+        changeIndexWithAnimation_ = withAnimation;
+    }
+
+    void SetJumpIndex(std::optional<int32_t> jumpIndex)
+    {
+        jumpIndex_ = jumpIndex;
+    }
+
     void DumpAdvanceInfo() override;
     void SetIndicatorInteractive(bool isInteractive);
 
@@ -253,6 +263,9 @@ private:
     RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<bool> changeIndexWithAnimation_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG
