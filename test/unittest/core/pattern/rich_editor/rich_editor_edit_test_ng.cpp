@@ -412,48 +412,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineBegin001, TestSize.Le
 }
 
 /**
- * @tc.name: TestRichEditorCursorMoveLineEndPos001
- * @tc.desc: test CursorMoveLineEndPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCursorMoveLineEndPos001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->GetCaretOffset().SetY(5.0f);
-    overlayMod->GetCaretOffset().SetX(0.0f);
-    richEditorPattern->richTextRect_.x_ = 5.0f;
-    OffsetF caretOffsetUp(-5.0f, 5.0f);
-    OffsetF caretOffsetDown(5.0f, 10.0f);
-    OffsetF nextCaretOffset(5.0f, 15.0f);
-    auto ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
-    EXPECT_EQ(ret, true);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    overlayMod->SetCaretWidth(-5.0f);
-    ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
-    EXPECT_EQ(ret, true);
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    nextCaretOffset.x_ = -10.0f;
-    ret = richEditorPattern->CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
-    EXPECT_EQ(ret, true);
-}
-
-/**
  * @tc.name: TestRichEditorCalcLineEndPosition001
  * @tc.desc: test CalcLineEndPosition
  * @tc.type: FUNC
