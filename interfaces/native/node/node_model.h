@@ -46,6 +46,7 @@ struct ArkUI_Node {
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
+    ArkUI_AttributeItem* areaChangeRadio = nullptr;
 };
 
 struct ArkUI_Context {

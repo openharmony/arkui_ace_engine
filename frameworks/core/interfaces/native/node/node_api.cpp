@@ -254,6 +254,8 @@ void ResetAttribute(ArkUINodeHandle nodePtr, ArkUI_CharPtr attribute)
 
 typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
+typedef void (*ResetComponentAsyncEventHandler)(ArkUINodeHandle node);
+
 /**
  * IMPORTANT!!!
  * the order of declaring the handler must be same as the in the ArkUIEventSubKind enum
@@ -436,6 +438,185 @@ const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnRepeat,
     NodeModifier::SetImageAnimatorOnCancel,
     NodeModifier::SetImageAnimatorOnFinish,
+};
+
+const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnAppear,
+    NodeModifier::ResetOnDisappear,
+    NodeModifier::ResetOnTouch,
+    NodeModifier::ResetOnClick,
+    NodeModifier::ResetOnHover,
+    NodeModifier::ResetOnBlur,
+    nullptr,
+    NodeModifier::ResetOnMouse,
+    NodeModifier::ResetOnAreaChange,
+    NodeModifier::ResetOnVisibleAreaChange,
+    nullptr,
+    NodeModifier::ResetOnFocus,
+    NodeModifier::ResetOnTouchIntercept,
+    NodeModifier::ResetOnAttach,
+    NodeModifier::ResetOnDetach,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnScroll,
+    NodeModifier::ResetOnScrollFrameBegin,
+    NodeModifier::ResetScrollOnWillScroll,
+    NodeModifier::ResetScrollOnDidScroll,
+    NodeModifier::ResetOnScrollStart,
+    NodeModifier::ResetOnScrollStop,
+    NodeModifier::ResetOnScrollEdge,
+    NodeModifier::ResetOnScrollReachStart,
+    NodeModifier::ResetOnScrollReachEnd,
+};
+
+const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnDetectResultUpdate,
+};
+
+const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnTextInputEditChange,
+    NodeModifier::ResetTextInputOnSubmit,
+    NodeModifier::ResetOnTextInputChange,
+    NodeModifier::ResetOnTextInputCut,
+    NodeModifier::ResetOnTextInputPaste,
+    NodeModifier::ResetOnTextInputSelectionChange,
+    NodeModifier::ResetOnTextInputContentSizeChange,
+    NodeModifier::ResetOnTextInputInputFilterError,
+    NodeModifier::ResetTextInputOnTextContentScroll,
+};
+
+const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnTextAreaEditChange,
+    nullptr,
+    NodeModifier::ResetOnTextAreaChange,
+    NodeModifier::ResetOnTextAreaPaste,
+    NodeModifier::ResetOnTextAreaSelectionChange,
+    NodeModifier::ResetTextAreaOnSubmit,
+    NodeModifier::ResetOnTextAreaContentSizeChange,
+    NodeModifier::ResetOnTextAreaInputFilterError,
+    NodeModifier::ResetTextAreaOnTextContentScroll,
+};
+
+const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetRefreshOnStateChange,
+    NodeModifier::ResetOnRefreshing,
+    NodeModifier::ResetRefreshOnOffsetChange,
+    NodeModifier::ResetRefreshChangeEvent,
+};
+
+const ResetComponentAsyncEventHandler TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnToggleChange,
+};
+
+const ResetComponentAsyncEventHandler IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetImageOnComplete,
+    NodeModifier::ResetImageOnError,
+    NodeModifier::ResetImageOnSvgPlayFinish,
+    NodeModifier::ResetImageOnDownloadProgress,
+};
+
+const ResetComponentAsyncEventHandler DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnListScroll,
+    NodeModifier::ResetOnListScrollIndex,
+    NodeModifier::ResetOnListScrollStart,
+    NodeModifier::ResetOnListScrollStop,
+    NodeModifier::ResetOnListScrollFrameBegin,
+    NodeModifier::ResetOnListWillScroll,
+    NodeModifier::ResetOnListDidScroll,
+    NodeModifier::ResetOnListReachStart,
+    NodeModifier::ResetOnListReachEnd,
+};
+
+const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetListItemOnSelect,
+};
+
+const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnWillScroll,
+    NodeModifier::ResetOnWaterFlowReachEnd,
+    NodeModifier::ResetOnDidScroll,
+    NodeModifier::ResetOnWaterFlowScrollStart,
+    NodeModifier::ResetOnWaterFlowScrollStop,
+    NodeModifier::ResetOnWaterFlowScrollFrameBegin,
+    NodeModifier::ResetOnWaterFlowScrollIndex,
+    NodeModifier::ResetOnWaterFlowReachStart,
+};
+
+const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnGridScrollIndex,
+};
+
+const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetImageAnimatorOnStart,
+    NodeModifier::ResetImageAnimatorOnPause,
+    NodeModifier::ResetImageAnimatorOnRepeat,
+    NodeModifier::ResetImageAnimatorOnCancel,
+    NodeModifier::ResetImageAnimatorOnFinish,
 };
 
 /* clang-format on */
@@ -679,9 +860,278 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
     }
 }
 
-void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind subKind)
+void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind)
 {
-    // TODO
+    unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
+    unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
+    ResetComponentAsyncEventHandler eventHandle = nullptr;
+    switch (subClassType) {
+        case 0: {
+            // common event type.
+            if (subKind >= sizeof(COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE: {
+            if (subKind >= sizeof(IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SCROLL: {
+            // scroll event type.
+            if (subKind >= sizeof(SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT: {
+            // text event type.
+            if (subKind >= sizeof(TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT_INPUT: {
+            // text input event type.
+            if (subKind >=
+                sizeof(TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXTAREA: {
+            // textarea event type.
+            if (subKind >=
+                sizeof(TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_REFRESH: {
+            // refresh event type.
+            if (subKind >= sizeof(REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TOGGLE: {
+            // toggle event type.
+            if (subKind >= sizeof(TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_DATE_PICKER: {
+            // datepicker event type.
+            if (subKind >=
+                sizeof(DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TIME_PICKER: {
+            // timepicker event type.
+            if (subKind >=
+                sizeof(TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT_PICKER: {
+            if (subKind >=
+                sizeof(TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CALENDAR_PICKER: {
+            // calendar picker event type.
+            if (subKind >= sizeof(CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
+                ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECKBOX: {
+            // timepicker event type.
+            if (subKind >= sizeof(CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SLIDER: {
+            // timepicker event type.
+            if (subKind >= sizeof(SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SWIPER: {
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CANVAS: {
+            if (subKind >= sizeof(CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST: {
+            // list event type.
+            if (subKind >= sizeof(LIST_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST_ITEM: {
+            // list item event type.
+            if (subKind >=
+                sizeof(LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_WATER_FLOW: {
+            // swiper event type.
+            if (subKind >=
+                sizeof(WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID: {
+            // grid event type.
+            if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ALPHABET_INDEXER: {
+            // alphabet indexer event type.
+            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
+                ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_RADIO: {
+            // search event type.
+            if (subKind >= sizeof(RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SELECT: {
+            // select event type.
+            if (subKind >= sizeof(SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >=
+                sizeof(IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        default: {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+        }
+    }
+    if (eventHandle) {
+        eventHandle(node);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
+    }
 }
 
 void RegisterNodeAsyncEventReceiver(EventReceiver eventReceiver)

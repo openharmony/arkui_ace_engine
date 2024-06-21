@@ -934,5 +934,30 @@ void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
     };
     ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
 }
+
+void ResetImageOnComplete(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnComplete(frameNode, nullptr);
+}
+void ResetImageOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnError(frameNode, nullptr);
+}
+void ResetImageOnSvgPlayFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
+}
+void ResetImageOnDownloadProgress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOnDownloadProgress(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
