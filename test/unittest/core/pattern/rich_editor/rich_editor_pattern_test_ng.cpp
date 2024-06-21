@@ -1912,4 +1912,159 @@ HWTEST_F(RichEditorPatternTestNg, OnBackPressed001, TestSize.Level1)
     richEditorPattern->imeShown_ = true;
     EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 }
+
+/**
+ * @tc.name: AddUdmfData001
+ * @tc.desc: test AddUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, AddUdmfData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ResultObject resultObject;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPESYMBOLSPAN;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString = INIT_VALUE_1;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString.clear();
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    ASSERT_NE(resultObject.valuePixelMap, nullptr);
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    richEditorPattern->AddUdmfData(event);
+    if (UdmfClient::GetInstance()->CreateUnifiedData()) {
+        EXPECT_NE(event->GetData(), 0);
+    } else {
+        EXPECT_EQ(event->GetData(), 0);
+    }
+}
+
+/**
+ * @tc.name: ToBaselineOffsetSpan001
+ * @tc.desc: test ToBaselineOffsetSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, ToBaselineOffsetSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    spanItem->textLineStyle->UpdateBaselineOffset(Dimension(testNumber5, DimensionUnit::PX));
+    EXPECT_NE(richEditorPattern->ToBaselineOffsetSpan(spanItem), nullptr);
+}
+
+/**
+ * @tc.name: ToTextShadowSpan001
+ * @tc.desc: test ToTextShadowSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, ToTextShadowSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+
+    Shadow textShadow1 = Shadow();
+    Shadow textShadow2 = Shadow();
+    textShadow1.SetColor(Color::RED);
+    textShadow2.SetColor(Color::WHITE);
+    std::vector<Shadow> shadows { textShadow1, textShadow2 };
+    spanItem->fontStyle->UpdateTextShadow(shadows);
+    EXPECT_NE(richEditorPattern->ToTextShadowSpan(spanItem), nullptr);
+}
+
+/**
+ * @tc.name: GetPreviewTextRects001
+ * @tc.desc: test GetPreviewTextRects
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, GetPreviewTextRects001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    PreviewRange previewRange;
+    previewRange.start = -1;
+    previewRange.end = -1;
+    richEditorPattern->InitPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> firstRects { RectF(testNumber0, testNumber0, testNumber5, testNumber5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(firstRects));
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = paragraph, .start = testNumber0, .end = testNumber2 });
+    richEditorPattern->paragraphs_.AddParagraph(
+        { .paragraph = paragraph, .start = testNumber2, .end = testNumber4 });
+
+    EXPECT_NE(richEditorPattern->GetPreviewTextRects().size(), 0);
+}
+
+/**
+ * @tc.name: DeleteSelectOperation001
+ * @tc.desc: test DeleteSelectOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, DeleteSelectOperation001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->DeleteSelectOperation(&record);
+
+    RectF rect(testNumber0, testNumber0, testNumber5, testNumber5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, testNumber5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+
+    EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
+    richEditorPattern->DeleteSelectOperation(nullptr);
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: IsLineSeparatorInLast001
+ * @tc.desc: test IsLineSeparatorInLast
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, IsLineSeparatorInLast001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
+    ASSERT_NE(spanNode, nullptr);
+    auto spanItem = spanNode->GetSpanItem();
+    ASSERT_NE(spanNode, nullptr);
+
+    spanItem->content = "ni\nhao";
+    EXPECT_FALSE(richEditorPattern->IsLineSeparatorInLast(spanNode));
+
+    spanItem->content = "nihao\n";
+    EXPECT_TRUE(richEditorPattern->IsLineSeparatorInLast(spanNode));
+}
 } // namespace
