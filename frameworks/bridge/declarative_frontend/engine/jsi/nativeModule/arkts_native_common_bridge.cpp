@@ -2881,19 +2881,37 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> repeatArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string src;
-    int32_t repeatIndex = 0;
-    if (!ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
-        GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImage(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
     std::string bundle;
     std::string module;
-    ArkTSUtils::GetJsMediaBundleInfo(vm, srcArg, bundle, module);
+    int32_t repeatIndex = 0;
+    RefPtr<PixelMap> pixmap = nullptr;
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
-        nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
+    if (srcArg->IsString(vm)) {
+        src = srcArg->ToString(vm)->ToString();
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
+    } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
+        ArkTSUtils::GetJsMediaBundleInfo(vm, srcArg, bundle, module);
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
+    } else {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (ArkTSUtils::IsDrawable(vm, srcArg)) {
+            pixmap = ArkTSUtils::GetDrawablePixmap(vm, srcArg);
+        } else {
+            pixmap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, srcArg);
+        }
+#endif
+        if (pixmap) {
+            auto pixelMapSharedPtr = pixmap->GetPixelMapSharedPtr();
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePixelMapByPixelMapPtr(
+                nativeNode, &pixelMapSharedPtr, repeatIndex);
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImage(nativeNode);
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
