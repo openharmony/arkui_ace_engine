@@ -433,7 +433,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
     CHECK_NULL_VOID(eventHub->HasOnStyledStringDidChange());
     StyledStringChangeValue changeValue;
     auto changeStart = std::clamp(start, 0, GetTextContentLength());
-    auto changeEnd = std::clamp(changeStart + length, 0, GetTextContentLength());
+    auto changeEnd = changeStart + length;
     auto stringLength = static_cast<int32_t>(StringUtils::ToWstring(string).length());
     auto stringEnd = changeStart + stringLength;
     changeValue.SetRangeBefore({ changeStart, changeEnd });
