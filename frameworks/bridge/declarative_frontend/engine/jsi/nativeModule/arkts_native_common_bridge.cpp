@@ -5885,18 +5885,14 @@ void CommonBridge::SetOnGestureEvent(
 Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info)
 {
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "globalX", "globalY",
-        "localX", "localY", "pinchCenterX", "pinchCenterY", "source", "pressure", "sourceTool", "velocityX",
-        "velocityY", "velocity", "getModifierKeyState" };
+    const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "pinchCenterX",
+        "pinchCenterY", "source", "pressure", "sourceTool", "velocityX", "velocityY", "velocity",
+        "getModifierKeyState" };
     Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, info.GetRepeat()),
         panda::NumberRef::New(vm, info.GetOffsetX() / density), panda::NumberRef::New(vm, info.GetOffsetY() / density),
         panda::NumberRef::New(vm, info.GetScale()), panda::NumberRef::New(vm, info.GetAngle()),
         panda::NumberRef::New(vm, info.GetSpeed()),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, info.GetGlobalLocation().GetX() / density),
-        panda::NumberRef::New(vm, info.GetGlobalLocation().GetY() / density),
-        panda::NumberRef::New(vm, info.GetLocalLocation().GetX() / density),
-        panda::NumberRef::New(vm, info.GetLocalLocation().GetY() / density),
         panda::NumberRef::New(vm, info.GetPinchCenter().GetX() / density),
         panda::NumberRef::New(vm, info.GetPinchCenter().GetY() / density),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
