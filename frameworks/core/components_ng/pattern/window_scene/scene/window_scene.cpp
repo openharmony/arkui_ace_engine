@@ -440,7 +440,10 @@ void WindowScene::OnForeground()
         ACE_SCOPED_TRACE("WindowScene::OnForeground");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-
+        CHECK_NULL_VOID(self->session_);
+        if (self->session_->IsAnco()) {
+            return;
+        }
         CHECK_NULL_VOID(self->snapshotNode_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -486,6 +489,29 @@ void WindowScene::OnDisconnect()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnDrawingCompleted()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::OnDrawingCompleted");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        CHECK_NULL_VOID(self->snapshotNode_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
+        self->snapshotNode_.Reset();
+        self->session_->SetNeedSnapshot(true);
+        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

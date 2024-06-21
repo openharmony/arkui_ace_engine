@@ -72,6 +72,13 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnDrawingCompleted() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnDrawingCompleted();
+    }
+
     void OnExtensionDied() override {}
 
     void OnExtensionTimeout(int32_t errorCode) override {}
