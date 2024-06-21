@@ -932,7 +932,11 @@ bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }
-    auto pathArray = JSRef<JSArray>::Cast(dataSourceObj_->GetProperty("pathArray"));
+    auto objArray = dataSourceObj_->GetProperty("pathArray");
+    if (!objArray->IsArray()) {
+        return false;
+    }
+    auto pathArray = JSRef<JSArray>::Cast(objArray);
     if (pathArray->IsEmpty()) {
         return false;
     }
@@ -940,7 +944,11 @@ bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
     if (index < 0 || index >= len) {
         return false;
     }
-    auto path = JSRef<JSObject>::Cast(pathArray->GetValueAt(index));
+    auto objVal = pathArray->GetValueAt(index);
+    if (!objVal->IsObject()) {
+        return false;
+    }
+    auto path = JSRef<JSObject>::Cast(objVal);
     if (path->IsEmpty()) {
         return false;
     }
