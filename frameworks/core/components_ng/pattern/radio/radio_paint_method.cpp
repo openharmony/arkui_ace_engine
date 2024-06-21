@@ -155,24 +155,24 @@ void RadioModifier::UpdateIsOnAnimatableProperty(bool isCheck)
 
     if (isOnAnimationFlag_->Get()) {
         pointScale_->Set(ANIMATION_MIN_SCALE);
-        AnimationUtils::Animate(delayOption, [pointScale_]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
+        AnimationUtils::Animate(delayOption, [this]() { pointScale_->Set(DEFAULT_POINT_SCALE); });
         AnimationUtils::Animate(
             halfDurationOption,
-            [ringPointScale_]() {
+            [this]() {
                 ringPointScale_->Set(ANIMATION_MIN_SCALE);
         });
     } else {
         pointScale_->Set(DEFAULT_POINT_SCALE);
-        AnimationUtils::Animate(halfDurationOption, [pointScale_]() { pointScale_->Set(ANIMATION_MIN_SCALE); });
+        AnimationUtils::Animate(halfDurationOption, [this]() { pointScale_->Set(ANIMATION_MIN_SCALE); });
         ringPointScale_->Set(ANIMATION_MIN_SCALE);
-        AnimationUtils::Animate(delayOption, [ringPointScale_]() { ringPointScale_->Set(ANIMATION_MAX_SCALE); });
+        AnimationUtils::Animate(delayOption, [this]() { ringPointScale_->Set(ANIMATION_MAX_SCALE); });
     }
 
     totalScale_->Set(DEFAULT_TOTAL_SCALE);
-    AnimationUtils::Animate(halfDurationOption, [totalScale_]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
+    AnimationUtils::Animate(halfDurationOption, [this]() { totalScale_->Set(DEFAULT_SHRINK_SCALE); });
     totalScale_->Set(DEFAULT_SHRINK_SCALE);
     AnimationUtils::Animate(
-        delayOption, [totalScale_]() { totalScale_->Set(ANIMATION_MAX_SCALE); },
+        delayOption, [this]() { totalScale_->Set(ANIMATION_MAX_SCALE); },
         [isCheck, weakUiStatus = AceType::WeakClaim(AceType::RawPtr(uiStatus_))]() {
             auto uiStatus = weakUiStatus.Upgrade();
             if (uiStatus) {
