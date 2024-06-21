@@ -36,7 +36,8 @@ namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
 
-void RatingPattern::OnAttachToFrameNode() {
+void RatingPattern::OnAttachToFrameNode()
+{
     InitDefaultParams();
 }
 
