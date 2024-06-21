@@ -107,7 +107,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
 
 bool SafeAreaManager::IsSafeAreaValid() const
 {
+#ifdef PREVIEW
+    return !ignoreSafeArea_;
+#else
     return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
+#endif
 }
 
 bool SafeAreaManager::SetIsFullScreen(bool value)
