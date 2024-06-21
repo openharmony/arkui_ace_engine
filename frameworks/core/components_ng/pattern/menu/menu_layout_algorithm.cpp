@@ -672,6 +672,27 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     geometryNode->SetFrameSize(idealSize);
 }
 
+void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
+    RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage)
+{
+    CHECK_NULL_VOID(isShowHoverImage);
+    bool isColNode = hostNode->GetTag() == V2::COLUMN_ETS_TAG;
+    CHECK_NULL_VOID(isColNode);
+    // column -> stack -> image index 0 , preview index 1 when hoverScale api in use
+    auto childNode = child->GetChildByIndex(0)->GetChildByIndex(1);
+    CHECK_NULL_VOID(childNode);
+
+    auto hostChild = childNode->GetHostNode();
+    CHECK_NULL_VOID(hostChild);
+    CHECK_NULL_VOID(hostChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostChild->GetTag() == V2::IMAGE_ETS_TAG);
+
+    auto childGeometryNode = childNode->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+
+    hostNode = hostChild;
+    geometryNode = childGeometryNode;
+}
+
 void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
 {
@@ -680,6 +701,8 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
     if (!hostNode || !geometryNode) {
         return;
     }
+    GetPreviewNodeTargetHoverImageChild(child, hostNode, geometryNode, isShowHoverImage);
+
     bool isImageNode = hostNode->GetTag() == V2::IMAGE_ETS_TAG;
     if (hostNode->GetTag() != V2::MENU_PREVIEW_ETS_TAG && !isImageNode) {
         return;
