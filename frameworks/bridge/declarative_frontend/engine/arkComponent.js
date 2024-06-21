@@ -15431,16 +15431,16 @@ if (globalThis.LoadingProgress !== undefined) {
       return new modifierJS.LoadingProgressModifier(nativePtr, classType);
     });
   };
-}
 
-globalThis.LoadingProgress.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkLoadingProgressComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
+  globalThis.LoadingProgress.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkLoadingProgressComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
+}
 
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
@@ -16179,17 +16179,16 @@ if (globalThis.Toggle !== undefined) {
       return new modifierJS.ToggleModifier(nativePtr, classType);
     });
   };
+  globalThis.Toggle.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkToggleComponent(nativeNode);
+    });
+    component.setNodePtr(nativeNode);
+    component.setContentModifier(modifier);
+  };
 }
-// @ts-ignore
-globalThis.Toggle.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkToggleComponent(nativeNode);
-  });
-  component.setNodePtr(nativeNode);
-  component.setContentModifier(modifier);
-};
 
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent {
@@ -17029,10 +17028,7 @@ if (globalThis.Radio !== undefined) {
       return new modifierJS.RadioModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-globalThis.Radio.contentModifier = function (modifier) {
+  globalThis.Radio.contentModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
@@ -17040,6 +17036,7 @@ globalThis.Radio.contentModifier = function (modifier) {
     });
     component.setContentModifier(modifier);
   };
+}
 
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent {
@@ -20945,15 +20942,6 @@ class ArkGaugeComponent extends ArkComponent {
     return this.gaugeNode.getFrameNode();
   }
 }
-// @ts-ignore
-globalThis.Gauge.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGaugeComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -21071,6 +21059,14 @@ if (globalThis.Gauge !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.GaugeModifier(nativePtr, classType);
     });
+  };
+  globalThis.Gauge.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkGaugeComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
@@ -21822,10 +21818,7 @@ if (globalThis.Progress !== undefined) {
       return new modifierJS.ProgressModifier(nativePtr, classType);
     });
   };
-}
 
-// @ts-ignore
-if (globalThis.Progress !== undefined) {
   globalThis.Progress.contentModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
@@ -22327,16 +22320,15 @@ if (globalThis.TextClock !== undefined) {
       return new modifierJS.TextClockModifier(nativePtr, classType);
     });
   };
+  globalThis.TextClock.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkTextClockComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
 }
-// @ts-ignore
-globalThis.TextClock.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextClockComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
 
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
