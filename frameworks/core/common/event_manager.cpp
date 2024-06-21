@@ -1863,20 +1863,24 @@ void EventManager::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAct
 void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImmediately)
 {
     if (logImmediately) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
-            lastReceivedEvent_.eventId);
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+                "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
+                lastReceivedEvent_.eventId);
+        }
         return;
     }
     auto currentTime = GetSysTimestamp();
     auto lastLogTimeStamp = lastReceivedEvent_.lastLogTimeStamp;
     if (lastReceivedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastReceivedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "Received new event id=%{public}d has been more than a second since the last one event "
-            "received "
-            "in ace_container, lastEventInfo: id:%{public}d",
-            eventId, lastReceivedEvent_.eventId);
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+                "Received new event id=%{public}d has been more than a second since the last one event "
+                "received "
+                "in ace_container, lastEventInfo: id:%{public}d",
+                eventId, lastReceivedEvent_.eventId);
+        }
         lastLogTimeStamp = currentTime;
     }
     lastReceivedEvent_ = { eventId, lastLogTimeStamp };
