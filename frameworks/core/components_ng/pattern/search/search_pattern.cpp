@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -178,6 +179,7 @@ void SearchPattern::OnModifyDone()
         layoutProperty->UpdateMargin(margin);
     }
 
+    InitSearchTheme();
     HandleBackgroundColor();
 
     auto searchButton = layoutProperty->GetSearchButton();
@@ -203,6 +205,11 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
+    InitAllEvent();
+}
+
+void SearchPattern::InitAllEvent()
+{
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -210,10 +217,14 @@ void SearchPattern::OnModifyDone()
     InitTextFieldClickEvent();
     InitButtonMouseAndTouchEvent();
     HandleTouchableAndHitTestMode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
+    InitHoverEvent();
+    InitTouchEvent();
     InitClickEvent();
     HandleEnabled();
     SetAccessibilityAction();
@@ -827,12 +838,18 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     TAG_LOGI(AceLogTag::ACE_SEARCH, "Focus Choice = %{public}d", static_cast<int>(focusChoice_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(focusBgColor_);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == FocusChoice::SEARCH) {
+        auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(textFieldLayoutProperty);
+        textFieldLayoutProperty->UpdateTextColor(focusTextColor_);
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
@@ -851,6 +868,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         textFieldPattern->CloseKeyboard(true);
     }
 
+    SetSearchIconColor(focusIconColor_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     RoundRect focusRect;
@@ -907,6 +925,15 @@ FocusPattern SearchPattern::GetFocusPattern() const
 {
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     focusPattern.SetIsFocusActiveWhenFocused(true);
+    if (focusBoxGlow_) {
+        focusPattern.SetStyleType(FocusStyleType::INNER_BORDER);
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(focusBorderColor_);
+        focusPaintParam.SetPaintWidth(focusBorderWidth_);
+        focusPaintParam.SetFocusPadding(focusBorderPadding_);
+        focusPaintParam.SetFocusBoxGlow(true);
+        focusPattern.SetFocusPaintParams(focusPaintParam);
+    }
     return focusPattern;
 }
 
@@ -1059,6 +1086,19 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
+void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
+    Color& blendColorFrom, Color& blendColorTo, int32_t duration, const RefPtr<Curve>& curve)
+{
+    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColorFrom);
+    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColorTo);
+    renderContext->OnBackgroundColorUpdate(highlightStart);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
 void SearchPattern::ResetDragOption()
 {
     ClearButtonStyle(BUTTON_INDEX);
@@ -1074,6 +1114,102 @@ void SearchPattern::ClearButtonStyle(int32_t childId)
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+}
+
+void SearchPattern::InitSearchTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    focusBorderColor_ = appTheme->GetFocusColor();
+    focusBorderWidth_ = appTheme->GetFocusWidthVp();
+    focusBorderPadding_ = appTheme->GetFocusOutPaddingVp();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    searchNormalColor_ = textFieldTheme->GetBgColor();
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    searchHoverColor_ = searchTheme->GetHoverColor();
+    searchTouchColor_ = searchTheme->GetTouchColor();
+    focusBoxGlow_ = searchTheme->IsFocusBoxGlow();
+    focusBgColor_ = searchTheme->GetFocusBgColor();
+    normalIconColor_ = searchTheme->GetSearchIconColor();
+    focusIconColor_ = searchTheme->GetFocusIconColor();
+    normalTextColor_ = searchTheme->GetTextColor();
+    focusTextColor_ = searchTheme->GetFocusTextColor();
+}
+
+void SearchPattern::InitHoverEvent()
+{
+    if (searchHoverListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SearchEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+    searchHoverListener_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(searchHoverListener_);
+}
+
+void SearchPattern::HandleHoverEvent(bool isHover)
+{
+    isSearchHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto inputEventHub = host->GetOrCreateInputEventHub();
+    auto hoverEffect = inputEventHub->GetHoverEffect();
+    if (hoverEffect == HoverEffectType::NONE || hoverEffect == HoverEffectType::SCALE) {
+        return;
+    }
+    if (!isSearchPress_ && (enabled || !isHover)) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        AnimateSearchTouchAndHover(renderContext, isHover ? transparentColor_ : searchHoverColor_,
+            isHover ? searchHoverColor_ : transparentColor_, HOVER_DURATION, Curves::FRICTION);
+    }
+}
+
+void SearchPattern::InitTouchEvent()
+{
+    if (searchTouchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto infoTouches = info.GetTouches();
+        CHECK_EQUAL_VOID(infoTouches.empty(), true);
+        pattern->OnTouchDownOrUp(infoTouches.front().GetTouchType() == TouchType::DOWN);
+    };
+    searchTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(searchTouchListener_);
+}
+
+void SearchPattern::OnTouchDownOrUp(bool isDown)
+{
+    isSearchPress_ = isDown;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchEventHub = GetEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(searchEventHub);
+    auto renderContext = host->GetRenderContext();
+    AnimateSearchTouchAndHover(renderContext, isDown ? searchHoverColor_ : searchTouchColor_,
+        isDown ? searchTouchColor_ : searchHoverColor_, TOUCH_DURATION, Curves::FRICTION);
 }
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -1128,8 +1264,15 @@ void SearchPattern::HandleBlurEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(searchNormalColor_);
+    SetSearchIconColor(normalIconColor_);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();

@@ -94,6 +94,9 @@ public:
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->focusBoxGlow_ = static_cast<bool>(pattern->GetAttr<double>("search_focus_effect_type", 0.0));
+            theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
+            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
         }
     };
 
@@ -189,6 +192,21 @@ public:
         return borderWidth_;
     }
 
+    bool IsFocusBoxGlow() const
+    {
+        return focusBoxGlow_;
+    }
+
+    const Color& GetFocusBgColor() const
+    {
+        return focusBgColor_;
+    }
+
+    const Color& GetFocusIconColor() const
+    {
+        return focusIconColor_;
+    }
+
     bool GetBlockRightShade() const
     {
         return blockRightShade_;
@@ -279,6 +297,8 @@ private:
     Color focusTextColor_;
     Color touchColor_;
     Color hoverColor_;
+    Color focusBgColor_;
+    Color focusIconColor_;
     Dimension height_;
     Dimension fontSize_;
     Dimension iconSize_;
@@ -307,6 +327,7 @@ private:
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     Color symbolIconColor_;
+    bool focusBoxGlow_ = false;
 };
 
 } // namespace OHOS::Ace
