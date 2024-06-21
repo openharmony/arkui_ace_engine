@@ -570,6 +570,9 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (rsTextureExport_) {
+        rsTextureExport_->UpdateBufferInfo(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    }
     if (handleChildBounds_) {
         SetChildBounds(paintRect);
     }
