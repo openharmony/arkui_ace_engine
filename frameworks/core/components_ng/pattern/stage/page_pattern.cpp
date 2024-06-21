@@ -127,7 +127,8 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
 }
 
-bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish)
+bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish,
+    const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -136,7 +137,7 @@ bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish)
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    return container->RequestAutoSave(host, onFinish);
+    return container->RequestAutoSave(host, onFinish, onUIExtNodeBindingCompleted);
 }
 
 void PagePattern::ProcessHideState()

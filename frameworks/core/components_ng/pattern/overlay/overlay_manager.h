@@ -434,9 +434,9 @@ public:
 
     // ui extension
     int32_t CreateModalUIExtension(const RefPtr<WantWrap>& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isProhibitBack, bool isAsyncModalBinding = false);
+        const ModalUIExtensionConfig& config);
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-        bool isProhibitBack, bool isAsyncModalBinding = false, bool isAllowedBeCovered = true);
+        const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,

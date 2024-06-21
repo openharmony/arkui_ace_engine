@@ -158,7 +158,8 @@ public:
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
-    bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr);
+    bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr);
 
     void StopPageTransition();
 
