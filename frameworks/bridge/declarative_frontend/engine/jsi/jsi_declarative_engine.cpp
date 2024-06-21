@@ -1728,7 +1728,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     }
     // if this triggering is not from js named router api,
     // 'namedRoute' will be used as url to find the page in 'main_pages.json'
-    if (!isTriggeredByJs) {
+    while (!isTriggeredByJs) {
         std::string bundleName;
         std::string moduleName;
         std::string url = namedRoute;
@@ -1750,11 +1750,15 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         bundleName = bundleName_;
         moduleName = moduleName_;
 #endif
+        if (url == "") {
+            break;
+        }
         iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
+        break;
     }
     if (iter == namedRouterRegisterMap_.end()) {
         LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
