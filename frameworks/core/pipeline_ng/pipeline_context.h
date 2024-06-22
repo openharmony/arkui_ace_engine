@@ -715,6 +715,8 @@ public:
 
     void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
 
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(

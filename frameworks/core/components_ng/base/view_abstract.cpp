@@ -2045,12 +2045,19 @@ void ViewAbstract::CleanTransition()
     }
 }
 
-void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(
+    const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
@@ -3398,9 +3405,15 @@ void ViewAbstract::CleanTransition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect,
+    NG::TransitionFinishCallback&& finishCallback)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)

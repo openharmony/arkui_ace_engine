@@ -5501,6 +5501,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));
             }
+            if (transitionUserCallback_ && !disappearingTransitionCount_) {
+                PostTransitionUserOutCallback();
+            }
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.
@@ -5552,6 +5555,7 @@ void RosenRenderContext::OnTransitionInFinish()
     RemoveDefaultTransition();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FireTransitionUserCallback(true);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     if (host->IsVisible()) {
@@ -5586,13 +5590,15 @@ void RosenRenderContext::OnTransitionOutFinish()
         }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
+        FireTransitionUserCallback(false);
         return;
     }
     RefPtr<UINode> breakPointChild = host;
     RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
     UINode::GetBestBreakPoint(breakPointChild, breakPointParent);
-    // if can not find the breakPoint, means the node is not disappearing (reappear?), return.
+    // if can not find the breakPoint, means the node is not disappearing (reappear? or the node of subtree), return.
     if (!breakPointParent) {
+        FireTransitionUserCallback(false);
         return;
     }
     if (breakPointChild->RemoveImmediately()) {
@@ -5608,6 +5614,27 @@ void RosenRenderContext::OnTransitionOutFinish()
         grandParent->RemoveChild(breakPointParent);
         grandParent->RebuildRenderContextTree();
     }
+    FireTransitionUserCallback(false);
+}
+
+void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)
+{
+    if (transitionUserCallback_) {
+        auto callback = transitionUserCallback_;
+        callback(isTransitionIn);
+    }
+}
+
+void RosenRenderContext::PostTransitionUserOutCallback()
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    // post the callback to let it run on isolate environment
+    taskExecutor->PostTask([callback = transitionUserCallback_]() {
+        if (callback) {
+            callback(false);
+        }
+    }, TaskExecutor::TaskType::UI, "ArkUITransitionOutFinishCallback", PriorityType::HIGH);
 }
 
 void RosenRenderContext::SetActualForegroundColor(const Color& value)
@@ -6002,6 +6029,11 @@ void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callbac
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
 {
     transitionOutCallback_ = std::move(callback);
+}
+
+void RosenRenderContext::SetTransitionUserCallback(TransitionFinishCallback&& callback)
+{
+    transitionUserCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetRectMask(const RectF& rect, const ShapeMaskProperty& property)
