@@ -117,6 +117,7 @@ private:
     void InitTextShadow(
         const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsTextShadowAttr(const std::string& key);
+    Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);
     WordBreak StringToWordBreak(const std::string& value);
     TextOverflow StringToTextOverflow(const std::string& value);

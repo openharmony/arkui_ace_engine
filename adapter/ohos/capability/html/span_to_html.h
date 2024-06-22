@@ -49,9 +49,11 @@ private:
     static std::string ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle);
     static std::string LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& style);
     static int WriteLocalFile(RefPtr<PixelMap> pixelMap, std::string& filePath, std::string& fileUri);
-    static std::string ToHtmlAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion);
+    static std::string ToHtmlImgSizeAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion);
 
     static void ToHtmlColor(std::string& color);
+    static std::string DimensionToString(const Dimension& dimension);
+    static std::string DimensionToStringWithoutUnit(const Dimension& dimension);
     static std::string ToHtmlStyleFormat(const std::string& key, const std::string& value)
     {
         return key + std::string(": ") + value + ";";
