@@ -464,7 +464,11 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
     if (!paramObj->IsObject()) {
         return nullptr;
     }
-    auto styleStringValue = JSRef<JSObject>::Cast(JSRef<JSObject>::Cast(paramObj)->GetProperty("styledValue"));
+    auto styledValueObj = JSRef<JSObject>::Cast(paramObj)->GetProperty("styledValue");
+    if (!styledValueObj->IsObject()) {
+        return nullptr;
+    }
+    auto styleStringValue = JSRef<JSObject>::Cast(styledValueObj);
     if (styleStringValue->IsUndefined()) {
         return nullptr;
     }

@@ -260,6 +260,7 @@ private:
     static ImageSpanAttribute ParseJsImageSpanAttribute(const JSRef<JSObject>& obj);
     static JSRef<JSObject> CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge);
     static JSRef<JSObject> CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius);
+    static void ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
     RefPtr<ImageSpan> imageSpan_;

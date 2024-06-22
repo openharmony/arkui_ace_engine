@@ -310,7 +310,10 @@ int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
         // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
         std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
         u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-    } while (static_cast<int32_t>(u32Content.length()) == 0 && --startIndex >= 0);
+        if (static_cast<int32_t>(u32Content.length()) == 0) {
+            --startIndex;
+        }
+    } while (static_cast<int32_t>(u32Content.length()) == 0 && startIndex >= 0);
     if (static_cast<int32_t>(u32Content.length()) == 0) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthForward u32Content is 0");
         return 0;
