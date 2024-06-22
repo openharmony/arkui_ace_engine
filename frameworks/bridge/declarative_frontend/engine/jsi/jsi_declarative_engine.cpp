@@ -1724,11 +1724,12 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
     auto iter = namedRouterRegisterMap_.find(namedRoute);
     if (isTriggeredByJs && iter == namedRouterRegisterMap_.end()) {
+        LOGW("named route %{public}s not found!", namedRoute.c_str());
         return false;
     }
     // if this triggering is not from js named router api,
     // 'namedRoute' will be used as url to find the page in 'main_pages.json'
-    while (!isTriggeredByJs) {
+    if (!isTriggeredByJs) {
         std::string bundleName;
         std::string moduleName;
         std::string url = namedRoute;
@@ -1750,19 +1751,22 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         bundleName = bundleName_;
         moduleName = moduleName_;
 #endif
+        // when need to locate page in main_pages.json, url shouldn't be empty
         if (url == "") {
-            break;
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
         }
         iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
-        break;
-    }
-    if (iter == namedRouterRegisterMap_.end()) {
-        LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
-        return false;
+        if (iter == namedRouterRegisterMap_.end()) {
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
+        }
     }
 
     /**
