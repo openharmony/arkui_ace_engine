@@ -733,24 +733,7 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
 ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSObject>& obj)
 {
     ImageSpanAttribute imageStyle;
-    auto sizeObj = obj->GetProperty("size");
-    if (sizeObj->IsObject()) {
-        ImageSpanSize imageSize;
-        auto size = JSRef<JSObject>::Cast(sizeObj);
-        JSRef<JSVal> width = size->GetProperty("width");
-        CalcDimension imageSpanWidth;
-        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
-            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
-            imageSize.width = imageSpanWidth;
-        }
-        JSRef<JSVal> height = size->GetProperty("height");
-        CalcDimension imageSpanHeight;
-        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
-            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
-            imageSize.height = imageSpanHeight;
-        }
-        imageStyle.size = imageSize;
-    }
+    ParseJsImageSpanSizeAttribute(obj, imageStyle);
     JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
     if (!verticalAlign->IsNull()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
@@ -770,16 +753,40 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
         imageStyle.objectFit = ImageFit::COVER;
     }
     auto layoutStyleObj = obj->GetProperty("layoutStyle");
-    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
-    if (!layoutStyleObject->IsUndefined()) {
-        auto marginAttr = layoutStyleObject->GetProperty("margin");
-        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
-        auto paddingAttr = layoutStyleObject->GetProperty("padding");
-        imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
-        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
-        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+    if (layoutStyleObj->IsObject()) {
+        auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+        if (!layoutStyleObject->IsUndefined()) {
+            auto marginAttr = layoutStyleObject->GetProperty("margin");
+            imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
+            auto paddingAttr = layoutStyleObject->GetProperty("padding");
+            imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
+            auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+            imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+        }
     }
     return imageStyle;
+}
+
+void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
+{
+    auto sizeObj = obj->GetProperty("size");
+    if (sizeObj->IsObject()) {
+        ImageSpanSize imageSize;
+        auto size = JSRef<JSObject>::Cast(sizeObj);
+        JSRef<JSVal> width = size->GetProperty("width");
+        CalcDimension imageSpanWidth;
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
+            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
+            imageSize.width = imageSpanWidth;
+        }
+        JSRef<JSVal> height = size->GetProperty("height");
+        CalcDimension imageSpanHeight;
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
+            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
+            imageSize.height = imageSpanHeight;
+        }
+        imageStyle.size = imageSize;
+    }
 }
 
 void JSImageAttachment::GetImageSrc(const JSCallbackInfo& info)

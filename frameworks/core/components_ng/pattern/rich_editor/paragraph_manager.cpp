@@ -143,7 +143,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
     }
     auto info = paragraphs_.back();
     auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-    finalResult.position_ = info.end;
+    finalResult.position_ = static_cast<size_t>(info.end);
     finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
     TAG_LOGI(AceLogTag::ACE_TEXT,
         "Current paragraph, final position = %{public}zu and affinity = %{public}d", finalResult.position_,

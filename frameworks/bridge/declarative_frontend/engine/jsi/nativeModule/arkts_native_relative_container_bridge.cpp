@@ -162,9 +162,9 @@ ArkUINativeModuleValue RelativeContainerBridge::SetBarrier(ArkUIRuntimeCallInfo*
         if (referencedIdVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(referencedIdVal);
             uint32_t referenceSize = array->Length(vm);
-            ParseReferencedId(vm, referenceSize, array, referencedIds);
+            ParseReferencedId(vm, static_cast<int32_t>(referenceSize), array, referencedIds);
             info.referencedId = referencedIds.data();
-            info.referencedIdSize = referencedIds.size();
+            info.referencedIdSize = static_cast<int32_t>(referencedIds.size());
             referencedIds.clear();
         } else {
             info.referencedIdSize = 0;
