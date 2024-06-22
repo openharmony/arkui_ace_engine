@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -74,8 +76,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, FocusPattern());
+
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintWidth(themeBorderWidth_);
+        focusPaintParams.SetPaintColor(theme->GetFocusColor());
+        focusPaintParams.SetPaintWidth(theme->GetFocusWidthVp());
+        focusPaintParams.SetFocusBoxGlow(true);
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
@@ -131,7 +140,9 @@ private:
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void OnFocusEvent();
     void OnBlurEvent();
+    void SetModifierFocus(bool isFocus);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(double ratingScore);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -150,6 +161,9 @@ private:
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void FireBuilder();
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     RefPtr<FrameNode> BuildContentModifierNode();
 
     std::optional<RatingMakeCallback> makeFunc_;
@@ -192,6 +206,7 @@ private:
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
+    bool focusEventInitialized_ = false;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
