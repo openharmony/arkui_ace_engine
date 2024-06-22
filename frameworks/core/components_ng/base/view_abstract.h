@@ -57,6 +57,7 @@ struct OptionParam {
     bool enabled = true;
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
+    std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -77,6 +78,24 @@ struct OptionParam {
         const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
         : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
     {}
+
+    void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
+    {
+        symbolUserDefinedIdealFontSize = dimension;
+    }
+
+    Dimension GetSymbolUserDefinedIdealFontSize(const Dimension& defaultValue) const
+    {
+        if (!symbolUserDefinedIdealFontSize.has_value()) {
+            return defaultValue;
+        }
+        return symbolUserDefinedIdealFontSize.value();
+    }
+
+    bool HasSymbolUserDefinedIdealFontSize() const
+    {
+        return symbolUserDefinedIdealFontSize.has_value();
+    }
 
     ~OptionParam() = default;
 };

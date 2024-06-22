@@ -796,8 +796,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
         if (params[i].symbol != nullptr) {
-            optionNode = OptionView::CreateMenuOption(
-                optionsHasSymbol, params[i].value, params[i].action, i, params[i].symbol);
+            optionNode = OptionView::CreateMenuOption(optionsHasSymbol, params, i);
         } else {
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
