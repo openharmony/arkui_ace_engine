@@ -132,6 +132,9 @@ private:
     static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
+    static void SetDividerNodeActive(RefPtr<UINode>& contentRow, bool firstDivider,
+        bool secondDivider, bool thirdDivider);
+    static void SetSingleDividerNodeActive(RefPtr<FrameNode>& dividerNode, bool dividerActive);
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;
 };
