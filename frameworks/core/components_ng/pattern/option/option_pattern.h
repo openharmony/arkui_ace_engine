@@ -96,7 +96,14 @@ public:
     void SetFontWeight(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
-
+    void SetSelected(int32_t selected)
+    {
+        selected_ = selected;
+    }
+    void SetBorderColor(const Color& color);
+    Color GetBorderColor();
+    void SetBorderWidth(const Dimension& value);
+    Dimension GetBorderWidth();
     Color GetBgColor();
     // get font props
     Dimension GetFontSize();
@@ -224,7 +231,9 @@ private:
     bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
     void UpdatePasteFontColor(const Color& fontColor);
-
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     std::optional<Color> bgColor_;
 
     // src of icon image, used in XTS inspector
@@ -245,6 +254,12 @@ private:
     bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
+    bool isFocused_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool focusEventInitialized_ = false;
+    bool isFocusShadowSet_ = false;
+    int32_t selected_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

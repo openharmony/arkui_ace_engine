@@ -273,6 +273,37 @@ void MenuPattern::OnModifyDone()
     }
 }
 
+void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(theme->GetMenuNormalBorderWidth());
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !renderContext->GetBackBlurStyle().has_value()) {
+        BlurStyleOption blurStyleOption;
+        auto blurStyle = static_cast<BlurStyle>(theme->GetMenuNormalBackgroundBlurStyle());
+        blurStyleOption.blurStyle = blurStyle;
+        renderContext->UpdateBackBlurStyle(blurStyleOption);
+    }
+}
+
 RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 {
     auto scroll = FrameNode::CreateFrameNode(
