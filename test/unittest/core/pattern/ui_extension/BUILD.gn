@@ -47,6 +47,7 @@ ace_unittest("ui_extension_component_test_ng") {
       "ability_runtime:abilitykit_native",
       "accessibility:accessibility_common",
       "c_utils:utils",
+      "ffrt:libffrt",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "input:libmmi-client",
