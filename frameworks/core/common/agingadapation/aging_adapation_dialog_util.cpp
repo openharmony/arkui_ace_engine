@@ -209,4 +209,21 @@ float AgingAdapationDialogUtil::GetDialogBigFontSizeScale()
     return dialogTheme->GetBigFontSizeScale();
 }
 
+float AgingAdapationDialogUtil::GetDialogLargeFontSizeScale()
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0.0);
+    return dialogTheme->GetLargeFontSizeScale();
+}
+
+float AgingAdapationDialogUtil::GetDialogMaxFontSizeScale()
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0.0);
+    return dialogTheme->GetMaxFontSizeScale();
+}
 } // namespace OHOS::Ace::NG

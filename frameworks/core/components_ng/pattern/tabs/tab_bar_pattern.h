@@ -540,6 +540,9 @@ private:
 
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f;
+    float bigScale_ = 0.0f;
+    float largeScale_ = 0.0f;
+    float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
