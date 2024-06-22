@@ -632,9 +632,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         }, TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     }
                 };
-
+                SnapshotParam param;
+                param.delay = CREATE_PIXELMAP_TIME;
                 OHOS::Ace::NG::ComponentSnapshot::Create(
-                    dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                    dragPreviewInfo.customNode, std::move(callback), false, param);
                 gestureHub->PrintBuilderNode(dragPreviewInfo.customNode);
 #endif
             } else {

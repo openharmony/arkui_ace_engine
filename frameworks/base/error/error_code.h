@@ -85,4 +85,7 @@ constexpr int32_t ERROR_CODE_DIALOG_CONTENT_NOT_FOUND = 103303;
 constexpr int32_t ERROR_CODE_NON_FOCUSABLE = 150001;
 constexpr int32_t ERROR_CODE_NON_FOCUSABLE_ANCESTOR = 150002;
 constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
+
+// ComponentSnapshot error code
+constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
 } // namespace OHOS::Ace

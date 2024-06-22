@@ -995,7 +995,8 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     auto builder = [build = asyncCtx->customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, true);
+    NG::SnapshotParam param;
+    delegate->CreateSnapshot(builder, callback, true, param);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
@@ -1029,7 +1030,8 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
     auto builder = [build = customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, true);
+    NG::SnapshotParam param;
+    delegate->CreateSnapshot(builder, callback, true, param);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }

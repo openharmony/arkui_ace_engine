@@ -807,7 +807,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        SnapshotParam param;
+        param.delay = CREATE_PIXELMAP_TIME;
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
