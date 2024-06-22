@@ -1267,7 +1267,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateAgingButtonNode(
     auto nextClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(nextCallBack));
     auto previousClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(previousCallBack));
 
-    for (int i = 0; i < contentRow->GetChildren().size(); i++) {
+    for (size_t i = 0; i < contentRow->GetChildren().size(); i++) {
         auto child = contentRow->GetChildAtIndex(i);
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(childNode, nullptr);
