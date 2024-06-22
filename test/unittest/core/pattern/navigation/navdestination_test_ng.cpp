@@ -659,19 +659,20 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 /**
@@ -700,19 +701,20 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 
@@ -742,19 +744,20 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
-    auto menuNode = AceType::DynamicCast<FrameNode>(navDestinationMenuItems->GetFirstChild());
-    ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2. call HandleLongPress.
      * @tc.expected: dialog_ != nullptr
      */
-    NavigationTitleUtil::HandleLongPress(menuNode, menuItem, false);
-    EXPECT_NE(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    NavigationTitleUtil::HandleLongPress(info, navDestinationMenuItems, menuItems);
+    EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
     /**
      * @tc.steps: step3. call HandleLongPressActionEnd.
      * @tc.expected: dialog_ == nullptr
      */
-    NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
+    NavigationTitleUtil::HandleLongPressActionEnd(navDestinationMenuItems);
     EXPECT_EQ(ui.titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG
