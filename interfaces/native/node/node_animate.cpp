@@ -317,7 +317,7 @@ ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize)
     return option;
 }
 
-void OH_ArkUI_ArkUI_AnimatorOption_Dispose(ArkUI_AnimatorOption* option)
+void OH_ArkUI_AnimatorOption_Dispose(ArkUI_AnimatorOption* option)
 {
     CHECK_NULL_VOID(option);
     if (option->expectedFrameRateRange) {
