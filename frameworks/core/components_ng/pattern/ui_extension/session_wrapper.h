@@ -69,7 +69,7 @@ public:
 
     // About session
     virtual void CreateSession(
-        const AAFwk::Want& want, bool isAsyncModalBinding = false, bool isCallerSystem = false) = 0;
+        const AAFwk::Want& want, bool isAsyncModalBinding = false, uint32_t uiExtensionUsage = 0) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
     virtual int32_t GetSessionId() = 0;

@@ -40,7 +40,7 @@ public:
 
     // About session
     void CreateSession(const AAFwk::Want& want,
-        bool isAsyncModalBinding = false, bool isCallerSystem = false) override;
+        bool isAsyncModalBinding = false, uint32_t uiExtensionUsage = 0) override;
     void DestroySession() override;
     bool IsSessionValid() override;
     int32_t GetSessionId() override;
