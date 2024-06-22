@@ -169,32 +169,7 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
     if (!argsPtr) {
         return JSRef<JSVal>::Cast(obj);
     }
-    std::tm dateTime = { 0 };
-    auto year = argsPtr->GetValue("year");
-    if (year && year->IsNumber()) {
-        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-    }
-    auto month = argsPtr->GetValue("month");
-    if (month && month->IsNumber()) {
-        dateTime.tm_mon = month->GetInt();
-    }
-    auto day = argsPtr->GetValue("day");
-    if (day && day->IsNumber()) {
-        dateTime.tm_mday = day->GetInt();
-    }
-    auto hour = argsPtr->GetValue("hour");
-    if (hour && hour->IsNumber()) {
-        dateTime.tm_hour = hour->GetInt();
-    }
-    auto minute = argsPtr->GetValue("minute");
-    if (minute && minute->IsNumber()) {
-        dateTime.tm_min = minute->GetInt();
-    }
-
-    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
-    auto duration = timestamp.time_since_epoch();
-    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    auto dateObj = JSDate::New(milliseconds);
+    auto dateObj = JSDatePickerDialog::GetDateObj(argsPtr);
     return JSRef<JSVal>::Cast(dateObj);
 }
 
@@ -633,32 +608,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
             return;
         }
 
-        std::tm dateTime = { 0 };
-        auto year = sourceJson->GetValue("year");
-        if (year && year->IsNumber()) {
-            dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-        }
-        auto month = sourceJson->GetValue("month");
-        if (month && month->IsNumber()) {
-            dateTime.tm_mon = month->GetInt();
-        }
-        auto day = sourceJson->GetValue("day");
-        if (day && day->IsNumber()) {
-            dateTime.tm_mday = day->GetInt();
-        }
-        auto hour = sourceJson->GetValue("hour");
-        if (hour && hour->IsNumber()) {
-            dateTime.tm_hour = hour->GetInt();
-        }
-        auto minute = sourceJson->GetValue("minute");
-        if (minute && minute->IsNumber()) {
-            dateTime.tm_min = minute->GetInt();
-        }
+        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson);
         PipelineContext::SetCallBackNode(node);
-        auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
-        auto duration = timestamp.time_since_epoch();
-        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-        auto dateObj = JSDate::New(milliseconds);
         func->ExecuteJS(1, &dateObj);
     };
     if (isDatePicker) {
@@ -850,31 +801,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateChangeEvent(c
             if (!selectedJson || selectedJson->IsNull()) {
                 return;
             }
-            std::tm dateTime = { 0 };
-            auto year = selectedJson->GetValue("year");
-            if (year && year->IsNumber()) {
-                dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-            }
-            auto month = selectedJson->GetValue("month");
-            if (month && month->IsNumber()) {
-                dateTime.tm_mon = month->GetInt();
-            }
-            auto day = selectedJson->GetValue("day");
-            if (day && day->IsNumber()) {
-                dateTime.tm_mday = day->GetInt();
-            }
-            auto hour = selectedJson->GetValue("hour");
-            if (hour && hour->IsNumber()) {
-                dateTime.tm_hour = hour->GetInt();
-            }
-            auto minute = selectedJson->GetValue("minute");
-            if (minute && minute->IsNumber()) {
-                dateTime.tm_min = minute->GetInt();
-            }
-            auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
-            auto duration = timestamp.time_since_epoch();
-            auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            auto dateObj = JSDate::New(milliseconds);
+            auto dateObj = GetDateObj(selectedJson);
             PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &dateObj);
         };
@@ -897,36 +824,42 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
             if (!selectedJson || selectedJson->IsNull()) {
                 return;
             }
-            std::tm dateTime = { 0 };
-            auto year = selectedJson->GetValue("year");
-            if (year && year->IsNumber()) {
-                dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-            }
-            auto month = selectedJson->GetValue("month");
-            if (month && month->IsNumber()) {
-                dateTime.tm_mon = month->GetInt();
-            }
-            auto day = selectedJson->GetValue("day");
-            if (day && day->IsNumber()) {
-                dateTime.tm_mday = day->GetInt();
-            }
-            auto hour = selectedJson->GetValue("hour");
-            if (hour && hour->IsNumber()) {
-                dateTime.tm_hour = hour->GetInt();
-            }
-            auto minute = selectedJson->GetValue("minute");
-            if (minute && minute->IsNumber()) {
-                dateTime.tm_min = minute->GetInt();
-            }
-            auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
-            auto duration = timestamp.time_since_epoch();
-            auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            auto dateObj = JSDate::New(milliseconds);
+            auto dateObj = GetDateObj(selectedJson);
             PipelineContext::SetCallBackNode(node);
             func->ExecuteJS(1, &dateObj);
         };
     }
     return dateAcceptEvent;
+}
+
+JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson)
+{
+    std::tm dateTime = { 0 };
+    auto year = selectedJson->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = selectedJson->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt();
+    }
+    auto day = selectedJson->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto hour = selectedJson->GetValue("hour");
+    if (hour && hour->IsNumber()) {
+        dateTime.tm_hour = hour->GetInt();
+    }
+    auto minute = selectedJson->GetValue("minute");
+    if (minute && minute->IsNumber()) {
+        dateTime.tm_min = minute->GetInt();
+    }
+    auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
+    auto duration = timestamp.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    auto dateObj = JSDate::New(milliseconds);
+    return dateObj;
 }
 
 std::function<void(const std::string&)> JSDatePickerDialog::GetChangeEvent(const JSRef<JSObject>& paramObject,
