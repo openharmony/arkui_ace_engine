@@ -65,6 +65,9 @@ public:
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->blurStyleTextColor_ = toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR_BLUR, Color());
 
+            theme->borderColor_ = toastPattern->GetAttr<Color>("toast_border_color", Color());
+            theme->borderWidth_ = toastPattern->GetAttr<Dimension>("toast_border_width", 0.0_vp);
+            theme->shadowNormal_ = static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_shadow_default", 0.0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
                     toastPattern->GetAttr<Dimension>("toast_padding_level4", 0.0_vp).Value(),
@@ -163,6 +166,21 @@ public:
         return blurStyleTextColor_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+    
+    uint32_t GetShadowNormal() const
+    {
+        return shadowNormal_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -172,11 +190,14 @@ private:
     Dimension minWidth_;
     Dimension minHeight_;
     Color backgroundColor_;
+    Color borderColor_;
     TextStyle textStyle_;
     Radius radius_;
     Dimension bottom_;
     Dimension minFontSize_;
+    Dimension borderWidth_;
     uint32_t textMaxLines_ = 1;
+    uint32_t shadowNormal_ = 6;  // no shadow
     Edge marging_;
     Color blurStyleTextColor_;
 };
