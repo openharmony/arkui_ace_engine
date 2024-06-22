@@ -2734,6 +2734,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.deviceId = event.deviceId;
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
+    result.touchEventId = event.touchEventId;
     result.pointerEvent = event.pointerEvent;
     result.screenX = event.screenX;
     result.screenY = event.screenY;
