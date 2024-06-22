@@ -4717,12 +4717,12 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.mode = mode->Int32Value(vm);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> modeArray = static_cast<Local<panda::ArrayRef>>(mode);
-        int32_t arrLength = modeArray->Length(vm);
+        int32_t arrLength = static_cast<int32_t>(modeArray->Length(vm));
         if (arrLength > NUM_4) {
             arrLength = NUM_4;
         }
         modeIntArray = new int32_t[arrLength];
-        for (size_t i = 0; i < arrLength; i++) {
+        for (int32_t i = 0; i < arrLength; i++) {
             Local<JSValueRef> objValue = modeArray->GetValueAt(vm, modeArray, i);
             modeIntArray[i] = objValue->Int32Value(vm);
         }
