@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/inspector.h"
 
+#include <unistd.h>
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
@@ -410,6 +411,12 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
         auto jsonTree = JsonUtil::Create(true);
         jsonTree->Put("type", "root");
         jsonTree->PutRef("content", std::move(jsonRoot));
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        if (pipeline) {
+            jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+            jsonTree->Put("ProcessID", getpid());
+            jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+        }
         return jsonTree->ToString();
     }
 
