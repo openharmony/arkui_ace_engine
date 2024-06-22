@@ -15,8 +15,8 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -24,8 +24,8 @@
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentTest : public WaterFlowTestNg {
@@ -1310,7 +1310,6 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
     algo->Layout(AceType::RawPtr(frameNode_));
 }
 
-
 /**
  * @tc.name: Illegal001
  * @tc.desc: Layout WaterFlow with empty sections.
@@ -1443,8 +1442,8 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 1);
     EXPECT_EQ(info->endIndex_, 5);
     EXPECT_EQ(info->GetCrossCount(), 1);
-        EXPECT_EQ(info->segmentTails_.size(), 1);
-        EXPECT_EQ(info->margins_.size(), 1);
+    EXPECT_EQ(info->segmentTails_.size(), 1);
+    EXPECT_EQ(info->margins_.size(), 1);
 
     UpdateCurrentOffset(250.0f);
     EXPECT_EQ(info->currentOffset_, 0.0f);

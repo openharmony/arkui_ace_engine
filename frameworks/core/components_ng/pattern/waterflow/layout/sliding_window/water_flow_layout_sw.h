@@ -39,6 +39,7 @@ public:
 
 private:
     void Init(const SizeF& frameSize);
+    /* init WaterFlow without Sections */
     void SingleInit(const SizeF& frameSize);
     void CheckReset();
 
@@ -57,8 +58,6 @@ private:
      * @param mainSize of the viewport
      */
     void MeasureOnJump(int32_t jumpIdx, ScrollAlign align);
-
-    void MeasureOnReset();
 
     /**
      * @brief Helper to perform jumping to an item.
@@ -131,8 +130,6 @@ private:
      * @param bound of the viewport
      */
     void ClearBack(float bound);
-
-    void PrepareSection(int32_t prev, int32_t cur);
 
     void AdjustOverScroll();
 

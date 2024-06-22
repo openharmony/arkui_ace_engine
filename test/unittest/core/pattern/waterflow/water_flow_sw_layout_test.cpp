@@ -139,10 +139,8 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     EXPECT_TRUE(info_->offsetEnd_);
     EXPECT_EQ(GetChildY(frameNode_, 96), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
-    EXPECT_EQ(
-        info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [96 98 100 103 104 ] }");
-    EXPECT_EQ(
-        info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 550.000000 Items [95 97 99 101 102 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [96 98 100 103 104 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 550.000000 Items [95 97 99 101 102 ] }");
 
     // delete start index
     frameNode_->RemoveChildAtIndex(96);
@@ -269,15 +267,13 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
     EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 750.000000 Items [71 72 75 76 79 ] }");
-    EXPECT_EQ(
-        info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 750.000000 Items [69 70 73 74 77 78 ] }");
 
     child = GetChildFrameNode(frameNode_, 0);
     child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(
-        info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 850.000000 Items [70 71 74 75 78 79 ] }");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -50.000000 EndPos: 850.000000 Items [70 71 74 75 78 79 ] }");
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -150.000000 EndPos: 650.000000 Items [69 72 73 76 77 ] }");
     EXPECT_EQ(GetChildY(frameNode_, 80), 650.0f);
     EXPECT_EQ(info_->startIndex_, 69);
@@ -588,10 +584,9 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
     });
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
-    std::vector<float> endPos = { info_->lanes_[0][0].endPos, info_->lanes_[0][1].endPos,
-        info_->lanes_[0][2].endPos };
-    std::vector<int32_t> endItems = { info_->lanes_[0][0].items_.back().idx,
-        info_->lanes_[0][1].items_.back().idx, info_->lanes_[0][2].items_.back().idx };
+    std::vector<float> endPos = { info_->lanes_[0][0].endPos, info_->lanes_[0][1].endPos, info_->lanes_[0][2].endPos };
+    std::vector<int32_t> endItems = { info_->lanes_[0][0].items_.back().idx, info_->lanes_[0][1].items_.back().idx,
+        info_->lanes_[0][2].items_.back().idx };
 
     pattern_->SetAnimateCanOverScroll(true);
     info_->delta_ = -751.0f;

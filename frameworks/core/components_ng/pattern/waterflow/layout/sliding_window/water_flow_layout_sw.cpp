@@ -99,15 +99,15 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
+        if (info_->segmentTails_.empty()) {
+            info_->InitSegments(sections, 0);
+        }
         // implies section update
         if (info_->margins_.empty()) {
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentedInit(sections, info_->margins_, frameSize);
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
     } else {
         SingleInit(frameSize);
     }
