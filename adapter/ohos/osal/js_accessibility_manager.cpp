@@ -3255,7 +3255,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
-    if (textJson.is_null() || !textJson.contains("type")) {
+    if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
         return;
     }
     if (textJson["type"] == "textType") {
@@ -4091,7 +4091,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
-    parentWindowId_ = static_cast<int32_t>(parentWindowId);
+    parentWindowId_ = parentWindowId;
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4841,7 +4841,7 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
         std::string text = searchParam.text;
         nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
         std::string value = "";
-        if (!textJson.is_null() && textJson.contains("value")) {
+        if (!textJson.is_null() && !textJson.is_discarded() && textJson.contains("value")) {
             value = textJson["value"];
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
