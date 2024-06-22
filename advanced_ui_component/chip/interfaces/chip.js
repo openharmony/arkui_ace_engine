@@ -1058,7 +1058,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getSuffixIconFocusable() {
-        return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0);
+        return (this.useDefaultSuffixIcon && (this.allowClose ?? true)) || this.suffixIcon?.action !== void (0);
     }
 
     getChipNodePadding() {
@@ -1161,7 +1161,7 @@ export class ChipComponent extends ViewPU {
         else if (this.suffixIcon?.src) {
             return this.getSuffixIconSize().width;
         }
-        else if (!this.suffixIcon?.src && this.allowClose) {
+        else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
             return this.theme.defaultSymbol.fontSize;
         }
         else {
@@ -1235,7 +1235,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getSuffixIconSrc() {
-        this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose;
+        this.useDefaultSuffixIcon = !this.suffixIcon?.src && (this.allowClose ?? true);
         return this.useDefaultSuffixIcon ? this.theme.suffixIcon.defaultDeleteIcon : (this.suffixIcon?.src ?? void (0));
     }
 
@@ -1531,7 +1531,7 @@ export class ChipComponent extends ViewPU {
                                 this.suffixIcon.action();
                                 return;
                             }
-                            if (this.allowClose && this.useDefaultSuffixIcon) {
+                            if ((this.allowClose ?? true) && this.useDefaultSuffixIcon) {
                                 this.onClose();
                                 this.deleteChipNodeAnimate();
                                 return;
@@ -1541,7 +1541,7 @@ export class ChipComponent extends ViewPU {
                     }, Image);
                 });
             }
-            else if (this.allowClose) {
+            else if ((this.allowClose ?? true)) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((q, r) => {
                         SymbolGlyph.create({
