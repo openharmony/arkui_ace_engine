@@ -423,10 +423,10 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAlignStyle(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!secondArg->IsNumber()) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlignStyle(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+    } else {
+        int32_t alignValue = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlignStyle(nativeNode, alignValue);
     }
-    int32_t alignValue = secondArg->Int32Value(vm);
-    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlignStyle(nativeNode, alignValue);
     CalcDimension popupHorizontalSpace;
     if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, popupHorizontalSpace)) {
