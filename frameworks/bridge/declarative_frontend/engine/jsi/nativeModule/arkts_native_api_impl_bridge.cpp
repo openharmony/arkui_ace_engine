@@ -1121,6 +1121,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetDraggable));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetDraggable));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPrivacySensitive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetPrivacySensitive));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPrivacySensitive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetPrivacySensitive));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMaxFontSize));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
@@ -3194,6 +3198,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetEnhancedImageQuality));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnhancedImageQuality"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetEnhancedImageQuality));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPrivacySensitive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetPrivacySensitive));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPrivacySensitive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetPrivacySensitive));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "enableAnalyzer"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::EnableAnalyzer));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "analyzerConfig"),
