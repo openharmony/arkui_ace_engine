@@ -975,31 +975,21 @@ HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
     auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
         ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
     auto layoutWrapper = customNode->CreateLayoutWrapper();
-    auto renderfunction = []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameChild2 =
+        FrameNode::GetOrCreateFrameNode("Child2", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto renderfunction = [frameChild1, frameChild2]() -> RefPtr<UINode> {
+        ViewStackProcessor::GetInstance()->Push(frameChild1);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->Push(frameChild2);
+        ViewStackProcessor::GetInstance()->Pop();
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
     test.renderFunction_ = renderfunction;
 
     /**
-     * @tc.steps: step3. Create frameNode and add two Children.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = static_cast<ElementIdType>(1);
-    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode("dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto frameChild1 =
-        FrameNode::GetOrCreateFrameNode("Child1", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto frameChild2 =
-        FrameNode::GetOrCreateFrameNode("Child2", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    frameNode->AddChild(frameChild1);
-    frameNode->AddChild(frameChild2);
-
-    /**
-     * @tc.steps: step4. Set up the created frameNode.
-     */
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
-
-    /**
-     * @tc.steps: step5. Call Measure.
+     * @tc.steps: step3. Call Measure.
      * @tc.expected: customNode add a Child and buildItem is equal with child
      */
     test.Measure(AceType::RawPtr(layoutWrapper));
