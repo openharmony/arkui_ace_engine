@@ -2287,6 +2287,7 @@ void ListPattern::RefreshLanesItemRange()
     if (updatePos == -1) {
         return;
     }
+    host->ChildrenUpdatedFrom(-1);
     if (updatePos == 0) {
         lanesItemRange_.clear();
         return;
