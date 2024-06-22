@@ -76,14 +76,13 @@ public:
     void OnMountToParentDone() override;
     void HandleDragEvent(const PointerEvent& info) override;
 
-    void SetOnErrorCallback(
-        const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
-    virtual void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message);
+    virtual void SetOnErrorCallback(const std::function<void(int32_t code,
+        const std::string& name, const std::string& message)>&& callback);
+    virtual void FireOnErrorCallback(
+        int32_t code, const std::string& name, const std::string& message);
 
     int32_t GetInstanceId();
     int32_t GetNodeId();
-    int32_t GetUiExtensionId() override;
-    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
@@ -95,9 +94,8 @@ protected:
     AceLogTag tag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     int32_t platformId_ = -1;
     int32_t instanceId_ = Container::CurrentId();
-    int32_t uiExtensionId_ = 0;
 
-private:
+protected:
     struct ErrorMsg {
         int32_t code = 0;
         std::string name;
