@@ -180,6 +180,16 @@ public:
         return resRegister_;
     }
 
+    UIContentType GetUIContentType() const
+    {
+        return uIContentType_;
+    }
+
+    void SetUIContentType(UIContentType uIContentType)
+    {
+        uIContentType_ = uIContentType;
+    }
+
     RefPtr<PipelineBase> GetPipelineContext() const override
     {
         std::lock_guard<std::mutex> lock(pipelineMutex_);
@@ -721,6 +731,7 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
+    UIContentType uIContentType_ = UIContentType::UNDEFINED;
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;

@@ -128,6 +128,13 @@ void SecurityUIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& w
 
 void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    if (container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        PLATFORM_LOGE("Not allowed nesting.");
+        return;
+    }
+
     CHECK_NULL_VOID(sessionWrapper_);
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {

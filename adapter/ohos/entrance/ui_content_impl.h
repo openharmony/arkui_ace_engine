@@ -77,6 +77,7 @@ public:
         napi_value storage, ContentInfoType type) override;
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
+    void SetUIContentType(UIContentType uIContentType) override;
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -384,6 +385,7 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
+    UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
