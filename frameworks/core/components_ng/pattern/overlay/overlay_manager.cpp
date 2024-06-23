@@ -4931,6 +4931,13 @@ bool OverlayManager::AddCurSessionId(int32_t sessionId)
     return true;
 }
 
+int32_t OverlayManager::CreateModalUIExtension(const RefPtr<WantWrap>& wantWrap,
+    const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
+{
+    auto& want = wantWrap->GetWant();
+    return CreateModalUIExtension(want, callbacks, isProhibitBack, isAsyncModalBinding);
+}
+
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
     bool isProhibitBack, bool isAsyncModalBinding, bool isAllowedBeCovered)

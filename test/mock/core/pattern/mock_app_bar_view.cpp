@@ -12,21 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_APP_BAR_HELPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_APP_BAR_HELPER_H
+namespace OHOS::Ace::NG {
+ACE_WEAK_SYM RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
+{
+    return nullptr;
+}
 
-#include <map>
-#include <string>
+ACE_WEAK_SYM void AppBarView::SetStatusBarItemColor(bool isLight)
+{
+    return;
+}
 
-#include "core/components_ng/base/frame_node.h"
-
-namespace OHOS::Ace {
-
-class ACE_EXPORT AppBarHelper final {
-public:
-    static std::string QueryAppGalleryBundleName();
-};
-
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_APP_BAR_HELPER_H
+ACE_WEAK_SYM std::optional<RectF> AppBarView::GetAppBarRect()
+{
+    return RectF();
+}
+} // namespace OHOS::Ace::NG
