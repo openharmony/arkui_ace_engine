@@ -121,8 +121,8 @@ HWTEST_F(ViewAbstractModelTestNg, BindSheetShowInPageTest1, TestSize.Level1)
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     auto overlay2 = pagePatern->GetOverlayManager();
     EXPECT_NE(overlay2, nullptr);
-    EXPECT_FALSE(targetNode->PageLevelIsNavDestination());
-    EXPECT_EQ(targetNode->GetPageLevelNodeId(), pageNode->GetId());
+    EXPECT_FALSE(!targetNode->RootNodeIsPage());
+    EXPECT_EQ(targetNode->GetRootNodeId(), pageNode->GetId());
 }
 
 /**
@@ -153,9 +153,9 @@ HWTEST_F(ViewAbstractModelTestNg, BindSheetShowInPageTest2, TestSize.Level1)
     ASSERT_NE(navPatern, nullptr);
     auto overlay = navPatern->GetOverlayManager();
     EXPECT_NE(overlay, nullptr);
-    EXPECT_TRUE(targetNode->PageLevelIsNavDestination());
-    EXPECT_EQ(targetNode->GetPageLevelNodeId(), navDestinaion->GetId());
-    EXPECT_TRUE(pageNode->PageLevelIsNavDestination());
-    EXPECT_EQ(pageNode->GetPageLevelNodeId(), targetNode->GetPageLevelNodeId());
+    EXPECT_TRUE(!targetNode->RootNodeIsPage());
+    EXPECT_EQ(targetNode->GetRootNodeId(), navDestinaion->GetId());
+    EXPECT_TRUE(!pageNode->RootNodeIsPage());
+    EXPECT_EQ(pageNode->GetRootNodeId(), targetNode->GetRootNodeId());
 }
 } // namespace OHOS::Ace::NG

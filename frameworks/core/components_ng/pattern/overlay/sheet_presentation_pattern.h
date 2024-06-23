@@ -68,6 +68,11 @@ public:
         return true;
     }
 
+    void SetOverlay(const WeakPtr<OverlayManager>& overlayManager)
+    {
+        overlayManager_ = overlayManager;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -650,6 +655,8 @@ private:
     //record sheet unsoreddetent index
     uint32_t detentsFinalIndex_ = 0;
     std::string sheetThemeType_ = "auto";
+
+    WeakPtr<OverlayManager> overlayManager_ = nullptr;
 
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;

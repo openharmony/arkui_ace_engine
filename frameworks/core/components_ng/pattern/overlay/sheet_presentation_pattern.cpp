@@ -41,6 +41,9 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#endif
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -1734,6 +1737,10 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
         CHECK_NULL_RETURN(pattern, nullptr);
         overlay = pattern->GetOverlayManager();
     }
+    if (!overlay) {
+        auto overlayManager = overlayManager_.Upgrade();
+        overlay = overlayManager;
+    }
     return overlay;
 }
 
@@ -1758,6 +1765,13 @@ void SheetPresentationPattern::DeleteOverlay()
         CHECK_NULL_VOID(pattern);
         pattern->DeleteOverlayManager();
     }
+#ifdef WINDOW_SCENE_SUPPORTED
+    else if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        auto pattern = node->GetPattern<SystemWindowScene>();
+        CHECK_NULL_VOID(pattern);
+        pattern->DeleteOverlayManager();
+    }
+#endif
 }
 
 void SheetPresentationPattern::GetBuilderInitHeight()
