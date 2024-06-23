@@ -240,6 +240,7 @@ public:
                 theme->defaultPaddingSize_ =
                     checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
                 theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
+                theme->hoverPaddingSize_ = checkboxPattern->GetAttr<Dimension>("checkbox_hover_padding_size", 2.0_vp);
             }
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultHeight_ = theme->defaultWidth_;
@@ -285,6 +286,11 @@ public:
         }
     };
 
+    const Dimension& GetHoverPaddingSize() const
+    {
+        return hoverPaddingSize_;
+    }
+
     const Dimension& GetBorderRadius() const
     {
         return borderRadius_;
@@ -303,6 +309,7 @@ public:
 private:
     Dimension borderRadius_;
     Dimension checkStroke_;
+    Dimension hoverPaddingSize_;
     double colorAnimationDuration_ = 0.0;
 };
 
@@ -447,6 +454,7 @@ public:
                 theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
                 theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
+                theme->showCircleDial_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_circle_dial", 0.0));
             }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
             theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
@@ -485,6 +493,14 @@ public:
             }
         }
     };
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
+private:
+    bool showCircleDial_ = false;
 };
 
 } // namespace OHOS::Ace
