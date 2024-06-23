@@ -1004,11 +1004,6 @@ const ParagraphStyle& TxtParagraph::GetParagraphStyle() const
     return paraStyle_;
 }
 
-void TxtParagraph::SetParagraphBuild(bool firstBuild)
-{
-    paraStyle_.firstBuild = firstBuild;
-}
-
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::Paragraph* TxtParagraph::GetParagraph()
 {
