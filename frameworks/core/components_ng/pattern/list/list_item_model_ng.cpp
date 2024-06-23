@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,17 +19,20 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
+void ListItemModelNG::Create(
+    std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle, bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -39,27 +42,47 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
-        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
-        });
+    const char* tag = isCreateArc ? V2::ARC_LIST_ITEM_ETS_TAG : V2::LIST_ITEM_ETS_TAG;
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (!isCreateArc) {
+        frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
+            [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), style = listItemStyle]() {
+                return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, style);
+            });
+    } else {
+        frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
+            [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), style = listItemStyle]() {
+                return AceType::MakeRefPtr<ArcListItemPattern>(shallowBuilder, style);
+            });
+    }
     stack->Push(frameNode);
 }
 
-void ListItemModelNG::Create()
+void ListItemModelNG::Create(bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (!isCreateArc) {
+        frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+            []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
+            []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    }
+
     stack->Push(frameNode);
 }
 
-RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId, bool isCreateArc)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
-        AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    if (isCreateArc) {
+        return FrameNode::CreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
+            AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    }
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
     return frameNode;
 }
 
@@ -159,6 +182,12 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
     }
 }
 
+void ListItemModelNG::SetAutoScale(bool autoScale)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ListItemModelNG::SetAutoScale(frameNode, autoScale);
+}
+
 void ListItemModelNG::InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
     OnStateChangedEvent&& onStateChange, bool isStartArea)
@@ -234,6 +263,12 @@ void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+}
+
+void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
 }
 
 } // namespace OHOS::Ace::NG

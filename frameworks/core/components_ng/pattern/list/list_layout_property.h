@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/list/list_component.h"
 
@@ -32,7 +33,10 @@ class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListLayoutProperty, LayoutProperty);
 
 public:
-    ListLayoutProperty() = default;
+    ListLayoutProperty(ListType type = ListType::RECT_LIST) : listType_(type)
+    {
+        ResetArcListProperty();
+    }
 
     ~ListLayoutProperty() override = default;
 
@@ -80,6 +84,8 @@ public:
         ResetEditMode();
         ResetScrollEnabled();
         ResetFadingEdge();
+
+        ResetArcListProperty();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -106,6 +112,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    void ResetArcListProperty()
+    {
+        if (listType_ != ListType::ARC_LIST) {
+            return;
+        }
+        propListDirection_ = Axis::VERTICAL;
+        propListItemAlign_ = V2::ListItemAlign::CENTER;
+        propScrollSnapAlign_ = V2::ScrollSnapAlign::CENTER;
+        propEditMode_ = false;
+    }
+
+private:
+    ListType listType_ = ListType::RECT_LIST;
 };
 } // namespace OHOS::Ace::NG
 

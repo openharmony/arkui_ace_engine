@@ -59,12 +59,16 @@ using std::chrono::milliseconds;
 ScrollablePattern::ScrollablePattern()
 {
     friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    velocityScale_ =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
     : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
 {
     friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    velocityScale_ =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -412,6 +416,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetScrollEndCallback(std::move(scrollEnd));
     scrollable->SetUnstaticFriction(friction_);
+    scrollable->SetUnstaticVelocityScale(velocityScale_);
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
     auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
@@ -892,6 +897,17 @@ void ScrollablePattern::SetFriction(double friction)
     scrollable->SetUnstaticFriction(friction_);
 }
 
+void ScrollablePattern::SetVelocityScale(double scale)
+{
+    if (LessOrEqual(scale, 0.0)) {
+        scale = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    }
+    velocityScale_ = scale;
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetUnstaticVelocityScale(velocityScale_);
+}
+
 void ScrollablePattern::SetMaxFlingVelocity(double max)
 {
     if (LessOrEqual(max, 0.0f)) {
@@ -911,7 +927,7 @@ void ScrollablePattern::GetParentNavigation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if ((host->GetTag() != V2::LIST_ETS_TAG) && (host->GetTag() != V2::GRID_ETS_TAG) &&
-        (host->GetTag() != V2::SCROLL_ETS_TAG)) {
+        (host->GetTag() != V2::SCROLL_ETS_TAG) && (host->GetTag() != V2::ARC_LIST_ETS_TAG)) {
         return;
     }
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
@@ -920,7 +936,7 @@ void ScrollablePattern::GetParentNavigation()
             continue;
         }
         if ((frameNode->GetTag() == V2::LIST_ETS_TAG) || (frameNode->GetTag() == V2::GRID_ETS_TAG) ||
-            (frameNode->GetTag() == V2::SCROLL_ETS_TAG)) {
+            (frameNode->GetTag() == V2::SCROLL_ETS_TAG) || (frameNode->GetTag() == V2::ARC_LIST_ETS_TAG)) {
             break;
         }
         navBarPattern_ = frameNode->GetPattern<NavBarPattern>();

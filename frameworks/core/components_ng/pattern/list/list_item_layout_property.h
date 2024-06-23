@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
+#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +28,7 @@ class ACE_EXPORT ListItemLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListItemLayoutProperty, LayoutProperty);
 
 public:
-    ListItemLayoutProperty() = default;
+    ListItemLayoutProperty(ListType type = ListType::RECT_LIST) : listType_(type) {}
 
     ~ListItemLayoutProperty() override = default;
 
@@ -54,6 +55,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyMode, V2::StickyMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartDeleteAreaDistance, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndDeleteAreaDistance, Dimension, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    void UpdateLayoutProperty(const ListItemLayoutProperty* layoutProperty);
+
+private:
+    ListType listType_ = ListType::RECT_LIST;
 };
 } // namespace OHOS::Ace::NG
 

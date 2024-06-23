@@ -52,6 +52,7 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
 constexpr float LIST_START_MAIN_POS = 0.0f;
 constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
+constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -575,12 +576,14 @@ void ListPattern::ProcessEvent(
         }
     }
 
-    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
-    if (onScrollVisibleContentChange) {
-        bool startChanged = UpdateStartListItemIndex();
-        bool endChanged = UpdateEndListItemIndex();
-        if (indexChanged || startChanged || endChanged) {
-            onScrollVisibleContentChange(startInfo_, endInfo_);
+    if (listType_ != ListType::ARC_LIST) {
+        auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
+        if (onScrollVisibleContentChange) {
+            bool startChanged = UpdateStartListItemIndex();
+            bool endChanged = UpdateEndListItemIndex();
+            if (indexChanged || startChanged || endChanged) {
+                onScrollVisibleContentChange(startInfo_, endInfo_);
+            }
         }
     }
 
@@ -950,6 +953,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
+    if (GetIsDragging() && listType_ == ListType::ARC_LIST) {
+        offset = FixScrollOffset(offset, source);
+    }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -989,6 +995,9 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
         auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        if (listType_ == ListType::ARC_LIST) {
+            friction = ARC_LIST_DRAG_OVER_FRICTION;
+        }
         currentDelta_ = currentDelta_ * friction;
     }
 
@@ -1349,7 +1358,8 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
-    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    auto align = listType_ == ListType::ARC_LIST ? ScrollAlign::CENTER : ScrollAlign::AUTO;
+    ScrollToIndex(curIndex, smooth_, align);
     auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
@@ -2220,7 +2230,9 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("multiSelectable", multiSelectable_, filter);
+    if (listType_ != ListType::ARC_LIST) {
+        json->PutExtAttr("multiSelectable", multiSelectable_, filter);
+    }
     json->PutExtAttr("startIndex", startIndex_, filter);
     if (!itemPosition_.empty()) {
         json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
@@ -2373,10 +2385,12 @@ void ListPattern::DumpAdvanceInfo()
     } else {
         DumpLog::GetInstance().AddDesc("jumpIndex:null");
     }
-    if (jumpIndexInGroup_.has_value()) {
-        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:" + std::to_string(jumpIndexInGroup_.value()));
-    } else {
-        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:null");
+    if (listType_ != ListType::ARC_LIST) {
+        if (jumpIndexInGroup_.has_value()) {
+            DumpLog::GetInstance().AddDesc("jumpIndexInGroup:" + std::to_string(jumpIndexInGroup_.value()));
+        } else {
+            DumpLog::GetInstance().AddDesc("jumpIndexInGroup:null");
+        }
     }
     if (targetIndex_.has_value()) {
         DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(targetIndex_.value()));
@@ -2403,19 +2417,25 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("itemPosition.first:" + std::to_string(item.first));
         DumpLog::GetInstance().AddDesc("startPos:" + std::to_string(item.second.startPos));
         DumpLog::GetInstance().AddDesc("endPos:" + std::to_string(item.second.endPos));
-        DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
+        if (listType_ != ListType::ARC_LIST) {
+            DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
+        }
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
     scrollStop_ ? DumpLog::GetInstance().AddDesc("scrollStop:true")
                 : DumpLog::GetInstance().AddDesc("scrollStop:false");
-    for (auto item : lanesItemRange_) {
-        DumpLog::GetInstance().AddDesc("------------------------------------------");
-        DumpLog::GetInstance().AddDesc("lanesItemRange.first:" + std::to_string(item.first));
-        DumpLog::GetInstance().AddDesc("lanesItemRange.second:" + std::to_string(item.second));
+    if (listType_ != ListType::ARC_LIST) {
+        for (auto item : lanesItemRange_) {
+            DumpLog::GetInstance().AddDesc("------------------------------------------");
+            DumpLog::GetInstance().AddDesc("lanesItemRange.first:" + std::to_string(item.first));
+            DumpLog::GetInstance().AddDesc("lanesItemRange.second:" + std::to_string(item.second));
+        }
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
-    DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
-    DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
+    if (listType_ != ListType::ARC_LIST) {
+        DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
+        DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
+    }
     dragFromSpring_ ? DumpLog::GetInstance().AddDesc("dragFromSpring:true")
                     : DumpLog::GetInstance().AddDesc("dragFromSpring:false");
     isScrollEnd_ ? DumpLog::GetInstance().AddDesc("isScrollEnd:true")
