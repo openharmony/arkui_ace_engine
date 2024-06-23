@@ -2330,7 +2330,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
-    auto onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
+    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON) {
+        onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    }
     TouchResult touchRes;
     if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
         std::vector<TouchTestInfo> touchInfos;
