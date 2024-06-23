@@ -2077,7 +2077,6 @@ JsAccessibilityManager::~JsAccessibilityManager()
     auto eventType = AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED;
 
     UnsubscribeStateObserver(eventType);
-    UnsubscribeToastObserver();
 
     DeregisterInteractionOperation();
 }
@@ -2155,8 +2154,6 @@ void JsAccessibilityManager::InitializeCallback()
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
-
-    SubscribeToastObserver();
 
     if (pipelineContext->IsFormRender() || pipelineContext->IsJsCard() || pipelineContext->IsJsPlugin()) {
         return;
