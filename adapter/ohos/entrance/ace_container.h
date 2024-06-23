@@ -99,7 +99,7 @@ public:
 
     ~AceContainer() override;
 
-    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node) override;
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId) override;
 
     void Initialize() override;
 
@@ -571,8 +571,8 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;

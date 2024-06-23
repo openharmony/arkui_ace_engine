@@ -2300,7 +2300,7 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
-    return (container->RequestAutoFill(host, autoFillType, isPopup, isNewPassWord));
+    return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -2727,7 +2727,7 @@ void TextFieldPattern::AutoFillValueChanged()
     CHECK_NULL_VOID(container);
     if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END
         && CheckAutoFill()) {
-        container->UpdatePopupUIExtension(host);
+        container->UpdatePopupUIExtension(host, autoFillSessionId_);
     }
 }
 

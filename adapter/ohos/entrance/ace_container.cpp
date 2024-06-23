@@ -1249,7 +1249,7 @@ private:
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
 };
 
-bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
+bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
 {
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1262,7 +1262,7 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(uiContent, viewData);
+    AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(autoFillSessionId, viewData);
     return true;
 }
 
@@ -1325,8 +1325,8 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     }
 }
 
-bool AceContainer::RequestAutoFill(
-    const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord)
+bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -1360,20 +1360,18 @@ bool AceContainer::RequestAutoFill(
     customConfig.isShowInSubWindow = false;
     customConfig.nodeId = node->GetId();
     customConfig.isEnableArrow = false;
-    auto inputInspectorId = node->GetInspectorId().value_or("");
-    if (!inputInspectorId.empty()) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "inputInspectorId is: %{public}s", inputInspectorId.c_str());
-        customConfig.inspectorId = inputInspectorId;
-    }
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.config = customConfig;
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
-    if (AbilityRuntime::AutoFillManager::GetInstance().
-        RequestAutoFill(uiContent, autoFillRequest, callback, isPopup) != 0) {
+    AbilityRuntime::AutoFill::AutoFillResult result;
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
+        uiContent, autoFillRequest, callback, result) != 0) {
         return false;
     }
+    isPopup = result.isPopup;
+    autoFillSessionId = result.autoFillSessionId;
     return true;
 }
 
@@ -1439,7 +1437,9 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
     autoFillRequest.autoFillType = ViewDataWrap::ViewDataToType(viewData);
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(uiContent, autoFillRequest, callback) != 0) {
+    AbilityRuntime::AutoFill::AutoFillResult result;
+    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoSave(
+        uiContent, autoFillRequest, callback, result) != 0) {
         return false;
     }
     return true;

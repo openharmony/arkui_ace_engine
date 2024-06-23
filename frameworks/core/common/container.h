@@ -82,7 +82,7 @@ public:
     }
 
     virtual void DestroyView() {}
-    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
     {
         return false;
     }
@@ -481,8 +481,8 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(
-        const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false)
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
     {
         return false;
     }
