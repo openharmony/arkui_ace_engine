@@ -147,6 +147,8 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
 
+    bool Close() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

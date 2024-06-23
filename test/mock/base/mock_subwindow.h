@@ -90,6 +90,7 @@ public:
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
     MOCK_METHOD0(MarkDirtyDialogSafeArea, void());
+    MOCK_METHOD0(Close, bool());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H
