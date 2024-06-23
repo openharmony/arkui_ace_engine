@@ -333,7 +333,8 @@ public:
     {
         scrollAbort_ = abort;
     }
-    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    void PlaySpringAnimation(
+        float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
     {
@@ -347,7 +348,8 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
+        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+        bool useTotalOffset = true);
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
@@ -615,11 +617,6 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
-    void SetUseTotalOffset(bool useTotalOffset)
-    {
-        useTotalOffset_ = useTotalOffset;
-    }
-
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -711,7 +708,7 @@ private:
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
-    void InitSpringOffsetProperty();
+    void InitSpringOffsetProperty(bool useTotalOffset = true);
     void InitCurveOffsetProperty();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
@@ -865,7 +862,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
-    bool useTotalOffset_ = true;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

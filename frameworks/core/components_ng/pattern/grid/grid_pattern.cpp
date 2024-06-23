@@ -1260,7 +1260,7 @@ void GridPattern::ScrollPage(bool reverse, bool smooth)
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (smooth) {
         float position = -gridLayoutInfo_.currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
         return;
     } else {
         if (!isConfigScrollable_) {
@@ -1299,7 +1299,8 @@ void GridPattern::OnAnimateStop()
     // AccessibilityEventType::SCROLL_END
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve> &curve, bool smooth,
+                            bool canOverScroll, bool useTotalOffset)
 {
     if (!isConfigScrollable_) {
         return;
