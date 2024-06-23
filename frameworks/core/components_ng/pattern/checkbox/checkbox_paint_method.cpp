@@ -127,7 +127,7 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     if (HoverEffectType::NONE == hoverEffectType_) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
     RSBrush brush;

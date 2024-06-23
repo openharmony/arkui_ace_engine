@@ -459,10 +459,7 @@ void CheckBoxGroupPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool CheckBoxGroupPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (event.code == KeyCode::KEY_FUNCTION) {
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_FUNCTION) {
         OnClick();
         return true;
     }

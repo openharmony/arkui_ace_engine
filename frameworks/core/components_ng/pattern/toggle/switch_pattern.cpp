@@ -461,10 +461,7 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SwitchPattern::OnKeyEvent(const KeyEvent& keyEventInfo)
 {
-    if (keyEventInfo.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (keyEventInfo.code == KeyCode::KEY_FUNCTION) {
+    if (keyEventInfo.action == KeyAction::DOWN && keyEventInfo.code == KeyCode::KEY_FUNCTION) {
         this->OnClick();
         return true;
     }
