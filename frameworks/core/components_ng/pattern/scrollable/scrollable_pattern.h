@@ -353,7 +353,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-                              IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ || nestedScrolling_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -746,12 +746,15 @@ private:
     bool HandleScrollVelocity(float velocity) override;
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
+    ScrollResult HandleOutBoundary(float& offset, int32_t source, NestedState state) override;
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -862,6 +865,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool nestedScrolling_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
