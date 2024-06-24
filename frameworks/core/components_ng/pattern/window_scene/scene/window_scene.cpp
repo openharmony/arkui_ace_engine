@@ -350,7 +350,8 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailableForSnapshot", TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIWindowSceneBufferAvailableForSnapshot", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnActivation()
@@ -538,14 +539,6 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::OnBackground()
-{
-    CHECK_NULL_VOID(session_);
-    lastWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionLastRect(lastWindowRect_);
-    WindowPattern::OnBackground();
-}
-
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (attachToFrameNodeFlag_) {
@@ -577,6 +570,14 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         surfaceNode->SetIsNotifyUIBufferAvailable(true);
     }
     return false;
+}
+
+void WindowScene::OnBackground()
+{
+    CHECK_NULL_VOID(session_);
+    lastWindowRect_ = session_->GetSessionRect();
+    session_->SetSessionLastRect(lastWindowRect_);
+    WindowPattern::OnBackground();
 }
 
 void WindowScene::CleanBlankNodeOrSnapshotNode()
