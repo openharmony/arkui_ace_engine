@@ -456,6 +456,7 @@ export struct FoldSplitContainer {
   private containerGlobalPosition: Position = { x: 0, y: 0 };
   private listener?: mediaQuery.MediaQueryListener;
   private isSmallScreen: boolean = false;
+  private isHoverMode: boolean | undefined = undefined;
 
   aboutToAppear() {
     this.listener = mediaQuery.matchMediaSync('(width<=600vp)');
@@ -467,13 +468,8 @@ export struct FoldSplitContainer {
     this.foldStatus = display.getFoldStatus();
     display.on('foldStatusChange', (foldStatus) => {
       if (this.foldStatus !== foldStatus) {
-        const lastHoverMode = this.isHoverMode();
         this.foldStatus = foldStatus;
         this.updateLayout();
-        const currentHoverMode = this.isHoverMode();
-        if (lastHoverMode !== currentHoverMode) {
-          this.dispatchHoverStatusChange(currentHoverMode);
-        }
         this.updatePreferredOrientation();
       }
     });
@@ -602,6 +598,7 @@ export struct FoldSplitContainer {
   }
 
   private updateLayout() {
+    let isHoverMode: boolean = false;
     let regionLayout: RegionLayout;
     if (this.isSmallScreen) {
       regionLayout = this.getFoldedRegionLayouts();
@@ -609,7 +606,12 @@ export struct FoldSplitContainer {
       if (this.foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
         regionLayout = this.getExpandedRegionLayouts();
       } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
-        regionLayout = this.getHoverModeRegionLayouts();
+        if (this.isPortraitOrientation()) {
+          regionLayout = this.getExpandedRegionLayouts();
+        } else {
+          regionLayout = this.getHoverModeRegionLayouts();
+          isHoverMode = true;
+        }
       } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
         regionLayout = this.getFoldedRegionLayouts();
       } else {
@@ -635,8 +637,12 @@ export struct FoldSplitContainer {
       });
     }
 
-    if (this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED &&
-      !this.hoverModeLayoutOptions.showExtraRegion) {
+    if (this.isHoverMode !== isHoverMode) {
+      this.dispatchHoverStatusChange(isHoverMode);
+      this.isHoverMode = isHoverMode;
+    }
+
+    if (isHoverMode && !this.hoverModeLayoutOptions.showExtraRegion) {
       this.extraOpacity = 0;
     } else {
       this.extraOpacity = 1;
@@ -701,11 +707,6 @@ export struct FoldSplitContainer {
     const primaryLayout: Layout = initLayout();
     const secondaryLayout: Layout = initLayout();
     const extraLayout: Layout = initLayout();
-
-    if (this.isPortraitOrientation()) {
-      return this.getExpandedRegionLayouts();
-    }
-
     const creaseRegionRect = this.getCreaseRegionRect();
     primaryLayout.position.x = 0;
     primaryLayout.position.y = 0;
@@ -805,10 +806,6 @@ export struct FoldSplitContainer {
     }
 
     return { left, top, width, height };
-  }
-
-  private isHoverMode() {
-    return this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED && !this.isPortraitOrientation();
   }
 
   private isPortraitOrientation() {
