@@ -1443,10 +1443,16 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
             syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
                 ? PROPERTY_UPDATE_LAYOUT
                 : PROPERTY_UPDATE_MEASURE);
-        lastPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
+        auto overlay = lastPage->GetPattern<PagePattern>();
+        if (overlay) {
+            overlay->MarkDirtyOverlay();
+        }
     }
     if (prevPage) {
-        prevPage->GetPattern<PagePattern>()->MarkDirtyOverlay();
+        auto overlay = prevPage->GetPattern<PagePattern>();
+        if (overlay) {
+            overlay->MarkDirtyOverlay();
+        }
     }
     SubwindowManager::GetInstance()->MarkDirtyDialogSafeArea();
     if (overlayManager_) {
