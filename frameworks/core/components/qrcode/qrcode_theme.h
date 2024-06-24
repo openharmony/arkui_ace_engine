@@ -56,6 +56,7 @@ public:
             if (!pattern) {
                 return;
             }
+            theme->qrcodeDefaultSize_ = pattern->GetAttr<Dimension>("default_size", 240.0_vp);
             theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 theme->qrcodeColor_ = Color(0xff000000);
@@ -104,6 +105,11 @@ public:
         return qrcodeHeight_;
     }
 
+    const Dimension& GetQrcodeDefaultSize() const
+    {
+        return qrcodeDefaultSize_;
+    }
+
 protected:
     QrcodeTheme() = default;
 
@@ -114,6 +120,7 @@ private:
     QrcodeType qrcodeType_ { QrcodeType::RECT };
     Dimension qrcodeWidth_;
     Dimension qrcodeHeight_;
+    Dimension qrcodeDefaultSize_;
 };
 
 } // namespace OHOS::Ace
