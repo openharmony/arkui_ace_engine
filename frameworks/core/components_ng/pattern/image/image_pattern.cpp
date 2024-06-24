@@ -377,7 +377,12 @@ void ImagePattern::OnImageLoadSuccess()
             pattern->CreateAnalyzerOverlay();
         }, "ArkUIImageCreateAnalyzerOverlay");
     }
-    ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
+    ACE_LAYOUT_SCOPED_TRACE(
+        "OnImageLoadSuccess[self:%d][src:%s]", host->GetId(), loadingCtx_->GetSourceInfo().ToString().c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(
+            AceLogTag::ACE_IMAGE, "OnImageLoadSuccess src=%{public}s", loadingCtx_->GetSourceInfo().ToString().c_str());
+    }
     host->MarkNeedRenderOnly();
 }
 
@@ -972,6 +977,9 @@ void ImagePattern::OnVisibleChange(bool visible)
 
 void ImagePattern::OnVisibleAreaChange(bool visible)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
+    }
     if (!visible) {
         CloseSelectOverlay();
     }
@@ -1314,6 +1322,9 @@ void ImagePattern::DumpInfo()
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
         DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
+    } else {
+        DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }
 
     auto host = GetHost();
