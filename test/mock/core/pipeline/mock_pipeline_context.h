@@ -33,8 +33,6 @@ public:
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
 
-    bool IsDestroyed();
-
     SafeAreaInsets GetSafeArea() const override
     {
         return safeAreaManager_->GetSafeArea();
@@ -67,8 +65,6 @@ protected:
     double dipScale_ = 1.0;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
-private:
-    bool destroyed_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H
