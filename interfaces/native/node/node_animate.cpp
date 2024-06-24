@@ -172,6 +172,10 @@ ArkUI_CurveHandle OH_ArkUI_AnimateOption_GetICurve(ArkUI_AnimateOption* option)
 
 ArkUI_KeyframeAnimateOption* OH_ArkUI_KeyframeAnimateOption_Create(int32_t size)
 {
+    if (size < 0) {
+        return nullptr;
+    }
+
     ArkUI_KeyframeAnimateOption* animateOption = new ArkUI_KeyframeAnimateOption;
     animateOption->keyframes.resize(size);
     animateOption->delay = 0;
@@ -293,6 +297,10 @@ ArkUI_CurveHandle OH_ArkUI_KeyframeAnimateOption_GetCurve(ArkUI_KeyframeAnimateO
 
 ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize)
 {
+    if (keyframeSize < 0) {
+        return nullptr;
+    }
+    
     ArkUI_AnimatorOption* option = new ArkUI_AnimatorOption;
     option->keyframes.resize(keyframeSize);
     for (int32_t i = 0; i < keyframeSize; i++) {
@@ -305,6 +313,7 @@ ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize)
     option->direction = ARKUI_ANIMATION_DIRECTION_NORMAL;
     option->begin = 0.0f;
     option->end = 1.0f;
+    option->easing = nullptr;
     option->onFrame = nullptr;
     option->frameUserData = nullptr;
     option->onFinish = nullptr;
@@ -322,6 +331,7 @@ void OH_ArkUI_AnimatorOption_Dispose(ArkUI_AnimatorOption* option)
     CHECK_NULL_VOID(option);
     if (option->expectedFrameRateRange) {
         delete option->expectedFrameRateRange;
+        option->expectedFrameRateRange = nullptr;
     }
     delete option;
 }
