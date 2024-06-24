@@ -999,7 +999,6 @@ public:
         }
     }
 
-    std::string GetSystemColorMode();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
