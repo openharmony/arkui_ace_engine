@@ -103,6 +103,13 @@ public:
     static float GetRowsGap(FrameNode* frameNode);
     static int32_t GetCachedCount(FrameNode* frameNode);
 
+    static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
+
+    static void SetGridItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc);
+    static void SetGridItemAdapterCallFinish(FrameNode* frameNode, int start, int end);
+    static void SetGridItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
+    static RefPtr<FrameNode> CreateGrid(int32_t nodeId);
+
 private:
     void AddDragFrameNodeToManager() const;
 };

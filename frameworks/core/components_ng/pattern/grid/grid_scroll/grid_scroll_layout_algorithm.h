@@ -74,6 +74,21 @@ public:
         }
     }
 
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
@@ -212,6 +227,10 @@ private:
     OffsetF childFrameOffset_;
     std::list<int32_t> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
