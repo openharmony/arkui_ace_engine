@@ -89,9 +89,11 @@ public:
 
     bool ProcessRotationEvent(float rotationValue);
 
-    void ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
-    void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action);
+    void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
     int32_t GetInstanceId() const override
     {

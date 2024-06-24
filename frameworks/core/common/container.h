@@ -61,7 +61,8 @@ using AxisEventCallback = std::function<void(const AxisEvent&, const std::functi
     const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
+using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
+    const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {

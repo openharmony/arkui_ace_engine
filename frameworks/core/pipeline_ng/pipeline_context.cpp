@@ -2072,7 +2072,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
-        ResetDraggingStatus(scalePoint);
+        ResetDraggingStatus(scalePoint, node);
     }
     if (scalePoint.type != TouchType::MOVE) {
         lastDispatchTime_.erase(scalePoint.id);
@@ -2149,7 +2149,7 @@ void PipelineContext::CompensateTouchMoveEvent(const TouchEvent& event)
     }
 }
 
-void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint)
+void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -3205,7 +3205,8 @@ void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t heigh
     }
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<NG::FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -3237,13 +3238,13 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
-        manager->OnDragEnd(pointerEvent, extraInfo);
+        manager->OnDragEnd(pointerEvent, extraInfo, node);
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->DoDragMoveAnimate(pointerEvent);
     }
-    manager->OnDragMove(pointerEvent, extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo, node);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

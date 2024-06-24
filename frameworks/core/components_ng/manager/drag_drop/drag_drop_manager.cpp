@@ -253,11 +253,15 @@ RefPtr<FrameNode> DragDropManager::FindTargetDropNode(const RefPtr<UINode> paren
     return nullptr;
 }
 
-RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY)
+RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY,
+    const RefPtr<FrameNode>& node)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto rootNode = pipeline->GetRootElement();
+    auto rootNode = node;
+    if (!rootNode) {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        rootNode = pipeline->GetRootElement();
+    }
 
     auto result = FindTargetDropNode(rootNode, {globalX, globalY});
     if (result) {
@@ -566,7 +570,31 @@ bool DragDropManager::ReachMoveLimit(const PointerEvent& pointerEvent, const Poi
     return false;
 }
 
-void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
+void DragDropManager::HandleOnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
+    const RefPtr<FrameNode>& dragFrameNode)
+{
+    CHECK_NULL_VOID(dragFrameNode);
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
+        auto pattern = dragFrameNode->GetPattern<Pattern>();
+        pattern->HandleDragEvent(pointerEvent);
+        return;
+    }
+
+    if (dragFrameNode == preTargetFrameNode_) {
+        FireOnDragEvent(dragFrameNode, pointerEvent, DragEventType::MOVE, extraInfo);
+        return;
+    }
+
+    FireOnDragLeave(preTargetFrameNode_, pointerEvent, extraInfo);
+    PrintDragFrameNode(pointerEvent, dragFrameNode);
+    FireOnDragEvent(dragFrameNode, pointerEvent, DragEventType::ENTER, extraInfo);
+    preTargetFrameNode_ = dragFrameNode;
+}
+
+void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
+    const RefPtr<FrameNode>& node)
 {
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
@@ -587,7 +615,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
     auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
             TAG_LOGI(AceLogTag::ACE_DRAG,
@@ -606,24 +634,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         }
         return;
     }
-
-    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
-        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
-        auto pattern = dragFrameNode->GetPattern<Pattern>();
-        pattern->HandleDragEvent(pointerEvent);
-        return;
-    }
-
-    if (dragFrameNode == preTargetFrameNode_) {
-        FireOnDragEvent(dragFrameNode, pointerEvent, DragEventType::MOVE, extraInfo);
-        return;
-    }
-
-    FireOnDragLeave(preTargetFrameNode_, pointerEvent, extraInfo);
-    PrintDragFrameNode(pointerEvent, dragFrameNode);
-    FireOnDragEvent(dragFrameNode, pointerEvent, DragEventType::ENTER, extraInfo);
-    preTargetFrameNode_ = dragFrameNode;
+    HandleOnDragMove(pointerEvent, extraInfo, dragFrameNode);
 }
 
 void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId)
@@ -638,7 +649,45 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
-void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo)
+void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
+    const RefPtr<FrameNode>& dragFrameNode)
+{
+    CHECK_NULL_VOID(dragFrameNode);
+    Point point = pointerEvent.GetPoint();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!IsDropAllowed(dragFrameNode)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d, "
+            "pointerEventId is %{public}d.",
+            container->GetWindowId(), pointerEvent.pointerEventId);
+        ResetDragDrop(container->GetWindowId(), point);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, pointerEventId is %{public}d, "
+        "drag position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s",
+        container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
+        static_cast<float>(point.GetY()), dragFrameNode->GetTag().c_str(),
+        dragFrameNode->GetInspectorId()->c_str());
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
+        auto pattern = dragFrameNode->GetPattern<Pattern>();
+        pattern->HandleDragEvent(pointerEvent);
+        return;
+    }
+
+    RequestDragSummaryInfoAndPrivilege();
+    std::string udKey;
+    InteractionInterface::GetInstance()->GetUdKey(udKey);
+    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
+        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
+        DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+    }
+}
+
+void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
+    const RefPtr<FrameNode>& node)
 {
     Point point = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
@@ -669,7 +718,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     }
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
     if (!dragFrameNode) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d, "
@@ -678,34 +727,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
-    if (!IsDropAllowed(dragFrameNode)) {
-        TAG_LOGI(AceLogTag::ACE_DRAG,
-            "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d, "
-            "pointerEventId is %{public}d.",
-            container->GetWindowId(), pointerEvent.pointerEventId);
-        ResetDragDrop(container->GetWindowId(), point);
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, pointerEventId is %{public}d, "
-        "drag position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s",
-        container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
-        static_cast<float>(point.GetY()), dragFrameNode->GetTag().c_str(),
-        dragFrameNode->GetInspectorId()->c_str());
-    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
-        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
-        auto pattern = dragFrameNode->GetPattern<Pattern>();
-        pattern->HandleDragEvent(pointerEvent);
-        return;
-    }
-
-    RequestDragSummaryInfoAndPrivilege();
-    std::string udKey;
-    InteractionInterface::GetInstance()->GetUdKey(udKey);
-    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
-        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
-        DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
-    }
+    HandleOnDragEnd(pointerEvent, extraInfo, dragFrameNode);
 }
 
 bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
