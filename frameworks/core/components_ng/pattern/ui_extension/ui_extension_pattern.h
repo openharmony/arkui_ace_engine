@@ -93,7 +93,6 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
-    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
