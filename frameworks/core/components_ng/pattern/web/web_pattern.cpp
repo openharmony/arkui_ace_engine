@@ -295,6 +295,17 @@ void WebPattern::OnAttachToFrameNode()
     SetRotation(pipeline->GetTransformHint());
 
     host->GetRenderContext()->SetClipToFrame(true);
+    auto color = GetSystemColor();
+    host->GetRenderContext()->UpdateBackgroundColor(color);
+    if (!renderContextForSurface_) {
+        renderContextForSurface_ = RenderContext::Create();
+        static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+            "RosenWeb" };
+        CHECK_NULL_VOID(renderContextForSurface_);
+        renderContextForSurface_->InitContext(false, param);
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(color);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -2241,7 +2252,6 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
-        UpdateBackgroundColorRightNow();
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -2253,11 +2263,7 @@ void WebPattern::OnModifyDone()
             delegate_->SetDrawSize(drawSize);
             int32_t instanceId = Container::CurrentId();
             CHECK_NULL_VOID(renderSurface_);
-            renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                "RosenWeb" };
-            renderContextForSurface_->InitContext(false, param);
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2283,7 +2289,6 @@ void WebPattern::OnModifyDone()
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
-        UpdateBackgroundColorRightNow();
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
@@ -4014,23 +4019,25 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContextForSurface_->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::UpdateBackgroundColorRightNow()
+Color WebPattern::GetSystemColor() const
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto color = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-    if (color == Color::TRANSPARENT && delegate_) {
-        auto colorMode = delegate_->GetSystemColorMode();
-        color = Color::WHITE;
-        if (colorMode == "dark") {
-            color = Color::BLACK;
-        }
+    Color color = Color::WHITE;
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    CHECK_NULL_RETURN(appMgrClient, color);
+    if (appMgrClient->ConnectAppMgrService()) {
+        return color;
     }
-    renderContext->UpdateBackgroundColor(color);
-    CHECK_NULL_VOID(renderContextForSurface_);
-    renderContextForSurface_->UpdateBackgroundColor(color);
+    auto systemConfig = OHOS::AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    auto colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
+        return Color::BLACK;
+    }
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
+        return Color::WHITE;
+    }
+    TAG_LOGW(AceLogTag::ACE_WEB, "no system color mode is found.");
+    return color;
 }
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
