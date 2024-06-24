@@ -576,8 +576,8 @@ export struct ChipComponent {
     if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start;
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated)
-      || this.prefixIcon?.src) {
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated)||
+      this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         localizedLabelMargin.start = this.theme.label.localizedSmallMargin.start;
       } else {
@@ -951,13 +951,13 @@ export struct ChipComponent {
     constraintSize.minWidth = Math.min(Math.max(this.getCalculateChipNodeWidth(),
       constraintSize.minWidth as number), constraintSize.maxWidth as number);
     constraintSize.minHeight = this.getChipNodeHeight();
-    if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0)
-      && this.toVp(this.chipNodeSize?.height) >= 0) {
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.height !== void (0) &&
+      this.toVp(this.chipNodeSize?.height) >= 0) {
       constraintSize.maxHeight = this.toVp(this.chipNodeSize.height);
       constraintSize.minHeight = this.toVp(this.chipNodeSize.height);
     }
-    if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0)
-      && this.toVp(this.chipNodeSize?.width) >= 0) {
+    if (!this.isChipSizeEnum() && this.chipNodeSize?.width !== void (0) &&
+      this.toVp(this.chipNodeSize?.width) >= 0) {
       constraintSize.minWidth = this.toVp(this.chipNodeSize.width);
       constraintSize.maxWidth = this.toVp(this.chipNodeSize.width);
     } else if (this.toVp(this.fontSizeScale) >= this.theme.chipNode.suitAgeScale) {
