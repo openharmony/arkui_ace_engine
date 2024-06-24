@@ -32,45 +32,52 @@ public:
     /**
      * @description: receive proxy side communication to execute click callback
      */
-    void ReportClickEvent(std::string data) override;
+    void ReportClickEvent(const std::string& data) override;
 
     /**
      * @description: receive proxy side communication to execute switch callback
      */
-    void ReportRouterChangeEvent(std::string data) override;
+    void ReportRouterChangeEvent(const std::string& data) override;
 
     /**
      * @description: receive proxy side communication to execute component callback
      */
-    void ReportComponentChangeEvent(std::string data) override;
+    void ReportComponentChangeEvent(const std::string& data) override;
 
     /**
      * @description: receive proxy side communication to execute search callback
      */
-    void ReportSearchEvent(std::string data) override;
+    void ReportSearchEvent(const std::string& data) override;
 
     /**
      * @description: register a callback when click event occurs execute
      * @param eventCallback callback to be performed
      */
-    void RegisterClickEventCallback(EventCallback eventCallback);
+    void RegisterClickEventCallback(const EventCallback& eventCallback);
 
     /**
      * @description: register a callback when page switch event occurs execute
      * @param eventCallback callback to be performed
      */
-    void RegisterRouterChangeEventCallback(EventCallback eventCallback);
+    void RegisterRouterChangeEventCallback(const EventCallback& eventCallback);
 
     /**
      * @description: register a callback when search component do search occurs execute
      * @param eventCallback callback to be performed
      */
-    void RegisterSearchEventCallback(EventCallback eventCallback);
+    void RegisterSearchEventCallback(const EventCallback& eventCallback);
+
     /**
      * @description: register a callback when specified component change occurs execute
      * @param eventCallback callback to be performed
      */
-    void RegisterComponentChangeEventCallback(EventCallback eventCallback);
+    void RegisterComponentChangeEventCallback(const EventCallback& eventCallback);
+
+    /**
+     * @description: register a callback when get inspector tree
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetInspectorTreeCallback(const EventCallback& eventCallback);
 
     /**
      * @description: unregister the click callback last register
@@ -92,11 +99,17 @@ public:
      */
     void UnregisterComponentChangeEventCallback();
 
+    /**
+     * @description: report whole inspectorTree for SA
+     */
+    void ReportInspectorTreeValue(const std::string& data) override;
+
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
+    EventCallback inspectorTreeCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

@@ -701,6 +701,9 @@ public:
     {
         return updateNodeConfig_;
     }
+
+    virtual void GetInspectorValue();
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

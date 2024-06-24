@@ -25,7 +25,7 @@ UiSessionManager& UiSessionManager::GetInstance()
     return instance_;
 }
 
-void UiSessionManager::ReportClickEvent(std::string data)
+void UiSessionManager::ReportClickEvent(const std::string& data)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
@@ -37,7 +37,7 @@ void UiSessionManager::ReportClickEvent(std::string data)
     }
 }
 
-void UiSessionManager::ReportSearchEvent(std::string data)
+void UiSessionManager::ReportSearchEvent(const std::string& data)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
@@ -49,7 +49,7 @@ void UiSessionManager::ReportSearchEvent(std::string data)
     }
 }
 
-void UiSessionManager::ReportRouterChangeEvent(std::string data)
+void UiSessionManager::ReportRouterChangeEvent(const std::string& data)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
@@ -61,7 +61,7 @@ void UiSessionManager::ReportRouterChangeEvent(std::string data)
     }
 }
 
-void UiSessionManager::ReportComponentChangeEvent(std::string data)
+void UiSessionManager::ReportComponentChangeEvent(const std::string& data)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
@@ -136,5 +136,49 @@ bool UiSessionManager::GetRouterChangeEventRegistered()
 bool UiSessionManager::GetComponentChangeEventRegistered()
 {
     return componentChangeEventRegisterProcesses_ > 0 ? true : false;
+}
+
+void UiSessionManager::GetInspectorTree()
+{
+    jsonValue_ = InspectorJsonUtil::Create(true);
+    webTaskNums = 0;
+    WebTaskNumsChange(1);
+    inspectorFunction_();
+}
+
+void UiSessionManager::SaveInspectorTreeFunction(InspectorFunction&& function)
+{
+    inspectorFunction_ = function;
+}
+
+void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
+{
+    std::string key = std::to_string(id);
+    if (jsonValue_->Contains(key)) {
+        jsonValue_->Replace(key.c_str(), value.c_str());
+    } else {
+        jsonValue_->Put(key.c_str(), value.c_str());
+    }
+}
+
+void UiSessionManager::WebTaskNumsChange(int32_t num)
+{
+    webTaskNums += num;
+    if (webTaskNums == 0) {
+        std::string data = jsonValue_->ToString();
+        ReportInspectorTreeValue(data);
+    }
+}
+
+void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportInspectorTreeValue(data);
+        } else {
+            LOGW("report component event failed,process id:%{public}d", pair.first);
+        }
+    }
 }
 } // namespace OHOS::Ace

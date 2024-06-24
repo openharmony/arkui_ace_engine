@@ -1434,4 +1434,10 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
+void UINode::GetInspectorValue()
+{
+    for (const auto& item : GetChildren()) {
+        item->GetInspectorValue();
+    }
+}
 } // namespace OHOS::Ace::NG

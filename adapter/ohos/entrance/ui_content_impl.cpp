@@ -41,6 +41,8 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -55,10 +57,10 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
-#include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -1711,7 +1713,22 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     // setLogFunc of current app
     AddAlarmLogFunc();
-
+    // set get inspector tree function for ui session manager
+    auto callback = [weakContext = WeakPtr(pipeline)]() {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline)]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetInspectorTree();
+                UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree");
+    };
+    UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
     return errorCode;
 }
 

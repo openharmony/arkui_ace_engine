@@ -3899,4 +3899,9 @@ void PipelineContext::RegisterFocusCallback()
         InputMethodManager::GetInstance()->OnFocusNodeChange(node);
     });
 }
+
+void PipelineContext::GetInspectorTree()
+{
+    rootNode_->GetInspectorValue();
+}
 } // namespace OHOS::Ace::NG

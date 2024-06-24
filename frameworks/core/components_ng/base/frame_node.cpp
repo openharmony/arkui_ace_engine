@@ -17,6 +17,11 @@
 
 #include <cstdint>
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#endif
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -4683,5 +4688,27 @@ void FrameNode::TriggerShouldParallelInnerWith(
             result->AddBridgeObj(currentRecognizer);
         }
     }
+}
+
+void FrameNode::GetInspectorValue()
+{
+    auto jsonItem = JsonUtil::Create(true);
+    auto rect = geometryNode_->GetFrameRect();
+    jsonItem->Put("x", rect.GetX());
+    jsonItem->Put("y", rect.GetY());
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        UiSessionManager::GetInstance().WebTaskNumsChange(1);
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
+            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
+            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+        };
+        pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
+    }
+    UiSessionManager::GetInstance().AddValueForTree(GetId(), jsonItem->ToString());
+#endif
+    UINode::GetInspectorValue();
 }
 } // namespace OHOS::Ace::NG

@@ -31,11 +31,11 @@ public:
     {
         return 0;
     }
-    int32_t GetInspectorTree() override;
-    int32_t RegisterClickEventCallback(EventCallback eventCallback) override;
-    int32_t RegisterRouterChangeEventCallback(EventCallback eventCallback) override;
-    int32_t RegisterSearchEventCallback(EventCallback eventCallback) override;
-    int32_t RegisterComponentChangeEventCallback(EventCallback eventCallback) override;
+    int32_t GetInspectorTree(const EventCallback& eventCallback) override;
+    int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t UnregisterClickEventCallback() override;
     int32_t UnregisterSearchEventCallback() override;
     int32_t UnregisterRouterChangeEventCallback() override;
