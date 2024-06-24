@@ -37,6 +37,7 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
 constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
+constexpr bool DEFAULT_TEXT_SENSITIVE = false;
 constexpr Dimension DEFAULT_MAX_FONT_SIZE;
 constexpr Dimension DEFAULT_MIN_FONT_SIZE;
 constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
@@ -363,6 +364,22 @@ void ResetTextDraggable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+}
+
+void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(static_cast<bool>(sensitive));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ResetTextPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(DEFAULT_TEXT_SENSITIVE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -1023,6 +1040,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextMinFontSize,
         SetTextDraggable,
         ResetTextDraggable,
+        SetTextPrivacySensitve,
+        ResetTextPrivacySensitve,
         SetTextMaxFontSize,
         ResetTextMaxFontSize,
         SetTextFontFamily,

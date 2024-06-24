@@ -933,13 +933,18 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
         if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor)) {
             userColor.disable = disableColor;
         }
-        uint32_t size = ARG_GROUP_LENGTH;
-        ArkUI_Uint32 values[size];
+        ArkUI_Uint32 values[ARG_GROUP_LENGTH];
         values[CALL_ARG_0] = userColor.typing->GetValue();
         values[CALL_ARG_1] = userColor.normal->GetValue();
         values[CALL_ARG_2] = userColor.error->GetValue();
         values[CALL_ARG_3] = userColor.disable->GetValue();
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(nativeNode, values, size);
+        ArkUI_Bool hasValues[ARG_GROUP_LENGTH];
+        hasValues[CALL_ARG_0] = userColor.typing.has_value();
+        hasValues[CALL_ARG_1] = userColor.normal.has_value();
+        hasValues[CALL_ARG_2] = userColor.error.has_value();
+        hasValues[CALL_ARG_3] = userColor.disable.has_value();
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
+            nativeNode, values, hasValues, ARG_GROUP_LENGTH);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputUserUnderlineColor(nativeNode);
     }

@@ -101,6 +101,7 @@ class JSBuilderNode extends BaseNode {
         this.updateFuncByElmtId = new Map();
     }
     reuse(param) {
+        this.updateStart();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -113,6 +114,7 @@ class JSBuilderNode extends BaseNode {
                 }
             } // if child
         });
+        this.updateEnd();
     }
     recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -1298,6 +1300,11 @@ const __creatorMap__ = new Map([
     ["Button", (context) => {
             return new TypedFrameNode(context, "Button", (node, type) => {
                 return new ArkButtonComponent(node, type);
+            });
+        }],
+    ["XComponent", (context) => {
+            return new TypedFrameNode(context, "XComponent", (node, type) => {
+                return new ArkXComponentComponent(node, type);
             });
         }],
 ]);

@@ -13,39 +13,11 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/want/want_wrap.h"
 
 namespace OHOS::Ace {
-napi_value WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
-{
-    napi_value result = nullptr;
-    return result;
-}
-
-RefPtr<WantWrap> WantWrap::CreateWantWrap(napi_env env, napi_value value)
-{
-    return nullptr;
-}
-
 RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const std::string& abilityName)
 {
     return nullptr;
-}
-
-WantWrapOhos::WantWrapOhos(napi_env env, napi_value value)
-{
-}
-
-WantWrapOhos::WantWrapOhos(const std::string& bundleName, const std::string& abilityName)
-{
-}
-
-void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
-{
-}
-
-std::string WantWrapOhos::ToString() const
-{
-    return std::string();
 }
 } // namespace OHOS::Ace

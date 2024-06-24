@@ -4814,9 +4814,6 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
         webPattern->UpdateFocusedAccessibilityId();
         accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
-    } else if (eventType == AccessibilityEventType::CHANGE) {
-        auto accessibilityId = accessibilityManager->GetAccessibilityFocusId();
-        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
     }
     if (accessibilityId <= 0) {
         auto webNode = webPattern->GetHost();
@@ -6359,7 +6356,8 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
+void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
+    const std::map<std::string, std::string>& actionArguments)
 {
     if (!accessibilityState_) {
         return;
@@ -6368,11 +6366,11 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
+        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
+            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
 }

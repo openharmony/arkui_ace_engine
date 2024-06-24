@@ -512,7 +512,9 @@ void Animator::Stop()
     }
     status_ = Status::STOPPED;
     asyncTrace_ = nullptr;
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator stop, id:%{public}d", GetId());
+    if (animatorName_.find("ohos.animator") != std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator stop, id:%{public}d", GetId());
+    }
     StatusListenable::NotifyStopListener();
     for (auto& controller : proxyControllers_) {
         controller->Stop();

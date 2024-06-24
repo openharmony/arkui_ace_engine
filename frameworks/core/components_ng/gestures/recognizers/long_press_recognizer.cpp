@@ -63,7 +63,7 @@ void LongPressRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
@@ -122,8 +122,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, long press recognizer receives %{public}d,"
-        " state: %{public}d", event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d down, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -144,8 +144,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         int64_t currentTimeStamp = GetSysTimestamp();
         int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
         if (currentTimeStamp > eventTimeStamp) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE,
-                "CurrentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
             // nanoseconds to millisceond.
             curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
             if (curDuration < 0) {
@@ -185,9 +183,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event, state: %{public}d",
-        event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d up, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -238,10 +235,8 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch cancel event, touchPoint "
-        "size:%{public}d",
-        event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d", event.touchEventId,
+        event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }

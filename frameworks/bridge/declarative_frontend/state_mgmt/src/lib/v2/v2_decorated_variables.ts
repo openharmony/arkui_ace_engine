@@ -255,11 +255,13 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
     stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
     BaseClass.prototype[ObserveV2.ID_REFS] = {};
   }
-  return class extends BaseClass {
+  const observedClass =  class extends BaseClass {
     constructor(...args) {
       super(...args);
       AsyncAddComputedV2.addComputed(this, BaseClass.name);
       AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
     }
   };
+  Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
+  return observedClass;
 }

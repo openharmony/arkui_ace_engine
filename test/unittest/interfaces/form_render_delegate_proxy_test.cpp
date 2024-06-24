@@ -234,28 +234,4 @@ HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_009, TestSize.
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
     EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_VALUE);
 }
-
-/*
- * @tc.name: FormRenderDelegateProxyTest_010
- * @tc.desc: Test OnEnableForm() function.
- * @tc.type: FUNC
- */
-HWTEST_F(FormRenderDelegateProxyTest, FormRenderDelegateProxyTest_010, TestSize.Level1)
-{
-    sptr<AppExecFwk::MockFormIRemoteObject> iremoteObject = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
-    sptr<FormRendererDelegateProxy> renderDelegate =
-        new FormRendererDelegateProxy(static_cast<FormRendererDelegateProxy>(iremoteObject));
-    ASSERT_NE(renderDelegate, nullptr);
-
-    OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    formJsInfo.bundleName = "bundleName";
-    formJsInfo.moduleName = "moduleName";
-    formJsInfo.formId = 1;
-    EXPECT_EQ(formJsInfo.formId, 1);
-
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_OK));
-    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, true), ERR_OK);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(Return(ERR_INVALID_VALUE));
-    EXPECT_EQ(renderDelegate->OnEnableForm(formJsInfo, true), ERR_INVALID_VALUE);
-}
 }

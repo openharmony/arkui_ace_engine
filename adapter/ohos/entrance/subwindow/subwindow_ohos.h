@@ -66,7 +66,7 @@ public:
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
-    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset) override;
+    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart) override;
     void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset) override;
     void UpdatePreviewPosition() override;
@@ -146,6 +146,8 @@ public:
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
+
+    bool Close() override;
 
 private:
     RefPtr<StackElement> GetStack();

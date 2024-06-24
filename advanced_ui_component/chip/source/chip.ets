@@ -589,7 +589,7 @@ export struct ChipComponent {
   }
 
   private getSuffixIconFocusable(): boolean {
-    return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0)
+    return (this.useDefaultSuffixIcon && (this.allowClose ?? true)) || this.suffixIcon?.action !== void (0)
   }
 
   private getChipNodePadding(): LocalizedPadding {
@@ -688,7 +688,7 @@ export struct ChipComponent {
       return this.suffixSymbolWidth
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width
-    } else if (!this.suffixIcon?.src && this.allowClose) {
+    } else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
       return this.theme.defaultSymbol.fontSize
     } else {
       return 0
@@ -762,7 +762,7 @@ export struct ChipComponent {
   }
 
   private getSuffixIconSrc(): ResourceStr | undefined {
-    this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose
+    this.useDefaultSuffixIcon = !this.suffixIcon?.src && (this.allowClose ?? true)
     return this.useDefaultSuffixIcon ? this.theme.suffixIcon.defaultDeleteIcon : (this.suffixIcon?.src ?? void (0))
   }
 
@@ -989,14 +989,14 @@ export struct ChipComponent {
                 this.suffixIcon.action()
                 return
               }
-              if (this.allowClose && this.useDefaultSuffixIcon) {
+              if ((this.allowClose ?? true) && this.useDefaultSuffixIcon) {
                 this.onClose()
                 this.deleteChipNodeAnimate()
                 return
               }
               this.onClicked()
             })
-        } else if (this.allowClose) {
+        } else if (this.allowClose ?? true) {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())

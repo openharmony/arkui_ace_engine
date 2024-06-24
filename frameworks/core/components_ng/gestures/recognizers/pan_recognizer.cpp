@@ -134,7 +134,7 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     ReportSlideOn();
@@ -194,10 +194,8 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch down event, begin to detect pan event, "
-        "state: %{public}d",
-        event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, pan %{public}d down, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -251,10 +249,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives axis start event, begin to detect pan event, state: "
-        "%{public}d",
-        event.touchEventId, refereeState_);
+    TAG_LOGI(
+        AceLogTag::ACE_GESTURE, "Id:%{public}d, pan axis start, state:%{public}d", event.touchEventId, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -286,9 +282,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch up event, state: %{public}d",
-        event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -344,9 +339,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives axis end event, state: %{public}d", event.touchEventId,
-        refereeState_);
+    TAG_LOGI(
+        AceLogTag::ACE_GESTURE, "Id:%{public}d, pan axis end, state: %{public}d", event.touchEventId, refereeState_);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;
@@ -525,9 +519,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pan recognizer receives %{public}d touch cancel event", event.touchEventId,
-        event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, pan %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -543,8 +535,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pan recognizer receives axis cancel event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, pan axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -947,6 +938,8 @@ void PanRecognizer::UpdateFingerListInfo()
 {
     MultiFingersRecognizer::UpdateFingerListInfo();
     if (lastInputEventType_ == InputEventType::AXIS) {
+        fingerList_.clear();
+        lastPointEvent_.reset();
         PointF localPoint(lastAxisEvent_.x, lastAxisEvent_.y);
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_, false);
         FingerInfo fingerInfo = { lastAxisEvent_.originalId, lastAxisEvent_.GetOffset(),

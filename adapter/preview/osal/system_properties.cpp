@@ -100,6 +100,7 @@ bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+uint32_t SystemProperties::canvasDebugMode_ = 0;
 
 bool SystemProperties::IsOpIncEnable()
 {

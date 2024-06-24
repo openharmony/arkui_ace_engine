@@ -35,6 +35,7 @@ namespace {
 bool IsDataValid(const RefPtr<WaterFlowLayoutInfo>& info)
 {
     if (info->segmentTails_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Sections are not initialized.");
         return false;
     }
     if (info->childrenCount_ - 1 != info->segmentTails_.back()) {
@@ -110,7 +111,8 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
     auto cachedCount = props->GetCachedCountValue(1);
-    wrapper_->SetActiveChildRange(info_->startIndex_, info_->endIndex_, cachedCount, cachedCount);
+    wrapper_->SetActiveChildRange(
+        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cachedCount, cachedCount);
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
@@ -176,7 +178,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
             postJumpOffset_ = PrepareJump(info_);
         }
         info_->ClearCacheAfterIndex(updateIdx - 1);
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
 
@@ -319,7 +320,8 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     if (!forward) {
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-        for (int32_t i = info_->startIndex_; i < oldStart; ++i) {
+        int32_t bound = std::min(oldStart, info_->endIndex_);
+        for (int32_t i = info_->startIndex_; i <= bound; ++i) {
             MeasureItem(props, i, info_->itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_->GetSegment(i), i));
         }
     }

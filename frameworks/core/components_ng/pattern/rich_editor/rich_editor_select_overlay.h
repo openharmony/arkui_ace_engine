@@ -54,6 +54,7 @@ public:
 
 private:
     void RemoveAreaChangeInner();
+    void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType);
 

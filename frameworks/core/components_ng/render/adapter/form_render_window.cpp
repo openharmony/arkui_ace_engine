@@ -62,6 +62,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
                            int64_t timeStampNanos, int64_t frameCount, void* data) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
+            int64_t ts = GetSysTimestamp();
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -71,7 +72,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
             auto pipeline = container->GetPipelineContext();
             if (pipeline) {
-                pipeline->OnIdle(timeStampNanos + refreshPeriod);
+                pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
             }
         };
 

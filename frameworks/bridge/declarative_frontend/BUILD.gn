@@ -153,6 +153,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":prefetcher",
       ":shape",
       ":statemanagement",
       ":uicontext",
@@ -631,6 +632,7 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_embedded_component.cpp",
+          "jsview/js_security_ui_extension.cpp",
           "jsview/js_ui_extension.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
@@ -674,6 +676,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":prefetcher",
       ":shape",
       ":statemanagement",
       ":uicontext",
@@ -905,6 +908,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [
         "jsview/js_embedded_component.cpp",
+        "jsview/js_security_ui_extension.cpp",
         "jsview/js_ui_extension.cpp",
         "jsview/window_scene/js_root_scene.cpp",
         "jsview/window_scene/js_screen.cpp",
@@ -1096,6 +1100,15 @@ ohos_abc("statemanagement") {
 ohos_abc("x_node") {
   sources = [ "engine/jsXNode.js" ]
   output_name = "node"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("prefetcher") {
+  sources = [ "engine/jsPrefetcher.js" ]
+  output_name = "prefetcher"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

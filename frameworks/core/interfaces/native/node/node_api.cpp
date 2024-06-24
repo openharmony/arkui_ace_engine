@@ -745,7 +745,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Fl
     return ViewModel::MeasureNode(vmContext, node, data);
 }
 
-ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32 (*data)[2])
 {
     return ViewModel::LayoutNode(vmContext, node, data);
 }
@@ -775,8 +775,8 @@ ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootP
     ArkUI_Float32 measureData[] = { width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
     // layout
-    ArkUI_Float32 layoutData[] = { 0, 0, width, height };
-    LayoutNode(vmContext, rootPtr, &layoutData[0]);
+    ArkUI_Float32 layoutData[] = { 0, 0 };
+    LayoutNode(vmContext, rootPtr, &layoutData);
     // draw
     ArkUI_Float32 drawData[] = { 0, 0, 0, 0 };
     DrawNode(vmContext, rootPtr, &drawData[0]);

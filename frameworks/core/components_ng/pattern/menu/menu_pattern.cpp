@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -66,6 +67,8 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
 const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
+const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
@@ -1042,8 +1045,10 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto preview = menuWrapperPattern->GetPreview();
+
+    auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageColNode() : menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(preview);
+    bool isHoverImageTarget = isShowHoverImage_ && preview->GetTag() == V2::COLUMN_ETS_TAG;
     auto previewRenderContext = preview->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
     auto previewGeometryNode = preview->GetGeometryNode();
@@ -1057,20 +1062,22 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
     CHECK_NULL_VOID(menuTheme);
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
-    auto delay = isShowHoverImage_ && preview->GetTag() == V2::MENU_PREVIEW_ETS_TAG ?
-        menuTheme->GetHoverImageDelayDuration() : 0;
+    auto delay = isHoverImageTarget ? menuTheme->GetHoverImageDelayDuration() : 0;
 
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
     AnimationOption scaleOption = AnimationOption();
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    scaleOption.SetCurve(motion);
+    if (isHoverImageTarget) {
+        scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    } else {
+        scaleOption.SetCurve(motion);
+    }
     scaleOption.SetDelay(delay);
     AnimationUtils::Animate(scaleOption, [previewRenderContext, previewPosition]() {
-        if (previewRenderContext) {
-            previewRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        }
+        CHECK_NULL_VOID(previewRenderContext);
+        previewRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
     });
 }
 
@@ -1113,7 +1120,6 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
     });
-    SetEndOffset(menuPosition);
     isFirstShow_ = false;
 }
 
@@ -1368,11 +1374,31 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
+void MenuPattern::CallMenuAboutToAppearCallback()
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->CallMenuAboutToAppearCallback();
+    menuWrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
+    auto pipeline = menuWrapper->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetIsMenuShow(true);
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    CallMenuAboutToAppearCallback();
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackExpandMenu();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto menuPosition = host->GetPaintRectOffset();
+    SetEndOffset(menuPosition);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }

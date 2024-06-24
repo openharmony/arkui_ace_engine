@@ -187,6 +187,7 @@ void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelec
         result.spanSize = static_cast<int64_t>(spanObjectList.size());
 
         cjCallback(result);
+        delete[] spans;
     };
     RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
 }

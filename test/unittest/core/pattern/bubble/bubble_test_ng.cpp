@@ -110,6 +110,7 @@ const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = { Placement::LE
     Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::NONE };
 const Offset POPUP_PARAM_POSITION_OFFSET = Offset(100.0f, 100.0f);
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
+constexpr Dimension BUBBLE_CHILD_OFFSET = 16.0_vp;
 } // namespace
 struct TestProperty {
     // layout property
@@ -1334,6 +1335,51 @@ HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BubblePatternTest021
+ * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set popup value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+    popupParam->setErrorArrowHeight_ = true;
+    popupParam->setErrorArrowWidth_ = true;
+    popupParam->setErrorRadius_ = true;
+    popupParam->childwidth_ = 100.0_px;
+    /**
+     * @tc.steps: step2. create CustomBubbleNode with positon offset
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(rowFrameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    rowFrameNode->AddChild(blankFrameNode);
+    auto popupNode =
+        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    /**
+     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
+     * @tc.expected: check whether GetPositionOffset value is correct.
+     */
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    BubbleView::UpdateCommonParam(popupNode->GetId(), popupParam);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+}
+
+/**
  * @tc.name: BubbleLayoutTest001
  * @tc.desc: Test BubbleNode layout
  * @tc.type: FUNC
@@ -1610,6 +1656,10 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm->UpdateTouchRegion();
     }
+    bubbleLayoutAlgorithm->bCaretMode_ = true;
+    bubbleLayoutAlgorithm->bHorizontal_ = true;
+    SizeF childSizeFull(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    bubbleLayoutAlgorithm->GetChildPositionNew(childSizeFull, bubbleLayoutProperty);
 }
 
 /**
@@ -2019,6 +2069,18 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest010, TestSize.Level1)
     bubbleLayoutAlgorithm->GetPositionWithPlacementRightTop(childSize, topPosition, bottomPosition, arrowPosition);
     bubbleLayoutAlgorithm->GetPositionWithPlacementRightBottom(childSize, topPosition, bottomPosition, arrowPosition);
     EXPECT_EQ(result, position);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    bubbleLayoutAlgorithm->showArrow_ = true;
+    bubbleLayoutAlgorithm->enableArrow_ = true;
+    std::vector<Placement> curPlaceStates = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::NONE };
+    for (auto placement: curPlaceStates) {
+        bubbleLayoutAlgorithm->placement_ = placement;
+        bubbleLayoutAlgorithm->UpdateChildPosition(position);
+    }
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     bubbleLayoutAlgorithm->borderRadius_ = radius;
     bubbleLayoutAlgorithm->SetBubbleRadius();
@@ -2540,5 +2602,117 @@ HWTEST_F(BubbleTestNg, BubblePatternTest020, TestSize.Level1)
      * @tc.expected: after hover callback, isHover_ equal to true.
      */
     auto buttonRowNode = pattern->GetButtonRowNode();
+}
+
+/**
+ * @tc.name: BubbleAlgorithmTest007
+ * @tc.desc: Test bubble ClipBubbleWithPath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleAlgorithmTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and create layoutAlgorithm.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. test GetArrowBuildPlacement ClipBubbleWithPath
+     */
+    Placement arrowBuildPlacement = Placement::NONE;
+
+    layoutAlgorithm->arrowPlacement_ = Placement::BOTTOM;
+    layoutAlgorithm->GetArrowBuildPlacement(arrowBuildPlacement);
+    EXPECT_EQ(arrowBuildPlacement, Placement::TOP_RIGHT);
+    auto path = layoutAlgorithm->ClipBubbleWithPath();
+    EXPECT_NE(path, "");
+
+    layoutAlgorithm->arrowPlacement_ = Placement::TOP;
+    layoutAlgorithm->GetArrowBuildPlacement(arrowBuildPlacement);
+    EXPECT_EQ(arrowBuildPlacement, Placement::BOTTOM);
+    path = layoutAlgorithm->ClipBubbleWithPath();
+    EXPECT_NE(path, "");
+
+    layoutAlgorithm->arrowPlacement_ = Placement::LEFT;
+    layoutAlgorithm->GetArrowBuildPlacement(arrowBuildPlacement);
+    EXPECT_EQ(arrowBuildPlacement, Placement::RIGHT);
+    path = layoutAlgorithm->ClipBubbleWithPath();
+    EXPECT_NE(path, "");
+
+    layoutAlgorithm->arrowPlacement_ = Placement::RIGHT;
+    layoutAlgorithm->GetArrowBuildPlacement(arrowBuildPlacement);
+    EXPECT_EQ(arrowBuildPlacement, Placement::LEFT);
+    path = layoutAlgorithm->ClipBubbleWithPath();
+    EXPECT_NE(path, "");
+}
+
+/**
+ * @tc.name: BubbleAlgorithmTest008
+ * @tc.desc: Test bubble UpdateChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleAlgorithmTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateChildPosition.
+     */
+    layoutAlgorithm->enableArrow_ = false;
+    OffsetF offset = OffsetF(0, 0);
+    layoutAlgorithm->placement_ = Placement::TOP;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(offset.GetY(), BUBBLE_CHILD_OFFSET.ConvertToPx());
+
+    offset = OffsetF(0, 0);
+    layoutAlgorithm->placement_ = Placement::BOTTOM;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(offset.GetY(), -BUBBLE_CHILD_OFFSET.ConvertToPx());
+
+    offset = OffsetF(0, 0);
+    layoutAlgorithm->placement_ = Placement::LEFT;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(offset.GetX(), BUBBLE_CHILD_OFFSET.ConvertToPx());
+
+    offset = OffsetF(0, 0);
+    layoutAlgorithm->placement_ = Placement::RIGHT;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(offset.GetX(), -BUBBLE_CHILD_OFFSET.ConvertToPx());
+
+    layoutAlgorithm->enableArrow_ = true;
+    layoutAlgorithm->showArrow_ = true;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
+    layoutAlgorithm->enableArrow_ = false;
+    layoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
 }
 } // namespace OHOS::Ace::NG

@@ -570,14 +570,6 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(top, left);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
-
-    auto&& enableFormEventHandler = [weak = WeakClaim(this)](const OHOS::AppExecFwk::FormJsInfo& formInfo,
-        const bool enable) {
-        auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnEnableForm(formInfo, enable);
-    };
-    renderDelegate_->SetEnableFormEventHandler(std::move(enableFormEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -805,13 +797,6 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
             }
             break;
     }
-}
-
-void FormManagerDelegate::OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable)
-{
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate::OnEnableForm,formInfo.formId = %{public}" PRId64 "",
-        formInfo.formId);
-    HandleEnableFormCallback(enable);
 }
 
 void FormManagerDelegate::HandleUnTrustFormCallback()

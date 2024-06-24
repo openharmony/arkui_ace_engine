@@ -1550,6 +1550,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
             DumpLog::GetInstance().Print(1, "ViewScale: " + std::to_string(pipelineContext_->GetViewScale()));
             DumpLog::GetInstance().Print(
                 1, "DisplayWindowRect: " + pipelineContext_->GetDisplayWindowRectInfo().ToString());
+            DumpLog::GetInstance().Print(1, "vsyncID: " + std::to_string(pipelineContext_->GetFrameCount()));
         }
         DumpLog::GetInstance().Print(1, "ApiVersion: " + SystemProperties::GetApiVersion());
         DumpLog::GetInstance().Print(1, "ReleaseType: " + SystemProperties::GetReleaseType());
@@ -2947,20 +2948,30 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
     });
 }
 
-void AceContainer::NotifyDensityUpdate()
+bool AceContainer::NeedFullUpdate(uint32_t limitKey)
 {
     auto themeManager = pipelineContext_->GetThemeManager();
-    bool fullUpdate = true;
-    if (!themeManager || (themeManager->GetResourceLimitKeys() & DENSITY_KEY) == 0) {
-        fullUpdate = false;
+    if (!themeManager || (themeManager->GetResourceLimitKeys() & limitKey) == 0) {
+        return false;
     }
+    return true;
+}
 
+void AceContainer::NotifyDensityUpdate()
+{
+    bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
     }
-
     ConfigurationChange configurationChange { .dpiUpdate = true };
+    pipelineContext_->FlushReload(configurationChange, fullUpdate);
+}
+
+void AceContainer::NotifyDirectionUpdate()
+{
+    bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
+    ConfigurationChange configurationChange { .directionUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
 }
 } // namespace OHOS::Ace::Platform

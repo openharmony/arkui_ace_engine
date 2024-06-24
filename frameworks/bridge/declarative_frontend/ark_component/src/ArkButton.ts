@@ -45,7 +45,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   allowChildCount(): number {
     return 1;
   }
-  initialize(value: Object[]) {
+  initialize(value: Object[]): this {
     if (value.length >= 1 && (isResource(value[0]) || isString(value[0]))) {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
     } else {

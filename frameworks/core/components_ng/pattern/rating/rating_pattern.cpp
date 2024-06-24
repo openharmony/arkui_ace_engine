@@ -395,6 +395,9 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (info.GetTouches().empty()) {
             return;
         }
+        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
+            pattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             auto localPosition = info.GetTouches().front().GetLocalLocation();
             // handle touch down event and draw touch down effect.
@@ -407,7 +410,7 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle touch up");
         }
     });
-    gestureHub->AddTouchEvent(touchEvent_);
+    gestureHub->AddTouchAfterEvent(touchEvent_);
 }
 
 void RatingPattern::HandleTouchUp()
@@ -451,10 +454,16 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!clickEvent_);
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle click");
+        CHECK_NULL_VOID(pattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH &&
+            (info.IsPreventDefault() || pattern->isTouchPreventDefault_)) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating preventDefault successfully");
+            pattern->isTouchPreventDefault_ = false;
+            return;
+        }
         pattern->HandleClick(info);
     });
-    gestureHub->AddClickEvent(clickEvent_);
+    gestureHub->AddClickAfterEvent(clickEvent_);
 }
 
 void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)

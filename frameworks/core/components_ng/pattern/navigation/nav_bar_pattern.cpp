@@ -203,6 +203,8 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         menuNode->AddChild(menuItemNode);
         isCreateLandscapeMenu ? navBarNode->SetLandscapeMenuNode(barMenuNode) : navBarNode->SetMenuNode(barMenuNode);
     }
+
+    NavigationTitleUtil::InitDragAndLongPressEvent(menuNode, menuItems);
     return menuNode;
 }
 

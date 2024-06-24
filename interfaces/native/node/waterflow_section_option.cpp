@@ -55,6 +55,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t itemCount)
 {
     CHECK_NULL_VOID(option);
+    if (index < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -68,6 +71,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
     ArkUI_WaterFlowSectionOption* option, int32_t index, int32_t crossCount)
 {
     CHECK_NULL_VOID(option);
+    if (index < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -80,6 +86,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(
 void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float columnGap)
 {
     CHECK_NULL_VOID(option);
+    if (index < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -92,6 +101,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* 
 void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index, float rowGap)
 {
     CHECK_NULL_VOID(option);
+    if (index < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));
@@ -105,6 +117,9 @@ void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* opt
     float marginRight, float marginBottom, float marginLeft)
 {
     CHECK_NULL_VOID(option);
+    if (index < 0) {
+        return;
+    }
     auto size = static_cast<int32_t>(option->sections.size());
     if (size == 0 || size <= index + 1) {
         option->sections.resize(static_cast<uint32_t>(index + 1));

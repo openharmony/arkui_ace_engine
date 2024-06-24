@@ -1815,8 +1815,11 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest010, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir);
-    double distance = prop.fontheight - textPickerColumnPattern->optionProperties_[COLUMN_INDEX_0].height;
+    double distance = 0.0f - textPickerColumnPattern->optionProperties_[COLUMN_INDEX_0].height;
     EXPECT_EQ(textPickerColumnPattern_->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir), distance);
 }
 

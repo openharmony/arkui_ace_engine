@@ -81,7 +81,6 @@ public:
     bool IsFormRequestsEmpty();
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
     void RecycleForm(std::string& statusData) const;
-    void EnableForm(const AppExecFwk::FormJsInfo& formJsInfo, const bool enable);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,

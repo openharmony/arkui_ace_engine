@@ -1805,4 +1805,23 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest117, TestSize.Level1)
     pattern->HandleEnabled();
     eventHub->SetEnabled(status);
 }
+
+/**
+ * @tc.name: RadioPatternTest118
+ * @tc.desc: Radio test LoadBuilder.
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest118, TestSize.Level1)
+{
+    int32_t settingApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->CheckPageNode();
+}
 } // namespace OHOS::Ace::NG

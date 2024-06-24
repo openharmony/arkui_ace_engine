@@ -121,28 +121,58 @@ public:
         return menu;
     }
 
+    RefPtr<FrameNode> GetHoverImageColNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto node = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() != V2::COLUMN_ETS_TAG) {
+            return nullptr;
+        }
+        return node;
+    }
+
+    RefPtr<FrameNode> GetHoverImageStackNode() const
+    {
+        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageColNode()->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() != V2::STACK_ETS_TAG) {
+            return nullptr;
+        }
+        return node;
+    }
+
+    RefPtr<FrameNode> GetHoverImagePreview() const
+    {
+        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() != V2::IMAGE_ETS_TAG) {
+            return nullptr;
+        }
+        return node;
+    }
+
+    RefPtr<FrameNode> GetHoverImageCustomPreview() const
+    {
+        auto node = AceType::DynamicCast<FrameNode>(GetHoverImageStackNode()->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() != V2::MENU_PREVIEW_ETS_TAG) {
+            return nullptr;
+        }
+        return node;
+    }
+
     RefPtr<FrameNode> GetPreview() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
-        auto hoverImageCustomPreview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
-        if (hoverImageCustomPreview->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+        if (preview->GetTag() == V2::COLUMN_ETS_TAG) {
+            auto hoverImageCustomPreview = GetHoverImageCustomPreview();
+            CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
             return hoverImageCustomPreview;
-        }
-        return preview;
-    }
-
-    RefPtr<FrameNode> GetHoverImagePreview() const
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(preview, nullptr);
-        if (preview->GetTag() != V2::IMAGE_ETS_TAG) {
-            return nullptr;
         }
         return preview;
     }
@@ -154,10 +184,6 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
         CHECK_NULL_RETURN(badgeNode, nullptr);
-        if (badgeNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
-            auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(3));
-            CHECK_NULL_RETURN(badgeNode, nullptr);
-        }
         if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
             return nullptr;
         }

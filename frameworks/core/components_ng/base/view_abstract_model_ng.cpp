@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,13 +46,26 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 
-RefPtr<OverlayManager> GetOverlayFromPage(int32_t pageLevelId, bool isNav)
+std::string GetTagFromRootNodeType(RootNodeType rootNodeType)
 {
-    if (pageLevelId <= 0) {
+    switch (rootNodeType) {
+        case RootNodeType::PAGE_ETS_TAG:
+            return V2::PAGE_ETS_TAG;
+        case RootNodeType::NAVDESTINATION_VIEW_ETS_TAG:
+            return V2::NAVDESTINATION_VIEW_ETS_TAG;
+        case RootNodeType::WINDOW_SCENE_ETS_TAG:
+            return V2::WINDOW_SCENE_ETS_TAG;
+        default:
+            return V2::PAGE_ETS_TAG;
+    }
+}
+RefPtr<OverlayManager> GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType)
+{
+    if (rootNodeId <= 0) {
         return nullptr;
     }
-    std::string tag = isNav ? V2::NAVDESTINATION_VIEW_ETS_TAG : V2::PAGE_ETS_TAG;
-    auto frameNode = FrameNode::GetFrameNode(tag, pageLevelId);
+    std::string tag  = GetTagFromRootNodeType(rootNodeType);
+    auto frameNode = FrameNode::GetFrameNode(tag, rootNodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (tag == V2::PAGE_ETS_TAG) {
         auto node = AceType::DynamicCast<FrameNode>(frameNode);
@@ -64,13 +80,40 @@ RefPtr<OverlayManager> GetOverlayFromPage(int32_t pageLevelId, bool isNav)
         CHECK_NULL_RETURN(pattern, nullptr);
         return pattern->GetOverlayManager();
     }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (tag == V2::WINDOW_SCENE_ETS_TAG) {
+        auto node = AceType::DynamicCast<FrameNode>(frameNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pattern = node->GetPattern<SystemWindowScene>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
+#endif
     return nullptr;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+RefPtr<OverlayManager> FindTargetNodeOverlay(RefPtr<UINode>& parent,
+    const RefPtr<FrameNode>& targetNode, bool isShow)
+{
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pattern = node->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->CreateOverlayManager(isShow, targetNode);
+    auto overlay = pattern->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    targetNode->SetRootNodeId(node->GetId());
+    targetNode->SetRootNodeType(RootNodeType::WINDOW_SCENE_ETS_TAG);
+    return overlay;
+}
+#endif
+
 RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, bool isShow)
 {
-    if (targetNode->GetPageLevelNodeId() > 0) {
-        return GetOverlayFromPage(targetNode->GetPageLevelNodeId(), targetNode->PageLevelIsNavDestination());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    if (targetNode->GetRootNodeId() > 0) {
+        return GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType());
     }
     auto isNav = false;
     RefPtr<OverlayManager> overlay;
@@ -85,10 +128,11 @@ RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, 
                 pattern->CreateOverlayManager(isShow);
                 overlay = pattern->GetOverlayManager();
                 CHECK_NULL_RETURN(overlay, nullptr);
-                targetNode->SetPageLevelNodeId(node->GetId());
+                targetNode->SetRootNodeId(node->GetId());
+                targetNode->SetRootNodeType(RootNodeType::PAGE_ETS_TAG);
             } else {
-                node->SetPageLevelToNav(true);
-                node->SetPageLevelNodeId(targetNode->GetPageLevelNodeId());
+                node->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
+                node->SetRootNodeId(targetNode->GetRootNodeId());
             }
             break;
         }
@@ -100,10 +144,16 @@ RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, 
             pattern->CreateOverlayManager(isShow);
             overlay = pattern->GetOverlayManager();
             CHECK_NULL_RETURN(overlay, nullptr);
-            targetNode->SetPageLevelToNav(true);
-            targetNode->SetPageLevelNodeId(node->GetId());
+            targetNode->SetRootNodeId(node->GetId());
+            targetNode->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
             isNav = true;
         }
+#ifdef WINDOW_SCENE_SUPPORTED
+        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            overlay = FindTargetNodeOverlay(parent, targetNode, isShow);
+            break;
+        }
+#endif
         parent = parent->GetParent();
     }
     return overlay;
@@ -527,8 +577,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
     // delete Sheet when target node destroy
     auto destructor =
-        [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
-            isNav = targetNode->PageLevelIsNavDestination(), showInPage = sheetStyle.showInPage.value_or(false),
+        [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
+            rootNodeType = targetNode->GetRootNodeType(), showInPage = sheetStyle.showInPage.value_or(false),
             instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
             ContainerScope scope(instanceId);
             auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -536,7 +586,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
             auto overlayManager = pipeline->GetOverlayManager();
             if (showInPage) {
                 TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-                overlayManager = GetOverlayFromPage(pageLevelId, isNav);
+                overlayManager = GetOverlayFromPage(rootNodeId, rootNodeType);
             }
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteModal(id);

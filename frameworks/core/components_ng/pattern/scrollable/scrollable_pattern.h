@@ -45,7 +45,8 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
-constexpr double NEW_FRICTION = 0.7;
+constexpr double API11_FRICTION = 0.7;
+constexpr double API12_FRICTION = 0.75;
 constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
@@ -332,7 +333,8 @@ public:
     {
         scrollAbort_ = abort;
     }
-    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    void PlaySpringAnimation(
+        float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
     {
@@ -346,7 +348,8 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false);
+        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+        bool useTotalOffset = true);
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
@@ -614,11 +617,6 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
-    void SetUseTotalOffset(bool useTotalOffset)
-    {
-        useTotalOffset_ = useTotalOffset;
-    }
-
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -710,7 +708,7 @@ private:
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
-    void InitSpringOffsetProperty();
+    void InitSpringOffsetProperty(bool useTotalOffset = true);
     void InitCurveOffsetProperty();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
@@ -788,6 +786,7 @@ private:
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
+    void SetUiDvsyncSwitch(bool on);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -815,6 +814,8 @@ private:
     bool isAnimateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
     bool isScrollToSafeAreaHelper_ = true;
+    bool inScrollingStatus_ = false;
+    bool switchOnStatus_ = false;
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
@@ -861,7 +862,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
-    bool useTotalOffset_ = true;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

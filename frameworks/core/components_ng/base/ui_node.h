@@ -51,6 +51,12 @@ enum class NodeStatus : char {
     BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+enum class RootNodeType : int32_t {
+    PAGE_ETS_TAG = 0,
+    NAVDESTINATION_VIEW_ETS_TAG = 1,
+    WINDOW_SCENE_ETS_TAG = 2
+};
+
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
@@ -539,6 +545,9 @@ public:
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
     virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
+    {}
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
     // return value: true if the node can be removed immediately.
@@ -603,24 +612,29 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    void SetPageLevelNodeId(int32_t pageLevelId)
+    void SetRootNodeId(int32_t rootNodeId)
     {
-        pageLevelId_ = pageLevelId;
+        rootNodeId_ = rootNodeId;
     }
 
-    int32_t GetPageLevelNodeId() const
+    int32_t GetRootNodeId() const
     {
-        return pageLevelId_;
+        return rootNodeId_;
     }
 
-    void SetPageLevelToNav(bool isLevelNavDest)
+    bool RootNodeIsPage() const
     {
-        isLevelNavDest_ = isLevelNavDest;
+        return rootNodeType_ == RootNodeType::PAGE_ETS_TAG;
     }
 
-    bool PageLevelIsNavDestination() const
+    void SetRootNodeType(RootNodeType rootNodeType)
     {
-        return isLevelNavDest_;
+        rootNodeType_ = rootNodeType;
+    }
+
+    RootNodeType GetRootNodeType() const
+    {
+        return rootNodeType_;
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
@@ -764,8 +778,7 @@ private:
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
-    int32_t pageLevelId_ = 0; // host is Page or NavDestination
-    bool isLevelNavDest_ = false;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -775,6 +788,7 @@ private:
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
+    RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };

@@ -233,8 +233,6 @@ private:
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
         std::vector<std::string> fontFamilies;
-        std::string defaultFamily = "HarmonyOS Sans";
-        fontFamilies.emplace_back(defaultFamily);
         theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));

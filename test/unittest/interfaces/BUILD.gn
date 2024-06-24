@@ -86,6 +86,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
     "form_render_test.cpp",
+    "form_renderer_dispatcher_proxy_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -206,55 +207,18 @@ ohos_unittest("form_render_delegate_proxy_test") {
   module_out_path = interface_test_output_path
   include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
   sources = [
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
-    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_engine_helper.cpp",
-    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
-    "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
-    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
-    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
-    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
-    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
-    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
-    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
     "form_render_delegate_proxy_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
-  deps = [
-    "$ace_root/test/unittest:ace_base",
-    "$ace_root/test/unittest:ace_components_base",
-    "$ace_root/test/unittest:ace_components_event",
-    "$ace_root/test/unittest:ace_components_gestures",
-    "$ace_root/test/unittest:ace_components_layout",
-    "$ace_root/test/unittest:ace_components_manager",
-    "$ace_root/test/unittest:ace_components_pattern",
-    "$ace_root/test/unittest:ace_components_property",
-    "$ace_root/test/unittest:ace_components_render",
-    "$ace_root/test/unittest:ace_components_syntax",
-    "$ace_root/test/unittest:ace_core_animation",
-    "$ace_root/test/unittest:ace_core_extra",
-    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
-  ]
+  deps = [ "//third_party/googletest:gmock_main" ]
 
   external_deps = [
     "ability_base:want",
@@ -271,6 +235,66 @@ ohos_unittest("form_render_delegate_proxy_test") {
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
+ohos_unittest("form_render_delegate_stub_test") {
+  module_out_path = interface_test_output_path
+  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
+  sources = [
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "form_render_delegate_stub_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [ "//third_party/googletest:gmock_main" ]
+
+  external_deps = [
+    "ability_base:want",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
+    "graphic_2d:librender_service_client",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
+ohos_unittest("form_render_delegate_impl_test") {
+  module_out_path = interface_test_output_path
+  include_dirs = [ "$ace_root/interfaces/inner_api/form_render/include" ]
+  sources = [
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "form_render_delegate_impl_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [ "//third_party/googletest:gmock_main" ]
+
+  external_deps = [
+    "ability_base:want",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
+    "graphic_2d:librender_service_client",
+    "graphic_surface:surface",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
@@ -404,6 +428,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "native_node_napi_test.cpp",
+    "native_node_test.cpp",
   ]
 
   configs = [
@@ -444,7 +469,9 @@ group("interfaces_unittest") {
     ":ace_forward_compatibility_test",
     ":drawable_descriptor_test",
     ":extension_custom_node_test_ng",
+    ":form_render_delegate_impl_test",
     ":form_render_delegate_proxy_test",
+    ":form_render_delegate_stub_test",
     ":form_render_group_test",
     ":form_render_test",
     ":native_node_napi_test",

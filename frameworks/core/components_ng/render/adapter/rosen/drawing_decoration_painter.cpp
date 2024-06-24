@@ -701,12 +701,12 @@ float DrawingDecorationPainter::DrawingDimensionToPx(const Dimension& value, con
     if (value.Unit() == DimensionUnit::PERCENT) {
         switch (type) {
             case LengthMode::HORIZONTAL:
-                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Width()).value();
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Width()).value_or(0.0f);
             case LengthMode::VERTICAL:
-                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Height()).value();
+                return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), size.Height()).value_or(0.0f);
             case LengthMode::OTHER:
                 return ConvertToPx(value, ScaleProperty::CreateScaleProperty(), sqrt(size.Width() * size.Height()))
-                    .value();
+                    .value_or(0.0f);
             default:
                 return 0.0f;
         }

@@ -39,7 +39,7 @@ public:
     MOCK_METHOD0(HidePreviewNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
-    MOCK_METHOD1(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset));
+    MOCK_METHOD2(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset, bool isRedragStart));
     MOCK_METHOD2(ContextMenuSwitchDragPreviewAnimationtNG, void(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
@@ -90,6 +90,7 @@ public:
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
     MOCK_METHOD0(MarkDirtyDialogSafeArea, void());
+    MOCK_METHOD0(Close, bool());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <unordered_set>
 #include <utility>
 
@@ -1729,6 +1730,10 @@ std::pair<int32_t, int32_t> ListLayoutAlgorithm::GetLayoutGroupCachedCount(
     CHECK_NULL_RETURN(groupPattern, res);
     const auto& itemPos = groupPattern->GetItemPosition();
     int32_t itemCount = groupPattern->GetTotalItemCount();
+    if (groupNode->CheckNeedForceMeasureAndLayout()) {
+        groupPattern->CalculateItemStartIndex();
+        itemCount = groupNode->GetTotalChildCount() - groupPattern->GetItemStartIndex();
+    }
     if (forward) {
         int32_t cachedIndex = groupPattern->GetForwardCachedIndex(cacheCount);
         int32_t endIndex = itemPos.empty() ? -1 : itemPos.rbegin()->first;
@@ -1826,43 +1831,49 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
     ACE_SCOPED_TRACE("LayoutCachedItemV2");
     std::list<PredictLayoutItem> predictBuildList;
     int32_t cachedForward = 0;
+    int32_t endIndex = itemPosition_.rbegin()->first;
     if (itemPosition_.rbegin()->second.isGroup) {
-        auto wrapper = layoutWrapper->GetChildByIndex(itemPosition_.rbegin()->first);
+        auto wrapper = layoutWrapper->GetChildByIndex(endIndex);
         auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
-        cachedForward += res.second;
         if (res.first < res.second && res.first < cacheCount) {
-            predictBuildList.emplace_back(PredictLayoutItem { itemPosition_.rbegin()->first, true });
+            predictBuildList.emplace_back(PredictLayoutItem { endIndex, true, cachedForward });
         }
+        cachedForward += res.second;
     }
-    int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward);
-    if (index >= 0) {
-        predictBuildList.emplace_back(PredictLayoutItem { index, true });
+    if (cachedForward < cacheCount && endIndex < totalItemCount_ - 1) {
+        int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward);
+        if (index >= 0) {
+            predictBuildList.emplace_back(PredictLayoutItem { index, true, cachedForward });
+        }
     }
     int32_t cachedBackward = 0;
+    int32_t startIndex = itemPosition_.begin()->first;
     if (itemPosition_.begin()->second.isGroup) {
-        auto wrapper = layoutWrapper->GetChildByIndex(itemPosition_.begin()->first);
+        auto wrapper = layoutWrapper->GetChildByIndex(startIndex);
         auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount);
-        cachedBackward += res.second;
         if (res.first < res.second && res.first < cacheCount) {
-            predictBuildList.emplace_back(PredictLayoutItem { itemPosition_.begin()->first, false });
+            predictBuildList.emplace_back(PredictLayoutItem { startIndex, false, cachedBackward });
         }
+        cachedBackward += res.second;
     }
-    index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward);
-    if (index >= 0) {
-        predictBuildList.emplace_back(PredictLayoutItem { index, false });
+    if (cachedBackward < cacheCount && startIndex > 0) {
+        auto index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward);
+        if (index >= 0) {
+            predictBuildList.emplace_back(PredictLayoutItem { index, false, cachedBackward });
+        }
     }
     return predictBuildList;
 }
 
 bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-    const LayoutConstraintF& constraint, bool forward, int64_t deadline)
+    const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached)
 {
     CHECK_NULL_RETURN(wrapper, false);
     auto groupNode = AceType::DynamicCast<FrameNode>(wrapper);
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
-    groupPattern->LayoutCache(constraint, forward, deadline);
+    groupPattern->LayoutCache(constraint, forward, deadline, cached);
     return true;
 }
 
@@ -1897,7 +1908,7 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
             frameNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
             FrameNode::ProcessOffscreenNode(frameNode);
         } else {
-            PredictBuildGroup(wrapper, param.groupLayoutConstraint, (*it).forward, deadline);
+            PredictBuildGroup(wrapper, param.groupLayoutConstraint, (*it).forward, deadline, (*it).cached);
         }
         needMarkDirty = true;
         param.items.erase(it++);

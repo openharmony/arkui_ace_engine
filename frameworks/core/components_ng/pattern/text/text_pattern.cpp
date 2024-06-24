@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1269,23 +1270,22 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
 void TextPattern::HandleOnSelect(KeyCode code)
 {
-    auto start = textSelector_.GetStart();
     auto end = textSelector_.GetEnd();
     switch (code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            HandleSelection(start, end - 1);
+            HandleSelection(true, end - 1);
             break;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            HandleSelection(start, end + 1);
+            HandleSelection(false, end + 1);
             break;
         }
         case KeyCode::KEY_DPAD_UP: {
-            HandleSelectionUp(start, end);
+            HandleSelectionUp();
             break;
         }
         case KeyCode::KEY_DPAD_DOWN: {
-            HandleSelectionDown(start, end);
+            HandleSelectionDown();
             break;
         }
         default:
@@ -1293,11 +1293,12 @@ void TextPattern::HandleOnSelect(KeyCode code)
     }
 }
 
-void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
+void TextPattern::HandleSelectionUp()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, 0);
+        HandleSelection(true, 0);
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -1310,14 +1311,15 @@ void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
     if (end == caculateIndex) {
         caculateIndex = 0;
     }
-    HandleSelection(start, caculateIndex);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
+void TextPattern::HandleSelectionDown()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, GetTextLength());
+        HandleSelection(true, GetTextLength());
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -1328,13 +1330,21 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
     if (NearZero(height) || caculateIndex == end) {
         caculateIndex = GetTextLength();
     }
-    HandleSelection(start, caculateIndex);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelection(int32_t start, int32_t end)
+void TextPattern::HandleSelection(bool isEmojiStart, int32_t end)
 {
+    auto start = textSelector_.GetStart();
     if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
         return;
+    }
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(end, GetSelectedText(0, GetTextLength()),
+        emojiStartIndex, emojiEndIndex);
+    if (isIndexInEmoji) {
+        end = isEmojiStart ? emojiStartIndex : emojiEndIndex;
     }
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -327,6 +328,11 @@ public:
         return accessibilityEnabled_;
     }
 
+    static uint32_t GetCanvasDebugMode()
+    {
+        return canvasDebugMode_;
+    }
+
     static bool GetDebugEnabled();
 
     static bool GetLayoutDetectEnabled();
@@ -538,6 +544,7 @@ private:
     static bool textTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
+    static uint32_t canvasDebugMode_;
     static bool isRound_;
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;

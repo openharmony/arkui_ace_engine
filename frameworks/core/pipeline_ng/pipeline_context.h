@@ -715,6 +715,8 @@ public:
 
     void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
 
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(
@@ -977,7 +979,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     uint64_t resampleTimeStamp_ = 0;
-    int64_t lastVsyncEndTimestamp_ = 0;
+    uint64_t lastVsyncEndTimestamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;

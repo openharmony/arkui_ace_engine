@@ -800,6 +800,9 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) c
     if (it == lineHeightMap_.end()) {
         return -mainGap;
     }
+    if (startMainLineIndex_ > endMainLineIndex_ || it->first > endMainLineIndex_) {
+        return -mainGap;
+    }
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;

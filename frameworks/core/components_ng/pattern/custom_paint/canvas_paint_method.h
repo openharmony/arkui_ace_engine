@@ -34,17 +34,7 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<CanvasModifier> contentModifier,
-        const WeakPtr<FrameNode>& frameNode)
-        : frameNode_(frameNode)
-    {
-        matrix_.Reset();
-        context_ = context;
-        imageShadow_ = std::make_unique<Shadow>();
-        contentModifier_ = contentModifier;
-        InitImageCallbacks();
-    }
-
+    CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode);
     ~CanvasPaintMethod() override = default;
 
     void GetFastTaskPool();

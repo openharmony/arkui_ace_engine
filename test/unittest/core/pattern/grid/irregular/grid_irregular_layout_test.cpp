@@ -1090,10 +1090,10 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
 
     info.currentOffset_ = 800.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 
     info.currentOffset_ = 1500.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 }
 
 /**
@@ -1123,13 +1123,13 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
     info.endIndex_ = 9;
 
     info.currentOffset_ = 700.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 3);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 5);
 
     info.currentOffset_ = 1300.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
 
     info.currentOffset_ = 1600.0f;
-    EXPECT_EQ(algorithm->SkipLinesBackward(), 0);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 }
 
 /**

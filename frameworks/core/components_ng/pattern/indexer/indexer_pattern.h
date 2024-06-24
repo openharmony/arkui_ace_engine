@@ -99,6 +99,8 @@ public:
  
 private:
     void OnModifyDone() override;
+    void InitArrayValue(bool& autoCollapseModeChanged, bool& itemCountChanged);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void DumpInfo() override;
 

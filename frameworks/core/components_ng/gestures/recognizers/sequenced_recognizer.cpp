@@ -118,9 +118,8 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         } else {
             inputEventType_ = InputEventType::MOUSE_BUTTON;
         }
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "InputTracking id:%{public}d, sequenced recognizer receives %{public}d touch event, type: %{public}d",
-            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, sequenced %{public}d type: %{public}d", point.touchEventId,
+            point.id, static_cast<int32_t>(point.type));
     }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
@@ -265,10 +264,8 @@ bool SequencedRecognizer::CheckBetweenTwoLongPressRecognizer(int32_t currentInde
     std::advance(iterBefore, currentIndex - 1);
     auto iterAfter = recognizers_.begin();
     std::advance(iterAfter, currentIndex);
-    if (AceType::InstanceOf<LongPressRecognizer>(*iterBefore) && AceType::InstanceOf<LongPressRecognizer>(*iterAfter)) {
-        return true;
-    }
-    return false;
+    return AceType::InstanceOf<LongPressRecognizer>(*iterBefore) &&
+           AceType::InstanceOf<LongPressRecognizer>(*iterAfter);
 }
 
 void SequencedRecognizer::SendTouchEventToNextRecognizer(

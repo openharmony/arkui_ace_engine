@@ -225,14 +225,11 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     auto pattern = hostNode->GetPattern<NavDestinationPattern>();
-    float keyboardOffset = 0.0f;
+    float avoidKeyboardOffset = 0.0f;
     if (pattern) {
-        keyboardOffset = pattern->GetKeyboardOffset();
-        if (pattern->NeedIgnoreKeyboard()) {
-            keyboardOffset = 0.0f;
-        }
+        avoidKeyboardOffset = pattern->GetAvoidKeyboardOffset();
     }
-    auto contentOffset = OffsetF(0.0f, keyboardOffset);
+    auto contentOffset = OffsetF(0.0f, avoidKeyboardOffset);
     if (!navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         contentOffset += OffsetF(0.0f, titlebarHeight);
     }

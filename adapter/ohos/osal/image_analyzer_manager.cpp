@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
@@ -80,7 +81,7 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(false);
-    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
 
     isAnalyzerOverlayBuild_ = true;
     CHECK_NULL_VOID(analyzerUIConfig_.onAnalyzed);
@@ -116,7 +117,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     CHECK_NULL_VOID(overlayNode);
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
-    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ImageAnalyzerManager::DestroyAnalyzerOverlay()
@@ -199,7 +200,6 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
             renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
         }
     }
-    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
@@ -209,16 +209,25 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     CHECK_NULL_VOID(node);
     bool isUIConfigUpdate = false;
 
-    auto layoutProps = node->GetLayoutProperty<NG::ImageLayoutProperty>();
+    auto layoutProps = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
-        if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
-            analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        auto props = DynamicCast<NG::ImageLayoutProperty>(layoutProps);
+        CHECK_NULL_VOID(props);
+        if (analyzerUIConfig_.imageFit != props->GetImageFit().value_or(ImageFit::COVER)) {
+            analyzerUIConfig_.imageFit = props->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
     }
-
-    if (holder_ != ImageAnalyzerHolder::VIDEO_CUSTOM) {
+    
+    if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+        auto props = DynamicCast<NG::VideoLayoutProperty>(layoutProps);
+        CHECK_NULL_VOID(props);
+        if (analyzerUIConfig_.imageFit != props->GetObjectFitValue(ImageFit::COVER)) {
+            analyzerUIConfig_.imageFit = props->GetObjectFitValue(ImageFit::COVER);
+            isUIConfigUpdate = true;
+        }
+    } else {
         auto padding = layoutProps->CreatePaddingAndBorder();
         float paddingWidth = holder_ == ImageAnalyzerHolder::IMAGE ? padding.left.value_or(0) +
                                                                      padding.right.value_or(0) : 0.0f;

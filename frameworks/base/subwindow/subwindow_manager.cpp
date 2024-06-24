@@ -268,11 +268,11 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     }
 }
 
-void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdateHideMenuOffsetNG(offset);
+        subwindow->UpdateHideMenuOffsetNG(offset, isRedragStart);
     }
 }
 
@@ -804,6 +804,11 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
 {
     auto subwindow = GetDialogSubwindow(instanceId);
     if (!subwindow) {
+        subwindow = GetSubwindow(instanceId);
+        if (subwindow) {
+            subwindow->Close();
+            return;
+        }
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }

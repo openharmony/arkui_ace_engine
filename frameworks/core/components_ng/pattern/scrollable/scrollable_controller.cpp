@@ -139,7 +139,7 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
         auto position = pattern->GetTotalOffset() - offset;
         ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        pattern->AnimateTo(position, -1, nullptr, true);
+        pattern->AnimateTo(position, -1, nullptr, true, false, false);
     } else {
         pattern->StopAnimate();
         ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,

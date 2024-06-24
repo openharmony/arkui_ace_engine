@@ -59,6 +59,7 @@ enum class SessionType : int32_t {
     EMBEDDED_UI_EXTENSION = 0,
     UI_EXTENSION_ABILITY = 1,
     CLOUD_CARD = 2,
+    SECURITY_UI_EXTENSION_ABILITY = 3,
 };
 class SessionWrapper : public AceType {
     DECLARE_ACE_TYPE(SessionWrapper, AceType);

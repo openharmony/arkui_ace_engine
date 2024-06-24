@@ -1973,6 +1973,20 @@ void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, 
 #endif
 }
 
+void SetBackgroundImagePixelMapByPixelMapPtr(ArkUINodeHandle node, void* pixelMapPtr, ArkUI_Int32 repeatIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PixelMap> pixelmap = PixelMap::CreatePixelMap(pixelMapPtr);
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelmap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
 void ResetBackgroundImage(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5968,7 +5982,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
         GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle, ResetVisibleAreaChange, ResetAreaChange,
-        SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
+        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
+        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
         GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,

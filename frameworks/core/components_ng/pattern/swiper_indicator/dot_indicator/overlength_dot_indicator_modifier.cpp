@@ -43,6 +43,10 @@ constexpr float HALF_FLOAT = 0.5f;
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 {
+    if (maxDisplayCount_ <= 0) {
+        return;
+    }
+
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.unselectedIndicatorWidth = unselectedIndicatorWidth_->Get();
@@ -271,25 +275,44 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag()
         gestureState_ != GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         return;
     }
-    
+
+    auto leftMoveRate = longPointLeftCenterMoveRate_;
+    auto rightMoveRate = longPointRightCenterMoveRate_;
+    auto blackPointMoveRate = blackPointCenterMoveRate_;
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
+        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
+        blackPointMoveRate = 1.0f - blackPointCenterMoveRate_;
+    }
+
+    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        overlongSelectedEndCenterX_.first =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * leftMoveRate;
+
+        overlongSelectedEndCenterX_.second =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * (1.0f - rightMoveRate);
+    } else {
+        overlongSelectedEndCenterX_.first =
+            overlongSelectedStartCenterX_.first +
+            (overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first) * leftMoveRate;
+
+        overlongSelectedEndCenterX_.second =
+            overlongSelectedStartCenterX_.second +
+            (overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second) * rightMoveRate;
+    }
+
     animationEndCenterX_[currentSelectedIndex_] =
         animationStartCenterX_[currentSelectedIndex_] +
         (animationEndCenterX_[currentSelectedIndex_] - animationStartCenterX_[currentSelectedIndex_]) *
-            blackPointCenterMoveRate_;
+            blackPointMoveRate;
 
     animationEndCenterX_[targetSelectedIndex_] =
         animationStartCenterX_[targetSelectedIndex_] +
         (animationEndCenterX_[targetSelectedIndex_] - animationStartCenterX_[targetSelectedIndex_]) *
-            blackPointCenterMoveRate_;
-
-    overlongSelectedEndCenterX_.first =
-        overlongSelectedStartCenterX_.first +
-        (overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first) * longPointLeftCenterMoveRate_;
-
-    overlongSelectedEndCenterX_.second =
-        overlongSelectedStartCenterX_.second +
-        (overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second) * longPointRightCenterMoveRate_;
-
+            blackPointMoveRate;
     targetSelectedIndex_ = currentSelectedIndex_;
     targetOverlongType_ = currentOverlongType_;
 }
@@ -317,7 +340,14 @@ int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
     }
 
     if (animationStartIndex_ == animationEndIndex_) {
+        if (animationStartIndex_ == realItemCount_ - 1) {
+            return animationStartIndex_;
+        }
         return animationStartIndex_ + 1;
+    }
+
+    if (animationStartIndex_ == 0 && animationEndIndex_ == realItemCount_ - 1) {
+        return animationStartIndex_;
     }
 
     return animationEndIndex_;
@@ -473,6 +503,8 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     std::vector<std::pair<float, float>> pointCenterX;
     if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
         (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+        overlongSelectedStartCenterX_.first = animationEndCenterX_[currentSelectedIndex_];
+        overlongSelectedStartCenterX_.second = animationEndCenterX_[currentSelectedIndex_];
         pointCenterX.emplace_back(overlongSelectedStartCenterX_);
         pointCenterX.emplace_back(overlongSelectedEndCenterX_);
     } else {
@@ -484,6 +516,7 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     }
     longPointWithAnimation_ = true;
 }
+
 void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
 {
     if (ifImmediately) {
@@ -507,6 +540,8 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
         modifier->vectorBlackPointCenterX_->Set(modifier->vectorBlackPointCenterX_->Get());
         modifier->firstPointOpacity_->Set(modifier->firstPointOpacity_->Get());
         modifier->newPointOpacity_->Set(modifier->newPointOpacity_->Get());
+        modifier->unselectedIndicatorWidth_->Set(modifier->unselectedIndicatorWidth_->Get());
+        modifier->unselectedIndicatorHeight_->Set(modifier->unselectedIndicatorHeight_->Get());
     });
 
     longPointLeftAnimEnd_ = true;
@@ -571,18 +606,47 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPage
     }
 
     auto step = std::abs(targetPageIndex - currentPageIndex);
+    auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+    auto rightSecondPageIndex = realItemCount_ - 1 - SECOND_POINT_INDEX;
     if (currentPageIndex < targetPageIndex) {
-        if (currentSelectedIndex_ == maxDisplayCount_ - 1 - THIRD_POINT_INDEX &&
-            targetPageIndex < realItemCount_ - 1 - SECOND_POINT_INDEX) {
-            step = 0;
+        if (currentSelectedIndex_ == rightThirdIndicatorIndex) {
+            if (targetPageIndex < rightSecondPageIndex) {
+                step = 0;
+            } else {
+                step = targetPageIndex - currentPageIndex;
+            }
+        } else if (currentSelectedIndex_ < rightThirdIndicatorIndex) {
+            if (targetPageIndex < rightSecondPageIndex) {
+                step = std::min(targetPageIndex - currentPageIndex, rightThirdIndicatorIndex - currentSelectedIndex_);
+            } else if (targetPageIndex == rightSecondPageIndex) {
+                step = rightThirdIndicatorIndex - currentSelectedIndex_ + 1;
+            } else {
+                step = rightThirdIndicatorIndex - currentSelectedIndex_ + THIRD_POINT_INDEX;
+            }
+        } else {
+            step = targetPageIndex - currentPageIndex;
         }
 
         targetSelectedIndex_ = currentSelectedIndex_ + step;
         return;
     }
 
-    if (currentSelectedIndex_ == THIRD_POINT_INDEX && targetPageIndex >= THIRD_POINT_INDEX) {
-        step = 0;
+    if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = std::min(currentPageIndex - targetPageIndex, currentSelectedIndex_ - THIRD_POINT_INDEX);
+        } else if (targetPageIndex == SECOND_POINT_INDEX) {
+            step = currentSelectedIndex_ - SECOND_POINT_INDEX;
+        } else {
+            step = currentSelectedIndex_ - LEFT_FIRST_POINT_INDEX;
+        }
+    } else if (currentSelectedIndex_ == THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = 0;
+        } else {
+            step = currentPageIndex - targetPageIndex;
+        }
+    } else {
+        step = currentPageIndex - targetPageIndex;
     }
 
     targetSelectedIndex_ = currentSelectedIndex_ - step;

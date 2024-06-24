@@ -1038,17 +1038,21 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
     if (filter.IsFastFilter()) {
         return;
     }
-    auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
-    CHECK_NULL_VOID(props);
-    auto divider = JsonUtil::Create(true);
-    if (props->HasDivider()) {
-        divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
-        divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
-        divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
-        divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
-        json->PutExtAttr("divider", divider->ToString().c_str(), filter);
-    } else {
+    if (options_.empty()) {
         json->PutExtAttr("divider", "", filter);
+    } else {
+        auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        auto divider = JsonUtil::Create(true);
+        if (props->HasDivider()) {
+            divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
+            divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
+            divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+            json->PutExtAttr("divider", divider->ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("divider", "", filter);
+        }
     }
 }
 

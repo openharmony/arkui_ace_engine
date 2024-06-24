@@ -2683,7 +2683,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
 
 int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size < NUM_3) {
+    if (item->size < NUM_4) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -2696,12 +2696,8 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
         ArkUI_Float32 pathAttributes[NUM_2];
-        if (LessNotEqual(item->value[NUM_4].f32, 0.0f) || LessNotEqual(item->value[NUM_5].f32, 0.0f)) {
-            return ERROR_CODE_PARAM_INVALID;
-        } else {
-            pathAttributes[NUM_0] = item->value[NUM_4].f32;
-            pathAttributes[NUM_1] = item->value[NUM_5].f32;
-        }
+        pathAttributes[NUM_0] = item->size > NUM_4 ? item->value[NUM_4].f32 : NUM_0; // path width
+        pathAttributes[NUM_1] = item->size > NUM_5 ? item->value[NUM_5].f32 : NUM_0; // path height
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, &pathAttributes, item->string, unit);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
@@ -2709,12 +2705,15 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        progressAttributes[NUM_0] = item->value[NUM_1].f32; //value
-        progressAttributes[NUM_1] = item->value[NUM_2].f32; //total
+        progressAttributes[NUM_0] = item->value[NUM_1].f32; // value
+        progressAttributes[NUM_1] = item->value[NUM_2].f32; // total
         uint32_t color = item->value[NUM_3].u32;
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
+        if (item->size < NUM_6) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         auto fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
         auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
@@ -4446,9 +4445,10 @@ int32_t SetTextInputUnderlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     values[NUM_1] = item->value[NUM_1].u32;
     values[NUM_2] = item->value[NUM_2].u32;
     values[NUM_3] = item->value[NUM_3].u32;
+    ArkUI_Bool hasValues[NUM_4] = { 1, 1, 1, 1 };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-        node->uiNodeHandle, values, NUM_4);
+        node->uiNodeHandle, values, hasValues, NUM_4);
     return ERROR_CODE_NO_ERROR;
 }
 

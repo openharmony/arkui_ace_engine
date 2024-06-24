@@ -462,6 +462,15 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
 void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
 {
     handleRect.SetOffset(OffsetF(handleRect.GetX() - handleRect.Width() / 2.0f, handleRect.GetY()));
+    // The handle position does not extend beyond the left edge of the text.
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    auto textRect = textFiled->GetTextRect();
+    if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
+        handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
+    }
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)

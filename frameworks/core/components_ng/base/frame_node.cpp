@@ -337,6 +337,33 @@ public:
         }
     }
 
+    void SetActiveChildRange(
+        const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
+    {
+        if (!activeChildSets.has_value()) {
+            return;
+        }
+        for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
+            int32_t index = itor->first;
+            if (activeChildSets->activeItems.find(index) != activeChildSets->activeItems.end()) {
+                itor++;
+            } else {
+                partFrameNodeChildren_.erase(itor++);
+            }
+        }
+        auto guard = GetGuard();
+        // repeat node will use active node sets, V1 node(as lazyforeach) will still use active ndoe range.
+        for (const auto& child : children_) {
+            if (child.node->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+                child.node->DoSetActiveChildRange(
+                    activeChildSets->activeItems, activeChildSets->cachedItems, child.startIndex);
+            } else if (activeChildRange.has_value()) {
+                child.node->DoSetActiveChildRange(activeChildRange->start - child.startIndex,
+                    activeChildRange->end - child.startIndex, activeChildRange->cacheStart, activeChildRange->cacheEnd);
+            }
+        }
+    }
+
     void RecycleItemsByIndex(uint32_t start, uint32_t end)
     {
         for (auto it = partFrameNodeChildren_.begin(); it != partFrameNodeChildren_.end();) {
@@ -1133,9 +1160,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
             focusView->FocusViewClose();
-        } else {
-            focusHub->RemoveSelf();
         }
+        focusHub->RemoveSelf();
     }
     eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
@@ -3724,6 +3750,12 @@ void FrameNode::RemoveAllChildInRenderTree()
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+}
+
+void FrameNode::SetActiveChildRange(
+    const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
+{
+    frameProxy_->SetActiveChildRange(activeChildSets, activeChildRange);
 }
 
 void FrameNode::RecycleItemsByIndex(int32_t start, int32_t end)

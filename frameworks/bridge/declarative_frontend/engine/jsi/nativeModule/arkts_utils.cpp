@@ -15,14 +15,18 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
-#include "frameworks/core/components/declaration/common/declaration.h"
-#include "frameworks/core/common/resource/resource_manager.h"
-#include "frameworks/base/utils/system_properties.h"
-#include "frameworks/core/common/resource/resource_wrapper.h"
-#include "frameworks/core/common/resource/resource_object.h"
-#include "frameworks/core/components/theme/theme_constants.h"
 #include "ecmascript/napi/include/jsnapi.h"
+
+#include "frameworks/base/image/pixel_map.h"
+#include "frameworks/base/utils/system_properties.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
+#include "frameworks/core/common/resource/resource_manager.h"
+#include "frameworks/core/common/resource/resource_object.h"
+#include "frameworks/core/common/resource/resource_wrapper.h"
+#include "frameworks/core/components/declaration/common/declaration.h"
+#include "frameworks/core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -1819,5 +1823,81 @@ Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
     auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
     return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
 }
+bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
 
+    // if jsObject has function getPixelMap, it's a DrawableDescriptor object
+    auto func = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "getPixelMap"));
+    return (!func->IsNull() && func->IsFunction(vm));
+}
+
+RefPtr<PixelMap> ArkTSUtils::GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj)
+{
+    return PixelMap::GetFromDrawable(UnwrapNapiValue(vm, obj));
+}
+
+void* ArkTSUtils::UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)
+{
+    if (!obj->IsObject(vm)) {
+        LOGE("info is not an object when try CreateFromNapiValue");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    JSValueWrapper valueWrapper = obj;
+
+    Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
+}
+
+#if !defined(PREVIEW)
+RefPtr<PixelMap> ArkTSUtils::CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj)
+{
+    if (!obj->IsObject(vm)) {
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return nullptr;
+    }
+    auto* nativeEngine = engine->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        return nullptr;
+    }
+    JSValueWrapper valueWrapper = obj;
+
+    Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    Framework::PixelMapNapiEntry pixelMapNapiEntry = Framework::JsEngine::GetPixelMapNapiEntry();
+    if (!pixelMapNapiEntry) {
+        return nullptr;
+    }
+
+    void* pixmapPtrAddr = pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), napiValue);
+    if (pixmapPtrAddr == nullptr) {
+        return nullptr;
+    }
+    return PixelMap::CreatePixelMap(pixmapPtrAddr);
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -112,8 +112,8 @@ public:
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
      */
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
+        bool useTotalOffset = true) override;
 
     void ScrollPage(bool reverse, bool smooth = false) override;
 

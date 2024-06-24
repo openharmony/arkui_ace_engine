@@ -1038,11 +1038,11 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg027, Test
 }
 
 /**
- * @tc.name: ToggleContentModifierAddTestNg027
+ * @tc.name: ToggleContentModifierAddTestNg028
  * @tc.desc: Test ResetPointRadius of toggle.
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleContentModifierAddTestNg, TogglePatternTest1021, TestSize.Level1)
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create toggle and get frameNode.
@@ -1063,5 +1063,200 @@ HWTEST_F(ToggleContentModifierAddTestNg, TogglePatternTest1021, TestSize.Level1)
     EXPECT_NE(paintProperty, nullptr);
     EXPECT_FALSE(paintProperty->GetPointRadius().has_value());
     EXPECT_FALSE(paintProperty->GetTrackBorderRadius().has_value());
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg029
+ * @tc.desc: Test SetSelectedColor of toggle with checkbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    std::optional<Color> selectedColor = std::optional<Color>();
+
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto checkBoxFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(checkBoxFrameNode, nullptr);
+    EXPECT_EQ(checkBoxFrameNode->GetTag(), V2::CHECKBOX_ETS_TAG);
+    toggleModelNG.SetSelectedColor(AceType::RawPtr(checkBoxFrameNode), selectedColor);
+
+    /**
+     * @tc.steps: step2. set toggle event.
+     * @tc.expected: step2. function is called.
+     */
+    bool stateChange = true;
+    auto onChange = [&stateChange](bool flag) { stateChange = flag; };
+    toggleModelNG.OnChange(AceType::RawPtr(checkBoxFrameNode), onChange);
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    auto pattern = AceType::DynamicCast<CheckBoxPattern>(checkBoxFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetCheckBoxSelect(), IS_ON);
+    EXPECT_EQ(paintProperty->GetCheckBoxSelectedColor(), selectedColor);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg030
+ * @tc.desc: Test event function of toggle with button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    std::optional<Color> selectedColor = std::optional<Color>();
+
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(buttonFrameNode, nullptr);
+    EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    toggleModelNG.SetSelectedColor(AceType::RawPtr(buttonFrameNode), selectedColor);
+
+    /**
+     * @tc.steps: step2. set toggle event.
+     * @tc.expected: step2. function is called.
+     */
+    bool stateChange = true;
+    auto onChange = [&stateChange](bool flag) { stateChange = flag; };
+    toggleModelNG.OnChange(AceType::RawPtr(buttonFrameNode), onChange);
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    auto paintProperty = buttonFrameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetIsOn(), IS_ON);
+    EXPECT_EQ(paintProperty->GetSelectedColor(), selectedColor);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg031
+ * @tc.desc: Test event function of toggle with switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    std::optional<Color> selectedColor = std::optional<Color>();
+
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    EXPECT_EQ(switchFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    toggleModelNG.SetSelectedColor(AceType::RawPtr(switchFrameNode), selectedColor);
+    toggleModelNG.SetSwitchPointColor(AceType::RawPtr(switchFrameNode), SWITCH_POINT_COLOR);
+
+    /**
+     * @tc.steps: step2. set toggle event.
+     * @tc.expected: step2. function is called.
+     */
+    bool stateChange = true;
+    auto onChange = [&stateChange](bool flag) { stateChange = flag; };
+    toggleModelNG.OnChange(AceType::RawPtr(switchFrameNode), onChange);
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetIsOn(), IS_ON);
+    EXPECT_EQ(paintProperty->GetSelectedColor(), selectedColor);
+    EXPECT_EQ(paintProperty->GetSwitchPointColor(), SWITCH_POINT_COLOR);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg032
+ * @tc.desc: Test SetPointRadius of toggle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    switchFrameNode->paintProperty_ = nullptr;
+    toggleModelNG.SetPointRadius(AceType::RawPtr(switchFrameNode), Dimension(10));
+
+    /**
+     * @tc.steps: step2.get switch property and check whether the property value is correct.
+     */
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg033
+ * @tc.desc: Test ResetPointRadius of toggle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    switchFrameNode->paintProperty_ = nullptr;
+    toggleModelNG.ResetPointRadius(AceType::RawPtr(switchFrameNode));
+    toggleModelNG.ResetTrackBorderRadius();
+
+    /**
+     * @tc.steps: step2.get switch property and check whether the property value is correct.
+     */
+    auto pattern = AceType::DynamicCast<SwitchPattern>(switchFrameNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: ToggleContentModifierAddTestNg034
+ * @tc.desc: Test event function of toggle with switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+    EXPECT_EQ(switchFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    switchFrameNode->paintProperty_ = nullptr;
+    toggleModelNG.SetSelectedColor(AceType::RawPtr(switchFrameNode), SELECTED_COLOR);
+    toggleModelNG.SetSwitchPointColor(AceType::RawPtr(switchFrameNode), SWITCH_POINT_COLOR);
+
+    /**
+     * @tc.steps: step2. get the paintProperty.
+     * @tc.expected: step2. check whether the value is correct.
+     */
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
 }
 } // namespace OHOS::Ace::NG

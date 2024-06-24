@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -104,6 +105,12 @@ void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExt
     aliveUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
+void UIExtensionManager::AddAliveUIExtension(
+    int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension)
+{
+    aliveSecurityUIExtensions_.try_emplace(nodeId, uiExtension);
+}
+
 void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
 {
     for (const auto& it : aliveUIExtensions_) {
@@ -119,6 +126,11 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
     auto it = aliveUIExtensions_.find(nodeId);
     if (it != aliveUIExtensions_.end()) {
         aliveUIExtensions_.erase(nodeId);
+    }
+
+    auto iter = aliveSecurityUIExtensions_.find(nodeId);
+    if (iter != aliveSecurityUIExtensions_.end()) {
+        aliveSecurityUIExtensions_.erase(nodeId);
     }
 }
 

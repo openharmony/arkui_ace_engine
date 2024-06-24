@@ -914,6 +914,7 @@ void PipelineBase::Destroy()
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     finishFunctions_.clear();
+    densityChangedCallbacks_.clear();
 }
 
 std::string PipelineBase::OnFormRecycle()
@@ -931,5 +932,12 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
         return onFormRecover_(statusData);
     }
     LOGE("onFormRecover_ is null.");
+}
+
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
+    if (window_) {
+        window_->SetUiDvsyncSwitch(on);
+    }
 }
 } // namespace OHOS::Ace

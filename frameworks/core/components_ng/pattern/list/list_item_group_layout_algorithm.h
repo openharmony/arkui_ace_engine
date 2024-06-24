@@ -352,7 +352,7 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
-    TextDirection layoutDirection_;
+    TextDirection layoutDirection_ = TextDirection::LTR;
 };
 } // namespace OHOS::Ace::NG
 

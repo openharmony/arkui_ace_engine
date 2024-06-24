@@ -34,6 +34,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -78,6 +79,7 @@ struct PaintFocusExtraInfo final {
 };
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
+using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
@@ -396,6 +398,8 @@ public:
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
+    virtual void SetTransitionUserCallback(TransitionFinishCallback&& callback) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
@@ -651,6 +655,9 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
+    // AttractionEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
@@ -780,6 +787,7 @@ protected:
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
+    virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
     friend class ViewAbstract;

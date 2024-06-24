@@ -253,6 +253,7 @@
 
 #if defined(WINDOW_SCENE_SUPPORTED)
 #include "bridge/declarative_frontend/jsview/js_embedded_component.h"
+#include "bridge/declarative_frontend/jsview/js_security_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
@@ -804,6 +805,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
     { "PluginComponent", JSPlugin::JSBind },
+    { "SecurityUIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
@@ -813,6 +815,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
+    { "SecurityUIExtensionProxy", JSSecurityUIExtensionProxy::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },

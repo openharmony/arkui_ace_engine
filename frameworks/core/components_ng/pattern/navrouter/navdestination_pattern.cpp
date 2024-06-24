@@ -277,7 +277,7 @@ bool NavDestinationPattern::NeedIgnoreKeyboard()
     auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto& opts = layoutProperty->GetSafeAreaExpandOpts();
-    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && (opts->edges & SAFE_AREA_EDGE_BOTTOM)) {
         return true;
     }
     return false;
@@ -350,8 +350,8 @@ void NavDestinationPattern::HandleLongPress()
         if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
             return ;
         }
         auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();

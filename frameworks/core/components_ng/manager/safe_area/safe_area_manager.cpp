@@ -107,7 +107,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
 
 bool SafeAreaManager::IsSafeAreaValid() const
 {
+#ifdef PREVIEW
+    return !ignoreSafeArea_;
+#else
     return !(ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_));
+#endif
 }
 
 bool SafeAreaManager::SetIsFullScreen(bool value)
@@ -234,6 +238,15 @@ void SafeAreaManager::ExpandSafeArea()
     ClearNeedExpandNode();
 }
 
+bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+{
+    if (needExpandNodes_.find(node) == needExpandNodes_.end()) {
+        AddNeedExpandNode(node);
+        return true;
+    }
+    return false;
+}
+
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
 {
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
@@ -241,12 +254,12 @@ bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameN
     }
     // page will not avoid keyboard when lastChild is sheet
     RefPtr<OverlayManager> overlay;
-    if (!frameNode->PageLevelIsNavDestination()) {
+    if (frameNode->RootNodeIsPage()) {
         auto pattern = frameNode->GetPattern<PagePattern>();
         CHECK_NULL_RETURN(pattern, true);
         overlay = pattern->GetOverlayManager();
     } else {
-        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetPageLevelNodeId());
+        auto navNode = FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, frameNode->GetRootNodeId());
         CHECK_NULL_RETURN(navNode, true);
         auto pattern = navNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_RETURN(pattern, true);

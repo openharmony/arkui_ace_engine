@@ -584,9 +584,10 @@ public:
         ViewAbstract::CleanTransition();
     }
 
-    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr) override
     {
-        ViewAbstract::SetChainedTransition(effect);
+        ViewAbstract::SetChainedTransition(effect, std::move(finishCallback));
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
@@ -871,6 +872,13 @@ public:
     void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
@@ -1215,6 +1223,13 @@ public:
     void DisableOnKeyPreIme() override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
+    }
+
+    static void DisableOnKeyPreIme(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();
     }

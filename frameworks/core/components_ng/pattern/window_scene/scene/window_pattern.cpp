@@ -72,6 +72,13 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnDrawingCompleted() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnDrawingCompleted();
+    }
+
     void OnExtensionDied() override {}
 
     void OnExtensionTimeout(int32_t errorCode) override {}
@@ -223,6 +230,7 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
         ImageSourceInfo sourceInfo;
         if (session_->GetScenePersistence()->IsSavingSnapshot()) {

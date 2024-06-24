@@ -41,6 +41,7 @@ constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
 constexpr ImageFit DEFAULT_OBJECT_FIT_VALUE = ImageFit::COVER;
 constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr bool DEFAULT_DRAGGABLE = false;
+constexpr bool DEFAULT_IMAGE_SENSITIVE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
 constexpr ImageResizableSlice DEFAULT_IMAGE_SLICE;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
@@ -770,6 +771,22 @@ void EnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
     ImageModelNG::EnableAnalyzer(frameNode, enable);
 }
 
+void SetImagePrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(static_cast<bool>(sensitive));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ResetImagePrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(DEFAULT_IMAGE_SENSITIVE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void AnalyzerConfig(ArkUINodeHandle node, void* config)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -861,9 +878,9 @@ const ArkUIImageModifier* GetImageModifier()
         ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
         GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
         GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
-        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
-        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
+        GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError,
+        ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 

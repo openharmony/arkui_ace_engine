@@ -662,7 +662,7 @@ void SubwindowOhos::UpdatePreviewPosition()
     overlay->UpdatePixelMapPosition(true);
 }
 
-void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart)
 {
     ContainerScope scope(childContainerId_);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -672,7 +672,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
     }
-    overlay->UpdateContextMenuDisappearPosition(offset);
+    overlay->UpdateContextMenuDisappearPosition(offset, isRedragStart);
 }
 
 void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
@@ -1685,6 +1685,19 @@ bool SubwindowOhos::CheckHostWindowStatus() const
             return false;
         }
     }
+    return true;
+}
+
+bool SubwindowOhos::Close()
+{
+    CHECK_NULL_RETURN(window_, false);
+    OHOS::Rosen::WMError ret = window_->Close();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos fail to close the dialog subwindow.");
+        return false;
+    }
+    sptr<OHOS::Rosen::Window> uiWindow = nullptr;
+    Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, uiWindow);
     return true;
 }
 } // namespace OHOS::Ace

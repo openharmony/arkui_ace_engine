@@ -334,11 +334,15 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     auto customSpanPlaceholderInfo = pattern->GetCustomSpanPlaceholderInfo();
     auto x = paintOffset_.GetX();
     auto y = paintOffset_.GetY();
+    auto rectsForPlaceholderSize = rectsForPlaceholders.size();
     for (auto customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
+        if (index >= rectsForPlaceholderSize) {
+            return;
+        }
         auto rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;

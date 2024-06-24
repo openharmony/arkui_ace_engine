@@ -824,8 +824,11 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
-    } else if (paraStyle_.leadingMargin) {
-        HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
+    } else {
+        if (paraStyle_.leadingMargin) {
+            HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
+        }
+        result.offset.SetX(result.offset.GetX() + paraStyle_.indent.ConvertToPx());
     }
     return true;
 }

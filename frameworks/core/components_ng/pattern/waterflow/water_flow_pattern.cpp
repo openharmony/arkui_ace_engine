@@ -120,8 +120,8 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(
-        -info->currentOffset_, info->GetContentHeight(), Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
+    UpdateScrollBarRegion(-info->currentOffset_, info->EstimateContentHeight(),
+        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
@@ -376,7 +376,7 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
     if (smooth) {
         float distance = reverse ? mainContentSize : -mainContentSize;
         float position = layoutInfo_->Offset() + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
     } else {
         UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
     }
@@ -560,7 +560,7 @@ void WaterFlowPattern::OnAnimateStop()
 }
 
 void WaterFlowPattern::AnimateTo(
-    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
     if (layoutInfo_->Mode() == WaterFlowLayoutMode::SLIDING_WINDOW) {
         return;

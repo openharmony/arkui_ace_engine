@@ -80,6 +80,16 @@ public:
         return customPreviewHeight_;
     }
 
+    void SetHoverImageScaleFrom(float scaleFrom)
+    {
+        hoverImageScaleFrom_ = scaleFrom;
+    }
+
+    float GetHoverImageScaleFrom() const
+    {
+        return hoverImageScaleFrom_;
+    }
+
     void SetCustomPreviewScaleFrom(float scaleFrom)
     {
         customPreviewScaleFrom_ = scaleFrom;
@@ -146,6 +156,7 @@ private:
     bool isShowHoverImage_ = false;
     float customPreviewWidth_ = 0.0f;
     float customPreviewHeight_ = 0.0f;
+    float hoverImageScaleFrom_ = 1.0f;
     float customPreviewScaleFrom_ = 1.0f;
     float customPreviewScaleTo_ = 1.0f;
     float hoverImageDisAppearScale_ = 1.0f;

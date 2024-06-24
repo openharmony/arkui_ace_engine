@@ -89,6 +89,16 @@ double GetQuality(const std::string& args)
 #endif
 } // namespace
 
+CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
+    : frameNode_(frameNode)
+{
+    matrix_.Reset();
+    context_ = frameNode ? frameNode->GetContextRefPtr() : nullptr;
+    imageShadow_ = std::make_unique<Shadow>();
+    contentModifier_ = contentModifier;
+    InitImageCallbacks();
+}
+
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
@@ -130,10 +140,17 @@ void CanvasPaintMethod::FlushTask()
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
-    CHECK_NULL_VOID(paintWrapper);
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+    if (lastLayoutSize_ != pixelGridRoundSize) {
+        UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
+        lastLayoutSize_.SetSizeT(pixelGridRoundSize);
+    }
     auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
     CHECK_NULL_VOID(recordingCanvas);
-    lastLayoutSize_ = paintWrapper->GetGeometryNode()->GetFrameSize();
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto fontManager = context->GetFontManager();
