@@ -1286,6 +1286,11 @@ public:
         hasSupportedPreviewText_ = isSupported;
     }
 
+    bool GetSupportPreviewText() const
+    {
+        return hasSupportedPreviewText_;
+    }
+
     void OnTouchTestHit(SourceType hitTestType) override
     {
         selectOverlay_->OnTouchTestHit(hitTestType);
