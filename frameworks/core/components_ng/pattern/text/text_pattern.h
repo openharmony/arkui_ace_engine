@@ -660,9 +660,9 @@ protected:
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
-    void HandleSelectionUp(int32_t start, int32_t end);
-    void HandleSelectionDown(int32_t start, int32_t end);
-    void HandleSelection(int32_t start, int32_t end);
+    void HandleSelectionUp();
+    void HandleSelectionDown();
+    void HandleSelection(bool isEmojiStart, int32_t end);
     double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
     bool IsSelectableAndCopy();
