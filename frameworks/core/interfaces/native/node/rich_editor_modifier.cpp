@@ -73,6 +73,44 @@ void ResetRichEditorCaretColor(ArkUINodeHandle node)
     RichEditorModelNG::SetCaretColor(frameNode, caretColor);
 }
 
+void SetRichEditorOnSubmit(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSubmit = reinterpret_cast<std::function<void(int32_t, NG::TextFieldCommonEvent&)>*>(callback);
+        RichEditorModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
+    } else {
+        RichEditorModelNG::SetOnSubmit(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnSubmit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnSubmit(frameNode, nullptr);
+}
+
+void SetRichEditorAboutToIMEInput(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto aboutToIMEInput = reinterpret_cast<std::function<bool(const RichEditorInsertValue&)>*>(callback);
+        RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(*aboutToIMEInput));
+    } else {
+        RichEditorModelNG::SetAboutToIMEInput(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorAboutToIMEInput(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetAboutToIMEInput(frameNode, nullptr);
+}
+
 void SetRichEditorOnReady(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -226,6 +264,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
         SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
+        SetRichEditorOnSubmit, ResetRichEditorOnSubmit, SetRichEditorAboutToIMEInput, ResetRichEditorAboutToIMEInput,
         SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
         SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,

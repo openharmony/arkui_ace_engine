@@ -7413,6 +7413,34 @@ class RichEditorCaretColorModifier extends ModifierWithKey {
 }
 RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
 
+class RichEditorOnSubmitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSubmit(node);
+    } else {
+      getUINativeModule().richEditor.setOnSubmit(node, this.value);
+    }
+  }
+}
+RichEditorOnSubmitModifier.identity = Symbol('richEditorOnSubmit');
+
+class RichEditorAboutToIMEInputModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToIMEInput(node, this.value);
+    }
+  }
+}
+RichEditorAboutToIMEInputModifier.identity = Symbol('richEditorAboutToIMEInput');
+
 class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7575,8 +7603,13 @@ class ArkRichEditorComponent extends ArkComponent {
   onSelect(callback) {
     throw new Error('Method not implemented.');
   }
+  onSubmit(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
+    return this;
+  }
   aboutToIMEInput(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToIMEInputModifier.identity, RichEditorAboutToIMEInputModifier, callback);
+    return this;
   }
   onIMEInputComplete(callback) {
     throw new Error('Method not implemented.');
