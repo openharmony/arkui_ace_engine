@@ -71,19 +71,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         dotIndicatorModifier_->InitOverlongStatus(currentIndex_);
     }
 
-    if (touchBottomType_ != TouchBottomType::NONE) {
-        if (!dotIndicatorModifier_->GetIsPressed()) {
-            PaintPressIndicator(paintWrapper);
-            dotIndicatorModifier_->SetIsPressed(true);
-        }
-        UpdateBackground(paintWrapper);
-    } else if (isPressed_) {
-        PaintPressIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsPressed(true);
-    } else if (isHover_) {
-        PaintHoverIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsHover(true);
-    } else {
+    if (touchBottomType_ == TouchBottomType::NONE && !isPressed_ && !isHover_) {
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);

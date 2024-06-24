@@ -638,6 +638,11 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
+    bool IsIndicatorInteractive() const
+    {
+        return isIndicatorInteractive_;
+    }
+
     void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
     {
         nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
@@ -693,6 +698,11 @@ public:
     bool GetRequestLongPredict() const
     {
         return requestLongPredict_;
+    }
+
+    bool IsTouchDown() const
+    {
+        return isTouchDown_;
     }
 
 protected:
@@ -993,7 +1003,7 @@ private:
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation);
-    void SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex);
+    void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
