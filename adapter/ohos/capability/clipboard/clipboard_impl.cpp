@@ -190,7 +190,8 @@ void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const s
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
-    LOGI("add text record to pasteData, text:  %{public}s", selectedStr.c_str());
+    LOGI("add text record to pasteData, length: %{public}d",
+        static_cast<int32_t>(StringUtils::ToWstring(selectedStr).length()));
     peData->GetPasteDataData()->AddTextRecord(selectedStr);
 #endif
 }
