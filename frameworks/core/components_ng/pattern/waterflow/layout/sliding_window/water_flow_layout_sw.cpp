@@ -420,6 +420,9 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         MeasureToTarget(jumpIdx);
     }
     Jump(jumpIdx, align, inView || closeToView);
+    if (info_->extraOffset_) {
+        info_->delta_ += *info_->extraOffset_;
+    }
     if (!NearZero(info_->delta_)) {
         MeasureOnOffset(info_->delta_);
     } else {
