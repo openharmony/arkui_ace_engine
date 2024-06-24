@@ -443,9 +443,12 @@ void XComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value() && handlingSurfaceRenderContext_) {
+    if (bkColor.has_value() && bkColor.value() != Color::BLACK) {
         handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    } else {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
 #ifdef PLATFORM_VIEW_SUPPORTED
     if (type_ == XComponentType::PLATFORM_VIEW) {
