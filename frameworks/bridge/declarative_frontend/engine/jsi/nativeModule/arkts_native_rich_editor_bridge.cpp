@@ -127,4 +127,31 @@ ArkUINativeModuleValue RichEditorBridge::ResetSelectedBackgroundColor(ArkUIRunti
     GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorSelectedBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RichEditorBridge::SetEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t enterKeyType = static_cast<uint32_t>(TextInputAction::NEW_LINE);
+    if (secondArg->IsNumber()) {
+        enterKeyType = secondArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorEnterKeyType(nativeNode, enterKeyType);
+    } else {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorEnterKeyType(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorEnterKeyType(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

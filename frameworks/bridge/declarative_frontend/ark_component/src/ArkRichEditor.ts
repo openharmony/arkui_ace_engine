@@ -82,6 +82,23 @@ class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class RichEditorEnterKeyTypeModifier extends ModifierWithKey<EnterKeyType> {
+  constructor(value: EnterKeyType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorEnterKeyType');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnterKeyType(node);
+    } else {
+      getUINativeModule().richEditor.setEnterKeyType(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -137,6 +154,11 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   customKeyboard(value: CustomBuilder): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }
+  enterKeyType(value: EnterKeyType): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
+    return this;
+  }
+
 }
 
 // @ts-ignore
