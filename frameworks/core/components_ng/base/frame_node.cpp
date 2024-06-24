@@ -1160,9 +1160,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
             focusView->FocusViewClose();
-        } else {
-            focusHub->RemoveSelf();
         }
+        focusHub->RemoveSelf();
     }
     eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
