@@ -652,7 +652,8 @@ enum ArkUINodeType {
     ARKUI_SELECT,
     ARKUI_IMAGE_ANIMATOR,
     ARKUI_CIRCLE,
-    ARKUI_TAB_CONTENT
+    ARKUI_TAB_CONTENT,
+    ARKUI_NAVIGATION
 };
 
 enum ArkUIEventCategory {
