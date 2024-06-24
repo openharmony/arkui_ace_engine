@@ -512,9 +512,11 @@ export struct ChipComponent {
   }
 
   private getChipNodeBorderWidth(): Dimension {
-    if (this.chipSize === ChipSize.NORMAL && this.chipNodeBackgroundColor == this.theme.chipNode.backgroundColor) {
+    if (this.chipSize === ChipSize.NORMAL &&
+      this.chipNodeBackgroundColor === this.theme.chipNode.backgroundColor) {
       return this.theme.chipNode.normalBorderWidth
-    } else if (this.chipSize === ChipSize.SMALL && this.chipNodeBackgroundColor == this.theme.chipNode.backgroundColor) {
+    } else if (this.chipSize === ChipSize.SMALL &&
+      this.chipNodeBackgroundColor === this.theme.chipNode.backgroundColor) {
       return this.theme.chipNode.smallBorderWidth
     } else {
       return 0
@@ -522,9 +524,11 @@ export struct ChipComponent {
   }
 
   private getChipNodeBorderColor(): ResourceColor {
-    if (this.chipSize === ChipSize.NORMAL && this.chipNodeBackgroundColor == this.theme.chipNode.backgroundColor) {
+    if (this.chipSize === ChipSize.NORMAL &&
+      this.chipNodeBackgroundColor === this.theme.chipNode.backgroundColor) {
       return this.theme.chipNode.normalBorderColor
-    } else if (this.chipSize === ChipSize.SMALL && this.chipNodeBackgroundColor == this.theme.chipNode.backgroundColor) {
+    } else if (this.chipSize === ChipSize.SMALL &&
+      this.chipNodeBackgroundColor === this.theme.chipNode.backgroundColor) {
       return this.theme.chipNode.smallBorderColor
     } else {
       return this.theme.chipNode.backgroundColor
@@ -533,16 +537,19 @@ export struct ChipComponent {
 
   private getLabelMargin(): Margin {
     let labelMargin: Margin = { left: 0, right: 0 }
-    if (this.label?.labelMargin?.left !== void (0) && this.toVp(this.label.labelMargin.left) >= 0) {
+    if (this.label?.labelMargin?.left !== void (0) &&
+      this.toVp(this.label.labelMargin.left) >= 0) {
       labelMargin.left = this.label?.labelMargin?.left
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
+      this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         labelMargin.left = this.theme.label.smallMargin.left
       } else {
         labelMargin.left = this.theme.label.normalMargin.left
       }
     }
-    if (this.label?.labelMargin?.right !== void (0) && this.toVp(this.label.labelMargin.right) >= 0) {
+    if (this.label?.labelMargin?.right !== void (0) &&
+      this.toVp(this.label.labelMargin.right) >= 0) {
       labelMargin.right = this.label?.labelMargin?.right
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
       this.suffixIcon?.src || this.useDefaultSuffixIcon) {
@@ -556,11 +563,15 @@ export struct ChipComponent {
   }
 
   private getLocalizedLabelMargin(): LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
+    let localizedLabelMargin: LocalizedMargin = {
+      start: LengthMetrics.vp(0),
+      end: LengthMetrics.vp(0)
+    }
     if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated)
+      || this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         localizedLabelMargin.start = this.theme.label.localizedSmallMargin.start
       } else {
