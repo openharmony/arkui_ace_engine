@@ -402,6 +402,7 @@ public:
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
+    void CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position, bool needLeadingMargin = false);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
@@ -1055,6 +1056,7 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
     void NotifyExitTextPreview();
+    void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

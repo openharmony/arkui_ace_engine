@@ -192,7 +192,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navdestination.title.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();

@@ -143,6 +143,12 @@ public:
     // common virtual methods.
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
+
+    virtual bool OnlyAllowedPasteNonEmptyString()
+    {
+        return false;
+    }
+
     virtual void OnResetTextSelection() {}
 
     virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType);

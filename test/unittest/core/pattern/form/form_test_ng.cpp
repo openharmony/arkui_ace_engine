@@ -41,6 +41,8 @@
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 #include "form_constants.h"
 
@@ -53,6 +55,7 @@ constexpr int64_t FORM_ID_OF_TDD = 123456;
 const std::string FORM_ID_STRING_OF_TDD = "123456";
 constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
+constexpr double TIME_LIMIT_FONT_SIZE_BASE = 18.0;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
 FormModelNG formModelNG;
@@ -1352,5 +1355,73 @@ HWTEST_F(FormTestNg, FormPatternTest010, TestSize.Level1)
     pattern->UpdateImageNode();
     pattern->RemoveFrsNode();
     ASSERT_NE(retNodeRef, nullptr);
+}
+
+/**
+ * @tc.name: AddFormChildNode and GetFormChildNode
+ * @tc.desc: Test function AddFormChildNode and GetFormChildNode in FormPattern with different params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, AddFormChildNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    EXPECT_EQ(disableStyleRootNode, columnNode);
+    EXPECT_EQ(disableStyleTextNode, textNode);
+}
+
+/**
+ * @tc.name: RemoveFormChildNode and GetFormChildNode
+ * @tc.desc: Test function RemoveFormChildNode and GetFormChildNode in FormPattern with different params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, RemoveFormChildNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    EXPECT_EQ(disableStyleRootNode, nullptr);
+    EXPECT_EQ(disableStyleTextNode, nullptr);
+}
+
+/**
+ * @tc.name: GetTimeLimitFontSize
+ * @tc.desc: Test function GetTimeLimitFontSize in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetTimeLimitFontSize, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    double fontSize = pattern->GetTimeLimitFontSize();
+    EXPECT_EQ(fontSize, TIME_LIMIT_FONT_SIZE_BASE);
 }
 } // namespace OHOS::Ace::NG

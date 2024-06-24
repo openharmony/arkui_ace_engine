@@ -35,6 +35,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+}
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -48,7 +51,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK });
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
@@ -121,6 +124,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     ProcessDefaultStyleAndBehaviors(frameNode);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;

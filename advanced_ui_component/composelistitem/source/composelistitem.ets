@@ -337,14 +337,14 @@ struct OperateItemStruct {
       minHeight: BUTTON_SIZE
     })
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -379,14 +379,14 @@ struct OperateItemStruct {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -448,14 +448,14 @@ struct OperateItemStruct {
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -486,15 +486,15 @@ struct OperateItemStruct {
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
-        this.parentCanFocus = false
+        this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down) {
-          this.parentCanTouch = false
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
         }
-        if (event.type == TouchType.Up) {
-          this.parentCanTouch = true
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
         }
       })
       .onHover((isHover: boolean) => {
@@ -524,15 +524,15 @@ struct OperateItemStruct {
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .onFocus(() => {
-        this.parentCanFocus = false
+        this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
-        if (event.type == TouchType.Down) {
-          this.parentCanTouch = false
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
         }
-        if (event.type == TouchType.Up) {
-          this.parentCanTouch = true
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
         }
       })
       .onHover((isHover: boolean) => {
@@ -567,14 +567,14 @@ struct OperateItemStruct {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -616,14 +616,14 @@ struct OperateItemStruct {
     .backgroundColor(Color.Transparent)
     .borderRadius($r('sys.float.corner_radius_level8'))
     .onFocus(() => {
-      this.parentCanFocus = false
+      this.parentCanFocus = false;
     })
     .onTouch((event: TouchEvent) => {
-      if (event.type == TouchType.Down) {
-        this.parentCanTouch = false
+      if (event.type === TouchType.Down) {
+        this.parentCanTouch = false;
       }
-      if (event.type == TouchType.Up) {
-        this.parentCanTouch = true
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.parentCanTouch = true;
       }
     })
     .onHover((isHover: boolean) => {
@@ -954,7 +954,7 @@ export struct ComposeListItem {
             isParentCanTouch: this.isCanTouch,
             parentDirection: this.containerDirection,
           })
-            .flexShrink(this.containerDirection === FLexDirection.Column ? 0 : 1)
+            .flexShrink(this.containerDirection === FlexDirection.Column ? 0 : 1)
             .align(Alignment.End)
             .onFocus(() => {
               this.canFocus = false;
@@ -986,7 +986,7 @@ export struct ComposeListItem {
           if (event.type === TouchType.Down && this.canTouch) {
             this.frontColor = this.touchDownColor;
           }
-          if (event.type === TouchType.Up) {
+          if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
             this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
           }
         }

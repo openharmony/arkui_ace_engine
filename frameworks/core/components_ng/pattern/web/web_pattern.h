@@ -523,7 +523,8 @@ public:
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
-    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
+    void ExecuteAction(int64_t accessibilityId, AceAction action,
+        const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
@@ -694,6 +695,7 @@ private:
     void UninitTouchEventListener();
     void DragDropSelectionMenu();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
+    bool needRestoreMenuForDrag_ = false;
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
@@ -755,6 +757,7 @@ private:
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
+    void UpdateBackgroundColorRightNow();
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
     bool ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
@@ -848,6 +851,7 @@ private:
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
+    bool isShowAutofillPopup_ = false;
     OffsetF webOffset_;
     RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;

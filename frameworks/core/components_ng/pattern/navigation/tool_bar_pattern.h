@@ -64,15 +64,18 @@ public:
 
 private:
     void OnModifyDone() override;
-    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<BarItemNode>& barItemNode);
-    void HandleLongPressEvent(const RefPtr<BarItemNode>& barItemNode);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleLongPressEvent(const GestureEvent& info);
     void HandleLongPressActionEnd();
+    void ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode);
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     NavigationToolbarOptions options_;
     RefPtr<FrameNode> dialogNode_;
+    std::optional<int32_t> moveIndex_;
 };
 } // namespace OHOS::Ace::NG
 

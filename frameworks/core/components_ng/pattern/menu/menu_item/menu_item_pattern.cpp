@@ -53,8 +53,8 @@ namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double VELOCITY = 0.0f;
 constexpr double MASS = 1.0f;
-constexpr double STIFFNESS = 228.0f;
-constexpr double DAMPING = 22.0f;
+constexpr double STIFFNESS = 328.0f;
+constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
 

@@ -2349,6 +2349,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest013, TestSize.Level1)
     yearDatePickerColumnPattern->SetCurrentIndex(123);
     monthDatePickerColumnPattern->SetCurrentIndex(2);
     pickerPattern->HandleReduceLunarDayChange(0);
+
+    pickerPattern->isPicker_ = false;
+    pickerPattern->HandleReduceLunarDayChange(0);
 }
 
 /**
@@ -3656,6 +3659,53 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus003, Test
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus004
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus004, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_COMPONENT_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus005
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus005, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.isPrimary = true;
+    info1.isAcceptButton = true;
+    buttonInfos.push_back(info1);
+
+    ButtonInfo info2;
+    buttonInfos.push_back(info2);
+
+    const RefPtr<FrameNode> buttonNode;
+
+    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
 }
 
 /**
@@ -5601,4 +5651,103 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0048, TestSize.Level1)
         AM + std::to_string(BIG_SHOWCOUNT) + COLON + std::to_string(BIG_SHOWCOUNT));
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+/**
+ * @tc.name: DatePickerDialogViewShow0049
+ * @tc.desc: Test DatePickerDialogView Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0049, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(START_YEAR, CURRENT_DAY, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(END_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1)->GetLastChild());
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    columnPattern->SetCurrentIndex(0);
+    columnPattern->UpdateToss(PATTERN_OFFSET);
+
+    auto timePickerSwitchEvent =
+        DatePickerDialogView::CreateAndSetTimePickerSwitchEvent(midStackNode, dateNode, columnNode);
+    int32_t setApiVersion = 11;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto dialogViewNode =
+        DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    dialogViewNode =
+        DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest001
+ * @tc.desc: Test OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternTest111, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    datePickerNode->MountToParent(pickerStack);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->isFiredDateChange_ = true;
+    datePickerPattern->OnModifyDone();
+
+    datePickerPattern->isFiredDateChange_ = false;
+    datePickerPattern->showMonthDays_ = true;
+    datePickerPattern->OnModifyDone();
+}
+
 } // namespace OHOS::Ace::NG

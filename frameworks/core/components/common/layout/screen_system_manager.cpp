@@ -14,6 +14,7 @@
  */
 
 #include "core/components/common/layout/screen_system_manager.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -42,13 +43,16 @@ void ScreenSystemManager::OnSurfaceChanged(double width)
 ScreenSizeType ScreenSystemManager::GetSize(double width) const
 {
     ScreenSizeType size = ScreenSizeType::UNDEFINED;
-    if (width < MAX_SCREEN_WIDTH_SM.Value() * dipScale_) {
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, size);
+    auto dipScale = context->GetDipScale();
+    if (width < MAX_SCREEN_WIDTH_SM.Value() * dipScale) {
         size = ScreenSizeType::XS;
-    } else if (width < MAX_SCREEN_WIDTH_MD.Value() * dipScale_) {
+    } else if (width < MAX_SCREEN_WIDTH_MD.Value() * dipScale) {
         size = ScreenSizeType::SM;
-    } else if (width < MAX_SCREEN_WIDTH_LG.Value() * dipScale_) {
+    } else if (width < MAX_SCREEN_WIDTH_LG.Value() * dipScale) {
         size = ScreenSizeType::MD;
-    } else if (width < MAX_SCREEN_WIDTH_XL.Value() * dipScale_) {
+    } else if (width < MAX_SCREEN_WIDTH_XL.Value() * dipScale) {
         size = ScreenSizeType::LG;
     } else {
         size = ScreenSizeType::XL;

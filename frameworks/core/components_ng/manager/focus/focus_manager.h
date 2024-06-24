@@ -38,9 +38,10 @@ class FocusManager : public virtual AceType {
 public:
     class FocusGuard {
     public:
-        explicit FocusGuard(const RefPtr<FocusHub>& focushub, const RefPtr<PipelineContext>& context = nullptr);
+        explicit FocusGuard(const RefPtr<FocusHub>& focushub);
         FocusGuard() = delete;
         ~FocusGuard();
+        void CreateFocusGuard(const RefPtr<FocusHub>& focushub, const RefPtr<FocusManager>& focusManager);
     private:
         RefPtr<FocusManager> focusMng_;
     };

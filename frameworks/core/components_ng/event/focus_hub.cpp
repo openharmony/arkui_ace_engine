@@ -269,7 +269,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
     }
-    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus(), context);
+    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus());
     auto parent = GetParentFocusHub();
     if (parent) {
         if (focusManager) {
@@ -352,7 +352,7 @@ void FocusHub::RemoveSelf(BlurReason reason)
     auto parent = GetParentFocusHub();
     if (parent && parent != screenFocusHub && !focusView) {
         parent->RemoveChild(AceType::Claim(this), reason);
-    } else {
+    } else if (IsCurrentFocus()) {
         FocusManager::FocusGuard guard(parent);
         LostFocus(reason);
     }

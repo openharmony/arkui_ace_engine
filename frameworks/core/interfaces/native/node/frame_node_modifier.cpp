@@ -442,10 +442,10 @@ ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
-    auto offset = currentNode->GetGeometryNode()->GetFrameOffset();
+    auto rect = currentNode->GetPaintRectWithTransform();
     ArkUI_Float32* ret = new ArkUI_Float32[2];
-    ret[0] = offset.GetX();
-    ret[1] = offset.GetY();
+    ret[0] = rect.GetX();
+    ret[1] = rect.GetY();
     return ret;
 }
 

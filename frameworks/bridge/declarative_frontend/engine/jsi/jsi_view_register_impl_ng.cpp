@@ -181,6 +181,7 @@
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h"
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -500,6 +501,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSSecurityUIExtensionProxy::JSBind(globalObj);
+    JSSecurityUIExtension::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
     JSUIExtensionProxy::JSBind(globalObj);
 #if defined(DYNAMIC_COMPONENT_SUPPORT)

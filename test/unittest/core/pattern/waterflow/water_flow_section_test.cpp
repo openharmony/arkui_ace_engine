@@ -54,5 +54,57 @@ HWTEST_F(WaterFlowSectionTest, Update001, TestSize.Level1)
     newSection[4].crossCount = 3;
     s.ChangeData(4, 1, { newSection[4] });
     EXPECT_EQ(startIdx, 4);
+    EXPECT_EQ(s.sections_.size(), 5);
+
+    // illegal parameters
+    s.ChangeData(4, 20, { newSection[4] });
+    EXPECT_EQ(startIdx, 5);
+    EXPECT_EQ(s.sections_.size(), 5);
+
+    s.ChangeData(5, 20, { newSection[4] });
+    EXPECT_EQ(startIdx, 5);
+    EXPECT_EQ(s.sections_.size(), 6);
+    EXPECT_EQ(s.sections_[5], newSection[4]);
+}
+
+/**
+ * @tc.name: Update-CAPI001
+ * @tc.desc: Test interface for CAPI
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSectionTest, CAPI001, TestSize.Level1)
+{
+    WaterFlowSections s;
+    int32_t startIdx = -1;
+    s.SetOnDataChange([&startIdx](int32_t start) { startIdx = start; });
+
+    s.ReplaceFrom(0, SECTION_7);
+    EXPECT_EQ(startIdx, 0);
+
+    s.ReplaceFrom(0, SECTION_7);
+    EXPECT_EQ(startIdx, 4);
+
+    auto sections = SECTION_7;
+    sections[3].crossCount = 5;
+    s.ReplaceFrom(0, sections);
+    EXPECT_EQ(startIdx, 3);
+
+    ++sections[2].itemsCount;
+    s.ReplaceFrom(0, sections);
+    EXPECT_EQ(startIdx, 3);
+
+    --sections[3].itemsCount;
+    s.ReplaceFrom(0, sections);
+    EXPECT_EQ(startIdx, 4);
+    EXPECT_EQ(s.sections_.size(), 4);
+
+    s.ReplaceFrom(3, SECTION_7);
+    EXPECT_EQ(startIdx, 3);
+    EXPECT_EQ(s.sections_.size(), 7);
+
+    // illegal
+    s.ReplaceFrom(20, SECTION_7);
+    EXPECT_EQ(startIdx, 7);
+    EXPECT_EQ(s.sections_.size(), 11);
 }
 } // namespace OHOS::Ace::NG

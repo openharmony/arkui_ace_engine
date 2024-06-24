@@ -94,6 +94,11 @@ public:
     {
         return false;
     }
+    
+    virtual bool CheckCustomAvoidKeyboard() const
+    {
+        return false;
+    }
 
     virtual bool IsSupportDrawModifier() const
     {

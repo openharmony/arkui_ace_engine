@@ -74,6 +74,7 @@ class JSBuilderNode extends BaseNode {
     this.updateFuncByElmtId = new Map();
   }
   public reuse(param: Object): void {
+    this.updateStart();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
       if (child) {
@@ -86,6 +87,7 @@ class JSBuilderNode extends BaseNode {
         }
       } // if child
     });
+    this.updateEnd();
   }
   public recycle(): void {
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -230,7 +232,7 @@ class JSBuilderNode extends BaseNode {
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object; pop?: () => void }): void {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
-      classObject && "pop" in classObject ? classObject.pop! : () => { };
+      classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -316,7 +318,7 @@ class JSBuilderNode extends BaseNode {
       // Create array of new ids.
       arr.forEach((item, index) => {
         newIdArray.push(
-          `${itemGenFuncUsesIndex ? index + "_" : ""}` + idGenFunc(item)
+          `${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item)
         );
       });
     }

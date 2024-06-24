@@ -2292,6 +2292,12 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
+    if ((!frameNode->IsActive()) || frameNode->CheckAccessibilityLevelNo()) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "node: %{public}" PRId64 ", is not active or level is no",
+            frameNode->GetAccessibilityId());
+        return;
+    }
+
     AccessibilityEventInfo eventInfo;
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
 
@@ -3255,7 +3261,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
-    if (textJson.is_null() || !textJson.contains("type")) {
+    if (textJson.is_null() || textJson.is_discarded() || !textJson.contains("type")) {
         return;
     }
     if (textJson["type"] == "textType") {
@@ -3723,7 +3729,8 @@ bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
 
 #ifdef WEB_SUPPORTED
 bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
-    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<NG::PipelineContext>& ngPipeline)
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<NG::PipelineContext>& ngPipeline,
+    const std::map<std::string, std::string>& actionArguments)
 {
     auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(frameNode);
     CHECK_NULL_RETURN(webAccessibilityNode, false);
@@ -3731,7 +3738,7 @@ bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType ac
     CHECK_NULL_RETURN(webNode, false);
     auto webPattern = webNode->GetPattern<NG::WebPattern>();
     CHECK_NULL_RETURN(webPattern, false);
-    webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action));
+    webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action), actionArguments);
     return true;
 }
 
@@ -3788,7 +3795,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
 
 #ifdef WEB_SUPPORTED
     if (frameNode->GetTag() == V2::WEB_CORE_TAG) {
-        return ExecuteWebActionNG(elementId, action, frameNode, ngPipeline);
+        return ExecuteWebActionNG(elementId, action, frameNode, ngPipeline, actionArguments);
     }
 #endif
     auto enabled = frameNode->GetFocusHub() ? frameNode->GetFocusHub()->IsEnabled() : true;
@@ -4090,7 +4097,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
     parentElementId_ = parentElementId;
-    parentWindowId_ = static_cast<int32_t>(parentWindowId);
+    parentWindowId_ = parentWindowId;
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4840,7 +4847,7 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
         std::string text = searchParam.text;
         nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
         std::string value = "";
-        if (!textJson.is_null() && textJson.contains("value")) {
+        if (!textJson.is_null() && !textJson.is_discarded() && textJson.contains("value")) {
             value = textJson["value"];
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();

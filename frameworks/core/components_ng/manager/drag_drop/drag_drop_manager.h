@@ -414,16 +414,6 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
-    void SetDragNodeGrayscale(float dragNodeGrayscale)
-    {
-        dragNodeGrayscale_ = dragNodeGrayscale;
-    }
-
-    float GetDragNodeGrayscale() const
-    {
-        return dragNodeGrayscale_;
-    }
-
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -516,7 +506,6 @@ private:
     int32_t badgeNumber_ = -1;
     bool isDragWithContextMenu_ = false;
     Point dragDampStartPoint_ { 1, 1 };
-    float dragNodeGrayscale_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

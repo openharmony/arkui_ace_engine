@@ -15,5 +15,15 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("app_bar_test_ng") {
   type = "new"
-  sources = [ "app_bar_test_ng.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
+    "app_bar_test_ng.cpp",
+  ]
+  mocks = [
+    "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
+    "$ace_root/test/mock/adapter/mock_want_wrap.cpp",
+  ]
+  sources += mocks
 }

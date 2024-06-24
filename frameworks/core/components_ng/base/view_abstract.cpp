@@ -2045,12 +2045,19 @@ void ViewAbstract::CleanTransition()
     }
 }
 
-void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(
+    const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
@@ -2620,6 +2627,14 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
+}
+
+void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(AttractionEffect, effect);
 }
 
 void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value)
@@ -3390,9 +3405,15 @@ void ViewAbstract::CleanTransition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect,
+    NG::TransitionFinishCallback&& finishCallback)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
@@ -4635,5 +4656,33 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
+{
+    uint32_t value = SAFE_AREA_TYPE_ALL;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& SafeAreaExpandOpts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(SafeAreaExpandOpts, value);
+    if (SafeAreaExpandOpts->type > 0) {
+        value = SafeAreaExpandOpts->type;
+    }
+    return value;
+}
+
+uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
+{
+    uint32_t value = SAFE_AREA_EDGE_ALL;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& SafeAreaExpandOpts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(SafeAreaExpandOpts, value);
+    if (SafeAreaExpandOpts->edges > 0) {
+        value = SafeAreaExpandOpts->edges;
+    }
+    return value;
 }
 } // namespace OHOS::Ace::NG

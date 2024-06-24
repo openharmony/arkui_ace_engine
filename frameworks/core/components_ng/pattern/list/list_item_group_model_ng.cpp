@@ -135,4 +135,11 @@ void ListItemGroupModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
 }
+
+V2::ItemDivider ListItemGroupModelNG::GetDivider(FrameNode* frameNode)
+{
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListItemGroupLayoutProperty, Divider, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

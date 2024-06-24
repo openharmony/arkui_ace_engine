@@ -68,6 +68,11 @@ public:
         return true;
     }
 
+    void SetOverlay(const WeakPtr<OverlayManager>& overlayManager)
+    {
+        overlayManager_ = overlayManager;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -556,7 +561,7 @@ public:
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
     
-    int32_t GetDetentsIndex() const
+    uint32_t GetDetentsIndex() const
     {
         return detentsFinalIndex_;
     }
@@ -645,11 +650,13 @@ private:
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
 
     //record sheet sored detent index
-    int32_t detentsIndex_ = 0;
+    uint32_t detentsIndex_ = 0;
 
     //record sheet unsoreddetent index
-    int32_t detentsFinalIndex_ = 0;
+    uint32_t detentsFinalIndex_ = 0;
     std::string sheetThemeType_ = "auto";
+
+    WeakPtr<OverlayManager> overlayManager_ = nullptr;
 
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;

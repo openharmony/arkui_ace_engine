@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/event/touch_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,6 +50,7 @@ const TouchRestrict DRAG_TOUCH_RESTRICT_MOUSE = {
     .forbiddenType = TouchRestrict::CLICK,
     .sourceType = SourceType::MOUSE
 };
+constexpr int32_t UNKNOWN = 1;
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE_2 = 2;
@@ -64,6 +66,7 @@ constexpr float DISTANCE_EQUAL_DEFAULT = 5.0f;
 constexpr float IMAGE_INVALID_RECT_WIDTH = 100.0f;
 const std::string COMPONENT_ID = "id of component which you want to get screenshot from";
 const std::string NO_COMPONENT_ID = "";
+const std::string TOUCH_EVENT_INFO_TYPE = "onTouchDown";
 } // namespace
 
 class DragEventTestNg : public testing::Test {
@@ -1989,5 +1992,367 @@ HWTEST_F(DragEventTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
     auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
     EXPECT_EQ(pressedKeyCodes.size(), 2);
     EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_DPAD_RIGHT);
+}
+
+/**
+ * @tc.name: DragEventActuatorRestartDragTaskTest001
+ * @tc.desc: Test RestartDragTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorRestartDragTaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Execute RestartDragTask when actionStart_ is null.
+     */
+    auto info = GestureEvent();
+    dragEventActuator->RestartDragTask(info);
+    ASSERT_EQ(dragEventActuator->actionStart_, nullptr);
+
+    /**
+     * @tc.steps: step3. Execute RestartDragTask when actionStart_ is not null.
+     */
+    
+    int unknownPropertyValue = UNKNOWN;
+    dragEventActuator->actionStart_ = [&unknownPropertyValue](GestureEvent& gestureInfo) mutable {
+        unknownPropertyValue++;
+    };
+    dragEventActuator->RestartDragTask(info);
+    ASSERT_NE(unknownPropertyValue, UNKNOWN);
+}
+
+/**
+ * @tc.name: DragEventActuatorDragingStatusTest001
+ * @tc.desc: Test IsGlobalStatusSuitableForDragging and IsCurrentCodeStatusSuitableForDragging function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorDragingStatusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Execute IsGlobalStatusSuitableForDragging.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetDragging(DragDropMgrState::DRAGGING);
+    auto globalStatus = dragEventActuator->IsGlobalStatusSuitableForDragging();
+    ASSERT_EQ(globalStatus, false);
+
+    /**
+     * @tc.steps: step3. Execute IsCurrentNodeStatusSuitableForDragging.
+     */
+    TouchRestrict dragTouchRestrict = { TouchRestrict::CLICK };
+    dragTouchRestrict.inputEventType = InputEventType::AXIS;
+    auto nodeStatus = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(framenode, dragTouchRestrict);
+    ASSERT_EQ(nodeStatus, false);
+}
+
+/**
+ * @tc.name: DragEventActuatorSetDragDampStartPointInfoTest001
+ * @tc.desc: Test SetDragDampStartPointInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorSetDragDampStartPointInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke SetDragDampStartPointInfo.
+     * @tc.expected: cover SetDragDampStartPointInfo.
+     */
+    GestureEvent info = GestureEvent();
+    dragEventActuator->SetDragDampStartPointInfo(info.GetGlobalPoint(), info.GetPointerId());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    ASSERT_EQ(dragDropManager->currentPointerId_, info.GetPointerId());
+}
+
+/**
+ * @tc.name: DragEventActuatorHandleDragDampingMoveTest001
+ * @tc.desc: Test HandleDragDampingMove function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorHandleDragDampingMoveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke DragDampingMove with DragDropMgrState::IDLE and same Pointer.
+     * @tc.expected: cover DragDampingMove.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    TouchEventInfo info(TOUCH_EVENT_INFO_TYPE);
+    auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
+                       info.GetTouches().front().GetGlobalLocation().GetY());
+    dragDropManager->SetDraggingPointer(info.GetTouches().front().GetFingerId());
+    dragDropManager->ResetDragging(DragDropMgrState::IDLE);
+    dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+    ASSERT_FALSE(dragDropManager->IsAboutToPreview());
+    ASSERT_FALSE(dragDropManager->IsDragging());
+    EXPECT_FALSE(!dragDropManager->IsSameDraggingPointer(info.GetTouches().front().GetFingerId()));
+
+    /**
+     * @tc.steps: step3. Invoke DragDampingMove with DragDropMgrState::DRAGGING and same Pointer.
+     * @tc.expected: cover DragDampingMove.
+     */
+    dragDropManager->ResetDragging(DragDropMgrState::DRAGGING);
+    dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+    EXPECT_FALSE(dragDropManager->IsAboutToPreview());
+    EXPECT_TRUE(dragDropManager->IsDragging());
+    EXPECT_FALSE(!dragDropManager->IsSameDraggingPointer(info.GetTouches().front().GetFingerId()));
+
+    /**
+     * @tc.steps: step4. Invoke DragDampingMove with DragDropMgrState::ABOUT_TO_PREVIEW and same Pointer.
+     * @tc.expected: cover DragDampingMove.
+     */
+    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
+    dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+    EXPECT_TRUE(dragDropManager->IsAboutToPreview());
+    EXPECT_FALSE(dragDropManager->IsDragging());
+    EXPECT_FALSE(!dragDropManager->IsSameDraggingPointer(info.GetTouches().front().GetFingerId()));
+
+    /**
+     * @tc.steps: step5. Invoke DragDampingMove.
+     * @tc.expected: cover DragDampingMove.
+     */
+    dragDropManager->ResetDragging(DragDropMgrState::IDLE);
+    point.SetX(10.0);
+    point.SetY(10.0);
+    dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+    auto startPoint = dragDropManager->GetDragDampStartPoint();
+    auto delta = Point(point.GetX(), point.GetY()) - startPoint;
+    auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    EXPECT_TRUE(delta.GetDistance() > Dimension(distance, DimensionUnit::VP).ConvertToPx());
+
+    point.SetX(1.0);
+    point.SetY(1.0);
+    dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+    startPoint = dragDropManager->GetDragDampStartPoint();
+    delta = Point(point.GetX(), point.GetY()) - startPoint;
+    distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    EXPECT_TRUE(delta.GetDistance() < Dimension(distance, DimensionUnit::VP).ConvertToPx());
+}
+
+/**
+ * @tc.name: DragEventActuatorUpdatePreviewAttrTest001
+ * @tc.desc: Test UpdatePreviewAttr function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke UpdatePreviewAttr.
+     * @tc.expected: cover UpdatePreviewAttr with TextDraggable true.
+     */
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub, nullptr);
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(imageNode, nullptr);
+    gestureHub->SetTextDraggable(true);
+    dragEventActuator->UpdatePreviewAttr(frameNode, imageNode);
+    EXPECT_TRUE(gestureHub->IsTextCategoryComponent(frameTag));
+    EXPECT_TRUE(gestureHub->GetTextDraggable());
+}
+
+/**
+ * @tc.name: DragEventActuatorSetPixelMapTest001
+ * @tc.desc: Test SetPixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorSetPixelMapTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke SetHasPixelMap.
+     * @tc.desc: GetHasPixelMap true.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->SetHasPixelMap(true);
+    dragEventActuator->SetPixelMap(dragEventActuator);
+    ASSERT_TRUE(manager->GetHasPixelMap());
+}
+
+/**
+ * @tc.name: DragEventActuatorBrulStyleToEffectionTest001
+ * @tc.desc: Test BrulStyleToEffection function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke BrulStyleToEffection.
+     */
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    auto blurstyletmp = imageContext->GetBackBlurStyle();
+    blurstyletmp->colorMode = ThemeColorMode::DARK;
+    dragEventActuator->BrulStyleToEffection(blurstyletmp);
+    ASSERT_NE(blurstyletmp->colorMode, ThemeColorMode::SYSTEM);
+}
+
+/**
+ * @tc.name: DragEventActuatorHidePixelMapTest001
+ * @tc.desc: Test HidePixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorHidePixelMapTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke HidePixelMap.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    dragEventActuator->HidePixelMap(true, 0, 0, false);
+    EXPECT_FALSE(manager->hasPixelMap_);
+}
+
+/**
+ * @tc.name: DragEventActuatorSetTextPixelMapTest001
+ * @tc.desc: Test SetTextPixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorSetTextPixelMapTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke HidePixelMap.
+     */
+    dragEventActuator->SetTextPixelMap(gestureEventHub);
+    EXPECT_EQ(dragEventActuator->textPixelMap_, nullptr);
 }
 } // namespace OHOS::Ace::NG

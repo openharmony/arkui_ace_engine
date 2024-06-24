@@ -154,7 +154,6 @@ private:
         const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
-    static bool hasSwitchContentRow_;
     static bool isShowTime_;
     static bool isUserSetFont_;
 };

@@ -352,6 +352,9 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
+    if (NearZero(currentOffset_) && endPosArray_.size() > 0 && NearZero(endPosArray_[0].first)) {
+        return endPosArray_[0].second;
+    }
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
         [](float value, const std::pair<float, int32_t>& info) { return LessNotEqual(value, info.first); });
     if (it == endPosArray_.end()) {
@@ -589,5 +592,27 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
         res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
     }
     return res;
+}
+
+float WaterFlowLayoutInfo::EstimateContentHeight() const
+{
+    auto childCount = 0;
+    if (!itemInfos_.empty()) {
+        //in segmented layout
+        childCount = static_cast<int32_t>(itemInfos_.size());
+    } else if (maxHeight_) {
+        //in original layout, already reach end.
+        return maxHeight_;
+    } else {
+        //in original layout
+        for (const auto& item : items_[0]) {
+            childCount += static_cast<int32_t>(item.second.size());
+        }
+    }
+    if (childCount == 0) {
+        return 0;
+    }
+    auto estimateHeight = GetMaxMainHeight() / childCount * childrenCount_;
+    return estimateHeight;
 }
 } // namespace OHOS::Ace::NG

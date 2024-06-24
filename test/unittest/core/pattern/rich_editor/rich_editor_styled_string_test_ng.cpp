@@ -861,4 +861,33 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.firstHandle, RectF(OffsetF(0, 0), handlePaintSize));
     EXPECT_EQ(richEditorPattern->textSelector_.secondHandle, RectF(OffsetF(100.f, 0), handlePaintSize));
 }
+
+/**
+ * @tc.name: FromStyledStrign001
+ * @tc.desc: Test FromStyledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+
+    /**
+     * @tc.steps: step2. get richEditor styledString controller and set styledString
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+    styledStringController->SetStyledString(mutableStr);
+
+    /**
+     * @tc.steps: step3. FromStyledString
+     */
+    auto info = richEditorPattern->FromStyledString(mutableStr);
+    EXPECT_EQ(info.selection_.resultObjects.size(), mutableStr->GetSpanItems().size());
+}
 } // namespace OHOS::Ace::NG

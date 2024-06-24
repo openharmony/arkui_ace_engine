@@ -1305,13 +1305,12 @@ void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
     double height = GetTextHeight(end, false);
-    if (NearZero(height)) {
-        end = 0;
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
-        end = GetHandleIndex(offset);
+    Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+    auto caculateIndex = GetHandleIndex(offset);
+    if (end == caculateIndex) {
+        caculateIndex = 0;
     }
-    HandleSelection(start, end);
+    HandleSelection(start, caculateIndex);
 }
 
 void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
@@ -1324,15 +1323,12 @@ void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
     CaretMetricsF secondHandleMetrics;
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
-    auto secondOffsetY = secondHandleMetrics.offset.GetY();
     double height = GetTextHeight(end, true);
-    if (NearZero(height)) {
-        end = GetTextLength();
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
-        end = GetHandleIndex(offset);
+    auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
+    if (NearZero(height) || caculateIndex == end) {
+        caculateIndex = GetTextLength();
     }
-    HandleSelection(start, end);
+    HandleSelection(start, caculateIndex);
 }
 
 void TextPattern::HandleSelection(int32_t start, int32_t end)
@@ -1356,17 +1352,18 @@ double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
         auto lineMetrics = GetLineMetrics(lineNumber);
         auto startIndex = static_cast<int32_t>(lineMetrics.startIndex);
         auto endIndex = static_cast<int32_t>(lineMetrics.endIndex);
+        lineHeight += lineMetrics.height;
         if (isNextLine) {
-            if (index >= startIndex && index <= endIndex && endIndex != GetTextLength() - 1) {
-                lineHeight = GetLineMetrics(lineNumber + 1).height;
+            if (index <= endIndex && endIndex != GetTextLength()) {
+                return lineHeight;
             }
         } else {
-            if (index >= startIndex && index <= endIndex && startIndex != 0) {
-                lineHeight = GetLineMetrics(lineNumber - 1).height;
+            if (index <= endIndex && startIndex != 0) {
+                return GetLineMetrics(lineNumber - 1).height;
             }
         }
     }
-    return lineHeight;
+    return 0.0;
 }
 
 int32_t TextPattern::GetTextLength()
@@ -2631,6 +2628,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
         }
+        imageSpanItem->UpdatePlaceholderBackgroundStyle(imageSpanNode);
         spans_.emplace_back(imageSpanItem);
         spans_.back()->imageNodeId = imageSpanNode->GetId();
         return;

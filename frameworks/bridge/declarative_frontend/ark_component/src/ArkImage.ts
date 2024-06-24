@@ -532,6 +532,23 @@ class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ImagePrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imagePrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetPrivacySensitive(node);
+    } else {
+      getUINativeModule().image.setPrivacySensitive(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -787,6 +804,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  privacySensitive(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
     return this;
   }

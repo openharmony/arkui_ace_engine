@@ -24,6 +24,7 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+const std::string TEST_IMAGE_SOURCE = "src/image.png";
 } // namespace
 
 class RichEditorOverlayTestNg : public RichEditorCommonTestNg {
@@ -1290,5 +1291,62 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
     auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
     EXPECT_FALSE(selectInfoFirstHandle.isShow);
     EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+}
+
+/**
+ * @tc.name: SelectionMenuOptionsTest001
+ * @tc.desc: test SelectionMenuOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest001, TestSize.Level1)
+{
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    NG::MenuOptionsParam menuOptionsParam1;
+    menuOptionsParam1.content = "按钮1";
+    menuOptionsParam1.icon = TEST_IMAGE_SOURCE;
+    menuOptionsItems.push_back(menuOptionsParam1);
+
+    NG::MenuOptionsParam menuOptionsParam2;
+    menuOptionsParam2.content = "按钮2";
+    menuOptionsParam2.icon = TEST_IMAGE_SOURCE;
+    menuOptionsItems.push_back(menuOptionsParam2);
+
+    NG::MenuOptionsParam menuOptionsParam3;
+    menuOptionsParam3.content = "按钮3";
+    menuOptionsParam3.icon = TEST_IMAGE_SOURCE;
+    menuOptionsItems.push_back(menuOptionsParam3);
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    EXPECT_EQ(richEditorPattern->menuOptionItems_.size(), 3);
+}
+
+/**
+ * @tc.name: SelectionMenuOptionsTest002
+ * @tc.desc: test SelectionMenuOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest002, TestSize.Level1)
+{
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::vector<NG::MenuOptionsParam> menuOptionsItems;
+    NG::MenuOptionsParam menuOptionsParam1;
+    menuOptionsParam1.content = "按钮1";
+    menuOptionsItems.push_back(menuOptionsParam1);
+
+    NG::MenuOptionsParam menuOptionsParam2;
+    menuOptionsParam2.content = "按钮2";
+    menuOptionsItems.push_back(menuOptionsParam2);
+
+    NG::MenuOptionsParam menuOptionsParam3;
+    menuOptionsParam3.content = "按钮3";
+    menuOptionsItems.push_back(menuOptionsParam3);
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    EXPECT_EQ(richEditorPattern->menuOptionItems_.size(), 3);
 }
 } // namespace OHOS::Ace::NG

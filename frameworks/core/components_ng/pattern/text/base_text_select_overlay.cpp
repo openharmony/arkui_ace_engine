@@ -47,6 +47,10 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
+        if (OnlyAllowedPasteNonEmptyString()) {
+            clipboard->GetData([checkClipboard](const std::string& data) { checkClipboard(!data.empty()); });
+            return;
+        }
         clipboard->HasData(checkClipboard);
     } else {
         checkClipboard(false);

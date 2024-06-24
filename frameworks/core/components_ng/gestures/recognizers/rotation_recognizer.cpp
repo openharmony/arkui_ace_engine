@@ -57,7 +57,7 @@ void RotationRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
@@ -73,10 +73,8 @@ void RotationRecognizer::OnRejected()
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch down event, begin to detect"
-        "rotation event, state: %{public}d",
-        event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation %{public}d down, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -112,10 +110,8 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives axis start event, begin to detect rotation event, "
-        "state: %{public}d",
-        event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation axis start, state: %{public}d", event.touchEventId,
+        refereeState_);
     lastAxisEvent_ = event;
     touchPoints_[event.id] = TouchEvent();
     UpdateTouchPointWithAxisEvent(event);
@@ -133,9 +129,8 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch up event, state: %{public}d",
-        event.touchEventId, event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation %{public}d up, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -165,9 +160,8 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives axis end event, state: %{public}d",
-        event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation axis end, state: %{public}d", event.touchEventId,
+        refereeState_);
     // if rotation recognizer received another axisEvent, no need to active.
     if (!event.isRotationEvent) {
         return;
@@ -273,9 +267,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, rotation recognizer receives %{public}d touch cancel event", event.touchEventId,
-        event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -290,8 +282,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, rotation recognizer receives axis cancel event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, rotation axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

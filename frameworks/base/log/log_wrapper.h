@@ -110,7 +110,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 
 namespace OHOS::Ace {
 enum AceLogTag : uint8_t {
-    ACE_DEFAULT_DOMAIN = 0,          // C03900
+    ACE_DEFAULT_DOMAIN = 0,   // C03900
     ACE_ALPHABET_INDEXER,     // C03901
     ACE_COUNTER,              // C03902
     ACE_SUB_WINDOW,           // C03903
@@ -189,6 +189,7 @@ enum AceLogTag : uint8_t {
     ACE_MOVING_PHOTO,         // C0394C
     ACE_ARK_COMPONENT,        // C0394D
     ACE_WINDOW,               // C0394E
+    ACE_SECURITYUIEXTENSION,  // C0394F
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

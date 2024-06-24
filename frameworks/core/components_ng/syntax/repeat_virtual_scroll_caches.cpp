@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "base/log/log_wrapper.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/pipeline/base/element_register.h"
@@ -42,9 +43,7 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(const std::map<std::string,
       // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // API might need to change to tell which old item to update
-      onCreateNode_(onCreateNode),
-      onUpdateNode_(onUpdateNode),
-      onGetTypes4Range_(onGetTypes4Range),
+      onCreateNode_(onCreateNode), onUpdateNode_(onUpdateNode), onGetTypes4Range_(onGetTypes4Range),
       onGetKeys4Range_(onGetKeys4Range)
 {}
 
@@ -100,7 +99,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
 }
 
 // get UINode for given index without create.
-RefPtr<UINode> RepeatVirtualScrollCaches::GetNode4Index(uint32_t index) const
+RefPtr<UINode> RepeatVirtualScrollCaches::GetNode4Index(uint32_t index)
 {
     const auto it = key4index_.find(index);
     if (it == key4index_.end()) {
@@ -111,11 +110,16 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetNode4Index(uint32_t index) const
     const std::string& key4Index = it->second;
     const auto nodeIter = node4key_.find(key4Index);
     if (nodeIter == node4key_.end()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "no UINode for index %{public}d and key %{public}s",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "no UINode for index %{public}d and key %{public}s",
             static_cast<int32_t>(index), key4Index.c_str());
         return nullptr;
     }
-    return nodeIter->second;
+    // if the cache is mark invalid, need update first.
+    if (!nodeIter->second.isValid) {
+        UpdateSameKeyItem(key4Index, index);
+        nodeIter->second.isValid = true;
+    }
+    return nodeIter->second.item;
 }
 
 /** scenario:
@@ -135,6 +139,10 @@ void RepeatVirtualScrollCaches::InvalidateKeyAndTTypeCaches()
     index4Key_.clear();
     ttype4index_.clear();
     index4ttype_.clear();
+    // mark the item need to update.
+    for (auto& [key, item] : node4key_) {
+        item.isValid = false;
+    }
 
     // request new index -> key and index -> ttype
     // only fetch keys for the active range
@@ -162,7 +170,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     const auto& ttype = iterTType->second;
     const auto iterNewKey = key4index_.find(forIndex);
     if (iterNewKey == key4index_.end()) {
-        TAG_LOGW(AceLogTag::ACE_REPEAT, "no key for index %{public}d", forIndex);
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "no key for index %{public}d", forIndex);
         return nullptr;
     }
     const std::string& forKey = iterNewKey->second;
@@ -170,7 +178,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     const auto& oldKey = GetL2KeyToUpdate(ttype);
     if (!oldKey) {
         // no key for this ttype available to update
-        TAG_LOGW(AceLogTag::ACE_REPEAT, "for index %{public}d, ttype %{public}s, no UINode found to update", forIndex,
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "for index %{public}d, ttype %{public}s, no UINode found to update", forIndex,
             ttype.c_str());
         return nullptr;
     }
@@ -179,6 +187,12 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
     onUpdateNode_(oldKey.value(), forIndex);
 
     return HasUINodeBeenUpdated(ttype, oldKey.value(), forKey);
+}
+
+void RepeatVirtualScrollCaches::UpdateSameKeyItem(const std::string& key, uint32_t index)
+{
+    // call TS to do the RepeatItem update
+    onUpdateNode_(key, index);
 }
 
 RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
@@ -195,7 +209,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     const auto nodeIter = node4key_.find(forKey);
     if (nodeIter != node4key_.end()) {
         // have a node for this key already, just return
-        return nodeIter->second;
+        return nodeIter->second.item;
     }
 
     // need to create a new node for key
@@ -237,7 +251,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::CreateNewNode(uint32_t forIndex)
     }
 
     // add node to node4key_
-    node4key_.emplace(forKey, node4Index);
+    node4key_.emplace(forKey, CacheItem { true, node4Index });
     return node4Index;
 }
 
@@ -245,13 +259,13 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(
     const std::function<void(uint32_t index, const RefPtr<UINode>& node)>& cbFunc)
 {
     for (const auto& key : activeNodeKeysInL1_) {
-        const RefPtr<UINode>& node = node4key_[key];
+        const auto& cacheItem = node4key_[key];
         const auto& indexIter = index4Key_.find(key);
         if (indexIter == index4Key_.end()) {
             TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get index for %{public}s key", key.c_str());
             continue;
         }
-        cbFunc(indexIter->second, node);
+        cbFunc(indexIter->second, cacheItem.item);
     }
 }
 
@@ -279,9 +293,9 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         if (indexIter == index4Key_.end()) {
             continue;
         }
-        const auto& node = node4key_[key];
+        const auto& cacheItem = node4key_[key];
         int32_t index = indexIter->second;
-        if (cbFunc(index, node)) {
+        if (cbFunc(index, cacheItem.item)) {
             activeNodeKeysInL1_.emplace(key);
         } else {
             modified = true;
@@ -304,10 +318,10 @@ int32_t RepeatVirtualScrollCaches::GetFrameNodeIndex(const RefPtr<FrameNode>& fr
 {
     for (const auto& key : activeNodeKeysInL1_) {
         const auto nodeIter = node4key_.find(key);
-        if (nodeIter == node4key_.end() || !nodeIter->second) {
+        if (nodeIter == node4key_.end() || !nodeIter->second.item) {
             continue;
         }
-        const auto& node = nodeIter->second->GetFrameChildByIndex(0, true);
+        const auto& node = nodeIter->second.item->GetFrameChildByIndex(0, true);
         if (node != frameNode) {
             continue;
         }
@@ -396,10 +410,11 @@ RefPtr<UINode> RepeatVirtualScrollCaches::HasUINodeBeenUpdated(
     // 2. update the key: fromKey to forKey in node4key_
     auto iter = node4key_.find(fromKey);
     if (iter != node4key_.end()) {
-        auto node = iter->second;
+        auto cachedItem = iter->second;
+        cachedItem.isValid = true;
         node4key_.erase(iter);
-        node4key_.emplace(forKey, node);
-        return node;
+        node4key_.emplace(forKey, cachedItem);
+        return cachedItem.item;
     }
     TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to update L2 : %{public}s, %{public}s, %{public}s, ", ttype.c_str(),
         fromKey.c_str(), forKey.c_str());
@@ -573,7 +588,11 @@ std::string RepeatVirtualScrollCaches::DumpL1() const
 
 std::string RepeatVirtualScrollCaches::DumpL2() const
 {
-    std::set<std::string, KeySorterClass> l2KeyResult = GetSortedL2KeysForTType(node4key_);
+    std::unordered_map<std::string, RefPtr<UINode>> allCaches;
+    for (const auto& [item, cacheItem] : node4key_) {
+        allCaches.try_emplace(item, cacheItem.item);
+    }
+    std::set<std::string, KeySorterClass> l2KeyResult = GetSortedL2KeysForTType(allCaches);
 
     std::string result =
         "l2_keys (sorted by distance): size=" + std::to_string(l2KeyResult.size()) + "--------------\n";
@@ -614,8 +633,8 @@ std::string RepeatVirtualScrollCaches::DumpUINode4Key4TType() const
 {
     std::string result = "node4key_: size=" + std::to_string(node4key_.size()) + "--------------\n";
     for (const auto& it : node4key_) {
-        result += "   \"" + it.first + "\" -> node: " + it.second->GetTag() + "(" + std::to_string(it.second->GetId()) +
-                  ") \n";
+        result += "   \"" + it.first + "\" -> node: " + it.second.item->GetTag() + "(" +
+                  std::to_string(it.second.item->GetId()) + ") \n";
     }
     return result;
 }
@@ -639,7 +658,7 @@ std::string RepeatVirtualScrollCaches::DumpUINodeWithKey(const std::string& key)
 {
     const auto it = node4key_.find(key);
     return (it == node4key_.end()) ? "no UINode on file"
-                                   : it->second->GetTag() + "(" + std::to_string(it->second->GetId()) + ")";
+                                   : it->second.item->GetTag() + "(" + std::to_string(it->second.item->GetId()) + ")";
 }
 
 std::string RepeatVirtualScrollCaches::DumpUINode(const RefPtr<UINode>& node) const

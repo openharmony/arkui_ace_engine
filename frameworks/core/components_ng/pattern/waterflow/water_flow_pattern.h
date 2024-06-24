@@ -112,8 +112,8 @@ public:
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
      */
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
+        bool useTotalOffset = true) override;
 
     void ScrollPage(bool reverse, bool smooth = false) override;
 
@@ -149,9 +149,17 @@ public:
      * @param start the index of the first modified section.
      */
     void OnSectionChanged(int32_t start);
-    void OnSectionChangedNow(int32_t start);
 
     void DumpAdvanceInfo() override;
+
+    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
 
     // ------------------------ Focus adapter --------------------------------
     FocusPattern GetFocusPattern() const override
@@ -198,6 +206,8 @@ private:
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
+
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

@@ -268,11 +268,11 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     }
 }
 
-void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdateHideMenuOffsetNG(offset);
+        subwindow->UpdateHideMenuOffsetNG(offset, isRedragStart);
     }
 }
 

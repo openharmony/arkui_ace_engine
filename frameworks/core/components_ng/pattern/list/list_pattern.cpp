@@ -1679,13 +1679,14 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
     auto extraOffset = GetExtraOffset();
+    bool useTotalOffset = true;
     if (extraOffset.has_value()) {
-        SetUseTotalOffset(false);
+        useTotalOffset = false;
         targetPos += extraOffset.value();
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false, useTotalOffset);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
@@ -1700,7 +1701,7 @@ void ListPattern::ScrollPage(bool reverse, bool smooth)
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     if (smooth) {
         float position = -GetTotalOffset() + distance;
-        AnimateTo(-position, -1, nullptr, true);
+        AnimateTo(-position, -1, nullptr, true, false, false);
     } else {
         StopAnimate();
         UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
@@ -2287,6 +2288,7 @@ void ListPattern::RefreshLanesItemRange()
     if (updatePos == -1) {
         return;
     }
+    host->ChildrenUpdatedFrom(-1);
     if (updatePos == 0) {
         lanesItemRange_.clear();
         return;

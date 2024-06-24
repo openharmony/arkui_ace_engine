@@ -33,6 +33,10 @@ class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
     modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
     return this;
   }
+  pullDownRatio(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
+    return this;
+  }
 }
 
 class RefreshOffsetModifier extends ModifierWithKey<number> {
@@ -59,6 +63,22 @@ class PullToRefreshModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().refresh.setPullToRefresh(node, this.value);
     }
+  }
+}
+class PullDownRatioModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pullDownRatio');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().refresh.resetPullDownRatio(node);
+    } else {
+      getUINativeModule().refresh.setPullDownRatio(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 // @ts-ignore

@@ -135,6 +135,16 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
     return ToHtmlStyleFormat("text-decoration-style", table[index].value);
 }
 
+std::string SpanToHtml::DimensionToString(const Dimension& dimension)
+{
+    return StringUtils::DoubleToString(dimension.ConvertToVp()).append("px");
+}
+
+std::string SpanToHtml::DimensionToStringWithoutUnit(const Dimension& dimension)
+{
+    return StringUtils::DoubleToString(dimension.ConvertToVp());
+}
+
 std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimension>& dimension)
 {
     if (!dimension) {
@@ -144,8 +154,7 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimen
     if (!value.IsValid()) {
         return "";
     }
-
-    return ToHtmlStyleFormat(key, value.ToString());
+    return ToHtmlStyleFormat(key, DimensionToString(value));
 }
 
 std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
@@ -204,16 +213,16 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<CalcD
         return "";
     }
 
-    return ToHtmlStyleFormat(key, dimesion->ToString());
+    return ToHtmlStyleFormat(key, DimensionToString(*dimesion));
 }
 
-std::string SpanToHtml::ToHtmlAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion)
+std::string SpanToHtml::ToHtmlImgSizeAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion)
 {
     if (!dimesion) {
         return "";
     }
 
-    return ToHtmlAttributeFormat(key, dimesion->ToString());
+    return ToHtmlAttributeFormat(key, DimensionToStringWithoutUnit(*dimesion));
 }
 
 std::string SpanToHtml::ToHtml(const std::optional<ImageSpanSize>& size)
@@ -222,8 +231,8 @@ std::string SpanToHtml::ToHtml(const std::optional<ImageSpanSize>& size)
         return "";
     }
 
-    std::string style = ToHtmlAttribute("width", size->width);
-    style += ToHtmlAttribute("height", size->height);
+    std::string style = ToHtmlImgSizeAttribute("width", size->width);
+    style += ToHtmlImgSizeAttribute("height", size->height);
     return style;
 }
 
@@ -282,13 +291,13 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<OHOS:
         if (!prop->top) {
             return "";
         }
-        return ToHtmlStyleFormat(key, prop->top->ToString());
+        return ToHtmlStyleFormat(key, DimensionToString(prop->top->GetDimension()));
     }
 
-    auto padding = prop->top.has_value() ? prop->top->ToString() : "0";
-    padding += " " + (prop->right.has_value() ? prop->right->ToString() : "0");
-    padding += " " + (prop->bottom.has_value() ? prop->bottom->ToString() : "0");
-    padding += " " + (prop->left.has_value() ? prop->left->ToString() : "0");
+    auto padding = prop->top.has_value() ? DimensionToString(prop->top->GetDimension()) : "0";
+    padding += " " + (prop->right.has_value() ? DimensionToString(prop->right->GetDimension()) : "0");
+    padding += " " + (prop->bottom.has_value() ? DimensionToString(prop->bottom->GetDimension()) : "0");
+    padding += " " + (prop->left.has_value() ? DimensionToString(prop->left->GetDimension()) : "0");
 
     return ToHtmlStyleFormat(key, padding);
 }
@@ -301,16 +310,16 @@ std::string SpanToHtml::ToHtml(const std::optional<OHOS::Ace::NG::BorderRadiusPr
 
     std::string radius;
     if (borderRadius->radiusTopLeft) {
-        radius += ToHtmlStyleFormat("border-top-left-radius", borderRadius->radiusTopLeft->ToString());
+        radius += ToHtmlStyleFormat("border-top-left-radius", DimensionToString(*borderRadius->radiusTopLeft));
     }
     if (borderRadius->radiusTopRight) {
-        radius += ToHtmlStyleFormat("border-top-right-radius", borderRadius->radiusTopRight->ToString());
+        radius += ToHtmlStyleFormat("border-top-right-radius", DimensionToString(*borderRadius->radiusTopRight));
     }
     if (borderRadius->radiusBottomRight) {
-        radius += ToHtmlStyleFormat("border-bottom-right-radius", borderRadius->radiusBottomRight->ToString());
+        radius += ToHtmlStyleFormat("border-bottom-right-radius", DimensionToString(*borderRadius->radiusBottomRight));
     }
     if (borderRadius->radiusBottomLeft) {
-        radius += ToHtmlStyleFormat("border-bottom-left-radius", borderRadius->radiusBottomLeft->ToString());
+        radius += ToHtmlStyleFormat("border-bottom-left-radius", DimensionToString(*borderRadius->radiusBottomLeft));
     }
 
     return radius;
@@ -431,6 +440,7 @@ std::string SpanToHtml::NormalStyleToHtml(
     style += ColorToHtml(fontStyle.GetTextColor());
     style += FontFamilyToHtml(fontStyle.GetFontFamily());
     style += DeclarationToHtml(fontStyle);
+    style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());
     style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());
     style += ToHtml(fontStyle.GetTextShadow());
@@ -516,7 +526,7 @@ std::string SpanToHtml::LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& 
 std::string SpanToHtml::ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
     auto details = ToHtml(textLineStyle.GetTextAlign());
-    details += ToHtml("text-indent", textLineStyle.GetBaselineOffset());
+    details += ToHtml("text-indent", textLineStyle.GetTextIndent());
     details += ToHtml(textLineStyle.GetWordBreak());
     details += ToHtml(textLineStyle.GetTextOverflow());
     if (details.empty()) {

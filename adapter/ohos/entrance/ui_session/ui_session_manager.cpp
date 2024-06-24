@@ -17,6 +17,7 @@
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
+std::mutex UiSessionManager::mutex_;
 
 UiSessionManager& UiSessionManager::GetInstance()
 {
@@ -24,88 +25,116 @@ UiSessionManager& UiSessionManager::GetInstance()
     return instance_;
 }
 
-void UiSessionManager::ReportClickEvent()
+void UiSessionManager::ReportClickEvent(std::string data)
 {
-    auto reportService = iface_cast<ReportService>(reportObject_);
-    if (reportService != nullptr) {
-        reportService->ReportClickEvent();
-    } else {
-        LOGW("report click event failed");
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportClickEvent(data);
+        } else {
+            LOGW("report click event failed,process id:%{public}d", pair.first);
+        }
     }
 }
 
-void UiSessionManager::ReportSearchEvent()
+void UiSessionManager::ReportSearchEvent(std::string data)
 {
-    auto reportService = iface_cast<ReportService>(reportObject_);
-    if (reportService != nullptr) {
-        reportService->ReportClickEvent();
-    } else {
-        LOGW("report search event failed");
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportSearchEvent(data);
+        } else {
+            LOGW("report search event failed,process id:%{public}d", pair.first);
+        }
     }
 }
 
-void UiSessionManager::ReportRouterChangeEvent()
+void UiSessionManager::ReportRouterChangeEvent(std::string data)
 {
-    auto reportService = iface_cast<ReportService>(reportObject_);
-    if (reportService != nullptr) {
-        reportService->ReportClickEvent();
-    } else {
-        LOGW("report switch event failed");
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportRouterChangeEvent(data);
+        } else {
+            LOGW("report switch event failed,process id:%{public}d", pair.first);
+        }
     }
 }
 
-void UiSessionManager::ReportComponentChangeEvent()
+void UiSessionManager::ReportComponentChangeEvent(std::string data)
 {
-    auto reportService = iface_cast<ReportService>(reportObject_);
-    if (reportService != nullptr) {
-        reportService->ReportClickEvent();
-    } else {
-        LOGW("report component event failed");
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportComponentChangeEvent(data);
+        } else {
+            LOGW("report component event failed,process id:%{public}d", pair.first);
+        }
     }
 }
 
-void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub)
+void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
-    reportObject_ = reportStub;
+    reportObjectMap_.emplace(processId, reportStub);
 }
 
 void UiSessionManager::SetClickEventRegistered(bool status)
 {
-    isClickEventRegistered_ = status;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (status) {
+        clickEventRegisterProcesses_++;
+    } else {
+        clickEventRegisterProcesses_--;
+    }
 }
 
 void UiSessionManager::SetSearchEventRegistered(bool status)
 {
-    isSearchEventRegistered_ = status;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (status) {
+        searchEventRegisterProcesses_++;
+    } else {
+        searchEventRegisterProcesses_--;
+    }
 }
 
 void UiSessionManager::SetRouterChangeEventRegistered(bool status)
 {
-    isRouterChangeEventRegistered_ = status;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (status) {
+        routerChangeEventRegisterProcesses_++;
+    } else {
+        routerChangeEventRegisterProcesses_--;
+    }
 }
 
 void UiSessionManager::SetComponentChangeEventRegistered(bool status)
 {
-    isComponentChangeEventRegistered_ = status;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (status) {
+        componentChangeEventRegisterProcesses_++;
+    } else {
+        componentChangeEventRegisterProcesses_--;
+    }
 }
 
 bool UiSessionManager::GetClickEventRegistered()
 {
-    return isClickEventRegistered_;
+    return clickEventRegisterProcesses_ > 0 ? true : false;
 }
 
 bool UiSessionManager::GetSearchEventRegistered()
 {
-    return isSearchEventRegistered_;
+    return searchEventRegisterProcesses_ > 0 ? true : false;
 }
 
 bool UiSessionManager::GetRouterChangeEventRegistered()
 {
-    return isRouterChangeEventRegistered_;
+    return routerChangeEventRegisterProcesses_ > 0 ? true : false;
 }
 
 bool UiSessionManager::GetComponentChangeEventRegistered()
 {
-    return isComponentChangeEventRegistered_;
+    return componentChangeEventRegisterProcesses_ > 0 ? true : false;
 }
 } // namespace OHOS::Ace

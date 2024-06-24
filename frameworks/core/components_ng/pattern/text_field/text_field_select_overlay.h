@@ -38,6 +38,12 @@ public:
     // override BaseTextSelectOverlay
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
+
+    bool OnlyAllowedPasteNonEmptyString() override
+    {
+        return true;
+    }
+
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
 

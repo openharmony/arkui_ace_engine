@@ -216,18 +216,20 @@ void NavigationPattern::OnModifyDone()
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
-
-        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        uint8_t ignoreExpandKeyboard = 0x11;
+        SafeAreaExpandOpts optsExceptKeyboard = { .type = opts->type & ignoreExpandKeyboard,
+            .edges = opts->edges };
+        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         navBarNode->MarkModifyDone();
 
         auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
         CHECK_NULL_VOID(navigationContentNode);
-        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         navigationContentNode->MarkModifyDone();
 
         auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
         CHECK_NULL_VOID(dividerNode);
-        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         dividerNode->MarkModifyDone();
     }
 
@@ -2306,7 +2308,7 @@ void NavigationPattern::RecoveryToLastStack()
 
     // update cached node
     auto destinationNodes = navigationStack_->GetAllNavDestinationNodes();
-    for (auto index = 0; index < destinationNodes.size(); index++) {
+    for (uint32_t index = 0; index < destinationNodes.size(); index++) {
         auto childNode = destinationNodes[index];
         if (!childNode.second) {
             continue;

@@ -351,6 +351,7 @@ public:
     {
         return isDownScroll_;
     }
+    void ResetOptionPropertyHeight();
 
 private:
     void OnModifyDone() override;
@@ -425,7 +426,6 @@ private:
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();
 
-    void ResetOptionPropertyHeight();
     bool IsTextFadeOut();
     void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 

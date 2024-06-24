@@ -321,8 +321,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     auto movingPhotoPattern = WeakClaim(this);
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
-            CHECK_NULL_VOID(&movingPhotoPattern);
+        uiTaskExecutor.PostTask([movingPhotoPattern, currentPos] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -331,8 +330,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
-            CHECK_NULL_VOID(&movingPhotoPattern);
+        uiTaskExecutor.PostTask([movingPhotoPattern, status] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -342,7 +340,6 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
-            CHECK_NULL_VOID(&movingPhotoPattern);
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -351,8 +348,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
-            CHECK_NULL_VOID(&movingPhotoPattern);
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -361,8 +357,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
-            CHECK_NULL_VOID(&movingPhotoPattern);
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -723,15 +718,21 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(videoRsContext);
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
+    auto movingPhotoPattern = WeakClaim(this);
     AnimationOption animationOption;
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
-    animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED
-                                                         || !startAnimationFlag_) {
+    animationOption.SetOnFinishEvent([movingPhotoPattern]() {
+        auto movingPhoto = movingPhotoPattern.Upgrade();
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent1.");
+        CHECK_NULL_VOID(movingPhoto);
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent2.");
+        if (movingPhoto->currentPlayStatus_ == PlaybackStatus::PAUSED
+            || movingPhoto->currentPlayStatus_ == PlaybackStatus::STOPPED
+            || !movingPhoto->startAnimationFlag_) {
             return;
         }
-        HideImageNode();
+        movingPhoto->HideImageNode();
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
@@ -776,11 +777,16 @@ void MovingPhotoPattern::StopAnimation()
     videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     video->MarkModifyDone();
 
+    auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
-    option.SetOnFinishEvent([this]() {
-        Seek(0);
+    option.SetOnFinishEvent([movingPhotoPattern]() {
+        auto movingPhoto = movingPhotoPattern.Upgrade();
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StopAnimation OnFinishEvent1.");
+        CHECK_NULL_VOID(movingPhoto);
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StopAnimation OnFinishEvent2.");
+        movingPhoto->Seek(0);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -850,7 +856,7 @@ void MovingPhotoPattern::Stop()
 
 void MovingPhotoPattern::Seek(int32_t position)
 {
-    if (!mediaPlayer_) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }

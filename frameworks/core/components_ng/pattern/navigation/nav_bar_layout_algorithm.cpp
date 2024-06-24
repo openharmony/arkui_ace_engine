@@ -359,8 +359,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     auto pattern = hostNode->GetPattern<NavBarPattern>();
-    float keyboardOffset = pattern ? pattern->GetKeyboardOffset() : 0.0f;
-    auto contentOffset = OffsetF(0.0f, keyboardOffset);
+    float avoidKeyboardOffset = pattern ? pattern->GetAvoidKeyboardOffset() : 0.0f;
+    auto contentOffset = OffsetF(0.0f, avoidKeyboardOffset);
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         contentOffset += OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
     }

@@ -2056,7 +2056,7 @@ HWTEST_F(RichEditorEditTestNg, ShowHandles001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = true;
     auto pasteStr = richEditorPattern->GetPasteStr();
     richEditorPattern->InsertValueByPaste(pasteStr);
-    EXPECT_EQ(richEditorPattern->isTextChange_, true);
+    EXPECT_EQ(richEditorPattern->caretVisible_, true);
 
     richEditorPattern->GetThumbnailCallback();
     EXPECT_EQ(richEditorPattern->dragNode_, nullptr);

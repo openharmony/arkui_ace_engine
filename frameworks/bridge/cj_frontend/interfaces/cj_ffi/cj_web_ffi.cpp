@@ -202,6 +202,9 @@ void RequestPermissionsFromUserWeb(CJWebPermissionRequest& request)
     std::string permission = "ohos.permission.READ_PASTEBOARD";
     char* cPermission = MallocCString(permission);
 
+    if (cPermission == nullptr) {
+        return;
+    }
     auto callBack = [&request](RetDataCPermissionRequestResult infoRef) -> void {
         if (infoRef.code == 0) {
             request.GetAccessibleResources();

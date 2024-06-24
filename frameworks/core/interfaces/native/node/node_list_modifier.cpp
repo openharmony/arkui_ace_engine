@@ -629,6 +629,16 @@ void ResetListFlingSpeedLimit(ArkUINodeHandle node)
     ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
 }
 
+void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto divider = ListModelNG::GetDivider(frameNode);
+    option->color = divider.color.GetValue();
+    option->strokeWidth = divider.strokeWidth.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->startMargin = divider.startMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -647,7 +657,7 @@ const ArkUIListModifier* GetListModifier()
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit };
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider };
     return &modifier;
 }
 

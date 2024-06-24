@@ -817,10 +817,19 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 
 PipelineContext* UINode::GetContext()
 {
+    PipelineContext* context = nullptr;
     if (context_) {
-        return context_;
+        context = context_;
+    } else {
+        context = PipelineContext::GetCurrentContextPtrSafely();
     }
-    return PipelineContext::GetCurrentContextPtrSafely();
+    
+    if (context && context->IsDestroyed()) {
+        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
+            context_? " not" : "");
+    }
+
+    return context;
 }
 
 PipelineContext* UINode::GetContextWithCheck()

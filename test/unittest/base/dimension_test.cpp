@@ -16,9 +16,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,6 +35,7 @@ const Dimension DIMENSION_LPX(DEFAULT_DOUBLE, DimensionUnit::LPX);
 const Dimension DIMENSION_PCT(DEFAULT_DOUBLE, DimensionUnit::PERCENT);
 const Dimension DIMENSION_AUTO(DEFAULT_DOUBLE, DimensionUnit::AUTO);
 const Dimension DIMENSION_CALC(DEFAULT_DOUBLE, DimensionUnit::CALC);
+const Dimension DIMENSION_NONE(DEFAULT_DOUBLE, DimensionUnit::NONE);
 
 const std::string DIMENSION_PX_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("px");
 const std::string DIMENSION_VP_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("vp");
@@ -42,8 +43,8 @@ const std::string DIMENSION_FP_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE)
 const std::string DIMENSION_LPX_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("lpx");
 const std::string DIMENSION_PCT_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE * 100).append("%");
 const std::string DIMENSION_AUTO_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("auto");
+const std::string DIMENSION_NONE_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("none");
 } // namespace
-
 
 class DimensionTest : public testing::Test {
 public:
@@ -75,6 +76,7 @@ HWTEST_F(DimensionTest, DimensionTest001, TestSize.Level1)
     EXPECT_DOUBLE_EQ(DIMENSION_PCT.ConvertToVp(), ZERO_DOUBLE);
     EXPECT_DOUBLE_EQ(DIMENSION_AUTO.ConvertToVp(), ZERO_DOUBLE);
     EXPECT_DOUBLE_EQ(DIMENSION_CALC.ConvertToVp(), ZERO_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_NONE.ConvertToVp(), DEFAULT_DOUBLE);
 }
 
 /**
@@ -95,6 +97,7 @@ HWTEST_F(DimensionTest, DimensionTest002, TestSize.Level1)
     EXPECT_DOUBLE_EQ(DIMENSION_PCT.ConvertToPx(), ZERO_DOUBLE);
     EXPECT_DOUBLE_EQ(DIMENSION_AUTO.ConvertToPx(), ZERO_DOUBLE);
     EXPECT_DOUBLE_EQ(DIMENSION_CALC.ConvertToPx(), ZERO_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_NONE.ConvertToPx(), DEFAULT_DOUBLE);
 }
 
 /**
@@ -114,6 +117,11 @@ HWTEST_F(DimensionTest, DimensionTest003, TestSize.Level1)
     EXPECT_EQ(DIMENSION_LPX.ToString(), DIMENSION_LPX_STR);
     EXPECT_EQ(DIMENSION_PCT.ToString(), DIMENSION_PCT_STR);
     EXPECT_EQ(DIMENSION_AUTO.ToString(), DIMENSION_AUTO_STR);
+    Dimension dimension(DEFAULT_DOUBLE);
+    dimension.SetUnit(static_cast<DimensionUnit>(7));
+    EXPECT_EQ(dimension.ToString(), DIMENSION_PX_STR);
+    dimension.SetUnit(DimensionUnit::NONE);
+    EXPECT_EQ(dimension.ToString(), DIMENSION_NONE_STR);
 }
 
 /**
@@ -248,5 +256,63 @@ HWTEST_F(DimensionTest, DimensionTest005, TestSize.Level1)
     result = 0;
     EXPECT_FALSE(DIMENSION_CALC.NormalizeToPx(DEFAULT_DOUBLE, DEFAULT_DOUBLE, DEFAULT_DOUBLE, DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
+}
+
+/**
+ * @tc.name: DimensionTest006
+ * @tc.desc: ConvertToFp().
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test the function ConvertToFp of the class Dimension.
+     * @tc.expected: The return values are equal to DEFAULT_DOUBLE or ZERO_DOUBLE
+     */
+    EXPECT_DOUBLE_EQ(DIMENSION_PX.ConvertToFp(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_VP.ConvertToFp(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_FP.ConvertToFp(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_LPX.ConvertToFp(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_PCT.ConvertToFp(), ZERO_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_AUTO.ConvertToFp(), ZERO_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_CALC.ConvertToFp(), ZERO_DOUBLE);
+    EXPECT_DOUBLE_EQ(DIMENSION_NONE.ConvertToFp(), DEFAULT_DOUBLE);
+}
+
+/**
+ * @tc.name: DimensionTest007
+ * @tc.desc: FromString().
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test the function FromString of the class Dimension.
+     * @tc.expected: The return values are equal to DEFAULT_DOUBLE or ZERO_DOUBLE
+     */
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_PX_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_VP_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_FP_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_LPX_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_PCT_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString(DIMENSION_AUTO_STR).Value(), DEFAULT_DOUBLE);
+    EXPECT_DOUBLE_EQ(Dimension::FromString("").Value(), ZERO_DOUBLE);
+}
+
+/**
+ * @tc.name: DimensionTest008
+ * @tc.desc: ConvertToPxWithSize().
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test the function ConvertToPxWithSize of the class Dimension.
+     * @tc.expected: The return values are equal to DEFAULT_DOUBLE * size.
+     */
+    Dimension dimension(DEFAULT_DOUBLE, DimensionUnit::PERCENT);
+    EXPECT_DOUBLE_EQ(dimension.ConvertToPxWithSize(5.0), DEFAULT_DOUBLE * 5.0);
+    dimension.SetUnit(DimensionUnit::PX);
+    EXPECT_DOUBLE_EQ(dimension.ConvertToPxWithSize(5.0), DEFAULT_DOUBLE);
 }
 } // namespace OHOS::Ace

@@ -247,6 +247,8 @@ public:
     }
 
     /**
+     * The task use PostDelayedTask will new an object TraceId, when use
+     * RemoveTask will cause memory overflow.
      * Post a delayed task without traceId to the specified thread.
      * Never allow to post a background delayed task.
      *

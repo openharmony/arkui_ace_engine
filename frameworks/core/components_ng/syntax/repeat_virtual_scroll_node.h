@@ -36,8 +36,7 @@ class ACE_EXPORT RepeatVirtualScrollNode : public ForEachBaseNode {
     DECLARE_ACE_TYPE(RepeatVirtualScrollNode, ForEachBaseNode);
 
 public:
-    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId,
-        uint32_t totalCount,
+    static RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
         const std::map<std::string, uint32_t>& templateCachedCountMap,
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
@@ -82,6 +81,14 @@ public:
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
+    /**
+     * those items with index in cachedItems are marked active
+     * those items with index in cachedItems are marked inactive
+     * baseIndex is repeat first node index
+     */
+    void DoSetActiveChildRange(
+        const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex) override;
+
     // largely unknown when it is expected to be called
     // meant to inform which items with index [ from .. to ] can be recycled / updated
     void RecycleItems(int32_t from, int32_t to) override;
@@ -125,7 +132,7 @@ public:
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
-            child->SetJSViewActive(active);
+            child.item->SetJSViewActive(active);
         }
         isActive_ = active;
     }
@@ -133,7 +140,7 @@ public:
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
-            child->PaintDebugBoundaryTreeAll(flag);
+            child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
 

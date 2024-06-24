@@ -40,18 +40,18 @@ class SynchedPropertySimpleOneWay<T> extends ObservedPropertySimpleAbstract<T> {
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || 'unknown'}']: get returns '${this.wrappedValue_}'`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }
 
   public set(newValue: T): void {
     if (this.wrappedValue_ == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || 'unknown'}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || 'unknown'}']: set from '${this.wrappedValue_} to '${newValue}'.`);
     this.wrappedValue_ = newValue;
     this.notifyHasChanged(newValue);
   }
@@ -68,7 +68,7 @@ class SynchedPropertySimpleOneWay<T> extends ObservedPropertySimpleAbstract<T> {
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
-    throw new Error("Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.");
+    throw new Error('Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.');
   }
 }
 
@@ -98,7 +98,7 @@ class SynchedPropertySimpleOneWaySubscribing<T> extends SynchedPropertySimpleOne
 
 
   hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || "unknown"}']: source property hasChanged'.`)
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || 'unknown'}']: source property hasChanged'.`)
     this.set(newValue);
   }
 

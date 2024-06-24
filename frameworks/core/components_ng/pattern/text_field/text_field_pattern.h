@@ -1301,6 +1301,11 @@ public:
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
+    bool IsPressSelectedBox()
+    {
+        return isPressSelectedBox_;
+    }
+
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
     void HiddenMenu();
 
@@ -1522,6 +1527,8 @@ private:
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
+    bool GetTouchInnerPreviewText(const Offset& offset) const;
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1576,6 +1583,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     bool scrollable_ = true;
     bool blockPress_ = false;
+    bool isPressSelectedBox_ = false;
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
@@ -1699,16 +1707,16 @@ private:
     bool isFocusTextColorSet_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText_ = true;
+    bool hasSupportedPreviewText_ = false;
     bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
-    bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
+    bool isTouchPreviewText_ = false;
 };
 } // namespace OHOS::Ace::NG
 

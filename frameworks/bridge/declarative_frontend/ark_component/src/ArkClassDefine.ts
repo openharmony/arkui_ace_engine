@@ -582,7 +582,7 @@ class ArkBackgroundImageSize {
 }
 
 class ArkBackgroundImage {
-  src: string | undefined | Resource;
+  src: string | undefined | Resource | PixelMap;
   repeat: number | undefined;
   constructor() {
     this.src = undefined;

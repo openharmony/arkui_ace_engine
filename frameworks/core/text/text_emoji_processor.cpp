@@ -220,7 +220,11 @@ std::wstring TextEmojiProcessor::SubWstring(
     int32_t index, int32_t length, const std::wstring& content, bool includeHalf)
 {
     TextEmojiSubStringRange range = CalSubWstringRange(index, length, content, includeHalf);
-    return content.substr(range.startIndex, range.endIndex - range.startIndex);
+    int32_t rangeLength = range.endIndex - range.startIndex;
+    if (rangeLength == 0) {
+        return L"";
+    }
+    return content.substr(range.startIndex, rangeLength);
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
@@ -233,7 +237,15 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     std::string curStr = StringUtils::ToString(content);
-    // clamp left emoji
+    // exclude right overflow emoji
+    if (!includeHalf && IsIndexInEmoji(endIndex - 1, curStr, emojiStartIndex, emojiEndIndex) &&
+        emojiEndIndex > index + length) {
+        emojiEndIndex = emojiStartIndex;
+        length = emojiEndIndex - index;
+        length = std::max(length, 0);
+        endIndex = index + length;
+    }
+    // process left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, curStr, emojiStartIndex, emojiEndIndex)) {
         if (startIndex != emojiStartIndex && !includeHalf) {
             startIndex = emojiEndIndex; // exclude current emoji
@@ -242,7 +254,7 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubWstringRange(
             startIndex = emojiStartIndex; // include current emoji
         }
     }
-    // clamp right emoji
+    // process right emoji
     if (IsIndexAfterOrInEmoji(endIndex, curStr, emojiStartIndex, emojiEndIndex)) {
         if (endIndex != emojiEndIndex && !includeHalf) {
             endIndex = emojiStartIndex; // exclude current emoji
@@ -298,7 +310,10 @@ int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
         // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
         std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
         u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-    } while (static_cast<int32_t>(u32Content.length()) == 0 && --startIndex >= 0);
+        if (static_cast<int32_t>(u32Content.length()) == 0) {
+            --startIndex;
+        }
+    } while (static_cast<int32_t>(u32Content.length()) == 0 && startIndex >= 0);
     if (static_cast<int32_t>(u32Content.length()) == 0) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthForward u32Content is 0");
         return 0;

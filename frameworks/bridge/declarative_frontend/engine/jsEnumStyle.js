@@ -2179,7 +2179,7 @@ class NavPathStack {
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
       this.pathArray.pop();
-      promise = new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }

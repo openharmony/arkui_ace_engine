@@ -126,44 +126,6 @@ DrawingContext SelectOverlayTestNg::GetDrawingContext(Testing::MockCanvas& canva
 }
 
 /**
- * @tc.name: SelectFrameNodeCreator001
- * @tc.desc: Test CreateSelectOverlayNode
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, SelectFrameNodeCreator001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode with using mouse.
-     * @tc.expected: the selectOverlayNode is created successfully.
-     */
-    SelectOverlayInfo selectInfo;
-    selectInfo.menuInfo.menuIsShow = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    selectInfo.isUsingMouse = true;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
-    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    EXPECT_NE(selectOverlayNode, nullptr);
-
-    /**
-     * @tc.steps: step2. Create selectOverlayNode with extension.
-     * @tc.expected: the selectOverlayNode including selectMenu is created successfully.
-     */
-    SelectOverlayInfo selectInfo2;
-    selectInfo2.menuInfo.menuIsShow = true;
-    selectInfo2.menuInfo.showCopy = false;
-    selectInfo2.menuInfo.showCopyAll = false;
-    selectInfo2.menuOptionItems = GetMenuOptionItems();
-    auto infoPtr2 = std::make_shared<SelectOverlayInfo>(selectInfo2);
-    auto frameNode2 = SelectOverlayNode::CreateSelectOverlayNode(infoPtr2);
-    auto selectOverlayNode2 = AceType::DynamicCast<SelectOverlayNode>(frameNode2);
-    EXPECT_NE(selectOverlayNode2->selectMenu_, nullptr);
-    EXPECT_NE(selectOverlayNode2->selectMenuInner_, nullptr);
-}
-/**
  * @tc.name: SelectFrameNodeCreator002
  * @tc.desc: Test CreateSelectOverlayNode
  * @tc.type: FUNC
@@ -4040,7 +4002,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
     float maxWidth = 8.0f;
     float allocatedSize = 14.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -4068,7 +4030,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
     float maxWidth = 8.0f;
     float allocatedSize = 11.0f;
     auto ret = selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**

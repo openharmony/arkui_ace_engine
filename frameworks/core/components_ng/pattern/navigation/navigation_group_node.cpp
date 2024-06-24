@@ -214,7 +214,8 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     auto pattern = GetPattern<NavigationPattern>();
     // record remove destination size
     int32_t removeSize = 0;
-    while (static_cast<int32_t>(slot) + removeSize < navigationContentNode->GetChildren().size()) {
+    while (
+        static_cast<int32_t>(slot) + removeSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
         if (!navDestination) {
@@ -342,6 +343,16 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
+}
+
+RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigationStack = pattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, nullptr);
+    auto topNavdestination = AceType::DynamicCast<FrameNode>(GetNavDestinationNode(navigationStack->Get()));
+    return topNavdestination;
 }
 
 bool NavigationGroupNode::CheckCanHandleBack()

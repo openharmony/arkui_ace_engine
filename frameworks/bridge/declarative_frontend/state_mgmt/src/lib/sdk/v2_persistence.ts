@@ -15,11 +15,11 @@
 
 const enum PersistError {
   Quota = 'quota',
-  Serialisation = 'serialisation',
+  Serialization = 'serialization',
   Unknown = 'unknown'
 };
 
-type PersistErrorType = PersistError.Quota | PersistError.Serialisation | PersistError.Unknown;
+type PersistErrorType = PersistError.Quota | PersistError.Serialization | PersistError.Unknown;
 type PersistErrorCallback = ((key: string, reason: PersistErrorType, message: string) => void) | undefined;
 
 class AppStorageV2Impl {
@@ -144,7 +144,7 @@ class PersistenceV2Impl {
         ObserveV2.getObserve().stopRecordDependencies();
       } catch (err) {
         if (this.cb_ && typeof this.cb_ === 'function') {
-          this.cb_(key, PersistError.Serialisation, err);
+          this.cb_(key, PersistError.Serialization, err);
           return undefined;
         }
 
@@ -199,7 +199,7 @@ class PersistenceV2Impl {
         PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(value));
       } catch (err) {
         if (this.cb_ && typeof this.cb_ === 'function') {
-          this.cb_(key, PersistError.Serialisation, err);
+          this.cb_(key, PersistError.Serialization, err);
           return;
         }
         throw err;
@@ -234,7 +234,7 @@ class PersistenceV2Impl {
         }
       } catch (err) {
         if (this.cb_ && typeof this.cb_ === 'function') {
-          this.cb_(key, PersistError.Serialisation, err);
+          this.cb_(key, PersistError.Serialization, err);
           continue;
         }
 

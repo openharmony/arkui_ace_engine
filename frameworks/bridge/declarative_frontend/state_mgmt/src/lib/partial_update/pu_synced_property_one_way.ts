@@ -92,7 +92,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // code path for 
         // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
         // 2- nested Object/Array inside observed another object/array in parent, source is its value
-        if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+        if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
           stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
             Object property changes will not be observed.`);
         }
@@ -132,7 +132,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // 1. the embedded ObservedPropertyPU, followed by a reset when the owning ViewPU received a local update in parent 
   // 2. a @Link or @Consume that uses this @Prop as a source.  FIXME is this possible? - see the if (eventSource && this.source_ == eventSource) {
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
-    stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerHasChanged");
+    stateMgmtProfiler.begin('SyncedPropertyOneWayPU.syncPeerHasChanged');
     if (this.source_ === undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
       stateMgmtProfiler.end();
@@ -156,7 +156,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
 
   public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName): void {
-    stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerTrackedPropertyHasChanged");
+    stateMgmtProfiler.begin('SyncedPropertyOneWayPU.syncPeerTrackedPropertyHasChanged');
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
       stateMgmtProfiler.end();
@@ -327,11 +327,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     // therefore shallowCopyObject will always be used in API version 9 and before
     // but the code in this file is the same regardless of API version
     stateMgmtConsole.debug(`${this.debugInfo()}: copyObject: Version: \
-    ${(typeof ViewStackProcessor["getApiVersion"] === 'function') ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
-    will use ${((typeof ViewStackProcessor["getApiVersion"] === 'function') && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
+    ${(typeof ViewStackProcessor['getApiVersion'] === 'function') ? ViewStackProcessor['getApiVersion']() : 'unknown'}, \
+    will use ${((typeof ViewStackProcessor['getApiVersion'] === 'function') && (ViewStackProcessor['getApiVersion']() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
 
-    return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
-      (ViewStackProcessor["getApiVersion"]() >= 10))
+    return ((typeof ViewStackProcessor['getApiVersion'] == 'function') &&
+      (ViewStackProcessor['getApiVersion']() >= 10))
       ? this.deepCopyObject(value, propName)
       : this.shallowCopyObject(value, propName);
   }
@@ -343,7 +343,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     if (!rawValue || typeof rawValue !== 'object') {
       copy = rawValue;
-    } else if (typeof rawValue != "object") {
+    } else if (typeof rawValue != 'object') {
       // FIXME would it be better to throw Exception here?
       stateMgmtConsole.error(`${this.debugInfo()}: shallowCopyObject: request to copy non-object value, actual type is '${typeof rawValue}'. Internal error! Setting copy:=original value.`);
       copy = rawValue;

@@ -1800,4 +1800,51 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
     EXPECT_FALSE(parentFocusHub->OnKeyEventScope(keyEvent));
 }
+
+
+/**
+ * @tc.name: FocusHubTestNg0108
+ * @tc.desc: Test the function HasFocusedChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: call the function HasFocusedChild with true and FocusType::SCOPE
+     */
+    focusHub->currentFocus_ = true;
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub->HasFocusedChild();
+
+
+    /**
+     * @tc.steps3: call the function HasFocusedChild with true and FocusType::DISABLE
+     * @tc.expected: The return value of HasFocusedChild is false.
+     */
+    focusHub->focusType_ = FocusType::DISABLE;
+    ASSERT_FALSE(focusHub->HasFocusedChild());
+
+    /**
+     * @tc.steps4: call the function HasFocusedChild with false and FocusType::DISABLE
+     * @tc.expected: The return value of HasFocusedChild is false.
+     */
+    focusHub->currentFocus_ = false;
+    focusHub->focusType_ = FocusType::DISABLE;
+    ASSERT_FALSE(focusHub->HasFocusedChild());
+
+
+    /**
+     * @tc.steps5: call the function HasFocusedChild with false and FocusType::SCOPE
+     * @tc.expected: The return value of HasFocusedChild is false.
+     */
+    focusHub->focusType_ = FocusType::SCOPE;
+    ASSERT_FALSE(focusHub->HasFocusedChild());
+}
 } // namespace OHOS::Ace::NG

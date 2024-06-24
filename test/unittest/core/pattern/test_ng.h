@@ -47,7 +47,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
-    void CreateDone(const RefPtr<FrameNode>& frameNode);
+    RefPtr<PaintWrapper> CreateDone(const RefPtr<FrameNode>& frameNode);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);

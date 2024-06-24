@@ -295,7 +295,6 @@ void WebPattern::OnAttachToFrameNode()
     SetRotation(pipeline->GetTransformHint());
 
     host->GetRenderContext()->SetClipToFrame(true);
-    host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -492,8 +491,11 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleScaleGestureChange(event);
-        TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ", event.GetScale());
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            pattern->HandleScaleGestureChange(event);
+            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ",
+                event.GetScale());
+        }
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -533,10 +535,13 @@ bool WebPattern::CheckZoomStatus(const double& curScale)
 
 bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
 {
+    int32_t curScaleNew = (int32_t)(curScale * 100);
+    int32_t preScaleNew = (int32_t)(preScale_ * 100);
+
     // zoom out
     if (curScale - preScale_ >= 0) {
         if (preScale_ >= DEFAULT_PINCH_SCALE) {
-            if (startPinchScale_  >= DEFAULT_PINCH_SCALE) {
+            if (startPinchScale_ >= DEFAULT_PINCH_SCALE) {
                 scale = curScale;
             } else {
                 scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
@@ -571,15 +576,12 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                                          "than the previous scale value, ignore data.");
             return false;
         }
-        // The scale is from 1.x to 0.9, zomm in
-        if (preScale_ > DEFAULT_PINCH_SCALE) {
-            scale = curScale;
 
-            // reset
-            startPinchScale_ = curScale;
-        } else {
-            scale = ZOOMIN_SMOOTH_SCALE;
+        if (curScaleNew == preScaleNew) {
+            return false;
         }
+
+        scale = ZOOMIN_SMOOTH_SCALE;
 
         zoomStatus_ = STATUS_ZOOMIN;
     }
@@ -761,6 +763,8 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         WebRequestFocus();
     }
 
+    // set touchup false when using mouse
+    isTouchUpEvent_ = false;
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
         if (isReceivedArkDrag_) {
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop Do not reset drag action when dragging,"
@@ -1059,7 +1063,11 @@ void WebPattern::InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub)
         if (!pattern->isDragging_) {
             return;
         }
-        pattern->OnQuickMenuDismissed();
+
+        if (pattern->selectOverlayProxy_ && !pattern->selectOverlayProxy_->IsClosed()) {
+            pattern->needRestoreMenuForDrag_ = true;
+            pattern->OnQuickMenuDismissed();
+        }
 
         // update drag status
         info->SetResult(pattern->GetDragAcceptableStatus());
@@ -1158,7 +1166,8 @@ bool WebPattern::NotifyStartDragTask()
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag, and start drag task for web");
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
+        "is mouse event: %{public}d", isMouseEvent_);
     gestureHub->StartDragTaskForWeb();
     return true;
 }
@@ -2232,6 +2241,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
+        UpdateBackgroundColorRightNow();
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -2273,6 +2283,9 @@ void WebPattern::OnModifyDone()
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
+        UpdateBackgroundColorRightNow();
+        bool isApiGteTwelve =
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -2318,10 +2331,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverlayScrollbarEnabled(GetOverlayScrollbarEnabledValue(false));
-        bool isApiGteTwelve =
-            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
-        delegate_->UpdateOverScrollMode(
-            GetOverScrollModeValue(isApiGteTwelve ? OverScrollMode::ALWAYS : OverScrollMode::NEVER));
+        delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
@@ -2978,7 +2988,7 @@ void WebPattern::DragDropSelectionMenu()
         TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_: %{public}d", isDragEndMenuShow_);
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
@@ -2996,7 +3006,8 @@ void WebPattern::DragDropSelectionMenu()
     RegisterSelectOverlayEvent(selectInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (!selectOverlayProxy_) {
+    if (!selectOverlayProxy_ && needRestoreMenuForDrag_) {
+        needRestoreMenuForDrag_ = false;
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     }
@@ -3999,6 +4010,27 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
+}
+
+void WebPattern::UpdateBackgroundColorRightNow()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto color = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+    if (color == Color::TRANSPARENT && delegate_) {
+        auto colorMode = delegate_->GetSystemColorMode();
+        color = Color::WHITE;
+        if (colorMode == "dark") {
+            color = Color::BLACK;
+        }
+    }
+    renderContext->UpdateBackgroundColor(color);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(color);
 }
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
@@ -4369,6 +4401,9 @@ void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetX());
     if (fitContentOffset_.GetX() >= 0) {
+        if (isNeedReDrawRect_) {
+            SetDrawRect(0, 0, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, drawRectHeight_, isNeedReset);
+        }
         isNeedReDrawRect_ = false;
         return;
     }
@@ -4391,6 +4426,9 @@ void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetY());
     if (fitContentOffset_.GetY() >= 0) {
+        if (isNeedReDrawRect_) {
+            SetDrawRect(0, 0, drawRectWidth_, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, isNeedReset);
+        }
         isNeedReDrawRect_ = false;
         return;
     }
@@ -4518,10 +4556,11 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 }
 
 
-void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action) const
+void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
+    const std::map<std::string, std::string>& actionArguments) const
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(accessibilityId, action);
+    delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
 void WebPattern::SetAccessibilityState(bool state)
@@ -4573,14 +4612,7 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto offset = geometryNode->GetContentOffset();
-
-    paintRect.SetRect(info->GetRectX() + offset.GetX(), info->GetRectY() + offset.GetY(), info->GetRectWidth(),
-        info->GetRectHeight());
+    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
     return true;
 }
 
@@ -4734,6 +4766,7 @@ void WebPattern::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
+    isShowAutofillPopup_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
@@ -4777,6 +4810,9 @@ void WebPattern::OnShowAutofillPopup(
 void WebPattern::OnHideAutofillPopup()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
+    if (!isShowAutofillPopup_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
@@ -4794,6 +4830,7 @@ void WebPattern::OnHideAutofillPopup()
     };
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisappear(destructor);
+    isShowAutofillPopup_ = false;
 }
 
 void WebPattern::CloseKeyboard()

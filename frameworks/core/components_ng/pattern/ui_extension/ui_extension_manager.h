@@ -49,6 +49,7 @@ constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
 }; // namespace
 
 class UIExtensionPattern;
+class SecurityUIExtensionPattern;
 class UIExtensionManager : public AceType {
     DECLARE_ACE_TYPE(UIExtensionManager, AceType);
 
@@ -101,6 +102,8 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
+    void AddAliveUIExtension(int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension);
+
 private:
     class UIExtensionIdUtility {
     public:
@@ -120,6 +123,7 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
+    std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };
 } // namespace OHOS::Ace::NG

@@ -1721,6 +1721,20 @@ class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
   }
 }
 
+class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  constructor(value: Callback<KeyEvent, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyPreIme');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyPreIme(node);
+    } else {
+      getUINativeModule().common.setOnKeyPreIme(node, this.value);
+    }
+  }
+}
+
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
   constructor(value: VoidCallback) {
     super(value);
@@ -3242,7 +3256,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
+  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat): this {
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;
@@ -3457,6 +3471,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onKeyEvent(event: (event?: KeyEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
+    return this;
+  }
+
+  onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
     return this;
   }
 

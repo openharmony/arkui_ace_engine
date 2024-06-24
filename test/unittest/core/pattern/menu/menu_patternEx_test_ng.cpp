@@ -1491,6 +1491,10 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg034, TestSize.Level1)
      */
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1524,6 +1528,10 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg035, TestSize.Level1)
 {
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    auto context = PipelineBase::GetCurrentContext();
+    if (context) {
+        context->dipScale_ = DIP_SCALE;
+    }
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));

@@ -74,7 +74,7 @@ bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
 bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
-RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine = nullptr);
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj);
 bool CheckRegexValid(const std::string& pattern);
 void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options);

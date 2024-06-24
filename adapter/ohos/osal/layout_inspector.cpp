@@ -161,10 +161,8 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
 void LayoutInspector::TriggerJsStateProfilerStatusCallback(bool status)
 {
     if (jsStateProfilerStatusCallback_) {
-        auto taskExecutor = Container::CurrentTaskExecutorSafely();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([callback = jsStateProfilerStatusCallback_, status]() { callback(status); },
-            TaskExecutor::TaskType::UI, "ArkUITriggerJsStateProfilerStatusCallback");
+        stateProfilerStatus_ = status;
+        jsStateProfilerStatusCallback_(status);
     }
 }
 
@@ -185,8 +183,10 @@ void LayoutInspector::SendStateProfilerMessage(const std::string& message)
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
 {
-    stateProfilerStatus_ = status;
-    TriggerJsStateProfilerStatusCallback(status);
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [status]() { LayoutInspector::TriggerJsStateProfilerStatusCallback(status); };
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
 void LayoutInspector::SetCallback(int32_t instanceId)
@@ -242,8 +242,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipeline);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -259,11 +257,6 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 #endif
-    auto jsonTree = JsonUtil::ParseJsonString(treeJsonStr);
-    jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
-    jsonTree->Put("ProcessID", getpid());
-    jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
-    treeJsonStr = jsonTree->ToString();
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)

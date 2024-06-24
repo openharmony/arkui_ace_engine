@@ -321,6 +321,31 @@ ArkUINativeModuleValue ImageBridge::ResetEnhancedImageQuality(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ImageBridge::SetPrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t sensitive = false;
+    if (secondArg->IsBoolean()) {
+        sensitive = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    }
+    GetArkUINodeModifiers()->getImageModifier()->setImagePrivacySensitive(nativeNode, sensitive);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetPrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageModifier()->resetImagePrivacySensitive(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ImageBridge::SetRenderMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -517,11 +542,9 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string src;
     if (!ArkTSUtils::ParseJsMedia(vm, secondArg, src)) {
-        GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     std::string bundleName;
@@ -535,10 +558,6 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
 ArkUINativeModuleValue ImageBridge::ResetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getImageModifier()->resetAlt(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

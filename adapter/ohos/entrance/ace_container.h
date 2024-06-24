@@ -180,6 +180,16 @@ public:
         return resRegister_;
     }
 
+    UIContentType GetUIContentType() const
+    {
+        return uIContentType_;
+    }
+
+    void SetUIContentType(UIContentType uIContentType)
+    {
+        uIContentType_ = uIContentType;
+    }
+
     RefPtr<PipelineBase> GetPipelineContext() const override
     {
         std::lock_guard<std::mutex> lock(pipelineMutex_);
@@ -636,7 +646,9 @@ public:
     OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
+    bool NeedFullUpdate(uint32_t limitKey);
     void NotifyDensityUpdate();
+    void NotifyDirectionUpdate();
 
 private:
     virtual bool MaybeRelease() override;
@@ -719,6 +731,7 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
+    UIContentType uIContentType_ = UIContentType::UNDEFINED;
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;

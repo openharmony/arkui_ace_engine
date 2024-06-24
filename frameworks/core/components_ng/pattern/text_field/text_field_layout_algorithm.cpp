@@ -374,7 +374,23 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
         textFieldWidth -= pattern->GetResponseArea()->GetFrameSize().Width();
     }
 
-    paragraph_->Layout(std::max(std::ceil(longestLine) + indent_, textFieldWidth));
+    std::optional<SizeF> minSize;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
+        const auto &calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
+            calcLayoutConstraint->minSize->Width().has_value() &&
+            !contentConstraint.selfIdealSize.Width().has_value()) {
+            minSize = contentConstraint.minSize;
+        }
+    }
+    if (minSize.has_value()) {
+        auto minWidth = minSize.value().Width();
+        paragraph_->Layout(std::max(std::ceil(longestLine) + indent_, minWidth));
+    } else {
+        paragraph_->Layout(std::max(std::ceil(longestLine) + indent_, textFieldWidth));
+    }
+
     CounterNodeMeasure(contentWidth, layoutWrapper);
     if (autoWidth_) {
         double minWidth = INLINE_MIN_WITH.ConvertToPx();

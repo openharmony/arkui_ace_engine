@@ -1630,6 +1630,19 @@ class OnKeyEventModifier extends ModifierWithKey {
   }
 }
 OnKeyEventModifier.identity = Symbol('onKeyEvent');
+class OnKeyPreImeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyPreIme(node);
+    } else {
+      getUINativeModule().common.setOnKeyPreIme(node, this.value);
+    }
+  }
+}
+OnKeyPreImeModifier.identity = Symbol('onKeyPreIme');
 class OnFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3345,6 +3358,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
     return this;
   }
+  onKeyPreIme(event) {
+    modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
+    return this;
+  }
   focusable(value) {
     if (typeof value === 'boolean') {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
@@ -4031,13 +4048,13 @@ const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 
 var CommonGestureType;
 (function (CommonGestureType) {
-    CommonGestureType[CommonGestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
-    CommonGestureType[CommonGestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
-    CommonGestureType[CommonGestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
-    CommonGestureType[CommonGestureType["SWIPE_GESTURE"] = 3] = "SWIPE_GESTURE";
-    CommonGestureType[CommonGestureType["PINCH_GESTURE"] = 4] = "PINCH_GESTURE";
-    CommonGestureType[CommonGestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
-    CommonGestureType[CommonGestureType["GESTURE_GROUP"] = 6] = "GESTURE_GROUP";
+    CommonGestureType[CommonGestureType['TAP_GESTURE'] = 0] = 'TAP_GESTURE';
+    CommonGestureType[CommonGestureType['LONG_PRESS_GESTURE'] = 1] = 'LONG_PRESS_GESTURE';
+    CommonGestureType[CommonGestureType['PAN_GESTURE'] = 2] = 'PAN_GESTURE';
+    CommonGestureType[CommonGestureType['SWIPE_GESTURE'] = 3] = 'SWIPE_GESTURE';
+    CommonGestureType[CommonGestureType['PINCH_GESTURE'] = 4] = 'PINCH_GESTURE';
+    CommonGestureType[CommonGestureType['ROTATION_GESTURE'] = 5] = 'ROTATION_GESTURE';
+    CommonGestureType[CommonGestureType['GESTURE_GROUP'] = 6] = 'GESTURE_GROUP';
 })(CommonGestureType || (CommonGestureType = {}));
 
 class GestureHandler {
@@ -6465,6 +6482,24 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('analyzerConfig');
 
+class ImagePrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetPrivacySensitive(node);
+    }
+    else {
+      getUINativeModule().image.setPrivacySensitive(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ImagePrivacySensitiveModifier.identity = Symbol('imagePrivacySensitive');
+
 class ImageOnCompleteModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6628,6 +6663,11 @@ class ArkImageComponent extends ArkComponent {
   enableAnalyzer(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  privacySensitive(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImagePrivacySensitiveModifier.identity, ImagePrivacySensitiveModifier, value);
     return this;
   }
   analyzerConfig(value) {
@@ -9845,6 +9885,23 @@ class TextDraggableModifier extends ModifierWithKey {
   }
 }
 TextDraggableModifier.identity = Symbol('textDraggable');
+class TextPrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetPrivacySensitive(node);
+    }
+    else {
+      getUINativeModule().text.setPrivacySensitive(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextPrivacySensitiveModifier.identity = Symbol('textPrivacySensitive');
 class TextWordBreakModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10477,6 +10534,10 @@ class ArkTextComponent extends ArkComponent {
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, TextDraggableModifier.identity, TextDraggableModifier, value);
+    return this;
+  }
+  privacySensitive(value) {
+    modifierWithKey(this._modifiersWithKeys, TextPrivacySensitiveModifier.identity, TextPrivacySensitiveModifier, value);
     return this;
   }
   textShadow(value) {
@@ -15414,16 +15475,16 @@ if (globalThis.LoadingProgress !== undefined) {
       return new modifierJS.LoadingProgressModifier(nativePtr, classType);
     });
   };
-}
 
-globalThis.LoadingProgress.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkLoadingProgressComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
+  globalThis.LoadingProgress.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkLoadingProgressComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
+}
 
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
@@ -15442,6 +15503,10 @@ class ArkRefreshComponent extends ArkComponent {
   }
   pullToRefresh(value) {
     modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
+    return this;
+  }
+  pullDownRatio(value) {
+    modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
     return this;
   }
 }
@@ -15473,6 +15538,23 @@ class PullToRefreshModifier extends ModifierWithKey {
   }
 }
 PullToRefreshModifier.identity = Symbol('pullToRefresh');
+class PullDownRatioModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullDownRatio(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullDownRatio(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PullDownRatioModifier.identity = Symbol('pullDownRatio');
 // @ts-ignore
 if (globalThis.Refresh !== undefined) {
   globalThis.Refresh.attributeModifier = function (modifier) {
@@ -16162,17 +16244,16 @@ if (globalThis.Toggle !== undefined) {
       return new modifierJS.ToggleModifier(nativePtr, classType);
     });
   };
+  globalThis.Toggle.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkToggleComponent(nativeNode);
+    });
+    component.setNodePtr(nativeNode);
+    component.setContentModifier(modifier);
+  };
 }
-// @ts-ignore
-globalThis.Toggle.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkToggleComponent(nativeNode);
-  });
-  component.setNodePtr(nativeNode);
-  component.setContentModifier(modifier);
-};
 
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent {
@@ -17012,10 +17093,7 @@ if (globalThis.Radio !== undefined) {
       return new modifierJS.RadioModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-globalThis.Radio.contentModifier = function (modifier) {
+  globalThis.Radio.contentModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
@@ -17023,6 +17101,7 @@ globalThis.Radio.contentModifier = function (modifier) {
     });
     component.setContentModifier(modifier);
   };
+}
 
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent {
@@ -19218,7 +19297,7 @@ class ArkNavigationComponent extends ArkComponent {
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
-    if (types && types.length > 0) {
+    if (types && types.length >= 0) {
       let safeAreaType = '';
       for (let param of types) {
         if (!isNumber(param) || param >= SAFE_AREA_TYPE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
@@ -19235,7 +19314,7 @@ class ArkNavigationComponent extends ArkComponent {
       }
       opts.type = safeAreaType;
     }
-    if (edges && edges.length > 0) {
+    if (edges && edges.length >= 0) {
       let safeAreaEdge = '';
       for (let param of edges) {
         if (!isNumber(param) || param >= SAFE_AREA_EDGE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
@@ -20928,15 +21007,6 @@ class ArkGaugeComponent extends ArkComponent {
     return this.gaugeNode.getFrameNode();
   }
 }
-// @ts-ignore
-globalThis.Gauge.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkGaugeComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -21054,6 +21124,14 @@ if (globalThis.Gauge !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.GaugeModifier(nativePtr, classType);
     });
+  };
+  globalThis.Gauge.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkGaugeComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
@@ -21805,10 +21883,7 @@ if (globalThis.Progress !== undefined) {
       return new modifierJS.ProgressModifier(nativePtr, classType);
     });
   };
-}
 
-// @ts-ignore
-if (globalThis.Progress !== undefined) {
   globalThis.Progress.contentModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
@@ -22310,16 +22385,15 @@ if (globalThis.TextClock !== undefined) {
       return new modifierJS.TextClockModifier(nativePtr, classType);
     });
   };
+  globalThis.TextClock.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkTextClockComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
+  };
 }
-// @ts-ignore
-globalThis.TextClock.contentModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextClockComponent(nativeNode);
-  });
-  component.setContentModifier(modifier);
-};
 
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
@@ -23180,6 +23254,9 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   draggable(value) {
+    throw new Error('Method not implemented.');
+  }
+  privacySensitive(value) {
     throw new Error('Method not implemented.');
   }
   overlay(value, options) {

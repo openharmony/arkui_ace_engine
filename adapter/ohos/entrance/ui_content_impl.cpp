@@ -1521,6 +1521,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 }),
             false, false, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    container->SetUIContentType(uIContentType_);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
@@ -2100,6 +2101,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
                 pipelineContext->StartWindowAnimation();
+                container->NotifyDirectionUpdate();
             }
         }
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
@@ -2175,6 +2177,14 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+}
+
+void UIContentImpl::SetUIContentType(UIContentType uIContentType)
+{
+    uIContentType_ = uIContentType;
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetUIContentType(uIContentType);
 }
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
@@ -3290,9 +3300,6 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateFrontGrayScale(Dimension(grayscale));
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetDragNodeGrayscale(grayscale);
 }
 
 void UIContentImpl::PreLayout()

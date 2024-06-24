@@ -136,6 +136,7 @@ public:
 
 private:
     Offset GetHoverOffset(const Size& size) const;
+    void CheckMainModeNearEqual();
     // Animatable
     RefPtr<AnimatablePropertyUint8> opacity_;
     RefPtr<AnimatablePropertyFloat> barWidth_;
@@ -145,6 +146,9 @@ private:
 
     // no Animatable
     RefPtr<PropertyColor> barColor_;
+    bool isAdaptAnimationStop_ = true;
+    float lastMainModeHeight_ = 0.f;
+    float lastMainModeOffset_ = 0.f;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);
 
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;

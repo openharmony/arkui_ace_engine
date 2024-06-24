@@ -488,6 +488,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 
 void GestureEventHub::StartLongPressActionForWeb()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -506,6 +507,7 @@ void GestureEventHub::StartLongPressActionForWeb()
 
 void GestureEventHub::CancelDragForWeb()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop cancel drag for web");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -524,6 +526,7 @@ void GestureEventHub::CancelDragForWeb()
 
 void GestureEventHub::ResetDragActionForWeb()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop reset drag action for web");
     isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
@@ -532,7 +535,7 @@ void GestureEventHub::ResetDragActionForWeb()
 void GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
             "because not recv gesture info");
         return;
     }
@@ -668,6 +671,7 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
         isReceivedDragGestureInfo_ = true;
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop drag gesture info received");
     }
 }
 
@@ -980,11 +984,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
-    auto dragNodeGrayscale = dragDropManager->GetDragNodeGrayscale();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary, dragNodeGrayscale };
+        info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     std::string summarys;
     for (const auto& [udkey, recordSize] : summary) {
         std::string str = udkey + "-" + std::to_string(recordSize) + ";";
