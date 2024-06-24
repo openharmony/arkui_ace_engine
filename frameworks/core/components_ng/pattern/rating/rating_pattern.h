@@ -97,9 +97,8 @@ public:
 
     void SetRatingScore(double value);
 
-    void InitDefaultParams();
-
 private:
+    void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
     void OnModifyDone() override;
