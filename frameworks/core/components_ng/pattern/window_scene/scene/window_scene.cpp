@@ -57,7 +57,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         if (self->blankNode_) {
             self->BufferAvailableCallbackForBlank();
             self->deleteNodeTask_.Cancel();
-        } else if {
+        } else if (self->snapshotNode_) {
             self->BufferAvailableCallbackForSnapshot();
             self->deleteNodeTask_.Cancel();
         } else {
