@@ -55,7 +55,6 @@ constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
-constexpr int DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT = 10000;
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -243,13 +242,6 @@ void FormManagerDelegate::HandleCachedClickEvents()
         }
         pointerEventCache_.clear();
     }
-
-    // recycle form after handle click event
-    std::vector<int64_t> formIds = {runningCardId_};
-    AAFwk::Want want;
-    want.SetParam(OHOS::AppExecFwk::Constants::FORM_DELAY_TIME_OF_RECYCLE,
-        DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT);
-    OHOS::AppExecFwk::FormMgr::GetInstance().RecycleForms(formIds, want);
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
