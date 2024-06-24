@@ -979,8 +979,10 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::OnScrollEndCallback()
 {
-    scrollStop_ = true;
-    MarkDirtyNodeSelf();
+    if (AnimateStoped()) {
+        scrollStop_ = true;
+        MarkDirtyNodeSelf();
+    }
 }
 
 SizeF ListPattern::GetContentSize() const
@@ -1435,9 +1437,11 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
 
 void ListPattern::OnAnimateStop()
 {
-    scrollStop_ = true;
-    MarkDirtyNodeSelf();
-    isScrollEnd_ = true;
+    if (!GetIsDragging() || GetScrollAbort()) {
+        scrollStop_ = true;
+        MarkDirtyNodeSelf();
+        isScrollEnd_ = true;
+    }
 }
 
 void ListPattern::ScrollTo(float position)

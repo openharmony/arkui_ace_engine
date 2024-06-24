@@ -547,14 +547,18 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
 
 void WaterFlowPattern::OnScrollEndCallback()
 {
-    scrollStop_ = true;
+    if (AnimateStoped()) {
+        scrollStop_ = true;
+    }
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::OnAnimateStop()
 {
-    scrollStop_ = true;
+    if (!GetIsDragging() || GetScrollAbort()) {
+        scrollStop_ = true;
+    }
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }

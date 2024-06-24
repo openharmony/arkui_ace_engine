@@ -1026,7 +1026,9 @@ void ScrollablePattern::AnimateTo(
     } else {
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
-    FireOnScrollStart();
+    if (!GetIsDragging()) {
+        FireOnScrollStart();
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
