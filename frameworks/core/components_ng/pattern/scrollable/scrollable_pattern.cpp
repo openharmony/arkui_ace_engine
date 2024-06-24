@@ -559,6 +559,10 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = springEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->StopSpringAnimation();
     if (edgeEffect == EdgeEffect::FADE && !scrollEffect_) {
         auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
         CHECK_NULL_VOID(fadeEdgeEffect);
@@ -574,9 +578,6 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = fadeEdgeEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
-    CHECK_NULL_VOID(scrollableEvent_);
-    auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
 }
 
@@ -988,7 +989,7 @@ void ScrollablePattern::ScrollTo(float position)
 }
 
 void ScrollablePattern::AnimateTo(
-    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
@@ -1017,8 +1018,11 @@ void ScrollablePattern::AnimateTo(
     CHECK_NULL_VOID(host);
     AceAsyncTraceBegin(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
     if (smooth) {
+        if (!useTotalOffset) {
+            lastPosition_ = GetTotalOffset();
+        }
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
-            DEFAULT_SCROLL_TO_DAMPING);
+            DEFAULT_SCROLL_TO_DAMPING, useTotalOffset);
     } else {
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
@@ -1028,10 +1032,11 @@ void ScrollablePattern::AnimateTo(
     pipeline->RequestFrame();
 }
 
-void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping)
+void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
+                                            bool useTotalOffset)
 {
     if (!springOffsetProperty_) {
-        InitSpringOffsetProperty();
+        InitSpringOffsetProperty(useTotalOffset);
         CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
@@ -1053,12 +1058,12 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             pattern->SetUiDvsyncSwitch(true);
             pattern->springOffsetProperty_->Set(position);
         },
-        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId(), &useTotalOffset]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SetUiDvsyncSwitch(false);
-            pattern->useTotalOffset_ = true;
+            useTotalOffset = true;
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
@@ -1107,13 +1112,13 @@ void ScrollablePattern::PlayCurveAnimation(
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
 
-void ScrollablePattern::InitSpringOffsetProperty()
+void ScrollablePattern::InitSpringOffsetProperty(bool useTotalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
+    auto propertyCallback = [weak = AceType::WeakClaim(this), useTotalOffset](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->isAnimationStop_) {
@@ -1132,7 +1137,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (stopAnimation) {
             offset = pattern->finalPosition_;
         }
-        auto delta = pattern->useTotalOffset_ ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
+        auto delta = useTotalOffset ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         if (!pattern->UpdateCurrentOffset(delta,
@@ -2548,7 +2553,7 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     float position = -GetTotalOffset() + distance;
-    AnimateTo(-position, -1, nullptr, true);
+    AnimateTo(-position, -1, nullptr, true, false, false);
     return;
 }
 

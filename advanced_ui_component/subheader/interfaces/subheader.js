@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const TextModifier = requireNapi('arkui.modifier').TextModifier;
@@ -46,11 +46,11 @@ const PADDING_LEVEL_2 = 4;
 const MAX_RIGHT_WIDTH = '34%';
 const MIN_FONT_SIZE = 1.75;
 export var OperationType;
-(function (t12) {
-    t12[t12['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
-    t12[t12['BUTTON'] = 1] = 'BUTTON';
-    t12[t12['ICON_GROUP'] = 2] = 'ICON_GROUP';
-    t12[t12['LOADING'] = 3] = 'LOADING';
+(function (u12) {
+    u12[u12['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
+    u12[u12['BUTTON'] = 1] = 'BUTTON';
+    u12[u12['ICON_GROUP'] = 2] = 'ICON_GROUP';
+    u12[u12['LOADING'] = 3] = 'LOADING';
 })(OperationType || (OperationType = {}));
 class IconOptions {
 }
@@ -74,49 +74,49 @@ class SubHeaderTheme {
         this.rightIconColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
 }
-function __Text__secondaryTitleStyles(s12) {
+function __Text__secondaryTitleStyles(t12) {
     Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontColor(s12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontColor(t12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontWeight(t12?.fontWeight);
+    Text.maxLines(t12?.maxLines);
+    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+    Text.align(t12?.alignment);
+}
+function __Text__primaryTitleStyles(s12) {
+    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontColor(s12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
     Text.fontWeight(s12?.fontWeight);
     Text.maxLines(s12?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
     Text.align(s12?.alignment);
 }
-function __Text__primaryTitleStyles(r12) {
-    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontColor(r12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontWeight(r12?.fontWeight);
-    Text.maxLines(r12?.maxLines);
-    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    Text.align(r12?.alignment);
-}
 class SubHeaderModifier {
     constructor() {
         this.isAgeing = false;
     }
-    applyNormalAttribute(q12) {
+    applyNormalAttribute(r12) {
         if (this.isAgeing) {
-            q12.width('100%');
+            r12.width('100%');
         }
         else {
         }
     }
 }
 export class SubHeader extends ViewPU {
-    constructor(k12, l12, m12, n12 = -1, o12 = undefined, p12) {
-        super(k12, m12, n12, p12);
-        if (typeof o12 === 'function') {
-            this.paramsGenerator_ = o12;
+    constructor(l12, m12, n12, o12 = -1, p12 = undefined, q12) {
+        super(l12, n12, o12, q12);
+        if (typeof p12 === 'function') {
+            this.paramsGenerator_ = p12;
         }
-        this.__icon = new SynchedPropertyObjectOneWayPU(l12.icon, this, 'icon');
+        this.__icon = new SynchedPropertyObjectOneWayPU(m12.icon, this, 'icon');
         this.iconSymbolOptions = null;
-        this.__primaryTitle = new SynchedPropertyObjectOneWayPU(l12.primaryTitle, this, 'primaryTitle');
+        this.__primaryTitle = new SynchedPropertyObjectOneWayPU(m12.primaryTitle, this, 'primaryTitle');
         this.__primaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'primaryTitleModifier');
-        this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(l12.secondaryTitle, this, 'secondaryTitle');
+        this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(m12.secondaryTitle, this, 'secondaryTitle');
         this.__secondaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'secondaryTitleModifier');
         this.__subHeaderModifier = new ObservedPropertyObjectPU(new SubHeaderModifier(), this, 'subHeaderModifier');
         this.select = null;
-        this.__operationType = new SynchedPropertySimpleOneWayPU(l12.operationType, this, 'operationType');
+        this.__operationType = new SynchedPropertySimpleOneWayPU(m12.operationType, this, 'operationType');
         this.operationItem = null;
         this.operationSymbolOptions = null;
         this.callbackId = undefined;
@@ -131,128 +131,128 @@ export class SubHeader extends ViewPU {
         this.__selectValue = new ObservedPropertyObjectPU('', this, 'selectValue');
         this.__flexAlign = new ObservedPropertySimplePU(FlexAlign.SpaceBetween, this, 'flexAlign');
         this.titleBuilder = undefined;
-        this.__contentMargin = new SynchedPropertyObjectOneWayPU(l12.contentMargin, this, 'contentMargin');
-        this.__contentPadding = new SynchedPropertyObjectOneWayPU(l12.contentPadding, this, 'contentPadding');
+        this.__contentMargin = new SynchedPropertyObjectOneWayPU(m12.contentMargin, this, 'contentMargin');
+        this.__contentPadding = new SynchedPropertyObjectOneWayPU(m12.contentPadding, this, 'contentPadding');
         this.__subHeaderMargin = new ObservedPropertyObjectPU({
-            start: LengthMetrics.vp(0),
-            end: LengthMetrics.vp(0)
+            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
         }, this, 'subHeaderMargin');
         this.__subHeaderTheme = new ObservedPropertyObjectPU(new SubHeaderTheme(), this, 'subHeaderTheme');
         this.addProvidedVar('subHeaderTheme', this.__subHeaderTheme, false);
         this.constraintWidth = 0;
-        this.setInitiallyProvidedValue(l12);
+        this.setInitiallyProvidedValue(m12);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(j12) {
-        if (j12.icon === undefined) {
+    setInitiallyProvidedValue(k12) {
+        if (k12.icon === undefined) {
             this.__icon.set(null);
         }
-        if (j12.iconSymbolOptions !== undefined) {
-            this.iconSymbolOptions = j12.iconSymbolOptions;
+        if (k12.iconSymbolOptions !== undefined) {
+            this.iconSymbolOptions = k12.iconSymbolOptions;
         }
-        if (j12.primaryTitle === undefined) {
+        if (k12.primaryTitle === undefined) {
             this.__primaryTitle.set(null);
         }
-        if (j12.primaryTitleModifier !== undefined) {
-            this.primaryTitleModifier = j12.primaryTitleModifier;
+        if (k12.primaryTitleModifier !== undefined) {
+            this.primaryTitleModifier = k12.primaryTitleModifier;
         }
-        if (j12.secondaryTitle === undefined) {
+        if (k12.secondaryTitle === undefined) {
             this.__secondaryTitle.set(null);
         }
-        if (j12.secondaryTitleModifier !== undefined) {
-            this.secondaryTitleModifier = j12.secondaryTitleModifier;
+        if (k12.secondaryTitleModifier !== undefined) {
+            this.secondaryTitleModifier = k12.secondaryTitleModifier;
         }
-        if (j12.subHeaderModifier !== undefined) {
-            this.subHeaderModifier = j12.subHeaderModifier;
+        if (k12.subHeaderModifier !== undefined) {
+            this.subHeaderModifier = k12.subHeaderModifier;
         }
-        if (j12.select !== undefined) {
-            this.select = j12.select;
+        if (k12.select !== undefined) {
+            this.select = k12.select;
         }
-        if (j12.operationType === undefined) {
+        if (k12.operationType === undefined) {
             this.__operationType.set(OperationType.BUTTON);
         }
-        if (j12.operationItem !== undefined) {
-            this.operationItem = j12.operationItem;
+        if (k12.operationItem !== undefined) {
+            this.operationItem = k12.operationItem;
         }
-        if (j12.operationSymbolOptions !== undefined) {
-            this.operationSymbolOptions = j12.operationSymbolOptions;
+        if (k12.operationSymbolOptions !== undefined) {
+            this.operationSymbolOptions = k12.operationSymbolOptions;
         }
-        if (j12.callbackId !== undefined) {
-            this.callbackId = j12.callbackId;
+        if (k12.callbackId !== undefined) {
+            this.callbackId = k12.callbackId;
         }
-        if (j12.fontSize !== undefined) {
-            this.fontSize = j12.fontSize;
+        if (k12.fontSize !== undefined) {
+            this.fontSize = k12.fontSize;
         }
-        if (j12.ageing !== undefined) {
-            this.ageing = j12.ageing;
+        if (k12.ageing !== undefined) {
+            this.ageing = k12.ageing;
         }
-        if (j12.textArrowBgColor !== undefined) {
-            this.textArrowBgColor = j12.textArrowBgColor;
+        if (k12.textArrowBgColor !== undefined) {
+            this.textArrowBgColor = k12.textArrowBgColor;
         }
-        if (j12.buttonBgColor !== undefined) {
-            this.buttonBgColor = j12.buttonBgColor;
+        if (k12.buttonBgColor !== undefined) {
+            this.buttonBgColor = k12.buttonBgColor;
         }
-        if (j12.textArrowStyleWidth !== undefined) {
-            this.textArrowStyleWidth = j12.textArrowStyleWidth;
+        if (k12.textArrowStyleWidth !== undefined) {
+            this.textArrowStyleWidth = k12.textArrowStyleWidth;
         }
-        if (j12.textArrowStyleHeight !== undefined) {
-            this.textArrowStyleHeight = j12.textArrowStyleHeight;
+        if (k12.textArrowStyleHeight !== undefined) {
+            this.textArrowStyleHeight = k12.textArrowStyleHeight;
         }
-        if (j12.iconWidth !== undefined) {
-            this.iconWidth = j12.iconWidth;
+        if (k12.iconWidth !== undefined) {
+            this.iconWidth = k12.iconWidth;
         }
-        if (j12.selectedIndex !== undefined) {
-            this.selectedIndex = j12.selectedIndex;
+        if (k12.selectedIndex !== undefined) {
+            this.selectedIndex = k12.selectedIndex;
         }
-        if (j12.selectValue !== undefined) {
-            this.selectValue = j12.selectValue;
+        if (k12.selectValue !== undefined) {
+            this.selectValue = k12.selectValue;
         }
-        if (j12.flexAlign !== undefined) {
-            this.flexAlign = j12.flexAlign;
+        if (k12.flexAlign !== undefined) {
+            this.flexAlign = k12.flexAlign;
         }
-        if (j12.titleBuilder !== undefined) {
-            this.titleBuilder = j12.titleBuilder;
+        if (k12.titleBuilder !== undefined) {
+            this.titleBuilder = k12.titleBuilder;
         }
-        if (j12.subHeaderMargin !== undefined) {
-            this.subHeaderMargin = j12.subHeaderMargin;
+        if (k12.subHeaderMargin !== undefined) {
+            this.subHeaderMargin = k12.subHeaderMargin;
         }
-        if (j12.subHeaderTheme !== undefined) {
-            this.subHeaderTheme = j12.subHeaderTheme;
+        if (k12.subHeaderTheme !== undefined) {
+            this.subHeaderTheme = k12.subHeaderTheme;
         }
-        if (j12.constraintWidth !== undefined) {
-            this.constraintWidth = j12.constraintWidth;
+        if (k12.constraintWidth !== undefined) {
+            this.constraintWidth = k12.constraintWidth;
         }
     }
-    updateStateVars(i12) {
-        this.__icon.reset(i12.icon);
-        this.__primaryTitle.reset(i12.primaryTitle);
-        this.__secondaryTitle.reset(i12.secondaryTitle);
-        this.__operationType.reset(i12.operationType);
-        this.__contentMargin.reset(i12.contentMargin);
-        this.__contentPadding.reset(i12.contentPadding);
+    updateStateVars(j12) {
+        this.__icon.reset(j12.icon);
+        this.__primaryTitle.reset(j12.primaryTitle);
+        this.__secondaryTitle.reset(j12.secondaryTitle);
+        this.__operationType.reset(j12.operationType);
+        this.__contentMargin.reset(j12.contentMargin);
+        this.__contentPadding.reset(j12.contentPadding);
     }
-    purgeVariableDependenciesOnElmtId(h12) {
-        this.__icon.purgeDependencyOnElmtId(h12);
-        this.__primaryTitle.purgeDependencyOnElmtId(h12);
-        this.__primaryTitleModifier.purgeDependencyOnElmtId(h12);
-        this.__secondaryTitle.purgeDependencyOnElmtId(h12);
-        this.__secondaryTitleModifier.purgeDependencyOnElmtId(h12);
-        this.__subHeaderModifier.purgeDependencyOnElmtId(h12);
-        this.__operationType.purgeDependencyOnElmtId(h12);
-        this.__fontSize.purgeDependencyOnElmtId(h12);
-        this.__ageing.purgeDependencyOnElmtId(h12);
-        this.__textArrowBgColor.purgeDependencyOnElmtId(h12);
-        this.__buttonBgColor.purgeDependencyOnElmtId(h12);
-        this.__textArrowStyleWidth.purgeDependencyOnElmtId(h12);
-        this.__textArrowStyleHeight.purgeDependencyOnElmtId(h12);
-        this.__iconWidth.purgeDependencyOnElmtId(h12);
-        this.__selectedIndex.purgeDependencyOnElmtId(h12);
-        this.__selectValue.purgeDependencyOnElmtId(h12);
-        this.__flexAlign.purgeDependencyOnElmtId(h12);
-        this.__contentMargin.purgeDependencyOnElmtId(h12);
-        this.__contentPadding.purgeDependencyOnElmtId(h12);
-        this.__subHeaderMargin.purgeDependencyOnElmtId(h12);
-        this.__subHeaderTheme.purgeDependencyOnElmtId(h12);
+    purgeVariableDependenciesOnElmtId(i12) {
+        this.__icon.purgeDependencyOnElmtId(i12);
+        this.__primaryTitle.purgeDependencyOnElmtId(i12);
+        this.__primaryTitleModifier.purgeDependencyOnElmtId(i12);
+        this.__secondaryTitle.purgeDependencyOnElmtId(i12);
+        this.__secondaryTitleModifier.purgeDependencyOnElmtId(i12);
+        this.__subHeaderModifier.purgeDependencyOnElmtId(i12);
+        this.__operationType.purgeDependencyOnElmtId(i12);
+        this.__fontSize.purgeDependencyOnElmtId(i12);
+        this.__ageing.purgeDependencyOnElmtId(i12);
+        this.__textArrowBgColor.purgeDependencyOnElmtId(i12);
+        this.__buttonBgColor.purgeDependencyOnElmtId(i12);
+        this.__textArrowStyleWidth.purgeDependencyOnElmtId(i12);
+        this.__textArrowStyleHeight.purgeDependencyOnElmtId(i12);
+        this.__iconWidth.purgeDependencyOnElmtId(i12);
+        this.__selectedIndex.purgeDependencyOnElmtId(i12);
+        this.__selectValue.purgeDependencyOnElmtId(i12);
+        this.__flexAlign.purgeDependencyOnElmtId(i12);
+        this.__contentMargin.purgeDependencyOnElmtId(i12);
+        this.__contentPadding.purgeDependencyOnElmtId(i12);
+        this.__subHeaderMargin.purgeDependencyOnElmtId(i12);
+        this.__subHeaderTheme.purgeDependencyOnElmtId(i12);
     }
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
@@ -282,140 +282,150 @@ export class SubHeader extends ViewPU {
     get icon() {
         return this.__icon.get();
     }
-    set icon(g12) {
-        this.__icon.set(g12);
+    set icon(h12) {
+        this.__icon.set(h12);
     }
     get primaryTitle() {
         return this.__primaryTitle.get();
     }
-    set primaryTitle(f12) {
-        this.__primaryTitle.set(f12);
+    set primaryTitle(g12) {
+        this.__primaryTitle.set(g12);
     }
     get primaryTitleModifier() {
         return this.__primaryTitleModifier.get();
     }
-    set primaryTitleModifier(e12) {
-        this.__primaryTitleModifier.set(e12);
+    set primaryTitleModifier(f12) {
+        this.__primaryTitleModifier.set(f12);
     }
     get secondaryTitle() {
         return this.__secondaryTitle.get();
     }
-    set secondaryTitle(d12) {
-        this.__secondaryTitle.set(d12);
+    set secondaryTitle(e12) {
+        this.__secondaryTitle.set(e12);
     }
     get secondaryTitleModifier() {
         return this.__secondaryTitleModifier.get();
     }
-    set secondaryTitleModifier(c12) {
-        this.__secondaryTitleModifier.set(c12);
+    set secondaryTitleModifier(d12) {
+        this.__secondaryTitleModifier.set(d12);
     }
     get subHeaderModifier() {
         return this.__subHeaderModifier.get();
     }
-    set subHeaderModifier(b12) {
-        this.__subHeaderModifier.set(b12);
+    set subHeaderModifier(c12) {
+        this.__subHeaderModifier.set(c12);
     }
     get operationType() {
         return this.__operationType.get();
     }
-    set operationType(a12) {
-        this.__operationType.set(a12);
+    set operationType(b12) {
+        this.__operationType.set(b12);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(z11) {
-        this.__fontSize.set(z11);
+    set fontSize(a12) {
+        this.__fontSize.set(a12);
     }
     get ageing() {
         return this.__ageing.get();
     }
-    set ageing(y11) {
-        this.__ageing.set(y11);
+    set ageing(z11) {
+        this.__ageing.set(z11);
     }
     get textArrowBgColor() {
         return this.__textArrowBgColor.get();
     }
-    set textArrowBgColor(x11) {
-        this.__textArrowBgColor.set(x11);
+    set textArrowBgColor(y11) {
+        this.__textArrowBgColor.set(y11);
     }
     get buttonBgColor() {
         return this.__buttonBgColor.get();
     }
-    set buttonBgColor(w11) {
-        this.__buttonBgColor.set(w11);
+    set buttonBgColor(x11) {
+        this.__buttonBgColor.set(x11);
     }
     get textArrowStyleWidth() {
         return this.__textArrowStyleWidth.get();
     }
-    set textArrowStyleWidth(v11) {
-        this.__textArrowStyleWidth.set(v11);
+    set textArrowStyleWidth(w11) {
+        this.__textArrowStyleWidth.set(w11);
     }
     get textArrowStyleHeight() {
         return this.__textArrowStyleHeight.get();
     }
-    set textArrowStyleHeight(u11) {
-        this.__textArrowStyleHeight.set(u11);
+    set textArrowStyleHeight(v11) {
+        this.__textArrowStyleHeight.set(v11);
     }
     get iconWidth() {
         return this.__iconWidth.get();
     }
-    set iconWidth(t11) {
-        this.__iconWidth.set(t11);
+    set iconWidth(u11) {
+        this.__iconWidth.set(u11);
     }
     get selectedIndex() {
         return this.__selectedIndex.get();
     }
-    set selectedIndex(s11) {
-        this.__selectedIndex.set(s11);
+    set selectedIndex(t11) {
+        this.__selectedIndex.set(t11);
     }
     get selectValue() {
         return this.__selectValue.get();
     }
-    set selectValue(r11) {
-        this.__selectValue.set(r11);
+    set selectValue(s11) {
+        this.__selectValue.set(s11);
     }
     get flexAlign() {
         return this.__flexAlign.get();
     }
-    set flexAlign(q11) {
-        this.__flexAlign.set(q11);
+    set flexAlign(r11) {
+        this.__flexAlign.set(r11);
     }
     get contentMargin() {
         return this.__contentMargin.get();
     }
-    set contentMargin(p11) {
-        this.__contentMargin.set(p11);
+    set contentMargin(q11) {
+        this.__contentMargin.set(q11);
     }
     get contentPadding() {
         return this.__contentPadding.get();
     }
-    set contentPadding(o11) {
-        this.__contentPadding.set(o11);
+    set contentPadding(p11) {
+        this.__contentPadding.set(p11);
     }
     get subHeaderMargin() {
         return this.__subHeaderMargin.get();
     }
-    set subHeaderMargin(n11) {
-        this.__subHeaderMargin.set(n11);
+    set subHeaderMargin(o11) {
+        this.__subHeaderMargin.set(o11);
     }
     get subHeaderTheme() {
         return this.__subHeaderTheme.get();
     }
-    set subHeaderTheme(m11) {
-        this.__subHeaderTheme.set(m11);
+    set subHeaderTheme(n11) {
+        this.__subHeaderTheme.set(n11);
     }
-    onWillApplyTheme(l11) {
-        this.subHeaderTheme.fontPrimaryColor = l11.colors.fontPrimary;
-        this.subHeaderTheme.fontSecondaryColor = l11.colors.fontSecondary;
-        this.subHeaderTheme.fontButtonColor = l11.colors.fontEmphasize;
-        this.subHeaderTheme.iconArrowColor = l11.colors.iconTertiary;
-        this.subHeaderTheme.textArrowHoverBgColor = l11.colors.interactiveHover;
-        this.subHeaderTheme.borderFocusColor = l11.colors.interactiveFocus;
-        this.subHeaderTheme.leftIconColor = l11.colors.iconSecondary;
-        this.subHeaderTheme.rightIconColor = l11.colors.iconPrimary;
+    onWillApplyTheme(m11) {
+        this.subHeaderTheme.fontPrimaryColor = m11.colors.fontPrimary;
+        this.subHeaderTheme.fontSecondaryColor = m11.colors.fontSecondary;
+        this.subHeaderTheme.fontButtonColor = m11.colors.fontEmphasize;
+        this.subHeaderTheme.iconArrowColor = m11.colors.iconTertiary;
+        this.subHeaderTheme.textArrowHoverBgColor = m11.colors.interactiveHover;
+        this.subHeaderTheme.borderFocusColor = m11.colors.interactiveFocus;
+        this.subHeaderTheme.leftIconColor = m11.colors.iconSecondary;
+        this.subHeaderTheme.rightIconColor = m11.colors.iconPrimary;
     }
     async aboutToAppear() {
+        let l11 = this.getUIContext().getHostContext();
+        this.fontSize = l11.config?.fontSizeScale ?? 1;
+        if (this.isSuitableAging()) {
+            this.ageing = true;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
+        else {
+            this.ageing = false;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
         if (this.select) {
             this.selectedIndex = this.select.selected;
             this.selectValue = this.select.value;
@@ -496,34 +506,12 @@ export class SubHeader extends ViewPU {
         if (this.isSuitableAging()) {
             this.ageing = true;
             this.subHeaderModifier.isAgeing = this.ageing;
-        } else {
+        }
+        else {
             this.ageing = false;
             this.subHeaderModifier.isAgeing = this.ageing;
         }
         i10.forEach((n10) => {
-            if (Math.abs(this.constraintWidth - Number(j10.maxWidth)) > Number.EPSILON) {
-                if (!this.contentMargin) {
-                    this.constraintWidth = Number(j10.maxWidth);
-                    if (this.constraintWidth < Util.BREAKPOINT_S) {
-                        this.subHeaderMargin = {
-                            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
-                        };
-                    }
-                    else if (this.constraintWidth < Util.BREAKPOINT_M) {
-                        this.subHeaderMargin = {
-                            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
-                        };
-                    }
-                    else {
-                        this.subHeaderMargin = {
-                            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level16'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level16'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                        };
-                    }
-                }
-            }
             j10.minHeight = Math.min(Number(this.getMinHeight()), Number(j10.maxHeight));
             k10.height = n10.measure(j10).height;
             k10.width = Number(j10.maxWidth);
@@ -1114,7 +1102,7 @@ export class SubHeader extends ViewPU {
                                         {
                                             this.observeComponentCreation2((w3, x3) => {
                                                 if (x3) {
-                                                    let y3 = new SingleIconStyle(typeof PUV2ViewBase !== 'undefined' && q2 instanceof PUV2ViewBase ? q2 : this, {
+                                                    let y3 = new SingleIconStyle(ViewPU.__proto__ !== NativeViewPartialUpdate && q2 instanceof PUV2ViewBase ? q2 : this, {
                                                         item: {
                                                             iconOptions: {
                                                                 icon: z2.value,
@@ -1123,7 +1111,7 @@ export class SubHeader extends ViewPU {
                                                             },
                                                             action: z2.action,
                                                         }
-                                                    }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 745, col: 13 });
+                                                    }, undefined, w3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 731, col: 13 });
                                                     ViewPU.create(y3);
                                                     let z3 = () => {
                                                         return {
@@ -1157,7 +1145,7 @@ export class SubHeader extends ViewPU {
                                         {
                                             this.observeComponentCreation2((m3, n3) => {
                                                 if (n3) {
-                                                    let o3 = new SingleIconStyle(typeof PUV2ViewBase !== 'undefined' && q2 instanceof PUV2ViewBase ? q2 : this, {
+                                                    let o3 = new SingleIconStyle(ViewPU.__proto__ !== NativeViewPartialUpdate && q2 instanceof PUV2ViewBase ? q2 : this, {
                                                         item: {
                                                             action: z2.action,
                                                             iconOptions: {
@@ -1166,7 +1154,7 @@ export class SubHeader extends ViewPU {
                                                                     this.operationSymbolOptions[y2] : null,
                                                             },
                                                         }
-                                                    }, undefined, m3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 756, col: 13 });
+                                                    }, undefined, m3, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 742, col: 13 });
                                                     ViewPU.create(o3);
                                                     let p3 = () => {
                                                         return {

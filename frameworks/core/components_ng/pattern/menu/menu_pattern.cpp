@@ -1120,7 +1120,6 @@ void MenuPattern::ShowPreviewMenuAnimation()
                 OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
         }
     });
-    SetEndOffset(menuPosition);
     isFirstShow_ = false;
 }
 
@@ -1396,6 +1395,10 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ShowPreviewMenuAnimation();
     ShowMenuAppearAnimation();
     ShowStackExpandMenu();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto menuPosition = host->GetPaintRectOffset();
+    SetEndOffset(menuPosition);
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }

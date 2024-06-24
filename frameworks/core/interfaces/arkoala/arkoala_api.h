@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 110
+#define ARKUI_FULL_API_VERSION 111
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 110
+#define ARKUI_NODE_API_VERSION 111
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1754,6 +1754,8 @@ struct ArkUITextModifier {
     void (*resetTextMinFontSize)(ArkUINodeHandle node);
     void (*setTextDraggable)(ArkUINodeHandle node, ArkUI_Uint32 draggable);
     void (*resetTextDraggable)(ArkUINodeHandle node);
+    void (*setTextPrivacySensitive)(ArkUINodeHandle node, ArkUI_Uint32 sensitive);
+    void (*resetTextPrivacySensitive)(ArkUINodeHandle node);
     void (*setTextMaxFontSize)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit);
     void (*resetTextMaxFontSize)(ArkUINodeHandle node);
     void (*setTextFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
@@ -1953,6 +1955,8 @@ struct ArkUIImageModifier {
     void (*setPixelMapArray)(ArkUINodeHandle node, void* animatedDrawableDescriptor);
     void (*setResourceSrc)(ArkUINodeHandle node, void* resource);
     void (*enableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*setImagePrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
+    void (*resetImagePrivacySensitive)(ArkUINodeHandle node);
     void (*analyzerConfig)(ArkUINodeHandle node, void* config);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
@@ -3854,6 +3858,8 @@ struct ArkUIGridRowModifier {
     void (*resetColumns)(ArkUINodeHandle node);
     void (*setGutter)(ArkUINodeHandle node, ArkUI_Int32* containerSizeArray, ArkUI_Int32 size);
     void (*resetGutter)(ArkUINodeHandle node);
+    void (*setOnBreakpointChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnBreakpointChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIPanelModifier {
@@ -4142,12 +4148,15 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getParent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
-    void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32* parentOffset, ArkUI_Bool useVp);
-    void (*getPositionToScreen)(ArkUINodeHandle node, ArkUI_Float32* screenPosition, ArkUI_Bool useVp);
-    void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32* windowOffset, ArkUI_Bool useVp);
-    void (*getPositionToParentWithTransform)(ArkUINodeHandle node, ArkUI_Float32* parentPosition, ArkUI_Bool useVp);
-    void (*getPositionToScreenWithTransform)(ArkUINodeHandle node, ArkUI_Float32* screenPosition, ArkUI_Bool useVp);
-    void (*getPositionToWindowWithTransform)(ArkUINodeHandle node, ArkUI_Float32* windowPosition, ArkUI_Bool useVp);
+    void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp);
+    void (*getPositionToScreen)(ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp);
+    void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2], ArkUI_Bool useVp);
+    void (*getPositionToParentWithTransform)(
+        ArkUINodeHandle node, ArkUI_Float32 (*parentPosition)[2], ArkUI_Bool useVp);
+    void (*getPositionToScreenWithTransform)(
+        ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp);
+    void (*getPositionToWindowWithTransform)(
+        ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
     ArkUI_Float32* (*getMeasuredSize)(ArkUINodeHandle node);
     ArkUI_Float32* (*getLayoutPosition)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getInspectorId)(ArkUINodeHandle node);
@@ -4498,7 +4507,7 @@ struct ArkUIExtendedNodeAPI {
     void (*setCustomCallback)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 callbackId);
     ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext, ArkUINodeHandle node);
     ArkUI_Int32 (*measureNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
-    ArkUI_Int32 (*layoutNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
+    ArkUI_Int32 (*layoutNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32  (*data)[2]);
     ArkUI_Int32 (*drawNode)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data);
 
     void (*setAttachNodePtr)(ArkUINodeHandle node, void* value);

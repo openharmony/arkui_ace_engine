@@ -1065,8 +1065,7 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
     bool isShow = outterMenuPattern->GetDisappearAnimation();
-    if ((menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) ||
-        ((menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) && isHasContextMenu())) {
+    if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         if (!showPreviewAnimation) {
             CleanPreviewInSubWindow();
         } else {
@@ -1092,23 +1091,6 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     }
     // start animation immediately
     pipeline->RequestFrame();
-}
-
-bool OverlayManager::isHasContextMenu()
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(mainPipeline, false);
-    auto dragDropManager = mainPipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, false);
-    auto preDragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
-    CHECK_NULL_RETURN(preDragFrameNode, false);
-    auto eventHub = preDragFrameNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    auto frameNode = eventHub->GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
 }
 
 void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
@@ -3701,6 +3683,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
+    sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
     // create maskColor node(sheetWrapper)
     auto sheetType = sheetNodePattern->GetSheetType();
     auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -4640,7 +4623,7 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
 RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsScenceBoardWindow() || isAttachToCustomNode_) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -4947,6 +4930,13 @@ bool OverlayManager::AddCurSessionId(int32_t sessionId)
 
     curSessionIds_.insert(sessionId);
     return true;
+}
+
+int32_t OverlayManager::CreateModalUIExtension(const RefPtr<WantWrap>& wantWrap,
+    const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
+{
+    auto& want = wantWrap->GetWant();
+    return CreateModalUIExtension(want, callbacks, isProhibitBack, isAsyncModalBinding);
 }
 
 int32_t OverlayManager::CreateModalUIExtension(

@@ -80,7 +80,7 @@ private:
     void PostTask(std::function<void()> callback, bool isUI = true);
     void OnPrePageChange(const RefPtr<JsAcePage>&);
 
-    BaseId::IdType lastTransitionListener_;
+    BaseId::IdType lastTransitionListener_ = 0;
     std::list<RefPtr<JsAcePage>> pageRouterStack_;
     RefPtr<JsAcePage> loadingPage_;
 

@@ -79,6 +79,7 @@ struct PaintFocusExtraInfo final {
 };
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
+using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
@@ -396,6 +397,8 @@ public:
     virtual void SetTransitionOutCallback(std::function<void()>&& callback) {}
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
+
+    virtual void SetTransitionUserCallback(TransitionFinishCallback&& callback) {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 

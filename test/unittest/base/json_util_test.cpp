@@ -820,4 +820,272 @@ HWTEST_F(JsonUtilTest, JsonUtilTest032, TestSize.Level1)
     bool ret = jsonValue.Replace(key, value);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: JsonUtilTest033
+ * @tc.desc: Check json util func bool PutFixedAttr  with const char* value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the jsonValue object.
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutFixedAttr("editable", "EditMode.None", filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest034
+ * @tc.desc: Check json util bool PutExtAttr
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the jsonValue object.
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutExtAttr("editable", "EditMode.None", filter);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: JsonUtilTest035
+ * @tc.desc: Check json util func bool PutFixedAttr with const std::unique_ptr<JsonValue>& value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the empty jsonValue object
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    JsonValue jsonValueTemp;
+    const std::unique_ptr<JsonValue> value = std::make_unique<JsonValue>(jsonValueTemp);
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutFixedAttr("editable", value, filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. set the value to jsonValueTemp, construct the jsonValue object.
+     * @tc.expected: step3.  the results are correct.
+     */
+    std::string testJson = "true";
+    std::unique_ptr<JsonValue> boolValue = JsonUtil::ParseJsonString(testJson);
+    bool ret2 = jsonValue.PutFixedAttr("editable", boolValue, filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_TRUE(ret2);
+
+    /**
+     * @tc.steps: step4. construct the filter object, add filter attr, construct the jsonValue object.
+     */
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step5. get  results
+     * @tc.expected: step5.  the results are correct.
+     */
+    bool ret3 = jsonValue.PutFixedAttr("editable", value, filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_FALSE(ret3);
+}
+
+/**
+ * @tc.name: JsonUtilTest036
+ * @tc.desc: Check json util func bool PutExtAttr with size_t value/int32_t value/double value/bool value/int64_t
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the jsonValue object.
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    size_t value = 5;
+    int32_t value2 = 5;
+    double value3 = 5.0;
+    int64_t value4 = 5;
+    bool value5 = true;
+    bool ret = jsonValue.PutExtAttr("editable", value, filter);
+    bool ret2 = jsonValue.PutExtAttr("editable", value2, filter);
+    bool ret3 = jsonValue.PutExtAttr("editable", value3, filter);
+    bool ret4 = jsonValue.PutExtAttr("editable", value4, filter);
+    bool ret5 = jsonValue.PutExtAttr("editable", value5, filter);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(ret2);
+    EXPECT_TRUE(ret3);
+    EXPECT_TRUE(ret4);
+    EXPECT_TRUE(ret5);
+    /**
+     * @tc.steps: step2. make filterExt not empty
+     */
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret6 = jsonValue.PutExtAttr("editable", value, filter);
+    bool ret7 = jsonValue.PutExtAttr("editable", value2, filter);
+    bool ret8 = jsonValue.PutExtAttr("editable", value3, filter);
+    bool ret9 = jsonValue.PutExtAttr("editable", value4, filter);
+    bool ret10 = jsonValue.PutExtAttr("editable", value5, filter);
+    EXPECT_FALSE(ret6);
+    EXPECT_FALSE(ret7);
+    EXPECT_FALSE(ret8);
+    EXPECT_FALSE(ret9);
+    EXPECT_FALSE(ret10);
+}
+
+/**
+ * @tc.name: JsonUtilTest037
+ * @tc.desc: Check json util func bool PutFixedAttr with size_t value/int32_t value/double value/bool value/int64_t
+ * value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the empty jsonValue object
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    size_t value = 5;
+    int32_t value2 = 5;
+    double value3 = 5.0;
+    int64_t value4 = 5;
+    bool value5 = true;
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutFixedAttr("editable", value, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret2 = jsonValue.PutFixedAttr("editable", value2, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret3 = jsonValue.PutFixedAttr("editable", value3, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret4 = jsonValue.PutFixedAttr("editable", value4, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret5 = jsonValue.PutFixedAttr("editable", value5, filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(ret2);
+    EXPECT_TRUE(ret3);
+    EXPECT_TRUE(ret4);
+    EXPECT_TRUE(ret5);
+
+    /**
+     * @tc.steps: step3. construct the filter object, add filter attr
+     */
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step4. get  results
+     * @tc.expected: step4.  the results are correct.
+     */
+    bool ret6 = jsonValue.PutFixedAttr("editable", value, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret7 = jsonValue.PutFixedAttr("editable", value2, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret8 = jsonValue.PutFixedAttr("editable", value3, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret9 = jsonValue.PutFixedAttr("editable", value4, filter, NG::FIXED_ATTR_EDITABLE);
+    bool ret10 = jsonValue.PutFixedAttr("editable", value5, filter, NG::FIXED_ATTR_EDITABLE);
+    EXPECT_FALSE(ret6);
+    EXPECT_FALSE(ret7);
+    EXPECT_FALSE(ret8);
+    EXPECT_FALSE(ret9);
+    EXPECT_FALSE(ret10);
+}
+
+/**
+ * @tc.name: JsonUtilTest038
+ * @tc.desc: Check json util func bool PutExtAttr with const std::unique_ptr<JsonValue>& value
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the filter object, add filter attr, construct the empty jsonValue object
+     */
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+    JsonValue jsonValueTemp;
+    const std::unique_ptr<JsonValue> value = std::make_unique<JsonValue>(jsonValueTemp);
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutExtAttr("editable", value, filter);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. set the value to jsonValueTemp, construct the jsonValue object.
+     * @tc.expected: step3.  the results are correct.
+     */
+    std::string testJson = "true";
+    std::unique_ptr<JsonValue> boolValue = JsonUtil::ParseJsonString(testJson);
+    bool ret2 = jsonValue.PutExtAttr("editable", boolValue, filter);
+    EXPECT_TRUE(ret2);
+
+    /**
+     * @tc.steps: step4. construct the filter object, add filter attr, construct the jsonValue object.
+     */
+    const std::string attr = "color";
+    filter.AddFilterAttr(attr);
+    /**
+     * @tc.steps: step5. get  results
+     * @tc.expected: step5.  the results are correct.
+     */
+    bool ret3 = jsonValue.PutExtAttr("editable", value, filter);
+    EXPECT_FALSE(ret3);
+}
+
+/**
+ * @tc.name: JsonUtilTest039
+ * @tc.desc: Check json util bool bool PutRef(const char* key, std::unique_ptr<JsonValue>&& value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the nullptr key
+     */
+    JsonValue jsonValue;
+    const char* key = nullptr;
+    std::unique_ptr<JsonValue> value = std::make_unique<JsonValue>();
+    /**
+     * @tc.steps: step2. get  results
+     * @tc.expected: step2.  the results are correct.
+     */
+    bool ret = jsonValue.PutRef(key, std::move(value));
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. construct the nullptr value
+     */
+    char a = 'a';
+    const char* key2 = &a;
+    std::unique_ptr<JsonValue> value2;
+    /**
+     * @tc.steps: step4. get  results
+     * @tc.expected: step4.  the results are correct.
+     */
+    bool ret2 = jsonValue.PutRef(key2, std::move(value2));
+    bool ret3 = jsonValue.PutRef(std::move(value2));
+    EXPECT_FALSE(ret2);
+    EXPECT_FALSE(ret3);
+}
 } // namespace OHOS::Ace

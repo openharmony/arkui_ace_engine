@@ -41,6 +41,9 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#endif
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -429,8 +432,8 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         detentsLowerPos = sheetDetentsSize - 1;
         detentsUpperPos = sheetDetentsSize - 1;
     } else {
-        uint32_t lowerPosition = std::distance(sheetDetentHeight_.begin(), lowerIter);
-        uint32_t upperPosition = std::distance(sheetDetentHeight_.begin(), upperIter);
+        auto lowerPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), lowerIter));
+        auto upperPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), upperIter));
         if (lowerPosition == 0) {
             upHeight = sheetDetentHeight_[lowerPosition];
             downHeight = 0;
@@ -489,7 +492,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto detentHeight = sheetDetentHeight_[detentsIndex_];
     auto pos = std::find(unSortedSheetDentents_.begin(), unSortedSheetDentents_.end(), detentHeight);
     if (pos != std::end(unSortedSheetDentents_)) {
-        auto idx = std::distance(unSortedSheetDentents_.begin(), pos);
+        auto idx = static_cast<uint32_t>(std::distance(unSortedSheetDentents_.begin(), pos));
         detentsFinalIndex_ = idx;
     }
 }
@@ -559,8 +562,8 @@ void SheetPresentationPattern::AvoidSafeArea()
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
-    CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
-    auto heightUp = GetSheetHeightChange();
+    CHECK_NULL_VOID(host->GetFocusHub());
+    auto heightUp = host->GetFocusHub()->IsCurrentFocus() ? GetSheetHeightChange() : 0.0f;
     sheetHeightUp_ = heightUp;
     if (isDismissProcess_) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
@@ -681,13 +684,15 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
     property_->Set(start_);
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weak = AceType::WeakClaim(this), renderContext, offset, scrollSizeMode = scrollSizeMode_]() {
+        [weak = AceType::WeakClaim(this), renderContext, offset]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {
                 renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
-                if (scrollSizeMode == ScrollSizeMode::CONTINUOUS) {
+                bool isNeedChangeScrollHeight =
+                    ref->scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && ref->isDirectionUp_;
+                if (isNeedChangeScrollHeight) {
                     ref->ChangeScrollHeight(ref->height_);
                 }
             }
@@ -1732,6 +1737,10 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
         CHECK_NULL_RETURN(pattern, nullptr);
         overlay = pattern->GetOverlayManager();
     }
+    if (!overlay) {
+        auto overlayManager = overlayManager_.Upgrade();
+        overlay = overlayManager;
+    }
     return overlay;
 }
 
@@ -1756,6 +1765,13 @@ void SheetPresentationPattern::DeleteOverlay()
         CHECK_NULL_VOID(pattern);
         pattern->DeleteOverlayManager();
     }
+#ifdef WINDOW_SCENE_SUPPORTED
+    else if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        auto pattern = node->GetPattern<SystemWindowScene>();
+        CHECK_NULL_VOID(pattern);
+        pattern->DeleteOverlayManager();
+    }
+#endif
 }
 
 void SheetPresentationPattern::GetBuilderInitHeight()

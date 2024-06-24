@@ -858,14 +858,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     if (options.paraStyle) {
         UpdateParagraphStyle(spanNode, *options.paraStyle);
     }
-    if (options.userGestureOption.onClick) {
-        auto tmpClickFunc = options.userGestureOption.onClick;
-        spanItem->SetOnClickEvent(std::move(tmpClickFunc));
-    }
-    if (options.userGestureOption.onLongPress) {
-        auto tmpLongPressFunc = options.userGestureOption.onLongPress;
-        spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
-    }
+    SetGestureOptions(options.userGestureOption, spanItem);
     if (updateCaretPosition && !previewTextRecord_.isPreviewTextInputting) {
         if (options.offset.has_value()) {
             SetCaretPosition(options.offset.value() + StringUtils::ToWstring(options.value).length());
@@ -1302,6 +1295,25 @@ void RichEditorPattern::CopyTextSpanLineStyle(
     }
 }
 
+void RichEditorPattern::CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+{
+    CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(target);
+    auto sourceItem = source->GetSpanItem();
+    CHECK_NULL_VOID(sourceItem);
+    auto targetItem = target->GetSpanItem();
+    CHECK_NULL_VOID(targetItem);
+
+    if (sourceItem->onClick) {
+        auto tmpClickFunc = sourceItem->onClick;
+        targetItem->SetOnClickEvent(std::move(tmpClickFunc));
+    }
+    if (sourceItem->onLongPress) {
+        auto tmpLongPressFunc = sourceItem->onLongPress;
+        targetItem->SetLongPressEvent(std::move(tmpLongPressFunc));
+    }
+}
+
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
 {
     CHECK_NULL_RETURN(!spans_.empty(), -1);
@@ -1335,6 +1347,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
     CHECK_NULL_RETURN(newSpanNode, -1);
 
     CopyTextSpanStyle(spanNode, newSpanNode, needLeadingMargin);
+    CopyGestureOption(spanNode, newSpanNode);
     auto secondContent = spanItemContent.substr(offsetInSpan);
     newSpanNode->UpdateContent(StringUtils::ToString(secondContent));
     newSpanNode->MountToParent(host, spanIndex + 1);

@@ -161,6 +161,23 @@ class TextDraggableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextPrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textPrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetPrivacySensitive(node);
+    } else {
+      getUINativeModule().text.setPrivacySensitive(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
@@ -791,6 +808,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextDraggableModifier.identity, TextDraggableModifier, value);
+    return this;
+  }
+  privacySensitive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextPrivacySensitiveModifier.identity, TextPrivacySensitiveModifier, value);
     return this;
   }
   textShadow(value: ShadowOptions | Array<ShadowOptions>): TextAttribute {

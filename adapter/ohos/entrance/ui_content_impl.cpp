@@ -1521,6 +1521,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 }),
             false, false, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    container->SetUIContentType(uIContentType_);
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
@@ -2176,6 +2177,14 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
            pipelineContext->ChangeDarkModeBrightness();
         },
         TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+}
+
+void UIContentImpl::SetUIContentType(UIContentType uIContentType)
+{
+    uIContentType_ = uIContentType;
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetUIContentType(uIContentType);
 }
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)

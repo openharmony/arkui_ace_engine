@@ -706,9 +706,13 @@ void IndexerPattern::ApplyIndexChanged(
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+#ifndef ACE_UNITTEST
     auto fontManager = pipeline->GetFontManager();
     CHECK_NULL_VOID(fontManager);
-    auto customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+#else
+    const std::vector<std::string> customFonts;
+#endif
     int32_t index = 0;
     auto total = host->GetTotalChildCount();
     auto childrenNode = host->GetChildren();

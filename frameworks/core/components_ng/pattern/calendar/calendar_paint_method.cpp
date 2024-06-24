@@ -156,7 +156,7 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
 
     // Set the rowCount.
     if (totalWeek != 0) {
-        rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
+        rowCount_ = static_cast<int32_t>(calendarDays_.size() / totalWeek);
     }
 
     // Set dailyFourRowSpace_ for four line calendar.

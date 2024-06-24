@@ -5156,6 +5156,19 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
   }
 }
 GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
+class GridRowOnBreakpointChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridRow.resetOnBreakpointChange(node);
+    } else {
+      getUINativeModule().gridRow.setOnBreakpointChange(node, this.value);
+    }
+  }
+}
+GridRowOnBreakpointChangeModifier.identity = Symbol('gridRowOnBreakpointChange');
 class SetDirectionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5257,7 +5270,8 @@ class ArkGridRowComponent extends ArkComponent {
     return ["GridCol"];
   }
   onBreakpointChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridRowOnBreakpointChangeModifier.identity, GridRowOnBreakpointChangeModifier, callback);
+    return this;
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
@@ -6482,6 +6496,24 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey {
 }
 ImageSrcModifier.identity = Symbol('analyzerConfig');
 
+class ImagePrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetPrivacySensitive(node);
+    }
+    else {
+      getUINativeModule().image.setPrivacySensitive(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ImagePrivacySensitiveModifier.identity = Symbol('imagePrivacySensitive');
+
 class ImageOnCompleteModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6645,6 +6677,11 @@ class ArkImageComponent extends ArkComponent {
   enableAnalyzer(value) {
     modifierWithKey(
       this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  privacySensitive(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImagePrivacySensitiveModifier.identity, ImagePrivacySensitiveModifier, value);
     return this;
   }
   analyzerConfig(value) {
@@ -9862,6 +9899,23 @@ class TextDraggableModifier extends ModifierWithKey {
   }
 }
 TextDraggableModifier.identity = Symbol('textDraggable');
+class TextPrivacySensitiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetPrivacySensitive(node);
+    }
+    else {
+      getUINativeModule().text.setPrivacySensitive(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextPrivacySensitiveModifier.identity = Symbol('textPrivacySensitive');
 class TextWordBreakModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10494,6 +10548,10 @@ class ArkTextComponent extends ArkComponent {
   }
   draggable(value) {
     modifierWithKey(this._modifiersWithKeys, TextDraggableModifier.identity, TextDraggableModifier, value);
+    return this;
+  }
+  privacySensitive(value) {
+    modifierWithKey(this._modifiersWithKeys, TextPrivacySensitiveModifier.identity, TextPrivacySensitiveModifier, value);
     return this;
   }
   textShadow(value) {
@@ -15461,6 +15519,10 @@ class ArkRefreshComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
     return this;
   }
+  pullDownRatio(value) {
+    modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
+    return this;
+  }
 }
 class RefreshOffsetModifier extends ModifierWithKey {
   constructor(value) {
@@ -15490,6 +15552,23 @@ class PullToRefreshModifier extends ModifierWithKey {
   }
 }
 PullToRefreshModifier.identity = Symbol('pullToRefresh');
+class PullDownRatioModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullDownRatio(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullDownRatio(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PullDownRatioModifier.identity = Symbol('pullDownRatio');
 // @ts-ignore
 if (globalThis.Refresh !== undefined) {
   globalThis.Refresh.attributeModifier = function (modifier) {
@@ -19232,7 +19311,7 @@ class ArkNavigationComponent extends ArkComponent {
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
-    if (types && types.length > 0) {
+    if (types && types.length >= 0) {
       let safeAreaType = '';
       for (let param of types) {
         if (!isNumber(param) || param >= SAFE_AREA_TYPE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
@@ -19249,7 +19328,7 @@ class ArkNavigationComponent extends ArkComponent {
       }
       opts.type = safeAreaType;
     }
-    if (edges && edges.length > 0) {
+    if (edges && edges.length >= 0) {
       let safeAreaEdge = '';
       for (let param of edges) {
         if (!isNumber(param) || param >= SAFE_AREA_EDGE_LIMIT || param < SAFE_AREA_LOWER_LIMIT) {
@@ -23189,6 +23268,9 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   draggable(value) {
+    throw new Error('Method not implemented.');
+  }
+  privacySensitive(value) {
     throw new Error('Method not implemented.');
   }
   overlay(value, options) {

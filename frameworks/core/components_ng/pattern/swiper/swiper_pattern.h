@@ -994,6 +994,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation);
     void SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex);
+    bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 

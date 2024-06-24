@@ -52,6 +52,28 @@ RefPtr<AppBarTheme> GetAppBarTheme()
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<AppBarTheme>();
 }
+
+#ifndef PREVIEW
+void AssembleUiExtensionParams(
+    bool firstTry, std::string& appGalleryBundleName, std::map<std::string, std::string>& params)
+{
+    auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
+    params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
+    params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
+    params.try_emplace("module", Container::Current()->GetModuleName());
+    if (missionId != -1) {
+        params.try_emplace("missionId", std::to_string(missionId));
+    }
+
+    if (firstTry) {
+        params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
+        appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
+    } else {
+        params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+        appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
+    }
+}
+#endif
 } // namespace
 
 RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
@@ -217,12 +239,15 @@ RefPtr<FrameNode> AppBarView::BuildDivider()
 
 void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
 {
-    auto clickCallback = [weakButton = WeakClaim(RawPtr(menuButton))](GestureEvent& info) {
+    auto clickCallback = [wp = WeakClaim(this)](GestureEvent& info) {
 #ifdef PREVIEW
         LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. "
              "Perform this operation on the emulator or a real device instead.");
 #else
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto appbarView = wp.Upgrade();
+        CHECK_NULL_VOID(appbarView);
+        auto node = appbarView->atomicService_.Upgrade();
+        auto pipeline = node->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<AppBarTheme>();
         CHECK_NULL_VOID(theme);
@@ -231,9 +256,7 @@ void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
                 theme->GetAbilityName().c_str());
             pipeline->FireSharePanelCallback(theme->GetBundleName(), theme->GetAbilityName());
         } else {
-            auto menuButton = weakButton.Upgrade();
-            CHECK_NULL_VOID(menuButton);
-            BindContentCover(menuButton);
+            appbarView->CreateServicePanel(true);
         }
 #endif
     };
@@ -264,8 +287,21 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
     }
 }
 
-void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode, bool firstBind)
+void AppBarView::DestroyServicePanel()
 {
+    auto node = atomicService_.Upgrade();
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->CloseModalUIExtension(sessionId_);
+    LOGI("ServicePanel release session:%{public}d", sessionId_);
+}
+
+void AppBarView::CreateServicePanel(bool firstTry)
+{
+#ifndef PREVIEW
     if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
         OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
         LOGE("UIExtension BundleName is empty.");
@@ -277,48 +313,35 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode, bool firs
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    std::string stageAbilityName = "";
+    ModalUIExtensionCallbacks callbacks;
+    callbacks.onRelease = [wp = WeakClaim(this)](int32_t releaseCode) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+    };
+    callbacks.onError = [wp = WeakClaim(this), firstTry](
+                            int32_t code, const std::string& name, const std::string& message) {
+        auto bar = wp.Upgrade();
+        bar->DestroyServicePanel();
+        if (firstTry) {
+            bar->CreateServicePanel(false);
+        }
+    };
+    std::string abilityName;
     auto theme = pipeline->GetTheme<AppBarTheme>();
     if (theme) {
-        stageAbilityName = theme->GetStageAbilityName();
+        abilityName = theme->GetStageAbilityName();
     }
-    NG::ModalStyle modalStyle;
-    modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetNode, overlayManager, modalStyle, stageAbilityName, firstBind]() -> RefPtr<UINode> {
-        auto onRelease = [overlayManager, modalStyle, targetNode](int32_t releaseCode) {
-            auto style = modalStyle;
-            overlayManager->BindContentCover(
-                false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(), targetNode);
-        };
-        auto onError = [overlayManager, modalStyle, targetNode, firstBind](
-                           int32_t code, const std::string& name, const std::string& message) {
-            auto style = modalStyle;
-            overlayManager->BindContentCover(
-                false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(), targetNode);
-            // if pull up new service panel failed, try to pull up the old one.
-            if (firstBind) {
-                BindContentCover(targetNode, false);
-            }
-        };
-        // Create parameters of UIExtension.
-        std::map<std::string, std::string> params = CreateUIExtensionParams();
-
-        // Create UIExtension node.
-        auto appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
-        if (!firstBind) {
-            appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
-            params.erase("ability.want.params.uiExtensionType");
-            params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
-        }
-        auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(
-            appGalleryBundleName, stageAbilityName, params, std::move(onRelease), std::move(onError));
-        LOGI("UIExtension BundleName: %{public}s, AbilityName: %{public}s", appGalleryBundleName.c_str(),
-            stageAbilityName.c_str());
-        InitUIExtensionNode(uiExtNode);
-        return uiExtNode;
-    };
-    overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr,
-        nullptr, ContentCoverParam(), targetNode);
+    std::string appGalleryBundleName;
+    std::map<std::string, std::string> params;
+    AssembleUiExtensionParams(firstTry, appGalleryBundleName, params);
+    auto wantWrap = WantWrap::CreateWantWrap(appGalleryBundleName, abilityName);
+    wantWrap->SetWantParam(params);
+    LOGI("ServicePanel request bundle: %{public}s, ability: %{public}s. "
+         "UIExtension bundle: %{public}s, ability: %{public}s, module: %{public}s",
+        appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
+        params["module"].c_str());
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, false);
+#endif
 }
 
 void AppBarView::InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode)
@@ -329,23 +352,6 @@ void AppBarView::InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(
         CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
     uiExtNode->MarkModifyDone();
-}
-
-std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
-{
-    auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
-    std::map<std::string, std::string> params;
-    params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
-    params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-    params.try_emplace("module", Container::Current()->GetModuleName());
-    if (missionId != -1) {
-        params.try_emplace("missionId", std::to_string(missionId));
-    }
-    params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
-    LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
-        AceApplicationInfo::GetInstance().GetProcessName().c_str(),
-        AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());
-    return params;
 }
 
 std::optional<RectF> AppBarView::GetAppBarRect()

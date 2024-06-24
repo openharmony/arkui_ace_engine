@@ -1707,7 +1707,7 @@ private:
     bool isFocusTextColorSet_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText_ = true;
+    bool hasSupportedPreviewText_ = false;
     bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;

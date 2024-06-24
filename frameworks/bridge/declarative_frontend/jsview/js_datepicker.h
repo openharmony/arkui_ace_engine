@@ -24,6 +24,7 @@
 #include "frameworks/base/i18n/time_format.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/components_ng/pattern/picker/picker_model.h"
 
 namespace OHOS::Ace::Framework {
 class JSDatePicker : public JSViewAbstract {
@@ -62,8 +63,24 @@ public:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions);
+    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson);
 
 private:
+    static std::function<void(const std::string&)> GetDateChangeEvent(const JSRef<JSObject>& paramObject,
+        const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode);
+    static std::function<void(const std::string&)> GetDateAcceptEvent(const JSRef<JSObject>& paramObject,
+        const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode);
+    static std::function<void(const std::string&)> GetChangeEvent(const JSRef<JSObject>& paramObject,
+        const JSCallbackInfo& info, const DatePickerType& pickerType, const WeakPtr<NG::FrameNode>& frameNode);
+    static std::function<void(const std::string&)> GetAcceptEvent(
+        const JSRef<JSObject>& paramObject, const JSCallbackInfo& info, const WeakPtr<NG::FrameNode>& frameNode);
+    static std::function<void()> GetCancelEvent(
+        const JSRef<JSObject>& paramObject, const JSCallbackInfo& info, const WeakPtr<NG::FrameNode>& frameNode);
+    static void UpdateDatePickerSettingData(const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
+    static void UpdatePickerDialogTimeInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
+    static void UpdatePickerDialogPositionInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
+    static void UpdatePickerDialogInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
+
     static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     // keep compatible, need remove after
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);

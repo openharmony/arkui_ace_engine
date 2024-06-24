@@ -339,6 +339,7 @@ struct ImageMenuItem {
   callbackId: number | undefined = undefined;
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
+  longPressTime: number = 500;
   @Prop fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -450,7 +451,7 @@ struct ImageMenuItem {
       this.touchEventAction(event);
     })
     .gesture(GestureGroup(GestureMode.Exclusive,
-      LongPressGesture({ repeat: false, duration: 500 })
+      LongPressGesture({ repeat: false, duration: this.longPressTime })
         .onAction((event: GestureEvent) => {
           let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
           this.fontSize = context.config?.fontSizeScale ?? 1;
@@ -568,6 +569,9 @@ struct EditableTitleBarDialog {
   controller?: CustomDialogController
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
+  screenWidth: number = 640;
+  verticalScreenLines: number = 6;
+  horizontalsScreenLines: number = 1;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {
@@ -630,10 +634,10 @@ struct EditableTitleBarDialog {
     this.mainWindowStage = context.windowStage.getMainWindowSync();
     let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
     let rect = properties.windowRect;
-    if (px2vp(rect.height) > 640) {
-      this.maxLines = 6;
+    if (px2vp(rect.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
     } else {
-      this.maxLines = 1;
+      this.maxLines = this.horizontalsScreenLines;
     }
   }
 }

@@ -110,7 +110,9 @@ public:
 
     void SetOpacity(double opacity, bool passThrough = false) override;
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override;
-    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override {};
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr) override
+    {}
     void SetOverlay(
         const std::string& text, std::function<void()> &&buildFunc, const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,

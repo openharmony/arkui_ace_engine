@@ -569,6 +569,9 @@ build_component_ng("pattern_ng") {
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]
+    if (!use_mingw_win && !use_mac && !use_linux) {
+      external_deps += [ "window_manager:scene_session" ]
+    }
     if (product_name == "ohos-sdk") {
       sources +=
           [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]

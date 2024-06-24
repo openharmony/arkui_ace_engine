@@ -61,14 +61,13 @@ public:
         const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, bool isButtonEnabled);
     static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);
     static uint32_t GetOrInitMaxMenuNums(RefPtr<NavigationBarTheme>& theme, RefPtr<TitleBarNode> titleBarNode);
-    static void HandleLongPress(const WeakPtr<FrameNode>& buttonNode, const BarItem& menuItem, bool isMoreButton);
-    static void HandleLongPressActionEnd(const WeakPtr<FrameNode>& buttonNode);
-
+    static void HandleLongPress(
+        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+    static void HandleLongPressActionEnd(const RefPtr<FrameNode>& buttonNode);
+    static void InitDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
 private:
-    static void InitTitleBarButtonLongPressEvent(const RefPtr<FrameNode>& buttonNode,
-        bool isMoreButton, const BarItem& menuItem);
     static RefPtr<FrameNode> CreatePopupDialogNode(
-        const RefPtr<FrameNode> targetNode, const BarItem& menuItem, bool isMoreButton);
+        const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
     static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
 };
 

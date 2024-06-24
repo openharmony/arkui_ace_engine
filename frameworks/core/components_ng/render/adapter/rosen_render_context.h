@@ -224,6 +224,7 @@ public:
     void OnNodeDisappear(bool recursive) override;
     void SetTransitionOutCallback(std::function<void()>&& callback) override;
     void SetTransitionInCallback(std::function<void()>&& callback) override;
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
     void RemoveClipWithRRect() override;
@@ -491,6 +492,8 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
+    void FireTransitionUserCallback(bool isTransitionIn);
+    void PostTransitionUserOutCallback();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -641,6 +644,7 @@ private:
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::function<void()> transitionOutCallback_;
     std::function<void()> transitionInCallback_;
+    TransitionFinishCallback transitionUserCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;

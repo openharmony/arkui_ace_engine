@@ -194,6 +194,49 @@ T* HtmlToSpan::Get(StyleValue* styleValue) const
     return static_cast<T*>(v);
 }
 
+// for example str = 0.00px
+Dimension HtmlToSpan::FromString(const std::string& str)
+{
+    static const int32_t PERCENT_UNIT = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+        { "rem", DimensionUnit::INVALID },
+        { "em", DimensionUnit::INVALID },
+    };
+
+    double value = 0.0;
+    DimensionUnit unit = DimensionUnit::VP;
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        return Dimension(NG::TEXT_DEFAULT_FONT_SIZE);
+    }
+
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
+            value = unit == DimensionUnit::PERCENT ? value / PERCENT_UNIT : value;
+            break;
+        }
+    }
+    if (unit == DimensionUnit::PX) {
+        return Dimension(value, DimensionUnit::VP);
+    } else if (unit == DimensionUnit::INVALID) {
+        return Dimension(NG::TEXT_DEFAULT_FONT_SIZE);
+    }
+
+    return Dimension(value, unit);
+}
+
 void HtmlToSpan::InitFont(
     const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
 {
@@ -210,7 +253,7 @@ void HtmlToSpan::InitFont(
     if (key == "color") {
         font->fontColor = ToSpanColor(value);
     } else if (key == "font-size") {
-        font->fontSize = Dimension::FromString(value);
+        font->fontSize = FromString(value);
     } else if (key == "font-weight") {
         font->fontWeight = StringUtils::StringToFontWeight(value);
     } else if (key == "font-style") {
@@ -249,7 +292,7 @@ void HtmlToSpan::InitParagrap(
     } else if (key == "text-overflow") {
         style->textOverflow = StringToTextOverflow(value);
     } else if (IsTextIndentAttr(key)) {
-        style->textIndent = Dimension::FromString(value);
+        style->textIndent = FromString(value);
     } else {
     }
 }
@@ -332,7 +375,7 @@ void HtmlToSpan::InitDimension(
     if (obj == nullptr) {
         return;
     }
-    obj->dimension = Dimension::FromString(value);
+    obj->dimension = FromString(value);
 }
 
 bool HtmlToSpan::IsLetterSpacingAttr(const std::string& key)
@@ -630,9 +673,9 @@ void HtmlToSpan::HandleImageSize(const std::string& key, const std::string& valu
         options.imageAttribute->size = std::make_optional<ImageSpanSize>();
     }
     if (key == "width") {
-        options.imageAttribute->size->width = Dimension::FromString(value);
+        options.imageAttribute->size->width = FromString(value);
     } else {
-        options.imageAttribute->size->height = Dimension::FromString(value);
+        options.imageAttribute->size->height = FromString(value);
     }
 }
 
@@ -878,7 +921,7 @@ void HtmlToSpan::ToSpan(
         contentLen++;
         ToImage(curNode, contentLen, pos, spanInfos);
         curNodeLen++;
-    } else if (nameStr == "span" || nameStr == "strong") {
+    } else if (nameStr == "span" || nameStr == "strong" || nameStr == "figure") {
         ToTextSpan(curNode, contentLen, pos, spanInfos);
     } else if (IsValidNode(nameStr)) {
         ToDefalutSpan(curNode, contentLen, pos, spanInfos);

@@ -6370,7 +6370,7 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->performAction(accessibilityId, nwebAction, actionArguments);
+            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
 }

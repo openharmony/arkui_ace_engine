@@ -376,4 +376,77 @@ HWTEST_F(InspectorTestNg, InspectorTestNg008, TestSize.Level1)
     EXPECT_EQ(rect.scale.z, zResult);
     context->rootNode_ = nullptr;
 }
+
+/**
+ * @tc.name: InspectorTestNg009
+ * @tc.desc: Test the GetFrameNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg009, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", id2, AceType::MakeRefPtr<Pattern>());
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto nodePtr = Inspector::GetFrameNodeByKey(key);
+    EXPECT_EQ(nodePtr, nullptr);
+}
+
+/**
+ * @tc.name: InspectorTestNg010
+ * @tc.desc: Test the GetRectangleById
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg010, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = ONE;
+    context->rootNode_->SetGeometryNode(AceType::MakeRefPtr<GeometryNode>());
+    std::string key = "key";
+    OHOS::Ace::NG::Rectangle rect;
+    Inspector::GetRectangleById(key, rect);
+    context->rootNode_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg011
+ * @tc.desc: Test the operation of GetSubWindowInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg011, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    auto test = Inspector::GetSubWindowInspector(false);
+    auto str = "";
+    EXPECT_NE(test, str);
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg012
+ * @tc.desc: Test the operation of GetSubWindowInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
+    int32_t containerId = 1;
+    std::string result = Inspector::GetSimplifiedInspector(containerId);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+}
 } // namespace OHOS::Ace::NG

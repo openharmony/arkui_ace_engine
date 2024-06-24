@@ -148,6 +148,7 @@ public:
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
+    virtual void SetUIContentType(UIContentType uIContentType) {};
 
     // Judge whether window need soft keyboard or not
     virtual bool NeedSoftKeyboard()

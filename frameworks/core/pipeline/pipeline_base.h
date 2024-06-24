@@ -1414,7 +1414,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
-    bool hasSupportedPreviewText_ = true;
+    bool hasSupportedPreviewText_ = false;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;

@@ -1350,6 +1350,20 @@ bool ParseResponseRegion(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Ark
     }
     return true;
 }
+
+std::function<void(bool)> ParseTransitionCallback(
+    const JSRef<JSFunc>& jsFunc, const JSExecutionContext& context, FrameNode* node)
+{
+    auto jsFuncFinish = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsFunc));
+    auto targetNode = AceType::WeakClaim(node);
+    auto finishCallback = [execCtx = context, jsFuncFinish, targetNode](bool isTransitionIn) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        NG::PipelineContext::SetCallBackNode(targetNode);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(isTransitionIn));
+        jsFuncFinish->ExecuteJS(1, &newJSVal);
+    };
+    return finishCallback;
+}
 } // namespace
 
 ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -4717,12 +4731,12 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.mode = mode->Int32Value(vm);
     } else if (mode->IsArray(vm)) {
         Local<panda::ArrayRef> modeArray = static_cast<Local<panda::ArrayRef>>(mode);
-        int32_t arrLength = modeArray->Length(vm);
+        int32_t arrLength = static_cast<int32_t>(modeArray->Length(vm));
         if (arrLength > NUM_4) {
             arrLength = NUM_4;
         }
         modeIntArray = new int32_t[arrLength];
-        for (size_t i = 0; i < arrLength; i++) {
+        for (int32_t i = 0; i < arrLength; i++) {
             Local<JSValueRef> objValue = modeArray->GetValueAt(vm, modeArray, i);
             modeIntArray[i] = objValue->Int32Value(vm);
         }
@@ -4800,7 +4814,7 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     ViewAbstract::CleanTransition(frameNode);
-    ViewAbstract::SetChainedTransition(frameNode, nullptr);
+    ViewAbstract::SetChainedTransition(frameNode, nullptr, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4814,13 +4828,18 @@ ArkUINativeModuleValue CommonBridge::SetTransition(ArkUIRuntimeCallInfo* runtime
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     if (!info[1]->IsObject()) {
         ViewAbstract::CleanTransition(frameNode);
-        ViewAbstract::SetChainedTransition(frameNode, nullptr);
+        ViewAbstract::SetChainedTransition(frameNode, nullptr, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
     auto obj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
     if (!obj->GetProperty("successor_")->IsUndefined()) {
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        ViewAbstract::SetChainedTransition(frameNode, chainedEffect);
+        std::function<void(bool)> finishCallback;
+        if (info.Length() > 2 && info[2]->IsFunction()) {
+            finishCallback =
+                ParseTransitionCallback(JSRef<JSFunc>::Cast(info[2]), info.GetExecutionContext(), frameNode);
+        }
+        ViewAbstract::SetChainedTransition(frameNode, chainedEffect, std::move(finishCallback));
         return panda::JSValueRef::Undefined(vm);
     }
     auto options = ParseJsTransition(info[1]);
@@ -5903,18 +5922,14 @@ void CommonBridge::SetOnGestureEvent(
 Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info)
 {
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "globalX", "globalY",
-        "localX", "localY", "pinchCenterX", "pinchCenterY", "source", "pressure", "sourceTool", "velocityX",
-        "velocityY", "velocity", "getModifierKeyState" };
+    const char* keys[] = { "repeat", "offsetX", "offsetY", "scale", "angle", "speed", "timestamp", "pinchCenterX",
+        "pinchCenterY", "source", "pressure", "sourceTool", "velocityX", "velocityY", "velocity",
+        "getModifierKeyState" };
     Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, info.GetRepeat()),
         panda::NumberRef::New(vm, info.GetOffsetX() / density), panda::NumberRef::New(vm, info.GetOffsetY() / density),
         panda::NumberRef::New(vm, info.GetScale()), panda::NumberRef::New(vm, info.GetAngle()),
         panda::NumberRef::New(vm, info.GetSpeed()),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, info.GetGlobalLocation().GetX() / density),
-        panda::NumberRef::New(vm, info.GetGlobalLocation().GetY() / density),
-        panda::NumberRef::New(vm, info.GetLocalLocation().GetX() / density),
-        panda::NumberRef::New(vm, info.GetLocalLocation().GetY() / density),
         panda::NumberRef::New(vm, info.GetPinchCenter().GetX() / density),
         panda::NumberRef::New(vm, info.GetPinchCenter().GetY() / density),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),

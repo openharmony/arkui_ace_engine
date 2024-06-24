@@ -1,0 +1,35 @@
+{
+    "include": [
+        "../state_mgmt/src/lib/sdk/i_data_source.d.ts"
+    ],
+    "files": [
+        "src/BasicPrefetcher.ts",
+        "src/IDataSourcePrefetching.ts",
+        "src/IPrefetcher.ts",
+        "src/prefetcher/FetchedRegistry.ts",
+        "src/prefetcher/ItemsOnScreenProvider.ts",
+        "src/prefetcher/PrefetchCount.ts",
+        "src/prefetcher/PrefetchRangeEvaluator.ts",
+        "src/prefetcher/PrefetchRangeRatio.ts",
+        "src/prefetcher/Prefetcher.ts",
+        "src/prefetcher/logger.ts",
+        "src/utils/IndexRange.ts",
+        "src/utils/RatioRange.ts",
+        "src/utils/ScrollDirection.ts"
+    ],
+    "compilerOptions": {
+        "module": "None",
+        "moduleResolution": "Node",
+        "target": "ES2020",
+        "rootDir": "./src",
+        "outDir": ".ohos",
+        "outFile": ".ohos/jsPrefetcher.js",
+        "noEmitOnError": true,
+        "experimentalDecorators": true,
+        "allowJs": true,
+        "lib": [
+            "ES2020"
+        ],
+        "removeComments": true
+    }
+}

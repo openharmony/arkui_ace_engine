@@ -90,10 +90,7 @@ AceEngine::AceEngine()
     }
 }
 
-AceEngine::~AceEngine()
-{
-    LOG_DESTROY();
-}
+AceEngine::~AceEngine() {}
 
 AceEngine& AceEngine::Get()
 {
