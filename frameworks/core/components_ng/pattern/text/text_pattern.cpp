@@ -541,7 +541,7 @@ void TextPattern::HandleOnCopy()
 void TextPattern::HandleOnCopySpanString()
 {
     RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    auto subSpanString = spanString->GetSubSpanString(textSelector_.GetTextStart(),
+    auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
@@ -1495,7 +1495,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
     };
     if (isSpanStringMode_) {
         std::vector<uint8_t> arr;
-        auto dragSpanString = spanString->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
         dragSpanString->EncodeTlv(arr);
         UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     } else {
@@ -3284,8 +3284,8 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ProcessSpanString();
-    auto length = spanString->GetLength();
-    spanString->ReplaceSpanString(0, length, value);
+    auto length = styledString_->GetLength();
+    styledString_->ReplaceSpanString(0, length, value);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

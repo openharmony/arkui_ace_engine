@@ -545,7 +545,6 @@ public:
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
-    void AddUdmfData(const RefPtr<Ace::DragEvent>& event) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     const std::string& GetPasteStr() const
@@ -1054,7 +1053,6 @@ private:
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
     void NotifyExitTextPreview();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
 
@@ -1106,7 +1104,6 @@ private:
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
     RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
-    RefPtr<MutableSpanString> styledString_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;

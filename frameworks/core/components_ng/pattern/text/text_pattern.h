@@ -695,7 +695,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> spanString = MakeRefPtr<MutableSpanString>("");
+    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
