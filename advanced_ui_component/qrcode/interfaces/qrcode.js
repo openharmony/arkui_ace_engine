@@ -13,6 +13,12 @@
  * limitations under the License.
  */
  
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
@@ -38,7 +44,7 @@ ConfigDataConstants.SIX_VP = '6vp';
 ConfigDataConstants.FIVE_HUNDRED = 500;
 ConfigDataConstants.DEFAULT_OPACITY = 0.4;
 ConfigDataConstants.DEFAULT_TIMES = 200;
-export class QrcodeOptions {
+let QrcodeOptions = class QrcodeOptions {
     constructor(options) {
         this.edgeLength = options.edgeLength ?? new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP, LengthUnit.VP);
         this.color = options.color ?? ColorMetrics.resourceColor(Color.Black);
@@ -56,57 +62,64 @@ export class QrcodeOptions {
         this.space = options.space ?? ConfigDataConstants.SIX_VP;
         this.loadingImageLength = options.loadingImageLength ?? new LengthMetrics(ConfigDataConstants.THIRTY_FOUR_VP, LengthUnit.VP);
     }
-}
-export class Qrcode extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.__options = new SynchedPropertyObjectTwoWayPU(params.options, this, "options");
-        this.__value = new SynchedPropertySimpleTwoWayPU(params.value, this, "value");
-        this.__state = new SynchedPropertySimpleTwoWayPU(params.state, this, "state");
-        this.setInitiallyProvidedValue(params);
-        this.declareWatch("options", this.optionsChange);
+};
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "edgeLength", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "color", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "backgroundColor", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "textColor", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "textContent", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "borderRadius", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "opacity", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "animationCurve", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "animationDuration", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "qrcodeSideLength", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "expiredImageLength", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "textSize", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "textWeight", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "space", void 0);
+__decorate([
+    Trace
+], QrcodeOptions.prototype, "loadingImageLength", void 0);
+QrcodeOptions = __decorate([
+    ObservedV2
+], QrcodeOptions);
+export { QrcodeOptions };
+export class Qrcode extends ViewV2 {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("options", (params && "options" in params) ? params.options : undefined);
+        this.value = '';
+        this.state = QrcodeState.NORMAL;
+        this.clickCallback = "clickCallback" in params ? params.clickCallback : () => { };
         this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-    }
-    updateStateVars(params) {
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__value.purgeDependencyOnElmtId(rmElmtId);
-        this.__state.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.__options.aboutToBeDeleted();
-        this.__value.aboutToBeDeleted();
-        this.__state.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get options() {
-        return this.__options.get();
-    }
-    set options(newValue) {
-        this.__options.set(newValue);
-    }
-    get value() {
-        return this.__value.get();
-    }
-    set value(newValue) {
-        this.__value.set(newValue);
-    }
-    get state() {
-        return this.__state.get();
-    }
-    set state(newValue) {
-        this.__state.set(newValue);
-    }
-    //监听组件状态变化
-    optionsChange() {
-        console.info('optionsChange end');
     }
     aboutToAppear() {
         if (this.options === undefined) {
@@ -114,19 +127,13 @@ export class Qrcode extends ViewPU {
         }
         else {
             console.info('aboutToAppear:' + JSON.stringify(this.options));
-            this.optionsChange();
         }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.onClick(() => {
-                if (this.state != QrcodeState.LOADING) {
-                    return this.state = QrcodeState.LOADING;
-                }
-                else {
-                    return this.state;
-                }
+                this.clickCallback && this.clickCallback();
             });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -220,9 +227,26 @@ export class Qrcode extends ViewPU {
         If.pop();
         Stack.pop();
     }
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("options" in params) {
+            this.updateParam("options", params.options);
+        }
+    }
     rerender() {
         this.updateDirtyElements();
     }
 }
+__decorate([
+    Param
+], Qrcode.prototype, "options", void 0);
+__decorate([
+    Consumer()
+], Qrcode.prototype, "value", void 0);
+__decorate([
+    Consumer()
+], Qrcode.prototype, "state", void 0);
 //# sourceMappingURL=Qrcode.js.map
 export default {Qrcode,QrcodeOptions,QrcodeState}

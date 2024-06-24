@@ -1,14 +1,9 @@
 import { LengthMetrics,ColorMetrics, LengthUnit } from '@ohos.arkui.node';
+
 export enum QrcodeState {
   NORMAL,
   EXPIRED,
   LOADING
-}
-
-enum ConfigData {
-  FIVE_HUNDRED = 500,
-  DEFAULT_OPACITY = 0.4,
-  DEFAULT_TIMES = 200
 }
 
 class ConfigDataConstants {
@@ -20,6 +15,9 @@ class ConfigDataConstants {
   static readonly THIRTY_FOUR_VP = 34;
   static readonly ELEVEN_FP = '11fp';
   static readonly SIX_VP = '6vp';
+  static readonly FIVE_HUNDRED = 500;
+  static readonly DEFAULT_OPACITY = 0.4;
+  static readonly DEFAULT_TIMES = 200;
 }
 
 interface CommonQrcodeOptions {
@@ -42,26 +40,24 @@ interface CommonQrcodeOptions {
 
 }
 
-
+@ObservedV2
 export class QrcodeOptions  {
-  edgeLength?: LengthMetrics //边框长度
-  color?: ColorMetrics //二维码颜色
-  backgroundColor?: ColorMetrics //背景颜色
-  textColor?: ColorMetrics //字体颜色
-  textContent?: string //失效提示文本内容
-  borderRadius?: Length | BorderRadiuses | LocalizedBorderRadiuses //圆角
-  opacity?: number | Resource//不透明度
-  animationCurve?: Curve | string | ICurve //淡入曲线参数
-  animationDuration?: number
+  @Trace edgeLength?: LengthMetrics //边框长度
+  @Trace color?: ColorMetrics //二维码颜色
+  @Trace backgroundColor?: ColorMetrics //背景颜色
+  @Trace textColor?: ColorMetrics //字体颜色
+  @Trace textContent?: string //失效提示文本内容
+  @Trace borderRadius?: Length | BorderRadiuses | LocalizedBorderRadiuses //圆角
+  @Trace opacity?: number | Resource//不透明度
+  @Trace animationCurve?: Curve | string | ICurve //淡入曲线参数
+  @Trace animationDuration?: number
 
-  qrcodeSideLength?: LengthMetrics //二维码的边长
-  expiredImageLength?: LengthMetrics //失效图标边长
-  textSize?: ResourceStr //提示文本字体大小
-  textWeight?: number | FontWeight | string //文本字重
-  space?: ResourceStr //图标与文本间隔
-  loadingImageLength?: LengthMetrics //加载图标边长
-
-  optionsChange?: () => VoidCallback
+  @Trace qrcodeSideLength?: LengthMetrics //二维码的边长
+  @Trace expiredImageLength?: LengthMetrics //失效图标边长
+  @Trace textSize?: ResourceStr //提示文本字体大小
+  @Trace textWeight?: number | FontWeight | string //文本字重
+  @Trace space?: ResourceStr //图标与文本间隔
+  @Trace loadingImageLength?: LengthMetrics //加载图标边长
 
   constructor(options: CommonQrcodeOptions) {
     this.edgeLength = options.edgeLength ?? new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP,LengthUnit.VP)
@@ -71,9 +67,9 @@ export class QrcodeOptions  {
     this.textContent = options.textContent ?? ConfigDataConstants.TIPS
 
     this.borderRadius = options.borderRadius ?? $r('sys.float.ohos_id_corner_radius_default_s')
-    this.opacity = options.opacity ?? ConfigData.DEFAULT_OPACITY
+    this.opacity = options.opacity ?? ConfigDataConstants.DEFAULT_OPACITY
     this.animationCurve = options.animationCurve ?? ConfigDataConstants.ANIMATION_CURVE
-    this.animationDuration = options.animationDuration ?? ConfigData.DEFAULT_TIMES
+    this.animationDuration = options.animationDuration ?? ConfigDataConstants.DEFAULT_TIMES
     this.qrcodeSideLength = options.qrcodeSideLength ?? new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_ONE_VP,LengthUnit.VP)
     this.expiredImageLength = options.expiredImageLength ?? new LengthMetrics(ConfigDataConstants.TWENTY_EIGHT_VP,LengthUnit.VP)
     this.textSize = options.textSize ?? ConfigDataConstants.ELEVEN_FP
@@ -84,23 +80,18 @@ export class QrcodeOptions  {
 
 }
 
-@Component
+@ComponentV2
 export struct Qrcode {
-  @Link @Watch('optionsChange') options: QrcodeOptions
-  @Link value: string
-  @Link state: QrcodeState
-
-  //监听组件状态变化
-  optionsChange() {
-    console.info('optionsChange end')
-  }
+  @Require @Param  options: QrcodeOptions
+  @Consumer() value: string = ''
+  @Consumer() state: QrcodeState = QrcodeState.NORMAL
+  clickCallback: () => void = () => {}
 
   aboutToAppear() {
     if (this.options === undefined) {
       return
     } else {
       console.info('aboutToAppear:' + JSON.stringify(this.options))
-      this.optionsChange()
     }
   }
 
@@ -166,11 +157,7 @@ export struct Qrcode {
       }
     }
     .onClick(() => {
-      if (this.state != QrcodeState.LOADING) {
-        return this.state = QrcodeState.LOADING
-      } else {
-        return this.state
-      }
+      this.clickCallback && this.clickCallback()
     })
   }
 }
