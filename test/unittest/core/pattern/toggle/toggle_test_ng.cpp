@@ -1407,6 +1407,143 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TogglePatternTest0026
+ * @tc.desc: Test HandleBorderStyle() and HandleShadowStyle().
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    auto toggleFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(toggleFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. obtain toggle theme、renderContext、property、pattern、graphics
+     */
+    auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
+    ASSERT_NE(toggleButtonTheme, nullptr);
+    auto renderContext = toggleFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto togglePaintProperty = toggleFrameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+    auto layoutProperty = toggleFrameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto togglePattern = toggleFrameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(togglePattern, nullptr);
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    ASSERT_NE(graphics, nullptr);
+    /**
+     * @tc.steps: step3. expect developer not set borderWidth and borderColor.
+     */
+    EXPECT_FALSE(layoutProperty->GetBorderWidthProperty());
+    EXPECT_FALSE(renderContext->HasBorderWidth());
+    EXPECT_FALSE(renderContext->HasBorderColor());
+    EXPECT_TRUE(togglePaintProperty->GetIsOn());
+    /**
+     * @tc.steps: step4. expect toggle unchecked.
+     */
+    EXPECT_FALSE(togglePaintProperty->GetIsOnValue(false));
+    EXPECT_FALSE(graphics->HasBackShadow());
+    /**
+     * @tc.steps: step5. visit method HandleBorderStyle() and HandleShadowStyle().
+     */
+    togglePattern->HandleBorderStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    togglePattern->HandleShadowStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    /**
+     * @tc.steps: step6. Obtain borderWidth and borderColor from theme and assign them to Property(Unchecked).
+     */
+    BorderWidthProperty borderWidthProperty;
+    BorderColorProperty borderColorProperty;
+    borderWidthProperty.SetBorderWidth(toggleButtonTheme->GetBorderWidth());
+    borderColorProperty.SetColor(toggleButtonTheme->GetBorderColorUnchecked());
+    Shadow noneShadow = Shadow::CreateShadow(ShadowStyle::None);
+    /**
+     * @tc.steps: step7. expect toggle border and shadow style is consistent with toggleTheme(Unchecked).
+     */
+    EXPECT_EQ(renderContext->GetBorderColor(), borderColorProperty);
+    EXPECT_EQ(renderContext->GetBorderWidth(), borderWidthProperty);
+    EXPECT_EQ(graphics->GetBackShadowValue(), noneShadow);
+    /**
+     * @tc.steps: step8. expect expect toggle checked.
+     */
+    EXPECT_TRUE(togglePaintProperty->GetIsOnValue(true));
+    borderColorProperty.SetColor(toggleButtonTheme->GetBorderColorChecked());
+    ShadowStyle normalShadowStyle = static_cast<ShadowStyle>(toggleButtonTheme->GetShadowNormal());
+    Shadow normalShadow = Shadow::CreateShadow(normalShadowStyle);
+
+    togglePattern->HandleShadowStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    togglePattern->HandleBorderStyle(togglePaintProperty, renderContext, toggleButtonTheme);
+    /**
+     * @tc.steps: step9. expect toggle and shadow border style is consistent with toggleTheme(Checked).
+     */
+    EXPECT_EQ(renderContext->GetBorderColor(), borderColorProperty);
+    EXPECT_EQ(graphics->GetBackShadowValue(), normalShadow);
+}
+
+/**
+ * @tc.name: TogglePatternTest0027
+ * @tc.desc: Test HandleFocusEvent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, TogglePatternTest0027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    auto toggleFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(toggleFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. obtain toggle theme、renderContext、property、pattern、graphics.
+     */
+    auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
+    ASSERT_NE(toggleButtonTheme, nullptr);
+    auto renderContext = toggleFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto togglePaintProperty = toggleFrameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+    auto layoutProperty = toggleFrameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto togglePattern = toggleFrameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(togglePattern, nullptr);
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    ASSERT_NE(graphics, nullptr);
+    /**
+     * @tc.steps: step3. obtain textnode and textProperty.
+     */
+    auto textNode = AceType::DynamicCast<FrameNode>(toggleFrameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step4. expect graphics and backgroundcolor style
+     */
+    Shadow normalshadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleButtonTheme->GetShadowNormal()));
+    EXPECT_TRUE(togglePaintProperty->GetIsOnValue(true));
+    EXPECT_TRUE(!graphics->HasBackShadow() || graphics->GetBackShadowValue() == normalshadow);
+    EXPECT_TRUE(renderContext->GetBackgroundColor() == toggleButtonTheme->GetCheckedColor());
+    /**
+     * @tc.steps: step5. visit HandleFocusEvent();
+     */
+    togglePattern->HandleFocusEvent(renderContext, toggleButtonTheme, textNode,
+		textLayoutProperty, togglePaintProperty);
+    Shadow focusShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleButtonTheme->GetShadowFocus()));
+    EXPECT_EQ(focusShadow, graphics->GetBackShadowValue());
+    EXPECT_EQ(toggleButtonTheme->GetBackgroundColorFocusChecked(), renderContext->GetBackgroundColor());
+    /**
+     * @tc.steps: step6. verify backgroundcolor and focus shadow.
+     */
+    EXPECT_FALSE(togglePaintProperty->GetIsOnValue(false));
+    EXPECT_TRUE(!graphics->HasBackShadow() ||
+		graphics->GetBackShadowValue() == Shadow::CreateShadow(ShadowStyle::None));
+    EXPECT_TRUE(renderContext->GetBackgroundColor() == toggleButtonTheme->GetBackgroundColor());
+    togglePattern->HandleFocusEvent(renderContext, toggleButtonTheme, textNode,
+		textLayoutProperty, togglePaintProperty);
+    EXPECT_EQ(focusShadow, graphics->GetBackShadowValue());
+    EXPECT_EQ(renderContext->GetBackgroundColor(), toggleButtonTheme->GetBackgroundColorFocusUnchecked());
+}
+
+/**
  * @tc.name: ToggleModelTest001
  * @tc.desc: Test toggle create.
  * @tc.type: FUNC
