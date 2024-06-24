@@ -1060,7 +1060,7 @@ void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF
 bool MenuItemPattern::IsInHoverRegions(double x, double y)
 {
     for (auto hoverRegion : hoverRegions_) {
-        if (hoverRegion.ContainsInRegion(x, y)) {
+        if (hoverRegion.ContainsInRegionNoBoundary(x, y)) {
             return true;
         }
     }
