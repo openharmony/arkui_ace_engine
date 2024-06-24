@@ -276,9 +276,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // deal with pixel round
     auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM) |
-                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
     buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
