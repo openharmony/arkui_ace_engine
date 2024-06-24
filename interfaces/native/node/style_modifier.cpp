@@ -4446,9 +4446,10 @@ int32_t SetTextInputUnderlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     values[NUM_1] = item->value[NUM_1].u32;
     values[NUM_2] = item->value[NUM_2].u32;
     values[NUM_3] = item->value[NUM_3].u32;
+    ArkUI_Bool hasValues[NUM_4] = { 1, 1, 1, 1 };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-        node->uiNodeHandle, values, NUM_4);
+        node->uiNodeHandle, values, hasValues, NUM_4);
     return ERROR_CODE_NO_ERROR;
 }
 
