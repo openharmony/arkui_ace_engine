@@ -340,7 +340,6 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 
         self->RemoveChild(host, self->snapshotNode_, self->snapshotNode_);
         self->snapshotNode_.Reset();
-        self->CleanBlankNodeOrSnapshotNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
