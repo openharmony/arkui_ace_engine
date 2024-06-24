@@ -576,7 +576,7 @@ export struct ChipComponent {
     if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start;
-    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated)||
+    } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) ||
       this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         localizedLabelMargin.start = this.theme.label.localizedSmallMargin.start;
@@ -878,7 +878,10 @@ export struct ChipComponent {
       this.deleteChip = true;
     } },
       () => {
-        this.chipScale = { x: 0.85, y: 0.85 };
+        this.chipScale = {
+          x: 0.85,
+          y: 0.85
+        };
       })
   }
 
