@@ -963,7 +963,7 @@ void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalC
 }
 
 void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* values,
-    ArkUI_Int32 length)
+    const ArkUI_Bool* hasValues, ArkUI_Int32 length)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -971,10 +971,18 @@ void SetTextInputUserUnderlineColor(ArkUINodeHandle node, const ArkUI_Uint32* va
     if (length != DEFAULT_GROUP_UNDERLINE_COLOR_VALUES_COUNT) {
         return;
     }
-    userColor.typing = Color(values[CALL_ARG_0]);
-    userColor.normal = Color(values[CALL_ARG_1]);
-    userColor.error = Color(values[CALL_ARG_2]);
-    userColor.disable = Color(values[CALL_ARG_3]);
+    if (hasValues[CALL_ARG_0]) {
+        userColor.typing = Color(values[CALL_ARG_0]);
+    }
+    if (hasValues[CALL_ARG_1]) {
+        userColor.normal = Color(values[CALL_ARG_1]);
+    }
+    if (hasValues[CALL_ARG_2]) {
+        userColor.error = Color(values[CALL_ARG_2]);
+    }
+    if (hasValues[CALL_ARG_3]) {
+        userColor.disable = Color(values[CALL_ARG_3]);
+    }
     TextFieldModelNG::SetUserUnderlineColor(frameNode, userColor);
 }
 

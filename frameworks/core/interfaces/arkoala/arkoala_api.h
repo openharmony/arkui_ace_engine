@@ -2874,7 +2874,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
     void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor);
-    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Int32 length);
+    void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values,
+        const ArkUI_Bool* hasValues, ArkUI_Int32 length);
     void (*resetTextInputUserUnderlineColor)(ArkUINodeHandle node);
     void (*setTextInputTextSelection)(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end);
     ArkUI_Int32 (*getTextInputTextSelectionIndex)(ArkUINodeHandle node, ArkUI_Bool isEnd);
