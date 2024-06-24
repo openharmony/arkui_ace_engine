@@ -23,6 +23,8 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
+const resourceFn = resourceManager.getSystemResourceManager()
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
@@ -176,26 +178,22 @@ export const defaultTheme: ChipTheme = {
     activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     fontFamily: "HarmonyOS Sans",
     normalMargin: {
-      left: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_normal_text_margin_left'),
-      right: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_normal_text_margin_right'),
+      left: resourceFn.getNumberByName('chip_normal_text_margin_left'),
+      right: resourceFn.getNumberByName('chip_normal_text_margin_right'),
       top: 0,
       bottom: 0 },
     smallMargin: {
-      left: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_small_text_margin_left'),
-      right: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_small_text_margin_right'),
+      left: resourceFn.getNumberByName('chip_small_text_margin_left'),
+      right: resourceFn.getNumberByName('chip_small_text_margin_right'),
       top: 0,
       bottom: 0
     },
     defaultFontSize: 14,
     localizedNormalMargin: {
-      start: LengthMetrics.vp(6),
-      end: LengthMetrics.vp(6),
-      top: LengthMetrics.vp(0),
-      bottom: LengthMetrics.vp(0)
+      start: LengthMetrics.vp(16),
+      end: LengthMetrics.vp(16),
+      top: LengthMetrics.vp(4),
+      bottom: LengthMetrics.vp(4)
     },
     localizedSmallMargin: {
       start: LengthMetrics.vp(4),
@@ -206,10 +204,8 @@ export const defaultTheme: ChipTheme = {
   },
   suffixIcon: {
     size: {
-      width: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_suffixIcon_size_width'),
-      height: resourceManager.getSystemResourceManager()
-        .getNumberByName('chip_suffixIcon_size_height')
+      width: resourceFn.getNumberByName('chip_suffixIcon_size_width'),
+      height: resourceFn.getNumberByName('chip_suffixIcon_size_height')
     },
     fillColor: $r('sys.color.chip_usually_icon_color'),
     activatedFillColor: $r('sys.color.chip_active_icon_color'),
@@ -239,18 +235,15 @@ export const defaultTheme: ChipTheme = {
     normalBorderRadius: $r('sys.float.chip_normal_radius'),
     smallBorderRadius: $r('sys.float.chip_small_radius'),
     borderWidth: 2,
-    focusBtnScaleX: resourceManager.getSystemResourceManager()
-      .getNumberByName('chip_focused_btn_scale_x'),
-    focusBtnScaleY: resourceManager.getSystemResourceManager()
-      .getNumberByName('chip_focused_btn_scale_y'),
+    focusBtnScaleX: resourceFn.getNumberByName('chip_focused_btn_scale_x'),
+    focusBtnScaleY: resourceFn.getNumberByName('chip_focused_btn_scale_y'),
     localizedNormalPadding: {
       start: {
-        value: resourceManager.getSystemResourceManager()
-          .getNumberByName('chip_normal_text_padding_left'),
+        value: resourceFn.getNumberByName('chip_normal_text_padding_left'),
         unit: LengthUnit.VP
       },
       end: {
-        value: resourceManager.getSystemResourceManager().getNumberByName('chip_normal_text_padding_right'),
+        value: resourceFn.getNumberByName('chip_normal_text_padding_right'),
         unit: LengthUnit.VP
       },
       top: LengthMetrics.vp(4),
@@ -258,11 +251,11 @@ export const defaultTheme: ChipTheme = {
     },
     localizedSmallPadding: {
       start: {
-        value: resourceManager.getSystemResourceManager().getNumberByName('chip_small_text_padding_left'),
+        value: resourceFn.getNumberByName('chip_small_text_padding_left'),
         unit: LengthUnit.VP
       },
       end: {
-        value: resourceManager.getSystemResourceManager().getNumberByName('chip_small_text_padding_right'),
+        value: resourceFn.getNumberByName('chip_small_text_padding_right'),
         unit: LengthUnit.VP
       },
       top: LengthMetrics.vp(4),
@@ -379,18 +372,12 @@ export struct ChipComponent {
   private getFocusFontSize(): Dimension {
     if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
       try {
-        resourceManager.getSystemResourceManager()
-          .getNumberByName((((this.theme.label.smallFocusFontSize as Resource)
-            .params as string[])[0]).split('.')[2]);
         return this.theme.label.smallFocusFontSize;
       } catch (error) {
         return this.theme.label.defaultFontSize;
       }
     } else {
       try {
-        resourceManager.getSystemResourceManager()
-          .getNumberByName((((this.theme.label.normalFocusFontSize as Resource)
-            .params as string[])[0]).split('.')[2]);
         return this.theme.label.normalFocusFontSize;
       } catch (error) {
         return this.theme.label.defaultFontSize;
