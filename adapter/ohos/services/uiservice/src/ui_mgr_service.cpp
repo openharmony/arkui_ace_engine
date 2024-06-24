@@ -91,7 +91,7 @@ bool UIMgrService::Init()
         return false;
     }
 
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread("UIMgrService", handler_, WATCHDOG_TIMEVAL);
+    int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread("UIMgrService", handler_, WATCHDOG_TIMEVAL);
     if (ret != 0) {
         LOGW("Add watchdog thread failed");
     }
