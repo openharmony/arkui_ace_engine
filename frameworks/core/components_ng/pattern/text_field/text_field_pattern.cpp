@@ -115,7 +115,6 @@ constexpr Dimension AVOID_OFFSET = 24.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
-constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
@@ -3918,7 +3917,7 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsInPasswordMode()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
+        if (!getMargin) {
             margin.bottom = CalcLength(COUNTER_BOTTOM);
             layoutProperty->UpdateMargin(margin);
             return;
