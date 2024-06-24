@@ -101,8 +101,8 @@ void RadioModifier::InitializeParam()
     shadowColor_ = radioTheme->GetShadowColor();
     clickEffectColor_ = radioTheme->GetClickEffectColor();
     hoverColor_ = radioTheme->GetHoverColor();
+    sizeHover_ = radioTheme->GetSizeHoverBg();
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
-    defaultPadding_ = radioTheme->GetDefaultPaddingSize();
     hoverDuration_ = radioTheme->GetHoverDuration();
     hoverToTouchDuration_ = radioTheme->GetHoverToTouchDuration();
     touchDuration_ = radioTheme->GetTouchDuration();
@@ -429,7 +429,7 @@ void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& conten
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        outCircleRadius += defaultPadding_.ConvertToPx();
+        outCircleRadius += sizeHover_.ConvertToPx();
     } else {
         outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
     }
