@@ -119,21 +119,6 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
 }
 
-std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
-{
-    focusNodes.clear();
-    auto frameNode = GetFrameNode();
-    if (frameNode) {
-        frameNode->GetCurrentChildrenFocusHub(focusNodes);
-    }
-
-    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
-    if (!lastFocusNode) {
-        return focusNodes.end();
-    }
-    return std::find(focusNodes.begin(), focusNodes.end(), lastFocusNode);
-}
-
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (!IsCurrentFocus()) {
@@ -368,9 +353,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
         return;
     }
 
-    std::list<RefPtr<FocusHub>> focusNodes;
-    auto itLastFocusNode = FlushCurrentChildrenFocusHub(focusNodes);
-
     if (focusNode->IsCurrentFocus()) {
         // Try to goto next focus, otherwise goto previous focus.
         if (!GoToNextFocusLinear(FocusStep::TAB) && !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
@@ -385,18 +367,8 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
         }
         FocusManager::FocusGuard guard(Claim(this));
         focusNode->LostFocus(reason);
-    } else {
-        if (itLastFocusNode != focusNodes.end() && (*itLastFocusNode) == focusNode) {
-            lastWeakFocusNode_ = nullptr;
-        }
     }
-
-    auto it = std::find(focusNodes.begin(), focusNodes.end(), focusNode);
-    if (it == focusNodes.end()) {
-        return;
-    }
-    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
-    if (lastFocusNode == focusNode) {
+    if (lastWeakFocusNode_ == focusNode) {
         lastWeakFocusNode_ = nullptr;
     }
 }
