@@ -25,7 +25,11 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#else
+#include "base/web/webview/ohos_interface/include/ohos_nweb/nweb_handler.h"
+#endif
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"

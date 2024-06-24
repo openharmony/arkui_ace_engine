@@ -25,13 +25,13 @@
 namespace OHOS::Ace::NG {
 // under the condition of supporting cross platform and texture rendering
 #ifdef RENDER_EXTRACT_SUPPORTED
-RefPtr<RenderSurface> RenderSurface::Create(const RenderSurfaceTpye& type)
+RefPtr<RenderSurface> RenderSurface::Create(const RenderSurfaceType& type)
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
         switch (type) {
-            case RenderSurfaceTpye::SURFACE:
+            case RenderSurfaceType::SURFACE:
                 return MakeRefPtr<RenderSurfaceImpl>();
-            case RenderSurfaceTpye::TEXTURE:
+            case RenderSurfaceType::TEXTURE:
                 return MakeRefPtr<RenderTextureImpl>();
             default:
                 break;
