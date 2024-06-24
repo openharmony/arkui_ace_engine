@@ -1051,8 +1051,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
-    LOGD("XComponent HandleTouchEvent x = %{public}f, y = %{public}f, id = %{public}d, type = %{public}zu, size = "
-         "%{public}u",
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT,
+        "XComponent HandleTouchEvent x = %{public}f, y = %{public}f, id = %{public}d, type = %{public}zu, size = "
+        "%{public}u",
         touchEventPoint_.x, touchEventPoint_.y, touchEventPoint_.id, touchType,
         static_cast<uint32_t>(info.GetTouches().size()));
 #ifdef OHOS_PLATFORM
