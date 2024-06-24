@@ -914,6 +914,7 @@ void PipelineBase::Destroy()
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     finishFunctions_.clear();
+    densityChangedCallbacks_.clear();
 }
 
 std::string PipelineBase::OnFormRecycle()
