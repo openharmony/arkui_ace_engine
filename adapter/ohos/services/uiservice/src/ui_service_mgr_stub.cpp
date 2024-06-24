@@ -92,8 +92,9 @@ int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParc
 
 int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_UNREGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT,
-        nullptr, nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
+    int32_t id =
+        OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_UNREGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT,
+            nullptr, nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
