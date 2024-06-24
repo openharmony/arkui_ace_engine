@@ -485,6 +485,13 @@ void WindowScene::OnForeground()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneForeground", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnBackground()
+{
+    CHECK_NULL_VOID(session_);
+    lastWindowRect_ = session_->GetSessionRect();
+    session_->SetSessionLastRect(lastWindowRect_);
+}
+
 void WindowScene::OnDisconnect()
 {
     CHECK_NULL_VOID(session_);
@@ -572,14 +579,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return false;
 }
 
-void WindowScene::OnBackground()
-{
-    CHECK_NULL_VOID(session_);
-    lastWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionLastRect(lastWindowRect_);
-    WindowPattern::OnBackground();
-}
-
 void WindowScene::CleanBlankNodeOrSnapshotNode()
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -591,11 +590,13 @@ void WindowScene::CleanBlankNodeOrSnapshotNode()
         ACE_SCOPED_TRACE("WindowScene::CleanBlankNodeOrSnapshotNode");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->blankNode_ || self->snapshotNode_) {
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        if (self->snapshotNode_) {
             self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
             self->snapshotNode_.Reset();
+        }
+        if (self->blankNode_) {
             self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
             self->blankNode_.Reset();
             self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);

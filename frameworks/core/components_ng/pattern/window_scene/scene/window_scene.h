@@ -44,8 +44,8 @@ protected:
     void OnActivation() override;
     void OnConnect() override;
     void OnForeground() override;
-    void OnDisconnect() override;
     void OnBackground() override;
+    void OnDisconnect() override;
     void OnDrawingCompleted() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CleanBlankNodeOrSnapshotNode();
