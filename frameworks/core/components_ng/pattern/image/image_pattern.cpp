@@ -576,6 +576,12 @@ void ImagePattern::CreateObscuredImage()
 
 void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
 {
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
@@ -610,12 +616,6 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
-    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
     } else if (IsSupportImageAnalyzerFeature()) {
