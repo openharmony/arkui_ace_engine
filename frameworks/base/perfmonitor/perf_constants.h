@@ -116,6 +116,9 @@ public:
 
     // folder close
     static constexpr char CLOSE_FOLDER_ANI[] = "CLOSE_FOLDER_ANI";
+
+    // launcher spring back scroll
+    static constexpr char LAUNCHER_SPRINGBACK_SCROLL[] = "LAUNCHER_SPRINGBACK_SCROLL";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H
