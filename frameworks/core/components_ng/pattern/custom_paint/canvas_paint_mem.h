@@ -123,7 +123,7 @@ private:
 
     static inline void* ReallocThrow(void*addr, size_t size)
     {
-        return ThrowOnFailure(size, std::realloc(addr, size));
+        return nullptr;
     }
 
     template <typename V, V* P>
