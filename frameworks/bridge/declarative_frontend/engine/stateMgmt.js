@@ -9729,7 +9729,6 @@ class __Repeat {
     constructor(owningView, arr) {
         this.config = {};
         this.isVirtualScroll = false;
-        //console.log('__Repeat ctor')
         this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         this.config.itemGenFuncs = {};
@@ -9745,43 +9744,36 @@ class __Repeat {
         this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
     each(itemGenFunc) {
-        //console.log('__Repeat.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
         this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
     key(keyGenFunc) {
-        //console.log('__Repeat.key()')
         this.config.keyGenFunc = keyGenFunc;
         return this;
     }
     virtualScroll(options) {
-        //console.log('__Repeat.virtualScroll()')
         this.config.totalCount = this.normTotalCount(options === null || options === void 0 ? void 0 : options.totalCount);
         this.isVirtualScroll = true;
         return this;
     }
     // function to decide which template to use, each template has an id
     templateId(typeFunc) {
-        //console.log('__Repeat.templateId()')
         this.config.typeGenFunc = typeFunc;
         return this;
     }
     // template: id + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
-        //console.log('__Repeat.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
         this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
     updateArr(arr) {
-        //console.log('__Repeat.updateArr()')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         return this;
     }
     render(isInitialRender) {
         var _a, _b, _c;
-        //console.log('__Repeat.render()')
         if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
             throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
@@ -9804,7 +9796,9 @@ class __Repeat {
     // normalize totalCount
     normTotalCount(totalCount) {
         const arrLen = this.config.arr.length;
-        if (Number.isInteger(totalCount) && totalCount > arrLen) {
+        if (Number.isInteger(totalCount) && totalCount >= 0) {
+            // 0 <= totalCount
+            // totalCount is allowed smaller than data array length
             return totalCount;
         }
         return arrLen;
@@ -9821,8 +9815,6 @@ class __Repeat {
     }
 }
 ; // __Repeat<T>
-// __Repeat implements ForEach with child re-use for both existing state observation
-// and deep observation , for non-virtual and virtual code paths (TODO)
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

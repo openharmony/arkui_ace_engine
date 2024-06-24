@@ -96,7 +96,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     for (const auto& key : keysFrom) {
         key4index_[from1] = key;
         index4Key_[key] = from1;
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... index %{public}d -> key '%{public}s'",
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... index %{public}d -> key '%{public}s'", 
             static_cast<int32_t>(from1), key.c_str());
         from1++;
     }
