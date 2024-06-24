@@ -676,9 +676,9 @@ void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<Layou
     RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage)
 {
     CHECK_NULL_VOID(isShowHoverImage);
-    bool isColNode = hostNode->GetTag() == V2::COLUMN_ETS_TAG;
+    bool isColNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
     CHECK_NULL_VOID(isColNode);
-    // column -> stack -> image index 0 , preview index 1 when hoverScale api in use
+    // flex -> stack -> image index 0 , preview index 1 when hoverScale api in use
     auto childNode = child->GetChildByIndex(0)->GetChildByIndex(1);
     CHECK_NULL_VOID(childNode);
 

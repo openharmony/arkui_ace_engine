@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -54,8 +55,10 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+constexpr float HALF_DIVIDE = 2.0f;
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
 void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
 {
@@ -108,6 +111,17 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     previewPattern->SetIsShowHoverImage(true);
     previewPattern->SetCustomPreviewWidth(previewSize.Width());
     previewPattern->SetCustomPreviewHeight(previewSize.Height());
+
+    auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
+    CHECK_NULL_VOID(previewScaleTo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? 1.0f : previewScaleTo;
+    previewPattern->SetCustomPreviewScaleTo(previewScaleTo);
+    previewPattern->SetCustomPreviewAfterScaleWidth(previewSize.Width() * previewScaleTo);
+    previewPattern->SetCustomPreviewAfterScaleHeight(previewSize.Height() * previewScaleTo);
 }
 
 // create menuWrapper and menu node, update menu props
@@ -270,6 +284,17 @@ void UpdateContainerMaxSizeConstraint(const RefPtr<FrameNode>& node, const CalcS
     nodeLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
 }
 
+
+void UpdateContainerIdealSizeConstraint(const RefPtr<FrameNode>& node, const CalcSize& idealSize)
+{
+    CHECK_NULL_VOID(node);
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    auto nodeLayoutProperty = node->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(nodeLayoutProperty);
+    nodeLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+}
+
 void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<RenderContext>& imageContext,
     bool isShowHoverImage)
 {
@@ -330,7 +355,8 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
         });
 }
 
-void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<MenuTheme>& menuTheme)
+void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<MenuTheme>& menuTheme,
+    bool isScaleNearEqual)
 {
     CHECK_NULL_VOID(hoverImageStackNode);
     auto stackContext = hoverImageStackNode->GetRenderContext();
@@ -345,6 +371,9 @@ void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode
     
     AnimationOption option;
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    if (isScaleNearEqual) {
+        option.SetDelay(menuTheme->GetHoverImageDelayDuration());
+    }
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
     AnimationUtils::Animate(
         option, [stackContext, previewBorderRadius]() {
@@ -355,10 +384,67 @@ void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode
         });
 }
 
+void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
+    const RefPtr<MenuTheme>& menuTheme, bool isScaleNearEqual)
+{
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+
+    auto clipStartValue = previewPattern->GetIsWidthDistLarger() ? previewPattern->GetHoverImageAfterScaleWidth() :
+        previewPattern->GetHoverImageAfterScaleHeight();
+    auto clipEndValue = previewPattern->GetIsWidthDistLarger() ?
+        previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
+
+    hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, 0,
+        [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
+            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
+            auto clipNode = weak.Upgrade();
+            CHECK_NULL_VOID(clipNode);
+            auto clipContext = clipNode->GetRenderContext();
+            CHECK_NULL_VOID(clipContext);
+
+            auto preview = previewWeak.Upgrade();
+            CHECK_NULL_VOID(preview);
+            auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
+            CHECK_NULL_VOID(previewPattern);
+            auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth();
+            auto clipEndWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
+            auto clipStartHeight = previewPattern->GetHoverImageAfterScaleHeight();
+            auto clipEndHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
+            auto dist = 1.0f;
+            auto rate = 1.0f;
+            auto currentWidth = 0.0f;
+            auto currentHeight = 0.0f;
+            if (previewPattern->GetIsWidthDistLarger()) {
+                dist = NearEqual(clipStartWidth, clipEndWidth) ? 1.0f : clipEndWidth - clipStartWidth;
+                rate = (value - clipStartWidth) / dist;
+                currentWidth = value;
+                currentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+            } else {
+                dist = NearEqual(clipStartHeight, clipEndHeight) ? 1.0f : clipEndHeight - clipStartHeight;
+                rate = (value - clipStartHeight) / dist;
+                currentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+                currentHeight = value;
+            }
+            auto imageOffset = previewPattern->GetHoverImageAfterScaleOffset();
+            clipContext->ClipWithRect(RectF(OffsetF((1 - rate) * imageOffset.GetX(), (1 - rate) * imageOffset.GetY()),
+                SizeF(currentWidth, currentHeight)));
+        });
+    AnimationOption option;
+    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    if (isScaleNearEqual) { option.SetDelay(menuTheme->GetHoverImageDelayDuration()); }
+    hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipStartValue);
+    auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+            hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_PROPERTY_NAME, clipEndValue);
+        });
+}
+
 void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
     const RefPtr<RenderContext>& imageContext, const RefPtr<MenuTheme>& menuTheme, bool isScaleNearEqual = true)
 {
     UpdateOpacityInFinishEvent(previewNode, imageContext, menuTheme, isScaleNearEqual);
+
+    UpdatePreivewVisibleArea(hoverImageStackNode, previewNode, menuTheme, isScaleNearEqual);
 
     CHECK_NULL_VOID(hoverImageStackNode && previewNode);
     auto stackContext = hoverImageStackNode->GetRenderContext();
@@ -377,14 +463,17 @@ void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, cons
     
     AnimationOption scaleOption = AnimationOption();
     scaleOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    if (isScaleNearEqual) {
+        scaleOption.SetDelay(menuTheme->GetHoverImageDelayDuration());
+    }
     AnimationUtils::Animate(
         scaleOption, [stackContext, scaleTo]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
         },
         scaleOption.GetOnFinishEvent());
-    
-    SetHoverImageStackBorderRadius(hoverImageStackNode, menuTheme);
+
+    SetHoverImageStackBorderRadius(hoverImageStackNode, menuTheme, isScaleNearEqual);
 }
 
 void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
@@ -418,8 +507,8 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
     AnimationOption scaleOption = AnimationOption();
     if (isScaleNearEqual) {
         SetHoverImageFinishEvent(hoverImageStackNode, previewNode, imageContext, menuTheme);
-        scaleOption.SetOnFinishEvent(
-            []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+        return;
     } else {
         scaleOption.SetOnFinishEvent(
             [hoverImageStackNode, previewNode, imageContext, menuTheme, isScaleNearEqual]() {
@@ -575,16 +664,21 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
 }
 
 float GetHoverImageCustomPreviewBaseScaleInfo(const MenuParam& menuParam, int32_t width, int32_t height,
-    float previewWidth, float previewHeight)
+    const RefPtr<MenuPreviewPattern>& previewPattern)
 {
     float scaleRet = 1.0f;
     CHECK_NULL_RETURN(menuParam.isShowHoverImage, scaleRet);
+    CHECK_NULL_RETURN(previewPattern, scaleRet);
+    auto previewWidth = previewPattern->GetCustomPreviewWidth();
+    auto previewHeight = previewPattern->GetCustomPreviewHeight();
     if (previewWidth - width < previewHeight - height) {
         CHECK_EQUAL_RETURN(previewWidth, 0, scaleRet);
         scaleRet = width / previewWidth;
+        previewPattern->SetIsWidthDistLarger(false);
     } else {
         CHECK_EQUAL_RETURN(previewHeight, 0, scaleRet);
         scaleRet = height / previewHeight;
+        previewPattern->SetIsWidthDistLarger(true);
     }
     return scaleRet;
 }
@@ -595,26 +689,30 @@ void SetHoverImageCustomPreviewInfo(const RefPtr<FrameNode>& previewNode, const 
     CHECK_NULL_VOID(previewNode);
     auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
-    auto previewWidth = previewPattern->GetCustomPreviewWidth();
-    auto previewHeight = previewPattern->GetCustomPreviewHeight();
-    auto scale = GetHoverImageCustomPreviewBaseScaleInfo(menuParam, width, height, previewWidth, previewHeight);
+    auto scale = GetHoverImageCustomPreviewBaseScaleInfo(menuParam, width, height, previewPattern);
     CHECK_NULL_VOID(scale);
-    previewPattern->SetHoverImageScaleFrom(scale);
+
+    auto hoverImageScaleFrom = menuParam.hoverImageAnimationOptions.scaleFrom;
+    hoverImageScaleFrom = LessOrEqual(hoverImageScaleFrom, 0.0) ? 1.0f : hoverImageScaleFrom;
+    previewPattern->SetHoverImageScaleFrom(scale * hoverImageScaleFrom);
 
     auto hoverImageScaleTo = menuParam.hoverImageAnimationOptions.scaleTo;
     hoverImageScaleTo = LessOrEqual(hoverImageScaleTo, 0.0) ? 1.0f : hoverImageScaleTo;
+    auto hoverImageActualScaleTo = hoverImageScaleTo / scale;
+    previewPattern->SetHoverImageScaleTo(hoverImageActualScaleTo);
+    // get actual area size for clip visible area
+    previewPattern->SetHoverImageAfterScaleWidth(width * hoverImageActualScaleTo);
+    previewPattern->SetHoverImageAfterScaleHeight(height * hoverImageActualScaleTo);
+
+    previewPattern->SetHoverImageAfterScaleOffset(previewPattern->GetStackCenterOffset() -
+        OffsetF(previewPattern->GetHoverImageAfterScaleWidth() / HALF_DIVIDE,
+        previewPattern->GetHoverImageAfterScaleHeight() / HALF_DIVIDE));
+
     auto previewScaleFrom = LessOrEqual(menuParam.previewAnimationOptions.scaleFrom, 0.0) ? scale * hoverImageScaleTo :
         menuParam.previewAnimationOptions.scaleFrom;
     previewPattern->SetCustomPreviewScaleFrom(previewScaleFrom);
 
-    auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
-    CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
-    previewPattern->SetCustomPreviewScaleTo(previewScaleTo);
+    auto previewScaleTo = previewPattern->GetCustomPreviewScaleTo();
     previewPattern->SetHoverImageDisAppearScaleTo(previewScaleTo / scale);
 }
 
@@ -866,7 +964,7 @@ void SetPreviewScaleAndHoverImageScale(const RefPtr<FrameNode>& menuNode, const 
     pattern->SetHoverImageAfterAnimationScale(menuParam.hoverImageAnimationOptions.scaleTo);
 }
 
-void MenuView::CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& colNode,
+void MenuView::CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& posNode,
     const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode)
 {
     CHECK_NULL_VOID(previewNode);
@@ -877,35 +975,41 @@ void MenuView::CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode,
     CHECK_NULL_VOID(stackNode);
     CalcSize maxSize = { CalcLength(previewWidth), CalcLength(previewHeight) };
     UpdateContainerMaxSizeConstraint(stackNode, maxSize);
+    previewPattern->SetStackCenterOffset(OffsetF(previewWidth / HALF_DIVIDE, previewHeight / HALF_DIVIDE));
 
-    CHECK_NULL_VOID(colNode);
-    UpdateContainerMaxSizeConstraint(colNode, maxSize);
-    auto props = colNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateMainAxisAlign(FlexAlign::CENTER);
-
-    stackNode->MountToParent(colNode);
+    CHECK_NULL_VOID(posNode);
+    auto scaleAfter = previewPattern->GetCustomPreviewScaleTo();
+    CalcSize posMaxSize = { CalcLength(previewWidth * scaleAfter), CalcLength(previewHeight * scaleAfter) };
+    UpdateContainerMaxSizeConstraint(posNode, posMaxSize);
+    UpdateContainerIdealSizeConstraint(posNode, posMaxSize);
+    auto posProps = posNode->GetLayoutProperty<FlexLayoutProperty>();
+    CHECK_NULL_VOID(posProps);
+    posProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    posProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    stackNode->MountToParent(posNode);
     stackNode->MarkModifyDone();
+
     CHECK_NULL_VOID(wrapperNode);
-    colNode->MountToParent(wrapperNode);
-    colNode->MarkModifyDone();
+    posNode->MountToParent(wrapperNode);
+    posNode->MarkModifyDone();
 }
 
 // contextmenu mount info proc
 void MenuView::ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
-    // stack to put image and custom preview when hoverImage api is using
+    // stack to put image and custom preview and control visible area when hoverImage api is using
     auto hoverImageStackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
     CHECK_NULL_VOID(hoverImageStackNode);
 
-    // column to control visible area
-    auto hoverImageColNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    CHECK_NULL_VOID(hoverImageColNode);
+    // flex  to control visible area position
+    auto hoverImagePosNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<FlexLayoutPattern>(false));
+    CHECK_NULL_VOID(hoverImagePosNode);
+
     if (menuParam.isShowHoverImage) {
-        CustomPreviewParentNodeCreate(hoverImageStackNode, hoverImageColNode, wrapperNode, previewNode);
+        CustomPreviewParentNodeCreate(hoverImageStackNode, hoverImagePosNode, wrapperNode, previewNode);
         CHECK_NULL_VOID(wrapperNode);
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);

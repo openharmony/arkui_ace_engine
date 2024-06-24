@@ -54,7 +54,7 @@ private:
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
         const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
-    static void CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& colNode,
+    static void CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& posNode,
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode);
 };
 } // namespace OHOS::Ace::NG

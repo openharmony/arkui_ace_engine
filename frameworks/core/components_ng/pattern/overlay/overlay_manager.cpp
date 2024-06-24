@@ -131,6 +131,7 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+const std::string HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME = "hoverImageClipDisAppear";
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
@@ -250,6 +251,62 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     });
 }
 
+void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageStackNode,
+    const RefPtr<FrameNode>& previewNode)
+{
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+
+    // reverse
+    auto clipStartValue = previewPattern->GetIsWidthDistLarger() ?
+        previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
+    auto clipEndValue = previewPattern->GetIsWidthDistLarger() ? previewPattern->GetHoverImageAfterScaleWidth() :
+        previewPattern->GetHoverImageAfterScaleHeight();
+
+    hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, 0,
+        [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
+            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
+            auto clipNode = weak.Upgrade();
+            CHECK_NULL_VOID(clipNode);
+            auto clipContext = clipNode->GetRenderContext();
+            CHECK_NULL_VOID(clipContext);
+
+            auto preview = previewWeak.Upgrade();
+            CHECK_NULL_VOID(preview);
+            auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
+            CHECK_NULL_VOID(previewPattern);
+            auto clipStartWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
+            auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
+            
+            auto clipStartHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
+            auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
+            auto dist = 1.0f;
+            auto rate = 1.0f;
+            auto currentWidth = 0.0f;
+            auto currentHeight = 0.0f;
+            if (previewPattern->GetIsWidthDistLarger()) {
+                dist = NearEqual(clipStartWidth, clipEndWidth) ? 1.0f : clipEndWidth - clipStartWidth;
+                rate = (value - clipStartWidth) / dist;
+                currentWidth = value;
+                currentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+            } else {
+                dist = NearEqual(clipStartHeight, clipEndHeight) ? 1.0f : clipEndHeight - clipStartHeight;
+                rate = (value - clipStartHeight) / dist;
+                currentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+                currentHeight = value;
+            }
+            auto imageOffset = previewPattern->GetHoverImageAfterScaleOffset();
+            clipContext->ClipWithRect(RectF(OffsetF(rate * imageOffset.GetX(), rate * imageOffset.GetY()),
+                SizeF(currentWidth, currentHeight)));
+        });
+    AnimationOption option;
+    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipStartValue);
+    auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+        hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipEndValue);
+    });
+}
+
 void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
     const RefPtr<MenuPreviewPattern>& previewPattern)
 {
@@ -313,6 +370,7 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
+    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
 }
 
