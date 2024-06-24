@@ -16,6 +16,10 @@ import curves from '@ohos.curves'
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import util from '@ohos.util';
 import { LengthMetrics } from '@ohos.arkui.node'
+import resourceManager from '@ohos.resourceManager';
+import { BusinessError } from '@ohos.base';
+import hilog from '@ohos.hilog';
+import json from '@ohos.util.json';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -33,21 +37,31 @@ interface SegmentButtonThemeInterface {
   HOVER_COLOR: ResourceColor,
   PRESS_COLOR: ResourceColor,
   BACKGROUND_BLUR_STYLE: BlurStyle,
+  SEGMENT_BUTTON_PADDING: Padding | Dimension,
+  CONSTRAINT_SIZE_MIN_WIDTH: DimensionNoPercentage,
+  CONSTRAINT_SIZE_MIN_HEIGHT: DimensionNoPercentage,
+  SEGMENT_BUTTON_MIN_FONT_SIZE: DimensionNoPercentage,
+  SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses
 }
 
 const segmentButtonTheme: SegmentButtonThemeInterface = {
-  FONT_COLOR: $r('sys.color.ohos_id_color_text_secondary'),
-  TAB_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_text_primary'),
+  FONT_COLOR: $r('sys.color.segment_button_unselected_text_primary'),
+  TAB_SELECTED_FONT_COLOR: $r('sys.color.segment_button_checked_text_primary'),
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
-  FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
-  SELECTED_FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
-  BACKGROUND_COLOR: $r('sys.color.ohos_id_color_button_normal'),
-  TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
+  FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  SELECTED_FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
+  BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_primary'),
+  TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_contrary'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
   FOCUS_BORDER_COLOR: $r("sys.color.ohos_id_color_focused_outline"),
-  HOVER_COLOR: $r("sys.color.ohos_id_color_hover"),
-  PRESS_COLOR: $r("sys.color.ohos_id_color_click_effect"),
-  BACKGROUND_BLUR_STYLE: BlurStyle.NONE
+  HOVER_COLOR: $r("sys.color.segment_button_color_hovered"),
+  PRESS_COLOR: $r("sys.color.segment_button_color_Press"),
+  BACKGROUND_BLUR_STYLE: getNumberByResource($r('sys.float.segment_button_background_blur_style')) as BlurStyle,
+  SEGMENT_BUTTON_PADDING: $r('sys.float.segment_button_baseplate_padding'),
+  CONSTRAINT_SIZE_MIN_WIDTH: $r('sys.float.segment_min_button_height'),
+  CONSTRAINT_SIZE_MIN_HEIGHT: $r('sys.float.segment_button_height'),
+  SEGMENT_BUTTON_MIN_FONT_SIZE: $r('sys.float.segment_button_min_font_size'),
+  SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius')
 }
 
 interface Point {
@@ -396,7 +410,7 @@ struct SelectItem {
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(ShadowStyle.OUTER_DEFAULT_XS)
+        .shadow(getNumberByResource($r('sys.float.segment_button_shadow')) as ShadowStyle || 0 as ShadowStyle)
         .pixelRound({
           top: PixelRoundCalcPolicy.FORCE_FLOOR
         })
@@ -456,6 +470,16 @@ struct MultiSelectItemArray {
   }
 }
 
+/**
+ * get resource size
+ *
+ * @param resourceName resource name
+ * @returns resource size
+ */
+function getNumberByResource(resourceName: Resource): number {
+  return resourceManager.getSystemResourceManager().getNumber(resourceName);
+}
+
 @Component
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
@@ -464,6 +488,7 @@ struct SegmentButtonItem {
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
+  @Prop marquee: boolean
   private groupId: string = ""
 
   private getTextPadding() {
@@ -485,17 +510,17 @@ struct SegmentButtonItem {
     }
     if (this.options.type === 'capsule' && this.options.showText && this.options.showIcon) {
       return {
-        top: LengthMetrics.vp(6),
-        bottom: LengthMetrics.vp(6),
-        start: LengthMetrics.vp(8),
-        end: LengthMetrics.vp(8)
+        top: LengthMetrics.resource($r('sys.float.segment_button_text_capsule_u_d_padding')),
+        bottom: LengthMetrics.resource($r('sys.float.segment_button_text_capsule_u_d_padding')),
+        start: LengthMetrics.resource($r('sys.float.segment_button_text_l_r_padding')),
+        end: LengthMetrics.resource($r('sys.float.segment_button_text_l_r_padding'))
       }
     }
     return {
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4),
-      start: LengthMetrics.vp(8),
-      end: LengthMetrics.vp(8)
+      top: LengthMetrics.resource($r('sys.float.segment_button_text_u_d_padding')),
+      bottom: LengthMetrics.resource($r('sys.float.segment_button_text_u_d_padding')),
+      start: LengthMetrics.resource($r('sys.float.segment_button_text_l_r_padding')),
+      end: LengthMetrics.resource($r('sys.float.segment_button_text_l_r_padding'))
     }
   }
 
@@ -518,9 +543,10 @@ struct SegmentButtonItem {
           .fontColor(this.property.fontColor)
           .fontWeight(this.property.fontWeight)
           .fontSize(this.property.fontSize)
-          .minFontSize(9)
+          .minFontSize(this.property.minFontSize)
           .maxFontSize(this.property.fontSize)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .fancy()
+          .marqueeOptions({start:this.marquee,fadeout:true})
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .focusable(true)
@@ -539,11 +565,12 @@ struct SegmentButtonItem {
           }))
       }
     }
+    .focusable(false)
     .direction(this.options.direction)
     .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
     .justifyContent(FlexAlign.Center)
     .padding(this.getButtonPadding())
-    .constraintSize({ minHeight: 28 })
+    .constraintSize(this.property.constraintSize)
   }
 }
 
@@ -564,12 +591,15 @@ struct PressAndHoverEffect {
 
   build() {
     Stack()
+      .focusable(false)
       .direction(this.options.direction)
       .size(this.buttonItemsSize[this.pressIndex])
       .backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor)
       .borderRadius(this.buttonBorderRadius[this.pressIndex])
   }
 }
+
+@Extend(Text) function fancy () {.textOverflow({ overflow: TextOverflow.MARQUEE })}
 
 @Component
 struct SegmentButtonItemArrayComponent {
@@ -590,6 +620,7 @@ struct SegmentButtonItemArrayComponent {
   }, (_: Object, index) => new HoverColorProperty())
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
+  @State marquee: boolean = false
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private groupId: string = util.generateRandomUUID(true)
 
@@ -693,7 +724,7 @@ struct SegmentButtonItemArrayComponent {
 
   private getBorderRadius(index: number): LocalizedBorderRadiuses {
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index]
-    if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
+    if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] && borderRadius.topStart) {
       borderRadius.topStart = LengthMetrics.vp(borderRadius.topStart.value + 4)
       borderRadius.topEnd = LengthMetrics.vp(borderRadius.topStart.value + 4)
       borderRadius.bottomStart = LengthMetrics.vp(borderRadius.topStart.value + 4)
@@ -780,7 +811,8 @@ struct SegmentButtonItemArrayComponent {
                 itemOptions: item,
                 options: this.options,
                 property: this.buttonItemProperty[index],
-                groupId: this.groupId
+                groupId: this.groupId,
+                marquee: this.marquee
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -821,8 +853,19 @@ struct SegmentButtonItemArrayComponent {
                 })
               }
             })
+
+            //Focus trigger event
+            .onClick(()=>{
+
+            })
+            .focusable(true)
             .onFocus(() => {
-              this.focusIndex = index
+              this.focusIndex = index;
+              if (getNumberByResource($r('sys.float.segment_marquee')) === 0) {
+                this.marquee = true;
+              } else {
+                this.marquee = false;
+              }
             })
             .onTouch((event: TouchEvent) => {
               if (event.source !== SourceType.TouchScreen) {
@@ -874,7 +917,7 @@ struct SegmentButtonItemArrayComponent {
       }
       .direction(this.options.direction)
       .focusScopeId(this.groupId, true)
-      .padding(this.options.componentPadding)
+      .padding(segmentButtonTheme.SEGMENT_BUTTON_PADDING ||  2)
       .onSizeChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
       })
@@ -888,6 +931,9 @@ class ItemProperty {
   public fontSize: DimensionNoPercentage = segmentButtonTheme.FONT_SIZE
   public fontWeight: FontWeight = FontWeight.Regular
   public isSelected: boolean = false
+  public constraintSize: ConstraintSizeOptions = { minWidth: segmentButtonTheme.CONSTRAINT_SIZE_MIN_WIDTH , minHeight: segmentButtonTheme.CONSTRAINT_SIZE_MIN_HEIGHT} || { minWidth: 48 , minHeight: 28};
+  public minFontSize: DimensionNoPercentage = segmentButtonTheme.SEGMENT_BUTTON_MIN_FONT_SIZE || 9;
+  public normalborderRadius: Length | BorderRadiuses | LocalizedBorderRadiuses = segmentButtonTheme.SEGMENT_BUTTON_NORMAL_BORDER_RADIUS || 2;
 }
 
 @Component
@@ -1033,7 +1079,7 @@ export struct SegmentButton {
             .direction(this.options.direction)
             .size(this.componentSize)
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-            .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
+            .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / (getNumberByResource($r('sys.float.segment_button_normal_border_radius')) || 2))
             .backgroundBlurStyle(this.options.backgroundBlurStyle)
         }
         Stack() {
