@@ -31,22 +31,20 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool IsDataValid(const RefPtr<WaterFlowLayoutInfo>& info)
+bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
 {
     if (info->segmentTails_.empty()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Sections are not initialized.");
         return false;
     }
-    if (info->childrenCount_ - 1 != info->segmentTails_.back()) {
+    if (childrenCnt - 1 != info->segmentTails_.back()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
-            info->childrenCount_, info->segmentTails_.back() + 1);
+            childrenCnt, info->segmentTails_.back() + 1);
         return false;
     }
     return true;
 }
-} // namespace
 
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 {
@@ -56,7 +54,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
 
     Init(idealSize);
-    if (!IsDataValid(info_)) {
+    if (!IsDataValid(info_, info_->childrenCount_)) {
         return;
     }
 
@@ -82,7 +80,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (!IsDataValid(info_)) {
+    if (!IsDataValid(info_, info_->childrenCount_)) {
         return;
     }
 

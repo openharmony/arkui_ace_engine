@@ -294,7 +294,9 @@ void WaterFlowLayoutInfoSW::Reset()
 {
     PrepareJump();
     for (auto& section : lanes_) {
-        section.clear();
+        for (auto& lane : section) {
+            lane.items_.clear();
+        }
     }
     idxToLane_.clear();
     maxHeight_ = 0.0f;
@@ -434,12 +436,23 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
     if (lanes_.empty()) {
         return false;
     }
-    if (StartIndex() > 0) {
+
+    const int32_t startIdx = StartIndex();
+    const int32_t startSeg = GetSegment(startIdx);
+    if (startSeg < 0) {
         return false;
     }
-    bool laneNotAligned = std::any_of(
-        lanes_[0].begin(), lanes_[0].end(), [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
-    return laneNotAligned || lanes_[0][0].items_.front().idx != 0;
+    if (startSeg == 0) {
+        if (startIdx > 0) {
+            return false;
+        }
+    } else if (startIdx != segmentTails_[startSeg - 1] + 1) {
+        return false;
+    }
+
+    const bool laneNotAligned = std::any_of(lanes_[startSeg].begin(), lanes_[startSeg].end(),
+        [this](const auto& lane) { return !NearEqual(lane.startPos, StartPos()); });
+    return laneNotAligned || lanes_[startSeg][0].items_.front().idx != startIdx;
 }
 
 void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start)
@@ -475,9 +488,9 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
     margins_.clear(); // to be initialized during layout
 }
 
-void WaterFlowLayoutInfoSW::PrepareSectionPos(int32_t idx, bool forward)
+void WaterFlowLayoutInfoSW::PrepareSectionPos(int32_t idx, bool fillBack)
 {
-    int32_t prevSeg = GetSegment(forward ? idx - 1 : idx + 1);
+    int32_t prevSeg = GetSegment(fillBack ? idx - 1 : idx + 1);
     int32_t curSeg = GetSegment(idx);
     if (prevSeg == curSeg) {
         return;

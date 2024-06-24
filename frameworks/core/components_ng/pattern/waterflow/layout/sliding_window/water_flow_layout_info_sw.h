@@ -175,9 +175,9 @@ public:
      * @brief prepare lanes in the current section.
      *
      * @param idx current item index
-     * @param forward true if preparing in the forward direction (prevIdx < curIdx).
+     * @param fillBack true if preparing in the forward direction (prevIdx < curIdx).
      */
-    void PrepareSectionPos(int32_t idx, bool forward);
+    void PrepareSectionPos(int32_t idx, bool fillBack);
 
     struct Lane;
     std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections

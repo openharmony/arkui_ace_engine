@@ -36,6 +36,11 @@ protected:
     void SegmentedInit(const std::vector<WaterFlowSections::Section>& options,
         const std::vector<PaddingPropertyF>& margins, const SizeF& frameSize);
 
+    /**
+     * @brief Check if Sections info align with actual children
+     */
+    static bool IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
+
     LayoutWrapper* wrapper_ {};
     Axis axis_ = Axis::VERTICAL;
     // [segmentIdx, [crossIdx, item's width]]
