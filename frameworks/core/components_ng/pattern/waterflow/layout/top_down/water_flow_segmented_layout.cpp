@@ -111,7 +111,8 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
     auto cachedCount = props->GetCachedCountValue(1);
-    wrapper_->SetActiveChildRange(info_->startIndex_, info_->endIndex_, cachedCount, cachedCount);
+    wrapper_->SetActiveChildRange(
+        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cachedCount, cachedCount);
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
