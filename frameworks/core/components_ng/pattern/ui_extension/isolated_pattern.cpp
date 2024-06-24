@@ -33,6 +33,7 @@ namespace {
 constexpr char RESOURCE_PATH[] = "resourcePath";
 constexpr char ABC_PATH[] = "abcPath";
 constexpr char ENTRY_POINT[] = "entryPoint";
+constexpr char REGISTER_COMPONENTS[] = "registerComponents";
 constexpr int32_t PARAM_ERR_CODE = 10001;
 constexpr char PARAM_NAME[] = "paramError";
 constexpr char PARAM_MSG[] = "The param is empty";
@@ -71,6 +72,7 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     auto resourcePath = want.GetStringParam(RESOURCE_PATH);
     auto abcPath = want.GetStringParam(ABC_PATH);
     auto entryPoint = want.GetStringParam(ENTRY_POINT);
+    auto registerComponents = want.GetStringArrayParam(REGISTER_COMPONENTS);
     if (resourcePath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
         PLATFORM_LOGE("The param empty.");
         FireOnErrorCallback(PARAM_ERR_CODE, PARAM_NAME, PARAM_MSG);
@@ -80,6 +82,7 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     curIsolatedInfo_.abcPath = abcPath;
     curIsolatedInfo_.reourcePath = resourcePath;
     curIsolatedInfo_.entryPoint = entryPoint;
+    curIsolatedInfo_.registerComponents = registerComponents;
     InitializeRender(runtime);
 }
 
@@ -89,8 +92,7 @@ void IsolatedPattern::InitializeRender(void* runtime)
 #if !defined(PREVIEW)
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(),
-            curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
+        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), runtime, curIsolatedInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
     }

@@ -638,6 +638,16 @@ public:
 
     void NotifyDensityUpdate();
 
+    void SetRegisterComponents(const std::vector<std::string>& registerComponents)
+    {
+        registerComponents_ = registerComponents;
+    }
+
+    std::vector<std::string> GetRegisterComponents() override
+    {
+        return registerComponents_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -706,6 +716,7 @@ private:
     // for other AceContainer subscribe configuration from host AceContaier
     // key is instanceId, value is callback function
     std::unordered_map<int32_t, ConfigurationChangedCallback> configurationChangedCallbacks_;
+    std::vector<std::string> registerComponents_;
 
     std::unordered_set<std::string> resAdapterRecord_;
 

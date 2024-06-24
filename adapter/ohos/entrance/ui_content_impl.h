@@ -61,8 +61,8 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void InitializeDynamic(
-        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override;
+    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
+        const std::vector<std::string>& registerComponents) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -385,6 +385,7 @@ private:
 
     bool isDynamicRender_ = false;
     std::shared_ptr<TaskWrapper> taskWrapper_;
+    std::vector<std::string> registerComponents_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
     sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();

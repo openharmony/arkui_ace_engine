@@ -35,6 +35,13 @@ struct RendererDumpInfo {
     }
 };
 
+struct IsolatedInfo {
+    std::string abcPath;
+    std::string reourcePath;
+    std::string entryPoint;
+    std::vector<std::string> registerComponents;
+};
+
 class DynamicComponentRenderer : public virtual AceType {
     DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
 
@@ -42,8 +49,8 @@ public:
     DynamicComponentRenderer() = default;
     virtual ~DynamicComponentRenderer() = default;
 
-    static RefPtr<DynamicComponentRenderer> Create(const RefPtr<FrameNode>& host, const std::string& hapPath,
-        const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    static RefPtr<DynamicComponentRenderer> Create(
+        const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
 
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;

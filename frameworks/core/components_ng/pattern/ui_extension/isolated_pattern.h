@@ -20,11 +20,6 @@
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
 namespace OHOS::Ace::NG {
-struct IsolatedInfo {
-    std::string abcPath;
-    std::string reourcePath;
-    std::string entryPoint;
-};
 
 struct IsolatedDumpInfo {
     int64_t createLimitedWorkerTime = 0;
