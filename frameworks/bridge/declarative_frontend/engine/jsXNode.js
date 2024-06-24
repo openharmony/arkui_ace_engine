@@ -1302,6 +1302,11 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
+    ["XComponent", (context) => {
+            return new TypedFrameNode(context, "XComponent", (node, type) => {
+                return new ArkXComponentComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {

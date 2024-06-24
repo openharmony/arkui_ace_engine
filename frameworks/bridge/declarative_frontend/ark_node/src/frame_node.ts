@@ -774,6 +774,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkButtonComponent(node, type);
       })
     }],
+    ["XComponent", (context: UIContext) => {
+      return new TypedFrameNode(context, "XComponent", (node: NodePtr, type: ModifierType) => {
+        return new ArkXComponentComponent(node, type);
+      })
+    }],
   ]
 )
 

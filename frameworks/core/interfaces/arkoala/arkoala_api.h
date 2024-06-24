@@ -4082,6 +4082,8 @@ struct ArkUIXComponentModifier {
     ArkUI_Uint32 (*getXComponentSurfaceWidth)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getXComponentSurfaceHeight)(ArkUINodeHandle node);
     void* (*getNativeXComponent)(ArkUINodeHandle node);
+    void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
+    void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
 };
 
 struct ArkUIStateModifier {

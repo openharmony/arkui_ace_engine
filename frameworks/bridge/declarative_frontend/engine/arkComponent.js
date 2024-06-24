@@ -14799,6 +14799,9 @@ class ArkButtonComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 1;
+  }
   initialize(value) {
     if (value.length >= 1 && (isResource(value[0]) || isString(value[0]))) {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, true);
@@ -22927,10 +22930,16 @@ if (globalThis.Web !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkXComponentComponent {
-  constructor(nativePtr) {
-    this._modifiersWithKeys = new Map();
-    this.nativePtr = nativePtr;
+class ArkXComponentComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0]) {
+      modifierWithKey(this._modifiersWithKeys, XComponentInitializeModifier.identity,
+        XComponentInitializeModifier, value[0]);
+    }
+    return this;
   }
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
@@ -23407,6 +23416,22 @@ if (globalThis.XComponent !== undefined) {
   };
 }
 
+class XComponentInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetXComponentInitialize(node);
+    }
+    else {
+      getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
+        this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
+      
+    }
+  }
+}
+XComponentInitializeModifier.identity = Symbol('xComponentInitialize');
 class XComponentOpacityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
