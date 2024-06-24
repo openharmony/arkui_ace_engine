@@ -2292,6 +2292,12 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
+    if ((!frameNode->IsActive()) || frameNode->CheckAccessibilityLevelNo()) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "node: %{public}" PRId64 ", is not active or level is no",
+            frameNode->GetAccessibilityId());
+        return;
+    }
+
     AccessibilityEventInfo eventInfo;
     FillEventInfoWithNode(frameNode, eventInfo, ngPipeline, accessibilityEvent.nodeId);
 
@@ -4846,7 +4852,8 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
         }
         std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
         nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
-        if (!textTypeJson.is_null() && !textTypeJson.is_discarded() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
+        if (!textTypeJson.is_null() && !textTypeJson.is_discarded() &&
+            textTypeJson.contains("type") && textTypeJson["type"] == value) {
             AccessibilityElementInfo nodeInfo;
             UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
             infos.emplace_back(nodeInfo);

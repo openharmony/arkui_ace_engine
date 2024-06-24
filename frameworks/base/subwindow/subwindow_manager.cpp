@@ -804,6 +804,11 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
 {
     auto subwindow = GetDialogSubwindow(instanceId);
     if (!subwindow) {
+        subwindow = GetSubwindow(instanceId);
+        if (subwindow) {
+            subwindow->Close();
+            return;
+        }
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }

@@ -1687,4 +1687,17 @@ bool SubwindowOhos::CheckHostWindowStatus() const
     }
     return true;
 }
+
+bool SubwindowOhos::Close()
+{
+    CHECK_NULL_RETURN(window_, false);
+    OHOS::Rosen::WMError ret = window_->Close();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos fail to close the dialog subwindow.");
+        return false;
+    }
+    sptr<OHOS::Rosen::Window> uiWindow = nullptr;
+    Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, uiWindow);
+    return true;
+}
 } // namespace OHOS::Ace

@@ -145,6 +145,7 @@ public:
     virtual void RequestFocus() = 0;
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
+    virtual bool Close() = 0;
 
 private:
     int32_t subwindowId_ = 0;
