@@ -768,11 +768,10 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
-    float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
-    float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
+    float width = root->GetGeometryNode()->GetFrameSize().Width();
+    float height = root->GetGeometryNode()->GetFrameSize().Height();
     // measure
-    ArkUI_Float32 measureData[] = { width, height, width, height };
+    ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
     // layout
     ArkUI_Float32 layoutData[] = { 0, 0, width, height };
