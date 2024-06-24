@@ -254,7 +254,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
 
     auto cachedCount = layoutProperty->GetCachedCountValue(1);
-    layoutWrapper->SetActiveChildRange(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_, cachedCount, cachedCount);
+    layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
+        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
     PreBuildItems(layoutWrapper, layoutInfo_,
         WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossPosition_.find(0)->second, mainSize_, axis_ }, layoutProperty, nullptr),
