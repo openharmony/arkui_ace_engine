@@ -175,11 +175,31 @@ void ResetGutter(ArkUINodeHandle node)
     GridRowModelNG::SetGutter(frameNode, parsedGutter);
 }
 
+void SetOnBreakpointChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onBreakpointChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(*onBreakpointChange));
+    } else {
+        GridRowModelNG::SetOnBreakPointChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnBreakpointChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridRowModelNG::SetOnBreakPointChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIGridRowModifier* GetGridRowModifier()
 {
     static const ArkUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter };
+        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter,
+        SetOnBreakpointChange, ResetOnBreakpointChange };
     return &modifier;
 }
 }
