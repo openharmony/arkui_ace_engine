@@ -206,7 +206,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarModifierOnDraw001, TestSize.Level1)
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
@@ -234,7 +236,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction001, Te
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetContentModifier001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
@@ -262,7 +266,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetContentModifier001, TestSize.
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodUpdateContentModifier001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
@@ -288,7 +294,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodUpdateContentModifier001, TestSi
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -384,7 +392,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarmodifierPaintIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
@@ -404,7 +414,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     /**
@@ -456,7 +468,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarModifierHasIndicator002, TestSize.Level1)
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPatternCreateNodePaintMethod001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
@@ -481,7 +495,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternCreateNodePaintMethod001, TestSize.L
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     IndicatorStyle indicator;
     tabBarPattern_->SetIndicatorStyle(indicator, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
@@ -524,7 +540,9 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction002, Te
  */
 HWTEST_F(TabBarModifierTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function InitOnKeyEvent.
