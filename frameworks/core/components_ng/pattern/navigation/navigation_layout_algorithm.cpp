@@ -184,6 +184,7 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
 {
     CHECK_NULL_VOID(hostNode);
     hostNode->SetDoingModeSwitchAnimationFlag(true);
+    hostNode->SetNeedSetInvisible(false);
     AnimationOption option;
     option.SetCurve(MODE_SWITCH_CURVE);
     option.SetFillMode(FillMode::FORWARDS);
@@ -198,6 +199,19 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
             auto layoutProperty = dividerNode->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            auto pattern = hostNode->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto lastStandardIndex = hostNode->GetLastStandardIndex();
+            auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+            CHECK_NULL_VOID(navigationLayoutProperty);
+            bool navbarIsHidden = (pattern->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0) ||
+                                  navigationLayoutProperty->GetHideNavBar().value_or(false);
+            if (navbarIsHidden) {
+                hostNode->SetNeedSetInvisible(true);
+            } else {
+                hostNode->SetNeedSetInvisible(false);
+            }
+            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
