@@ -166,6 +166,8 @@ declare class ArkButtonComponent extends ArkComponent {}
 
 declare class ArkXComponentComponent extends ArkComponent {}
 
+declare class ArkListItemGroupComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

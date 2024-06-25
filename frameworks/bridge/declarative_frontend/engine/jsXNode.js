@@ -1307,6 +1307,11 @@ const __creatorMap__ = new Map([
                 return new ArkXComponentComponent(node, type);
             });
         }],
+    ["ListItemGroup", (context) => {
+            return new TypedFrameNode(context, "ListItemGroup", (node, type) => {
+                return new ArkListItemGroupComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {

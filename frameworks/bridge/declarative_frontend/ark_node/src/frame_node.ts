@@ -779,6 +779,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkXComponentComponent(node, type);
       })
     }],
+    ["ListItemGroup", (context: UIContext) => {
+      return new TypedFrameNode(context, "ListItemGroup", (node: NodePtr, type: ModifierType) => {
+        return new ArkListItemGroupComponent(node, type);
+      })
+    }],
   ]
 )
 

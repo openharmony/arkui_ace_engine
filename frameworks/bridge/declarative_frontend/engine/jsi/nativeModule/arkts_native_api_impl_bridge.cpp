@@ -4593,6 +4593,10 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::SetChildrenMainSize));
     listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemGroupChildrenMainSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetChildrenMainSize));
+    listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListItemGroupInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::SetListItemGroupInitialize));
+    listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemGroupInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetListItemGroupInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 
