@@ -1726,7 +1726,7 @@ RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, boo
         auto syntIndex = forEachNode->GetChildIndex(parent);
         const auto& children = forEachNode->GetChildren();
         if (next) {
-            if (syntIndex < children.size() - 1) { // next is inside forEach
+            if (syntIndex < static_cast<int32_t>(children.size() - 1)) { // next is inside forEach
                 auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
                 CHECK_NULL_RETURN(nextSyntax, nullptr);
                 return nextSyntax->GetFirstChild();
@@ -1758,7 +1758,7 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
     int32_t shift = next ? 1 : -1;
     const auto& children = parentForEachNode->GetChildren();
-    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= children.size() - 1) {
+    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(children.size() - 1)) {
         return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
     } else {
         return nullptr;
