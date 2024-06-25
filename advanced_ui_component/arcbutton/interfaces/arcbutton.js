@@ -55,7 +55,8 @@ let ArcButtonOptions = class ArcButtonOptions {
     constructor(options) {
         this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE;
         this.width = options.width ?? Constants.UPPER_ARC_CIRCLE_R;
-        this.height = options.height ?? (Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y);
+        this.height = options.height ?? (Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R +
+            Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y);
         this.styleMode = options.styleMode ?? ArcButtonStyleMode.EMPHASIZED;
         this.status = options.status ?? ArcButtonStatus.NORMAL;
         this.resourceText = options.resourceText ?? '';
@@ -67,7 +68,7 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.textColor = options.textColor ?? Color.White;
         this.pressedTextColor = options.pressedTextColor ?? Color.White;
         this.textStyle = options.textStyle ?? FontStyle.Normal;
-        this.textFamily = options.textFamily ?? 'HarmonyOS Sans';
+        this.textFamily = options.textFamily ?? '';
         this.textMargin = options.textMargin ?? {
             left: Constants.TEXT_HORIZONTAL_MARGIN,
             top: Constants.TEXT_MARGIN_TOP,
@@ -245,7 +246,8 @@ export class ArcButton extends ViewV2 {
     aboutToAppear() {
         this.initValues();
         this.upperArcCircleR = this.options.width;
-        this.upperArcCircleY = Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + this.upperArcCircleR - this.options.height;
+        this.upperArcCircleY = Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + this.upperArcCircleR -
+            this.options.height;
         this.circularCrossPointUtil.initData(this.upperArcCircleR, this.upperArcCircleY);
         this.circularCrossPointUtil.calculate().then((data) => {
             if (data == null) {
@@ -270,17 +272,17 @@ export class ArcButton extends ViewV2 {
             canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
             let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
         A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
-        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} `
-                + `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} ` +
+                `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} `
-                + `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} ` +
+                `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
-          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} `
-                + `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} ` +
+                `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
           A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
-          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} `
-                + `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} ` +
+                `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
           L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
@@ -497,7 +499,8 @@ class CircularCrossPointUtil {
                 let tp2 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection2.x, intersection2.y));
                 let tp3 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection2.x, intersection2.y));
                 let tp4 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection1.x, intersection1.y));
-                let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y) + chamferCircleR * 2;
+                let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y)
+                    + chamferCircleR * 2;
                 let height = (this.upperArcCircleR + lowerArcCircleR) - this.calculateDistance(lowerArcCircleCenterX, lowerArcCircleCenterY, upperArcCircleCenterX, this.upperArcCircleY);
                 let canvasLeftTop = new Point(intersection1.x - chamferCircleR, this.upperArcCircleY - lowerArcCircleR);
                 return new AllPoints(width, height, tp1, tp2, tp4, tp3, canvasLeftTop);
@@ -512,7 +515,8 @@ class CircularCrossPointUtil {
      * @returns 是否在上弧圆内
      */
     isPointInPath(x, y, isUp) {
-        let distance = this.calculateDistance(x, y, Constants.UPPER_ARC_CIRCLE_CENTER_X, isUp ? this.mirrorUpperArcCircleY : this.upperArcCircleY);
+        let distance = this.calculateDistance(x, y, Constants.UPPER_ARC_CIRCLE_CENTER_X, isUp ? this.mirrorUpperArcCircleY
+            : this.upperArcCircleY);
         return distance <= this.upperArcCircleR;
     }
     /**
@@ -601,8 +605,10 @@ class CircularCrossPointUtil {
         let x2 = firstCircusCenterX + a * (secondCircusCenterX - firstCircusCenterX) / distance;
         let y2 = firstCircusCenterY + a * (secondCircusCenterY - firstCircusCenterY) / distance;
         // 交点
-        let intersection1 = new Point(x2 + h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 - h * (secondCircusCenterX - firstCircusCenterX) / distance);
-        let intersection2 = new Point(x2 - h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 + h * (secondCircusCenterX - firstCircusCenterX) / distance);
+        let intersection1 = new Point(x2 + h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 -
+            h * (secondCircusCenterX - firstCircusCenterX) / distance);
+        let intersection2 = new Point(x2 - h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 +
+            h * (secondCircusCenterX - firstCircusCenterX) / distance);
         return [intersection1, intersection2];
     }
 }
