@@ -250,7 +250,7 @@ void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
         PlayHoverAnimation(hoverColor_);
     } else {
         hoverd_ = false;
-        PlayHoverAnimation(Color::TRANSPARENT);
+        PlayHoverAnimation(buttonBgColor_);
     }
 }
 
@@ -264,7 +264,7 @@ void DatePickerColumnPattern::OnTouchUp()
     if (hoverd_) {
         PlayPressAnimation(hoverColor_);
     } else {
-        PlayPressAnimation(Color::TRANSPARENT);
+        PlayPressAnimation(buttonBgColor_);
     }
 }
 
