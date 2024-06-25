@@ -413,14 +413,14 @@ void ScrollablePattern::AddScrollEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireAndCleanScrollingListener();
-        pattern->OnScrollStartRecursive(position, pattern->GetVelocity());
+        pattern->OnScrollStartRecursiveInner(position, pattern->GetVelocity());
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
 
     auto scrollEndRec = [weak = WeakClaim(this)](const std::optional<float>& velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEndRecursive(velocity);
+        pattern->OnScrollEndRecursiveInner(velocity);
     };
     scrollable->SetOnScrollEndRec(std::move(scrollEndRec));
 
@@ -1760,6 +1760,20 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     return { 0, GetCanOverScroll() };
 }
 
+ScrollResult ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedState state)
+{
+    ScrollResult result = {offset, false};
+    auto overOffsets = GetOverScrollOffset(offset);
+    auto overOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
+    if (NearZero(overOffset)) {
+        return result;
+    }
+    result.remain = offset - overOffset;
+    bool moved = HandleScrollImpl(overOffset, source);
+    NotifyMoved(moved);
+    return result;
+}
+
 ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
@@ -1776,13 +1790,19 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
         }
         return { 0, true };
     }
+    auto handleParentOutBoundary = false;
+    if (InstanceOf<ScrollablePattern>(parent)) {
+        auto result = parent->HandleOutBoundary(offset, source, state);
+        offset = result.remain;
+        handleParentOutBoundary = NearZero(offset);
+    }
     float allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = GetOverScrollOffset(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     if (NearZero(overOffset) && NearZero(remainOffset)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(handleParentOutBoundary);
         return { 0, false };
     }
     offset -= overOffset;
@@ -1988,6 +2008,12 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
 
 void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 {
+    OnScrollStartRecursiveInner(position, velocity);
+    nestedScrolling_ = true;
+}
+
+void ScrollablePattern::OnScrollStartRecursiveInner(float position, float velocity)
+{
     SetIsNestedInterrupt(false);
     HandleScrollImpl(position, SCROLL_FROM_START);
     auto parent = GetNestedScrollParent();
@@ -1998,6 +2024,13 @@ void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 }
 
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    OnScrollEndRecursiveInner(velocity);
+    CheckRestartSpring(false);
+    nestedScrolling_ = false;
+}
+
+void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
 {
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
