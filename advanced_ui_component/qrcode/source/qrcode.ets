@@ -22,7 +22,7 @@ export enum QrcodeState {
 }
 
 class ConfigDataConstants {
-  static readonly TIPS = $r('sys.string.ohos_qrcode_expiration_prompt');
+  static readonly TIPS = $r('sys.string.qrcode_expiration_prompt');
   static readonly ANIMATION_CURVE = '0.33,0,0.67,1';
   static readonly ONE_HUNDRED_TWENTY_FIVE_VP = 125;
   static readonly ONE_HUNDRED_ONE_VP = 101;
@@ -160,7 +160,7 @@ export struct Qrcode {
   @Require @Param options: QrcodeOptions;
   @Consumer() value: string = '';
   @Consumer() state: QrcodeState = QrcodeState.NORMAL;
-  onAction: () => void = () => {
+  @Param onAction?: () => void = () => {
   };
 
   build() {
@@ -187,9 +187,9 @@ export struct Qrcode {
 
 
         Column() {
-          Image($r('sys.media.ohos_qrcode_refresh_icon'))
-            .height(this.options.expiredImageLength?.value)
-            .width(this.options.expiredImageLength?.value)
+          SymbolGlyph($r('sys.symbol.arrow_clockwise'))
+            .fontSize(this.options.expiredImageLength?.value)
+            .fontColor([this.options.textColor?.color])
             .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
 
           if (this.state == QrcodeState.LOADING) {

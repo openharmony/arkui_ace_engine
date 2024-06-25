@@ -33,7 +33,7 @@ export var QrcodeState;
 })(QrcodeState || (QrcodeState = {}));
 class ConfigDataConstants {
 }
-ConfigDataConstants.TIPS = $r('sys.string.ohos_qrcode_expiration_prompt');
+ConfigDataConstants.TIPS = { "id": -1, "type": 10003, params: ['sys.string.qrcode_expiration_prompt'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 ConfigDataConstants.ANIMATION_CURVE = '0.33,0,0.67,1';
 ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP = 125;
 ConfigDataConstants.ONE_HUNDRED_ONE_VP = 101;
@@ -123,8 +123,8 @@ export class Qrcode extends ViewV2 {
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
         this.value = '';
         this.state = QrcodeState.NORMAL;
-        this.onAction = "onAction" in params ? params.onAction : () => {
-        };
+        this.initParam("onAction", (params && "onAction" in params) ? params.onAction : () => {
+        });
         this.finalizeConstruction();
     }
     initialRender() {
@@ -173,11 +173,11 @@ export class Qrcode extends ViewV2 {
                         Context.animation(null);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Image.create($r('sys.media.ohos_qrcode_refresh_icon'));
-                        Image.height(this.options.expiredImageLength?.value);
-                        Image.width(this.options.expiredImageLength?.value);
-                        Image.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
-                    }, Image);
+                        SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.arrow_clockwise'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        SymbolGlyph.fontSize(this.options.expiredImageLength?.value);
+                        SymbolGlyph.fontColor([this.options.textColor?.color]);
+                        SymbolGlyph.visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None);
+                    }, SymbolGlyph);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.state == QrcodeState.LOADING) {
@@ -232,6 +232,9 @@ export class Qrcode extends ViewV2 {
         if ("options" in params) {
             this.updateParam("options", params.options);
         }
+        if ("onAction" in params) {
+            this.updateParam("onAction", params.onAction);
+        }
     }
     rerender() {
         this.updateDirtyElements();
@@ -246,5 +249,8 @@ __decorate([
 __decorate([
     Consumer()
 ], Qrcode.prototype, "state", void 0);
+__decorate([
+    Param
+], Qrcode.prototype, "onAction", void 0);
 //# sourceMappingURL=Qrcode.js.map
 export default {Qrcode,QrcodeOptions,QrcodeState}
