@@ -228,7 +228,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    if (destroyed_) {
+    if (IsDestroyed()) {
         LOGI("cannot add dirty layout node as the pipeline context is destroyed.");
         return;
     }
@@ -271,7 +271,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    if (destroyed_) {
+    if (IsDestroyed()) {
         LOGI("cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
@@ -3058,7 +3058,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
-    destroyed_ = true;
+    SetDestroyed();
     rootNode_->DetachFromMainTree();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
@@ -3409,11 +3409,6 @@ void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
 bool PipelineContext::IsWindowSceneConsumed()
 {
     return isWindowSceneConsumed_;
-}
-
-bool PipelineContext::IsDestroyed()
-{
-    return destroyed_;
 }
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled)

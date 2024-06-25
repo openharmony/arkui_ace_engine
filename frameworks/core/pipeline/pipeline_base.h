@@ -1253,6 +1253,9 @@ public:
 
     void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
+    bool IsDestroyed();
+
+    void SetDestroyed();
 
     virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
@@ -1420,6 +1423,7 @@ private:
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
+    bool destroyed_ = false;
     int32_t width_ = -1;
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
