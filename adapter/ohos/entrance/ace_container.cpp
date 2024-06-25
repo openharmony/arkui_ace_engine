@@ -2437,7 +2437,9 @@ void AceContainer::NotifyConfigurationChange(
                         pipeline->SetAppBgColor(themeManager->GetBackgroundColor());
                     }
                     pipeline->NotifyConfigurationChange();
-                    pipeline->FlushReload(configurationChange);
+                    if (configurationChange.IsNeedUpdate()) {
+                        pipeline->FlushReload(configurationChange);
+                    }
                     if (needReloadTransition) {
                         // reload transition animation
                         pipeline->FlushReloadTransition();
