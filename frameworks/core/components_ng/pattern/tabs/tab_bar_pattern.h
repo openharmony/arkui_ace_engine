@@ -552,7 +552,7 @@ private:
     bool translateAnimationIsRunning_ = false;
     bool tabBarTranslateAnimationIsRunning_ = false;
 
-    bool isRTL_ = false; // TODO Adapt RTL.
+    bool isRTL_ = false;
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;

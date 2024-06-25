@@ -21,7 +21,6 @@
 namespace OHOS::Ace::Framework {
 
 class JSClipboard {
-
 public:
     static void JSBind(BindingTarget globalObj);
     static void Get(const JSCallbackInfo& info);

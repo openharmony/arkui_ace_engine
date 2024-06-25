@@ -355,7 +355,7 @@ globalThis.Checkbox.attributeModifier = function (modifier: ArkComponent): void 
 };
 
 // @ts-ignore
-globalThis.Checkbox.contentModifier = function (modifier) {
+globalThis.Checkbox.contentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

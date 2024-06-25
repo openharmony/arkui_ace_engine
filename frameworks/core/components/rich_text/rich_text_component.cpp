@@ -83,7 +83,4 @@ RefPtr<Element> RichTextComponent::CreateElement()
     elementNode->SetDelegate(delegate_);
     return elementNode;
 }
-
-
-
 } // namespace OHOS::Ace

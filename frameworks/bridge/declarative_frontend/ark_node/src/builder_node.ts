@@ -30,7 +30,7 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object): void {
     this._JSBuilderNode.build(builder, params);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
@@ -220,7 +220,7 @@ class JSBuilderNode extends BaseNode {
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object; pop?: () => void }): void {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
-      classObject && "pop" in classObject ? classObject.pop! : () => { };
+      classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -306,7 +306,7 @@ class JSBuilderNode extends BaseNode {
       // Create array of new ids.
       arr.forEach((item, index) => {
         newIdArray.push(
-          `${itemGenFuncUsesIndex ? index + "_" : ""}` + idGenFunc(item)
+          `${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item)
         );
       });
     }
@@ -356,7 +356,7 @@ class JSBuilderNode extends BaseNode {
     this._nativeRef = null;
     this.frameNode_?.resetNodePtr();
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
       this.uiContext_ = uiContext;
       this.instanceId_ = uiContext.instanceId_;
       if (this.frameNode_ !== undefined && this.frameNode_ !== null) {

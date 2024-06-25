@@ -136,7 +136,8 @@ class ModifierUtils {
     }
   }
 
-  static putDirtyModifier<M extends ArkComponent | ArkSpanComponent>(arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>): void {
+  static putDirtyModifier<M extends ArkComponent | ArkSpanComponent>(
+    arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>): void {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,

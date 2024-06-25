@@ -53,7 +53,6 @@ ForEachModel* ForEachModel::GetInstance()
 
 
 namespace OHOS::Ace::Framework {
-
 // Create(...)
 // NG:       no params
 // Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
@@ -82,7 +81,8 @@ void JSForEach::Create(const JSCallbackInfo& info)
         jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
     }
 
-    OHOS::Ace::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
+    OHOS::Ace::ForEachFunc forEachFunc = {
+        [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
         [jsForEachFunction](int32_t index) { jsForEachFunction->ExecuteBuilderForIndex(index); } };
     ForEachModel::GetInstance()->Create(info[0]->ToString(), forEachFunc);
 }
@@ -176,7 +176,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
             }
         }
     }
-
     ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
 }
 

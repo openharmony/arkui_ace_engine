@@ -599,7 +599,7 @@ class InvertModifier extends ModifierWithKey<number | InvertOptions> {
     if (reset) {
       getUINativeModule().common.resetInvert(node);
     } else {
-      if(isNumber(this.value)) {
+      if (isNumber(this.value)) {
         getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
       } else {
         getUINativeModule().common.setInvert(node, undefined,
@@ -611,10 +611,10 @@ class InvertModifier extends ModifierWithKey<number | InvertOptions> {
     }
   }
   checkObjectDiff(): boolean {
-    return !((this.stageValue as InvertOptions).high == (this.value as InvertOptions).high &&
-      (this.stageValue as InvertOptions).low == (this.value as InvertOptions).low &&
-      (this.stageValue as InvertOptions).threshold == (this.value as InvertOptions).threshold &&
-      (this.stageValue as InvertOptions).thresholdRange == (this.value as InvertOptions).thresholdRange);
+    return !((this.stageValue as InvertOptions).high === (this.value as InvertOptions).high &&
+      (this.stageValue as InvertOptions).low === (this.value as InvertOptions).low &&
+      (this.stageValue as InvertOptions).threshold === (this.value as InvertOptions).threshold &&
+      (this.stageValue as InvertOptions).thresholdRange === (this.value as InvertOptions).thresholdRange);
   }
 }
 
@@ -1729,7 +1729,7 @@ class OnBlurModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
-declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void
+declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void;
 class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   constructor(value: HoverEventCallback) {
     super(value);
@@ -1744,7 +1744,7 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
-declare type MouseEventCallback = (event: MouseEvent) => void
+declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
     super(value);
@@ -1759,7 +1759,7 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   }
 }
 
-declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void
+declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
   constructor(value: SizeChangeEventCallback) {
     super(value);
@@ -1774,7 +1774,7 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
   }
 }
 
-declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void
+declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
 class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
   constructor(value: AreaChangeEventCallback) {
     super(value);
@@ -1789,7 +1789,7 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
   }
 }
 
-declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult
+declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallback> {
   constructor(value: GestureJudgeBeginCallback) {
     super(value);
@@ -2891,7 +2891,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   cleanStageValue(): void {
-    if (!this._modifiersWithKeys){
+    if (!this._modifiersWithKeys) {
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {

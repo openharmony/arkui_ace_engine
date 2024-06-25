@@ -230,8 +230,7 @@ void XComponentElement::CreatePlatformResource()
                     }
                 }
             }
-        },
-        idStr_);
+        }, idStr_);
 
     auto onTextureRefresh = [weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([weak] {

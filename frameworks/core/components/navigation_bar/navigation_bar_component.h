@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_BAR_COMPONENT_H
 
+#include <cstdint>
 #include "core/components/button/button_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/navigation_bar/navigation_bar_component_base.h"
@@ -29,6 +30,9 @@
 #endif
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DEFAULT_HEIGHT_DIMENSION = 112; // default height in vp
+} // namespace
 
 using NavigationBarShowFunc = std::function<void()>;
 using NavigationBarHideFunc = std::function<void()>;
@@ -336,7 +340,7 @@ public:
     explicit EmphasizeTitleBarBuilder(const RefPtr<NavigationBarData>& data)
         : CommonBuilder(data->theme), PhoneTitleBarBuilder(data)
     {
-        height_ = Dimension(112, DimensionUnit::VP);
+        height_ = Dimension(DEFAULT_HEIGHT_DIMENSION, DimensionUnit::VP);
         padding_.SetLeft(theme_->GetMaxPaddingStart());
         padding_.SetRight(theme_->GetDefaultPaddingEnd());
         titleFontSize_ = theme_->GetTitleFontSizeBig();
