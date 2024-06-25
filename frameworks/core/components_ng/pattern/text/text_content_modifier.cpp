@@ -335,18 +335,18 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     auto x = paintOffset_.GetX();
     auto y = paintOffset_.GetY();
     auto rectsForPlaceholderSize = rectsForPlaceholders.size();
-    for (auto customSpanPlaceholder : customSpanPlaceholderInfo) {
+    for (const auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
-        if (index >= rectsForPlaceholderSize) {
+        if (index >= static_cast<int32_t>(rectsForPlaceholderSize)) {
             return;
         }
         auto rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;
-        customSpanOptions.x = static_cast<double>(rect.Left()) + x;
+        customSpanOptions.x = static_cast<float>(rect.Left()) + x;
         customSpanOptions.lineTop = lineMetrics.y + y;
         customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height + y;
         customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender + y;
