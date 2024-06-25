@@ -118,6 +118,7 @@ void SubwindowOhos::InitContainer()
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
             windowOption, parentWindow->GetContext());
         if (!window_) {
+            SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
         }
         CHECK_NULL_VOID(window_);
@@ -150,6 +151,7 @@ void SubwindowOhos::InitContainer()
     container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
+    SetIsRosenWindowCreate(true);
     ViewportConfig config;
     // create ace_view
     auto aceView =
