@@ -885,7 +885,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
-    if (index < 0 || index >= animationProperties_.size()) {
+    if (index >= animationProperties_.size()) {
         return;
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
