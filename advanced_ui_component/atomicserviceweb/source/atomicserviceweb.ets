@@ -109,9 +109,17 @@ const NETWORK_NO_ACTIVE_ERROR: Error = new Error(200015, 'The network is not act
 
 @Component
 export struct AtomicServiceWeb {
-  @Prop src: ResourceStr;
+  public src: ResourceStr | undefined = undefined;
   public navPathStack?: NavPathStack;
-  public onMessage?: (event?: OnMessageEvent) => void = () => {
+  public onMessage?: (event: OnMessageEvent) => void = () => {
+  };
+  public onErrorReceive?: (event?: OnErrorReceiveEvent) => void = () => {
+  };
+  public onHttpErrorReceive?: (event?: OnHttpErrorReceiveEvent) => void = () => {
+  };
+  public onPageBegin?: (event?: OnPageBeginEvent) => void = () => {
+  };
+  public onPageEnd?: (event?: OnPageEndEvent) => void = () => {
   };
   private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   private controller: web_webview.WebviewController = new web_webview.WebviewController();
@@ -132,12 +140,14 @@ export struct AtomicServiceWeb {
 
   build() {
     Web({ src: this.src, controller: this.controller })
-      .fileAccess(true)
-      .imageAccess(true)
-      .onlineImageAccess(true)
-      .javaScriptAccess(true)
-      .domStorageAccess(true)
-      .geolocationAccess(true)
+      .zoomAccess(false)
+      .overviewModeAccess(false)
+      .allowWindowOpenMethod(false)
+      .layoutMode(WebLayoutMode.NONE)
+      .onErrorReceive(this.onErrorReceive)
+      .onHttpErrorReceive(this.onHttpErrorReceive)
+      .onPageBegin(this.onPageBegin)
+      .onPageEnd(this.onPageEnd)
       .onControllerAttached(() => {
         this.registerJavaScriptProxy();
         this.schemeHandler.onRequestStart((request: web_webview.WebSchemeHandlerRequest) => {
@@ -217,11 +227,11 @@ class AtomicService {
   protected context: common.UIAbilityContext;
   protected navPathStack?: NavPathStack;
   protected messageDataList: object[] = [];
-  protected onMessage: (event?: OnMessageEvent) => void = () => {
+  protected onMessage: (event: OnMessageEvent) => void = () => {
   };
 
   constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack,
-    onMessage?: (event?: OnMessageEvent) => void) {
+    onMessage?: (event: OnMessageEvent) => void) {
     this.context = context;
     this.navPathStack = navPathStack;
     this.onMessage = onMessage ? onMessage : this.onMessage;
@@ -366,7 +376,7 @@ class AtomicService {
     if (this.messageDataList.length <= 0) {
       return;
     }
-    this.onMessage({ data: this.messageDataList });
+    this.onMessage(new OnMessageEvent(this.messageDataList));
     this.messageDataList = [];
   }
 
@@ -554,7 +564,7 @@ class AtomicService {
 
 class AtomicServiceApi extends AtomicService {
   constructor(context: common.UIAbilityContext, navPathStack?: NavPathStack,
-    onMessage?: (event?: OnMessageEvent) => void) {
+    onMessage?: (event: OnMessageEvent) => void) {
     super(context, navPathStack, onMessage);
   }
 
@@ -970,7 +980,47 @@ class PostMessageResult {
 }
 
 export class OnMessageEvent {
-  public data?: object[];
+  public data: object[];
+
+  constructor(data: object[]) {
+    this.data = data;
+  }
+}
+
+export class OnErrorReceiveEvent {
+  public request: WebResourceRequest;
+  public error: WebResourceError;
+
+  constructor(request: WebResourceRequest, error: WebResourceError) {
+    this.request = request;
+    this.error = error;
+  }
+}
+
+export class OnHttpErrorReceiveEvent {
+  public request: WebResourceRequest;
+  public response: WebResourceResponse;
+
+  constructor(request: WebResourceRequest, response: WebResourceResponse) {
+    this.request = request;
+    this.response = response;
+  }
+}
+
+export class OnPageBeginEvent {
+  public url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+}
+
+export class OnPageEndEvent {
+  public url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
 }
 
 class GetEnvOptions extends BaseOptions<GetEnvResult> {

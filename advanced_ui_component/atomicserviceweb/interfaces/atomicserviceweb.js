@@ -105,9 +105,17 @@ export class AtomicServiceWeb extends ViewPU {
         if (typeof s10 === "function") {
             this.paramsGenerator_ = s10;
         }
-        this.__src = new SynchedPropertyObjectOneWayPU(p10.src, this, "src");
+        this.src = undefined;
         this.navPathStack = undefined;
         this.onMessage = () => {
+        };
+        this.onErrorReceive = () => {
+        };
+        this.onHttpErrorReceive = () => {
+        };
+        this.onPageBegin = () => {
+        };
+        this.onPageEnd = () => {
         };
         this.context = getContext(this);
         this.controller = new web_webview.WebviewController();
@@ -119,11 +127,26 @@ export class AtomicServiceWeb extends ViewPU {
     }
 
     setInitiallyProvidedValue(n10) {
+        if (n10.src !== undefined) {
+            this.src = n10.src;
+        }
         if (n10.navPathStack !== undefined) {
             this.navPathStack = n10.navPathStack;
         }
         if (n10.onMessage !== undefined) {
             this.onMessage = n10.onMessage;
+        }
+        if (n10.onErrorReceive !== undefined) {
+            this.onErrorReceive = n10.onErrorReceive;
+        }
+        if (n10.onHttpErrorReceive !== undefined) {
+            this.onHttpErrorReceive = n10.onHttpErrorReceive;
+        }
+        if (n10.onPageBegin !== undefined) {
+            this.onPageBegin = n10.onPageBegin;
+        }
+        if (n10.onPageEnd !== undefined) {
+            this.onPageEnd = n10.onPageEnd;
         }
         if (n10.context !== undefined) {
             this.context = n10.context;
@@ -143,25 +166,14 @@ export class AtomicServiceWeb extends ViewPU {
     }
 
     updateStateVars(m10) {
-        this.__src.reset(m10.src);
     }
 
     purgeVariableDependenciesOnElmtId(l10) {
-        this.__src.purgeDependencyOnElmtId(l10);
     }
 
     aboutToBeDeleted() {
-        this.__src.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
-    }
-
-    get src() {
-        return this.__src.get();
-    }
-
-    set src(k10) {
-        this.__src.set(k10);
     }
 
     aboutToAppear() {
@@ -178,12 +190,14 @@ export class AtomicServiceWeb extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((b10, c10) => {
             Web.create({ src: this.src, controller: this.controller });
-            Web.fileAccess(true);
-            Web.imageAccess(true);
-            Web.onlineImageAccess(true);
-            Web.javaScriptAccess(true);
-            Web.domStorageAccess(true);
-            Web.geolocationAccess(true);
+            Web.zoomAccess(false);
+            Web.overviewModeAccess(false);
+            Web.allowWindowOpenMethod(false);
+            Web.layoutMode(WebLayoutMode.NONE);
+            Web.onErrorReceive(this.onErrorReceive);
+            Web.onHttpErrorReceive(this.onHttpErrorReceive);
+            Web.onPageBegin(this.onPageBegin);
+            Web.onPageEnd(this.onPageEnd);
             Web.onControllerAttached(() => {
                 this.registerJavaScriptProxy();
                 this.schemeHandler.onRequestStart((j10) => {
@@ -420,7 +434,7 @@ class AtomicService {
         if (this.messageDataList.length <= 0) {
             return;
         }
-        this.onMessage({ data: this.messageDataList });
+        this.onMessage(new OnMessageEvent(this.messageDataList));
         this.messageDataList = [];
     }
 
@@ -977,6 +991,35 @@ class PostMessageResult {
 }
 
 export class OnMessageEvent {
+    constructor(c2) {
+        this.data = c2;
+    }
+}
+
+export class OnErrorReceiveEvent {
+    constructor(r4, v4) {
+        this.request = r4;
+        this.error = v4;
+    }
+}
+
+export class OnHttpErrorReceiveEvent {
+    constructor(r3, w3) {
+        this.request = r3;
+        this.response = w3;
+    }
+}
+
+export class OnPageBeginEvent {
+    constructor(e2) {
+        this.url = e2;
+    }
+}
+
+export class OnPageEndEvent {
+    constructor(d2) {
+        this.url = d2;
+    }
 }
 
 class GetEnvOptions extends BaseOptions {
