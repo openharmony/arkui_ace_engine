@@ -875,7 +875,13 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     uint32_t idx, uint32_t showCount, bool isDown, double scaleSize)
 {
     auto deltaIdx = GetOverScrollDeltaIndex();
-    auto index = static_cast<int32_t>(idx) + deltaIdx * (scrollDelta_ > 0.0 ? 1 : -1);
+    auto index = idx;
+    if (GreatNotEqual(scrollDelta_, 0.0f)) {
+        index = index + deltaIdx;
+    } else {
+        index = index - deltaIdx;
+    }
+
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
