@@ -375,7 +375,6 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
-    bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
