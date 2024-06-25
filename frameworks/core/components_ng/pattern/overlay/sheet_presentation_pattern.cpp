@@ -1994,7 +1994,7 @@ void SheetPresentationPattern::OnScrollEndRecursive(const std::optional<float>& 
     }
 }
 
-bool SheetPresentationPattern::HandleScrollVelocity(float velocity)
+bool SheetPresentationPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     if (isSheetPosChanged_) {
         HandleDragEnd(velocity);

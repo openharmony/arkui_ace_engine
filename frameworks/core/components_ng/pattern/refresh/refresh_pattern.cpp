@@ -1167,7 +1167,7 @@ void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
     }
 }
 
-bool RefreshPattern::HandleScrollVelocity(float velocity)
+bool RefreshPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
