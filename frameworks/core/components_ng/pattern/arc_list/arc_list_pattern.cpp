@@ -46,7 +46,7 @@ constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.6f;
 } // namespace
 
-ArcListPattern::ArcListPattern() : ListPattern(ListType::ARC_LIST) 
+ArcListPattern::ArcListPattern() : ListPattern(ListType::ARC_LIST)
 {
     SetFriction(ARC_LIST_FRICTION);
     SetVelocityScale(ARC_LIST_VELOCITY_SCALE);
@@ -366,7 +366,7 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
             break;
         }
         itemInfo = GetItemDisplayInfo(index);
-        if (GreatOrEqual(predictStop, itemInfo.startPos - space / 2) &&
+        if (GreatOrEqual(predictStop, itemInfo.startPos - space / 2) && /* 2:half */
             LessNotEqual(predictStop, itemInfo.endPos + space / 2)) { /* 2:half */
             break;
         }
@@ -473,8 +473,7 @@ bool ArcListPattern::GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo)
 
 float ArcListPattern::FixScrollOffset(float offset, int32_t source)
 {
-    if (!GetIsDragging())
-    {
+    if (!GetIsDragging()) {
         return offset;
     }
 

@@ -45,7 +45,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str(), filter);
     json->PutExtAttr("chainAnimation", propChainAnimation_.value_or(false), filter);
     json->PutExtAttr("fadingEdge", propFadingEdge_.value_or(false), filter);
-
     if (listType_ != ListType::ARC_LIST) {
         json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
         json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
@@ -74,7 +73,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         } else {
             json->PutExtAttr("alignListItem", "ListItemAlign.End", filter);
         }
-        
         auto sticky = propStickyStyle_.value_or(V2::StickyStyle::NONE);
         if (sticky == V2::StickyStyle::HEADER) {
             json->PutExtAttr("sticky", "StickyStyle.Header", filter);
@@ -86,7 +84,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
             json->PutExtAttr("sticky", "StickyStyle.None", filter);
         }
     }
-    
     ScrollSnapPropToJsonValue(json, filter);
 }
 
