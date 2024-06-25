@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_PATTERN_H
 
-#include "core/components_ng/pattern/list/arc_list_item_pattern.h"
-#include "core/components_ng/pattern/list/arc_list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/arc_list_position_map.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
+#include "core/components_ng/pattern/arc_list/arc_list_position_map.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -31,6 +31,10 @@ struct ItemSnapInfo {
     float snapLow;
     float snapHigh;
     float moveThreshold;
+};
+
+namespace {
+constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 };
 
 class ArcListPattern : public ListPattern {
@@ -101,6 +105,15 @@ private:
     bool GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo);
 
     virtual float FixScrollOffset(float offset, int32_t source) override;
+    virtual void OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged) override {}
+    virtual float GetScrollUpdateFriction(float overScroll) override
+    {
+        return ARC_LIST_DRAG_OVER_FRICTION;
+    }
+    virtual ScrollAlign GetScrollToNodeAlign() override
+    {
+        return ScrollAlign::CENTER;
+    }
 
     RefPtr<FrameNode> header_ = nullptr;
     int32_t scrollStartMidIndex_ = -1;
@@ -112,4 +125,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_PATTERN_H

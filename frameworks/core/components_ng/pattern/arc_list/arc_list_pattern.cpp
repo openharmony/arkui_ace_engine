@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/arc_list_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 
 #include <string>
 
@@ -29,8 +29,8 @@
 #include "core/components/list/arc_list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/list/arc_list_item_pattern.h"
-#include "core/components_ng/pattern/list/arc_list_layout_algorithm.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
@@ -287,10 +287,14 @@ bool ArcListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int
 
 void ArcListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ListPattern::ToJsonValue(json, filter);
+    ScrollablePattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
+    }
+    json->PutExtAttr("startIndex", startIndex_, filter);
+    if (!itemPosition_.empty()) {
+        json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
     }
     std::string sensitivity = "CrownSensitivity.MEDIUM";
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -469,6 +473,11 @@ bool ArcListPattern::GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo)
 
 float ArcListPattern::FixScrollOffset(float offset, int32_t source)
 {
+    if (!GetIsDragging())
+    {
+        return offset;
+    }
+
     float fixOffset = offset;
 
     float originTotal = 0.0f;

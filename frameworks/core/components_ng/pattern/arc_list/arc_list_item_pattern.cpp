@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/size_t.h"
@@ -23,8 +23,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/list/arc_list_item_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/list/arc_list_item_layout_property.h"
-#include "core/components_ng/pattern/list/arc_list_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_layout_property.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"

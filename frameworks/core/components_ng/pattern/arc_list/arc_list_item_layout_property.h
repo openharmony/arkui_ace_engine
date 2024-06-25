@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ARC_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ARC_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 
@@ -25,7 +25,7 @@ class ACE_EXPORT ArcListItemLayoutProperty : public ListItemLayoutProperty {
     DECLARE_ACE_TYPE(ArcListItemLayoutProperty, ListItemLayoutProperty);
 
 public:
-    ArcListItemLayoutProperty() : ListItemLayoutProperty(ListType::ARC_LIST)
+    ArcListItemLayoutProperty()
     {
         propEditMode_ = V2::EditMode::NONE;
     }
@@ -35,7 +35,9 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<ArcListItemLayoutProperty>();
-        value->ListItemLayoutProperty::UpdateLayoutProperty(DynamicCast<ListItemLayoutProperty>(this));
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propStartDeleteAreaDistance_ = CloneStartDeleteAreaDistance();
+        value->propEndDeleteAreaDistance_ = CloneEndDeleteAreaDistance();
         value->propAutoScale_ = CloneAutoScale();
         return value;
     }
@@ -48,7 +50,20 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        ListItemLayoutProperty::ToJsonValue(json, filter);
+        LayoutProperty::ToJsonValue(json, filter);
+        if (propEdgeEffect_.has_value()) {
+            auto swipeAction = JsonUtil::Create(true);
+            swipeAction->Put("edgeEffect", propEdgeEffect_.value() == V2::SwipeEdgeEffect::Spring ?
+                "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.Node");
+            json->PutExtAttr("swipeAction", swipeAction, filter);
+        } else {
+            auto swipeAction = JsonUtil::Create(true);
+            json->PutExtAttr("swipeAction", swipeAction, filter);
+        }
+        json->PutExtAttr("startDeleteAreaDistance",
+            propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("endDeleteAreaDistance",
+            propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("autoScale", propAutoScale_.value_or(true), filter);
     }
 
@@ -56,4 +71,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ARC_LIST_ARC_LIST_ITEM_LAYOUT_PROPERTY_H

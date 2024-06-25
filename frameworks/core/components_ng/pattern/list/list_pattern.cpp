@@ -52,7 +52,6 @@ constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
 constexpr float LIST_START_MAIN_POS = 0.0f;
 constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
-constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -576,16 +575,7 @@ void ListPattern::ProcessEvent(
         }
     }
 
-    if (listType_ != ListType::ARC_LIST) {
-        auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
-        if (onScrollVisibleContentChange) {
-            bool startChanged = UpdateStartListItemIndex();
-            bool endChanged = UpdateEndListItemIndex();
-            if (indexChanged || startChanged || endChanged) {
-                onScrollVisibleContentChange(startInfo_, endInfo_);
-            }
-        }
-    }
+    OnScrollVisibleContentChange(listEventHub, indexChanged);
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
@@ -953,9 +943,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
-    if (GetIsDragging() && listType_ == ListType::ARC_LIST) {
-        offset = FixScrollOffset(offset, source);
-    }
+    offset = FixScrollOffset(offset, source);
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -994,10 +982,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
-        if (listType_ == ListType::ARC_LIST) {
-            friction = ARC_LIST_DRAG_OVER_FRICTION;
-        }
+        auto friction = GetScrollUpdateFriction(overScroll);
         currentDelta_ = currentDelta_ * friction;
     }
 
@@ -1358,8 +1343,7 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
-    auto align = listType_ == ListType::ARC_LIST ? ScrollAlign::CENTER : ScrollAlign::AUTO;
-    ScrollToIndex(curIndex, smooth_, align);
+    ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
     auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
@@ -2230,9 +2214,7 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     if (filter.IsFastFilter()) {
         return;
     }
-    if (listType_ != ListType::ARC_LIST) {
-        json->PutExtAttr("multiSelectable", multiSelectable_, filter);
-    }
+    json->PutExtAttr("multiSelectable", multiSelectable_, filter);
     json->PutExtAttr("startIndex", startIndex_, filter);
     if (!itemPosition_.empty()) {
         json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
@@ -2522,4 +2504,23 @@ void ListPattern::ResetChildrenSize()
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
     }
 }
+
+void ListPattern::OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged)
+{
+    CHECK_NULL_VOID(listEventHub);
+    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
+    if (onScrollVisibleContentChange) {
+        bool startChanged = UpdateStartListItemIndex();
+        bool endChanged = UpdateEndListItemIndex();
+        if (indexChanged || startChanged || endChanged) {
+            onScrollVisibleContentChange(startInfo_, endInfo_);
+        }
+    }
+}
+
+float ListPattern::GetScrollUpdateFriction(float overScroll)
+{
+    return ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+}
+
 } // namespace OHOS::Ace::NG

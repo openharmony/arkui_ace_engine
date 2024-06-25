@@ -1010,19 +1010,15 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         // Don't recycle When the head item is Visibility.None.
-        if (GreatNotEqual(pos->second.endPos + chainOffset, startMainPos_) ||
-            GreatOrEqual(pos->second.startPos + chainOffset, startMainPos_)) {
+        if (GreatNotEqual(pos->second.endPos + chainOffset + endFixPos, startMainPos_) ||
+            GreatOrEqual(pos->second.startPos + chainOffset + endFixPos, startMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
             }
             break;
         }
         recycledItemPosition_.emplace(pos->first, pos->second);
-        if (listType_ != ListType::ARC_LIST) {
-            itemPosition_.erase(pos++);
-        } else {
-            pos++;
-        }
+        itemPosition_.erase(pos++);
     }
 }
 
@@ -1085,8 +1081,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         // Don't recycle When the tail item is Visibility.None.
-        if (LessNotEqual(pos->second.startPos + chainOffset, endMainPos_) ||
-            LessOrEqual(pos->second.endPos + chainOffset, endMainPos_)) {
+        if (LessNotEqual(pos->second.startPos + chainOffset - startFixPos, endMainPos_) ||
+            LessOrEqual(pos->second.endPos + chainOffset - startFixPos, endMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
             }
@@ -1095,10 +1091,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         recycledItemPosition_.emplace(pos->first, pos->second);
         removeIndexes.emplace_back(pos->first);
     }
-    if (listType_ != ListType::ARC_LIST) {
-        for (const auto& index : removeIndexes) {
-            itemPosition_.erase(index);
-        }
+    for (const auto& index : removeIndexes) {
+        itemPosition_.erase(index);
     }
 }
 

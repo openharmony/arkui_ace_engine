@@ -316,6 +316,12 @@ protected:
     {
         return offset;
     }
+    virtual void OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged);
+    virtual float GetScrollUpdateFriction(float overScroll);
+    virtual ScrollAlign GetScrollToNodeAlign()
+    {
+        return ScrollAlign::AUTO;
+    }
 
     bool isFadingEdge_ = false;
 

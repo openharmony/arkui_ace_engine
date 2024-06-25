@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_ITEM_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_ITEM_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_ITEM_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_ITEM_PATTERN_H
 
-#include "core/components_ng/pattern/list/arc_list_item_layout_property.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -52,4 +52,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_ARC_LIST_ITEM_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_ITEM_PATTERN_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,31 +23,9 @@ namespace OHOS::Ace::NG {
 void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
-    if (listType_ != ListType::ARC_LIST) {
-        auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            if (editMode == V2::EditMode::NONE) {
-                json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
-            } else if (editMode == V2::EditMode::MOVABLE) {
-                json->PutFixedAttr("editable", "EditMode.Movable", filter, FIXED_ATTR_EDITABLE);
-            } else if (editMode == V2::EditMode::DELETABLE) {
-                json->PutFixedAttr("editable", "EditMode.Deletable", filter, FIXED_ATTR_EDITABLE);
-            } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
-                json->PutFixedAttr("editable", true, filter, FIXED_ATTR_EDITABLE);
-            } else {
-                json->PutFixedAttr("editable", false, filter, FIXED_ATTR_EDITABLE);
-            }
-            return;
-        }
-        auto sticky = propStickyMode_.value_or(V2::StickyMode::NONE);
-        if (sticky == V2::StickyMode::NORMAL) {
-            json->PutExtAttr("sticky", "Sticky.Normal", filter);
-        } else if (sticky == V2::StickyMode::OPACITY) {
-            json->PutExtAttr("sticky", "Sticky.Opacity", filter);
-        } else {
-            json->PutExtAttr("sticky", "Sticky.None", filter);
-        }
+    auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
         if (editMode == V2::EditMode::NONE) {
             json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
         } else if (editMode == V2::EditMode::MOVABLE) {
@@ -59,6 +37,26 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
         } else {
             json->PutFixedAttr("editable", false, filter, FIXED_ATTR_EDITABLE);
         }
+        return;
+    }
+    auto sticky = propStickyMode_.value_or(V2::StickyMode::NONE);
+    if (sticky == V2::StickyMode::NORMAL) {
+        json->PutExtAttr("sticky", "Sticky.Normal", filter);
+    } else if (sticky == V2::StickyMode::OPACITY) {
+        json->PutExtAttr("sticky", "Sticky.Opacity", filter);
+    } else {
+        json->PutExtAttr("sticky", "Sticky.None", filter);
+    }
+    if (editMode == V2::EditMode::NONE) {
+        json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
+    } else if (editMode == V2::EditMode::MOVABLE) {
+        json->PutFixedAttr("editable", "EditMode.Movable", filter, FIXED_ATTR_EDITABLE);
+    } else if (editMode == V2::EditMode::DELETABLE) {
+        json->PutFixedAttr("editable", "EditMode.Deletable", filter, FIXED_ATTR_EDITABLE);
+    } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
+        json->PutFixedAttr("editable", true, filter, FIXED_ATTR_EDITABLE);
+    } else {
+        json->PutFixedAttr("editable", false, filter, FIXED_ATTR_EDITABLE);
     }
     if (propEdgeEffect_.has_value()) {
         auto swipeAction = JsonUtil::Create(true);
@@ -73,13 +71,6 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
         propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     json->PutExtAttr("endDeleteAreaDistance",
         propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-}
-
-void ListItemLayoutProperty::UpdateLayoutProperty(const ListItemLayoutProperty* layoutProperty)
-{
-    propEdgeEffect_ = layoutProperty->propEdgeEffect_;
-    propStartDeleteAreaDistance_ = layoutProperty->propStartDeleteAreaDistance_;
-    propEndDeleteAreaDistance_ = layoutProperty->propEndDeleteAreaDistance_;
 }
 
 }

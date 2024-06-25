@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/arc_list_layout_algorithm.h"
+#include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
 
 #include <algorithm>
 #include <unordered_set>
@@ -28,8 +28,8 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/arc_list_item_pattern.h"
-#include "core/components_ng/pattern/list/arc_list_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
