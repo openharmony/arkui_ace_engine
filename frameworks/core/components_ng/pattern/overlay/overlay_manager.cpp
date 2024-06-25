@@ -3911,6 +3911,9 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 void OverlayManager::PlaySheetTransition(
     RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
+    CHECK_NULL_VOID(sheetNode);
+    sheetNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     // current sheet animation
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =

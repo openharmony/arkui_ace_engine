@@ -1371,6 +1371,8 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             },
             option.GetOnFinishEvent());
     } else {
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (sheetPattern->HasCallback()) {
             sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
