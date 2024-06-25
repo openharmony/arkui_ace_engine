@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
@@ -368,6 +369,7 @@ protected:
     void UnregisterWindowStateChangedCallback();
     bool isShow_ = true;
     bool gifAnimation_ = false;
+    RefPtr<ImageOverlayModifier> overlayMod_;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -512,6 +514,7 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
+    bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
