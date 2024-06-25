@@ -1197,79 +1197,37 @@ SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
 
 void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
-    CHECK_NULL_VOID(source);
-    CHECK_NULL_VOID(source->GetTag() == V2::SPAN_ETS_TAG);
-    CHECK_NULL_VOID(target);
-
     CopyTextSpanFontStyle(source, target);
     CopyTextSpanLineStyle(source, target, needLeadingMargin);
 }
 
 void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
 {
-    if (source->HasFontSize()) {
-        target->UpdateFontSize(source->GetFontSizeValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::FONTSIZE);
-    }
-
-    if (source->HasTextColor()) {
-        target->UpdateTextColor(source->GetTextColorValue(Color::BLACK));
-        target->AddPropertyInfo(PropertyInfo::FONTCOLOR);
-    }
-
-    if (source->HasItalicFontStyle()) {
-        target->UpdateItalicFontStyle(source->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
-        target->AddPropertyInfo(PropertyInfo::FONTSTYLE);
-    }
-
-    if (source->HasFontWeight()) {
-        target->UpdateFontWeight(source->GetFontWeightValue(FontWeight::NORMAL));
-        target->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
-    }
-
-    if (source->HasFontFamily()) {
-        target->UpdateFontFamily(source->GetFontFamilyValue({ "HarmonyOS Sans" }));
-        target->AddPropertyInfo(PropertyInfo::FONTFAMILY);
-    }
-
-    if (source->HasTextDecoration()) {
-        target->UpdateTextDecoration(source->GetTextDecorationValue(TextDecoration::NONE));
-        target->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
-    }
-
-    if (source->HasTextDecorationColor()) {
-        target->UpdateTextDecorationColor(source->GetTextDecorationColorValue(Color::BLACK));
-        target->AddPropertyInfo(PropertyInfo::NONE);
-    }
-
-    if (source->HasTextCase()) {
-        target->UpdateTextCase(source->GetTextCaseValue(TextCase::NORMAL));
-        target->AddPropertyInfo(PropertyInfo::TEXTCASE);
-    }
-
-    if (source->HasLineHeight()) {
-        target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
-    }
-
-    if (source->HasLetterSpacing()) {
-        target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
-    }
-
-    if (source->HasFontFeature()) {
-        target->UpdateFontFeature(source->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1")));
-        target->AddPropertyInfo(PropertyInfo::FONTFEATURE);
-    }
+    CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(source->GetTag() == V2::SPAN_ETS_TAG);
+    CHECK_NULL_VOID(target);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontSize, PropertyInfo::FONTSIZE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextColor, PropertyInfo::FONTCOLOR);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, ItalicFontStyle, PropertyInfo::FONTSTYLE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontWeight, PropertyInfo::FONTWEIGHT);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFamily, PropertyInfo::FONTFAMILY);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecoration, PropertyInfo::TEXTDECORATION);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationColor, PropertyInfo::NONE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextCase, PropertyInfo::TEXTCASE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight, PropertyInfo::LINEHEIGHT);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing, PropertyInfo::LETTERSPACE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature, PropertyInfo::FONTFEATURE);
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
     RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
-    if (source->HasTextShadow()) {
-        target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
-        target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
-    }
+    CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(target);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow, PropertyInfo::TEXTSHADOW);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextAlign, PropertyInfo::TEXT_ALIGN);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak, PropertyInfo::WORD_BREAK);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy, PropertyInfo::LINE_BREAK_STRATEGY);
 
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
@@ -1278,21 +1236,6 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         }
         target->UpdateLeadingMargin(leadingMargin);
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
-    }
-
-    if (source->HasTextAlign()) {
-        target->UpdateTextAlign(source->GetTextAlignValue(TextAlign::LEFT));
-        target->AddPropertyInfo(PropertyInfo::TEXT_ALIGN);
-    }
-
-    if (source->HasWordBreak()) {
-        target->UpdateWordBreak(source->GetWordBreakValue(WordBreak::BREAK_WORD));
-        target->AddPropertyInfo(PropertyInfo::WORD_BREAK);
-    }
-
-    if (source->HasLineBreakStrategy()) {
-        target->UpdateLineBreakStrategy(source->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
-        target->AddPropertyInfo(PropertyInfo::LINE_BREAK_STRATEGY);
     }
 }
 
@@ -3924,20 +3867,26 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
 void RichEditorPattern::HandlePreviewTextStyle(
     RefPtr<SpanNode>& spanNode, RefPtr<SpanNode>& beforeSpanNode, RefPtr<SpanNode>& afterSpanNode)
 {
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
+    // is first span or after \n
+    bool isParagraphHead = !beforeSpanNode || (beforeSpanNode && IsLineSeparatorInLast(beforeSpanNode));
+
+    RefPtr<SpanNode> sourceNode = nullptr;
+    bool needLeadingMargin = true;
+    if (isParagraphHead && afterSpanNode) {
+        sourceNode = afterSpanNode;
+    } else if (beforeSpanNode) {
+        sourceNode = beforeSpanNode;
+        needLeadingMargin = false;
+    }
+
+    // handle paragraph style
+    CopyTextSpanLineStyle(sourceNode, spanNode, needLeadingMargin);
+
+    // handle text style
+    if (typingStyle_ && typingTextStyle_) {
+        UpdateTextStyle(spanNode, *typingStyle_, *typingTextStyle_);
     } else {
-        bool isParagraphHead = !beforeSpanNode; // is first span
-        if (beforeSpanNode) {
-            auto& beforeNodeContent = beforeSpanNode->GetSpanItem()->content;
-            bool isAfterNewLine = !beforeNodeContent.empty() && beforeNodeContent.back() == L'\n';
-            isParagraphHead |= isAfterNewLine; // after \n
-        }
-        if (isParagraphHead && afterSpanNode) {
-            CopyTextSpanStyle(afterSpanNode, spanNode, true);
-        } else if (beforeSpanNode) {
-            CopyTextSpanStyle(beforeSpanNode, spanNode, false);
-        }
+        CopyTextSpanFontStyle(sourceNode, spanNode);
     }
 }
 
