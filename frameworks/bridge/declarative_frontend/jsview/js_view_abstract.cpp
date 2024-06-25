@@ -6133,6 +6133,9 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
 NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
     NG::DragPreviewOption previewOption;
+    if (!info[0]->IsObject()) {
+        return previewOption;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     bool isAuto = true;
@@ -7241,7 +7244,7 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::string debugLine;
-    uint32_t length = info.Length();
+    auto length = info.Length();
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
 
     if (length == 1) { // deprecated version of debug line
