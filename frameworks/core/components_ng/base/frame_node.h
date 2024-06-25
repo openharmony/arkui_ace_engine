@@ -543,6 +543,11 @@ public:
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
+    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
+    {
+        previewOption_.options = optionsAfterApplied;
+    }
+
     DragPreviewOption GetDragPreviewOption() const
     {
         return previewOption_;

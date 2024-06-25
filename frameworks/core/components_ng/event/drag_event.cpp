@@ -266,6 +266,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 }
             }
+            if (!gestureHub->GetTextDraggable()) {
+                frameNode->SetOptionsAfterApplied(actuator->GetOptionsAfterApplied());
+            }
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
@@ -1097,7 +1100,10 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
 {
     UpdatePreviewOptionDefaultAttr(frameNode);
     auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
-    CHECK_NULL_VOID(modifierOnApply);
+    if (!modifierOnApply) {
+        optionsAfterApplied_ = frameNode->GetDragPreviewOption().options;
+        return;
+    }
 
     // create one temporary frame node for receiving the value from the modifier
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1112,7 +1118,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     CHECK_NULL_VOID(imageContext);
     auto opacity = imageContext->GetOpacity();
 
-    OptionsAfterApplied options;
+    OptionsAfterApplied options = frameNode->GetDragPreviewOption().options;
     if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         options.opacity = opacity.value();
     } else {
@@ -1145,6 +1151,7 @@ void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>&
     }
     dragPreviewOption.options = options; // replace the options with the new one after applied
     frameNode->SetDragPreviewOptions(dragPreviewOption);
+    optionsAfterApplied_ = options;
 }
 
 void DragEventActuator::UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode)
@@ -1322,6 +1329,8 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOptionsAfterApplied(optionsAfterApplied_);
     SetImageNodeInitAttr(frameNode, imageNode);
     // pixel map animation
     AnimationOption option;
