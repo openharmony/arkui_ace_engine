@@ -457,6 +457,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
+        SetIndicatorJumpIndex(jumpIndex_);
     }
     isVoluntarilyClear_ = false;
     if (jumpIndex_) {
@@ -2434,7 +2435,6 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     HandleTouchBottomLoop();
 
     if (!indicatorDoingAnimation_) {
-        SetIndicatorJumpIndex(child, jumpIndex_);
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if (GetLoopIndex(currentIndex_) != currentFirstIndex_) {
@@ -5669,9 +5669,20 @@ void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
     indicatorPattern->SetChangeIndexWithAnimation(withAnimation);
 }
 
-void SwiperPattern::SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex)
+void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
 {
-    CHECK_NULL_VOID(indicatorNode);
+    if (GetMaxDisplayCount() <= 0) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    if (!indicatorNode || indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        return;
+    }
+
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     CHECK_NULL_VOID(indicatorPattern);
 
