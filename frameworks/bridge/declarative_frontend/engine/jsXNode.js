@@ -1312,6 +1312,16 @@ const __creatorMap__ = new Map([
                 return new ArkListItemGroupComponent(node, type);
             });
         }],
+    ["WaterFlow", (context) => {
+            return new TypedFrameNode(context, "WaterFlow", (node, type) => {
+                return new ArkWaterFlowComponent(node, type);
+            });
+        }],
+    ["FlowItem", (context) => {
+            return new TypedFrameNode(context, "FlowItem", (node, type) => {
+                return new ArkFlowItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {
