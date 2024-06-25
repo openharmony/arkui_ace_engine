@@ -2666,28 +2666,21 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
-        swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
-        selectedModes_[swiperStartIndex_] != SelectedMode::INDICATOR) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
-    if (index >= static_cast<int32_t>(tabBarStyles_.size())) {
+    auto isRtl = ParseTabsIsRtl();
+    if (index >= static_cast<int32_t>(tabBarStyles_.size()) && !isRtl) {
         swiperStartIndex_--;
         index--;
         turnPageRate += 1.0f;
     }
+    if (isRtl && (index == static_cast<int32_t>(tabBarStyles_.size()) || NearEqual(turnPageRate, 1.0f))) {
+        return;
+    }
     if (Negative(turnPageRate)) {
         turnPageRate = 0.0f;
     }
-    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
-        selectedModes_[index] != SelectedMode::INDICATOR) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsValidIndex(index));
     if (GreatOrEqual(turnPageRate, 1.0f)) {
         turnPageRate_ = 1.0f;
     } else if (LessOrEqual(turnPageRate, 0.0f)) {
@@ -2700,13 +2693,20 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
         }
         turnPageRate_ = turnPageRate;
     }
-
     auto originalPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
     auto paintRectDiff = std::abs(targetPaintRect.GetX() + targetPaintRect.Width() / 2 - originalPaintRect.GetX() -
                                   originalPaintRect.Width() / 2);
 
     currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / 2 + paintRectDiff * turnPageRate_;
+    if (isRtl) {
+        auto originalPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_ + 1);
+        auto targetPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_ >= 0 ? swiperStartIndex_ : 0);
+        auto paintRectDiff = std::abs(targetPaintRect.GetX() + targetPaintRect.Width() / HALF_OF_WIDTH -
+                                      originalPaintRect.GetX() - originalPaintRect.Width() / HALF_OF_WIDTH);
+        currentIndicatorOffset_ =
+            originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH + paintRectDiff * (1 - turnPageRate_);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2951,5 +2951,27 @@ void TabBarPattern::SetMarginVP(MarginProperty& marginLeftOrRight, MarginPropert
     marginTopOrBottom.right = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
     marginTopOrBottom.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
     marginTopOrBottom.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+}
+
+bool TabBarPattern::ParseTabsIsRtl()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabLayoutProperty, false);
+    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    return isRTL;
+}
+
+bool TabBarPattern::IsValidIndex(int32_t index)
+{
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[index] != SelectedMode::INDICATOR) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

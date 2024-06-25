@@ -533,6 +533,8 @@ private:
     void TabBarSuitAging();
     void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool CanScroll() const;
+    bool ParseTabsIsRtl();
+    bool IsValidIndex(int32_t index);
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
