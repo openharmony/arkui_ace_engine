@@ -117,7 +117,7 @@ void NavigationBarElement::BindClickEventToOptions(const RefPtr<NavigationBarCom
                     return;
                 }
                 std::string selected = menuItemIter->second.value;
-                std::string param = std::string(R"("selected",{"value":")").append(selected.append("\"},null"));
+                std::string param = std::string(R"("selected", {"value":")").append(selected.append("\"}, null"));
                 navigationBarElement->menuSelectedEvent_(param);
             });
     }

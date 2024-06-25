@@ -30,7 +30,7 @@ class BuilderNode {
   public update(params: Object) {
     this._JSBuilderNode.update(params);
   }
-  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object): void {
     this._JSBuilderNode.build(builder, params);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
@@ -368,7 +368,7 @@ class JSBuilderNode extends BaseNode {
     this._nativeRef = null;
     this.frameNode_?.resetNodePtr();
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
       this.uiContext_ = uiContext;
       this.instanceId_ = uiContext.instanceId_;
       if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
