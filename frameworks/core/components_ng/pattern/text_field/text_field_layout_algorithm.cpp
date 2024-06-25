@@ -966,13 +966,14 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
-    if (textStyle.HasHeightOverride()) {
-        return AdaptFontSizeForLineHeight(textStyle, layoutProperty, contentConstraint, layoutWrapper);
-    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    bool hasHeightOverride = textStyle.HasHeightOverride();
+    auto lineHeight = textStyle.GetLineHeight();
+    SetAdaptFontSizeLineHeight(lineHeight);
+    textStyle.SetLineHeight(Dimension(), false);
     bool result = false;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
@@ -1000,6 +1001,10 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
         default:
             break;
     }
+    textStyle.SetLineHeight(lineHeight, hasHeightOverride);
+    if (result && hasHeightOverride) {
+        return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
+    }
     return result;
 }
 
@@ -1016,20 +1021,6 @@ bool TextFieldLayoutAlgorithm::IsNeedAdaptFontSize(const TextStyle& textStyle,
         return false;
     }
     return TextAdaptFontSizer::IsNeedAdaptFontSize(textStyle, contentConstraint);
-}
-
-bool TextFieldLayoutAlgorithm::AdaptFontSizeForLineHeight(TextStyle& textStyle,
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
-    LayoutWrapper* layoutWrapper)
-{
-    auto keepLineHeight = textStyle.GetLineHeight();
-    textStyle.SetLineHeight(Dimension(), false);
-    bool result = AddAdaptFontSizeAndAnimations(textStyle, layoutProperty, contentConstraint, layoutWrapper);
-    textStyle.SetLineHeight(keepLineHeight);
-    if (!result) {
-        return result;
-    }
-    return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
 }
 
 bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content,
@@ -1097,6 +1088,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptExceedLimit(const SizeF& maxSiz
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetHeight() / paragraph->GetLineCount(),
         maxSize.Height());
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+    didExceedMaxLines = didExceedMaxLines || IsAdaptFontSizeExceedLineHeight(paragraph);
     return didExceedMaxLines;
 }
 
@@ -1163,6 +1155,7 @@ bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptMinExceedLimit(const SizeF& max
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetHeight() / paragraph->GetLineCount(),
         maxSize.Height());
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
+    didExceedMaxLines = didExceedMaxLines || IsAdaptFontSizeExceedLineHeight(paragraph);
     return didExceedMaxLines;
 }
 
@@ -1281,12 +1274,23 @@ void TextFieldLayoutAlgorithm::UpdateParagraphTextFadeoutWidth(
     }
 }
 
+bool TextFieldLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
+{
+    auto paragraph = GetParagraph();
+    CHECK_NULL_RETURN(paragraph, false);
+    return paragraph->DidExceedMaxLines() ||
+        GreatNotEqual(paragraph->GetHeight(), maxSize.Height()) ||
+        GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
+        IsAdaptFontSizeExceedLineHeight(paragraph);
+}
+
 bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
 {
     auto paragraph = GetParagraph();
     CHECK_NULL_RETURN(paragraph, false);
     return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
+        IsAdaptFontSizeExceedLineHeight(paragraph) ||
         GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
 }
 } // namespace OHOS::Ace::NG
