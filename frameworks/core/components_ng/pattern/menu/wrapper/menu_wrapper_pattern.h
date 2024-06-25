@@ -127,7 +127,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto node = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(node, nullptr);
-        if (node->GetTag() != V2::COLUMN_ETS_TAG) {
+        if (node->GetTag() != V2::FLEX_ETS_TAG) {
             return nullptr;
         }
         return node;
@@ -169,7 +169,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
-        if (preview->GetTag() == V2::COLUMN_ETS_TAG) {
+        if (preview->GetTag() == V2::FLEX_ETS_TAG) {
             auto hoverImageCustomPreview = GetHoverImageCustomPreview();
             CHECK_NULL_RETURN(hoverImageCustomPreview, preview);
             return hoverImageCustomPreview;

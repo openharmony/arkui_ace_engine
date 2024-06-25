@@ -141,6 +141,9 @@ public:
 
     float GetPreviewAfterAnimationScale() const
     {
+        if (isShowHoverImage_) {
+            return 1.0f;
+        }
         return previewAnimationOptions_.scaleTo;
     }
 
