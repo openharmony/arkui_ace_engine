@@ -3772,7 +3772,6 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
         auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
         CHECK_NULL_VOID(isInsert);
     }
-    UpdateEditingValueToRecord();
     int32_t caretMoveLength = 0;
     bool hasInsertValue = false;
     int32_t originLength = 0;
@@ -3802,6 +3801,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
     if (isIME) {
         AfterIMEInsertValue(contentController_->GetInsertValue());
     }
@@ -4715,11 +4715,11 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
         CHECK_NULL_VOID(isDelete);
-        UpdateEditingValueToRecord();
         Delete(start, end);
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -4741,7 +4741,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto value = contentController_->GetSelectedValue(idx - willDeleteLength, idx);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, idx);
     CHECK_NULL_VOID(isDelete);
-    UpdateEditingValueToRecord();
     int32_t count = contentController_->Delete(selectController_->GetCaretIndex(), length, true);
     selectController_->UpdateCaretIndex(std::max(idx - count, 0));
     if (GetIsPreviewText()) {
@@ -4749,6 +4748,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
     StartTwinkling();
+    UpdateEditingValueToRecord();
 }
 
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
@@ -4759,13 +4759,13 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, caretIndex);
     CHECK_NULL_VOID(isDelete);
     ResetObscureTickCountDown();
-    UpdateEditingValueToRecord();
     contentController_->Delete(caretIndex, length, false);
     if (GetIsPreviewText()) {
         UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
     StartTwinkling();
+    UpdateEditingValueToRecord();
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
@@ -4777,11 +4777,11 @@ void TextFieldPattern::DeleteForward(int32_t length)
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
         CHECK_NULL_VOID(isDelete);
         ResetObscureTickCountDown();
-        UpdateEditingValueToRecord();
         Delete(start, end);
         AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
