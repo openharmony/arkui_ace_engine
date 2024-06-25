@@ -225,7 +225,6 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
         drawRepeatYTask(offsetTempX, down);
     }
     canvas.Restore();
-    // TODO: repeat refactory
 }
 
 void ImagePainter::ApplyImageFit(
